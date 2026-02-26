@@ -29,6 +29,13 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   return headers;
 }
 
+async function getAuthHeadersNoContentType(): Promise<HeadersInit> {
+  const token = getStoredAccessToken();
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 /**
  * Call this after 401 to clear local auth so the app can redirect to login.
  */
@@ -59,6 +66,49 @@ export async function apiFetch(
 
 export async function apiJson<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await apiFetch(path, options);
+  const data = (await res.json().catch(() => ({}))) as T & ApiError;
+  if (!res.ok) {
+    throw new Error((data as ApiError).error ?? (res.statusText || "Request failed"));
+  }
+  return data as T;
+}
+
+/** GET and return response as Blob (e.g. Excel download). */
+export async function apiBlob(path: string): Promise<Blob> {
+  const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: await getAuthHeadersNoContentType(),
+  });
+  if (res.status === 401) clearAuth();
+  if (!res.ok) {
+    const text = await res.text();
+    let msg = res.statusText;
+    try {
+      const j = JSON.parse(text) as ApiError;
+      if (j.error) msg = j.error;
+    } catch {
+      if (text) msg = text;
+    }
+    throw new Error(msg);
+  }
+  return res.blob();
+}
+
+/** POST multipart/form-data with a file (e.g. Excel import). Do not set Content-Type. */
+export async function apiUploadFile<T = { created: number; errors: unknown[] }>(
+  path: string,
+  file: File
+): Promise<T> {
+  const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(url, {
+    method: "POST",
+    headers: await getAuthHeadersNoContentType(),
+    body: form,
+  });
+  if (res.status === 401) clearAuth();
   const data = (await res.json().catch(() => ({}))) as T & ApiError;
   if (!res.ok) {
     throw new Error((data as ApiError).error ?? (res.statusText || "Request failed"));
