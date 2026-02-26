@@ -1,0 +1,20 @@
+import { redirect } from "react-router";
+import {
+  hasStoredSession,
+  getAccessTokenFromRequest,
+} from "~/lib/auth-storage";
+
+export async function loader({ request }: { request: Request }) {
+  // Client: use localStorage
+  if (typeof window !== "undefined") {
+    if (hasStoredSession()) throw redirect("/home");
+    throw redirect("/login");
+  }
+  // Server: use cookie so SSR respects auth
+  if (getAccessTokenFromRequest(request)) throw redirect("/home");
+  throw redirect("/login");
+}
+
+export default function Index() {
+  return null;
+}

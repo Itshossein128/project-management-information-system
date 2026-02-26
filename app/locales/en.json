@@ -1,0 +1,87 @@
+{
+  "common": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "username": "Username",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "phoneNumber": "Phone number",
+    "submit": "Submit",
+    "back": "Back",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "login": {
+    "title": "Sign in",
+    "description": "Enter your phone number and password.",
+    "phonePlaceholder": "+989123456789",
+    "signingIn": "Signing in…",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register",
+    "forgotPassword": "Forgot password?",
+    "failed": "Login failed"
+  },
+  "register": {
+    "title": "Create an account",
+    "description": "Enter your details to register.",
+    "creating": "Creating account…",
+    "hasAccount": "Already have an account?",
+    "signInLink": "Sign in",
+    "failed": "Registration failed"
+  },
+  "forgotPassword": {
+    "title": "Forgot password",
+    "description": "Enter your phone number and we'll send a reset code.",
+    "sending": "Sending…",
+    "sendLink": "Send reset code",
+    "backToSignIn": "Back to sign in",
+    "checkEmail": "Check your phone",
+    "emailSent": "If an account exists for {{email}}, we've sent a password reset code.",
+    "failed": "Request failed. Try again."
+  },
+  "resetPassword": {
+    "title": "Set new password",
+    "description": "Enter your new password below.",
+    "updating": "Updating…",
+    "updatePassword": "Update password",
+    "backToSignIn": "Back to sign in",
+    "successTitle": "Password reset",
+    "successMessage": "Your password has been updated. You can sign in now.",
+    "passwordsMismatch": "Passwords do not match.",
+    "missingToken": "Missing reset token. Use the link from your email.",
+    "failed": "Reset failed."
+  },
+  "home": {
+    "pageTitle": "Home | Building Management",
+    "pageDescription": "Dashboard home",
+    "headerTitle": "Building Management",
+    "welcome": "Welcome, {{name}}. You can add dashboard cards and role-based sections here later.",
+    "cardPlaceholder": "Card placeholder {{number}}",
+    "cardContent": "Content for this card will go here.",
+    "visitorSection": "Visitor section",
+    "visitorDescription": "This block is visible to users with the visitor role. New users get this role by default.",
+    "managerSection": "Manager section",
+    "managerDescription": "This block is visible only to users with the manager role. Permissions on routes and endpoints can be added later.",
+    "commentorSection": "Commentor section",
+    "commentorDescription": "This block is visible only to users with the commentor role."
+  },
+  "error": {
+    "oops": "Oops!",
+    "unexpected": "An unexpected error occurred.",
+    "notFound": "404",
+    "pageNotFound": "The requested page could not be found.",
+    "genericTitle": "Error"
+  },
+  "language": {
+    "select": "Language",
+    "persian": "Persian",
+    "english": "English"
+  }
+}
