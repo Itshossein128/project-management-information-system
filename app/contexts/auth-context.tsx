@@ -1,12 +1,12 @@
 import * as React from "react";
-import {
-  getStoredUser,
-  getStoredAccessToken,
-  setStoredAuth,
-  clearStoredAuth,
-} from "~/lib/auth-storage";
-import type { AuthUser, AuthRole } from "~/lib/auth-types";
 import { apiJson } from "~/lib/api-client";
+import {
+  clearStoredAuth,
+  getStoredAccessToken,
+  getStoredUser,
+  setStoredAuth,
+} from "~/lib/auth-storage";
+import type { AuthRole, AuthUser } from "~/lib/auth-types";
 
 interface LoginCredentials {
   phone_number: string;
@@ -31,12 +31,18 @@ interface AuthContextValue {
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
-const KNOWN_ROLES: AuthRole[] = ["visitor", "manager", "commentor", "business-setup"];
+const KNOWN_ROLES: AuthRole[] = [
+  "visitor",
+  "manager",
+  "commentor",
+  "business-setup",
+  "houman-resource",
+];
 
 function normalizeRoles(roles: string[] | undefined): AuthRole[] {
   if (!Array.isArray(roles)) return [];
   return roles.filter((r): r is AuthRole =>
-    KNOWN_ROLES.includes(r as AuthRole)
+    KNOWN_ROLES.includes(r as AuthRole),
   );
 }
 
@@ -69,7 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ...data.user,
       roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
     };
-    setStoredAuth({ access: data.access, refresh: data.refresh }, userWithRoles);
+    setStoredAuth(
+      { access: data.access, refresh: data.refresh },
+      userWithRoles,
+    );
     setUser(userWithRoles);
   }, []);
 
@@ -80,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const hasRole = React.useCallback(
     (role: AuthRole) => (user?.roles ?? []).includes(role),
-    [user?.roles]
+    [user?.roles],
   );
 
   const value: AuthContextValue = {
@@ -93,11 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restoreSession,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {

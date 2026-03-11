@@ -5,7 +5,7 @@
  * business-setup: add business and control features per business; support team only.
  */
 
-export type AuthRole = "visitor" | "manager" | "commentor" | "business-setup";
+export type AuthRole = "visitor" | "manager" | "commentor" | "business-setup" | "houman-resource";
 
 export interface AuthUser {
   id: number;
