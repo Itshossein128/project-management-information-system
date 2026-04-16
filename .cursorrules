@@ -1,0 +1,5 @@
+model: gapgpt
+modelProvider: custom
+modelEndpoint: https://api.gapgpt.ir/v1/chat/completions
+apiKey: ${env.GAPGPT_API_KEY}
+modelName: gapgpt-qwen-3.5
