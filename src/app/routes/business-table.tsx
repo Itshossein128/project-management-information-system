@@ -9,6 +9,7 @@ import {
   apiUploadFile,
 } from "src/app/lib/api-client";
 import { PATHS } from "src/app/routeVars";
+import { ROLES } from "@/config/roles";
 
 interface FieldDef {
   id: number;
@@ -53,7 +54,8 @@ export default function BusinessTablePage() {
   const importInputRef = useRef<HTMLInputElement>(null);
   const pageSize = 20;
   const REQUEST_TIMEOUT_MS = 20_000;
-  const canEdit = hasRole("manager") || hasRole("business-setup");
+  const canEdit =
+    hasRole(ROLES.MANAGER) || hasRole(ROLES.BUSINESS_SETUP);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

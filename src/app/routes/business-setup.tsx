@@ -1,6 +1,6 @@
 /**
- * Business setup: list businesses, create/edit business (name, slug).
- * Only users with the "business-setup" permission can access this route.
+ * Business admin list at `/businesses`. Edit inline; Add opens `/businesses/create`.
+ * Requires `business-setup` Django group (layout guard).
  */
 import {
   Button,
@@ -11,13 +11,16 @@ import {
   Input,
   Label,
 } from "@/components/form";
-import { useEffect, useState } from "react";
-import { Link } from "react-router";
-import { useAuth } from "src/app/contexts/auth-context";
-import { apiJson } from "src/app/lib/api-client";
-import { PATHS } from "src/app/routeVars";
+import { DataTable } from "@/components/grid";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "@/app/contexts/auth-context";
+import { apiJson } from "@/app/lib/api-client";
+import { PATHS } from "@/app/routeVars";
+import { ROLES } from "@/config/roles";
 
-interface BusinessItem {
+export interface BusinessItem {
   id: number;
   name: string;
   slug: string;
@@ -33,30 +36,31 @@ interface BusinessesListResponse {
 }
 
 export default function BusinessSetup() {
+  const navigate = useNavigate();
   const { hasRole, isLoading } = useAuth();
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
-  const loadBusinesses = () => {
+  const loadBusinesses = useCallback(() => {
     apiJson<BusinessesListResponse>(`/${PATHS.BUSINESS}/`)
       .then((data) => setBusinesses(data.results))
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
       );
-  };
+  }, []);
 
   useEffect(() => {
-    if (!hasRole("business-setup")) return;
+    if (!hasRole(ROLES.BUSINESS_SETUP)) return;
     loadBusinesses();
-  }, [hasRole]);
+  }, [hasRole, loadBusinesses]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingId) return;
     setFormError(null);
     const payload = {
       name: name.trim(),
@@ -68,26 +72,12 @@ export default function BusinessSetup() {
       );
       return;
     }
-    const duplicate =
-      !editingId && businesses.some((b) => b.slug === payload.slug);
-    if (duplicate) {
-      setFormError("A business with this slug already exists.");
-      return;
-    }
     try {
-      if (editingId) {
-        await apiJson(`/${PATHS.BUSINESS}/${editingId}/`, {
-          method: "PATCH",
-          body: JSON.stringify(payload),
-        });
-      } else {
-        await apiJson(`/${PATHS.BUSINESS}/`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-      }
+      await apiJson(`/${PATHS.BUSINESS}/${editingId}/`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
       loadBusinesses();
-      setShowForm(false);
       setEditingId(null);
       setName("");
       setSlug("");
@@ -107,84 +97,159 @@ export default function BusinessSetup() {
     }
   };
 
-  const startEdit = (b: BusinessItem) => {
+  const startEdit = useCallback((b: BusinessItem) => {
     setEditingId(b.id);
     setName(b.name);
     setSlug(b.slug);
-    setShowForm(true);
     setFormError(null);
-  };
+  }, []);
 
-  const startCreate = () => {
-    setEditingId(null);
-    setName("");
-    setSlug("");
-    setShowForm(true);
-    setFormError(null);
-  };
+  const goToCreate = useCallback(() => {
+    navigate(`/${PATHS.BUSINESS}/${PATHS.BUSINESS_CREATE}`);
+  }, [navigate]);
 
-  if (isLoading || !hasRole("business-setup")) return null;
+  const columns = useMemo<ColumnDef<BusinessItem>[]>(() => {
+    return [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => (
+          <span id={`text-businessName-${row.index}`}>{row.original.name}</span>
+        ),
+      },
+      {
+        accessorKey: "slug",
+        header: "Slug",
+        cell: ({ row }) => (
+          <span id={`text-businessSlug-${row.index}`} className="font-mono text-muted-foreground">
+            {row.original.slug}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div
+            id={`container-businessActions-${row.index}`}
+            className="flex flex-wrap gap-2"
+          >
+            <Link
+              id={`button-businessSchema-${row.index}`}
+              to={`/${PATHS.BUSINESS}/${row.original.id}/${PATHS.BUSINESS_ADMIN_SETUP}`}
+            >
+              <Button variant="outline" size="sm" type="button">
+                Tables & fields
+              </Button>
+            </Link>
+            <Button
+              id={`button-businessEdit-${row.index}`}
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => startEdit(row.original)}
+            >
+              Edit
+            </Button>
+          </div>
+        ),
+      },
+    ];
+  }, [startEdit]);
+
+  if (isLoading || !hasRole(ROLES.BUSINESS_SETUP)) return null;
 
   return (
-    <div className='min-h-svh bg-muted/30 p-4'>
-      <div className='mx-auto max-w-4xl'>
-        <h1 className='text-xl font-semibold'>Business setup</h1>
-        <p className='mt-2 text-muted-foreground text-sm'>
+    <div className="min-h-svh bg-muted/30 p-4">
+      <div className="mx-auto max-w-5xl">
+        <h1 id="text-pageTitle-businessSetup" className="text-xl font-semibold">
+          Business setup
+        </h1>
+        <p
+          id="text-pageDescription-businessSetup"
+          className="mt-2 text-muted-foreground text-sm"
+        >
           Create and edit businesses. Each business can have its own tables and
           fields.
         </p>
 
-        {error && <p className='mt-4 text-destructive text-sm'>{error}</p>}
+        {error && (
+          <p id="text-businessSetupError" className="mt-4 text-destructive text-sm">
+            {error}
+          </p>
+        )}
 
-        <div className='mt-6 flex justify-end'>
-          <Button onClick={startCreate}>Add business</Button>
+        <div
+          id="container-businessSetupToolbar"
+          className="mt-6 flex justify-end"
+        >
+          <Button id="button-addBusiness" type="button" onClick={goToCreate}>
+            Add business
+          </Button>
         </div>
 
-        {showForm && (
-          <Card className='mt-4'>
+        {editingId !== null && (
+          <Card id="container-businessForm" className="mt-4">
             <CardHeader>
-              <CardTitle className='text-base'>
-                {editingId ? "Edit business" : "New business"}
-              </CardTitle>
+              <CardTitle className="text-base">Edit business</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className='space-y-4'>
+              <form
+                id="form-businessSetup"
+                onSubmit={handleSubmitEdit}
+                className="space-y-4"
+              >
                 {formError && (
-                  <p className='text-destructive text-sm'>{formError}</p>
+                  <p id="text-businessFormError" className="text-destructive text-sm">
+                    {formError}
+                  </p>
                 )}
                 <div>
-                  <Label htmlFor='bs-name'>Name</Label>
+                  <Label id="text-businessNameInputLabel" htmlFor="input-businessName">
+                    Name
+                  </Label>
                   <Input
-                    id='bs-name'
+                    id="input-businessName"
+                    name="businessName"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    placeholder='e.g. Main Warehouse'
+                    placeholder="e.g. Main Warehouse"
                   />
                 </div>
                 <div>
-                  <Label htmlFor='bs-slug'>Slug</Label>
+                  <Label id="text-businessSlugInputLabel" htmlFor="input-businessSlug">
+                    Slug
+                  </Label>
                   <Input
-                    id='bs-slug'
+                    id="input-businessSlug"
+                    name="businessSlug"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     required
-                    placeholder='e.g. main_warehouse'
-                    disabled={!!editingId}
+                    placeholder="e.g. main_warehouse"
+                    disabled
                   />
-                  <p className='mt-1 text-muted-foreground text-xs'>
-                    Lowercase letters, numbers, underscores only. Cannot change
-                    after create.
+                  <p
+                    id="text-businessSlugHelper"
+                    className="mt-1 text-muted-foreground text-xs"
+                  >
+                    Slug cannot be changed after create.
                   </p>
                 </div>
-                <div className='flex gap-2'>
-                  <Button type='submit'>{editingId ? "Save" : "Create"}</Button>
+                <div id="container-businessFormActions" className="flex gap-2">
+                  <Button id="button-submitBusinessForm" type="submit">
+                    Save
+                  </Button>
                   <Button
-                    type='button'
-                    variant='outline'
+                    id="button-cancelBusinessForm"
+                    type="button"
+                    variant="outline"
                     onClick={() => {
-                      setShowForm(false);
                       setEditingId(null);
+                      setName("");
+                      setSlug("");
+                      setFormError(null);
                     }}
                   >
                     Cancel
@@ -195,39 +260,17 @@ export default function BusinessSetup() {
           </Card>
         )}
 
-        <div className='mt-6 space-y-3'>
-          {businesses.length > 0
-            ? businesses.map((b) => (
-                <Card key={b.id}>
-                  <CardContent className='flex items-center justify-between py-4'>
-                    <div>
-                      <p className='font-medium'>{b.name}</p>
-                      <p className='text-muted-foreground text-sm'>
-                        Slug: {b.slug}
-                      </p>
-                    </div>
-                    <div className='flex gap-2'>
-                      <Link to={`/${PATHS.BUSINESS_SETUP}/businesses/${b.id}`}>
-                        <Button variant='outline' size='sm'>
-                          Tables & fields
-                        </Button>
-                      </Link>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => startEdit(b)}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            : !error && (
-                <p className='mt-4 text-muted-foreground text-sm'>
-                  No businesses yet. Add one above.
-                </p>
-              )}
+        <div id="container-businessesGrid" className="mt-6">
+          <DataTable
+            name="businesses"
+            columns={columns}
+            data={businesses}
+            emptyMessage={
+              error
+                ? "Could not load businesses."
+                : "No businesses yet. Add one with the button above."
+            }
+          />
         </div>
       </div>
     </div>

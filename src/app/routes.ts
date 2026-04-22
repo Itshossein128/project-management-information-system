@@ -5,6 +5,7 @@ import {
   route,
 } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "./routeVars";
+import { businessSetupRoutes } from "./routes/business-setup.routes";
 
 export default [
   index(ROUTES.INDEX),
@@ -16,6 +17,9 @@ export default [
   // لایه محافظت شده عمومی (برای لاگین بودن)
   layout(ROUTES.PROTECTED_LAYOUT, [
     route(PATHS.HOME, ROUTES.HOME),
+
+    ...businessSetupRoutes,
+
     route(`${PATHS.BUSINESS}/:businessId`, ROUTES.BUSINESS),
     route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
 
@@ -23,10 +27,5 @@ export default [
     layout(ROUTES.HR_PROTECTED_LAYOUT, [
       route(PATHS.USERS, ROUTES.USERS),
     ]),
-  ]),
-
-  layout(ROUTES.BUSINESS_SETUP_LAYOUT, [
-    route(PATHS.BUSINESS_SETUP, ROUTES.BUSINESS_SETUP),
-    route(`${PATHS.BUSINESS_SETUP}/businesses/:businessId`, ROUTES.BUSINESS_SETUP_SCHEMA),
   ]),
 ] satisfies RouteConfig;

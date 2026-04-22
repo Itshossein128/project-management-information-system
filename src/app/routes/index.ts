@@ -9,6 +9,7 @@ import { PATHS, ROUTES } from "../routeVars";
 
 import { authRoutes } from "./auth.routes";
 import { businessRoutes } from "./business.routes";
+import { businessSetupRoutes } from "./business-setup.routes";
 import { hrRoutes } from "./hr.routes";
 
 export default [
@@ -19,17 +20,10 @@ export default [
   layout(ROUTES.PROTECTED_LAYOUT, [
     route(PATHS.HOME, ROUTES.HOME),
 
+    ...businessSetupRoutes,
+
     ...businessRoutes,
 
     ...hrRoutes,
-  ]),
-
-  layout(ROUTES.BUSINESS_SETUP_LAYOUT, [
-    route(PATHS.BUSINESS_SETUP, ROUTES.BUSINESS_SETUP),
-
-    route(
-      `${PATHS.BUSINESS_SETUP}/businesses/:businessId`,
-      ROUTES.BUSINESS_SETUP_SCHEMA,
-    ),
   ]),
 ] satisfies RouteConfig;

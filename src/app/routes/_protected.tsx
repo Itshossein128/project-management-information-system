@@ -1,6 +1,6 @@
 import { Button } from "@/components/form";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { Sidebar } from "@/components/navigation/sidebar/view";
+import { Sidebar } from "@/components/navigation/sidebar";
 import { useTranslation } from "react-i18next";
 import { Outlet, redirect, useNavigate } from "react-router";
 import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
@@ -30,8 +30,8 @@ export default function ProtectedLayout() {
   }
 
   return (
-    <div className='grid grid-cols-[100px_1fr]'>
-      <Sidebar className='row-span-2' />
+    <div className='grid min-h-screen grid-cols-[100px_1fr]'>
+      <Sidebar className='row-span-2 min-h-0' />
       <header className='border-b bg-background px-5 py-4'>
         <div className='mx-auto flex items-center justify-between'>
           <h1 className='text-lg font-semibold'>{t("home.headerTitle")}</h1>
@@ -50,7 +50,7 @@ export default function ProtectedLayout() {
         </div>
       </header>
       <div className='col-start-2'>
-        <Outlet />;
+        <Outlet />
       </div>
     </div>
   );

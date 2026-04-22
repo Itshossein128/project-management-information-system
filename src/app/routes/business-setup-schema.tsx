@@ -16,6 +16,7 @@ import { Link, useParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
 import { apiJson } from "src/app/lib/api-client";
 import { PATHS } from "src/app/routeVars";
+import { ROLES } from "@/config/roles";
 
 const FIELD_TYPES = [
   { value: "string", label: "String" },
@@ -114,7 +115,7 @@ export default function BusinessSetupSchema() {
   };
 
   useEffect(() => {
-    if (!hasRole("business-setup")) return;
+    if (!hasRole(ROLES.BUSINESS_SETUP)) return;
     loadBusiness();
     loadTables();
   }, [hasRole, validId]);
@@ -249,7 +250,7 @@ export default function BusinessSetupSchema() {
     } catch {}
   };
 
-  if (isLoading || !hasRole("business-setup")) return null;
+  if (isLoading || !hasRole(ROLES.BUSINESS_SETUP)) return null;
   if (!validId)
     return <p className='p-4 text-destructive'>Invalid business.</p>;
 
@@ -258,7 +259,7 @@ export default function BusinessSetupSchema() {
       <div className='mx-auto max-w-4xl'>
         <div className='flex items-center gap-3'>
           <Link
-            to={`/${PATHS.BUSINESS_SETUP}`}
+            to={`/${PATHS.BUSINESS}`}
             className='text-muted-foreground hover:underline'
           >
             Business setup

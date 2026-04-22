@@ -1,1 +1,1 @@
-export { Grid } from "./view";
+export { DataTable, type DataTableProps } from "./view";
