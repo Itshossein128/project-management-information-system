@@ -1,21 +1,21 @@
+import { useAssignmentsForBusinessQuery } from "@/app/hooks/queries";
+import type { UserBusinessAssignment } from "@/app/lib/api-types";
+import { AssignmentDetailModal } from "@/components/assignments/assignment-detail-modal";
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Input,
-  Label,
 } from "@/components/form";
-import { DataTable } from "@/components/grid";
+import { DataTable, useGridState } from "@/components/grid";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
 import { apiJson } from "src/app/lib/api-client";
 import { PATHS } from "src/app/routeVars";
-import { ROLES } from "@/config/roles";
 
 interface BusinessDetail {
   id: number;
@@ -52,61 +52,51 @@ export interface BusinessMembershipRow {
   updated_at: string;
 }
 
-interface MembershipsListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: BusinessMembershipRow[];
-}
-
-const BUSINESS_ROLE_OPTIONS = [
-  { value: "worker", label: "Worker" },
-  { value: "engineer", label: "Engineer" },
-  { value: "manager", label: "Manager" },
-  { value: "accountant", label: "Accountant" },
-  { value: "site_engineer", label: "Site engineer" },
-] as const;
-
-function roleLabel(role: string): string {
-  return BUSINESS_ROLE_OPTIONS.find((o) => o.value === role)?.label ?? role;
-}
-
+/**
+ * Project hub at `/businesses/:id` — card navigation to `users` and table routes.
+ * Sidebar stays global; use in-page back links and these cards to move through the project.
+ */
 export default function BusinessPage() {
   const { t } = useTranslation();
   const { businessId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [tables, setTables] = useState<TableItem[]>([]);
-  const [members, setMembers] = useState<BusinessMembershipRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [membersError, setMembersError] = useState<string | null>(null);
-  const [showAddMember, setShowAddMember] = useState(false);
-  const [addPhone, setAddPhone] = useState("");
-  const [addFirst, setAddFirst] = useState("");
-  const [addLast, setAddLast] = useState("");
-  const [addRole, setAddRole] = useState<string>("worker");
-  const [addSubmitting, setAddSubmitting] = useState(false);
-  const [addFormError, setAddFormError] = useState<string | null>(null);
+  const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
-  const canManageMembers =
-    hasRole(ROLES.MANAGER) || hasRole(ROLES.HR);
+  const assignmentsGrid = useGridState({
+    initialPageIndex: 0,
+    initialPageSize: 20,
+  });
+  const ordering = assignmentsGrid.query.sorting[0]
+    ? `${assignmentsGrid.query.sorting[0].desc ? "-" : ""}${assignmentsGrid.query.sorting[0].id}`
+    : undefined;
 
-  const loadMembers = useCallback(
-    (id: number) => {
-      apiJson<MembershipsListResponse>(`/${PATHS.BUSINESS}/${id}/users/`)
-        .then((data) => {
-          setMembers(data.results);
-          setMembersError(null);
-        })
-        .catch((e) =>
-          setMembersError(
-            e instanceof Error ? e.message : "Failed to load team",
-          ),
-        );
+  const assignmentsQuery = useAssignmentsForBusinessQuery(
+    businessId ?? "",
+    {
+      page: assignmentsGrid.query.pagination.pageIndex + 1,
+      page_size: assignmentsGrid.query.pagination.pageSize,
+      search: assignmentsGrid.debouncedSearch?.trim()
+        ? assignmentsGrid.debouncedSearch.trim()
+        : undefined,
+      ordering,
     },
-    [],
+    isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
   );
+  const assignments = assignmentsQuery.data?.results ?? [];
+  const assignmentsCount = assignmentsQuery.data?.count ?? 0;
+  const assignmentsLoading = assignmentsQuery.isFetching;
+  const assignmentsError =
+    assignmentsQuery.error instanceof Error
+      ? assignmentsQuery.error.message
+      : null;
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailAssignment, setDetailAssignment] =
+    useState<UserBusinessAssignment | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -129,355 +119,261 @@ export default function BusinessPage() {
         setBusiness(b);
         setTables(tListData.results);
         setError(null);
-        loadMembers(id);
       })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
       );
-  }, [isAuthenticated, businessId, loadMembers]);
-
-  const handleAddMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!businessId || !canManageMembers) return;
-    const id = Number(businessId);
-    setAddFormError(null);
-    setAddSubmitting(true);
-    try {
-      await apiJson(`/${PATHS.BUSINESS}/${id}/users/`, {
-        method: "POST",
-        body: JSON.stringify({
-          phone_number: addPhone.trim(),
-          first_name: addFirst.trim(),
-          last_name: addLast.trim(),
-          business_role: addRole,
-        }),
-      });
-      setShowAddMember(false);
-      setAddPhone("");
-      setAddFirst("");
-      setAddLast("");
-      setAddRole("worker");
-      loadMembers(id);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Request failed";
-      setAddFormError(msg);
-      if (
-        err &&
-        typeof err === "object" &&
-        "errors" in err &&
-        typeof (err as { errors: unknown }).errors === "object"
-      ) {
-        const errors = (err as { errors: Record<string, string[]> }).errors;
-        const first = Object.values(errors).flat()[0];
-        if (first) setAddFormError(first);
-      }
-    } finally {
-      setAddSubmitting(false);
-    }
-  };
-
-  const updateMemberRole = useCallback(
-    async (membershipId: number, business_role: string) => {
-      if (!businessId || !canManageMembers) return;
-      const id = Number(businessId);
-      try {
-        await apiJson(`/${PATHS.BUSINESS}/${id}/users/${membershipId}/`, {
-          method: "PATCH",
-          body: JSON.stringify({ business_role }),
-        });
-        loadMembers(id);
-      } catch {
-        /* surface via toast in future */
-      }
-    },
-    [businessId, canManageMembers, loadMembers],
-  );
-
-  const removeMember = useCallback(
-    async (membershipId: number) => {
-      if (!businessId || !canManageMembers) return;
-      const id = Number(businessId);
-      if (!window.confirm("Remove this user from the business?")) return;
-      try {
-        await apiJson(`/${PATHS.BUSINESS}/${id}/users/${membershipId}/`, {
-          method: "DELETE",
-        });
-        loadMembers(id);
-      } catch {
-        /* ignore */
-      }
-    },
-    [businessId, canManageMembers, loadMembers],
-  );
-
-  const memberColumns = useMemo<ColumnDef<BusinessMembershipRow>[]>(() => {
-    return [
-      {
-        accessorKey: "phone_number",
-        header: "Phone",
-        cell: ({ row }) => (
-          <span id={`text-memberPhone-${row.index}`}>{row.original.phone_number}</span>
-        ),
-      },
-      {
-        id: "name",
-        header: "Name",
-        cell: ({ row }) => (
-          <span id={`text-memberName-${row.index}`}>
-            {`${row.original.first_name} ${row.original.last_name}`.trim() ||
-              "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "business_role",
-        header: "Role",
-        cell: ({ row }) => (
-          <span id={`container-memberRole-${row.index}`}>
-            {canManageMembers ? (
-              <select
-                id={`select-memberRole-${row.index}`}
-                className="border-input bg-background ring-offset-background focus-visible:ring-ring max-w-[180px] rounded-md border px-2 py-1 text-sm focus-visible:ring-2 focus-visible:outline-none"
-                value={row.original.business_role}
-                onChange={(e) =>
-                  updateMemberRole(row.original.id, e.target.value)
-                }
-              >
-                {BUSINESS_ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span id={`text-memberRoleLabel-${row.index}`}>
-                {roleLabel(row.original.business_role)}
-              </span>
-            )}
-          </span>
-        ),
-      },
-      ...(canManageMembers
-        ? [
-            {
-              id: "actions",
-              header: "Actions",
-              cell: ({ row }) => (
-                <Button
-                  id={`button-removeMember-${row.index}`}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => removeMember(row.original.id)}
-                >
-                  Remove
-                </Button>
-              ),
-            } satisfies ColumnDef<BusinessMembershipRow>,
-          ]
-        : []),
-    ];
-  }, [canManageMembers, updateMemberRole, removeMember]);
+  }, [isAuthenticated, businessId]);
 
   if (isLoading || !isAuthenticated) return null;
 
+  const assignmentColumns: ColumnDef<UserBusinessAssignment>[] = [
+    {
+      id: "user",
+      header: t("assignmentDetail.user"),
+      accessorFn: (a) =>
+        typeof a.user === "object" && a.user
+          ? a.user.full_name
+          : String(a.user ?? ""),
+      cell: ({ row }) => (
+        <span id={`text-assignmentUser-${row.index}`}>
+          {typeof row.original.user === "object" && row.original.user
+            ? row.original.user.full_name
+            : "—"}
+        </span>
+      ),
+    },
+    {
+      id: "job",
+      header: t("assignmentDetail.jobPosition"),
+      accessorFn: (a) =>
+        typeof a.job_position === "object" && a.job_position
+          ? a.job_position.label
+          : String(a.job_position ?? ""),
+      cell: ({ row }) => (
+        <span id={`text-assignmentJob-${row.index}`}>
+          {typeof row.original.job_position === "object" &&
+          row.original.job_position
+            ? row.original.job_position.label
+            : "—"}
+        </span>
+      ),
+    },
+    {
+      id: "status",
+      header: t("assignmentDetail.status"),
+      accessorKey: "status",
+      cell: ({ row }) => (
+        <span id={`text-assignmentStatus-${row.index}`}>
+          {row.original.status ?? "—"}
+        </span>
+      ),
+    },
+    {
+      id: "wage",
+      header: t("assignmentDetail.wage"),
+      accessorKey: "wage",
+      cell: ({ row }) => (
+        <span id={`text-assignmentWage-${row.index}`}>
+          {row.original.wage ?? "—"}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: t("common.submit"),
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Button
+          id={`button-openAssignmentDetail-${row.index}`}
+          type='button'
+          variant='outline'
+          size='sm'
+          onClick={() => {
+            setDetailAssignment(row.original);
+            setDetailOpen(true);
+          }}
+        >
+          {t("businessAssignments.viewDetails")}
+        </Button>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-svh bg-muted/30">
-      <header className="border-b bg-background px-4 py-3">
-        <div className="mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className='min-h-svh bg-muted/30' id='container-businessHub'>
+      <AssignmentDetailModal
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        assignment={detailAssignment}
+      />
+      <header className='border-b bg-background px-4 py-3'>
+        <div className='mx-auto flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
             <Button
-              id="button-backFromBusiness"
-              variant="ghost"
-              size="sm"
-              type="button"
+              id='button-backFromBusinessToHome'
+              variant='ghost'
+              size='sm'
+              type='button'
               onClick={() => navigate(`/${PATHS.HOME}`)}
             >
               {t("common.back")}
             </Button>
-            <h1 id="text-businessTitle" className="text-lg font-semibold">
+            <h1 id='text-businessTitle' className='text-lg font-semibold'>
               {business?.name ?? "Business"}
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto p-4">
+      <main className='mx-auto p-4' id='container-businessHubMain'>
+        <p
+          className='mb-4 text-muted-foreground text-sm'
+          id='text-businessHubHint'
+        >
+          {t("businessProject.hubHint")}
+        </p>
         {error && (
-          <p id="text-businessError" className="mb-4 text-destructive text-sm">
+          <p id='text-businessError' className='mb-4 text-destructive text-sm'>
             {error}
           </p>
         )}
         {business && (
           <>
-            <section
-              id="container-businessTeam"
-              className="mb-10"
-              aria-labelledby="text-teamHeading"
+            <div
+              className='mb-6 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+              id='grid-businessProjectCards'
             >
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h2 id="text-teamHeading" className="text-xl font-medium">
-                  Team
-                </h2>
-                {canManageMembers && (
-                  <Button
-                    id="button-addTeamMember"
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setShowAddMember((v) => !v);
-                      setAddFormError(null);
-                    }}
-                  >
-                    Add user
-                  </Button>
-                )}
-              </div>
-              {membersError && (
-                <p
-                  id="text-teamLoadError"
-                  className="mb-2 text-destructive text-sm"
-                >
-                  {membersError}
-                </p>
-              )}
-              {canManageMembers && showAddMember && (
-                <Card id="container-addMemberForm" className="mb-4">
+              <Link
+                id='link-businessProjectUsers'
+                to={`/${PATHS.BUSINESS}/${businessId}/users`}
+              >
+                <Card className='h-full transition-colors hover:bg-muted/50'>
                   <CardHeader>
-                    <CardTitle id="text-addMemberTitle" className="text-base">
-                      Add user to business
+                    <CardTitle
+                      className='text-base'
+                      id='text-businessProjectUsersTitle'
+                    >
+                      {t("businessProject.cardUsersTitle")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <form
-                      id="form-addMember"
-                      className="grid max-w-xl gap-4 sm:grid-cols-2"
-                      onSubmit={handleAddMember}
+                    <p
+                      className='text-muted-foreground text-sm'
+                      id='text-businessProjectUsersDescription'
                     >
-                      {addFormError && (
-                        <p
-                          id="text-addMemberError"
-                          className="text-destructive text-sm sm:col-span-2"
-                        >
-                          {addFormError}
-                        </p>
-                      )}
-                      <div className="sm:col-span-2">
-                        <Label
-                          id="text-addMemberPhoneLabel"
-                          htmlFor="input-addMemberPhone"
-                        >
-                          Phone number
-                        </Label>
-                        <Input
-                          id="input-addMemberPhone"
-                          name="addMemberPhone"
-                          type="tel"
-                          required
-                          value={addPhone}
-                          onChange={(e) => setAddPhone(e.target.value)}
-                          placeholder="+989123456789"
-                        />
-                      </div>
-                      <div>
-                        <Label
-                          id="text-addMemberFirstLabel"
-                          htmlFor="input-addMemberFirst"
-                        >
-                          First name
-                        </Label>
-                        <Input
-                          id="input-addMemberFirst"
-                          name="addMemberFirst"
-                          value={addFirst}
-                          onChange={(e) => setAddFirst(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label
-                          id="text-addMemberLastLabel"
-                          htmlFor="input-addMemberLast"
-                        >
-                          Last name
-                        </Label>
-                        <Input
-                          id="input-addMemberLast"
-                          name="addMemberLast"
-                          value={addLast}
-                          onChange={(e) => setAddLast(e.target.value)}
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <Label
-                          id="text-addMemberRoleLabel"
-                          htmlFor="select-addMemberRole"
-                        >
-                          Business role
-                        </Label>
-                        <select
-                          id="select-addMemberRole"
-                          className="border-input bg-background ring-offset-background focus-visible:ring-ring max-w-xs rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
-                          value={addRole}
-                          onChange={(e) => setAddRole(e.target.value)}
-                        >
-                          {BUSINESS_ROLE_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div
-                        id="container-addMemberActions"
-                        className="flex gap-2 sm:col-span-2"
-                      >
-                        <Button
-                          id="button-submitAddMember"
-                          type="submit"
-                          disabled={addSubmitting}
-                        >
-                          {addSubmitting ? "Saving…" : "Add"}
-                        </Button>
-                        <Button
-                          id="button-cancelAddMember"
-                          type="button"
-                          variant="outline"
-                          onClick={() => setShowAddMember(false)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </form>
+                      {t("businessProject.cardUsersDescription")}
+                    </p>
                   </CardContent>
                 </Card>
+              </Link>
+              <Link
+                id='link-businessProjectJobPositions'
+                to={`/${PATHS.BUSINESS}/${businessId}/job-positions`}
+              >
+                <Card className='h-full transition-colors hover:bg-muted/50'>
+                  <CardHeader>
+                    <CardTitle
+                      className='text-base'
+                      id='text-businessProjectJobPositionsTitle'
+                    >
+                      {t("businessJobPositions.cardTitle")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p
+                      className='text-muted-foreground text-sm'
+                      id='text-businessProjectJobPositionsDescription'
+                    >
+                      {t("businessJobPositions.cardDescription")}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+
+            <section id='container-businessAssignments' className='mb-8'>
+              <div className='mb-3 flex items-center justify-between gap-2'>
+                <h2
+                  id='text-businessAssignmentsTitle'
+                  className='text-xl font-medium'
+                >
+                  {t("businessAssignments.title")}
+                </h2>
+                {assignmentsLoading && (
+                  <span
+                    id='text-businessAssignmentsLoading'
+                    className='text-muted-foreground text-sm'
+                  >
+                    {t("common.loading")}
+                  </span>
+                )}
+              </div>
+              {assignmentsError && (
+                <p
+                  id='text-businessAssignmentsError'
+                  className='mb-2 text-destructive text-sm'
+                >
+                  {assignmentsError}
+                </p>
               )}
               <DataTable
-                name="businessMembers"
-                columns={memberColumns}
-                data={members}
-                emptyMessage="No users linked to this business yet."
+                name='businessAssignments'
+                columns={assignmentColumns}
+                data={assignments}
+                emptyMessage={t("businessAssignments.empty")}
+                manual
+                enableRowSelection
+                globalFilter={assignmentsGrid.query.search}
+                onGlobalFilterChange={(value) =>
+                  assignmentsGrid.setSearch(value)
+                }
+                sorting={assignmentsGrid.query.sorting}
+                onSortingChange={(next) => assignmentsGrid.setSorting(next)}
+                pagination={assignmentsGrid.query.pagination}
+                onPaginationChange={(next) =>
+                  assignmentsGrid.setPagination(next)
+                }
+                pageCount={Math.max(
+                  1,
+                  Math.ceil(
+                    assignmentsCount /
+                      assignmentsGrid.query.pagination.pageSize,
+                  ),
+                )}
               />
             </section>
 
-            <h2 id="text-tablesHeading" className="mb-4 text-xl font-medium">
-              Tables
+            <h2 id='text-tablesHeading' className='mb-4 text-xl font-medium'>
+              {t("businessProject.tablesHeading")}
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {tables.map((table) => (
+            <div
+              className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+              id='grid-businessTables'
+            >
+              {tables.map((table, index) => (
                 <Card key={table.id} id={`container-tableCard-${table.id}`}>
                   <CardHeader>
-                    <CardTitle className="text-base">{table.name}</CardTitle>
+                    <CardTitle
+                      className='text-base'
+                      id={`text-tableName-${index}`}
+                    >
+                      {table.name}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="mb-3 text-muted-foreground text-sm">
-                      Slug: {table.slug}
+                    <p
+                      className='mb-3 text-muted-foreground text-sm'
+                      id={`text-tableSlug-${index}`}
+                    >
+                      {t("home.businessSlugLabel", { slug: table.slug })}
                     </p>
                     <Link
                       id={`link-tableRows-${table.id}`}
                       to={`/${PATHS.BUSINESS}/${businessId}/tables/${table.slug}`}
                     >
-                      <Button variant="outline" size="sm" type="button">
-                        View rows
+                      <Button variant='outline' size='sm' type='button'>
+                        {t("businessProject.viewRows")}
                       </Button>
                     </Link>
                   </CardContent>
@@ -485,8 +381,8 @@ export default function BusinessPage() {
               ))}
             </div>
             {tables.length === 0 && (
-              <p className="text-muted-foreground text-sm">
-                No tables defined for this business.
+              <p className='text-muted-foreground text-sm' id='text-noTables'>
+                {t("businessProject.noTables")}
               </p>
             )}
           </>

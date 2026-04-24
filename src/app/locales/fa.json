@@ -16,7 +16,12 @@
     "back": "بازگشت",
     "loading": "در حال بارگذاری...",
     "error": "خطا",
-    "success": "موفق"
+    "success": "موفق",
+    "cancel": "لغو"
+  },
+  "nav": {
+    "sidebarHome": "خانه",
+    "sidebarHr": "منابع انسانی"
   },
   "login": {
     "title": "ورود",
@@ -61,6 +66,11 @@
   "home": {
     "pageTitle": "خانه | مدیریت ساختمان",
     "pageDescription": "داشبورد اصلی",
+    "chooseBusinessTitle": "کسب‌وکارهای شما",
+    "chooseBusinessSubtitle": "یک کسب‌وکار را برای ورود به فضای پروژه آن انتخاب کنید. نوار کناری ثابت است؛ داخل هر کسب‌وکار از کارت‌ها به بخش‌های پروژه بروید.",
+    "businessesHeading": "کسب‌وکارها",
+    "businessSlugLabel": "نامک: {{slug}}",
+    "noBusinesses": "هنوز کسب‌وکاری ثبت نشده است.",
     "headerTitle": "مدیریت ساختمان",
     "welcome": "{{name}} عزیز، خوش آمدید. می‌توانید کارت‌های داشبورد و بخش‌های مبتنی بر نقش را بعداً اضافه کنید.",
     "cardPlaceholder": "کارت نمونه {{number}}",
@@ -83,5 +93,109 @@
     "select": "زبان",
     "persian": "فارسی",
     "english": "انگلیسی"
+  },
+  "businessProject": {
+    "hubHint": "با کارت‌های زیر بخش موردنظر را باز کنید. جایگاهتان در پروژه در هدر صفحه است، نه در منوی کناری.",
+    "cardUsersTitle": "تیم پروژه",
+    "cardUsersDescription": "اعضا و نقش‌های این کسب‌وکار.",
+    "tablesHeading": "جدول‌های داده",
+    "viewRows": "مشاهده ردیف‌ها",
+    "noTables": "جدولی برای این کسب‌وکار تعریف نشده است.",
+    "teamPageTitle": "تیم — {{name}}",
+    "teamSectionTitle": "تیم",
+    "addUser": "افزودن کاربر",
+    "addUserSubmit": "افزودن",
+    "addUserToBusiness": "افزودن کاربر به کسب‌وکار",
+    "businessRole": "نقش در کسب‌وکار",
+    "noMembers": "هنوز کاربری به این کسب‌وکار متصل نیست."
+  },
+  "businessAssignments": {
+    "title": "انتساب‌ها",
+    "empty": "برای این کسب‌وکار انتسابی یافت نشد.",
+    "viewDetails": "جزئیات"
+  },
+  "businessJobPositions": {
+    "cardTitle": "موقعیت‌های شغلی",
+    "cardDescription": "مدیریت موقعیت‌های شغلی این کسب‌وکار.",
+    "title": "موقعیت‌های شغلی — {{name}}",
+    "subtitle": "ایجاد و مدیریت موقعیت‌های شغلی در همین کسب‌وکار.",
+    "tableTitle": "موقعیت‌های شغلی",
+    "columnSlug": "نامک",
+    "columnLabel": "عنوان",
+    "columnOrdering": "ترتیب",
+    "columnActions": "عملیات",
+    "add": "افزودن موقعیت شغلی",
+    "closeForm": "بستن فرم",
+    "newTitle": "موقعیت شغلی جدید",
+    "editTitle": "ویرایش موقعیت شغلی",
+    "slug": "نامک",
+    "label": "عنوان",
+    "ordering": "ترتیب",
+    "slugHelper": "شناسه با حروف کوچک؛ در این کسب‌وکار یکتا است.",
+    "create": "ایجاد",
+    "save": "ذخیره",
+    "delete": "حذف",
+    "cancel": "لغو",
+    "empty": "هنوز موقعیت شغلی ثبت نشده است."
+  },
+  "hrHub": {
+    "title": "منابع انسانی",
+    "subtitle": "ابزار موردنظر را انتخاب کنید. منابع انسانی سطح برنامه اینجاست؛ افراد مربوط به هر پروژه زیر همان کسب‌وکار است.",
+    "cardUsersTitle": "کاربران سامانه",
+    "cardUsersDescription": "همه حساب‌هایی که می‌توانند وارد شوند (موبایل، نقش‌ها، وضعیت).",
+    "cardJobPositionsTitle": "موقعیت‌های شغلی",
+    "cardJobPositionsDescription": "تعریف یا مرور موقعیت‌های شغلی (در صورت فعال بودن).",
+    "cardBusinessesTitle": "کسب‌وکارها و راه‌اندازی",
+    "cardBusinessesDescription": "فهرست کسب‌وکارها، افزودن و گزینه‌های طرح داده.",
+    "cardRolesTitle": "تعریف نقش‌های تیمی",
+    "cardRolesDescription": "برچسب و کلید نقش‌ها درون کسب‌وکارها.",
+    "noModules": "شما به ماژول‌های منابع انسانی یا راه‌اندازی کسب‌وکار دسترسی ندارید."
+  },
+  "hrJobPositions": {
+    "title": "موقعیت‌های شغلی",
+    "placeholder": "این بخش فهرست و مدیریت موقعیت‌های شغلی را نشان می‌دهد. با اتصال API این صفحه را جایگزین کنید."
+  },
+  "hrUsers": {
+    "title": "کاربران",
+    "subtitle": "فهرست حساب‌هایی که می‌توانند وارد شوند (شماره موبایل، نقش‌ها، وضعیت).",
+    "tableTitle": "همه کاربران ({{count}})",
+    "newUser": "کاربر جدید",
+    "newUserTitle": "کاربر جدید",
+    "createUser": "ایجاد کاربر",
+    "columnPhone": "موبایل",
+    "columnName": "نام",
+    "columnRoles": "نقش‌ها",
+    "columnAssignments": "انتساب‌ها",
+    "columnJoined": "تاریخ عضویت",
+    "columnStatus": "وضعیت",
+    "statusActive": "فعال",
+    "statusInactive": "غیرفعال",
+    "empty": "کاربری یافت نشد.",
+    "loadError": "بارگذاری فهرست کاربران ممکن نشد.",
+    "pageInfo": "صفحه {{page}} از {{totalPages}} (جمع {{count}} نفر)",
+    "prev": "قبلی",
+    "next": "بعدی",
+    "forbiddenTitle": "دسترسی ندارید",
+    "forbiddenBody": "این بخش مخصوص منابع انسانی و مدیران است."
+  },
+  "assignments": {
+    "viewAll": "مشاهده همه (+{{count}})",
+    "modalTitle": "انتساب‌ها — {{user}}",
+    "modalSubtitle": "انتساب‌های کسب‌وکار و موقعیت شغلی این کاربر.",
+    "empty": "انتسابی یافت نشد."
+  },
+  "assignmentDetail": {
+    "modalTitle": "جزئیات انتساب",
+    "empty": "انتسابی انتخاب نشده است.",
+    "user": "کاربر",
+    "business": "کسب‌وکار",
+    "jobPosition": "موقعیت شغلی",
+    "status": "وضعیت",
+    "wage": "دستمزد",
+    "weeklyTotal": "جمع هفتگی",
+    "monthlyTotal": "جمع ماهانه",
+    "tools": "ابزارها",
+    "startDate": "تاریخ شروع",
+    "endDate": "تاریخ پایان"
   }
 }

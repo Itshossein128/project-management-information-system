@@ -4,6 +4,7 @@ export enum ROLES {
   ENGINEER = "engineer",
   ACCOUNTANT = "accountant",
   HR = "hr",
+  VISITOR = "visitor",
   /** Django group `business-setup`: manage business definitions (support team). */
   BUSINESS_SETUP = "business-setup",
 }

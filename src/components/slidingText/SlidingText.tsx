@@ -1,6 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import styles from "./SlidingText.module.css";
 
+interface SlidingTextProps {
+  text: string;
+  hoverSelector: string;
+  animationDuration?: number;
+  className?: string;
+}
+
 /**
  * A component that displays text, truncates it with an ellipsis if it overflows,
  * and slides the full text on hover of a specified parent selector.
@@ -16,7 +23,7 @@ const SlidingText = ({
   hoverSelector,
   animationDuration = 5,
   className = "",
-}) => {
+}: SlidingTextProps) => {
   // State to track if the text is actually overflowing its container.
   const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -24,8 +31,8 @@ const SlidingText = ({
   const [transformOffset, setTransformOffset] = useState(0);
 
   // Refs to get direct access to the DOM elements for measurement.
-  const containerRef = useRef(null);
-  const textRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const textRef = useRef<HTMLSpanElement | null>(null);
 
   // useLayoutEffect runs synchronously after all DOM mutations.
   // It's preferred over useEffect for DOM measurements to avoid visual flickering.
@@ -66,10 +73,12 @@ const SlidingText = ({
       <div
         ref={containerRef}
         className={`${styles.container} ${className}`}
-        style={{
-          // Pass the calculated offset to CSS via a custom property (variable).
-          "--transform-offset": `${transformOffset}px`,
-        }}
+        style={
+          {
+            // Pass the calculated offset to CSS via a custom property (variable).
+            "--transform-offset": `${transformOffset}px`,
+          } as React.CSSProperties
+        }
       >
         <span
           ref={textRef}

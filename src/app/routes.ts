@@ -14,18 +14,22 @@ export default [
   route(PATHS.FORGOT_PASSWORD, ROUTES.FORGOT_PASSWORD),
   route(PATHS.RESET_PASSWORD, ROUTES.RESET_PASSWORD),
 
-  // لایه محافظت شده عمومی (برای لاگین بودن)
-  layout(ROUTES.PROTECTED_LAYOUT, [
-    route(PATHS.HOME, ROUTES.HOME),
+  // Auth → app shell: fixed sidebar (Home + HR); workflows use in-page links under `/hr/*` and `/businesses/:id/*`.
+  layout(ROUTES.AUTH_LAYOUT, [
+    layout(ROUTES.PROTECTED_LAYOUT, [
+      route(PATHS.HOME, ROUTES.HOME),
+      ...businessSetupRoutes,
 
-    ...businessSetupRoutes,
+      route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
+      route(`${PATHS.BUSINESS}/:businessId/job-positions`, ROUTES.BUSINESS_JOB_POSITIONS),
+      route(`${PATHS.BUSINESS}/:businessId/users`, ROUTES.BUSINESS_USERS),
+      route(`${PATHS.BUSINESS}/:businessId`, ROUTES.BUSINESS),
 
-    route(`${PATHS.BUSINESS}/:businessId`, ROUTES.BUSINESS),
-    route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
-
-    // لایه محافظت شده اختصاصی منابع انسانی (زیرمجموعه پنل کاربری)
-    layout(ROUTES.HR_PROTECTED_LAYOUT, [
-      route(PATHS.USERS, ROUTES.USERS),
+      layout(ROUTES.HR_PROTECTED_LAYOUT, [
+        route(`${PATHS.HR}/${PATHS.HR_JOB_POSITIONS}`, ROUTES.HR_JOB_POSITIONS),
+        route(PATHS.USERS, ROUTES.USERS),
+        route(PATHS.HR, ROUTES.HR_HUB),
+      ]),
     ]),
   ]),
 ] satisfies RouteConfig;

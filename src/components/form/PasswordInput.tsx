@@ -13,6 +13,7 @@ function PasswordInput({
   ...props
 }: React.ComponentProps<"input">) {
   const [visible, setVisible] = React.useState(false);
+  const inputId = typeof props.id === "string" && props.id.trim() ? props.id.trim() : "password";
 
   return (
     <div className='relative'>
@@ -24,7 +25,7 @@ function PasswordInput({
         {...props}
       />
       <Button
-
+        id={`button-togglePasswordVisibility-${inputId}`}
         type='button'
         variant='ghost'
         size='icon'

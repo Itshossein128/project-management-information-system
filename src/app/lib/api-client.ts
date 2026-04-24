@@ -66,10 +66,31 @@ export async function apiFetch(
 
 export async function apiJson<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await apiFetch(path, options);
-  const data = (await res.json().catch(() => ({}))) as T & ApiError;
-  if (!res.ok) {
-    throw new Error((data as ApiError).error ?? (res.statusText || "Request failed"));
+  const raw = await res.text();
+  let data: (T & ApiError) | (ApiError & { detail?: unknown }) = {};
+  if (raw) {
+    try {
+      data = JSON.parse(raw) as T & ApiError;
+    } catch {
+      data = {};
+    }
   }
+  if (!res.ok) {
+    const apiError = data as ApiError & { detail?: unknown };
+    const detail =
+      typeof apiError.detail === "string"
+        ? apiError.detail
+        : apiError.detail
+          ? JSON.stringify(apiError.detail)
+          : null;
+    const message =
+      apiError.error ??
+      detail ??
+      (raw && raw.trim() ? raw.trim() : null) ??
+      (res.statusText || "Request failed");
+    throw new Error(message);
+  }
+  if (!raw) return {} as T;
   return data as T;
 }
 

@@ -11,7 +11,7 @@ import {
   Input,
   Label,
 } from "@/components/form";
-import { DataTable } from "@/components/grid";
+import { DataTable, useGridState } from "@/components/grid";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -39,19 +39,43 @@ export default function BusinessSetup() {
   const navigate = useNavigate();
   const { hasRole, isLoading } = useAuth();
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
+  const [count, setCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
+  const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
+  const ordering = grid.query.sorting[0]
+    ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
+    : undefined;
+
   const loadBusinesses = useCallback(() => {
-    apiJson<BusinessesListResponse>(`/${PATHS.BUSINESS}/`)
-      .then((data) => setBusinesses(data.results))
+    apiJson<BusinessesListResponse>(
+      `/${PATHS.BUSINESS}/?${new URLSearchParams({
+        page: String(grid.query.pagination.pageIndex + 1),
+        page_size: String(grid.query.pagination.pageSize),
+        ...(grid.debouncedSearch?.trim()
+          ? { search: grid.debouncedSearch.trim() }
+          : {}),
+        ...(ordering ? { ordering } : {}),
+      }).toString()}`,
+    )
+      .then((data) => {
+        setBusinesses(data.results);
+        setCount(data.count ?? data.results.length);
+        setError(null);
+      })
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
       );
-  }, []);
+  }, [
+    grid.debouncedSearch,
+    grid.query.pagination.pageIndex,
+    grid.query.pagination.pageSize,
+    ordering,
+  ]);
 
   useEffect(() => {
     if (!hasRole(ROLES.BUSINESS_SETUP)) return;
@@ -270,6 +294,15 @@ export default function BusinessSetup() {
                 ? "Could not load businesses."
                 : "No businesses yet. Add one with the button above."
             }
+            manual
+            enableRowSelection
+            sorting={grid.query.sorting}
+            onSortingChange={(next) => grid.setSorting(next)}
+            globalFilter={grid.query.search}
+            onGlobalFilterChange={(value) => grid.setSearch(value)}
+            pagination={grid.query.pagination}
+            onPaginationChange={(next) => grid.setPagination(next)}
+            pageCount={Math.max(1, Math.ceil(count / grid.query.pagination.pageSize))}
           />
         </div>
       </div>

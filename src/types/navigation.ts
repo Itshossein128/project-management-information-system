@@ -24,6 +24,8 @@ export interface NavigationChildItem {
 
 export interface NavigationItem {
   label: string;
+  /** When set, `Sidebar` uses `t(labelI18nKey)` for the visible label. */
+  labelI18nKey?: string;
   icon: IconName;
   /** URL path segment(s) without leading slash, used as NavLink `to` target. */
   path: string;

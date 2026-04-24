@@ -16,7 +16,12 @@
     "back": "Back",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "cancel": "Cancel"
+  },
+  "nav": {
+    "sidebarHome": "Home",
+    "sidebarHr": "HR"
   },
   "login": {
     "title": "Sign in",
@@ -61,6 +66,11 @@
   "home": {
     "pageTitle": "Home | Building Management",
     "pageDescription": "Dashboard home",
+    "chooseBusinessTitle": "Your businesses",
+    "chooseBusinessSubtitle": "Choose a business to open its project hub. The sidebar stays the same; use cards inside each business to go to project users, tables, and more.",
+    "businessesHeading": "Businesses",
+    "businessSlugLabel": "Slug: {{slug}}",
+    "noBusinesses": "No businesses yet.",
     "headerTitle": "Building Management",
     "welcome": "Welcome, {{name}}. You can add dashboard cards and role-based sections here later.",
     "cardPlaceholder": "Card placeholder {{number}}",
@@ -83,5 +93,109 @@
     "select": "Language",
     "persian": "Persian",
     "english": "English"
+  },
+  "businessProject": {
+    "hubHint": "Open a section with the cards below. Your place in the project is shown in the page header, not the sidebar.",
+    "cardUsersTitle": "Project team",
+    "cardUsersDescription": "Members and roles for this business.",
+    "tablesHeading": "Data tables",
+    "viewRows": "View rows",
+    "noTables": "No tables defined for this business.",
+    "teamPageTitle": "Team — {{name}}",
+    "teamSectionTitle": "Team",
+    "addUser": "Add user",
+    "addUserSubmit": "Add",
+    "addUserToBusiness": "Add user to business",
+    "businessRole": "Business role",
+    "noMembers": "No users linked to this business yet."
+  },
+  "businessAssignments": {
+    "title": "Assignments",
+    "empty": "No assignments found for this business.",
+    "viewDetails": "Details"
+  },
+  "businessJobPositions": {
+    "cardTitle": "Job positions",
+    "cardDescription": "Manage job positions for this business.",
+    "title": "Job positions — {{name}}",
+    "subtitle": "Create and manage job positions scoped to this business.",
+    "tableTitle": "Job positions",
+    "columnSlug": "Slug",
+    "columnLabel": "Label",
+    "columnOrdering": "Order",
+    "columnActions": "Actions",
+    "add": "Add job position",
+    "closeForm": "Close form",
+    "newTitle": "New job position",
+    "editTitle": "Edit job position",
+    "slug": "Slug",
+    "label": "Label",
+    "ordering": "Order",
+    "slugHelper": "Lowercase identifier; unique within this business.",
+    "create": "Create",
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "empty": "No job positions yet."
+  },
+  "hrHub": {
+    "title": "Human resources",
+    "subtitle": "Choose a tool. App-wide HR lives here; project-specific people are under each business.",
+    "cardUsersTitle": "App users",
+    "cardUsersDescription": "All accounts that can sign in (phone, roles, status).",
+    "cardJobPositionsTitle": "Job positions",
+    "cardJobPositionsDescription": "Define or browse job positions (when available).",
+    "cardBusinessesTitle": "Businesses & setup",
+    "cardBusinessesDescription": "List businesses, add new, and schema options.",
+    "cardRolesTitle": "Team role definitions",
+    "cardRolesDescription": "Labels and keys for roles inside businesses.",
+    "noModules": "You do not have access to HR or business setup modules."
+  },
+  "hrJobPositions": {
+    "title": "Job positions",
+    "placeholder": "This area will list and manage job positions. Connect your API and replace this page when ready."
+  },
+  "hrUsers": {
+    "title": "Users",
+    "subtitle": "Directory of accounts that can sign in (phone, roles, status).",
+    "tableTitle": "All users ({{count}})",
+    "newUser": "New user",
+    "newUserTitle": "New user",
+    "createUser": "Create user",
+    "columnPhone": "Phone",
+    "columnName": "Name",
+    "columnRoles": "Roles",
+    "columnAssignments": "Assignments",
+    "columnJoined": "Joined",
+    "columnStatus": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "empty": "No users found.",
+    "loadError": "Could not load users.",
+    "pageInfo": "Page {{page}} of {{totalPages}} ({{count}} total)",
+    "prev": "Previous",
+    "next": "Next",
+    "forbiddenTitle": "Access denied",
+    "forbiddenBody": "This area is for HR and administrators only."
+  },
+  "assignments": {
+    "viewAll": "View all (+{{count}})",
+    "modalTitle": "Assignments — {{user}}",
+    "modalSubtitle": "Business and job position assignments for this user.",
+    "empty": "No assignments found."
+  },
+  "assignmentDetail": {
+    "modalTitle": "Assignment details",
+    "empty": "No assignment selected.",
+    "user": "User",
+    "business": "Business",
+    "jobPosition": "Job position",
+    "status": "Status",
+    "wage": "Wage",
+    "weeklyTotal": "Weekly total",
+    "monthlyTotal": "Monthly total",
+    "tools": "Tools",
+    "startDate": "Start date",
+    "endDate": "End date"
   }
 }

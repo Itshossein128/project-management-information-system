@@ -7,6 +7,11 @@ import { apiJson } from "~/lib/api-client";
 import { PATHS } from "~/routeVars";
 import type { Route } from "./+types/home";
 
+/**
+ * Business picker at `/home`. The sidebar is fixed (Home + HR); business setup
+ * and HR tools are reached from the HR hub (`/hr`) and in-project navigation
+ * uses cards under each business (`/businesses/:id/...`).
+ */
 export interface BusinessItem {
   id: number;
   name: string;
@@ -31,7 +36,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const { t } = useTranslation();
-  const { user, logout, hasRole, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
   const [businessesError, setBusinessesError] = useState<string | null>(null);
@@ -57,94 +62,57 @@ export default function Home() {
     return null;
   }
 
-  const displayName =
-    user?.full_name ||
-    `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() ||
-    user?.phone_number ||
-    "User";
-
   return (
-    <div className='min-h-svh bg-muted/30'>
-      <main className='mx-auto  p-4'>
-        <h2 className='mb-4 text-xl font-medium'>
-          {t("home.pageDescription")}
-        </h2>
-        <p className='mb-6 text-muted-foreground'>
-          {t("home.welcome", { name: user?.first_name || displayName })}
+    <main className='mx-auto p-4' id='container-homeBusinessPicker'>
+      <h1 className='mb-6 text-xl font-medium' id='text-homePageTitle'>
+        {t("home.chooseBusinessTitle")}
+      </h1>
+
+      {businessesError && (
+        <p className='mb-4 text-destructive text-sm' id='text-homeBusinessesError'>
+          {businessesError}
         </p>
-
-        {businessesError && (
-          <p className='mb-4 text-destructive text-sm'>{businessesError}</p>
-        )}
-        <h3 className='mb-3 text-sm font-medium text-muted-foreground'>
-          Businesses
-        </h3>
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-          {businesses.length > 0
-            ? businesses.map((b) => (
-                <Link key={b.id} to={`/${PATHS.BUSINESS}/${b.id}`}>
-                  <Card className='transition-colors hover:bg-muted/50'>
-                    <CardHeader>
-                      <CardTitle className='text-base'>{b.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-muted-foreground text-sm'>
-                        Slug: {b.slug}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
-            : !businessesError && (
-                <p className='mt-4 text-muted-foreground text-sm'>
-                  No businesses yet.
-                </p>
-              )}
-        </div>
-
-        {hasRole("visitor") && (
-          <Card className='mt-6'>
-            <CardHeader>
-              <CardTitle className='text-base'>
-                {t("home.visitorSection")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className='text-muted-foreground text-sm'>
-                {t("home.visitorDescription")}
+      )}
+      <div
+        className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+        id='grid-homeBusinesses'
+      >
+        {businesses.length > 0
+          ? businesses.map((b, index) => (
+              <Link
+                key={b.id}
+                id={`link-homeBusiness-${index}`}
+                to={`/${PATHS.BUSINESS}/${b.id}`}
+              >
+                <Card className='transition-colors hover:bg-muted/50'>
+                  <CardHeader>
+                    <CardTitle
+                      className='text-base'
+                      id={`text-homeBusinessName-${index}`}
+                    >
+                      {b.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p
+                      className='text-muted-foreground text-sm'
+                      id={`text-homeBusinessSlug-${index}`}
+                    >
+                      {t("home.businessSlugLabel", { slug: b.slug })}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
+          : !businessesError && (
+              <p
+                className='mt-4 text-muted-foreground text-sm'
+                id='text-homeNoBusinesses'
+              >
+                {t("home.noBusinesses")}
               </p>
-            </CardContent>
-          </Card>
-        )}
-        {hasRole("manager") && (
-          <Card className='mt-6'>
-            <CardHeader>
-              <CardTitle className='text-base'>
-                {t("home.managerSection")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className='text-muted-foreground text-sm'>
-                {t("home.managerDescription")}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-        {hasRole("commentor") && (
-          <Card className='mt-6'>
-            <CardHeader>
-              <CardTitle className='text-base'>
-                {t("home.commentorSection")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className='text-muted-foreground text-sm'>
-                {t("home.commentorDescription")}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </main>
-    </div>
+            )}
+      </div>
+    </main>
   );
 }
