@@ -201,15 +201,15 @@ export default function BusinessPage() {
   ];
 
   return (
-    <div className='min-h-svh bg-muted/30' id='container-businessHub'>
+    <div className='page-shell' id='container-businessHub'>
       <AssignmentDetailModal
         open={detailOpen}
         onOpenChange={setDetailOpen}
         assignment={detailAssignment}
       />
-      <header className='border-b bg-background px-4 py-3'>
-        <div className='mx-auto flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
+      <header className='page-route-header'>
+        <div className='page-route-header-inner'>
+          <div className='page-route-header-title'>
             <Button
               id='button-backFromBusinessToHome'
               variant='ghost'
@@ -219,14 +219,17 @@ export default function BusinessPage() {
             >
               {t("common.back")}
             </Button>
-            <h1 id='text-businessTitle' className='text-lg font-semibold'>
+            <h1
+              id='text-businessTitle'
+              className='min-w-0 truncate text-base font-semibold sm:text-lg'
+            >
               {business?.name ?? "Business"}
             </h1>
           </div>
         </div>
       </header>
 
-      <main className='mx-auto p-4' id='container-businessHubMain'>
+      <main className='page-main' id='container-businessHubMain'>
         <p
           className='mb-4 text-muted-foreground text-sm'
           id='text-businessHubHint'
@@ -248,7 +251,7 @@ export default function BusinessPage() {
                 id='link-businessProjectUsers'
                 to={`/${PATHS.BUSINESS}/${businessId}/users`}
               >
-                <Card className='h-full transition-colors hover:bg-muted/50'>
+                <Card className='card-interactive h-full'>
                   <CardHeader>
                     <CardTitle
                       className='text-base'
@@ -271,7 +274,7 @@ export default function BusinessPage() {
                 id='link-businessProjectJobPositions'
                 to={`/${PATHS.BUSINESS}/${businessId}/job-positions`}
               >
-                <Card className='h-full transition-colors hover:bg-muted/50'>
+                <Card className='card-interactive h-full'>
                   <CardHeader>
                     <CardTitle
                       className='text-base'
@@ -293,7 +296,7 @@ export default function BusinessPage() {
             </div>
 
             <section id='container-businessAssignments' className='mb-8'>
-              <div className='mb-3 flex items-center justify-between gap-2'>
+              <div className='mb-3 flex flex-wrap items-center justify-between gap-2'>
                 <h2
                   id='text-businessAssignmentsTitle'
                   className='text-xl font-medium'
@@ -334,13 +337,8 @@ export default function BusinessPage() {
                 onPaginationChange={(next) =>
                   assignmentsGrid.setPagination(next)
                 }
-                pageCount={Math.max(
-                  1,
-                  Math.ceil(
-                    assignmentsCount /
-                      assignmentsGrid.query.pagination.pageSize,
-                  ),
-                )}
+                totalCount={assignmentsCount}
+                isLoading={assignmentsLoading}
               />
             </section>
 

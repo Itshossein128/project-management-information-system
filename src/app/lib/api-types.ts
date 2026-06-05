@@ -47,3 +47,52 @@ export interface UserBusinessAssignment {
   updated_at?: string;
 }
 
+/** Department slug used by `DepartmentActivityRecord.department`. Matches frontend route segments. */
+export type DepartmentSlug =
+  | "buildings"
+  | "mechanical"
+  | "security"
+  | "machinery"
+  | "warehouse"
+  | "electrical";
+
+export interface DepartmentActivityRecord {
+  id: Id;
+  business_id: Id;
+  department: DepartmentSlug;
+  /** ISO `YYYY-MM-DD` (Gregorian). Backend `DateField`. */
+  date: string;
+  location: string;
+  activity_description: string;
+  contractor: string;
+  unit: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DepartmentActivityRecordListParams {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  ordering?: string;
+  department: DepartmentSlug;
+  date_from?: string;
+  date_to?: string;
+  location?: string;
+  activity_description?: string;
+  contractor?: string;
+  unit?: string;
+}
+
+export type DepartmentActivityRecordPayload = Pick<
+  DepartmentActivityRecord,
+  | "department"
+  | "date"
+  | "location"
+  | "activity_description"
+  | "contractor"
+  | "unit"
+  | "description"
+>;
+

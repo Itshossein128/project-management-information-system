@@ -1,4 +1,5 @@
 import { Button, Input, Label } from "@/components/form";
+import { GridPagination } from "@/components/grid";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
@@ -132,7 +133,7 @@ export default function BusinessTablePage() {
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [isAuthenticated, businessId, tableSlug, page]);
+  }, [isAuthenticated, businessId, tableSlug, page, pageSize]);
 
   const handleDelete = async (rowId: string) => {
     if (!businessId || !tableSlug || !confirm("Delete this row?")) return;
@@ -258,21 +259,25 @@ export default function BusinessTablePage() {
   if (isLoading || !isAuthenticated) return null;
 
   return (
-    <div className='min-h-svh bg-muted/30'>
-      <header className='border-b bg-background px-4 py-3'>
-        <div className='mx-auto flex items-center justify-between'>
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => navigate(`/${PATHS.BUSINESS}/${businessId}`)}
-          >
-            Back
-          </Button>
-          <h1 className='text-lg font-semibold'>{schema?.name ?? tableSlug}</h1>
+    <div className='page-shell'>
+      <header className='page-route-header'>
+        <div className='page-route-header-inner'>
+          <div className='page-route-header-title'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={() => navigate(`/${PATHS.BUSINESS}/${businessId}`)}
+            >
+              Back
+            </Button>
+            <h1 className='min-w-0 truncate text-base font-semibold sm:text-lg'>
+              {schema?.name ?? tableSlug}
+            </h1>
+          </div>
         </div>
       </header>
 
-      <main className='mx-auto  p-4'>
+      <main className='page-main'>
         {error && <p className='mb-4 text-destructive text-sm'>{error}</p>}
         {(schemaLoading || rowsLoading) && !schema && (
           <p className='text-muted-foreground text-sm'>Loading table…</p>
@@ -416,29 +421,15 @@ export default function BusinessTablePage() {
                 </tbody>
               </table>
             </div>
-            {total > pageSize && (
-              <div className='mt-4 flex gap-2'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  disabled={page <= 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  Previous
-                </Button>
-                <span className='flex items-center px-2 text-muted-foreground text-sm'>
-                  Page {page} of {Math.ceil(total / pageSize)}
-                </span>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  disabled={page >= Math.ceil(total / pageSize)}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
+            <GridPagination
+              name="businessTableRows"
+              pageIndex={page - 1}
+              pageSize={pageSize}
+              totalCount={total}
+              isLoading={rowsLoading}
+              className="mt-4 rounded-xl border border-border bg-card"
+              onPageIndexChange={(nextIndex) => setPage(nextIndex + 1)}
+            />
           </>
         )}
       </main>

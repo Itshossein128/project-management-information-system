@@ -37,7 +37,11 @@ export interface UseGridStateResult {
   setSearch: (value: string) => void;
   searchInput: string;
   debouncedSearch: string;
-  setSorting: (updater: GridState["sorting"] | ((prev: GridState["sorting"]) => GridState["sorting"])) => void;
+  setSorting: (
+    updater:
+      | GridState["sorting"]
+      | ((prev: GridState["sorting"]) => GridState["sorting"]),
+  ) => void;
   setPagination: (
     updater:
       | GridState["pagination"]
@@ -90,6 +94,10 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
     return () => window.clearTimeout(handle);
   }, [searchInput, debounceMs]);
 
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [debouncedSearch]);
+
   const resetPage = useCallback(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, []);
@@ -97,6 +105,18 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
   const setSearch = useCallback(
     (value: string) => {
       setSearchInput(value);
+      resetPage();
+    },
+    [resetPage],
+  );
+
+  const setSortingWithReset = useCallback(
+    (
+      updater:
+        | GridState["sorting"]
+        | ((prev: GridState["sorting"]) => GridState["sorting"]),
+    ) => {
+      setSorting(updater);
       resetPage();
     },
     [resetPage],
@@ -123,7 +143,7 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
     setSearch,
     searchInput,
     debouncedSearch,
-    setSorting,
+    setSorting: setSortingWithReset,
     setPagination,
     setColumnFilters,
     setRowSelection,

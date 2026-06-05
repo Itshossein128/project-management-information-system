@@ -1,0 +1,14 @@
+/**
+ * Type scale — use via utilities or component classes in app.css.
+ */
+
+:root {
+  --text-page-title: 1.25rem;
+  --text-page-title-lg: 1.5rem;
+  --text-section-title: 1.125rem;
+  --text-body: 0.875rem;
+  --text-caption: 0.75rem;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --tracking-tight: -0.02em;
+}

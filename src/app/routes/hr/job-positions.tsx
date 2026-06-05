@@ -24,7 +24,7 @@ export default function HrJobPositionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-4" id="container-hrJobPositions">
+    <div className="page-main max-w-2xl" id="container-hrJobPositions">
       <div className="mb-4">
         <Button
           id="button-backToHrHub"

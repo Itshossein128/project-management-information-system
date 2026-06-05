@@ -62,8 +62,8 @@ export default function BusinessCreate() {
   if (isLoading || !hasRole(ROLES.BUSINESS_SETUP)) return null;
 
   return (
-    <div className="min-h-svh bg-muted/30 p-4">
-      <div className="mx-auto max-w-lg">
+    <div className="page-shell-padded">
+      <div className="page-main mx-auto max-w-lg !p-0">
         <div className="mb-4">
           <Link
             id="button-backToBusinessesList"

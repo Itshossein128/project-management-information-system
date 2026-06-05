@@ -23,7 +23,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     <aside
       id="container-mainSidebar"
       className={cn(
-        "flex h-full min-h-0 flex-col border-sidebar-border bg-sidebar text-sidebar-foreground shadow-[inset_-1px_0_0_0_var(--sidebar-border)]",
+        "flex h-dvh min-h-dvh flex-col border-sidebar-border bg-sidebar text-sidebar-foreground lg:shadow-[var(--shadow-sm)]",
         isRTL() ? "border-l" : "border-r",
         className,
       )}

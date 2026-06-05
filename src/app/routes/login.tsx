@@ -10,7 +10,7 @@ import {
   Label,
   PasswordInput,
 } from "@/components/form";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { redirect, useNavigate, useSearchParams } from "react-router";
@@ -66,8 +66,8 @@ export default function Login() {
 
   return (
     <div className='flex min-h-svh items-center justify-center p-4'>
-      <div className='absolute top-4 end-4'>
-        <LanguageSwitcher />
+      <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
+        <AppPreferencesBar />
       </div>
       <Card className='w-full max-w-sm'>
         <CardHeader>

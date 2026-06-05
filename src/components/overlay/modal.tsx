@@ -34,7 +34,7 @@ export function Modal({
   return (
     <div
       id={`modal-${idBase}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby={`text-${idBase}ModalTitle`}
@@ -45,13 +45,13 @@ export function Modal({
       <div
         id={`modal-${idBase}Body`}
         className={cn(
-          "w-full max-w-3xl rounded-xl border border-border bg-background shadow-lg",
+          "flex max-h-[min(90dvh,100%)] w-full max-w-3xl flex-col rounded-t-xl border border-border bg-background shadow-lg sm:max-h-[90dvh] sm:rounded-xl",
           className,
         )}
       >
         <div
           id={`modal-${idBase}Header`}
-          className="flex items-start justify-between gap-3 border-b border-border px-4 py-3"
+          className="flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3"
         >
           <h2
             id={`text-${idBase}ModalTitle`}
@@ -69,7 +69,7 @@ export function Modal({
             ×
           </Button>
         </div>
-        <div id={`modal-${idBase}Content`} className="p-4">
+        <div id={`modal-${idBase}Content`} className="min-h-0 flex-1 overflow-y-auto p-4">
           {children}
         </div>
       </div>

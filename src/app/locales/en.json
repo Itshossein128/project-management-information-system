@@ -19,9 +19,80 @@
     "success": "Success",
     "cancel": "Cancel"
   },
+  "grid": {
+    "pageInfo": "Page {{page}} of {{totalPages}} ({{count}} total)",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
   "nav": {
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
     "sidebarHome": "Home",
-    "sidebarHr": "HR"
+    "sidebarHr": "HR",
+    "deptBuildings": "Buildings",
+    "deptMechanical": "Mechanical",
+    "deptSecurity": "Security",
+    "deptMachinery": "Machinery",
+    "deptWarehouse": "Warehouse",
+    "deptElectrical": "Electrical"
+  },
+  "businessDepartment": {
+    "comingSoon": "This section will be added soon.",
+    "back": "Back to business",
+    "activityLog": {
+      "title": "Activity log",
+      "searchPlaceholder": "Search activities…",
+      "empty": "No activity records found.",
+      "loading": "Loading activity records…",
+      "loadError": "Could not load activity records.",
+      "add": "Add",
+      "addTitle": "Add activity record",
+      "create": "Create",
+      "creating": "Creating…",
+      "createFailed": "Could not create the record.",
+      "validationRequired": "Please fill all required fields.",
+      "columns": {
+        "date": "Date",
+        "location": "Location",
+        "activityDescription": "Activity",
+        "contractor": "Contractor",
+        "unit": "Unit",
+        "description": "Description"
+      },
+      "filters": {
+        "dateRange": "Date range",
+        "location": "Location",
+        "activityDescription": "Activity",
+        "contractor": "Contractor",
+        "unit": "Unit"
+      },
+      "fields": {
+        "date": "Date",
+        "location": "Location",
+        "activityDescription": "Activity",
+        "contractor": "Contractor",
+        "unit": "Unit",
+        "description": "Notes"
+      },
+      "importExcel": "Import Excel",
+      "exportExcel": "Export Excel",
+      "importing": "Importing…",
+      "exporting": "Exporting…",
+      "importSuccess": "Imported {{count}} record(s).",
+      "importPartial": "Created {{created}} record(s). Errors on {{errorCount}} row(s).",
+      "importFailed": "Import failed.",
+      "exportFailed": "Export failed.",
+      "dailyReport": "Daily report",
+      "weeklyReport": "Weekly report",
+      "generatingReport": "Generating…",
+      "reportFailed": "Could not generate the report."
+    }
   },
   "login": {
     "title": "Sign in",

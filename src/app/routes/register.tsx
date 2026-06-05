@@ -13,7 +13,7 @@ import {
   Label,
   PasswordInput,
 } from "@/components/form";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { apiFetch } from "~/lib/api-client";
 
 export default function Register() {
@@ -74,8 +74,8 @@ export default function Register() {
 
   return (
     <div className='flex min-h-svh items-center justify-center p-4'>
-      <div className='absolute top-4 end-4'>
-        <LanguageSwitcher />
+      <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
+        <AppPreferencesBar />
       </div>
       <Card className='w-full max-w-sm'>
         <CardHeader>
@@ -109,7 +109,7 @@ export default function Register() {
                 </p>
               )}
             </div>
-            <div className='grid grid-cols-2 gap-2'>
+            <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
               <div className='grid gap-2'>
                 <Label htmlFor='reg-first'>{t("common.firstName")}</Label>
                 <Input

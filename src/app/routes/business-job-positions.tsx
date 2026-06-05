@@ -231,12 +231,12 @@ export default function BusinessJobPositionsPage() {
 
   return (
     <div
-      className='min-h-svh bg-muted/30'
+      className='page-shell'
       id='container-businessJobPositionsPage'
     >
-      <header className='border-b bg-background px-4 py-3'>
-        <div className='mx-auto flex max-w-6xl items-center justify-between'>
-          <div className='flex items-center gap-3'>
+      <header className='page-route-header'>
+        <div className='page-route-header-inner'>
+          <div className='page-route-header-title'>
             <Button
               id='button-backToBusinessHubFromJobPositions'
               variant='ghost'
@@ -248,30 +248,32 @@ export default function BusinessJobPositionsPage() {
             </Button>
             <h1
               id='text-businessJobPositionsTitle'
-              className='text-lg font-semibold'
+              className='min-w-0 truncate text-base font-semibold sm:text-lg'
             >
               {t("businessJobPositions.title", { name: business?.name ?? "—" })}
             </h1>
           </div>
-          <Button
-            id='button-toggleJobPositionForm'
-            type='button'
-            size='sm'
-            variant={showForm ? "secondary" : "default"}
-            onClick={() => {
-              setShowForm((v) => !v);
-              setFormError(null);
-              if (showForm) resetForm();
-            }}
-          >
-            {showForm
-              ? t("businessJobPositions.closeForm")
-              : t("businessJobPositions.add")}
-          </Button>
+          <div className='page-route-header-actions'>
+            <Button
+              id='button-toggleJobPositionForm'
+              type='button'
+              size='sm'
+              variant={showForm ? "secondary" : "default"}
+              onClick={() => {
+                setShowForm((v) => !v);
+                setFormError(null);
+                if (showForm) resetForm();
+              }}
+            >
+              {showForm
+                ? t("businessJobPositions.closeForm")
+                : t("businessJobPositions.add")}
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className='mx-auto p-4' id='container-businessJobPositionsMain'>
+      <main className='page-main' id='container-businessJobPositionsMain'>
         <p
           id='text-businessJobPositionsSubtitle'
           className='mb-4 text-muted-foreground text-sm'
@@ -406,7 +408,7 @@ export default function BusinessJobPositionsPage() {
         )}
 
         <div
-          className='mb-2 flex items-center justify-between'
+          className='mb-2 flex flex-wrap items-center justify-between gap-2'
           id='container-businessJobPositionsHeaderRow'
         >
           <h2
@@ -438,10 +440,8 @@ export default function BusinessJobPositionsPage() {
           onGlobalFilterChange={(value) => grid.setSearch(value)}
           pagination={grid.query.pagination}
           onPaginationChange={(next) => grid.setPagination(next)}
-          pageCount={Math.max(
-            1,
-            Math.ceil(count / grid.query.pagination.pageSize),
-          )}
+          totalCount={count}
+          isLoading={loadingJobs}
         />
       </main>
     </div>

@@ -255,9 +255,9 @@ export default function BusinessSetupSchema() {
     return <p className='p-4 text-destructive'>Invalid business.</p>;
 
   return (
-    <div className='min-h-svh bg-muted/30 p-4'>
-      <div className='mx-auto max-w-4xl'>
-        <div className='flex items-center gap-3'>
+    <div className='page-shell-padded'>
+      <div className='page-main mx-auto max-w-4xl !p-0'>
+        <div className='flex flex-wrap items-center gap-2 gap-y-1 sm:gap-3'>
           <Link
             to={`/${PATHS.BUSINESS}`}
             className='text-muted-foreground hover:underline'
@@ -341,7 +341,7 @@ export default function BusinessSetupSchema() {
           <div className='mt-4 space-y-4'>
             {tables.map((t) => (
               <Card key={t.id}>
-                <CardHeader className='flex flex-row items-center justify-between py-3'>
+                <CardHeader className='flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between'>
                   <CardTitle className='text-base'>{t.name}</CardTitle>
                   <div className='flex gap-2'>
                     <Button

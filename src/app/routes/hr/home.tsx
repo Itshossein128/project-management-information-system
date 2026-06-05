@@ -28,7 +28,7 @@ export default function HrHubPage() {
   }
 
   return (
-    <main className='mx-auto p-4' id='container-hrHub'>
+    <main className='page-main' id='container-hrHub'>
       <h1 className='mb-1 text-xl font-semibold' id='text-hrHubTitle'>
         {t("hrHub.title")}
       </h1>
@@ -43,7 +43,7 @@ export default function HrHubPage() {
         {canHr && (
           <>
             <Link id='link-hrHubUsers' to={`/${PATHS.USERS}`}>
-              <Card className='h-full transition-colors hover:bg-muted/50'>
+              <Card className='card-interactive h-full'>
                 <CardHeader>
                   <CardTitle
                     className='text-base'
@@ -66,7 +66,7 @@ export default function HrHubPage() {
               id='link-hrHubJobPositions'
               to={`/${PATHS.HR}/${PATHS.HR_JOB_POSITIONS}`}
             >
-              <Card className='h-full transition-colors hover:bg-muted/50'>
+              <Card className='card-interactive h-full'>
                 <CardHeader>
                   <CardTitle
                     className='text-base'
@@ -91,7 +91,7 @@ export default function HrHubPage() {
         {canBusinessSetup && (
           <>
             <Link id='link-hrHubBusinesses' to={`/${PATHS.BUSINESS}`}>
-              <Card className='h-full transition-colors hover:bg-muted/50'>
+              <Card className='card-interactive h-full'>
                 <CardHeader>
                   <CardTitle
                     className='text-base'

@@ -51,12 +51,15 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
   return (
     <div
       id={`modal-excelImport-${name}`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
     >
-      <Card id={`container-excelImportCard-${name}`} className="w-full max-w-3xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+      <Card
+        id={`container-excelImportCard-${name}`}
+        className="flex max-h-[min(90dvh,100%)] w-full max-w-3xl flex-col rounded-t-xl sm:max-h-[90dvh] sm:rounded-xl"
+      >
+        <CardHeader className="flex shrink-0 flex-wrap items-center justify-between gap-2 space-y-0">
           <CardTitle id={`text-excelImportTitle-${name}`}>{title}</CardTitle>
           <Button
             id={`button-closeExcelImport-${name}`}

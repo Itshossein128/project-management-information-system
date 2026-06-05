@@ -1,4 +1,6 @@
 export { DataTable, type DataTableProps } from "./view";
+export { GridPagination, type GridPaginationProps } from "./grid-pagination";
+export { apiPageFromIndex, getPageCount, shouldShowPagination } from "./pagination";
 export type {
   GridFilters,
   GridPaginationState,

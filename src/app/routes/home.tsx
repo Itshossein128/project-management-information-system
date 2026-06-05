@@ -63,13 +63,16 @@ export default function Home() {
   }
 
   return (
-    <main className='mx-auto p-4' id='container-homeBusinessPicker'>
-      <h1 className='mb-6 text-xl font-medium' id='text-homePageTitle'>
+    <main className='page-main' id='container-homeBusinessPicker'>
+      <h1 className='text-page-title mb-6' id='text-homePageTitle'>
         {t("home.chooseBusinessTitle")}
       </h1>
 
       {businessesError && (
-        <p className='mb-4 text-destructive text-sm' id='text-homeBusinessesError'>
+        <p
+          className='mb-4 text-destructive text-sm'
+          id='text-homeBusinessesError'
+        >
           {businessesError}
         </p>
       )}
@@ -84,7 +87,7 @@ export default function Home() {
                 id={`link-homeBusiness-${index}`}
                 to={`/${PATHS.BUSINESS}/${b.id}`}
               >
-                <Card className='transition-colors hover:bg-muted/50'>
+                <Card className='card-interactive h-full'>
                   <CardHeader>
                     <CardTitle
                       className='text-base'

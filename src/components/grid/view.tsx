@@ -12,7 +12,9 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { cn } from "@/app/lib/utils";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { GridPagination } from "./grid-pagination";
+import { getPageCount, shouldShowPagination } from "./pagination";
 import { GridToolbar } from "./toolbar";
 
 export interface DataTableProps<TData> {
@@ -30,6 +32,9 @@ export interface DataTableProps<TData> {
   pagination?: PaginationState;
   onPaginationChange?: (updater: PaginationState) => void;
   pageCount?: number;
+  /** Total row count from API (`count` or `total`). Drives pagination footer. */
+  totalCount?: number;
+  isLoading?: boolean;
 
   globalFilter?: string;
   onGlobalFilterChange?: (value: string) => void;
@@ -60,7 +65,9 @@ export function DataTable<TData>({
 
   pagination: paginationProp,
   onPaginationChange,
-  pageCount,
+  pageCount: pageCountProp,
+  totalCount = 0,
+  isLoading = false,
 
   globalFilter,
   onGlobalFilterChange,
@@ -89,6 +96,16 @@ export function DataTable<TData>({
 
   const sorting = sortingProp ?? sortingInternal;
   const pagination = paginationProp ?? paginationInternal;
+  const pageCount =
+    pageCountProp ??
+    (manual && totalCount > 0
+      ? getPageCount(totalCount, pagination.pageSize)
+      : undefined);
+  const showPaginationFooter =
+    manual &&
+    paginationProp != null &&
+    onPaginationChange != null &&
+    shouldShowPagination(totalCount, pagination.pageSize);
   const columnFilters = columnFiltersProp ?? columnFiltersInternal;
   const rowSelection = rowSelectionProp ?? rowSelectionInternal;
 
@@ -97,6 +114,21 @@ export function DataTable<TData>({
     typeof onGlobalFilterChange === "function" ||
     toolbarLeftSlot != null ||
     toolbarRightSlot != null;
+
+  useEffect(() => {
+    if (!manual || !onPaginationChange || pageCount == null) return;
+    const maxIndex = pageCount - 1;
+    if (pagination.pageIndex > maxIndex) {
+      onPaginationChange({ ...pagination, pageIndex: Math.max(0, maxIndex) });
+    }
+  }, [
+    manual,
+    onPaginationChange,
+    pageCount,
+    pagination.pageIndex,
+    pagination.pageSize,
+    pagination,
+  ]);
 
   const withSelectionColumns = useMemo<ColumnDef<TData, unknown>[]>(() => {
     if (!enableRowSelection) return columns;
@@ -196,29 +228,36 @@ export function DataTable<TData>({
   return (
     <div
       id={`container-dataTable-${name}`}
-      className={cn(
-        "overflow-hidden rounded-xl border border-border bg-card shadow-sm",
-        className,
-      )}
+      className={cn("surface-panel", className)}
     >
       {showToolbar ? (
         toolbar ? (
-          <div id={`container-gridToolbarCustom-${name}`}>{toolbar}</div>
+          <div
+            id={`container-gridToolbarCustom-${name}`}
+            className="border-border border-b p-3 sm:p-4"
+          >
+            {toolbar}
+          </div>
         ) : (
-          <GridToolbar
-            name={name}
-            searchValue={globalFilter ?? ""}
-            searchPlaceholder={searchPlaceholder}
-            onSearchChange={onGlobalFilterChange ?? (() => {})}
-            leftSlot={toolbarLeftSlot}
-            rightSlot={toolbarRightSlot}
-          />
+          <div className="border-border border-b p-3 sm:p-4">
+            <GridToolbar
+              name={name}
+              searchValue={globalFilter ?? ""}
+              searchPlaceholder={searchPlaceholder}
+              onSearchChange={onGlobalFilterChange ?? (() => {})}
+              leftSlot={toolbarLeftSlot}
+              rightSlot={toolbarRightSlot}
+            />
+          </div>
         )
       ) : null}
-      <div id={`container-dataTableScroll-${name}`} className="overflow-x-auto">
+      <div
+        id={`container-dataTableScroll-${name}`}
+        className="overflow-x-auto overscroll-x-contain"
+      >
         <table
           id={`grid-${name}`}
-          className="w-full min-w-[320px] border-collapse text-sm"
+          className="w-full min-w-0 border-collapse text-sm sm:min-w-[480px]"
         >
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -231,7 +270,7 @@ export function DataTable<TData>({
                   <th
                     key={header.id}
                     id={`text-columnHeader-${name}-${header.id}`}
-                    className="px-4 py-3 text-start font-medium text-muted-foreground"
+                    className="px-3 py-2 text-start font-medium text-muted-foreground sm:px-4 sm:py-3"
                   >
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
@@ -290,7 +329,7 @@ export function DataTable<TData>({
                     <td
                       key={cell.id}
                       id={`cell-${name}-${cell.column.id}-${index}`}
-                      className="px-4 py-3 align-middle text-foreground"
+                      className="px-3 py-2 align-middle text-foreground sm:px-4 sm:py-3"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -304,6 +343,21 @@ export function DataTable<TData>({
           </tbody>
         </table>
       </div>
+      {showPaginationFooter ? (
+        <GridPagination
+          name={name}
+          pageIndex={pagination.pageIndex}
+          pageSize={pagination.pageSize}
+          totalCount={totalCount}
+          isLoading={isLoading}
+          onPageIndexChange={(nextIndex) =>
+            onPaginationChange?.({
+              ...pagination,
+              pageIndex: nextIndex,
+            })
+          }
+        />
+      ) : null}
     </div>
   );
 }

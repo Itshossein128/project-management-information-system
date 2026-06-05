@@ -19,9 +19,80 @@
     "success": "موفق",
     "cancel": "لغو"
   },
+  "grid": {
+    "pageInfo": "صفحه {{page}} از {{totalPages}} ({{count}} مورد)",
+    "prev": "قبلی",
+    "next": "بعدی"
+  },
+  "theme": {
+    "light": "حالت روشن",
+    "dark": "حالت تیره",
+    "switchToLight": "تغییر به حالت روشن",
+    "switchToDark": "تغییر به حالت تیره"
+  },
   "nav": {
+    "openMenu": "باز کردن منو",
+    "closeMenu": "بستن منو",
     "sidebarHome": "خانه",
-    "sidebarHr": "منابع انسانی"
+    "sidebarHr": "منابع انسانی",
+    "deptBuildings": "ابنیه",
+    "deptMechanical": "مکانیک",
+    "deptSecurity": "حراست",
+    "deptMachinery": "ماشین آلات",
+    "deptWarehouse": "انباردار",
+    "deptElectrical": "برق"
+  },
+  "businessDepartment": {
+    "comingSoon": "این بخش به‌زودی اضافه خواهد شد.",
+    "back": "بازگشت به کسب‌وکار",
+    "activityLog": {
+      "title": "گزارش فعالیت",
+      "searchPlaceholder": "جستجوی فعالیت‌ها…",
+      "empty": "رکوردی یافت نشد.",
+      "loading": "در حال بارگذاری گزارش فعالیت…",
+      "loadError": "بارگذاری گزارش فعالیت ممکن نشد.",
+      "add": "افزودن",
+      "addTitle": "افزودن فعالیت",
+      "create": "ایجاد",
+      "creating": "در حال ایجاد…",
+      "createFailed": "ایجاد رکورد ممکن نشد.",
+      "validationRequired": "لطفاً همه فیلدهای ضروری را تکمیل کنید.",
+      "columns": {
+        "date": "تاریخ",
+        "location": "موقعیت",
+        "activityDescription": "شرح فعالیت",
+        "contractor": "پیمانکار",
+        "unit": "واحد",
+        "description": "توضیحات"
+      },
+      "filters": {
+        "dateRange": "بازه تاریخ",
+        "location": "موقعیت",
+        "activityDescription": "شرح فعالیت",
+        "contractor": "پیمانکار",
+        "unit": "واحد"
+      },
+      "fields": {
+        "date": "تاریخ",
+        "location": "موقعیت",
+        "activityDescription": "شرح فعالیت",
+        "contractor": "پیمانکار",
+        "unit": "واحد",
+        "description": "توضیحات"
+      },
+      "importExcel": "ورود از اکسل",
+      "exportExcel": "خروجی اکسل",
+      "importing": "در حال ورود…",
+      "exporting": "در حال خروجی…",
+      "importSuccess": "{{count}} رکورد وارد شد.",
+      "importPartial": "{{created}} رکورد ایجاد شد. خطا در {{errorCount}} سطر.",
+      "importFailed": "ورود از اکسل ناموفق بود.",
+      "exportFailed": "خروجی اکسل ناموفق بود.",
+      "dailyReport": "گزارش روزانه",
+      "weeklyReport": "گزارش هفتگی",
+      "generatingReport": "در حال تولید…",
+      "reportFailed": "تولید گزارش ممکن نشد."
+    }
   },
   "login": {
     "title": "ورود",

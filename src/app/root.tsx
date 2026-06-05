@@ -1,3 +1,4 @@
+import { ThemeSync } from "@/components/ThemeSync";
 import { useTranslation } from "react-i18next";
 import {
   isRouteErrorResponse,
@@ -13,15 +14,18 @@ import { AuthProvider } from "./contexts/auth-context";
 import "./lib/i18n";
 import { isRTL } from "./lib/i18n";
 
+const themeInitScript = `(function(){try{var t=localStorage.getItem("app-theme");var d=t==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   const dir = isRTL(i18n.language) ? "rtl" : "ltr";
 
   return (
-    <html lang={i18n.language} dir={dir}>
+    <html lang={i18n.language} dir={dir} suppressHydrationWarning>
       <head>
         <meta charSet='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <Meta />
         <Links />
       </head>
@@ -37,6 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <AuthProvider>
+      <ThemeSync />
       <Outlet />
     </AuthProvider>
   );

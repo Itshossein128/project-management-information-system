@@ -184,9 +184,12 @@ export default function BusinessSetup() {
   if (isLoading || !hasRole(ROLES.BUSINESS_SETUP)) return null;
 
   return (
-    <div className="min-h-svh bg-muted/30 p-4">
-      <div className="mx-auto max-w-5xl">
-        <h1 id="text-pageTitle-businessSetup" className="text-xl font-semibold">
+    <div className="page-shell-padded">
+      <div className="page-main mx-auto max-w-5xl !p-0">
+        <h1
+          id="text-pageTitle-businessSetup"
+          className="text-lg font-semibold sm:text-xl"
+        >
           Business setup
         </h1>
         <p
@@ -302,7 +305,7 @@ export default function BusinessSetup() {
             onGlobalFilterChange={(value) => grid.setSearch(value)}
             pagination={grid.query.pagination}
             onPaginationChange={(next) => grid.setPagination(next)}
-            pageCount={Math.max(1, Math.ceil(count / grid.query.pagination.pageSize))}
+            totalCount={count}
           />
         </div>
       </div>

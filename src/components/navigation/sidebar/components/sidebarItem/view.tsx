@@ -81,7 +81,7 @@ export const SidebarItem = ({
     children?.filter((c) => childPathIsNavigable(c.path)) ?? [];
 
   const itemActiveClass =
-    "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm ring-1 ring-sidebar-ring/40";
+    "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-sm)] ring-1 ring-sidebar-ring/30";
 
   if (hasChildren && navigableChildren.length > 0) {
     return (

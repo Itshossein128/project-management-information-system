@@ -3,6 +3,9 @@ import { apiJson } from "@/app/lib/api-client";
 import type {
   Business,
   BusinessJobPosition,
+  DepartmentActivityRecord,
+  DepartmentActivityRecordListParams,
+  DepartmentActivityRecordPayload,
   ListResponse,
   UserBusinessAssignment,
 } from "@/app/lib/api-types";
@@ -202,6 +205,116 @@ export function useDeleteAssignment(businessId: number | string) {
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.businessAssignments(businessId) });
+    },
+  });
+}
+
+const DEPARTMENT_ACTIVITY_RECORDS_PATH = "department-activity-records";
+
+function buildDepartmentActivityRecordsSearch(
+  params: DepartmentActivityRecordListParams,
+): string {
+  const sp = new URLSearchParams();
+  sp.set("department", params.department);
+  if (params.page) sp.set("page", String(params.page));
+  if (params.page_size) sp.set("page_size", String(params.page_size));
+  if (params.search) sp.set("search", params.search);
+  if (params.ordering) sp.set("ordering", params.ordering);
+  if (params.date_from) sp.set("date_from", params.date_from);
+  if (params.date_to) sp.set("date_to", params.date_to);
+  if (params.location) sp.set("location", params.location);
+  if (params.activity_description)
+    sp.set("activity_description", params.activity_description);
+  if (params.contractor) sp.set("contractor", params.contractor);
+  if (params.unit) sp.set("unit", params.unit);
+  return sp.toString();
+}
+
+export function useDepartmentActivityRecordsQuery(
+  businessId: number | string,
+  params: DepartmentActivityRecordListParams,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: queryKeys.departmentActivityRecords(
+      businessId,
+      params.department,
+      params as unknown as Record<string, unknown>,
+    ),
+    enabled,
+    queryFn: () =>
+      apiJson<ListResponse<DepartmentActivityRecord>>(
+        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/?${buildDepartmentActivityRecordsSearch(params)}`,
+      ),
+  });
+}
+
+export function useCreateDepartmentActivityRecord(businessId: number | string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: DepartmentActivityRecordPayload) =>
+      apiJson<DepartmentActivityRecord>(
+        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/`,
+        {
+          method: "POST",
+          body: JSON.stringify(payload),
+        },
+      ),
+    onSuccess: (record) => {
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(
+          businessId,
+          record.department,
+        ),
+      });
+    },
+  });
+}
+
+export function useUpdateDepartmentActivityRecord(
+  businessId: number | string,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (args: {
+      id: number | string;
+      patch: Partial<DepartmentActivityRecordPayload>;
+    }) =>
+      apiJson<DepartmentActivityRecord>(
+        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${args.id}/`,
+        {
+          method: "PATCH",
+          body: JSON.stringify(args.patch),
+        },
+      ),
+    onSuccess: (record) => {
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(
+          businessId,
+          record.department,
+        ),
+      });
+    },
+  });
+}
+
+export function useDeleteDepartmentActivityRecord(
+  businessId: number | string,
+  department: string,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number | string) =>
+      apiJson<{ ok?: boolean }>(
+        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${id}/`,
+        {
+          method: "DELETE",
+        },
+      ),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, department),
+      });
     },
   });
 }

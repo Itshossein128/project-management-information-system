@@ -20,8 +20,6 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { z } from "zod";
 
-const PAGE_SIZE = 20;
-
 export interface HrUserRow {
   id: number;
   phone_number: string;
@@ -64,7 +62,7 @@ export default function HrUsersPage() {
   const [importOpen, setImportOpen] = useState(false);
   const grid = useGridState({
     initialPageIndex: 0,
-    initialPageSize: PAGE_SIZE,
+    initialPageSize: 20,
     searchDebounceMs: 350,
   });
 
@@ -94,8 +92,6 @@ export default function HrUsersPage() {
   const loading = usersQuery.isFetching;
   const loadError =
     usersQuery.error instanceof Error ? usersQuery.error.message : null;
-
-  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalUserLabel, setModalUserLabel] = useState<string>("");
@@ -210,7 +206,7 @@ export default function HrUsersPage() {
             id={`text-hrUserStatus-${row.index}`}
             className={
               row.original.is_active
-                ? "text-emerald-600"
+                ? "text-success"
                 : "text-muted-foreground"
             }
           >
@@ -285,7 +281,7 @@ export default function HrUsersPage() {
   }
 
   return (
-    <div className='mx-auto p-4' id='container-hrUsersPage'>
+    <div className='page-main' id='container-hrUsersPage'>
       <AllAssignmentsModal
         open={modalOpen}
         onOpenChange={setModalOpen}
@@ -361,7 +357,7 @@ export default function HrUsersPage() {
       </p>
 
       <Card id='container-hrUsersCard'>
-        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+        <CardHeader className='flex flex-col gap-3 space-y-0 pb-2 sm:flex-row sm:items-center sm:justify-between'>
           <CardTitle
             className='text-base font-medium'
             id='text-hrUsersCardTitle'
@@ -370,7 +366,7 @@ export default function HrUsersPage() {
           </CardTitle>
           <div
             id='container-hrUsersHeaderActions'
-            className='flex items-center gap-3'
+            className='flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end'
           >
             {loading && (
               <span
@@ -421,82 +417,10 @@ export default function HrUsersPage() {
             onGlobalFilterChange={(value) => grid.setSearch(value)}
             pagination={grid.query.pagination}
             onPaginationChange={(next) => grid.setPagination(next)}
-            pageCount={Math.max(
-              1,
-              Math.ceil(count / grid.query.pagination.pageSize),
-            )}
+            totalCount={count}
+            isLoading={loading}
           />
 
-          {count > grid.query.pagination.pageSize && (
-            <div
-              className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'
-              id='container-hrUsersPagination'
-            >
-              <p
-                className='text-muted-foreground text-sm'
-                id='text-hrUsersPageInfo'
-              >
-                {t("hrUsers.pageInfo", {
-                  page: grid.query.pagination.pageIndex + 1,
-                  totalPages: Math.max(
-                    1,
-                    Math.ceil(count / grid.query.pagination.pageSize),
-                  ),
-                  count,
-                })}
-              </p>
-              <div
-                className='flex gap-2'
-                id='container-hrUsersPaginationActions'
-              >
-                <Button
-                  id='button-hrUsersPrev'
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  disabled={grid.query.pagination.pageIndex <= 0 || loading}
-                  onClick={() =>
-                    grid.setPagination({
-                      ...grid.query.pagination,
-                      pageIndex: Math.max(
-                        0,
-                        grid.query.pagination.pageIndex - 1,
-                      ),
-                    })
-                  }
-                >
-                  {t("hrUsers.prev")}
-                </Button>
-                <Button
-                  id='button-hrUsersNext'
-                  type='button'
-                  variant='outline'
-                  size='sm'
-                  disabled={
-                    grid.query.pagination.pageIndex + 1 >=
-                      Math.max(
-                        1,
-                        Math.ceil(count / grid.query.pagination.pageSize),
-                      ) || loading
-                  }
-                  onClick={() =>
-                    grid.setPagination({
-                      ...grid.query.pagination,
-                      pageIndex: Math.min(
-                        Math.max(
-                          0,
-                          Math.ceil(count / grid.query.pagination.pageSize) - 1,
-                        ),
-                        grid.query.pagination.pageIndex + 1,
-                      ),
-                    })
-                  }
-                >
-                  {t("hrUsers.next")}
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

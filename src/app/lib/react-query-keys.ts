@@ -14,5 +14,18 @@ export const queryKeys = {
 
   userAssignments: (userId: number | string) =>
     ["auth", "users", userId, "assignments"] as const,
+
+  departmentActivityRecords: (
+    businessId: number | string,
+    department: string,
+    params?: Record<string, unknown>,
+  ) =>
+    [
+      "businesses",
+      businessId,
+      "department-activity-records",
+      department,
+      params ?? {},
+    ] as const,
 };
 

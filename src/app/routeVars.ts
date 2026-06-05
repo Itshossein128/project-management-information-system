@@ -17,7 +17,13 @@ export const ROUTES = {
   BUSINESS_SETUP: "routes/business-setup.tsx",
   BUSINESS_CREATE: "routes/business-create.tsx",
   BUSINESS_SETUP_SCHEMA: "routes/business-setup-schema.tsx",
-  USERS: "routes/hr/users.tsx"
+  USERS: "routes/hr/users.tsx",
+  BUSINESS_BUILDINGS: "routes/business-buildings.tsx",
+  BUSINESS_MECHANICAL: "routes/business-mechanical.tsx",
+  BUSINESS_SECURITY: "routes/business-security.tsx",
+  BUSINESS_MACHINERY: "routes/business-machinery.tsx",
+  BUSINESS_WAREHOUSE: "routes/business-warehouse.tsx",
+  BUSINESS_ELECTRICAL: "routes/business-electrical.tsx",
 } as const;
 
 /** URL segments (no leading slash). */
@@ -39,4 +45,13 @@ export const PATHS = {
   USERS: "hr/users",
   /** `GET /api/auth/users/` — HR / admin user list (not a React route). */
   API_AUTH_USERS: "auth/users",
+  /** Department segments under `/businesses/:id/...`. */
+  BUSINESS_DEPT: {
+    BUILDINGS: "buildings",
+    MECHANICAL: "mechanical",
+    SECURITY: "security",
+    MACHINERY: "machinery",
+    WAREHOUSE: "warehouse",
+    ELECTRICAL: "electrical",
+  },
 } as const;

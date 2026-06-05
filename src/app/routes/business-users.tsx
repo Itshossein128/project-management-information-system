@@ -146,15 +146,15 @@ export default function BusinessUsersPage() {
   if (isLoading || !isAuthenticated) return null;
 
   return (
-    <div className='min-h-svh bg-muted/30' id='container-businessUsersPage'>
+    <div className='page-shell' id='container-businessUsersPage'>
       <AssignmentDetailModal
         open={detailOpen}
         onOpenChange={setDetailOpen}
         assignment={detailAssignment}
       />
-      <header className='border-b bg-background px-4 py-3'>
-        <div className='mx-auto flex max-w-6xl items-center justify-between'>
-          <div className='flex items-center gap-3'>
+      <header className='page-route-header'>
+        <div className='page-route-header-inner'>
+          <div className='page-route-header-title'>
             <Button
               id='button-backToBusinessHub'
               variant='ghost'
@@ -164,7 +164,10 @@ export default function BusinessUsersPage() {
             >
               {t("common.back")}
             </Button>
-            <h1 id='text-businessUsersTitle' className='text-lg font-semibold'>
+            <h1
+              id='text-businessUsersTitle'
+              className='min-w-0 truncate text-base font-semibold sm:text-lg'
+            >
               {t("businessProject.teamPageTitle", {
                 name: business?.name ?? "—",
               })}
@@ -173,7 +176,7 @@ export default function BusinessUsersPage() {
         </div>
       </header>
 
-      <main className='mx-auto p-4' id='container-businessUsersMain'>
+      <main className='page-main' id='container-businessUsersMain'>
         {error && (
           <p
             id='text-businessUsersError'
@@ -235,10 +238,8 @@ export default function BusinessUsersPage() {
               onGlobalFilterChange={(value) => grid.setSearch(value)}
               pagination={grid.query.pagination}
               onPaginationChange={(next) => grid.setPagination(next)}
-              pageCount={Math.max(
-                1,
-                Math.ceil(count / grid.query.pagination.pageSize),
-              )}
+              totalCount={count}
+              isLoading={assignmentsLoading}
             />
           </section>
         )}
