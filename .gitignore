@@ -1,7 +1,39 @@
 .DS_Store
 .env
-/node_modules/
+.env.local
 
-# React Router
-/.react-router/
-/build/
+# Node
+node_modules/
+**/node_modules/
+
+# React Router / Vite (web)
+**/.react-router/
+**/build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+.venv/
+venv/
+env/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+/static
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*~
+Thumbs.db

@@ -1,87 +1,67 @@
-# Welcome to React Router!
+# Building Management (IPCAS) — Monorepo
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Monorepo for the IPCAS construction project management platform: React Router web app + Django API.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Structure
 
-## Features
+```
+apps/web/     React Router 7 + Vite frontend
+apps/api/     Django 4.2 + DRF backend
+docs/         Engineering blueprint and scope map
+packages/     Shared packages (future)
+```
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Current scope vs blueprint
 
-## Getting Started
+This codebase implements an **early foundation** (businesses, HR, department activity logs, dynamic tables). The full IPCAS target is documented in [docs/IPCAS_Engineering_Blueprint.md](docs/IPCAS_Engineering_Blueprint.md). See [docs/ipcas-scope-map.md](docs/ipcas-scope-map.md) for term mappings and gap analysis.
 
-### Installation
+**Do not confuse:** `Business` (code) = `Project` (blueprint); department activity logs ≠ IPCAS daily field reports.
 
-Install the dependencies:
+## Prerequisites
+
+- Node 20+, pnpm 9+
+- Python 3.12+
+- Docker (for PostgreSQL)
+
+## Quick start
 
 ```bash
-npm install
+cp .env.example .env
+pnpm install
+
+# PostgreSQL
+pnpm db:up
+
+# API venv (first time)
+cd apps/api && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && cd ../..
+
+pnpm db:migrate
+pnpm db:seed    # dev RBAC groups (first time)
+pnpm dev        # web :5173 + api :8000
 ```
 
-### Development
-
-Start the development server with HMR:
+## Docker (all services)
 
 ```bash
-npm run dev
+docker compose up --build
+# web http://localhost:3000  api http://localhost:8000
 ```
 
-Your application will be available at `http://localhost:5173`.
+## Scripts
 
-## Building for Production
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start web + API |
+| `pnpm db:up` | Start Postgres only |
+| `pnpm db:migrate` | Run Django migrations |
+| `pnpm db:seed` | Seed dev RBAC (`seed_rbac_dev`) |
+| `pnpm typecheck` | Web TypeScript check |
+| `pnpm build` | Production web build |
 
-Create a production build:
+## Environment
 
-```bash
-npm run build
-```
+Copy `.env.example` to `.env`. `DATABASE_URL` is **required** (PostgreSQL only; no SQLite). Default dev Postgres runs on host port **5433** (`docker-compose`) so it does not clash with a system Postgres on 5432.
 
-## Deployment
+## Former repositories
 
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+Squash-imported from `building-management-front` and `building-management-back`.

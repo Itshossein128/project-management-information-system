@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ipcas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ipcas}
+      POSTGRES_DB: ${POSTGRES_DB:-ipcas}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./apps/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-ipcas}:${POSTGRES_PASSWORD:-ipcas}@postgres:5432/${POSTGRES_DB:-ipcas}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
+      DEBUG: ${DEBUG:-true}
+      ALLOWED_HOSTS: localhost,127.0.0.1,api
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        VITE_API_BASE_URL: http://localhost:8000/api
+    depends_on:
+      - api
+    environment:
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
