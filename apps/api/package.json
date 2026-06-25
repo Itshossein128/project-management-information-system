@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "bash ./runserver.sh",
-    "migrate": "cd core && ../.venv/bin/python manage.py migrate",
-    "seed": "cd core && ../.venv/bin/python manage.py seed_rbac_dev"
+    "migrate": "bash ./django.sh migrate",
+    "seed": "bash ./django.sh seed_rbac_dev"
   }
 }

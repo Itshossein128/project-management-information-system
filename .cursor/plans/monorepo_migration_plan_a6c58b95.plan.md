@@ -4,28 +4,28 @@ overview: Consolidate building-management-front and building-management-back int
 todos:
   - id: scaffold-root
     content: "Create new repo root: pnpm-workspace.yaml, root package.json, unified .gitignore, .env.example, docs/ipcas-scope-map.md"
-    status: in_progress
+    status: completed
   - id: move-apps
     content: Squash-copy frontend to apps/web and backend to apps/api; add thin apps/api/package.json
     status: completed
   - id: unify-config
     content: Externalize Django settings to env vars; switch DATABASES to PostgreSQL via DATABASE_URL; align CORS + VITE_API_BASE_URL; merge and fix Cursor rules (Django not FastAPI)
-    status: pending
+    status: completed
   - id: postgres
     content: Add psycopg + dj-database-url to requirements; docker-compose postgres service; CI postgres service; document migrate/seed workflow
-    status: pending
+    status: completed
   - id: blueprint-docs
     content: Add docs/ipcas-scope-map.md and root README scope section; relocate IPCAS_Engineering_Blueprint.md to monorepo docs/
-    status: pending
+    status: completed
   - id: docker
     content: Fix apps/web Dockerfile for pnpm; add apps/api Dockerfile with migrate-on-start; root docker-compose.yml with postgres + api + web
     status: completed
   - id: ci
     content: Add .github/workflows/ci.yml with path-filtered web and api jobs; api job uses Postgres 16 service container
-    status: pending
+    status: completed
   - id: publish
     content: Push to new GitHub repo; archive building-management-front and building-management-back
-    status: pending
+    status: completed
 isProject: false
 ---
 

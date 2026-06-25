@@ -43,7 +43,7 @@ pnpm dev        # web :5173 + api :8000
 ## Docker (all services)
 
 ```bash
-docker compose up --build
+docker-compose up --build
 # web http://localhost:3000  api http://localhost:8000
 ```
 
