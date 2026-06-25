@@ -63,8 +63,15 @@ class UserRegistrationView(generics.CreateAPIView):
         request=UserRegistrationSerializer,
         responses={
             201: OpenApiResponse(
-                response=UserSerializer,
-                description="User created successfully"
+                description="User created and authenticated",
+                response={
+                    'type': 'object',
+                    'properties': {
+                        'access': {'type': 'string', 'description': 'JWT access token'},
+                        'refresh': {'type': 'string', 'description': 'JWT refresh token'},
+                        'user': {'type': 'object'},
+                    },
+                },
             ),
             400: OpenApiResponse(
                 description="Validation error",
@@ -88,9 +95,14 @@ class UserRegistrationView(generics.CreateAPIView):
         if serializer.is_valid():
             try:
                 user = serializer.save()
+                tokens = get_tokens_for_user(user)
                 return Response(
-                    UserSerializer(user).data,
-                    status=status.HTTP_201_CREATED
+                    {
+                        'access': tokens['access'],
+                        'refresh': tokens['refresh'],
+                        'user': UserSerializer(user).data,
+                    },
+                    status=status.HTTP_201_CREATED,
                 )
             except ValidationError as e:
                 return Response(

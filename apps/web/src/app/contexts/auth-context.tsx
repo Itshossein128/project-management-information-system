@@ -15,6 +15,14 @@ interface LoginCredentials {
   password: string;
 }
 
+interface RegisterCredentials {
+  phone_number: string;
+  first_name: string;
+  last_name: string;
+  password: string;
+  password_confirm: string;
+}
+
 interface AuthApiResponse {
   access: string;
   refresh: string;
@@ -26,6 +34,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (creds: LoginCredentials) => Promise<void>;
+  register: (creds: RegisterCredentials) => Promise<void>;
+  establishSession: (data: AuthApiResponse) => void;
   logout: () => Promise<void>;
   hasRole: (role: ROLES) => boolean;
   restoreSession: () => Promise<void>;
@@ -51,6 +61,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const completeSession = React.useCallback((data: AuthApiResponse) => {
+    const raw = data.user as AuthUser & { groups?: string[] };
+    const userWithRoles: AuthUser = {
+      ...data.user,
+      roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
+    };
+    setStoredAuth({ access: data.access, refresh: data.refresh }, userWithRoles);
+    setUser(userWithRoles);
+  }, []);
+
   const login = React.useCallback(async (creds: LoginCredentials) => {
     setIsLoading(true);
     try {
@@ -58,17 +78,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         body: JSON.stringify(creds),
       });
-      const raw = data.user as AuthUser & { groups?: string[] };
-      const userWithRoles: AuthUser = {
-        ...data.user,
-        roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
-      };
-      setStoredAuth({ access: data.access, refresh: data.refresh }, userWithRoles);
-      setUser(userWithRoles);
+      completeSession(data);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [completeSession]);
+
+  const register = React.useCallback(async (creds: RegisterCredentials) => {
+    setIsLoading(true);
+    try {
+      const data = await apiJson<AuthApiResponse>("/auth/register/", {
+        method: "POST",
+        body: JSON.stringify(creds),
+      });
+      completeSession(data);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [completeSession]);
 
   const logout = React.useCallback(async () => {
     const refresh = getStoredRefreshToken();
@@ -120,6 +147,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isLoading,
     login,
+    register,
+    establishSession: completeSession,
     logout,
     hasRole,
     restoreSession,

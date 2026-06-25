@@ -15,11 +15,20 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     phone_number = serializers.CharField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True, max_length=60)
+    first_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    last_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'mobile', 'phone_number', 'full_name', 'email', 'password', 'password_confirm']
+        fields = [
+            'id', 'username', 'mobile', 'phone_number', 'full_name',
+            'first_name', 'last_name', 'email', 'password', 'password_confirm',
+        ]
         read_only_fields = ['id']
+        extra_kwargs = {
+            'full_name': {'required': False, 'allow_blank': True},
+        }
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -27,6 +36,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         phone = attrs.get('phone_number') or attrs.get('mobile')
         if phone and not attrs.get('mobile'):
             attrs['mobile'] = phone.strip()
+        if not attrs.get('full_name'):
+            first = (attrs.pop('first_name', None) or '').strip()
+            last = (attrs.pop('last_name', None) or '').strip()
+            attrs['full_name'] = f'{first} {last}'.strip()
+        else:
+            attrs.pop('first_name', None)
+            attrs.pop('last_name', None)
         if not attrs.get('username'):
             mobile = attrs.get('mobile', '')
             attrs['username'] = mobile.lstrip('+').replace(' ', '') or attrs.get('email', 'user')
@@ -40,6 +56,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
         validated_data.pop('phone_number', None)
+        validated_data.pop('first_name', None)
+        validated_data.pop('last_name', None)
         service = UserRegistrationService()
         return service.register_user(password=password, **validated_data)
 

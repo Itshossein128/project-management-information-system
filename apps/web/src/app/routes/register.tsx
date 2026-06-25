@@ -15,10 +15,19 @@ import {
 } from "@/components/form";
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { apiFetch } from "~/lib/api-client";
+import { useAuth } from "src/app/contexts/auth-context";
+import type { AuthUser } from "src/app/lib/auth-types";
+
+interface RegisterAuthResponse {
+  access: string;
+  refresh: string;
+  user: AuthUser;
+}
 
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { establishSession } = useAuth();
   const [form, setForm] = useState({
     phone_number: "",
     first_name: "",
@@ -64,7 +73,9 @@ export default function Register() {
         }
         return;
       }
-      navigate("/login", { replace: true });
+      const data = (await res.json()) as RegisterAuthResponse;
+      establishSession(data);
+      navigate("/home", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t("register.failed"));
     } finally {
