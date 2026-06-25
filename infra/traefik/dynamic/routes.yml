@@ -1,0 +1,44 @@
+http:
+  middlewares:
+    api-ratelimit:
+      rateLimit:
+        average: 100
+        burst: 200
+    login-ratelimit:
+      rateLimit:
+        average: 10
+        period: 1m
+        burst: 5
+
+  routers:
+    api-login:
+      rule: PathPrefix(`/api/auth/login`)
+      entryPoints:
+        - web
+      middlewares:
+        - login-ratelimit
+      service: api
+      priority: 100
+    api:
+      rule: PathPrefix(`/api`)
+      entryPoints:
+        - web
+      middlewares:
+        - api-ratelimit
+      service: api
+    web:
+      rule: PathPrefix(`/`)
+      entryPoints:
+        - web
+      service: web
+      priority: 1
+
+  services:
+    api:
+      loadBalancer:
+        servers:
+          - url: http://api:8000
+    web:
+      loadBalancer:
+        servers:
+          - url: http://web:3000

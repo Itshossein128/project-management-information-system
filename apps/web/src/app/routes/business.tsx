@@ -18,9 +18,11 @@ import { apiJson } from "src/app/lib/api-client";
 import { PATHS } from "src/app/routeVars";
 
 interface BusinessDetail {
-  id: number;
+  id: string;
   name: string;
   slug: string;
+  project_name?: string;
+  project_code?: string;
   created_at: string;
   updated_at: string;
 }
@@ -64,7 +66,6 @@ export default function BusinessPage() {
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [tables, setTables] = useState<TableItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
   const assignmentsGrid = useGridState({
     initialPageIndex: 0,
@@ -84,7 +85,7 @@ export default function BusinessPage() {
         : undefined,
       ordering,
     },
-    isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
+    isAuthenticated && Boolean(businessId),
   );
   const assignments = assignmentsQuery.data?.results ?? [];
   const assignmentsCount = assignmentsQuery.data?.count ?? 0;
@@ -106,14 +107,9 @@ export default function BusinessPage() {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId) return;
-    const id = Number(businessId);
-    if (Number.isNaN(id)) {
-      setError("Invalid business");
-      return;
-    }
     Promise.all([
-      apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${id}/`),
-      apiJson<TablesListResponse>(`/${PATHS.BUSINESS}/${id}/tables/`),
+      apiJson<BusinessDetail>(`/${PATHS.API_PROJECTS}/${businessId}/`),
+      apiJson<TablesListResponse>(`/${PATHS.API_PROJECTS}/${businessId}/tables/`),
     ])
       .then(([b, tListData]) => {
         setBusiness(b);

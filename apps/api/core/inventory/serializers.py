@@ -23,13 +23,13 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class SpaceMaterialRequestSerializer(serializers.ModelSerializer):
-    business_id = serializers.IntegerField(source='business.id', read_only=True)
+    project_id = serializers.UUIDField(source='project.id', read_only=True)
 
     class Meta:
         model = SpaceMaterialRequest
         fields = [
             'id',
-            'business_id',
+            'project_id',
             'block_number',
             'floor_number',
             'unit_number',
@@ -43,17 +43,17 @@ class SpaceMaterialRequestSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'business_id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'project_id', 'created_at', 'updated_at']
 
 
 class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
-    business_id = serializers.IntegerField(source='business.id', read_only=True)
+    project_id = serializers.UUIDField(source='project.id', read_only=True)
 
     class Meta:
         model = DepartmentActivityRecord
         fields = [
             'id',
-            'business_id',
+            'project_id',
             'department',
             'date',
             'location',
@@ -64,4 +64,4 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['id', 'business_id', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'project_id', 'created_at', 'updated_at']

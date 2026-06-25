@@ -28,7 +28,7 @@ export function useBusinessesQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.businesses(),
     enabled,
-    queryFn: () => apiJson<ListResponse<Business>>(`/${PATHS.BUSINESS}/`),
+    queryFn: () => apiJson<ListResponse<Business>>(`/${PATHS.API_PROJECTS}/`),
   });
 }
 
@@ -91,7 +91,7 @@ export function useJobPositionsForBusinessQuery(
     enabled,
     queryFn: () =>
       apiJson<ListResponse<BusinessJobPosition>>(
-        `/${PATHS.BUSINESS}/${businessId}/job-positions/?${new URLSearchParams({
+        `/${PATHS.API_PROJECTS}/${businessId}/positions/?${new URLSearchParams({
           ...(params.page ? { page: String(params.page) } : {}),
           ...(params.page_size ? { page_size: String(params.page_size) } : {}),
           ...(params.search ? { search: params.search } : {}),
@@ -111,7 +111,7 @@ export function useAssignmentsForBusinessQuery(
     enabled,
     queryFn: () =>
       apiJson<ListResponse<UserBusinessAssignment>>(
-        `/${PATHS.BUSINESS}/${businessId}/assignments/?${new URLSearchParams({
+        `/${PATHS.API_PROJECTS}/${businessId}/members/?${new URLSearchParams({
           ...(params.page ? { page: String(params.page) } : {}),
           ...(params.page_size ? { page_size: String(params.page_size) } : {}),
           ...(params.search ? { search: params.search } : {}),
@@ -125,7 +125,7 @@ export function useCreateJobPosition(businessId: number | string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: Partial<BusinessJobPosition>) =>
-      apiJson<BusinessJobPosition>(`/${PATHS.BUSINESS}/${businessId}/job-positions/`, {
+      apiJson<BusinessJobPosition>(`/${PATHS.API_PROJECTS}/${businessId}/positions/`, {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -140,7 +140,7 @@ export function useUpdateJobPosition(businessId: number | string) {
   return useMutation({
     mutationFn: (args: { id: number | string; patch: Partial<BusinessJobPosition> }) =>
       apiJson<BusinessJobPosition>(
-        `/${PATHS.BUSINESS}/${businessId}/job-positions/${args.id}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/positions/${args.id}/`,
         {
           method: "PATCH",
           body: JSON.stringify(args.patch),
@@ -156,7 +156,7 @@ export function useDeleteJobPosition(businessId: number | string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) =>
-      apiJson<{ ok?: boolean }>(`/${PATHS.BUSINESS}/${businessId}/job-positions/${id}/`, {
+      apiJson<{ ok?: boolean }>(`/${PATHS.API_PROJECTS}/${businessId}/positions/${id}/`, {
         method: "DELETE",
       }),
     onSuccess: () => {
@@ -169,7 +169,7 @@ export function useCreateAssignment(businessId: number | string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: Partial<UserBusinessAssignment>) =>
-      apiJson<UserBusinessAssignment>(`/${PATHS.BUSINESS}/${businessId}/assignments/`, {
+      apiJson<UserBusinessAssignment>(`/${PATHS.API_PROJECTS}/${businessId}/members/`, {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -184,7 +184,7 @@ export function useUpdateAssignment(businessId: number | string) {
   return useMutation({
     mutationFn: (args: { id: number | string; patch: Partial<UserBusinessAssignment> }) =>
       apiJson<UserBusinessAssignment>(
-        `/${PATHS.BUSINESS}/${businessId}/assignments/${args.id}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/members/${args.id}/`,
         {
           method: "PATCH",
           body: JSON.stringify(args.patch),
@@ -200,7 +200,7 @@ export function useDeleteAssignment(businessId: number | string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) =>
-      apiJson<{ ok?: boolean }>(`/${PATHS.BUSINESS}/${businessId}/assignments/${id}/`, {
+      apiJson<{ ok?: boolean }>(`/${PATHS.API_PROJECTS}/${businessId}/members/${id}/`, {
         method: "DELETE",
       }),
     onSuccess: () => {
@@ -244,7 +244,7 @@ export function useDepartmentActivityRecordsQuery(
     enabled,
     queryFn: () =>
       apiJson<ListResponse<DepartmentActivityRecord>>(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/?${buildDepartmentActivityRecordsSearch(params)}`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/?${buildDepartmentActivityRecordsSearch(params)}`,
       ),
   });
 }
@@ -254,7 +254,7 @@ export function useCreateDepartmentActivityRecord(businessId: number | string) {
   return useMutation({
     mutationFn: (payload: DepartmentActivityRecordPayload) =>
       apiJson<DepartmentActivityRecord>(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/`,
         {
           method: "POST",
           body: JSON.stringify(payload),
@@ -281,7 +281,7 @@ export function useUpdateDepartmentActivityRecord(
       patch: Partial<DepartmentActivityRecordPayload>;
     }) =>
       apiJson<DepartmentActivityRecord>(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${args.id}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${args.id}/`,
         {
           method: "PATCH",
           body: JSON.stringify(args.patch),
@@ -306,7 +306,7 @@ export function useDeleteDepartmentActivityRecord(
   return useMutation({
     mutationFn: (id: number | string) =>
       apiJson<{ ok?: boolean }>(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${id}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/${id}/`,
         {
           method: "DELETE",
         },

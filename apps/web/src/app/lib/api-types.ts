@@ -1,4 +1,4 @@
-export type Id = number;
+export type Id = string;
 
 export interface ListResponse<T> {
   count: number;
@@ -58,7 +58,7 @@ export type DepartmentSlug =
 
 export interface DepartmentActivityRecord {
   id: Id;
-  business_id: Id;
+  project_id: Id;
   department: DepartmentSlug;
   /** ISO `YYYY-MM-DD` (Gregorian). Backend `DateField`. */
   date: string;

@@ -1,16 +1,13 @@
 """
-Permissions for business-scoped assignment and job position APIs.
+Permissions for project-scoped assignment and position APIs.
 """
 from rest_framework import permissions
 
 from authentication.permissions import IsHrOrAdmin
+from master_data.models import ProjectMember
 
 
 class IsHrOrAdminOrReadOnly(permissions.BasePermission):
-    """
-    Read (safe methods) for authenticated users who may view business data.
-    Write for HR, admin, staff, or superuser (IsHrOrAdmin).
-    """
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
@@ -19,29 +16,19 @@ class IsHrOrAdminOrReadOnly(permissions.BasePermission):
         return IsHrOrAdmin().has_permission(request, view)
 
 
-class CanViewBusinessAssignments(permissions.BasePermission):
-    """
-    List/retrieve assignments for a business: HR/admin/staff/superuser,
-    or any user with an assignment in that business, or `visitor` (read-only in combination with safe method).
-    """
+class CanViewProjectMembers(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
         u = request.user
         if u.is_superuser or u.is_staff:
             return True
-        if u.groups.filter(name__in=('admin', 'hr')).exists():
+        if u.groups.filter(name__in=('admin', 'hr', 'business-setup')).exists():
             return True
-        if u.groups.filter(name='business-setup').exists():
+        project_id = view.kwargs.get('project_pk')
+        if not project_id:
             return True
-        business_id = view.kwargs.get('business_pk')
-        if not business_id:
-            return True
-        from business_meta.models import UserBusinessAssignment
-        return UserBusinessAssignment.objects.filter(
-            business_id=business_id,
-            user_id=u.id,
-        ).exists()
+        return ProjectMember.objects.filter(project_id=project_id, user_id=u.id).exists()
 
     def has_object_permission(self, request, view, obj) -> bool:
         u = request.user
@@ -49,17 +36,15 @@ class CanViewBusinessAssignments(permissions.BasePermission):
             name__in=('admin', 'hr', 'business-setup')
         ).exists():
             return True
-        from business_meta.models import UserBusinessAssignment
-        return UserBusinessAssignment.objects.filter(
-            business_id=obj.business_id,
-            user_id=u.id,
-        ).exists()
+        project_id = getattr(obj, 'project_id', None)
+        return ProjectMember.objects.filter(project_id=project_id, user_id=u.id).exists()
+
+
+# Backward-compatible alias
+CanViewBusinessAssignments = CanViewProjectMembers
 
 
 class IsVisitorReadOnly(permissions.BasePermission):
-    """
-    Users in the `visitor` group may not use unsafe HTTP methods.
-    """
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
@@ -71,14 +56,3 @@ class IsVisitorReadOnly(permissions.BasePermission):
         ).exists():
             return False
         return True
-
-
-def assignment_view_permissions():
-    """
-    For ViewSet: safe methods need CanViewBusinessAssignments + IsVisitorReadOnly; unsafe need IsHrOrAdmin + IsVisitorReadOnly.
-    """
-    from rest_framework.permissions import IsAuthenticated
-    return [IsAuthenticated, CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdmin]
-
-
-# Expose a getter used from get_permissions that branches on method

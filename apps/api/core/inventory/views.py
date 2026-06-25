@@ -170,21 +170,21 @@ class ItemViewSet(viewsets.ModelViewSet):
             OpenApiParameter(name='space_name', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='material_code', type=OpenApiTypes.STR, required=False),
         ],
-        tags=['Business inventory'],
+        tags=['Project inventory'],
     ),
     create=extend_schema(
         summary='Create space material request for a business (form)',
         description='Form endpoint to create a new space material request under a business.',
-        tags=['Business inventory'],
+        tags=['Project inventory'],
     ),
-    retrieve=extend_schema(summary='Get space material request', tags=['Business inventory']),
-    update=extend_schema(summary='Update space material request', tags=['Business inventory']),
-    partial_update=extend_schema(summary='Patch space material request', tags=['Business inventory']),
-    destroy=extend_schema(summary='Delete space material request', tags=['Business inventory']),
+    retrieve=extend_schema(summary='Get space material request', tags=['Project inventory']),
+    update=extend_schema(summary='Update space material request', tags=['Project inventory']),
+    partial_update=extend_schema(summary='Patch space material request', tags=['Project inventory']),
+    destroy=extend_schema(summary='Delete space material request', tags=['Project inventory']),
 )
 class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
     """
-    Business-scoped CRUD for SpaceMaterialRequest.
+    Project-scoped CRUD for SpaceMaterialRequest.
     """
 
     serializer_class = SpaceMaterialRequestSerializer
@@ -200,10 +200,10 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
+        project_pk = self.kwargs.get('project_pk')
         qs = SpaceMaterialRequest.objects.all()
-        if business_pk is not None:
-            qs = qs.filter(business_id=business_pk)
+        if project_pk is not None:
+            qs = qs.filter(project_id=project_pk)
 
         # Grid filters
         params = self.request.query_params
@@ -227,8 +227,8 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         return qs.select_related('business')
 
     def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        serializer.save(business_id=business_pk)
+        project_pk = self.kwargs.get('project_pk')
+        serializer.save(project_id=project_pk)
 
 
 @extend_schema_view(
@@ -272,21 +272,21 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
                 description='Page size (default 20, max 100).',
             ),
         ],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     ),
     create=extend_schema(
         summary='Create department activity record',
         description='Form endpoint to create a new activity record under a business.',
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     ),
-    retrieve=extend_schema(summary='Get department activity record', tags=['Business activity records']),
-    update=extend_schema(summary='Update department activity record', tags=['Business activity records']),
-    partial_update=extend_schema(summary='Patch department activity record', tags=['Business activity records']),
-    destroy=extend_schema(summary='Delete department activity record', tags=['Business activity records']),
+    retrieve=extend_schema(summary='Get department activity record', tags=['Project activity records']),
+    update=extend_schema(summary='Update department activity record', tags=['Project activity records']),
+    partial_update=extend_schema(summary='Patch department activity record', tags=['Project activity records']),
+    destroy=extend_schema(summary='Delete department activity record', tags=['Project activity records']),
 )
 class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
     """
-    Business-scoped CRUD for `DepartmentActivityRecord`.
+    Project-scoped CRUD for `DepartmentActivityRecord`.
 
     Frontend per-department pages call this endpoint with `?department=<slug>`
     so the same model serves all six department grids.
@@ -322,11 +322,11 @@ class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        if business_pk is None:
+        project_pk = self.kwargs.get('project_pk')
+        if project_pk is None:
             return DepartmentActivityRecord.objects.none()
-        return get_department_activity_queryset(business_pk, self.request.query_params)
+        return get_department_activity_queryset(project_pk, self.request.query_params)
 
     def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        serializer.save(business_id=business_pk)
+        project_pk = self.kwargs.get('project_pk')
+        serializer.save(project_id=project_pk)

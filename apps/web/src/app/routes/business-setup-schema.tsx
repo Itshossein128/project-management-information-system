@@ -82,12 +82,12 @@ export default function BusinessSetupSchema() {
   const [editingFieldId, setEditingFieldId] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const id = Number(businessId);
-  const validId = !Number.isNaN(id);
+  const id = businessId ?? "";
+  const validId = Boolean(id);
 
   const loadBusiness = () => {
     if (!validId) return;
-    apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${id}/`)
+    apiJson<BusinessDetail>(`/${PATHS.API_PROJECTS}/${id}/`)
       .then(setBusiness)
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
@@ -96,7 +96,7 @@ export default function BusinessSetupSchema() {
 
   const loadTables = () => {
     if (!validId) return;
-    apiJson<PaginatedResults<TableItem>>(`/${PATHS.BUSINESS}/${id}/tables/`)
+    apiJson<PaginatedResults<TableItem>>(`/${PATHS.API_PROJECTS}/${id}/tables/`)
       .then((data) => setTables(data.results))
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load tables"),
@@ -106,7 +106,7 @@ export default function BusinessSetupSchema() {
   const loadFields = (tableId: number) => {
     if (!validId) return;
     apiJson<PaginatedResults<FieldItem>>(
-      `/${PATHS.BUSINESS}/${id}/tables/${tableId}/fields/`,
+      `/${PATHS.API_PROJECTS}/${id}/tables/${tableId}/fields/`,
     )
       .then((data) =>
         setFieldsByTable((prev) => ({ ...prev, [tableId]: data.results })),
@@ -153,7 +153,7 @@ export default function BusinessSetupSchema() {
     }
     try {
       if (editingTableId) {
-        await apiJson(`/${PATHS.BUSINESS}/${id}/tables/${editingTableId}/`, {
+        await apiJson(`/${PATHS.API_PROJECTS}/${id}/tables/${editingTableId}/`, {
           method: "PATCH",
           body: JSON.stringify({
             name: tableForm.name.trim(),
@@ -162,7 +162,7 @@ export default function BusinessSetupSchema() {
           }),
         });
       } else {
-        await apiJson(`/${PATHS.BUSINESS}/${id}/tables/`, {
+        await apiJson(`/${PATHS.API_PROJECTS}/${id}/tables/`, {
           method: "POST",
           body: JSON.stringify({
             name: tableForm.name.trim(),
@@ -209,12 +209,12 @@ export default function BusinessSetupSchema() {
       };
       if (editingFieldId) {
         await apiJson(
-          `/${PATHS.BUSINESS}/${id}/tables/${fieldFormTableId}/fields/${editingFieldId}/`,
+          `/${PATHS.API_PROJECTS}/${id}/tables/${fieldFormTableId}/fields/${editingFieldId}/`,
           { method: "PATCH", body: JSON.stringify(payload) },
         );
       } else {
         await apiJson(
-          `/${PATHS.BUSINESS}/${id}/tables/${fieldFormTableId}/fields/`,
+          `/${PATHS.API_PROJECTS}/${id}/tables/${fieldFormTableId}/fields/`,
           { method: "POST", body: JSON.stringify(payload) },
         );
       }
@@ -230,7 +230,7 @@ export default function BusinessSetupSchema() {
   const deleteTable = async (tableId: number) => {
     if (!validId || !confirm("Delete this table and all its fields?")) return;
     try {
-      await apiJson(`/${PATHS.BUSINESS}/${id}/tables/${tableId}/`, {
+      await apiJson(`/${PATHS.API_PROJECTS}/${id}/tables/${tableId}/`, {
         method: "DELETE",
       });
       loadTables();
@@ -241,7 +241,7 @@ export default function BusinessSetupSchema() {
     if (!validId || !confirm("Delete this field?")) return;
     try {
       await apiJson(
-        `/${PATHS.BUSINESS}/${id}/tables/${tableId}/fields/${fieldId}/`,
+        `/${PATHS.API_PROJECTS}/${id}/tables/${tableId}/fields/${fieldId}/`,
         {
           method: "DELETE",
         },

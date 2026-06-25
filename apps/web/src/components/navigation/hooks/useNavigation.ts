@@ -5,8 +5,8 @@ import { mainSidebarNavigation } from "@/config/navigation.config";
 import type { ROLES } from "@/config/roles";
 import type { NavigationItem } from "@/types/navigation";
 
-/** Matches `/businesses/:numericId` and any sub-path (excludes `create`, non-numeric ids). */
-const BUSINESS_WITH_NUMERIC_ID = /^\/businesses\/(\d+)(?:\/|$)/;
+/** Matches `/projects/:uuid` and any sub-path (excludes `create`). */
+const PROJECT_WITH_ID = /^\/projects\/([0-9a-f-]{36})(?:\/|$)/i;
 
 export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
   const { pathname } = useLocation();
@@ -22,7 +22,7 @@ export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
     [roles],
   );
 
-  const businessId = pathname.match(BUSINESS_WITH_NUMERIC_ID)?.[1];
+  const businessId = pathname.match(PROJECT_WITH_ID)?.[1];
 
   return useMemo(() => {
     if (!businessId) return filtered;

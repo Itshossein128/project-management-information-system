@@ -1,219 +1,106 @@
-"""
-Authentication services following SOLID principles.
-Each service class has a single responsibility (Single Responsibility Principle).
-Uses phone_number as identifier (no username/email).
-"""
-from typing import Optional, Dict, Any
+"""Authentication services."""
+import hashlib
+import logging
+from datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.conf import settings
-from django.utils.crypto import get_random_string
 from django.utils import timezone
-from datetime import timedelta
-import logging
+from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+
+from authentication.models import PasswordResetToken
 
 logger = logging.getLogger(__name__)
-
 User = get_user_model()
+DEFAULT_REGISTRATION_GROUP_NAME = 'visitor'
 
-# Default role for new registrations; role groups created in migration 0001_add_role_groups.
-DEFAULT_REGISTRATION_GROUP_NAME = "visitor"
+
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def blacklist_user_tokens(user) -> None:
+    for token in OutstandingToken.objects.filter(user=user):
+        BlacklistedToken.objects.get_or_create(token=token)
 
 
 class UserRegistrationService:
-    """
-    Service responsible for user registration logic.
-    Single Responsibility: Handle user creation and validation.
-    """
-
-    def __init__(self):
-        self.logger = logger
-
-    def register_user(
-        self,
-        phone_number: str,
-        password: str,
-        first_name: str = "",
-        last_name: str = "",
-        **extra_fields
-    ) -> User:
-        """
-        Register a new user with validation.
-
-        Args:
-            phone_number: Unique phone number
-            password: User password (will be validated)
-            first_name: User's first name
-            last_name: User's last name
-            **extra_fields: Additional user fields
-
-        Returns:
-            Created User instance
-
-        Raises:
-            ValidationError: If validation fails
-        """
-        # Validate password
+    def register_user(self, password: str, **fields) -> User:
         try:
             validate_password(password)
         except ValidationError as e:
-            self.logger.warning(f"Password validation failed: {e.messages}")
-            raise ValidationError({'password': e.messages})
-
-        # Check if user already exists
-        if User.objects.filter(phone_number=phone_number).exists():
-            raise ValidationError({'phone_number': 'A user with this phone number already exists.'})
-
-        # Create user
+            raise ValidationError({'password': e.messages}) from e
+        user = User.objects.create_user(password=password, **fields)
         try:
-            user = User.objects.create_user(
-                phone_number=phone_number,
-                password=password,
-                first_name=first_name,
-                last_name=last_name,
-                **extra_fields
-            )
-            # Assign default role so new users have at least one role (e.g. visitor).
-            try:
-                default_group = Group.objects.get(name=DEFAULT_REGISTRATION_GROUP_NAME)
-                user.groups.add(default_group)
-            except Group.DoesNotExist:
-                self.logger.warning(
-                    f"Group '{DEFAULT_REGISTRATION_GROUP_NAME}' not found; "
-                    "run authentication migration to create role groups."
-                )
-            self.logger.info(f"User registered successfully: {phone_number}")
-            return user
-        except Exception as e:
-            self.logger.error(f"Error creating user: {str(e)}")
-            raise ValidationError({'error': 'Failed to create user account.'})
+            user.groups.add(Group.objects.get(name=DEFAULT_REGISTRATION_GROUP_NAME))
+        except Group.DoesNotExist:
+            logger.warning("Group '%s' not found", DEFAULT_REGISTRATION_GROUP_NAME)
+        return user
 
 
 class PasswordResetService:
-    """
-    Service responsible for password reset logic.
-    Single Responsibility: Handle password reset tokens and SMS sending.
-    """
-
-    def __init__(self):
-        self.logger = logger
-        self.token_length = 6  # Short numeric code for SMS
-        self.token_expiry_hours = 1
+    token_length = 6
+    token_expiry_hours = 1
 
     def generate_reset_token(self) -> str:
-        """Generate a secure random numeric token for password reset (SMS-friendly)."""
         return get_random_string(self.token_length, allowed_chars='0123456789')
 
     def send_reset_sms(self, user, reset_token: str) -> bool:
-        """
-        Send password reset SMS to user.
-
-        Args:
-            user: User instance
-            reset_token: Reset token to include in SMS
-
-        Returns:
-            True if SMS sent successfully, False otherwise
-        """
-        # TODO: Implement actual SMS sending (e.g. via Twilio, Kavenegar, etc.)
-        self.logger.info(f"Password reset code for {user.phone_number}: {reset_token}")
+        logger.info('Password reset code for %s: %s', user.mobile, reset_token)
         return True
 
-    def initiate_password_reset(self, phone_number: str) -> Dict[str, Any]:
-        """
-        Initiate password reset process for a user.
-
-        Args:
-            phone_number: User's phone number
-
-        Returns:
-            Dict with status and message
-        """
+    def initiate_password_reset(self, phone_number: str) -> dict:
         try:
-            user = User.objects.get(phone_number=phone_number)
+            user = User.objects.get(mobile=phone_number)
         except User.DoesNotExist:
-            # Don't reveal if phone exists (security best practice)
-            self.logger.warning(f"Password reset requested for non-existent phone: {phone_number}")
             return {
                 'success': True,
-                'message': 'If an account exists with this phone number, a reset code has been sent.'
+                'message': _(
+                    'If an account exists with this phone number, a reset code has been sent.'
+                ),
             }
-
-        # Generate reset token
         reset_token = self.generate_reset_token()
+        PasswordResetToken.objects.create(
+            user=user,
+            token_hash=_hash_token(reset_token),
+            expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours),
+        )
+        self.send_reset_sms(user, reset_token)
+        return {'success': True, 'message': _('Password reset code sent successfully.')}
 
-        # TODO: Store token in database with expiration
-        # PasswordResetToken.objects.create(
-        #     user=user,
-        #     token=reset_token,
-        #     expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours)
-        # )
-
-        # Send SMS
-        sms_sent = self.send_reset_sms(user, reset_token)
-
-        if sms_sent:
-            return {
-                'success': True,
-                'message': 'Password reset code sent successfully.'
-            }
-        else:
-            return {
-                'success': False,
-                'message': 'Failed to send password reset code. Please try again later.'
-            }
+    def reset_password(self, token: str, new_password: str) -> dict:
+        token_hash = _hash_token(token)
+        prt = (
+            PasswordResetToken.objects.filter(token_hash=token_hash, used_at__isnull=True)
+            .select_related('user')
+            .order_by('-created_at')
+            .first()
+        )
+        if prt is None or prt.expires_at < timezone.now():
+            raise ValidationError({'token': _('Invalid or expired reset token.')})
+        validate_password(new_password, user=prt.user)
+        prt.user.set_password(new_password)
+        prt.user.save(update_fields=['password'])
+        prt.used_at = timezone.now()
+        prt.save(update_fields=['used_at'])
+        blacklist_user_tokens(prt.user)
+        return {'success': True, 'message': _('Password reset successfully.')}
 
 
 class PasswordChangeService:
-    """
-    Service responsible for password change logic.
-    Single Responsibility: Handle password changes for authenticated users.
-    """
-
-    def __init__(self):
-        self.logger = logger
-
-    def change_password(
-        self,
-        user,
-        old_password: str,
-        new_password: str
-    ) -> Dict[str, Any]:
-        """
-        Change user's password.
-
-        Args:
-            user: User instance
-            old_password: Current password
-            new_password: New password
-
-        Returns:
-            Dict with status and message
-        """
-        # Verify old password
+    def change_password(self, user, old_password: str, new_password: str) -> dict:
         if not user.check_password(old_password):
-            self.logger.warning(f"Invalid old password attempt for user: {user.phone_number}")
-            raise ValidationError({'old_password': 'Current password is incorrect.'})
-
-        # Validate new password
-        try:
-            validate_password(new_password, user=user)
-        except ValidationError as e:
-            self.logger.warning(f"New password validation failed for user {user.phone_number}: {e.messages}")
-            raise ValidationError({'new_password': e.messages})
-
-        # Check if new password is same as old
+            raise ValidationError({'old_password': _('Current password is incorrect.')})
+        validate_password(new_password, user=user)
         if user.check_password(new_password):
-            raise ValidationError({'new_password': 'New password must be different from current password.'})
-
-        # Set new password
+            raise ValidationError(
+                {'new_password': _('New password must be different from the current password.')}
+            )
         user.set_password(new_password)
-        user.save()
-
-        self.logger.info(f"Password changed successfully for user: {user.phone_number}")
-        return {
-            'success': True,
-            'message': 'Password changed successfully.'
-        }
+        user.save(update_fields=['password'])
+        blacklist_user_tokens(user)
+        return {'success': True, 'message': _('Password changed successfully.')}

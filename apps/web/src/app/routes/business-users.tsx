@@ -13,7 +13,7 @@ import type { UserBusinessAssignment } from "@/app/lib/api-types";
 import { AssignmentDetailModal } from "@/components/assignments/assignment-detail-modal";
 
 interface BusinessDetail {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -25,7 +25,6 @@ export default function BusinessUsersPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
   const ordering = grid.query.sorting[0]
@@ -42,7 +41,7 @@ export default function BusinessUsersPage() {
         : undefined,
       ordering,
     },
-    isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
+    isAuthenticated && Boolean(businessId),
   );
   const assignments = assignmentsQuery.data?.results ?? [];
   const count = assignmentsQuery.data?.count ?? 0;
@@ -64,11 +63,7 @@ export default function BusinessUsersPage() {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId) return;
-    if (Number.isNaN(businessIdNum)) {
-      setError("Invalid business");
-      return;
-    }
-    apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${businessIdNum}/`)
+    apiJson<BusinessDetail>(`/${PATHS.API_PROJECTS}/${businessId}/`)
       .then((b) => {
         setBusiness(b);
         setError(null);
@@ -76,7 +71,7 @@ export default function BusinessUsersPage() {
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
       );
-  }, [isAuthenticated, businessId, businessIdNum]);
+  }, [isAuthenticated, businessId]);
 
   const columns = useMemo<ColumnDef<UserBusinessAssignment>[]>(() => {
     return [
@@ -210,7 +205,7 @@ export default function BusinessUsersPage() {
                 variant='outline'
                 onClick={() =>
                   navigate(
-                    `/${PATHS.BUSINESS}/${businessId ?? ""}/job-positions`,
+                    `/${PATHS.API_PROJECTS}/${businessId ?? ""}/job-positions`,
                   )
                 }
               >

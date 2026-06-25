@@ -30,11 +30,11 @@ _ALLOWED_ORDERING_FIELDS = {
 
 
 def get_department_activity_queryset(
-    business_pk: int,
+    project_pk: int,
     query_params: Any,
 ) -> QuerySet[DepartmentActivityRecord]:
     """Apply list/export filters from query parameters."""
-    qs = DepartmentActivityRecord.objects.filter(business_id=business_pk)
+    qs = DepartmentActivityRecord.objects.filter(project_id=project_pk)
 
     department = query_params.get('department')
     if department:

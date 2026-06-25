@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-exec "$(dirname "$0")/django.sh" runserver "$@"
+set -euo pipefail
+DIR="$(dirname "$0")"
+"$DIR/wait-for-postgres.sh"
+exec "$DIR/django.sh" runserver "$@"

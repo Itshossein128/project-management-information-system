@@ -1,0 +1,66 @@
+# Persian translations for IPCAS API authentication messages.
+msgid ""
+msgstr ""
+"Project-Id-Version: IPCAS API\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Invalid credentials. Please check your phone number and password."
+msgstr "نام کاربری یا رمز عبور اشتباه است. لطفاً شماره موبایل و رمز عبور را بررسی کنید."
+
+msgid "User account is disabled."
+msgstr "حساب کاربری غیرفعال است."
+
+msgid "Refresh token is required."
+msgstr "توکن بازنشانی الزامی است."
+
+msgid "Invalid refresh token."
+msgstr "توکن بازنشانی نامعتبر است."
+
+msgid "Logged out successfully."
+msgstr "خروج با موفقیت انجام شد."
+
+msgid "You can only list your own assignments unless you are HR or admin."
+msgstr "فقط می‌توانید تخصیص‌های خود را مشاهده کنید مگر اینکه منابع انسانی یا مدیر باشید."
+
+msgid "Password fields do not match."
+msgstr "فیلدهای رمز عبور یکسان نیستند."
+
+msgid "Username already exists."
+msgstr "نام کاربری قبلاً ثبت شده است."
+
+msgid "Mobile number is already registered."
+msgstr "شماره موبایل قبلاً ثبت شده است."
+
+msgid "Phone number or username is required."
+msgstr "شماره موبایل یا نام کاربری الزامی است."
+
+msgid "New password fields do not match."
+msgstr "فیلدهای رمز عبور جدید یکسان نیستند."
+
+msgid "If an account exists with this phone number, a reset code has been sent."
+msgstr "اگر حسابی با این شماره وجود داشته باشد، کد بازنشانی ارسال شده است."
+
+msgid "Password reset code sent successfully."
+msgstr "کد بازنشانی رمز عبور با موفقیت ارسال شد."
+
+msgid "Invalid or expired reset token."
+msgstr "توکن بازنشانی نامعتبر یا منقضی شده است."
+
+msgid "Password reset successfully."
+msgstr "رمز عبور با موفقیت بازنشانی شد."
+
+msgid "Current password is incorrect."
+msgstr "رمز عبور فعلی اشتباه است."
+
+msgid "New password must be different from the current password."
+msgstr "رمز عبور جدید باید با رمز فعلی متفاوت باشد."
+
+msgid "Password changed successfully."
+msgstr "رمز عبور با موفقیت تغییر کرد."
+
+msgid "Phone number must be 9-15 digits, optionally starting with +."
+msgstr "شماره تلفن باید ۹ تا ۱۵ رقم باشد و می‌تواند با + شروع شود."

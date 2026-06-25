@@ -1,244 +1,126 @@
-"""
-Authentication serializers following SOLID principles.
-Each serializer has a single responsibility for data validation and transformation.
-Uses phone_number as identifier (no username/email).
-"""
+"""Authentication serializers."""
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from .services import (
-    UserRegistrationService,
-    PasswordResetService,
-    PasswordChangeService
-)
+from django.utils.translation import gettext_lazy as _
+
+from master_data.models import ProjectMember
+from .services import UserRegistrationService, PasswordResetService, PasswordChangeService
 
 User = get_user_model()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user registration.
-    Single Responsibility: Validate and transform registration data.
-    """
-    password = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'},
-        help_text="Password must meet Django's password validation requirements."
-    )
-    password_confirm = serializers.CharField(
-        write_only=True,
-        required=True,
-        style={'input_type': 'password'},
-        help_text="Must match the password field."
-    )
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    phone_number = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'password', 'password_confirm', 'first_name', 'last_name']
+        fields = ['id', 'username', 'mobile', 'phone_number', 'full_name', 'email', 'password', 'password_confirm']
         read_only_fields = ['id']
-        extra_kwargs = {
-            'phone_number': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-        }
 
-    def validate_phone_number(self, value: str) -> str:
-        """Validate phone number uniqueness."""
-        if User.objects.filter(phone_number=value).exists():
-            raise serializers.ValidationError("A user with this phone number already exists.")
-        return value
-
-    def validate(self, attrs: dict) -> dict:
-        """Validate password confirmation matches password."""
+    def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({
-                'password_confirm': 'Password fields do not match.'
-            })
+            raise serializers.ValidationError({'password_confirm': _('Password fields do not match.')})
+        phone = attrs.get('phone_number') or attrs.get('mobile')
+        if phone and not attrs.get('mobile'):
+            attrs['mobile'] = phone.strip()
+        if not attrs.get('username'):
+            mobile = attrs.get('mobile', '')
+            attrs['username'] = mobile.lstrip('+').replace(' ', '') or attrs.get('email', 'user')
+        if User.objects.filter(username=attrs['username']).exists():
+            raise serializers.ValidationError({'username': _('Username already exists.')})
+        if attrs.get('mobile') and User.objects.filter(mobile=attrs['mobile']).exists():
+            raise serializers.ValidationError({'mobile': _('Mobile number is already registered.')})
         return attrs
 
-    def create(self, validated_data: dict) -> User:
-        """Create user using registration service."""
+    def create(self, validated_data):
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-
+        validated_data.pop('phone_number', None)
         service = UserRegistrationService()
-        return service.register_user(
-            password=password,
-            **validated_data
-        )
+        return service.register_user(password=password, **validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user data (read-only for authenticated endpoints).
-    Single Responsibility: Serialize user data for API responses.
-    Exposes roles (group names) for frontend permission-aware UI.
-    """
-    roles = serializers.SerializerMethodField(
-        help_text="List of role names (Django group names) for this user."
-    )
-    full_name = serializers.SerializerMethodField(
-        help_text="Display name: first_name + last_name"
-    )
+    roles = serializers.SerializerMethodField()
+    phone_number = serializers.CharField(source='mobile', read_only=True, allow_null=True)
 
     class Meta:
         model = User
-        fields = [
-            'id', 'phone_number', 'first_name', 'last_name', 'full_name',
-            'date_joined', 'roles'
-        ]
-        read_only_fields = ['id', 'date_joined', 'roles', 'full_name']
+        fields = ['id', 'username', 'mobile', 'phone_number', 'full_name', 'email', 'created_at', 'roles']
+        read_only_fields = ['id', 'created_at', 'roles']
 
-    def get_roles(self, obj) -> list[str]:
+    def get_roles(self, obj):
         return list(obj.groups.values_list('name', flat=True))
-
-    def get_full_name(self, obj) -> str:
-        return obj.get_full_name()
 
 
 class UserListSerializer(serializers.ModelSerializer):
-    """
-    User row for HR / admin list endpoint (read-only, includes account status).
-    """
     roles = serializers.SerializerMethodField()
-    full_name = serializers.SerializerMethodField()
-    assignments_preview = serializers.SerializerMethodField(
-        help_text="All business–job lines for the user, ordered by business name (UI may show first 2).",
-    )
+    phone_number = serializers.CharField(source='mobile', read_only=True, allow_null=True)
+    assignments_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
-            "id",
-            "phone_number",
-            "first_name",
-            "last_name",
-            "full_name",
-            "date_joined",
-            "is_active",
-            "roles",
-            "assignments_preview",
+            'id', 'username', 'mobile', 'phone_number', 'full_name', 'email',
+            'created_at', 'is_active', 'roles', 'assignments_preview',
         ]
-        read_only_fields = (
-            "id",
-            "phone_number",
-            "first_name",
-            "last_name",
-            "full_name",
-            "date_joined",
-            "is_active",
-            "roles",
-            "assignments_preview",
-        )
+        read_only_fields = fields
 
-    def get_roles(self, obj) -> list[str]:
-        return list(obj.groups.values_list("name", flat=True))
+    def get_roles(self, obj):
+        return list(obj.groups.values_list('name', flat=True))
 
-    def get_full_name(self, obj) -> str:
-        return obj.get_full_name()
-
-    def get_assignments_preview(self, obj) -> list[dict]:
-        from business_meta.models import UserBusinessAssignment
-
-        rows = getattr(obj, "prefetched_assignments", None)
+    def get_assignments_preview(self, obj):
+        rows = getattr(obj, 'prefetched_memberships', None)
         if rows is None:
             rows = list(
-                UserBusinessAssignment.objects.filter(user=obj)
-                .select_related("business", "job_position")
-                .order_by("business__name")
+                ProjectMember.objects.filter(user=obj)
+                .select_related('project', 'position')
+                .order_by('project__project_name')
             )
         return [
-            {"business_name": a.business.name, "job_label": a.job_position.label}
-            for a in rows
+            {'business_name': m.project.project_name, 'job_label': m.position.position_name if m.position else ''}
+            for m in rows
         ]
 
 
 class LoginSerializer(serializers.Serializer):
-    """
-    Serializer for login credentials.
-    Single Responsibility: Validate login input.
-    """
-    phone_number = serializers.CharField(required=True, help_text="Phone number")
-    password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="User password"
-    )
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+    username = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+
+    def validate(self, attrs):
+        login = attrs.get('phone_number') or attrs.get('username')
+        if not login:
+            raise serializers.ValidationError(_('Phone number or username is required.'))
+        attrs['login'] = login.strip()
+        return attrs
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    """
-    Serializer for password change.
-    Single Responsibility: Validate password change input.
-    """
-    old_password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="Current password"
-    )
-    new_password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="New password (must meet Django's password validation requirements)"
-    )
-    new_password_confirm = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="Confirm new password"
-    )
+    old_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    new_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    new_password_confirm = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
 
-    def validate(self, attrs: dict) -> dict:
-        """Validate password confirmation matches."""
+    def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
-            raise serializers.ValidationError({
-                'new_password_confirm': 'New password fields do not match.'
-            })
+            raise serializers.ValidationError({'new_password_confirm': _('New password fields do not match.')})
         return attrs
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
-    """
-    Serializer for forgot password request.
-    Single Responsibility: Validate phone input for password reset.
-    """
-    phone_number = serializers.CharField(
-        required=True,
-        help_text="Phone number associated with the account"
-    )
+    phone_number = serializers.CharField(required=True)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    """
-    Serializer for password reset with token.
-    Single Responsibility: Validate password reset input.
-    """
-    token = serializers.CharField(
-        required=True,
-        help_text="Password reset token received via SMS"
-    )
-    new_password = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="New password"
-    )
-    new_password_confirm = serializers.CharField(
-        required=True,
-        write_only=True,
-        style={'input_type': 'password'},
-        help_text="Confirm new password"
-    )
+    token = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    new_password_confirm = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
 
-    def validate(self, attrs: dict) -> dict:
-        """Validate password confirmation matches."""
+    def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
-            raise serializers.ValidationError({
-                'new_password_confirm': 'Password fields do not match.'
-            })
+            raise serializers.ValidationError({'new_password_confirm': _('Password fields do not match.')})
         return attrs

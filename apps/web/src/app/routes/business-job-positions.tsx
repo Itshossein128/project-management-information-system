@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router";
 
 interface BusinessDetail {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -35,7 +35,6 @@ export default function BusinessJobPositionsPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
 
-  const businessIdNum = businessId ? Number(businessId) : Number.NaN;
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [businessError, setBusinessError] = useState<string | null>(null);
 
@@ -54,14 +53,14 @@ export default function BusinessJobPositionsPage() {
         : undefined,
       ordering,
     },
-    isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
+    isAuthenticated && Boolean(businessId),
   );
 
   const createJob = useCreateJobPosition(businessId ?? "");
   const updateJob = useUpdateJobPosition(businessId ?? "");
   const deleteJob = useDeleteJobPosition(businessId ?? "");
 
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [slug, setSlug] = useState("");
   const [label, setLabel] = useState("");
@@ -75,8 +74,8 @@ export default function BusinessJobPositionsPage() {
   }, [isLoading, isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (!isAuthenticated || !businessId || Number.isNaN(businessIdNum)) return;
-    apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${businessIdNum}/`)
+    if (!isAuthenticated || !businessId) return;
+    apiJson<BusinessDetail>(`/${PATHS.API_PROJECTS}/${businessId}/`)
       .then((b) => {
         setBusiness(b);
         setBusinessError(null);
@@ -86,7 +85,7 @@ export default function BusinessJobPositionsPage() {
           e instanceof Error ? e.message : "Failed to load business",
         ),
       );
-  }, [isAuthenticated, businessId, businessIdNum]);
+  }, [isAuthenticated, businessId]);
 
   if (isLoading || !isAuthenticated) return null;
 

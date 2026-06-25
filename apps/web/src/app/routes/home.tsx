@@ -49,7 +49,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    apiJson<BusinessesListResponse>(`/${PATHS.BUSINESS}/`)
+    apiJson<BusinessesListResponse>(`/${PATHS.API_PROJECTS}/`)
       .then((data) => setBusinesses(data.results))
       .catch((e) =>
         setBusinessesError(

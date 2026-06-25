@@ -33,8 +33,12 @@ export const PATHS = {
   FORGOT_PASSWORD: "forgot-password",
   RESET_PASSWORD: "reset-password",
   HOME: "home",
-  /** Business workspace & admin URLs under `/businesses/...`. */
-  BUSINESS: "businesses",
+  /** Frontend URL segment `/projects/...`. */
+  PROJECT: "projects",
+  /** API base segment `v1/projects`. */
+  API_PROJECTS: "v1/projects",
+  /** @deprecated use PROJECT */
+  BUSINESS: "projects",
   /** `/businesses/create` */
   BUSINESS_CREATE: "create",
   /** `/businesses/:id/setup` (tables & fields admin) */

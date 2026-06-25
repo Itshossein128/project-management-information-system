@@ -10,18 +10,18 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from .models import Business, TableDefinition, DynamicTableRow
+from .models import Project, TableDefinition, DynamicTableRow
 from .services import validate_row_data
 from .excel_io import export_table_to_xlsx, import_rows_from_xlsx
 
 
-def get_business_and_table(business_pk, table_slug):
-    """Return (Business, TableDefinition) or (None, None) if not found."""
+def get_project_and_table(project_pk, table_slug):
+    """Return (Project, TableDefinition) or (None, None) if not found."""
     try:
-        business = Business.objects.get(pk=business_pk)
-        table = TableDefinition.objects.get(business=business, slug=table_slug)
+        business = Project.objects.get(pk=project_pk)
+        table = TableDefinition.objects.get(project=business, slug=table_slug)
         return business, table
-    except (Business.DoesNotExist, TableDefinition.DoesNotExist):
+    except (Project.DoesNotExist, TableDefinition.DoesNotExist):
         return None, None
 
 
@@ -54,10 +54,10 @@ class DynamicRowsView(APIView):
         ],
         tags=['Dynamic data'],
     )
-    def get(self, request, business_pk, table_slug):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def get(self, request, project_pk, table_slug):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         allowed_slugs = {f.slug for f in table.fields.all()}
         filter_kwargs = {'table': table}
@@ -92,10 +92,10 @@ class DynamicRowsView(APIView):
         responses={201: {'type': 'object', 'properties': {'id': {'type': 'string'}, 'data': {'type': 'object'}}}},
         tags=['Dynamic data'],
     )
-    def post(self, request, business_pk, table_slug):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def post(self, request, project_pk, table_slug):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         field_defs = list(table.fields.all().order_by('ordering', 'name'))
         cleaned, errors = validate_row_data(field_defs, request.data)
@@ -115,10 +115,10 @@ class DynamicRowsExportView(APIView):
         description='Download all rows of this table as .xlsx. First row is headers (field names).',
         tags=['Dynamic data'],
     )
-    def get(self, request, business_pk, table_slug):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def get(self, request, project_pk, table_slug):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         xlsx_bytes = export_table_to_xlsx(table)
         filename = f"{table.slug}_export.xlsx"
@@ -138,10 +138,10 @@ class DynamicRowsImportView(APIView):
         request={'multipart/form-data': {'type': 'object', 'properties': {'file': {'type': 'string', 'format': 'binary'}}}},
         tags=['Dynamic data'],
     )
-    def post(self, request, business_pk, table_slug):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def post(self, request, project_pk, table_slug):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         file_obj = request.FILES.get('file')
         if not file_obj:
@@ -163,10 +163,10 @@ class DynamicRowDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(summary='Get row', tags=['Dynamic data'])
-    def get(self, request, business_pk, table_slug, row_id):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def get(self, request, project_pk, table_slug, row_id):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         pk = parse_row_id(row_id)
         if pk is None:
@@ -179,18 +179,18 @@ class DynamicRowDetailView(APIView):
         return Response(serialize_row(row))
 
     @extend_schema(summary='Update row (full)', tags=['Dynamic data'])
-    def put(self, request, business_pk, table_slug, row_id):
-        return self._update(request, business_pk, table_slug, row_id, partial=False)
+    def put(self, request, project_pk, table_slug, row_id):
+        return self._update(request, project_pk, table_slug, row_id, partial=False)
 
     @extend_schema(summary='Update row (partial)', tags=['Dynamic data'])
-    def patch(self, request, business_pk, table_slug, row_id):
-        return self._update(request, business_pk, table_slug, row_id, partial=True)
+    def patch(self, request, project_pk, table_slug, row_id):
+        return self._update(request, project_pk, table_slug, row_id, partial=True)
 
     @extend_schema(summary='Delete row', tags=['Dynamic data'])
-    def delete(self, request, business_pk, table_slug, row_id):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def delete(self, request, project_pk, table_slug, row_id):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         pk = parse_row_id(row_id)
         if pk is None:
@@ -201,10 +201,10 @@ class DynamicRowDetailView(APIView):
             return Response({'error': 'Row not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _update(self, request, business_pk, table_slug, row_id, partial):
-        business, table = get_business_and_table(business_pk, table_slug)
+    def _update(self, request, project_pk, table_slug, row_id, partial):
+        business, table = get_project_and_table(project_pk, table_slug)
         if business is None or table is None:
-            return Response({'error': 'Business or table not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project or table not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         pk = parse_row_id(row_id)
         if pk is None:

@@ -1,0 +1,9 @@
+api:
+  address: http://api:8000
+  healthCheck:
+    path: /api/schema/
+    interval: 10s
+    timeout: 3s
+
+web:
+  address: http://web:3000

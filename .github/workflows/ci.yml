@@ -70,5 +70,7 @@ jobs:
         working-directory: apps/api/core
       - run: python manage.py migrate --noinput
         working-directory: apps/api/core
-      - run: python manage.py test
+      - run: python manage.py verify_blueprint_schema
+        working-directory: apps/api/core
+      - run: python manage.py test events authentication
         working-directory: apps/api/core

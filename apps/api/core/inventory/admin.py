@@ -19,7 +19,7 @@ class ItemAdmin(admin.ModelAdmin):
 @admin.register(SpaceMaterialRequest)
 class SpaceMaterialRequestAdmin(admin.ModelAdmin):
     list_display = [
-        'business',
+        'project',
         'block_number',
         'floor_number',
         'unit_number',
@@ -30,14 +30,14 @@ class SpaceMaterialRequestAdmin(admin.ModelAdmin):
         'unit',
         'created_at',
     ]
-    list_filter = ['business', 'unit']
+    list_filter = ['project', 'unit']
     search_fields = ['material_code', 'space_name', 'unit_number', 'item_description']
 
 
 @admin.register(DepartmentActivityRecord)
 class DepartmentActivityRecordAdmin(admin.ModelAdmin):
     list_display = [
-        'business',
+        'project',
         'department',
         'date',
         'location',
@@ -46,7 +46,7 @@ class DepartmentActivityRecordAdmin(admin.ModelAdmin):
         'unit',
         'created_at',
     ]
-    list_filter = ['business', 'department', 'unit']
+    list_filter = ['project', 'department', 'unit']
     search_fields = ['location', 'activity_description', 'contractor', 'unit', 'description']
     date_hierarchy = 'date'
     ordering = ['-date', '-created_at']

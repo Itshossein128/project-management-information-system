@@ -53,7 +53,7 @@ export default function BusinessSetup() {
 
   const loadBusinesses = useCallback(() => {
     apiJson<BusinessesListResponse>(
-      `/${PATHS.BUSINESS}/?${new URLSearchParams({
+      `/${PATHS.API_PROJECTS}/?${new URLSearchParams({
         page: String(grid.query.pagination.pageIndex + 1),
         page_size: String(grid.query.pagination.pageSize),
         ...(grid.debouncedSearch?.trim()
@@ -97,7 +97,7 @@ export default function BusinessSetup() {
       return;
     }
     try {
-      await apiJson(`/${PATHS.BUSINESS}/${editingId}/`, {
+      await apiJson(`/${PATHS.API_PROJECTS}/${editingId}/`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });

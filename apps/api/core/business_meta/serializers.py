@@ -1,24 +1,16 @@
-"""
-Serializers for business meta API. Validate slugs/names with allowlist.
-"""
+"""Serializers for project meta API."""
 import re
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
-from authentication.models import phone_regex
-from .models import (
-    Business,
-    BusinessJobPosition,
-    TableDefinition,
-    FieldDefinition,
-    RelationDefinition,
-    FieldType,
-    RelationKind,
-    UserBusinessAssignment,
-    WageType,
-    AssignmentStatus,
-)
 
+from authentication.models import phone_regex
+from master_data.models import ProjectMember, ProjectPosition, MemberStatus, WageType
+from projects.models import Project
+from .models import TableDefinition, FieldDefinition, RelationDefinition, FieldType
+
+User = get_user_model()
 SLUG_PATTERN = re.compile(r'^[a-z][a-z0-9_]*$')
 
 
@@ -30,20 +22,19 @@ def validate_slug(value: str) -> str:
     return value
 
 
-class BusinessSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Business
-        fields = ['id', 'name', 'slug', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+class ProjectNestedMiniSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='project_name', read_only=True)
+    slug = serializers.CharField(source='project_code', read_only=True)
 
-    def validate_slug(self, value):
-        return validate_slug(value)
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'slug', 'project_name', 'project_code']
 
 
 class TableDefinitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TableDefinition
-        fields = ['id', 'business', 'name', 'slug', 'ordering', 'created_at', 'updated_at']
+        fields = ['id', 'project', 'name', 'slug', 'ordering', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate_slug(self, value):
@@ -64,9 +55,7 @@ class FieldDefinitionSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs.get('field_type') == FieldType.REFERENCE and not attrs.get('target_table'):
-            raise serializers.ValidationError(
-                {'target_table': 'Target table is required for reference fields.'}
-            )
+            raise serializers.ValidationError({'target_table': 'Target table is required for reference fields.'})
         return attrs
 
 
@@ -80,160 +69,99 @@ class RelationDefinitionSerializer(serializers.ModelSerializer):
         from_table = attrs.get('from_table')
         to_table = attrs.get('to_table')
         from_field = attrs.get('from_field')
-        if from_table and to_table and from_table.business_id != to_table.business_id:
-            raise serializers.ValidationError(
-                'from_table and to_table must belong to the same business.'
-            )
+        if from_table and to_table and from_table.project_id != to_table.project_id:
+            raise serializers.ValidationError('from_table and to_table must belong to the same project.')
         if from_field and from_table and from_field.table_id != from_table.id:
-            raise serializers.ValidationError(
-                'from_field must belong to from_table.'
-            )
+            raise serializers.ValidationError('from_field must belong to from_table.')
         to_field = attrs.get('to_field')
         if to_field and to_table and to_field.table_id != to_table.id:
-            raise serializers.ValidationError(
-                'to_field must belong to to_table.'
-            )
+            raise serializers.ValidationError('to_field must belong to to_table.')
         return attrs
 
 
 class TableDefinitionListSerializer(serializers.ModelSerializer):
-    """Light serializer for listing tables (e.g. under a business)."""
     class Meta:
         model = TableDefinition
         fields = ['id', 'name', 'slug', 'ordering', 'created_at', 'updated_at']
 
 
 class TableDefinitionWithFieldsSerializer(serializers.ModelSerializer):
-    """Table with nested field definitions for schema-aware UI."""
     fields = FieldDefinitionSerializer(many=True, read_only=True)
 
     class Meta:
         model = TableDefinition
-        fields = ['id', 'business', 'name', 'slug', 'ordering', 'fields', 'created_at', 'updated_at']
+        fields = ['id', 'project', 'name', 'slug', 'ordering', 'fields', 'created_at', 'updated_at']
 
 
-class BusinessJobPositionSerializer(serializers.ModelSerializer):
+class ProjectPositionSerializer(serializers.ModelSerializer):
+    label = serializers.CharField(source='position_name', required=False)
+
     class Meta:
-        model = BusinessJobPosition
-        fields = ['id', 'business', 'slug', 'label', 'ordering', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at', 'business']
+        model = ProjectPosition
+        fields = ['id', 'project', 'slug', 'position_name', 'label', 'description', 'ordering', 'is_active']
+        read_only_fields = ['id', 'project']
 
     def validate_slug(self, value: str) -> str:
         return validate_slug(value)
 
-    def validate(self, attrs):
-        business = attrs.get('business') or getattr(self.instance, 'business', None)
-        slug = attrs.get('slug') or getattr(self.instance, 'slug', None)
-        if business and slug:
-            qs = BusinessJobPosition.objects.filter(business=business, slug=slug)
-            if self.instance is not None:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise serializers.ValidationError({'slug': 'A job position with this slug already exists for this business.'})
-        return attrs
+    def create(self, validated_data):
+        if 'position_name' not in validated_data and 'label' in self.initial_data:
+            validated_data['position_name'] = self.initial_data['label']
+        return super().create(validated_data)
 
 
-class JobPositionNestedSerializer(serializers.ModelSerializer):
+class PositionNestedSerializer(serializers.ModelSerializer):
+    label = serializers.CharField(source='position_name', read_only=True)
+
     class Meta:
-        model = BusinessJobPosition
-        fields = ['id', 'slug', 'label', 'ordering']
-
-
-class BusinessNestedMiniSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Business
-        fields = ['id', 'name', 'slug']
+        model = ProjectPosition
+        fields = ['id', 'slug', 'label', 'position_name', 'ordering']
 
 
 class UserNestedMiniSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
+    phone_number = serializers.CharField(source='mobile', read_only=True, allow_null=True)
 
     class Meta:
-        model = get_user_model()
-        fields = ['id', 'phone_number', 'first_name', 'last_name', 'full_name']
-
-    def get_full_name(self, obj) -> str:
-        return obj.get_full_name()
+        model = User
+        fields = ['id', 'username', 'mobile', 'phone_number', 'full_name', 'email']
 
 
-class UserBusinessAssignmentReadSerializer(serializers.ModelSerializer):
+class ProjectMemberReadSerializer(serializers.ModelSerializer):
     user = UserNestedMiniSerializer(read_only=True)
-    business = BusinessNestedMiniSerializer(read_only=True)
-    job_position = JobPositionNestedSerializer(read_only=True)
+    project = ProjectNestedMiniSerializer(read_only=True)
+    job_position = PositionNestedSerializer(source='position', read_only=True)
 
     class Meta:
-        model = UserBusinessAssignment
+        model = ProjectMember
         fields = [
-            'id',
-            'user',
-            'business',
-            'job_position',
-            'wage',
-            'wage_type',
-            'weekly_total',
-            'monthly_total',
-            'tools',
-            'start_date',
-            'end_date',
-            'status',
-            'created_at',
-            'updated_at',
+            'id', 'user', 'project', 'job_position', 'position',
+            'wage', 'wage_type', 'weekly_total', 'monthly_total', 'tools',
+            'start_date', 'end_date', 'status', 'joined_at',
         ]
-        read_only_fields = [
-            'id',
-            'user',
-            'business',
-            'job_position',
-            'wage',
-            'wage_type',
-            'weekly_total',
-            'monthly_total',
-            'tools',
-            'start_date',
-            'end_date',
-            'status',
-            'created_at',
-            'updated_at',
-        ]
+        read_only_fields = fields
 
 
-class UserBusinessAssignmentWriteSerializer(serializers.ModelSerializer):
-    """Update an existing assignment (job position + work details)."""
+class ProjectMemberWriteSerializer(serializers.ModelSerializer):
+    job_position = serializers.PrimaryKeyRelatedField(source='position', queryset=ProjectPosition.objects.all())
 
     class Meta:
-        model = UserBusinessAssignment
+        model = ProjectMember
         fields = [
-            'job_position',
-            'wage',
-            'wage_type',
-            'weekly_total',
-            'monthly_total',
-            'tools',
-            'start_date',
-            'end_date',
-            'status',
+            'job_position', 'position', 'wage', 'wage_type', 'weekly_total', 'monthly_total',
+            'tools', 'start_date', 'end_date', 'status',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        business_pk = self.context.get('business_pk')
-        if business_pk is not None:
-            self.fields['job_position'].queryset = BusinessJobPosition.objects.filter(
-                business_id=business_pk
-            )
-
-    def validate_job_position(self, jp: BusinessJobPosition) -> BusinessJobPosition:
-        business_pk = self.context.get('business_pk')
-        if business_pk is not None and jp.business_id != int(business_pk):
-            raise serializers.ValidationError('Job position must belong to this business.')
-        return jp
+        project_pk = self.context.get('project_pk')
+        if project_pk is not None:
+            self.fields['job_position'].queryset = ProjectPosition.objects.filter(project_id=project_pk)
 
 
-class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(max_length=17)
-    first_name = serializers.CharField(max_length=150, allow_blank=True, default='')
-    last_name = serializers.CharField(max_length=150, allow_blank=True, default='')
-    job_position = serializers.PrimaryKeyRelatedField(queryset=BusinessJobPosition.objects.none())
+class ProjectMemberCreateSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=20)
+    full_name = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
+    job_position = serializers.PrimaryKeyRelatedField(queryset=ProjectPosition.objects.none())
     wage = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, default=0)
     wage_type = serializers.ChoiceField(choices=WageType.choices, default=WageType.HOURLY)
     weekly_total = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, default=0)
@@ -241,15 +169,13 @@ class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
     tools = serializers.JSONField(required=False, default=list)
     start_date = serializers.DateField(required=False, allow_null=True)
     end_date = serializers.DateField(required=False, allow_null=True)
-    status = serializers.ChoiceField(choices=AssignmentStatus.choices, default=AssignmentStatus.ACTIVE)
+    status = serializers.ChoiceField(choices=MemberStatus.choices, default=MemberStatus.ACTIVE)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        business_pk = self.context.get('business_pk')
-        if business_pk is not None:
-            self.fields['job_position'].queryset = BusinessJobPosition.objects.filter(
-                business_id=business_pk
-            )
+        project_pk = self.context.get('project_pk')
+        if project_pk is not None:
+            self.fields['job_position'].queryset = ProjectPosition.objects.filter(project_id=project_pk)
 
     def validate_phone_number(self, value: str) -> str:
         value = value.strip()
@@ -259,46 +185,41 @@ class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(list(exc.messages)) from exc
         return value
 
-    def validate_job_position(self, jp: BusinessJobPosition) -> BusinessJobPosition:
-        business_pk = self.context['business_pk']
-        if jp.business_id != int(business_pk):
-            raise serializers.ValidationError('Job position must belong to this business.')
-        return jp
-
     def create(self, validated_data):
         from business_meta.assignment_services import create_assignment_for_user
 
-        business_pk = int(self.context['business_pk'])
+        project_pk = self.context['project_pk']
         phone = validated_data['phone_number'].strip()
-        first_name = validated_data.get('first_name') or ''
-        last_name = validated_data.get('last_name') or ''
-        job_position = validated_data['job_position']
+        full_name = validated_data.get('full_name') or ''
+        position = validated_data['job_position']
+        username = phone.lstrip('+').replace(' ', '')
 
-        User = get_user_model()
         user, created = User.objects.get_or_create(
-            phone_number=phone,
-            defaults={'first_name': first_name, 'last_name': last_name},
+            mobile=phone,
+            defaults={'username': username, 'full_name': full_name},
         )
-        if not created:
-            if first_name:
-                user.first_name = first_name
-            if last_name:
-                user.last_name = last_name
-            user.save(update_fields=['first_name', 'last_name'])
+        if not created and full_name:
+            user.full_name = full_name
+            user.save(update_fields=['full_name'])
 
-        extra = {
-            'wage': validated_data.get('wage', 0),
-            'wage_type': validated_data.get('wage_type', WageType.HOURLY),
-            'weekly_total': validated_data.get('weekly_total', 0),
-            'monthly_total': validated_data.get('monthly_total', 0),
-            'tools': validated_data.get('tools') or [],
-            'start_date': validated_data.get('start_date'),
-            'end_date': validated_data.get('end_date'),
-            'status': validated_data.get('status', AssignmentStatus.ACTIVE),
-        }
         return create_assignment_for_user(
-            business_id=business_pk,
+            project_id=project_pk,
             user=user,
-            job_position=job_position,
-            **extra,
+            position=position,
+            wage=validated_data.get('wage', 0),
+            wage_type=validated_data.get('wage_type', WageType.HOURLY),
+            weekly_total=validated_data.get('weekly_total', 0),
+            monthly_total=validated_data.get('monthly_total', 0),
+            tools=validated_data.get('tools') or [],
+            start_date=validated_data.get('start_date'),
+            end_date=validated_data.get('end_date'),
+            status=validated_data.get('status', MemberStatus.ACTIVE),
         )
+
+
+# Backward-compatible aliases
+BusinessSerializer = ProjectNestedMiniSerializer
+BusinessJobPositionSerializer = ProjectPositionSerializer
+UserBusinessAssignmentReadSerializer = ProjectMemberReadSerializer
+UserBusinessAssignmentWriteSerializer = ProjectMemberWriteSerializer
+UserBusinessAssignmentCreateSerializer = ProjectMemberCreateSerializer

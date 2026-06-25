@@ -13,6 +13,9 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+from common.i18n import localize_api_payload
 
 from .serializers import (
     UserRegistrationSerializer,
@@ -23,8 +26,8 @@ from .serializers import (
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
 )
-from business_meta.models import UserBusinessAssignment
-from business_meta.serializers import UserBusinessAssignmentReadSerializer
+from business_meta.serializers import ProjectMemberReadSerializer
+from master_data.models import ProjectMember
 from .permissions import IsHrOrAdmin
 from .services import (
     UserRegistrationService,
@@ -32,6 +35,7 @@ from .services import (
     PasswordChangeService
 )
 from .utils import authenticate_user, get_tokens_for_user
+from .throttles import LoginRateThrottle
 
 User = get_user_model()
 
@@ -90,23 +94,22 @@ class UserRegistrationView(generics.CreateAPIView):
                 )
             except ValidationError as e:
                 return Response(
-                    {'error': str(e)},
+                    localize_api_payload(
+                        e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
+                    ),
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
         return Response(
-            serializer.errors,
+            localize_api_payload(serializer.errors),
             status=status.HTTP_400_BAD_REQUEST
         )
 
 
 class LoginView(generics.GenericAPIView):
-    """
-    User login endpoint.
-    Single Responsibility: Handle user authentication and token generation.
-    """
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="User login",
@@ -154,24 +157,26 @@ class LoginView(generics.GenericAPIView):
 
         if not serializer.is_valid():
             return Response(
-                serializer.errors,
+                localize_api_payload(serializer.errors),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        phone_number = serializer.validated_data['phone_number']
+        login = serializer.validated_data['login']
         password = serializer.validated_data['password']
 
-        user = authenticate_user(phone_number, password)
+        user = authenticate_user(login, password)
 
         if user is None:
             return Response(
-                {'error': 'Invalid credentials. Please check your phone number and password.'},
+                localize_api_payload(
+                    {'error': _('Invalid credentials. Please check your phone number and password.')}
+                ),
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
         if not user.is_active:
             return Response(
-                {'error': 'User account is disabled.'},
+                localize_api_payload({'error': _('User account is disabled.')}),
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
@@ -236,7 +241,7 @@ class ChangePasswordView(generics.GenericAPIView):
 
         if not serializer.is_valid():
             return Response(
-                serializer.errors,
+                localize_api_payload(serializer.errors),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -250,10 +255,12 @@ class ChangePasswordView(generics.GenericAPIView):
                 old_password=old_password,
                 new_password=new_password
             )
-            return Response(result, status=status.HTTP_200_OK)
+            return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response(
-                {'error': str(e)},
+                localize_api_payload(
+                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
+                ),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -307,7 +314,7 @@ class ForgotPasswordView(generics.GenericAPIView):
 
         if not serializer.is_valid():
             return Response(
-                serializer.errors,
+                localize_api_payload(serializer.errors),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -316,7 +323,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         service = PasswordResetService()
         result = service.initiate_password_reset(phone_number)
 
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(localize_api_payload(result), status=status.HTTP_200_OK)
 
 
 class ResetPasswordView(generics.GenericAPIView):
@@ -366,17 +373,47 @@ class ResetPasswordView(generics.GenericAPIView):
 
         if not serializer.is_valid():
             return Response(
-                serializer.errors,
+                localize_api_payload(serializer.errors),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # TODO: Implement token validation and user lookup
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+        try:
+            service = PasswordResetService()
+            result = service.reset_password(token=token, new_password=new_password)
+            return Response(localize_api_payload(result), status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response(
+                localize_api_payload(
+                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
+                ),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Logout (blacklist refresh token)', tags=['Authentication'])
+    def post(self, request):
+        refresh = request.data.get('refresh')
+        if not refresh:
+            return Response(
+                localize_api_payload({'error': _('Refresh token is required.')}),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from rest_framework_simplejwt.tokens import RefreshToken
+        try:
+            RefreshToken(refresh).blacklist()
+        except Exception:
+            return Response(
+                localize_api_payload({'error': _('Invalid refresh token.')}),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(
-            {
-                'message': 'Password reset functionality requires token storage implementation. '
-                          'Please implement PasswordResetToken model and validation logic.'
-            },
-            status=status.HTTP_501_NOT_IMPLEMENTED
+            localize_api_payload({'message': _('Logged out successfully.')}),
+            status=status.HTTP_200_OK,
         )
 
 
@@ -462,14 +499,12 @@ class UserListView(generics.ListCreateAPIView):
     def get_queryset(self):
         return (
             User.objects.all()
-            .order_by("-date_joined", "id")
+            .order_by('-created_at', 'id')
             .prefetch_related(
                 Prefetch(
-                    "business_assignments",
-                    queryset=UserBusinessAssignment.objects.select_related(
-                        "business", "job_position"
-                    ).order_by("business__name"),
-                    to_attr="prefetched_assignments",
+                    'project_memberships',
+                    queryset=ProjectMember.objects.select_related('project', 'position').order_by('project__project_name'),
+                    to_attr='prefetched_memberships',
                 )
             )
         )
@@ -518,21 +553,20 @@ class UserListView(generics.ListCreateAPIView):
 
 
 class UserAssignmentsListView(generics.ListAPIView):
-    """
-    All business assignments for a user. Self-service or HR/admin.
-    """
-    serializer_class = UserBusinessAssignmentReadSerializer
+    serializer_class = ProjectMemberReadSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         u = self.request.user
-        if u.id != int(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
-            raise PermissionDenied('You can only list your own assignments unless you are HR or admin.')
+        if str(u.id) != str(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
+            raise PermissionDenied(
+                _('You can only list your own assignments unless you are HR or admin.')
+            )
         return (
-            UserBusinessAssignment.objects.filter(user_id=user_id)
-            .select_related('user', 'business', 'job_position')
-            .order_by('business__name')
+            ProjectMember.objects.filter(user_id=user_id)
+            .select_related('user', 'project', 'position')
+            .order_by('project__project_name')
         )
 
     @extend_schema(

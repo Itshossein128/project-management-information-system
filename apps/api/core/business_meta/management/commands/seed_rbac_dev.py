@@ -1,13 +1,4 @@
-"""
-Development seed: auth groups, sample businesses, job positions, users, assignments.
-Run: python manage.py seed_rbac_dev
-
-Default dev logins (password: devpass123):
-- +10000000001 — admin
-- +10000000002 — hr
-- +10000000003 — visitor (read-only on unsafe routes)
-- +10000000004 — worker (no admin groups)
-"""
+"""Development seed: auth groups, sample projects, positions, users, members."""
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -15,27 +6,15 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from business_meta.models import (
-    AssignmentStatus,
-    Business,
-    BusinessJobPosition,
-    UserBusinessAssignment,
-    WageType,
-)
+from master_data.models import ProjectMember, ProjectPosition, MemberStatus, WageType
+from projects.models import Project
 
 User = get_user_model()
 
 GROUPS = [
-    "admin",
-    "hr",
-    "manager",
-    "visitor",
-    "business-setup",
-    "engineer",
-    "accountant",
+    'admin', 'hr', 'manager', 'visitor', 'business-setup', 'engineer', 'accountant',
 ]
-
-DEV_PASSWORD = "devpass123"
+DEV_PASSWORD = 'devpass123'
 
 
 @transaction.atomic
@@ -43,103 +22,71 @@ def run_seed():
     for name in GROUPS:
         Group.objects.get_or_create(name=name)
 
-    u_admin, _ = User.objects.get_or_create(
-        phone_number="+10000000001",
-        defaults={"first_name": "Admin", "last_name": "User"},
-    )
-    u_hr, _ = User.objects.get_or_create(
-        phone_number="+10000000002",
-        defaults={"first_name": "HR", "last_name": "User"},
-    )
-    u_visitor, _ = User.objects.get_or_create(
-        phone_number="+10000000003",
-        defaults={"first_name": "Visitor", "last_name": "User"},
-    )
-    u_worker, _ = User.objects.get_or_create(
-        phone_number="+10000000004",
-        defaults={"first_name": "Worker", "last_name": "User"},
-    )
-    for u in (u_admin, u_hr, u_visitor, u_worker):
-        u.set_password(DEV_PASSWORD)
-        u.save()
+    def upsert_user(mobile, username, full_name, group_name=None):
+        user, _ = User.objects.get_or_create(
+            mobile=mobile,
+            defaults={'username': username, 'full_name': full_name},
+        )
+        user.set_password(DEV_PASSWORD)
+        user.save()
+        if group_name:
+            user.groups.set([Group.objects.get(name=group_name)])
+        else:
+            user.groups.clear()
+        return user
 
-    u_admin.groups.set([Group.objects.get(name="admin")])
-    u_hr.groups.set([Group.objects.get(name="hr")])
-    u_visitor.groups.set([Group.objects.get(name="visitor")])
-    u_worker.groups.clear()
+    u_admin = upsert_user('+10000000001', '10000000001', 'Admin User', 'admin')
+    u_hr = upsert_user('+10000000002', '10000000002', 'HR User', 'hr')
+    u_visitor = upsert_user('+10000000003', '10000000003', 'Visitor User', 'visitor')
+    u_worker = upsert_user('+10000000004', '10000000004', 'Worker User', None)
 
-    b1, _ = Business.objects.get_or_create(
-        slug="acme",
-        defaults={"name": "Acme Construction"},
+    p1, _ = Project.objects.get_or_create(
+        project_code='acme',
+        defaults={'project_name': 'Acme Construction'},
     )
-    b2, _ = Business.objects.get_or_create(
-        slug="buildco",
-        defaults={"name": "BuildCo"},
+    p2, _ = Project.objects.get_or_create(
+        project_code='buildco',
+        defaults={'project_name': 'BuildCo'},
     )
 
-    for b in (b1, b2):
-        for slug, label, ordering in (
-            ("electrician", "Electrician", 0),
-            ("worker", "Worker", 1),
-            ("supervisor", "Supervisor", 2),
-            ("plumber", "Plumber", 3),
+    for project in (p1, p2):
+        for slug, name, ordering in (
+            ('electrician', 'Electrician', 0),
+            ('worker', 'Worker', 1),
+            ('supervisor', 'Supervisor', 2),
+            ('plumber', 'Plumber', 3),
         ):
-            BusinessJobPosition.objects.get_or_create(
-                business=b,
+            ProjectPosition.objects.get_or_create(
+                project=project,
                 slug=slug,
-                defaults={"label": label, "ordering": ordering},
+                defaults={'position_name': name, 'ordering': ordering},
             )
 
-    jp_e_b1 = BusinessJobPosition.objects.get(business=b1, slug="electrician")
-    jp_w_b1 = BusinessJobPosition.objects.get(business=b1, slug="worker")
-    jp_s_b2 = BusinessJobPosition.objects.get(business=b2, slug="supervisor")
+    pos_e = ProjectPosition.objects.get(project=p1, slug='electrician')
+    pos_w = ProjectPosition.objects.get(project=p1, slug='worker')
+    pos_s = ProjectPosition.objects.get(project=p2, slug='supervisor')
 
-    if not UserBusinessAssignment.objects.filter(user=u_worker, business=b1).exists():
-        UserBusinessAssignment.objects.create(
-            user=u_worker,
-            business=b1,
-            job_position=jp_e_b1,
-            wage=Decimal("45.00"),
-            wage_type=WageType.HOURLY,
-            weekly_total=Decimal("40"),
-            monthly_total=Decimal("160"),
-            tools=["drill", "multimeter"],
-            status=AssignmentStatus.ACTIVE,
-        )
-    if not UserBusinessAssignment.objects.filter(user=u_hr, business=b1).exists():
-        UserBusinessAssignment.objects.create(
-            user=u_hr,
-            business=b1,
-            job_position=jp_w_b1,
-            wage=Decimal("30.00"),
-            wage_type=WageType.HOURLY,
-            weekly_total=Decimal("20"),
-            monthly_total=Decimal("80"),
-            tools=[],
-            status=AssignmentStatus.ACTIVE,
-        )
-    if not UserBusinessAssignment.objects.filter(user=u_worker, business=b2).exists():
-        UserBusinessAssignment.objects.create(
-            user=u_worker,
-            business=b2,
-            job_position=jp_s_b2,
-            wage=Decimal("5000.00"),
-            wage_type=WageType.MONTHLY,
-            weekly_total=Decimal("0"),
-            monthly_total=Decimal("160"),
-            tools=["laptop"],
-            status=AssignmentStatus.SUSPENDED,
+    for user, project, position, wage, wage_type, status in (
+        (u_worker, p1, pos_e, Decimal('45.00'), WageType.HOURLY, MemberStatus.ACTIVE),
+        (u_hr, p1, pos_w, Decimal('30.00'), WageType.HOURLY, MemberStatus.ACTIVE),
+        (u_worker, p2, pos_s, Decimal('5000.00'), WageType.MONTHLY, MemberStatus.SUSPENDED),
+    ):
+        ProjectMember.objects.get_or_create(
+            user=user,
+            project=project,
+            defaults={
+                'position': position,
+                'wage': wage,
+                'wage_type': wage_type,
+                'status': status,
+                'tools': ['drill'] if user == u_worker and project == p1 else [],
+            },
         )
 
 
 class Command(BaseCommand):
-    help = "Seed development RBAC: groups, businesses, job positions, users, assignments. Password: devpass123"
+    help = 'Seed development RBAC and sample projects. Password: devpass123'
 
     def handle(self, *args, **options):
         run_seed()
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Seeded groups, +10000000001 (admin), +10000000002 (hr), "
-                "+10000000003 (visitor), +10000000004 (worker). Password: devpass123"
-            )
-        )
+        self.stdout.write(self.style.SUCCESS('Seeded groups, users, projects, members. Password: devpass123'))
