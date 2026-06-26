@@ -12,6 +12,7 @@ import {
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { Link } from "react-router";
 import { apiFetch } from "~/lib/api-client";
 
@@ -106,6 +107,9 @@ export default function ForgotPassword() {
           </CardContent>
           <CardFooter className='flex flex-col gap-2'>
             <Button type='submit' className='w-full' disabled={submitting}>
+              {submitting && (
+                <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+              )}
               {submitting
                 ? t("forgotPassword.sending")
                 : t("forgotPassword.sendLink")}
