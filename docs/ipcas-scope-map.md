@@ -23,7 +23,18 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 | **F-04** Project tenancy middleware | Done — `/api/v1/projects/{uuid}/` |
 | **F-06** Audit log middleware | Done — writes on POST/PATCH/PUT/DELETE |
 | **F-07** MinIO S3 + presigned URLs | Done — `/api/v1/projects/{id}/files/upload-url/` |
-| **F-08** RabbitMQ event topology | Done — `setup_event_topology` + `EventPublisher` |
+| **F-08** RabbitMQ event topology | Done — `setup_event_topology` + `EventPublisher` + `run_event_worker` consumer |
+
+## Sprint 1 hardening (post-foundation)
+
+| Item | Status |
+|------|--------|
+| Tenancy (`IsProjectMember` on project routes) | Done |
+| Audit resource metadata + async via `audit.log` | Done — sync fallback when RabbitMQ unavailable |
+| Auth / audit / events / storage integration tests | Done — CI runs with Postgres + RabbitMQ + MinIO |
+| Full-stack smoke workflow | Done — `.github/workflows/integration-smoke.yml` |
+| Role-aware DRF throttles + JSON 429 | Done |
+| Traefik read/write rate limit split | Done |
 
 ## Stack alignment
 

@@ -5,7 +5,7 @@ Excel export/import for table rows.
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from projects.mixins import PROJECT_MEMBER_PERMISSIONS
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -43,7 +43,7 @@ def parse_row_id(row_id):
 
 class DynamicRowsView(APIView):
     """GET list, POST create for rows of a dynamic table."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(
         summary='List rows',
@@ -108,7 +108,7 @@ class DynamicRowsView(APIView):
 
 class DynamicRowsExportView(APIView):
     """GET export table rows as .xlsx file."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(
         summary='Export rows to Excel',
@@ -129,7 +129,7 @@ class DynamicRowsExportView(APIView):
 
 class DynamicRowsImportView(APIView):
     """POST import rows from .xlsx file (multipart)."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = PROJECT_MEMBER_PERMISSIONS
     parser_classes = [MultiPartParser, FormParser]
 
     @extend_schema(
@@ -160,7 +160,7 @@ class DynamicRowsImportView(APIView):
 
 class DynamicRowDetailView(APIView):
     """GET, PUT, PATCH, DELETE a single row by id."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(summary='Get row', tags=['Dynamic data'])
     def get(self, request, project_pk, table_slug, row_id):

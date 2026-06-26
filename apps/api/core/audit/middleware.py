@@ -3,7 +3,8 @@ import logging
 
 from django.utils.deprecation import MiddlewareMixin
 
-from audit.models import AuditLog
+from audit.resolve_resource import resolve_resource
+from audit.service import build_audit_payload, record_audit_log
 
 logger = logging.getLogger(__name__)
 
@@ -34,16 +35,29 @@ class AuditLogMiddleware(MiddlewareMixin):
                         changes = json.loads(raw.decode('utf-8'))
                     except (json.JSONDecodeError, UnicodeDecodeError):
                         changes = {'raw': 'binary or invalid json'}
-            AuditLog.objects.create(
-                actor=actor,
-                project_id=getattr(request, 'project_id', None),
+
+            project_id = getattr(request, 'project_id', None)
+            resolved = resolve_resource(request.path, project_id=project_id)
+            resource_type = ''
+            resource_id = None
+            project_fk_id = project_id
+            if resolved:
+                resource_type = resolved.resource_type
+                resource_id = resolved.resource_id
+                if resolved.project_id is not None:
+                    project_fk_id = resolved.project_id
+
+            payload = build_audit_payload(
+                actor_id=actor.id if actor else None,
+                project_id=project_fk_id,
                 http_method=request.method,
-                path=request.path[:512],
-                resource_type='',
-                resource_id=None,
+                path=request.path,
+                resource_type=resource_type,
+                resource_id=resource_id,
                 changes=changes if isinstance(changes, dict) else {'data': changes},
                 ip_address=self._client_ip(request),
             )
+            record_audit_log(payload)
         except Exception:
             logger.exception('Failed to write audit log')
         return response

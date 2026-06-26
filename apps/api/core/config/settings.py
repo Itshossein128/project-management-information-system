@@ -127,6 +127,7 @@ AUTHENTICATION_BACKENDS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -138,11 +139,13 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': [
         'authentication.throttles.BurstAnonRateThrottle',
-        'authentication.throttles.BurstUserRateThrottle',
+        'authentication.throttles.RoleAwareUserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '60/min',
         'user': '600/min',
+        'admin': '1200/min',
+        'hr': '900/min',
         'login': '10/min',
     },
 }
@@ -204,3 +207,6 @@ AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'false').lower() in ('1', 'tru
 
 # RabbitMQ
 RABBITMQ_URL = os.environ.get('RABBITMQ_URL', 'amqp://ipcas:ipcas@localhost:5672/')
+
+# Audit: publish to RabbitMQ when true; sync fallback on publish failure
+AUDIT_LOG_ASYNC = os.environ.get('AUDIT_LOG_ASYNC', 'true').lower() in ('1', 'true', 'yes')

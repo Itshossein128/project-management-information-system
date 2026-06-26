@@ -25,4 +25,4 @@ class EventPublisherTests(TestCase):
         body = channel.basic_publish.call_args.kwargs['body']
         payload = json.loads(body.decode())
         self.assertEqual(payload['topic'], 'daily-report.approved')
-        self.assertEqual(len(TOPIC_QUEUE_MAP), 4)
+        self.assertEqual(len(TOPIC_QUEUE_MAP), 5)

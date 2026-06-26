@@ -571,7 +571,7 @@ class UserAssignmentsListView(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         u = self.request.user
-        if str(u.id) != str(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
+        if str(u.pk) != str(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
             raise PermissionDenied(
                 _('You can only list your own assignments unless you are HR or admin.')
             )

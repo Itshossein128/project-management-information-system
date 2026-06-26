@@ -7,6 +7,7 @@ BLUEPRINT_TOPICS = (
     'cost.recorded',
     'ipc.submitted',
     'schedule.updated',
+    'audit.log',
 )
 
 TOPIC_QUEUE_MAP = {
@@ -14,4 +15,5 @@ TOPIC_QUEUE_MAP = {
     'cost.recorded': 'cost.recorded.q',
     'ipc.submitted': 'ipc.submitted.q',
     'schedule.updated': 'schedule.updated.q',
+    'audit.log': 'audit.log.q',
 }

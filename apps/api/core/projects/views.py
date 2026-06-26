@@ -1,3 +1,6 @@
+"""REST CRUD for blueprint projects."""
+import logging
+
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -6,11 +9,14 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from authentication.permissions import IsBusinessSetup
+from events.publisher import EventPublisher
 from master_data.models import ProjectMember
 from projects.models import Project
 from projects.permissions import IsProjectMember
 from projects.serializers import ProjectSerializer
 from business_meta.services import create_project_from_template, get_available_templates
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema_view(
@@ -26,7 +32,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated()]
+            return [IsAuthenticated(), IsProjectMember()]
         return [IsBusinessSetup()]
 
     def get_queryset(self):
@@ -35,6 +41,17 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Project.objects.all()
         member_project_ids = ProjectMember.objects.filter(user=user).values_list('project_id', flat=True)
         return Project.objects.filter(Q(id__in=member_project_ids) | Q(project_manager=user))
+
+    def perform_create(self, serializer):
+        project = serializer.save()
+        try:
+            EventPublisher().publish(
+                'schedule.updated',
+                {'project_id': str(project.id), 'action': 'created'},
+                project_id=str(project.id),
+            )
+        except Exception:
+            logger.exception('Failed to publish schedule.updated for project %s', project.id)
 
     @extend_schema(summary='List available templates', tags=['Projects'])
     @action(detail=False, methods=['get'], url_path='templates')

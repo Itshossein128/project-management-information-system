@@ -12,9 +12,22 @@ infra/        Traefik gateway config
 packages/     Shared packages (future)
 ```
 
+## Dev modes
+
+| Mode | Command | API | Gateway | MinIO / RabbitMQ |
+|------|---------|-----|---------|------------------|
+| **Local dev** | `pnpm dev` | `:8000` direct | No | Not started (storage/events need Docker) |
+| **Full stack** | `docker compose up --build` | via Traefik `:8080` | Yes | Yes (+ `worker` consumes events) |
+
+Set `AUDIT_LOG_ASYNC=true` (default in Docker) to publish audit entries to RabbitMQ; the `worker` service persists them. Use `AUDIT_LOG_ASYNC=false` for synchronous audit writes (CI tests use this).
+
+Integration tests: `python manage.py test events authentication audit storage` (requires Postgres; RabbitMQ + MinIO for `*_integration` modules).
+
+Smoke test (full stack): `bash scripts/smoke-stack.sh` after `docker compose up`.
+
 ## Current scope vs blueprint
 
-Sprint 1 (Infrastructure & Auth) is implemented: full blueprint UUID schema, JWT with revocation, Traefik gateway, tenancy middleware, audit log, MinIO storage, RabbitMQ events. See [docs/ipcas-scope-map.md](docs/ipcas-scope-map.md).
+Sprint 1 (Infrastructure & Auth) is implemented: full blueprint UUID schema, JWT with revocation, Traefik gateway, tenancy middleware, audit log (sync or async via RabbitMQ), MinIO storage, RabbitMQ events + worker consumer. See [docs/ipcas-scope-map.md](docs/ipcas-scope-map.md).
 
 **API:** `/api/v1/projects/` (UUID). **Frontend routes:** `/projects/{uuid}/...`
 

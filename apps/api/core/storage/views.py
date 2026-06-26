@@ -12,6 +12,7 @@ from drf_spectacular.utils import extend_schema
 
 from projects.permissions import IsProjectMember
 from storage.models import StoredFile
+from storage.permissions import CanAccessStoredFile
 
 
 def s3_client():
@@ -55,7 +56,8 @@ class UploadUrlView(APIView):
 
 
 class ConfirmUploadView(APIView):
-    permission_classes = [IsAuthenticated]
+    require_uploader = True
+    permission_classes = [IsAuthenticated, CanAccessStoredFile]
 
     @extend_schema(summary='Confirm file upload', tags=['Storage'])
     def post(self, request, file_id):
@@ -70,7 +72,7 @@ class ConfirmUploadView(APIView):
 
 
 class DownloadUrlView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanAccessStoredFile]
 
     @extend_schema(summary='Get presigned download URL', tags=['Storage'])
     def get(self, request, file_id):

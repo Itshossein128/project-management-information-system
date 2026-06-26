@@ -53,11 +53,42 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: ipcas
+          RABBITMQ_DEFAULT_PASS: ipcas
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: ipcas
+          MINIO_ROOT_PASSWORD: ipcas-secret
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       DATABASE_URL: postgres://ipcas:ipcas@localhost:5432/ipcas_test
       SECRET_KEY: ci-test-secret
       DEBUG: "true"
       ALLOWED_HOSTS: localhost,127.0.0.1
+      RABBITMQ_URL: amqp://ipcas:ipcas@localhost:5672/
+      AWS_S3_ENDPOINT_URL: http://localhost:9000
+      AWS_ACCESS_KEY_ID: ipcas
+      AWS_SECRET_ACCESS_KEY: ipcas-secret
+      AWS_STORAGE_BUCKET_NAME: ipcas-files
+      AWS_S3_USE_SSL: "false"
+      AUDIT_LOG_ASYNC: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -70,7 +101,33 @@ jobs:
         working-directory: apps/api/core
       - run: python manage.py migrate --noinput
         working-directory: apps/api/core
+      - name: Create MinIO bucket
+        run: |
+          python - <<'PY'
+          import boto3
+          from botocore.config import Config
+          import os
+          client = boto3.client(
+              's3',
+              endpoint_url=os.environ['AWS_S3_ENDPOINT_URL'],
+              aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+              region_name='us-east-1',
+              config=Config(signature_version='s3v4'),
+          )
+          bucket = os.environ['AWS_STORAGE_BUCKET_NAME']
+          try:
+              client.create_bucket(Bucket=bucket)
+          except client.exceptions.BucketAlreadyOwnedByYou:
+              pass
+          except Exception as exc:
+              if 'BucketAlreadyOwnedByYou' not in str(exc) and 'AlreadyOwnedByYou' not in str(exc):
+                  raise
+          PY
+        working-directory: apps/api/core
       - run: python manage.py verify_blueprint_schema
         working-directory: apps/api/core
-      - run: python manage.py test events authentication
+      - run: python manage.py setup_event_topology
+        working-directory: apps/api/core
+      - run: python manage.py test events authentication audit storage
         working-directory: apps/api/core

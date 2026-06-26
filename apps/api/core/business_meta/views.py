@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
+from projects.permissions import IsProjectMember
 from master_data.models import ProjectMember, ProjectPosition
 from .models import TableDefinition, FieldDefinition, RelationDefinition
 from .permissions import CanViewProjectMembers, IsVisitorReadOnly
@@ -35,7 +36,7 @@ class TableDefinitionViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve', 'by_slug'):
-            return [IsAuthenticated()]
+            return [IsAuthenticated(), IsProjectMember()]
         return [IsBusinessSetup()]
 
     def get_queryset(self):
@@ -137,7 +138,11 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
 )
 class FieldDefinitionViewSet(viewsets.ModelViewSet):
     serializer_class = FieldDefinitionSerializer
-    permission_classes = [IsBusinessSetup]
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [IsAuthenticated(), IsProjectMember()]
+        return [IsBusinessSetup()]
 
     def get_queryset(self):
         table_pk = self.kwargs.get('table_pk')
