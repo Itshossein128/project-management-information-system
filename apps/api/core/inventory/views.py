@@ -36,7 +36,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     
     Provides CRUD operations for items and Excel import/export functionality.
     """
-    queryset = Item.objects.all()
+    queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
 
     @extend_schema(
