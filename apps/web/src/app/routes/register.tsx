@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import {
   Button,
@@ -195,6 +196,7 @@ export default function Register() {
           </CardContent>
           <CardFooter className='flex flex-col gap-2'>
             <Button type='submit' className='w-full' disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {submitting ? t("register.creating") : t("common.register")}
             </Button>
             <Button type='button' variant='link' asChild>

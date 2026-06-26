@@ -13,6 +13,7 @@ import {
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { redirect, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
 import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
@@ -112,6 +113,7 @@ export default function Login() {
           </CardContent>
           <CardFooter className='flex flex-col gap-2 mt-6'>
             <Button type='submit' className='w-full' disabled={submitting}>
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {submitting ? t("login.signingIn") : t("common.signIn")}
             </Button>
             <Button
