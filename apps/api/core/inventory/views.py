@@ -36,7 +36,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     
     Provides CRUD operations for items and Excel import/export functionality.
     """
-    # ⚡ Bolt: added select_related('category') to prevent N+1 query issue when serializing category_name
     queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
 
