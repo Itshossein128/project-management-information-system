@@ -128,7 +128,9 @@ export default function ResetPassword() {
           </CardContent>
           <CardFooter className='flex flex-col gap-2'>
             <Button type='submit' className='w-full' disabled={submitting}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+              {submitting && (
+                <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+              )}
               {submitting
                 ? t("resetPassword.updating")
                 : t("resetPassword.updatePassword")}

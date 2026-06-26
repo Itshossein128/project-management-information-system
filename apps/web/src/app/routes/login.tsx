@@ -28,7 +28,6 @@ export async function loader({ request }: { request: Request }) {
 export default function Login() {
   const { t } = useTranslation();
   const { login, isAuthenticated, isLoading } = useAuth();
-  console.log("isLoading", isLoading);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "/home";
@@ -44,25 +43,29 @@ export default function Login() {
   }, [isLoading, isAuthenticated, navigate, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
-    console.log("fired");
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
       await login({ phone_number: phoneNumber, password });
     } catch (err) {
-      console.log("injas");
       setError(err instanceof Error ? err.message : t("login.failed"));
       setSubmitting(false);
     }
   }
 
-  if (isLoading) {
-    return null;
-  }
+  const busy = submitting || isLoading;
 
   if (isAuthenticated) {
-    return null;
+    return (
+      <div className='flex min-h-svh items-center justify-center p-4'>
+        <Loader2
+          className='h-8 w-8 animate-spin text-muted-foreground'
+          aria-hidden='true'
+        />
+        <span className='sr-only'>{t("login.signingIn")}</span>
+      </div>
+    );
   }
 
   return (
@@ -112,9 +115,11 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className='flex flex-col gap-2 mt-6'>
-            <Button type='submit' className='w-full' disabled={submitting}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-              {submitting ? t("login.signingIn") : t("common.signIn")}
+            <Button type='submit' className='w-full' disabled={busy}>
+              {busy && (
+                <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+              )}
+              {busy ? t("login.signingIn") : t("common.signIn")}
             </Button>
             <Button
               type='button'
