@@ -224,7 +224,8 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         if material_code:
             qs = qs.filter(material_code__icontains=material_code)
 
-        return qs.select_related('business')
+        # ⚡ Bolt: added 'project' to select_related to prevent N+1 query when serializing project_id
+        return qs.select_related('business', 'project')
 
     def perform_create(self, serializer):
         project_pk = self.kwargs.get('project_pk')

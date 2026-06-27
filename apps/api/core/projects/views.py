@@ -37,10 +37,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        # ⚡ Bolt: select_related('project_manager') added to avoid N+1 query when serializing project_manager field
         if user.is_superuser or user.groups.filter(name='admin').exists():
-            return Project.objects.all()
+            return Project.objects.select_related('project_manager').all()
         member_project_ids = ProjectMember.objects.filter(user=user).values_list('project_id', flat=True)
-        return Project.objects.filter(Q(id__in=member_project_ids) | Q(project_manager=user))
+        return Project.objects.select_related('project_manager').filter(Q(id__in=member_project_ids) | Q(project_manager=user))
 
     def perform_create(self, serializer):
         project = serializer.save()

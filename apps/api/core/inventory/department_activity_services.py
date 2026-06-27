@@ -80,7 +80,8 @@ def get_department_activity_queryset(
     else:
         qs = qs.order_by('-date', '-created_at')
 
-    return qs.select_related('business')
+    # ⚡ Bolt: added 'project' to select_related to prevent N+1 query when serializing project_id
+    return qs.select_related('business', 'project')
 
 
 def require_valid_department(department: str | None) -> str | None:
