@@ -5,12 +5,15 @@ from config.pagination import DefaultPageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
+import logging
 import pandas as pd
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
 
 from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
+
+logger = logging.getLogger(__name__)
 
 from .department_activity_services import get_department_activity_queryset
 from .models import (
@@ -141,7 +144,8 @@ class ItemViewSet(viewsets.ModelViewSet):
                     )
                     imported_count += 1
                 except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
+                    logger.exception('Row processing error')
+                    errors.append(f'Row {index + 2}: Error processing row')  # +2 because Excel rows start at 1 and header is row 1
             
             return Response({
                 'message': f'Successfully imported {imported_count} items',
@@ -150,8 +154,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            logger.exception('Error processing file')
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': 'Error processing file'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
