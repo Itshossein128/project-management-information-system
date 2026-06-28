@@ -33,6 +33,8 @@
   "nav": {
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
+    "expandSubmenu": "Expand submenu",
+    "collapseSubmenu": "Collapse submenu",
     "sidebarHome": "Home",
     "sidebarHr": "HR",
     "deptBuildings": "Buildings",
