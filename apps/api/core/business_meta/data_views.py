@@ -2,6 +2,7 @@
 Data API: CRUD for dynamic table rows (Django DB / SQLite). Enforce access and validate payload against table schema.
 Excel export/import for table rows.
 """
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from .models import Project, TableDefinition, DynamicTableRow
 from .services import validate_row_data
 from .excel_io import export_table_to_xlsx, import_rows_from_xlsx
 
+logger = logging.getLogger(__name__)
 
 def get_project_and_table(project_pk, table_slug):
     """Return (Project, TableDefinition) or (None, None) if not found."""
@@ -152,7 +154,8 @@ class DynamicRowsImportView(APIView):
         try:
             file_bytes = file_obj.read()
         except Exception as e:
-            return Response({'error': f'Failed to read file: {e}'}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception("Failed to read file during import")
+            return Response({'error': 'Failed to read file due to an internal error.'}, status=status.HTTP_400_BAD_REQUEST)
 
         created, errors = import_rows_from_xlsx(table, file_bytes)
         return Response({'created': created, 'errors': errors})
