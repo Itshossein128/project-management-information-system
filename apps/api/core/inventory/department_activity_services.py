@@ -80,7 +80,10 @@ def get_department_activity_queryset(
     else:
         qs = qs.order_by('-date', '-created_at')
 
-    return qs.select_related('business')
+    # ⚡ Bolt: Fixed select_related to prevent N+1 query regressions and FieldErrors.
+    # Since business does not exist on DepartmentActivityRecord but project does, we use project.
+    # This optimizes serialization by fetching the related project in a single query.
+    return qs.select_related('project')
 
 
 def require_valid_department(department: str | None) -> str | None:
