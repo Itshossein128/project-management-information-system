@@ -5,6 +5,8 @@
     "register": "Register",
     "email": "Email",
     "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "confirmPassword": "Confirm password",
     "newPassword": "New password",
     "confirmNewPassword": "Confirm new password",

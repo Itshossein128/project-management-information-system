@@ -5,6 +5,8 @@
     "register": "ثبت‌نام",
     "email": "ایمیل",
     "password": "رمز عبور",
+    "showPassword": "نمایش رمز عبور",
+    "hidePassword": "پنهان کردن رمز عبور",
     "confirmPassword": "تأیید رمز عبور",
     "newPassword": "رمز عبور جدید",
     "confirmNewPassword": "تأیید رمز عبور جدید",
