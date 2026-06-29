@@ -72,7 +72,8 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'roles']
 
     def get_roles(self, obj):
-        return list(obj.groups.values_list('name', flat=True))
+        # Use .all() to leverage prefetch_related('groups') and avoid N+1 queries
+        return [g.name for g in obj.groups.all()]
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -89,7 +90,8 @@ class UserListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_roles(self, obj):
-        return list(obj.groups.values_list('name', flat=True))
+        # Use .all() to leverage prefetch_related('groups') and avoid N+1 queries
+        return [g.name for g in obj.groups.all()]
 
     def get_assignments_preview(self, obj):
         rows = getattr(obj, 'prefetched_memberships', None)
