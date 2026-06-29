@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -24,6 +25,8 @@ from .serializers import (
     SpaceMaterialRequestSerializer,
     DepartmentActivityRecordSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DepartmentActivityRecordPagination(DefaultPageNumberPagination):
@@ -141,7 +144,8 @@ class ItemViewSet(viewsets.ModelViewSet):
                     )
                     imported_count += 1
                 except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
+                    logger.exception(f'Error importing item at row {index + 2}')
+                    errors.append(f'Row {index + 2}: Invalid data')  # +2 because Excel rows start at 1 and header is row 1
             
             return Response({
                 'message': f'Successfully imported {imported_count} items',
@@ -150,8 +154,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            logger.exception('Error processing import file')
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': 'An error occurred while processing the file.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
