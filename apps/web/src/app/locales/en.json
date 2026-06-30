@@ -31,6 +31,8 @@
     "switchToDark": "Switch to dark mode"
   },
   "nav": {
+    "openSubmenu": "Open submenu",
+    "closeSubmenu": "Close submenu",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
     "sidebarHome": "Home",

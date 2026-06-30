@@ -31,6 +31,8 @@
     "switchToDark": "تغییر به حالت تیره"
   },
   "nav": {
+    "openSubmenu": "باز کردن زیرمنو",
+    "closeSubmenu": "بستن زیرمنو",
     "openMenu": "باز کردن منو",
     "closeMenu": "بستن منو",
     "sidebarHome": "خانه",
