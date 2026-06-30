@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -25,6 +26,8 @@ from .serializers import (
     DepartmentActivityRecordSerializer,
 )
 
+
+logger = logging.getLogger(__name__)
 
 class DepartmentActivityRecordPagination(DefaultPageNumberPagination):
     """Department activity grids use the shared default pagination."""
@@ -140,8 +143,9 @@ class ItemViewSet(viewsets.ModelViewSet):
                         category=category
                     )
                     imported_count += 1
-                except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
+                except Exception:
+                    logger.exception(f'Failed to import item at row {index + 2}')
+                    errors.append(f'Row {index + 2}: Failed to process item due to an internal error')  # +2 because Excel rows start at 1 and header is row 1
             
             return Response({
                 'message': f'Successfully imported {imported_count} items',
@@ -149,9 +153,10 @@ class ItemViewSet(viewsets.ModelViewSet):
                 'errors': errors if errors else None
             }, status=status.HTTP_201_CREATED)
             
-        except Exception as e:
+        except Exception:
+            logger.exception('Error processing file during import')
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': 'An internal error occurred while processing the file'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
