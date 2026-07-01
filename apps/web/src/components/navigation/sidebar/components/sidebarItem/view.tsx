@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/app/lib/utils";
 import { ICONS, type IconName } from "@/components/icons";
 import type { NavigationChildItem } from "@/types/navigation";
@@ -60,6 +61,7 @@ export const SidebarItem = ({
   activeExact,
   children,
 }: SidebarItemProps) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const Icon = ICONS[icon];
   const [expanded, setExpanded] = useState(false);
@@ -108,7 +110,9 @@ export const SidebarItem = ({
               id={`button-sidebarExpand-${name}`}
               type="button"
               aria-expanded={expanded}
-              aria-label={expanded ? "بستن زیرمنو" : "باز کردن زیرمنو"}
+              aria-label={
+                expanded ? t("nav.closeSubmenu") : t("nav.openSubmenu")
+              }
               className={cn(
                 "flex w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-sidebar-foreground/80 transition-colors",
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
