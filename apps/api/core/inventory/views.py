@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
 import pandas as pd
+import logging
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
@@ -129,6 +130,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             imported_count = 0
             errors = []
             
+            logger = logging.getLogger(__name__)
             for index, row in df.iterrows():
                 try:
                     category_name = row['category']
@@ -141,7 +143,8 @@ class ItemViewSet(viewsets.ModelViewSet):
                     )
                     imported_count += 1
                 except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
+                    logger.exception(f"Error importing row {index + 2}")
+                    errors.append(f'Row {index + 2}: An error occurred while importing this row.')  # +2 because Excel rows start at 1 and header is row 1
             
             return Response({
                 'message': f'Successfully imported {imported_count} items',
@@ -150,8 +153,10 @@ class ItemViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.exception("Error processing Excel file for import")
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': 'An error occurred while processing the file. Please check the file format.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

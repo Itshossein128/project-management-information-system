@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from projects.mixins import PROJECT_MEMBER_PERMISSIONS
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import HttpResponse
+import logging
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from .models import Project, TableDefinition, DynamicTableRow
@@ -152,7 +153,9 @@ class DynamicRowsImportView(APIView):
         try:
             file_bytes = file_obj.read()
         except Exception as e:
-            return Response({'error': f'Failed to read file: {e}'}, status=status.HTTP_400_BAD_REQUEST)
+            logger = logging.getLogger(__name__)
+            logger.exception("Failed to read imported Excel file")
+            return Response({'error': 'Failed to read file. Please check the file format and try again.'}, status=status.HTTP_400_BAD_REQUEST)
 
         created, errors = import_rows_from_xlsx(table, file_bytes)
         return Response({'created': created, 'errors': errors})
