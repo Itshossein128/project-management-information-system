@@ -513,6 +513,8 @@ class UserListView(generics.ListCreateAPIView):
             User.objects.all()
             .order_by('-created_at', 'id')
             .prefetch_related(
+                # Prefetch groups to prevent N+1 queries when serializing roles
+                'groups',
                 Prefetch(
                     'project_memberships',
                     queryset=ProjectMember.objects.select_related('project', 'position').order_by('project__project_name'),
