@@ -67,7 +67,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Project.objects.annotate(
+        qs = Project.objects.select_related('project_manager').annotate(
             member_count=Count('members', filter=Q(members__status=MemberStatus.ACTIVE)),
         )
         if user.is_superuser or user.groups.filter(name='admin').exists():
