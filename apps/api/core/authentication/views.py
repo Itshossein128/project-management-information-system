@@ -517,7 +517,8 @@ class UserListView(generics.ListCreateAPIView):
                     'project_memberships',
                     queryset=ProjectMember.objects.select_related('project', 'position').order_by('project__project_name'),
                     to_attr='prefetched_memberships',
-                )
+                ),
+                'groups', # ⚡ Bolt: Prefetch groups to avoid N+1 queries in UserListSerializer
             )
         )
 
