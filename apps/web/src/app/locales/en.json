@@ -39,6 +39,9 @@
   "nav": {
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
+    "openSubmenu": "Open submenu",
+    "closeSubmenu": "Close submenu",
+    "main": "Main",
     "sidebarHome": "Home",
     "sidebarHr": "HR",
     "deptBuildings": "Buildings",

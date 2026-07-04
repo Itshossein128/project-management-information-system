@@ -50,7 +50,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       <nav
         id="nav-mainSidebar"
         className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden py-3"
-        aria-label="اصلی"
+        aria-label={t("nav.main")}
       >
         <ul id="list-sidebarNav" className="flex flex-col gap-1">
           {items.map((item, index) => (

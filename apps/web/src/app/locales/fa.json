@@ -39,6 +39,9 @@
   "nav": {
     "openMenu": "باز کردن منو",
     "closeMenu": "بستن منو",
+    "openSubmenu": "باز کردن زیرمنو",
+    "closeSubmenu": "بستن زیرمنو",
+    "main": "اصلی",
     "sidebarHome": "خانه",
     "sidebarHr": "منابع انسانی",
     "deptBuildings": "ابنیه",
