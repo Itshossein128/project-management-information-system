@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -6,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
@@ -140,8 +143,11 @@ class ItemViewSet(viewsets.ModelViewSet):
                         category=category
                     )
                     imported_count += 1
+                except ValueError as e:
+                    errors.append(f'Row {index + 2}: Invalid data format (e.g., non-numeric quantity).')
                 except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
+                    logger.exception('Failed to import row %s', index + 2)
+                    errors.append(f'Row {index + 2}: An unexpected error occurred.')  # +2 because Excel rows start at 1 and header is row 1
             
             return Response({
                 'message': f'Successfully imported {imported_count} items',
@@ -150,8 +156,9 @@ class ItemViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
+            logger.exception('Failed to process Excel file')
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': 'Error processing file. Please check the file format and try again.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
