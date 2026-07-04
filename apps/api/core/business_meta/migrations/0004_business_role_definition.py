@@ -2,6 +2,7 @@ import django.core.validators
 from django.db import migrations, models
 
 
+# Function to handle seed business roles
 def seed_business_roles(apps, schema_editor):
     BusinessRoleDefinition = apps.get_model('business_meta', 'BusinessRoleDefinition')
     seed = [
@@ -18,6 +19,7 @@ def seed_business_roles(apps, schema_editor):
         )
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
 
     dependencies = [

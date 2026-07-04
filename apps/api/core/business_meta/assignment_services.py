@@ -9,6 +9,7 @@ User = get_user_model()
 
 
 @transaction.atomic
+# Function to handle create assignment for user
 def create_assignment_for_user(
     *,
     business_id: int,

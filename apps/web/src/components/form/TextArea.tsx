@@ -14,6 +14,7 @@ export type TextAreaProps = Omit<React.ComponentProps<"textarea">, "name"> & {
   fieldClassName?: string;
 };
 
+// Function to manage TextArea
 export function TextArea({
   name,
   id,
@@ -24,10 +25,14 @@ export function TextArea({
   className,
   ...props
 }: TextAreaProps) {
+  // Variable holding inputId
   const inputId = typeof id === "string" && id.trim() ? id.trim() : `input-${name}`;
 
+  // Variable holding helpId
   const helpId = `text-${name}InputHelper`;
+  // Variable holding errorId
   const errorId = `text-${name}InputError`;
+  // Variable holding describedBy
   const describedBy = [helpText != null ? helpId : null, error != null ? errorId : null]
     .filter(Boolean)
     .join(" ");

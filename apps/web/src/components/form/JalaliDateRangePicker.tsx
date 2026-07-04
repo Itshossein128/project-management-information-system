@@ -7,8 +7,10 @@ import { Field, type FieldProps } from "./Field";
 
 const ISO_DATE_FORMAT = "YYYY-MM-DD";
 
+// Function to manage dateObjectToIso
 function dateObjectToIso(value: DateObject | null | undefined): string {
   if (!value) return "";
+  // Variable holding g
   const g = value.convert(undefined as unknown as any);
   return g.format(ISO_DATE_FORMAT);
 }
@@ -53,6 +55,7 @@ export function JalaliDateRangePicker({
   fieldClassName,
   id,
 }: JalaliDateRangePickerProps) {
+  // Variable holding inputId
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
 
   const valueArr: string[] = [value.from || "", value.to || ""].filter(Boolean);
@@ -74,6 +77,7 @@ export function JalaliDateRangePicker({
           dateSeparator=" تا "
           value={valueArr}
           onChange={(dates) => {
+            // Variable holding arr
             const arr = Array.isArray(dates) ? (dates as DateObject[]) : [];
             onChange({
               from: dateObjectToIso(arr[0]),

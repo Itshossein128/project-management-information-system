@@ -25,6 +25,7 @@ from business_meta.models import (
 
 User = get_user_model()
 
+# Global variable GROUPS
 GROUPS = [
     "admin",
     "hr",
@@ -35,10 +36,12 @@ GROUPS = [
     "accountant",
 ]
 
+# Global variable DEV_PASSWORD
 DEV_PASSWORD = "devpass123"
 
 
 @transaction.atomic
+# Function to handle run seed
 def run_seed():
     for name in GROUPS:
         Group.objects.get_or_create(name=name)
@@ -132,9 +135,11 @@ def run_seed():
         )
 
 
+# Class representing Command
 class Command(BaseCommand):
     help = "Seed development RBAC: groups, businesses, job positions, users, assignments. Password: devpass123"
 
+    # Function to handle handle
     def handle(self, *args, **options):
         run_seed()
         self.stdout.write(

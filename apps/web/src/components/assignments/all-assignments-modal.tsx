@@ -4,16 +4,19 @@ import { Modal } from "@/components/overlay/modal";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+// Function to manage getBusinessName
 function getBusinessName(a: UserBusinessAssignment): string {
   if (typeof a.business === "object" && a.business) return a.business.name;
   return "—";
 }
 
+// Function to manage getJobLabel
 function getJobLabel(a: UserBusinessAssignment): string {
   if (typeof a.job_position === "object" && a.job_position) return a.job_position.label;
   return "—";
 }
 
+// Function to manage AllAssignmentsModal
 export function AllAssignmentsModal(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +25,7 @@ export function AllAssignmentsModal(props: {
 }) {
   const { t } = useTranslation();
 
+  // Variable holding lines
   const lines = useMemo(() => {
     // Prefer rich rows if present; fallback to display lines.
     const hasRich = props.assignments.some(

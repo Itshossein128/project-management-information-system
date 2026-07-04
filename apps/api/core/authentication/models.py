@@ -14,9 +14,11 @@ phone_regex = RegexValidator(
 )
 
 
+# Class representing CustomUserManager
 class CustomUserManager(BaseUserManager):
     """Manager for custom User model using phone_number."""
 
+    # Function to handle create user
     def create_user(self, phone_number, password=None, **extra_fields):
         if not phone_number:
             raise ValueError("Phone number is required")
@@ -26,6 +28,7 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    # Function to handle create superuser
     def create_superuser(self, phone_number, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -36,6 +39,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(phone_number, password, **extra_fields)
 
 
+# Class representing User
 class User(AbstractBaseUser, PermissionsMixin):
     """
     Custom User model.
@@ -60,16 +64,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
+    # Class representing Meta
     class Meta:
         verbose_name = "user"
         verbose_name_plural = "users"
 
+    # Function to handle   str
     def __str__(self):
         return self.get_full_name() or self.phone_number
 
+    # Function to handle get full name
     def get_full_name(self):
         full = f"{self.first_name} {self.last_name}".strip()
         return full if full else self.phone_number
 
+    # Function to handle get short name
     def get_short_name(self):
         return self.first_name or self.phone_number

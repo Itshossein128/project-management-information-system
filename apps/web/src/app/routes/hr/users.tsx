@@ -32,6 +32,7 @@ export interface HrUserRow {
   assignments_preview?: UserBusinessAssignment[];
 }
 
+// Function to manage meta
 export function meta() {
   return [
     { title: "Users | Building Management" },
@@ -39,6 +40,7 @@ export function meta() {
   ];
 }
 
+// Function to manage formatJoinedAt
 function formatJoinedAt(iso: string, language: string) {
   try {
     return new Date(iso).toLocaleString(language, {
@@ -52,14 +54,18 @@ function formatJoinedAt(iso: string, language: string) {
 
 export default function HrUsersPage() {
   const { t, i18n } = useTranslation();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
+  // Variable holding canAccess
   const canAccess = hasRole(ROLES.HR) || hasRole(ROLES.ADMIN);
 
   const [createOpen, setCreateOpen] = useState(false);
+  // Variable holding createUser
   const createUser = useCreateHrUser();
 
   const [importOpen, setImportOpen] = useState(false);
+  // Variable holding grid
   const grid = useGridState({
     initialPageIndex: 0,
     initialPageSize: 20,
@@ -72,6 +78,7 @@ export default function HrUsersPage() {
     }
   }, [isLoading, isAuthenticated, navigate]);
 
+  // Variable holding ordering
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
     : undefined;
@@ -87,9 +94,13 @@ export default function HrUsersPage() {
     },
     isAuthenticated && canAccess,
   );
+  // Function to manage rows
   const rows = (usersQuery.data?.results ?? []) as HrUserRow[];
+  // Variable holding count
   const count = usersQuery.data?.count ?? 0;
+  // Variable holding loading
   const loading = usersQuery.isFetching;
+  // Variable holding loadError
   const loadError =
     usersQuery.error instanceof Error ? usersQuery.error.message : null;
 
@@ -99,6 +110,7 @@ export default function HrUsersPage() {
     UserBusinessAssignment[]
   >([]);
 
+  // Variable holding columns
   const columns = useMemo<ColumnDef<HrUserRow>[]>(
     () => [
       {
@@ -132,9 +144,11 @@ export default function HrUsersPage() {
         id: "assignments",
         header: t("hrUsers.columnAssignments"),
         cell: ({ row }) => {
+          // Variable holding assignments
           const assignments = Array.isArray(row.original.assignments_preview)
             ? row.original.assignments_preview
             : [];
+          // Variable holding preview
           const preview = splitAssignmentsForTablePreview(assignments, 2);
           return (
             <div
@@ -220,6 +234,7 @@ export default function HrUsersPage() {
     [i18n.language, t],
   );
 
+  // Variable holding excelMapping
   const excelMapping = useMemo(
     () => ({
       phone_number: [
@@ -236,6 +251,7 @@ export default function HrUsersPage() {
     [],
   );
 
+  // Variable holding excelSchema
   const excelSchema = useMemo(
     () =>
       z.object({
@@ -298,6 +314,7 @@ export default function HrUsersPage() {
         onSubmitValidRows={async (validRows) => {
           // Minimal: create users one-by-one (until backend provides bulk endpoint).
           for (const row of validRows) {
+            // Variable holding payload
             const payload = row as unknown as {
               phone_number: string;
               first_name: string;

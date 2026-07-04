@@ -22,6 +22,7 @@ export type SelectProps = Omit<React.ComponentProps<"select">, "name" | "childre
   placeholder?: string;
 };
 
+// Function to manage Select
 export function Select({
   name,
   id,
@@ -34,10 +35,14 @@ export function Select({
   placeholder,
   ...props
 }: SelectProps) {
+  // Variable holding selectId
   const selectId = typeof id === "string" && id.trim() ? id.trim() : `select-${name}`;
 
+  // Variable holding helpId
   const helpId = `text-${name}InputHelper`;
+  // Variable holding errorId
   const errorId = `text-${name}InputError`;
+  // Variable holding describedBy
   const describedBy = [helpText != null ? helpId : null, error != null ? errorId : null]
     .filter(Boolean)
     .join(" ");

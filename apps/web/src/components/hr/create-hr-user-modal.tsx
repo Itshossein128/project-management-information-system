@@ -12,6 +12,7 @@ export interface CreateHrUserModalProps {
   submitError: string | null;
 }
 
+// Function to manage CreateHrUserModal
 export function CreateHrUserModal({
   open,
   onOpenChange,
@@ -27,6 +28,7 @@ export function CreateHrUserModal({
   const [password, setPassword] = useState("");
   const [password_confirm, setPasswordConfirm] = useState("");
 
+  // Variable holding canSubmit
   const canSubmit = useMemo(() => {
     return (
       phone_number.trim().length > 0 &&

@@ -8,9 +8,11 @@ import type { NavigationItem } from "@/types/navigation";
 /** Matches `/businesses/:numericId` and any sub-path (excludes `create`, non-numeric ids). */
 const BUSINESS_WITH_NUMERIC_ID = /^\/businesses\/(\d+)(?:\/|$)/;
 
+// Function to manage useNavigation
 export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
   const { pathname } = useLocation();
 
+  // Variable holding filtered
   const filtered = useMemo(
     () =>
       mainSidebarNavigation.filter((item) => {
@@ -22,6 +24,7 @@ export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
     [roles],
   );
 
+  // Variable holding businessId
   const businessId = pathname.match(BUSINESS_WITH_NUMERIC_ID)?.[1];
 
   return useMemo(() => {

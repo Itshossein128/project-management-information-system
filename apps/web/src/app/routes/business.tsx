@@ -59,21 +59,26 @@ export interface BusinessMembershipRow {
 export default function BusinessPage() {
   const { t } = useTranslation();
   const { businessId } = useParams();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [tables, setTables] = useState<TableItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // Variable holding businessIdNum
   const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
+  // Variable holding assignmentsGrid
   const assignmentsGrid = useGridState({
     initialPageIndex: 0,
     initialPageSize: 20,
   });
+  // Variable holding ordering
   const ordering = assignmentsGrid.query.sorting[0]
     ? `${assignmentsGrid.query.sorting[0].desc ? "-" : ""}${assignmentsGrid.query.sorting[0].id}`
     : undefined;
 
+  // Variable holding assignmentsQuery
   const assignmentsQuery = useAssignmentsForBusinessQuery(
     businessId ?? "",
     {
@@ -86,9 +91,13 @@ export default function BusinessPage() {
     },
     isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
   );
+  // Variable holding assignments
   const assignments = assignmentsQuery.data?.results ?? [];
+  // Variable holding assignmentsCount
   const assignmentsCount = assignmentsQuery.data?.count ?? 0;
+  // Variable holding assignmentsLoading
   const assignmentsLoading = assignmentsQuery.isFetching;
+  // Variable holding assignmentsError
   const assignmentsError =
     assignmentsQuery.error instanceof Error
       ? assignmentsQuery.error.message
@@ -106,6 +115,7 @@ export default function BusinessPage() {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId) return;
+    // Variable holding id
     const id = Number(businessId);
     if (Number.isNaN(id)) {
       setError("Invalid business");

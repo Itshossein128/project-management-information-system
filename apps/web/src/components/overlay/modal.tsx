@@ -12,6 +12,7 @@ export interface ModalProps {
   className?: string;
 }
 
+// Function to manage Modal
 export function Modal({
   open,
   onOpenChange,
@@ -22,6 +23,7 @@ export function Modal({
 }: ModalProps) {
   useEffect(() => {
     if (!open) return;
+    // Function to manage onKeyDown
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onOpenChange(false);
     };

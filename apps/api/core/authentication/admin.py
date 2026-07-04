@@ -10,6 +10,7 @@ User = get_user_model()
 
 
 @admin.register(User)
+# Class representing UserAdmin
 class UserAdmin(BaseUserAdmin):
     list_display = ('phone_number', 'first_name', 'last_name', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active', 'groups')

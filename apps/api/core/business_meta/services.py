@@ -6,6 +6,7 @@ from django.db import transaction
 from .models import Business, BusinessJobPosition, TableDefinition, FieldDefinition, FieldType
 
 
+# Global variable TEMPLATES
 TEMPLATES = {
     'warehouse': {
         'name': 'Warehouse',
@@ -34,6 +35,7 @@ TEMPLATES = {
 }
 
 
+# Function to handle get available templates
 def get_available_templates():
     """Return list of template identifiers and labels."""
     return [
@@ -43,6 +45,7 @@ def get_available_templates():
 
 
 @transaction.atomic
+# Function to handle create business from template
 def create_business_from_template(*, name: str, slug: str, template_id: str) -> Business:
     """
     Create a Business and its TableDefinitions and FieldDefinitions from a template.
@@ -98,6 +101,7 @@ def create_business_from_template(*, name: str, slug: str, template_id: str) -> 
     return business
 
 
+# Function to handle validate row data
 def validate_row_data(field_defs, data):
     """
     Validate payload against field definitions. Return (cleaned_data, errors).

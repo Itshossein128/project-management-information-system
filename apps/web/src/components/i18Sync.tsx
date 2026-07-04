@@ -6,6 +6,7 @@ import { useLanguageStore } from "src/app/store/languageStore";
 // این یک کامپوننت "نامرئی" است که فقط منطق همگام‌سازی را اجرا می‌کند
 const I18nSync = () => {
   const { i18n } = useTranslation();
+  // Variable holding language
   const language = useLanguageStore((state) => state.language);
 
   useEffect(() => {

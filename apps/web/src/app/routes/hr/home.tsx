@@ -12,9 +12,12 @@ import { Link, useNavigate } from "react-router";
  */
 export default function HrHubPage() {
   const { t } = useTranslation();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
+  // Variable holding canHr
   const canHr = hasRole(ROLES.HR) || hasRole(ROLES.ADMIN);
+  // Variable holding canBusinessSetup
   const canBusinessSetup = hasRole(ROLES.BUSINESS_SETUP);
 
   useEffect(() => {

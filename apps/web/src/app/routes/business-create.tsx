@@ -19,14 +19,17 @@ import { ROLES } from "@/config/roles";
 
 export default function BusinessCreate() {
   const { hasRole, isLoading } = useAuth();
+  // Variable holding navigate
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Variable holding handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    // Variable holding payload
     const payload = {
       name: name.trim(),
       slug: slug.trim().toLowerCase().replace(/\s+/g, "_"),
@@ -44,6 +47,7 @@ export default function BusinessCreate() {
       });
       navigate(`/${PATHS.BUSINESS}`, { replace: true });
     } catch (err: unknown) {
+      // Variable holding msg
       const msg = err instanceof Error ? err.message : "Request failed";
       setFormError(typeof msg === "string" ? msg : "Request failed");
       if (
@@ -52,7 +56,9 @@ export default function BusinessCreate() {
         "errors" in err &&
         typeof (err as { errors: unknown }).errors === "object"
       ) {
+        // Function to manage errors
         const errors = (err as { errors: Record<string, string[]> }).errors;
+        // Variable holding first
         const first = Object.values(errors).flat()[0];
         if (first) setFormError(first);
       }

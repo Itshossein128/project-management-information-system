@@ -16,6 +16,7 @@ export interface SidebarItemProps {
   children?: NavigationChildItem[];
 }
 
+// Function to manage isNavActive
 function isNavActive(
   pathname: string,
   path: string,
@@ -25,14 +26,18 @@ function isNavActive(
     activeExact?: boolean;
   },
 ): boolean {
+  // Variable holding base
   const base = `/${path}`.replace(/\/+$/, "") || "/";
 
   if (options.activePathPrefix) {
+    // Variable holding prefix
     const prefix = `/${options.activePathPrefix}`;
+    // Variable holding prefixMatches
     const prefixMatches =
       pathname === prefix || pathname.startsWith(`${prefix}/`);
     if (!prefixMatches) return false;
     if (options.activePathExclude) {
+      // Variable holding re
       const re = new RegExp(options.activePathExclude);
       if (re.test(pathname)) return false;
     }
@@ -46,10 +51,12 @@ function isNavActive(
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
+// Function to manage childPathIsNavigable
 function childPathIsNavigable(path: string): boolean {
   return !path.includes(":");
 }
 
+// Function to manage SidebarItem
 export const SidebarItem = ({
   name,
   label,
@@ -60,12 +67,15 @@ export const SidebarItem = ({
   activeExact,
   children,
 }: SidebarItemProps) => {
+  // Variable holding location
   const location = useLocation();
   const Icon = ICONS[icon];
   const [expanded, setExpanded] = useState(false);
 
+  // Variable holding to
   const to = `/${path}`.replace(/\/+/g, "/");
 
+  // Variable holding active
   const active = useMemo(
     () =>
       isNavActive(location.pathname, path, {
@@ -76,10 +86,13 @@ export const SidebarItem = ({
     [location.pathname, path, activePathPrefix, activePathExclude, activeExact],
   );
 
+  // Variable holding hasChildren
   const hasChildren = Boolean(children?.length);
+  // Variable holding navigableChildren
   const navigableChildren =
     children?.filter((c) => childPathIsNavigable(c.path)) ?? [];
 
+  // Variable holding itemActiveClass
   const itemActiveClass =
     "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-sm)] ring-1 ring-sidebar-ring/30";
 

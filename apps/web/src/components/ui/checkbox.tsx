@@ -7,7 +7,9 @@ export interface CheckboxProps
   indeterminate?: boolean;
 }
 
+// Function to manage Checkbox
 function Checkbox({ className, indeterminate, ...props }: CheckboxProps) {
+  // Variable holding ref
   const ref = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {

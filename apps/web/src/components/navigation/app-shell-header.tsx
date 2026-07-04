@@ -17,15 +17,19 @@ export interface AppShellHeaderProps {
  */
 export function AppShellHeader({ className }: AppShellHeaderProps) {
   const { user, logout } = useAuth();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { t } = useTranslation();
+  // Variable holding openMobileNav
   const openMobileNav = useShellStore((s) => s.openMobileNav);
+  // Variable holding displayName
   const displayName =
     user?.full_name ||
     `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() ||
     user?.phone_number ||
     "User";
 
+  // Function to manage handleLogout
   function handleLogout() {
     logout();
     navigate("/login", { replace: true });

@@ -6,11 +6,13 @@ from rest_framework import permissions
 from authentication.permissions import IsHrOrAdmin
 
 
+# Class representing IsHrOrAdminOrReadOnly
 class IsHrOrAdminOrReadOnly(permissions.BasePermission):
     """
     Read (safe methods) for authenticated users who may view business data.
     Write for HR, admin, staff, or superuser (IsHrOrAdmin).
     """
+    # Function to handle has permission
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
@@ -19,11 +21,13 @@ class IsHrOrAdminOrReadOnly(permissions.BasePermission):
         return IsHrOrAdmin().has_permission(request, view)
 
 
+# Class representing CanViewBusinessAssignments
 class CanViewBusinessAssignments(permissions.BasePermission):
     """
     List/retrieve assignments for a business: HR/admin/staff/superuser,
     or any user with an assignment in that business, or `visitor` (read-only in combination with safe method).
     """
+    # Function to handle has permission
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
@@ -43,6 +47,7 @@ class CanViewBusinessAssignments(permissions.BasePermission):
             user_id=u.id,
         ).exists()
 
+    # Function to handle has object permission
     def has_object_permission(self, request, view, obj) -> bool:
         u = request.user
         if u.is_superuser or u.is_staff or u.groups.filter(
@@ -56,10 +61,12 @@ class CanViewBusinessAssignments(permissions.BasePermission):
         ).exists()
 
 
+# Class representing IsVisitorReadOnly
 class IsVisitorReadOnly(permissions.BasePermission):
     """
     Users in the `visitor` group may not use unsafe HTTP methods.
     """
+    # Function to handle has permission
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
@@ -73,6 +80,7 @@ class IsVisitorReadOnly(permissions.BasePermission):
         return True
 
 
+# Function to handle assignment view permissions
 def assignment_view_permissions():
     """
     For ViewSet: safe methods need CanViewBusinessAssignments + IsVisitorReadOnly; unsafe need IsHrOrAdmin + IsVisitorReadOnly.

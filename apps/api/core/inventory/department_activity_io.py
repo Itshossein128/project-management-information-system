@@ -19,6 +19,7 @@ from business_meta.models import Business
 
 from .models import Department, DepartmentActivityRecord
 
+# Global variable EXPORT_HEADERS
 EXPORT_HEADERS = [
     'date',
     'location',
@@ -43,6 +44,7 @@ HEADER_ALIASES: dict[str, list[str]] = {
 }
 
 
+# Function to handle export activities to xlsx
 def export_activities_to_xlsx(records: list[DepartmentActivityRecord]) -> bytes:
     wb = Workbook(write_only=True)
     ws = wb.create_sheet(title='Activity log')
@@ -63,6 +65,7 @@ def export_activities_to_xlsx(records: list[DepartmentActivityRecord]) -> bytes:
     return buf.getvalue()
 
 
+# Function to handle  map header row
 def _map_header_row(header_row: tuple[Any, ...]) -> dict[int, str]:
     alias_to_field: dict[str, str] = {}
     for field, aliases in HEADER_ALIASES.items():
@@ -80,6 +83,7 @@ def _map_header_row(header_row: tuple[Any, ...]) -> dict[int, str]:
     return col_to_field
 
 
+# Function to handle  parse date value
 def _parse_date_value(raw: Any) -> date | None:
     if raw is None:
         return None
@@ -99,6 +103,7 @@ def _parse_date_value(raw: Any) -> date | None:
     return None
 
 
+# Function to handle import activities from xlsx
 def import_activities_from_xlsx(
     business: Business,
     department: str,
@@ -181,6 +186,7 @@ def import_activities_from_xlsx(
     return created, errors
 
 
+# Function to handle generate activity report pdf
 def generate_activity_report_pdf(
     *,
     business: Business,
@@ -262,6 +268,7 @@ def generate_activity_report_pdf(
     return buf.getvalue()
 
 
+# Function to handle department display label
 def department_display_label(department: str) -> str:
     for value, label in Department.choices:
         if value == department:

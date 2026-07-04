@@ -23,6 +23,7 @@ export interface GridToolbarProps {
   rightSlot?: React.ReactNode;
 }
 
+// Function to manage GridToolbar
 export function GridToolbar({
   name,
   searchValue,

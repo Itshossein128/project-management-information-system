@@ -4,6 +4,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
 
     dependencies = [

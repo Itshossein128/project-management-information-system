@@ -14,6 +14,7 @@ export type CheckboxProps = Omit<React.ComponentProps<"input">, "type" | "name">
   fieldClassName?: string;
 };
 
+// Function to manage Checkbox
 export function Checkbox({
   name,
   id,
@@ -24,11 +25,16 @@ export function Checkbox({
   className,
   ...props
 }: CheckboxProps) {
+  // Variable holding inputId
   const inputId = typeof id === "string" && id.trim() ? id.trim() : `checkbox-${name}`;
 
+  // Variable holding labelId
   const labelId = `text-${name}CheckboxLabel`;
+  // Variable holding helpId
   const helpId = `text-${name}InputHelper`;
+  // Variable holding errorId
   const errorId = `text-${name}InputError`;
+  // Variable holding describedBy
   const describedBy = [helpText != null ? helpId : null, error != null ? errorId : null]
     .filter(Boolean)
     .join(" ");

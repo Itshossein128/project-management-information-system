@@ -13,6 +13,7 @@ function PasswordInput({
   ...props
 }: React.ComponentProps<"input">) {
   const [visible, setVisible] = React.useState(false);
+  // Variable holding inputId
   const inputId = typeof props.id === "string" && props.id.trim() ? props.id.trim() : "password";
 
   return (

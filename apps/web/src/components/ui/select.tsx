@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "src/app/lib/utils";
 
+// Function to manage Select
 function Select({ className, ...props }: React.ComponentProps<"select">) {
   return (
     <select

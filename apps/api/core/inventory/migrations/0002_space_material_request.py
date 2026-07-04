@@ -4,6 +4,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
     dependencies = [
         ('business_meta', '0005_job_positions_and_user_assignment'),

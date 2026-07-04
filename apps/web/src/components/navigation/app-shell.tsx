@@ -7,11 +7,16 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router";
 
+// Function to manage AppShell
 export function AppShell() {
   const { t } = useTranslation();
+  // Variable holding location
   const location = useLocation();
+  // Variable holding mobileNavOpen
   const mobileNavOpen = useShellStore((s) => s.mobileNavOpen);
+  // Variable holding closeMobileNav
   const closeMobileNav = useShellStore((s) => s.closeMobileNav);
+  // Variable holding rtl
   const rtl = isRTL();
 
   useEffect(() => {
@@ -20,6 +25,7 @@ export function AppShell() {
 
   useEffect(() => {
     if (!mobileNavOpen) return;
+    // Function to manage onKeyDown
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeMobileNav();
     };

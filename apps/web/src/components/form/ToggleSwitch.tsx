@@ -10,6 +10,7 @@ export interface ToggleSwitchProps
   containerClassName?: string;
 }
 
+// Function to manage ToggleSwitch
 export function ToggleSwitch({
   name,
   label,
@@ -18,6 +19,7 @@ export function ToggleSwitch({
   className,
   ...props
 }: ToggleSwitchProps) {
+  // Variable holding inputId
   const inputId = typeof id === "string" && id.trim() ? id.trim() : `toggle-${name}`;
   return (
     <div

@@ -18,6 +18,7 @@ import { apiFetch } from "src/app/lib/api-client";
 export default function ResetPassword() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+  // Variable holding token
   const token = searchParams.get("token") ?? "";
 
   const [password, setPassword] = useState("");
@@ -39,6 +40,7 @@ export default function ResetPassword() {
     }
     setSubmitting(true);
     try {
+      // Variable holding res
       const res = await apiFetch("/auth/reset-password/", {
         method: "POST",
         body: JSON.stringify({
@@ -48,6 +50,7 @@ export default function ResetPassword() {
         }),
       });
       if (!res.ok) {
+        // Function to manage data
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error ?? res.statusText ?? t("resetPassword.failed"));
         return;

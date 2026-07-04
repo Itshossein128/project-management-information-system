@@ -9,9 +9,11 @@ export interface SidebarProps {
   className?: string;
 }
 
+// Function to manage Sidebar
 export const Sidebar = ({ className }: SidebarProps) => {
   const { user } = useAuth();
   const { t } = useTranslation();
+  // Variable holding items
   const items = useNavigation(user?.roles).map((item) => ({
     ...item,
     label: item.labelI18nKey

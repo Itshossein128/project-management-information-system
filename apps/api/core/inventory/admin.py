@@ -3,12 +3,14 @@ from .models import Category, Item, SpaceMaterialRequest, DepartmentActivityReco
 
 
 @admin.register(Category)
+# Class representing CategoryAdmin
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name']
     search_fields = ['name']
 
 
 @admin.register(Item)
+# Class representing ItemAdmin
 class ItemAdmin(admin.ModelAdmin):
     list_display = ['name', 'quantity', 'category']
     list_filter = ['category']
@@ -17,6 +19,7 @@ class ItemAdmin(admin.ModelAdmin):
 
 
 @admin.register(SpaceMaterialRequest)
+# Class representing SpaceMaterialRequestAdmin
 class SpaceMaterialRequestAdmin(admin.ModelAdmin):
     list_display = [
         'business',
@@ -35,6 +38,7 @@ class SpaceMaterialRequestAdmin(admin.ModelAdmin):
 
 
 @admin.register(DepartmentActivityRecord)
+# Class representing DepartmentActivityRecordAdmin
 class DepartmentActivityRecordAdmin(admin.ModelAdmin):
     list_display = [
         'business',

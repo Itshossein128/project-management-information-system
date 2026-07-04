@@ -2,21 +2,25 @@ import type { UserBusinessAssignment } from "@/app/lib/api-types";
 import { Modal } from "@/components/overlay/modal";
 import { useTranslation } from "react-i18next";
 
+// Function to manage getUserName
 function getUserName(a: UserBusinessAssignment): string {
   if (typeof a.user === "object" && a.user) return a.user.full_name;
   return "—";
 }
 
+// Function to manage getBusinessName
 function getBusinessName(a: UserBusinessAssignment): string {
   if (typeof a.business === "object" && a.business) return a.business.name;
   return "—";
 }
 
+// Function to manage getJobLabel
 function getJobLabel(a: UserBusinessAssignment): string {
   if (typeof a.job_position === "object" && a.job_position) return a.job_position.label;
   return "—";
 }
 
+// Function to manage AssignmentDetailModal
 export function AssignmentDetailModal(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,6 +28,7 @@ export function AssignmentDetailModal(props: {
 }) {
   const { t } = useTranslation();
 
+  // Variable holding a
   const a = props.assignment;
   return (
     <Modal

@@ -18,6 +18,7 @@ import { apiFetch } from "~/lib/api-client";
 
 export default function Register() {
   const { t } = useTranslation();
+  // Variable holding navigate
   const navigate = useNavigate();
   const [form, setForm] = useState({
     phone_number: "",
@@ -36,6 +37,7 @@ export default function Register() {
     setFieldErrors({});
     setSubmitting(true);
     try {
+      // Variable holding res
       const res = await apiFetch("/auth/register/", {
         method: "POST",
         body: JSON.stringify({
@@ -47,6 +49,7 @@ export default function Register() {
         }),
       });
       if (!res.ok) {
+        // Function to manage data
         const data = (await res.json().catch(() => ({}))) as Record<
           string,
           string[] | string

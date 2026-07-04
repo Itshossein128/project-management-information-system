@@ -28,18 +28,24 @@ export interface DepartmentPageProps {
   slug: string;
 }
 
+// Function to manage DepartmentPage
 export function DepartmentPage({ slug }: DepartmentPageProps) {
   const { t } = useTranslation();
   const { businessId } = useParams();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Variable holding businessIdNum
   const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
+  // Variable holding dept
   const dept = findDepartmentBySlug(slug);
+  // Variable holding department
   const department = slug as DepartmentSlug;
 
+  // Variable holding grid
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
 
   const [dateRange, setDateRange] = useState<DateRangeValue>({ from: "", to: "" });
@@ -48,10 +54,12 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const [contractorFilter, setContractorFilter] = useState("");
   const [unitFilter, setUnitFilter] = useState("");
 
+  // Variable holding ordering
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
     : undefined;
 
+  // Variable holding activityQuery
   const activityQuery = useDepartmentActivityRecordsQuery(
     businessId ?? "",
     {
@@ -70,8 +78,11 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
   );
 
+  // Variable holding rows
   const rows = activityQuery.data?.results ?? [];
+  // Variable holding count
   const count = activityQuery.data?.count ?? 0;
+  // Variable holding listError
   const listError =
     activityQuery.error instanceof Error ? activityQuery.error.message : null;
 
@@ -80,10 +91,14 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const [importing, setImporting] = useState(false);
   const [reporting, setReporting] = useState<"daily" | "weekly" | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  // Variable holding importInputRef
   const importInputRef = useRef<HTMLInputElement>(null);
+  // Variable holding queryClient
   const queryClient = useQueryClient();
 
+  // Variable holding activityExportParams
   const activityExportParams = useMemo(() => {
+    // Variable holding sp
     const sp = new URLSearchParams();
     sp.set("department", department);
     if (dateRange.from) sp.set("date_from", dateRange.from);
@@ -107,8 +122,11 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     ordering,
   ]);
 
+  // Function to manage downloadBlob
   const downloadBlob = (blob: Blob, filename: string) => {
+    // Variable holding url
     const url = URL.createObjectURL(blob);
+    // Variable holding anchor
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = filename;
@@ -116,11 +134,13 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     URL.revokeObjectURL(url);
   };
 
+  // Variable holding handleExportExcel
   const handleExportExcel = async () => {
     if (!businessId) return;
     setExporting(true);
     setActionMessage(null);
     try {
+      // Variable holding blob
       const blob = await apiBlob(
         `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/export/?${activityExportParams.toString()}`,
       );
@@ -134,7 +154,9 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     }
   };
 
+  // Variable holding handleImportExcel
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Variable holding file
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !businessId) return;
@@ -145,6 +167,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     setImporting(true);
     setActionMessage(null);
     try {
+      // Variable holding result
       const result = await apiUploadFile<{
         created: number;
         errors: { row: number; errors: Record<string, string> }[];
@@ -183,11 +206,13 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     }
   };
 
+  // Variable holding handleDownloadReport
   const handleDownloadReport = async (period: "daily" | "weekly") => {
     if (!businessId) return;
     setReporting(period);
     setActionMessage(null);
     try {
+      // Variable holding blob
       const blob = await apiBlob(
         `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/${period}/?department=${department}`,
       );
@@ -225,10 +250,12 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
 
   if (isLoading || !isAuthenticated) return null;
 
+  // Variable holding deptTitle
   const deptTitle = dept?.labelI18nKey
     ? t(dept.labelI18nKey)
     : slug;
 
+  // Variable holding columns
   const columns = useMemo<ColumnDef<DepartmentActivityRecord>[]>(() => {
     return [
       {

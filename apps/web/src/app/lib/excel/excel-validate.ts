@@ -23,6 +23,7 @@ export interface ExcelCoerceOptions {
   trimStrings?: boolean;
 }
 
+// Function to manage pickFirstHeaderValue
 function pickFirstHeaderValue(
   raw: Record<string, unknown>,
   headers: string[],
@@ -43,6 +44,7 @@ export function mapExcelRow<T extends Record<string, unknown>>(
 ): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const key of Object.keys(mapping)) {
+    // Variable holding value
     const value = pickFirstHeaderValue(raw, mapping[key as keyof T & string] ?? []);
     if (options.trimStrings !== false && typeof value === "string") out[key] = value.trim();
     else out[key] = value;
@@ -60,14 +62,18 @@ export function validateExcelRows<T extends Record<string, unknown>>(args: {
   /** Excel row number offset. Default: 2 (row1 header, row2 first data). */
   firstDataRowNumber?: number;
 }): ExcelValidationResult<T> {
+  // Variable holding firstDataRowNumber
   const firstDataRowNumber = args.firstDataRowNumber ?? 2;
 
   const validRows: T[] = [];
   const invalidRows: ExcelValidationResult<T>["invalidRows"] = [];
 
   args.rows.forEach((raw, idx) => {
+    // Variable holding excelRow
     const excelRow = firstDataRowNumber + idx;
+    // Variable holding mapped
     const mapped = mapExcelRow<T>(raw, args.mapping);
+    // Variable holding parsed
     const parsed = args.schema.safeParse(mapped);
 
     if (parsed.success) {

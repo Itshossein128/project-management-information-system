@@ -31,6 +31,7 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'true').lower() in ('1', 'true', 'yes')
 
+# Global variable ALLOWED_HOSTS
 ALLOWED_HOSTS = [
     h.strip()
     for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
@@ -40,6 +41,7 @@ ALLOWED_HOSTS = [
 
 # Application definition
 
+# Global variable INSTALLED_APPS
 INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.admin',
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar'
 ]
 
+# Global variable MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -68,8 +71,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Global variable ROOT_URLCONF
 ROOT_URLCONF = 'config.urls'
 
+# Global variable TEMPLATES
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -86,12 +91,14 @@ TEMPLATES = [
     },
 ]
 
+# Global variable WSGI_APPLICATION
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# Global variable DATABASES
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ['DATABASE_URL'],
@@ -104,6 +111,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
+# Global variable AUTH_PASSWORD_VALIDATORS
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -123,23 +131,29 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
+# Global variable LANGUAGE_CODE
 LANGUAGE_CODE = 'en-us'
 
+# Global variable TIME_ZONE
 TIME_ZONE = 'UTC'
 
+# Global variable USE_I18N
 USE_I18N = True
 
+# Global variable USE_TZ
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# Global variable STATIC_URL
 STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
+# Global variable DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User model (phone_number as unique identifier, no username/email)
@@ -181,6 +195,7 @@ SPECTACULAR_SETTINGS = {
 # JWT Settings
 from datetime import timedelta
 
+# Global variable SIMPLE_JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -209,7 +224,9 @@ CORS_ALLOWED_ORIGINS = [
 
 # Email configuration (for password reset)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Console backend for development
+# Global variable DEFAULT_FROM_EMAIL
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@inventory.com')
+# Global variable FRONTEND_URL
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # Dynamic table row data is stored in the Django database (see DynamicTableRow model).

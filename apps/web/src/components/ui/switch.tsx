@@ -5,6 +5,7 @@ import { cn } from "src/app/lib/utils";
 export interface SwitchProps
   extends Omit<React.ComponentProps<"input">, "type"> {}
 
+// Function to manage Switch
 function Switch({ className, ...props }: SwitchProps) {
   return (
     <input
@@ -22,6 +23,7 @@ function Switch({ className, ...props }: SwitchProps) {
 
 /**
  * Visual wrapper for `Switch`.\n+ * Use:\n+ *  <Switch id=\"toggle-x\" ... />\n+ *  <SwitchTrack htmlFor=\"toggle-x\" />\n+ */
+// Function to manage SwitchTrack
 function SwitchTrack({
   className,
   ...props

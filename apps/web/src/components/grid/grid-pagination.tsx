@@ -13,6 +13,7 @@ export interface GridPaginationProps {
   className?: string;
 }
 
+// Function to manage GridPagination
 export function GridPagination({
   name,
   pageIndex,
@@ -23,13 +24,16 @@ export function GridPagination({
   className,
 }: GridPaginationProps) {
   const { t } = useTranslation();
+  // Variable holding totalPages
   const totalPages = getPageCount(totalCount, pageSize);
 
   if (!shouldShowPagination(totalCount, pageSize)) {
     return null;
   }
 
+  // Variable holding canPrev
   const canPrev = pageIndex > 0;
+  // Variable holding canNext
   const canNext = pageIndex + 1 < totalPages;
 
   return (

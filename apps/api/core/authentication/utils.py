@@ -8,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
 
 
+# Function to handle get tokens for user
 def get_tokens_for_user(user) -> dict:
     """
     Build JWT access and refresh tokens with custom claims (groups, is_staff).
@@ -26,6 +27,7 @@ def get_tokens_for_user(user) -> dict:
     }
 
 
+# Function to handle authenticate user
 def authenticate_user(phone_number: str, password: str) -> Optional[User]:
     """
     Authenticate user by phone number.

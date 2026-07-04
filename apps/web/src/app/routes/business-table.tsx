@@ -39,6 +39,7 @@ interface RowResponse {
 
 export default function BusinessTablePage() {
   const { businessId, tableSlug } = useParams();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
   const [schema, setSchema] = useState<TableSchema | null>(null);
@@ -52,9 +53,12 @@ export default function BusinessTablePage() {
   const [newRow, setNewRow] = useState<Record<string, string>>({});
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  // Variable holding importInputRef
   const importInputRef = useRef<HTMLInputElement>(null);
+  // Variable holding pageSize
   const pageSize = 20;
   const REQUEST_TIMEOUT_MS = 20_000;
+  // Variable holding canEdit
   const canEdit =
     hasRole(ROLES.MANAGER) || hasRole(ROLES.BUSINESS_SETUP);
 
@@ -66,7 +70,9 @@ export default function BusinessTablePage() {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId || !tableSlug) return;
+    // Variable holding controller
     const controller = new AbortController();
+    // Variable holding timeoutId
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     setSchemaLoading(true);
     setError(null);
@@ -82,6 +88,7 @@ export default function BusinessTablePage() {
       })
       .catch((e) => {
         if (controller.signal.aborted) return;
+        // Variable holding msg
         const msg = e instanceof Error ? e.message : "Failed to load schema";
         setError(
           /abort|timeout/i.test(msg)
@@ -101,7 +108,9 @@ export default function BusinessTablePage() {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId || !tableSlug) return;
+    // Variable holding controller
     const controller = new AbortController();
+    // Variable holding timeoutId
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     setRowsLoading(true);
     setError(null);
@@ -118,6 +127,7 @@ export default function BusinessTablePage() {
       })
       .catch((e) => {
         if (controller.signal.aborted) return;
+        // Variable holding msg
         const msg = e instanceof Error ? e.message : "Failed to load rows";
         setError(
           /abort|timeout/i.test(msg)
@@ -135,11 +145,15 @@ export default function BusinessTablePage() {
     };
   }, [isAuthenticated, businessId, tableSlug, page, pageSize]);
 
+  // Variable holding handleDelete
   const handleDelete = async (rowId: string) => {
     if (!businessId || !tableSlug || !confirm("Delete this row?")) return;
+    // Variable holding controller
     const controller = new AbortController();
+    // Variable holding timeoutId
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
+      // Variable holding res
       const res = await apiFetch(
         `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/${rowId}/`,
         { method: "DELETE", signal: controller.signal },
@@ -149,6 +163,7 @@ export default function BusinessTablePage() {
         setTotal((t) => Math.max(0, t - 1));
       }
     } catch (e) {
+      // Variable holding msg
       const msg = e instanceof Error ? e.message : "Delete failed";
       if (!/abort|timeout/i.test(msg)) setError(msg);
     } finally {
@@ -156,11 +171,13 @@ export default function BusinessTablePage() {
     }
   };
 
+  // Variable holding handleAddSubmit
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!businessId || !tableSlug || !schema) return;
     const payload: Record<string, unknown> = {};
     for (const f of schema.fields) {
+      // Variable holding v
       const v = newRow[f.slug];
       if (v === undefined || v === "") {
         if (f.required) return;
@@ -171,9 +188,12 @@ export default function BusinessTablePage() {
         payload[f.slug] = v === "true" || v === "1";
       else payload[f.slug] = v;
     }
+    // Variable holding controller
     const controller = new AbortController();
+    // Variable holding timeoutId
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
+      // Variable holding created
       const created = await apiJson<Record<string, unknown>>(
         `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/`,
         {
@@ -187,6 +207,7 @@ export default function BusinessTablePage() {
       setNewRow({});
       setShowAddForm(false);
     } catch (err) {
+      // Variable holding msg
       const msg = err instanceof Error ? err.message : "Failed to add row";
       setError(
         /abort|timeout/i.test(msg) ? "Request timed out. Try again." : msg,
@@ -196,15 +217,19 @@ export default function BusinessTablePage() {
     }
   };
 
+  // Variable holding handleExportExcel
   const handleExportExcel = async () => {
     if (!businessId || !tableSlug) return;
     setExporting(true);
     setError(null);
     try {
+      // Variable holding blob
       const blob = await apiBlob(
         `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/export/`,
       );
+      // Variable holding url
       const url = URL.createObjectURL(blob);
+      // Variable holding a
       const a = document.createElement("a");
       a.href = url;
       a.download = `${tableSlug}_export.xlsx`;
@@ -217,7 +242,9 @@ export default function BusinessTablePage() {
     }
   };
 
+  // Variable holding handleImportExcel
   const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Variable holding file
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !businessId || !tableSlug) return;
@@ -228,6 +255,7 @@ export default function BusinessTablePage() {
     setImporting(true);
     setError(null);
     try {
+      // Variable holding result
       const result = await apiUploadFile<{
         created: number;
         errors: { row: number; errors: Record<string, string> }[];
@@ -235,6 +263,7 @@ export default function BusinessTablePage() {
         `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/import/`,
         file,
       );
+      // Variable holding msg
       const msg =
         result.errors.length > 0
           ? `Created ${result.created} row(s). Errors on ${result.errors.length} row(s): ${result.errors.map((x) => `row ${x.row}`).join(", ")}`
@@ -242,6 +271,7 @@ export default function BusinessTablePage() {
       setError(null);
       if (result.created > 0) {
         setPage(1);
+        // Variable holding r
         const r = await apiJson<RowResponse>(
           `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/?page=1&page_size=${pageSize}`,
         );

@@ -27,6 +27,7 @@ interface BusinessesListResponse {
   results: BusinessItem[];
 }
 
+// Function to manage meta
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Home | Building Management" },
@@ -37,6 +38,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
   const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
+  // Variable holding navigate
   const navigate = useNavigate();
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
   const [businessesError, setBusinessesError] = useState<string | null>(null);

@@ -32,17 +32,22 @@ interface AuthContextValue {
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
+// Function to manage normalizeRoles
 function normalizeRoles(roles: string[] | undefined): ROLES[] {
   if (!roles) return [];
 
+  // Variable holding validRoles
   const validRoles = Object.values(ROLES);
 
   return roles.filter((r): r is ROLES => validRoles.includes(r as ROLES));
 }
 
+// Function to manage AuthProvider
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 const [user, setUser] = React.useState<AuthUser | null>(() => {
+  // Variable holding token
   const token = getStoredAccessToken();
+  // Variable holding stored
   const stored = getStoredUser();
 
   if (token && stored) {
@@ -55,14 +60,17 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
 
   const [isLoading, setIsLoading] = React.useState(false);
 
+  // Variable holding login
   const login = React.useCallback(async (creds: LoginCredentials) => {
     setIsLoading(true);
 
+    // Variable holding data
     const data = await apiJson<AuthApiResponse>("/auth/login/", {
       method: "POST",
       body: JSON.stringify(creds),
     });
 
+    // Variable holding raw
     const raw = data.user as AuthUser & { groups?: string[] };
 
     const userWithRoles: AuthUser = {
@@ -79,11 +87,13 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
     setIsLoading(false);
   }, []);
 
+  // Variable holding logout
   const logout = React.useCallback(() => {
     clearStoredAuth();
     setUser(null);
   }, []);
 
+  // Variable holding hasRole
   const hasRole = React.useCallback(
     (role: ROLES) => (user?.roles ?? []).includes(role),
     [user?.roles],
@@ -102,7 +112,9 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// Function to manage useAuth
 export function useAuth(): AuthContextValue {
+  // Variable holding ctx
   const ctx = React.useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;

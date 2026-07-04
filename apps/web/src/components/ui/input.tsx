@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "src/app/lib/utils";
 
+// Function to manage Input
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input

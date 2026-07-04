@@ -32,12 +32,15 @@ const SlidingText = ({
 
   // Refs to get direct access to the DOM elements for measurement.
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Variable holding textRef
   const textRef = useRef<HTMLSpanElement | null>(null);
 
   // useLayoutEffect runs synchronously after all DOM mutations.
   // It's preferred over useEffect for DOM measurements to avoid visual flickering.
   useLayoutEffect(() => {
+    // Variable holding container
     const container = containerRef.current;
+    // Variable holding textElement
     const textElement = textRef.current;
 
     if (container && textElement) {

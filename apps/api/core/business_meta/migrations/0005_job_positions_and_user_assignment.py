@@ -4,6 +4,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+# Function to handle migrate memberships to job positions
 def migrate_memberships_to_job_positions(apps, schema_editor):
     Business = apps.get_model('business_meta', 'Business')
     BusinessJobPosition = apps.get_model('business_meta', 'BusinessJobPosition')
@@ -32,10 +33,12 @@ def migrate_memberships_to_job_positions(apps, schema_editor):
         m.save(update_fields=['job_position_id'])
 
 
+# Function to handle noop reverse
 def noop_reverse(apps, schema_editor):
     pass
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
 
     dependencies = [

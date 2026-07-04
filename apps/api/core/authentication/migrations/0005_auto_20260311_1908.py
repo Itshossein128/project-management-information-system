@@ -1,5 +1,6 @@
 from django.db import migrations
 
+# Function to handle apply roles automatically
 def apply_roles_automatically(apps, schema_editor):
     # این کد دقیقاً جایگزین کار دستی شماست
     Group = apps.get_model('auth', 'Group')
@@ -11,11 +12,13 @@ def apply_roles_automatically(apps, schema_editor):
     # حذف نقش اشتباه
     Group.objects.filter(name='root').delete()
 
+# Function to handle revert roles
 def revert_roles(apps, schema_editor):
     # کدی برای زمانی که بخواهید مایگریشن را برگردانید (Undo)
     Group = apps.get_model('auth', 'Group')
     Group.objects.filter(name__in=['hr', 'site_engineer']).delete()
 
+# Class representing Migration
 class Migration(migrations.Migration):
 
     dependencies = [

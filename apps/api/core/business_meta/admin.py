@@ -10,6 +10,7 @@ from .models import (
 
 
 @admin.register(BusinessJobPosition)
+# Class representing BusinessJobPositionAdmin
 class BusinessJobPositionAdmin(admin.ModelAdmin):
     list_display = ('business', 'slug', 'label', 'ordering', 'updated_at')
     list_filter = ('business',)
@@ -18,6 +19,7 @@ class BusinessJobPositionAdmin(admin.ModelAdmin):
 
 
 @admin.register(UserBusinessAssignment)
+# Class representing UserBusinessAssignmentAdmin
 class UserBusinessAssignmentAdmin(admin.ModelAdmin):
     list_display = ('business', 'user', 'job_position', 'status', 'wage', 'created_at')
     list_filter = ('status', 'business', 'job_position')
@@ -26,6 +28,7 @@ class UserBusinessAssignmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(Business)
+# Class representing BusinessAdmin
 class BusinessAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'created_at')
     search_fields = ('name', 'slug')
@@ -33,6 +36,7 @@ class BusinessAdmin(admin.ModelAdmin):
 
 
 @admin.register(TableDefinition)
+# Class representing TableDefinitionAdmin
 class TableDefinitionAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'business', 'ordering', 'created_at')
     list_filter = ('business',)
@@ -41,6 +45,7 @@ class TableDefinitionAdmin(admin.ModelAdmin):
 
 
 @admin.register(FieldDefinition)
+# Class representing FieldDefinitionAdmin
 class FieldDefinitionAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'table', 'field_type', 'required', 'ordering')
     list_filter = ('field_type', 'table__business')
@@ -49,6 +54,7 @@ class FieldDefinitionAdmin(admin.ModelAdmin):
 
 
 @admin.register(RelationDefinition)
+# Class representing RelationDefinitionAdmin
 class RelationDefinitionAdmin(admin.ModelAdmin):
     list_display = ('from_table', 'from_field', 'to_table', 'to_field', 'kind')
     list_filter = ('kind',)

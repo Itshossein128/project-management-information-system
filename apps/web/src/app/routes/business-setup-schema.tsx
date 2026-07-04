@@ -82,9 +82,12 @@ export default function BusinessSetupSchema() {
   const [editingFieldId, setEditingFieldId] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Variable holding id
   const id = Number(businessId);
+  // Variable holding validId
   const validId = !Number.isNaN(id);
 
+  // Function to manage loadBusiness
   const loadBusiness = () => {
     if (!validId) return;
     apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${id}/`)
@@ -94,6 +97,7 @@ export default function BusinessSetupSchema() {
       );
   };
 
+  // Function to manage loadTables
   const loadTables = () => {
     if (!validId) return;
     apiJson<PaginatedResults<TableItem>>(`/${PATHS.BUSINESS}/${id}/tables/`)
@@ -103,6 +107,7 @@ export default function BusinessSetupSchema() {
       );
   };
 
+  // Function to manage loadFields
   const loadFields = (tableId: number) => {
     if (!validId) return;
     apiJson<PaginatedResults<FieldItem>>(
@@ -124,6 +129,7 @@ export default function BusinessSetupSchema() {
     tables.forEach((t) => loadFields(t.id));
   }, [tables.length, validId]);
 
+  // Function to manage slugFromName
   const slugFromName = (s: string) =>
     s
       .trim()
@@ -131,12 +137,15 @@ export default function BusinessSetupSchema() {
       .replace(/\s+/g, "_")
       .replace(/[^a-z0-9_]/g, "");
 
+  // Function to manage validateSlug
   const validateSlug = (slug: string) => /^[a-z][a-z0-9_]*$/.test(slug);
 
+  // Variable holding saveTable
   const saveTable = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!tableForm || !validId) return;
     setFormError(null);
+    // Variable holding slug
     const slug = tableForm.slug.trim() || slugFromName(tableForm.name);
     if (!validateSlug(slug)) {
       setFormError(
@@ -144,6 +153,7 @@ export default function BusinessSetupSchema() {
       );
       return;
     }
+    // Variable holding duplicateTable
     const duplicateTable = tables.some(
       (t) => t.slug === slug && t.id !== (editingTableId ?? 0),
     );
@@ -179,10 +189,12 @@ export default function BusinessSetupSchema() {
     }
   };
 
+  // Variable holding saveField
   const saveField = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fieldForm || !fieldFormTableId || !validId) return;
     setFormError(null);
+    // Variable holding slug
     const slug = fieldForm.slug.trim() || slugFromName(fieldForm.name);
     if (!validateSlug(slug)) {
       setFormError(
@@ -190,7 +202,9 @@ export default function BusinessSetupSchema() {
       );
       return;
     }
+    // Variable holding existingFields
     const existingFields = fieldsByTable[fieldFormTableId] ?? [];
+    // Variable holding duplicateField
     const duplicateField = existingFields.some(
       (f) =>
         f.slug === slug && (editingFieldId ? f.id !== editingFieldId : true),
@@ -200,6 +214,7 @@ export default function BusinessSetupSchema() {
       return;
     }
     try {
+      // Variable holding payload
       const payload = {
         name: fieldForm.name.trim(),
         slug,
@@ -227,6 +242,7 @@ export default function BusinessSetupSchema() {
     }
   };
 
+  // Variable holding deleteTable
   const deleteTable = async (tableId: number) => {
     if (!validId || !confirm("Delete this table and all its fields?")) return;
     try {
@@ -237,6 +253,7 @@ export default function BusinessSetupSchema() {
     } catch {}
   };
 
+  // Variable holding deleteField
   const deleteField = async (tableId: number, fieldId: number) => {
     if (!validId || !confirm("Delete this field?")) return;
     try {

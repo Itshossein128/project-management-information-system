@@ -1,5 +1,6 @@
 import { useLanguageStore } from "src/app/store/languageStore";
 
+// Function to manage LanguageSwitcher
 export const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguageStore();
 

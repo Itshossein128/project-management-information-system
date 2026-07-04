@@ -1,6 +1,7 @@
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
 
+// Function to manage Welcome
 export function Welcome() {
   return (
     <main className="flex min-h-svh items-center justify-center px-4 py-8 sm:py-16">
@@ -46,6 +47,7 @@ export function Welcome() {
   );
 }
 
+// Variable holding resources
 const resources = [
   {
     href: "https://reactrouter.com/docs",

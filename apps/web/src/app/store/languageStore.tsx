@@ -18,6 +18,7 @@ const getInitialLanguage = (): "fa" | "en" => {
   if (typeof window === "undefined") {
     return "fa"; // مقدار پیش‌فرض در سمت سرور
   }
+  // Variable holding storedLang
   const storedLang = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (storedLang === "fa" || storedLang === "en") {
     return storedLang;

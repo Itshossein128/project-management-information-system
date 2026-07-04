@@ -15,6 +15,7 @@ export interface ExcelReadResult {
   rows: Record<string, unknown>[];
 }
 
+// Function to manage normalizeHeader
 function normalizeHeader(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string") return value.trim();
@@ -25,13 +26,18 @@ export async function readExcelFile(
   file: File,
   options: ExcelReadOptions = {},
 ): Promise<ExcelReadResult> {
+  // Variable holding buf
   const buf = await file.arrayBuffer();
+  // Variable holding wb
   const wb = XLSX.read(buf, { type: "array" });
+  // Variable holding sheetName
   const sheetName = options.sheetName ?? wb.SheetNames[0] ?? "";
   if (!sheetName) {
     return { sheetName: "", headers: [], rows: [] };
   }
+  // Variable holding ws
   const ws = wb.Sheets[sheetName];
+  // Variable holding raw
   const raw = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, {
     defval: null,
     raw: false,
@@ -42,7 +48,9 @@ export async function readExcelFile(
   const headers: string[] = [];
   if (range) {
     for (let c = range.s.c; c <= range.e.c; c++) {
+      // Variable holding addr
       const addr = XLSX.utils.encode_cell({ r: 0, c });
+      // Variable holding cell
       const cell = ws[addr];
       headers.push(normalizeHeader(cell?.v));
     }
@@ -50,7 +58,9 @@ export async function readExcelFile(
     headers.push(...Object.keys(raw[0] ?? {}).map(normalizeHeader));
   }
 
+  // Variable holding skipEmpty
   const skipEmpty = options.skipEmpty ?? true;
+  // Variable holding rows
   const rows = skipEmpty
     ? raw.filter((r) => Object.values(r).some((v) => v != null && String(v).trim() !== ""))
     : raw;

@@ -15,6 +15,7 @@ from .services import validate_row_data
 from .excel_io import export_table_to_xlsx, import_rows_from_xlsx
 
 
+# Function to handle get business and table
 def get_business_and_table(business_pk, table_slug):
     """Return (Business, TableDefinition) or (None, None) if not found."""
     try:
@@ -25,6 +26,7 @@ def get_business_and_table(business_pk, table_slug):
         return None, None
 
 
+# Function to handle serialize row
 def serialize_row(row):
     """Build API response dict: id, field values, created_at, updated_at."""
     out = {'id': row.pk, **row.data}
@@ -33,6 +35,7 @@ def serialize_row(row):
     return out
 
 
+# Function to handle parse row id
 def parse_row_id(row_id):
     """Return integer PK or None if invalid."""
     try:
@@ -41,6 +44,7 @@ def parse_row_id(row_id):
         return None
 
 
+# Class representing DynamicRowsView
 class DynamicRowsView(APIView):
     """GET list, POST create for rows of a dynamic table."""
     permission_classes = [IsAuthenticated]
@@ -54,6 +58,7 @@ class DynamicRowsView(APIView):
         ],
         tags=['Dynamic data'],
     )
+    # Function to handle get
     def get(self, request, business_pk, table_slug):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -92,6 +97,7 @@ class DynamicRowsView(APIView):
         responses={201: {'type': 'object', 'properties': {'id': {'type': 'string'}, 'data': {'type': 'object'}}}},
         tags=['Dynamic data'],
     )
+    # Function to handle post
     def post(self, request, business_pk, table_slug):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -106,6 +112,7 @@ class DynamicRowsView(APIView):
         return Response(serialize_row(row), status=status.HTTP_201_CREATED)
 
 
+# Class representing DynamicRowsExportView
 class DynamicRowsExportView(APIView):
     """GET export table rows as .xlsx file."""
     permission_classes = [IsAuthenticated]
@@ -115,6 +122,7 @@ class DynamicRowsExportView(APIView):
         description='Download all rows of this table as .xlsx. First row is headers (field names).',
         tags=['Dynamic data'],
     )
+    # Function to handle get
     def get(self, request, business_pk, table_slug):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -127,6 +135,7 @@ class DynamicRowsExportView(APIView):
         return response
 
 
+# Class representing DynamicRowsImportView
 class DynamicRowsImportView(APIView):
     """POST import rows from .xlsx file (multipart)."""
     permission_classes = [IsAuthenticated]
@@ -138,6 +147,7 @@ class DynamicRowsImportView(APIView):
         request={'multipart/form-data': {'type': 'object', 'properties': {'file': {'type': 'string', 'format': 'binary'}}}},
         tags=['Dynamic data'],
     )
+    # Function to handle post
     def post(self, request, business_pk, table_slug):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -158,11 +168,13 @@ class DynamicRowsImportView(APIView):
         return Response({'created': created, 'errors': errors})
 
 
+# Class representing DynamicRowDetailView
 class DynamicRowDetailView(APIView):
     """GET, PUT, PATCH, DELETE a single row by id."""
     permission_classes = [IsAuthenticated]
 
     @extend_schema(summary='Get row', tags=['Dynamic data'])
+    # Function to handle get
     def get(self, request, business_pk, table_slug, row_id):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -179,14 +191,17 @@ class DynamicRowDetailView(APIView):
         return Response(serialize_row(row))
 
     @extend_schema(summary='Update row (full)', tags=['Dynamic data'])
+    # Function to handle put
     def put(self, request, business_pk, table_slug, row_id):
         return self._update(request, business_pk, table_slug, row_id, partial=False)
 
     @extend_schema(summary='Update row (partial)', tags=['Dynamic data'])
+    # Function to handle patch
     def patch(self, request, business_pk, table_slug, row_id):
         return self._update(request, business_pk, table_slug, row_id, partial=True)
 
     @extend_schema(summary='Delete row', tags=['Dynamic data'])
+    # Function to handle delete
     def delete(self, request, business_pk, table_slug, row_id):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:
@@ -201,6 +216,7 @@ class DynamicRowDetailView(APIView):
             return Response({'error': 'Row not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    # Function to handle  update
     def _update(self, request, business_pk, table_slug, row_id, partial):
         business, table = get_business_and_table(business_pk, table_slug)
         if business is None or table is None:

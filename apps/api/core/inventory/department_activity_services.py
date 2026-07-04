@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from .models import Department, DepartmentActivityRecord
 
+# Global variable _ALLOWED_ORDERING_FIELDS
 _ALLOWED_ORDERING_FIELDS = {
     'date',
     '-date',
@@ -29,6 +30,7 @@ _ALLOWED_ORDERING_FIELDS = {
 }
 
 
+# Function to handle get department activity queryset
 def get_department_activity_queryset(
     business_pk: int,
     query_params: Any,
@@ -83,6 +85,7 @@ def get_department_activity_queryset(
     return qs.select_related('business')
 
 
+# Function to handle require valid department
 def require_valid_department(department: str | None) -> str | None:
     if not department:
         return None
@@ -90,6 +93,7 @@ def require_valid_department(department: str | None) -> str | None:
     return department if department in valid else None
 
 
+# Function to handle get report date range
 def get_report_date_range(period: str) -> tuple[date, date]:
     """
     Daily: previous calendar day. Weekly: rolling last 7 days including today.

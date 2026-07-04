@@ -34,9 +34,12 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExcelValidationResult<T> | null>(null);
 
+  // Variable holding invalidCount
   const invalidCount = result?.invalidRows.length ?? 0;
+  // Variable holding validCount
   const validCount = result?.validRows.length ?? 0;
 
+  // Variable holding errorRowsForExport
   const errorRowsForExport = useMemo(() => {
     if (!result) return [];
     return result.invalidRows.map((r) => ({
@@ -86,12 +89,15 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
               onChange={async (e) => {
                 setError(null);
                 setResult(null);
+                // Variable holding f
                 const f = e.target.files?.[0] ?? null;
                 setFile(f);
                 if (!f) return;
                 setLoading(true);
                 try {
+                  // Variable holding parsed
                   const parsed = await readExcelFile(f);
+                  // Variable holding validated
                   const validated = validateExcelRows<T>({
                     rows: parsed.rows,
                     mapping,

@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "src/app/lib/utils";
 
+// Function to manage Card
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -16,6 +17,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardHeader
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -29,6 +31,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardTitle
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -39,6 +42,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardDescription
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -49,6 +53,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardAction
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -62,6 +67,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardContent
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -72,6 +78,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
+// Function to manage CardFooter
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

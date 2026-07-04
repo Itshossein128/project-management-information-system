@@ -10,6 +10,7 @@ import { useEffect } from "react";
  */
 export default function HrJobPositionsPage() {
   const { t } = useTranslation();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
 

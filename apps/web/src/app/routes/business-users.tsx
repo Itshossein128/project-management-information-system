@@ -21,17 +21,22 @@ interface BusinessDetail {
 export default function BusinessUsersPage() {
   const { t } = useTranslation();
   const { businessId } = useParams();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Variable holding businessIdNum
   const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
+  // Variable holding grid
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
+  // Variable holding ordering
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
     : undefined;
 
+  // Variable holding assignmentsQuery
   const assignmentsQuery = useAssignmentsForBusinessQuery(
     businessId ?? "",
     {
@@ -44,9 +49,13 @@ export default function BusinessUsersPage() {
     },
     isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
   );
+  // Variable holding assignments
   const assignments = assignmentsQuery.data?.results ?? [];
+  // Variable holding count
   const count = assignmentsQuery.data?.count ?? 0;
+  // Variable holding assignmentsLoading
   const assignmentsLoading = assignmentsQuery.isFetching;
+  // Variable holding assignmentsError
   const assignmentsError =
     assignmentsQuery.error instanceof Error
       ? assignmentsQuery.error.message
@@ -78,6 +87,7 @@ export default function BusinessUsersPage() {
       );
   }, [isAuthenticated, businessId, businessIdNum]);
 
+  // Variable holding columns
   const columns = useMemo<ColumnDef<UserBusinessAssignment>[]>(() => {
     return [
       {

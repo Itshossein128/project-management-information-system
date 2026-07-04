@@ -1,3 +1,4 @@
+// Variable holding queryKeys
 export const queryKeys = {
   businesses: () => ["businesses"] as const,
   business: (businessId: number | string) => ["businesses", businessId] as const,

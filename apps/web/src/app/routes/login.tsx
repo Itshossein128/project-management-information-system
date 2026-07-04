@@ -28,8 +28,10 @@ export default function Login() {
   const { t } = useTranslation();
   const { login, isAuthenticated, isLoading } = useAuth();
   console.log("isLoading", isLoading);
+  // Variable holding navigate
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  // Variable holding redirectTo
   const redirectTo = searchParams.get("redirectTo") ?? "/home";
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");

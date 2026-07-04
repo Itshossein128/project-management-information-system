@@ -17,6 +17,7 @@ slug_validator = RegexValidator(
 )
 
 
+# Class representing Business
 class Business(models.Model):
     """A tenant (e.g. warehouse or inventory system)."""
     name = models.CharField(max_length=255)
@@ -24,14 +25,17 @@ class Business(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         verbose_name_plural = 'Businesses'
         ordering = ['name']
 
+    # Function to handle   str
     def __str__(self):
         return self.name
 
 
+# Class representing BusinessJobPosition
 class BusinessJobPosition(models.Model):
     """
     A job title within a specific business (e.g. electrician, worker).
@@ -52,6 +56,7 @@ class BusinessJobPosition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         ordering = ['business', 'ordering', 'slug']
         constraints = [
@@ -63,22 +68,26 @@ class BusinessJobPosition(models.Model):
         verbose_name = 'business job position'
         verbose_name_plural = 'business job positions'
 
+    # Function to handle   str
     def __str__(self) -> str:
         return f'{self.business.name}: {self.label}'
 
 
+# Class representing WageType
 class WageType(models.TextChoices):
     HOURLY = 'hourly', 'Hourly'
     DAILY = 'daily', 'Daily'
     MONTHLY = 'monthly', 'Monthly'
 
 
+# Class representing AssignmentStatus
 class AssignmentStatus(models.TextChoices):
     ACTIVE = 'active', 'Active'
     SUSPENDED = 'suspended', 'Suspended'
     ARCHIVED = 'archived', 'Archived'
 
 
+# Class representing UserBusinessAssignment
 class UserBusinessAssignment(models.Model):
     """
     Links a user to a business with a job position and work details.
@@ -118,6 +127,7 @@ class UserBusinessAssignment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         verbose_name = 'user business assignment'
         verbose_name_plural = 'user business assignments'
@@ -132,10 +142,12 @@ class UserBusinessAssignment(models.Model):
             models.Index(fields=['user', 'business'], name='uba_user_business_idx'),
         ]
 
+    # Function to handle   str
     def __str__(self):
         return f'{self.user} @ {self.business} ({self.job_position.slug})'
 
 
+# Class representing TableDefinition
 class TableDefinition(models.Model):
     """A logical table (collection) within a business."""
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='tables')
@@ -145,14 +157,17 @@ class TableDefinition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         ordering = ['business', 'ordering', 'name']
         unique_together = [['business', 'slug']]
 
+    # Function to handle   str
     def __str__(self):
         return f'{self.business.slug}.{self.slug}'
 
 
+# Class representing FieldType
 class FieldType(models.TextChoices):
     STRING = 'string', 'String'
     NUMBER = 'number', 'Number'
@@ -161,6 +176,7 @@ class FieldType(models.TextChoices):
     REFERENCE = 'reference', 'Reference (FK to another table)'
 
 
+# Class representing FieldDefinition
 class FieldDefinition(models.Model):
     """A field (column) of a table."""
     table = models.ForeignKey(TableDefinition, on_delete=models.CASCADE, related_name='fields')
@@ -180,19 +196,23 @@ class FieldDefinition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         ordering = ['table', 'ordering', 'name']
         unique_together = [['table', 'slug']]
 
+    # Function to handle   str
     def __str__(self):
         return f'{self.table}.{self.slug}'
 
 
+# Class representing RelationKind
 class RelationKind(models.TextChoices):
     ONE_TO_MANY = 'one_to_many', 'One to many'
     MANY_TO_ONE = 'many_to_one', 'Many to one'
 
 
+# Class representing RelationDefinition
 class RelationDefinition(models.Model):
     """Relation between two tables (from_field -> to_table/to_field)."""
     from_table = models.ForeignKey(
@@ -220,13 +240,16 @@ class RelationDefinition(models.Model):
     kind = models.CharField(max_length=20, choices=RelationKind.choices, default=RelationKind.ONE_TO_MANY)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Class representing Meta
     class Meta:
         ordering = ['from_table', 'to_table']
 
+    # Function to handle   str
     def __str__(self):
         return f'{self.from_table}.{self.from_field} -> {self.to_table}'
 
 
+# Class representing DynamicTableRow
 class DynamicTableRow(models.Model):
     """A single row of data for a dynamic table. Payload stored in JSONField."""
     table = models.ForeignKey(
@@ -238,11 +261,13 @@ class DynamicTableRow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Class representing Meta
     class Meta:
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['table']),
         ]
 
+    # Function to handle   str
     def __str__(self):
         return f'{self.table}.row_{self.pk}'

@@ -5,6 +5,7 @@
 
 import { getStoredAccessToken, clearStoredAuth } from "./auth-storage";
 
+// Function to manage getBaseUrl
 const getBaseUrl = (): string => {
   if (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) {
     return (import.meta.env.VITE_API_BASE_URL as string).replace(/\/$/, "");
@@ -20,6 +21,7 @@ export interface ApiError {
 }
 
 async function getAuthHeaders(): Promise<HeadersInit> {
+  // Variable holding token
   const token = getStoredAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -30,6 +32,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 }
 
 async function getAuthHeadersNoContentType(): Promise<HeadersInit> {
+  // Variable holding token
   const token = getStoredAccessToken();
   const headers: Record<string, string> = { Accept: "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -50,7 +53,9 @@ export async function apiFetch(
   path: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  // Variable holding url
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  // Variable holding res
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -65,7 +70,9 @@ export async function apiFetch(
 }
 
 export async function apiJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // Variable holding res
   const res = await apiFetch(path, options);
+  // Variable holding raw
   const raw = await res.text();
   let data: (T & ApiError) | (ApiError & { detail?: unknown }) = {};
   if (raw) {
@@ -76,13 +83,16 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
     }
   }
   if (!res.ok) {
+    // Variable holding apiError
     const apiError = data as ApiError & { detail?: unknown };
+    // Variable holding detail
     const detail =
       typeof apiError.detail === "string"
         ? apiError.detail
         : apiError.detail
           ? JSON.stringify(apiError.detail)
           : null;
+    // Variable holding message
     const message =
       apiError.error ??
       detail ??
@@ -96,16 +106,21 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
 
 /** GET and return response as Blob (e.g. Excel download). */
 export async function apiBlob(path: string): Promise<Blob> {
+  // Variable holding url
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  // Variable holding res
   const res = await fetch(url, {
     method: "GET",
     headers: await getAuthHeadersNoContentType(),
   });
   if (res.status === 401) clearAuth();
   if (!res.ok) {
+    // Variable holding text
     const text = await res.text();
+    // Variable holding msg
     let msg = res.statusText;
     try {
+      // Variable holding j
       const j = JSON.parse(text) as ApiError;
       if (j.error) msg = j.error;
     } catch {
@@ -121,15 +136,19 @@ export async function apiUploadFile<T = { created: number; errors: unknown[] }>(
   path: string,
   file: File
 ): Promise<T> {
+  // Variable holding url
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  // Variable holding form
   const form = new FormData();
   form.append("file", file);
+  // Variable holding res
   const res = await fetch(url, {
     method: "POST",
     headers: await getAuthHeadersNoContentType(),
     body: form,
   });
   if (res.status === 401) clearAuth();
+  // Function to manage data
   const data = (await res.json().catch(() => ({}))) as T & ApiError;
   if (!res.ok) {
     throw new Error((data as ApiError).error ?? (res.statusText || "Request failed"));

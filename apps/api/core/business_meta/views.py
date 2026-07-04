@@ -41,15 +41,18 @@ from .serializers import (
     partial_update=extend_schema(summary='Patch business', tags=['Business meta']),
     destroy=extend_schema(summary='Delete business', tags=['Business meta']),
 )
+# Class representing BusinessViewSet
 class BusinessViewSet(viewsets.ModelViewSet):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
+    # Function to handle get permissions
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return [IsAuthenticated()]
         return [IsBusinessSetup()]
 
+    # Function to handle get serializer context
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['business_pk'] = self.kwargs.get('business_pk')
@@ -61,6 +64,7 @@ class BusinessViewSet(viewsets.ModelViewSet):
         tags=['Business meta'],
     )
     @action(detail=False, methods=['get'], url_path='templates')
+    # Function to handle templates
     def templates(self, request):
         return Response(get_available_templates())
 
@@ -85,6 +89,7 @@ class BusinessViewSet(viewsets.ModelViewSet):
         tags=['Business meta'],
     )
     @action(detail=False, methods=['post'], url_path='from_template')
+    # Function to handle from template
     def from_template(self, request):
         name = request.data.get('name')
         slug = request.data.get('slug')
@@ -110,25 +115,30 @@ class BusinessViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch table', tags=['Business meta']),
     destroy=extend_schema(summary='Delete table', tags=['Business meta']),
 )
+# Class representing TableDefinitionViewSet
 class TableDefinitionViewSet(viewsets.ModelViewSet):
     serializer_class = TableDefinitionSerializer
 
+    # Function to handle get permissions
     def get_permissions(self):
         if self.action in ('list', 'retrieve', 'by_slug'):
             return [IsAuthenticated()]
         return [IsBusinessSetup()]
 
+    # Function to handle get queryset
     def get_queryset(self):
         business_pk = self.kwargs.get('business_pk')
         if business_pk is not None:
             return TableDefinition.objects.filter(business_id=business_pk)
         return TableDefinition.objects.all()
 
+    # Function to handle get serializer class
     def get_serializer_class(self):
         if self.action == 'list':
             return TableDefinitionListSerializer
         return TableDefinitionSerializer
 
+    # Function to handle perform create
     def perform_create(self, serializer):
         business_pk = self.kwargs.get('business_pk')
         if business_pk is not None:
@@ -137,6 +147,7 @@ class TableDefinitionViewSet(viewsets.ModelViewSet):
             serializer.save()
 
     @extend_schema(summary='Get table by slug (with fields)', tags=['Business meta'])
+    # Function to handle by slug
     def by_slug(self, request, business_pk=None, table_slug=None):
         from rest_framework.exceptions import NotFound
         table = TableDefinition.objects.filter(business_id=business_pk, slug=table_slug).first()
@@ -154,24 +165,29 @@ class TableDefinitionViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch job position', tags=['Business meta']),
     destroy=extend_schema(summary='Delete job position', tags=['Business meta']),
 )
+# Class representing BusinessJobPositionViewSet
 class BusinessJobPositionViewSet(viewsets.ModelViewSet):
     """Per-business job titles (not system roles)."""
     serializer_class = BusinessJobPositionSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
+    # Function to handle get permissions
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:
             return [IsAuthenticated(), CanViewBusinessAssignments(), IsVisitorReadOnly()]
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
 
+    # Function to handle get queryset
     def get_queryset(self):
         business_pk = self.kwargs.get('business_pk')
         return BusinessJobPosition.objects.filter(business_id=business_pk).select_related('business')
 
+    # Function to handle perform create
     def perform_create(self, serializer):
         business_pk = self.kwargs.get('business_pk')
         serializer.save(business_id=business_pk)
 
+    # Function to handle perform destroy
     def perform_destroy(self, instance: BusinessJobPosition) -> None:
         if UserBusinessAssignment.objects.filter(job_position=instance).exists():
             raise ValidationError(
@@ -188,6 +204,7 @@ class BusinessJobPositionViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch assignment', tags=['Business meta']),
     destroy=extend_schema(summary='Remove assignment', tags=['Business meta']),
 )
+# Class representing UserBusinessAssignmentViewSet
 class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
     """
     User–business assignments with wage, tools, dates, status.
@@ -195,11 +212,13 @@ class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
     """
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
+    # Function to handle get permissions
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:
             return [IsAuthenticated(), CanViewBusinessAssignments(), IsVisitorReadOnly()]
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
 
+    # Function to handle get queryset
     def get_queryset(self):
         business_pk = self.kwargs.get('business_pk')
         return (
@@ -207,6 +226,7 @@ class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
             .select_related('user', 'business', 'job_position')
         )
 
+    # Function to handle get serializer class
     def get_serializer_class(self):
         if self.action == 'create':
             return UserBusinessAssignmentCreateSerializer
@@ -214,6 +234,7 @@ class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
             return UserBusinessAssignmentWriteSerializer
         return UserBusinessAssignmentReadSerializer
 
+    # Function to handle get serializer context
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['business_pk'] = self.kwargs.get('business_pk')
@@ -228,16 +249,19 @@ class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch field', tags=['Business meta']),
     destroy=extend_schema(summary='Delete field', tags=['Business meta']),
 )
+# Class representing FieldDefinitionViewSet
 class FieldDefinitionViewSet(viewsets.ModelViewSet):
     serializer_class = FieldDefinitionSerializer
     permission_classes = [IsBusinessSetup]
 
+    # Function to handle get queryset
     def get_queryset(self):
         table_pk = self.kwargs.get('table_pk')
         if table_pk is not None:
             return FieldDefinition.objects.filter(table_id=table_pk)
         return FieldDefinition.objects.all()
 
+    # Function to handle perform create
     def perform_create(self, serializer):
         table_pk = self.kwargs.get('table_pk')
         if table_pk is not None:
@@ -254,6 +278,7 @@ class FieldDefinitionViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch relation', tags=['Business meta']),
     destroy=extend_schema(summary='Delete relation', tags=['Business meta']),
 )
+# Class representing RelationDefinitionViewSet
 class RelationDefinitionViewSet(viewsets.ModelViewSet):
     queryset = RelationDefinition.objects.all()
     serializer_class = RelationDefinitionSerializer

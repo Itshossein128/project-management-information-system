@@ -22,15 +22,18 @@ User = get_user_model()
 DEFAULT_REGISTRATION_GROUP_NAME = "visitor"
 
 
+# Class representing UserRegistrationService
 class UserRegistrationService:
     """
     Service responsible for user registration logic.
     Single Responsibility: Handle user creation and validation.
     """
 
+    # Function to handle   init
     def __init__(self):
         self.logger = logger
 
+    # Function to handle register user
     def register_user(
         self,
         phone_number: str,
@@ -91,21 +94,25 @@ class UserRegistrationService:
             raise ValidationError({'error': 'Failed to create user account.'})
 
 
+# Class representing PasswordResetService
 class PasswordResetService:
     """
     Service responsible for password reset logic.
     Single Responsibility: Handle password reset tokens and SMS sending.
     """
 
+    # Function to handle   init
     def __init__(self):
         self.logger = logger
         self.token_length = 6  # Short numeric code for SMS
         self.token_expiry_hours = 1
 
+    # Function to handle generate reset token
     def generate_reset_token(self) -> str:
         """Generate a secure random numeric token for password reset (SMS-friendly)."""
         return get_random_string(self.token_length, allowed_chars='0123456789')
 
+    # Function to handle send reset sms
     def send_reset_sms(self, user, reset_token: str) -> bool:
         """
         Send password reset SMS to user.
@@ -121,6 +128,7 @@ class PasswordResetService:
         self.logger.info(f"Password reset code for {user.phone_number}: {reset_token}")
         return True
 
+    # Function to handle initiate password reset
     def initiate_password_reset(self, phone_number: str) -> Dict[str, Any]:
         """
         Initiate password reset process for a user.
@@ -166,15 +174,18 @@ class PasswordResetService:
             }
 
 
+# Class representing PasswordChangeService
 class PasswordChangeService:
     """
     Service responsible for password change logic.
     Single Responsibility: Handle password changes for authenticated users.
     """
 
+    # Function to handle   init
     def __init__(self):
         self.logger = logger
 
+    # Function to handle change password
     def change_password(
         self,
         user,

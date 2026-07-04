@@ -1,6 +1,7 @@
 from rest_framework.pagination import PageNumberPagination
 
 
+# Class representing DefaultPageNumberPagination
 class DefaultPageNumberPagination(PageNumberPagination):
     """Honors `page` and `page_size` query params for grid UIs."""
 

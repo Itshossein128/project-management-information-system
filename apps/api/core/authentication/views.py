@@ -36,6 +36,7 @@ from .utils import authenticate_user, get_tokens_for_user
 User = get_user_model()
 
 
+# Class representing UserRegistrationView
 class UserRegistrationView(generics.CreateAPIView):
     """
     User registration endpoint.
@@ -77,6 +78,7 @@ class UserRegistrationView(generics.CreateAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle create
     def create(self, request, *args, **kwargs):
         """Handle user registration."""
         serializer = self.get_serializer(data=request.data)
@@ -100,6 +102,7 @@ class UserRegistrationView(generics.CreateAPIView):
         )
 
 
+# Class representing LoginView
 class LoginView(generics.GenericAPIView):
     """
     User login endpoint.
@@ -148,6 +151,7 @@ class LoginView(generics.GenericAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle post
     def post(self, request):
         """Handle user login."""
         serializer = self.get_serializer(data=request.data)
@@ -183,6 +187,7 @@ class LoginView(generics.GenericAPIView):
         }, status=status.HTTP_200_OK)
 
 
+# Class representing ChangePasswordView
 class ChangePasswordView(generics.GenericAPIView):
     """
     Change password endpoint for authenticated users.
@@ -230,6 +235,7 @@ class ChangePasswordView(generics.GenericAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle post
     def post(self, request):
         """Handle password change."""
         serializer = self.get_serializer(data=request.data)
@@ -258,6 +264,7 @@ class ChangePasswordView(generics.GenericAPIView):
             )
 
 
+# Class representing ForgotPasswordView
 class ForgotPasswordView(generics.GenericAPIView):
     """
     Forgot password endpoint.
@@ -301,6 +308,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle post
     def post(self, request):
         """Handle forgot password request."""
         serializer = self.get_serializer(data=request.data)
@@ -319,6 +327,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         return Response(result, status=status.HTTP_200_OK)
 
 
+# Class representing ResetPasswordView
 class ResetPasswordView(generics.GenericAPIView):
     """
     Reset password endpoint with token.
@@ -360,6 +369,7 @@ class ResetPasswordView(generics.GenericAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle post
     def post(self, request):
         """Handle password reset."""
         serializer = self.get_serializer(data=request.data)
@@ -380,6 +390,7 @@ class ResetPasswordView(generics.GenericAPIView):
         )
 
 
+# Class representing UserProfileView
 class UserProfileView(generics.RetrieveUpdateAPIView):
     """
     User profile endpoint.
@@ -388,6 +399,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
+    # Function to handle get object
     def get_object(self):
         """Return the current authenticated user."""
         return self.request.user
@@ -404,6 +416,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle get
     def get(self, request, *args, **kwargs):
         """Retrieve user profile."""
         return super().get(request, *args, **kwargs)
@@ -422,6 +435,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle put
     def put(self, request, *args, **kwargs):
         """Update user profile."""
         return super().put(request, *args, **kwargs)
@@ -440,11 +454,13 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         },
         tags=['Authentication']
     )
+    # Function to handle patch
     def patch(self, request, *args, **kwargs):
         """Partially update user profile."""
         return super().patch(request, *args, **kwargs)
 
 
+# Class representing UserListView
 class UserListView(generics.ListCreateAPIView):
     """
     Paginated list of all application users (phone-based accounts).
@@ -454,11 +470,13 @@ class UserListView(generics.ListCreateAPIView):
     """
     permission_classes = [IsAuthenticated, IsHrOrAdmin]
 
+    # Function to handle get serializer class
     def get_serializer_class(self):
         if self.request.method == "POST":
             return UserRegistrationSerializer
         return UserListSerializer
 
+    # Function to handle get queryset
     def get_queryset(self):
         return (
             User.objects.all()
@@ -489,6 +507,7 @@ class UserListView(generics.ListCreateAPIView):
         },
         tags=["Authentication"],
     )
+    # Function to handle get
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
@@ -510,6 +529,7 @@ class UserListView(generics.ListCreateAPIView):
         },
         tags=["Authentication"],
     )
+    # Function to handle post
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -517,6 +537,7 @@ class UserListView(generics.ListCreateAPIView):
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
+# Class representing UserAssignmentsListView
 class UserAssignmentsListView(generics.ListAPIView):
     """
     All business assignments for a user. Self-service or HR/admin.
@@ -524,6 +545,7 @@ class UserAssignmentsListView(generics.ListAPIView):
     serializer_class = UserBusinessAssignmentReadSerializer
     permission_classes = [IsAuthenticated]
 
+    # Function to handle get queryset
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         u = self.request.user
@@ -540,10 +562,12 @@ class UserAssignmentsListView(generics.ListAPIView):
         description='Returns all UserBusinessAssignment rows for the user. Owner or HR/admin only.',
         tags=['Authentication'],
     )
+    # Function to handle get
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
 
+# Class representing SystemRolesListView
 class SystemRolesListView(APIView):
     """
     Read-only list of Django auth Group names (system roles). No CRUD via API.
@@ -555,6 +579,7 @@ class SystemRolesListView(APIView):
         description='Static groups used for global RBAC (e.g. admin, hr, visitor).',
         tags=['Authentication'],
     )
+    # Function to handle get
     def get(self, request):
         data = [
             {'name': g.name, 'label': g.name.replace('-', ' ').title()}

@@ -24,6 +24,7 @@ export interface HrUserRow {
   assignments_preview?: UserBusinessAssignment[];
 }
 
+// Function to manage useBusinessesQuery
 export function useBusinessesQuery(enabled = true) {
   return useQuery({
     queryKey: queryKeys.businesses(),
@@ -32,6 +33,7 @@ export function useBusinessesQuery(enabled = true) {
   });
 }
 
+// Function to manage useHrUsersQuery
 export function useHrUsersQuery(
   params: { page: number; page_size?: number; search?: string; ordering?: string },
   enabled = true,
@@ -59,7 +61,9 @@ export interface CreateHrUserPayload {
   password_confirm: string;
 }
 
+// Function to manage useCreateHrUser
 export function useCreateHrUser() {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateHrUserPayload) =>
@@ -73,14 +77,17 @@ export function useCreateHrUser() {
   });
 }
 
+// Function to manage useJobPositionsForBusiness
 export function useJobPositionsForBusiness(businessId: number | string, enabled = true) {
   return useJobPositionsForBusinessQuery(businessId, {}, enabled);
 }
 
+// Function to manage useAssignmentsForBusiness
 export function useAssignmentsForBusiness(businessId: number | string, enabled = true) {
   return useAssignmentsForBusinessQuery(businessId, {}, enabled);
 }
 
+// Function to manage useJobPositionsForBusinessQuery
 export function useJobPositionsForBusinessQuery(
   businessId: number | string,
   params: { page?: number; page_size?: number; search?: string; ordering?: string } = {},
@@ -101,6 +108,7 @@ export function useJobPositionsForBusinessQuery(
   });
 }
 
+// Function to manage useAssignmentsForBusinessQuery
 export function useAssignmentsForBusinessQuery(
   businessId: number | string,
   params: { page?: number; page_size?: number; search?: string; ordering?: string } = {},
@@ -121,7 +129,9 @@ export function useAssignmentsForBusinessQuery(
   });
 }
 
+// Function to manage useCreateJobPosition
 export function useCreateJobPosition(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: Partial<BusinessJobPosition>) =>
@@ -135,7 +145,9 @@ export function useCreateJobPosition(businessId: number | string) {
   });
 }
 
+// Function to manage useUpdateJobPosition
 export function useUpdateJobPosition(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: { id: number | string; patch: Partial<BusinessJobPosition> }) =>
@@ -152,7 +164,9 @@ export function useUpdateJobPosition(businessId: number | string) {
   });
 }
 
+// Function to manage useDeleteJobPosition
 export function useDeleteJobPosition(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) =>
@@ -165,7 +179,9 @@ export function useDeleteJobPosition(businessId: number | string) {
   });
 }
 
+// Function to manage useCreateAssignment
 export function useCreateAssignment(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: Partial<UserBusinessAssignment>) =>
@@ -179,7 +195,9 @@ export function useCreateAssignment(businessId: number | string) {
   });
 }
 
+// Function to manage useUpdateAssignment
 export function useUpdateAssignment(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: { id: number | string; patch: Partial<UserBusinessAssignment> }) =>
@@ -196,7 +214,9 @@ export function useUpdateAssignment(businessId: number | string) {
   });
 }
 
+// Function to manage useDeleteAssignment
 export function useDeleteAssignment(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) =>
@@ -211,9 +231,11 @@ export function useDeleteAssignment(businessId: number | string) {
 
 const DEPARTMENT_ACTIVITY_RECORDS_PATH = "department-activity-records";
 
+// Function to manage buildDepartmentActivityRecordsSearch
 function buildDepartmentActivityRecordsSearch(
   params: DepartmentActivityRecordListParams,
 ): string {
+  // Variable holding sp
   const sp = new URLSearchParams();
   sp.set("department", params.department);
   if (params.page) sp.set("page", String(params.page));
@@ -230,6 +252,7 @@ function buildDepartmentActivityRecordsSearch(
   return sp.toString();
 }
 
+// Function to manage useDepartmentActivityRecordsQuery
 export function useDepartmentActivityRecordsQuery(
   businessId: number | string,
   params: DepartmentActivityRecordListParams,
@@ -249,7 +272,9 @@ export function useDepartmentActivityRecordsQuery(
   });
 }
 
+// Function to manage useCreateDepartmentActivityRecord
 export function useCreateDepartmentActivityRecord(businessId: number | string) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: DepartmentActivityRecordPayload) =>
@@ -271,9 +296,11 @@ export function useCreateDepartmentActivityRecord(businessId: number | string) {
   });
 }
 
+// Function to manage useUpdateDepartmentActivityRecord
 export function useUpdateDepartmentActivityRecord(
   businessId: number | string,
 ) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (args: {
@@ -298,10 +325,12 @@ export function useUpdateDepartmentActivityRecord(
   });
 }
 
+// Function to manage useDeleteDepartmentActivityRecord
 export function useDeleteDepartmentActivityRecord(
   businessId: number | string,
   department: string,
 ) {
+  // Variable holding qc
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) =>

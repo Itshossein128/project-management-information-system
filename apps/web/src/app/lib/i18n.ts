@@ -5,6 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import en from "../locales/en.json";
 import fa from "../locales/fa.json";
 
+// Variable holding supportedLanguages
 export const supportedLanguages = ["fa", "en"] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
@@ -13,6 +14,7 @@ export const languageNames: Record<SupportedLanguage, string> = {
   en: "English",
 };
 
+// Function to manage isRTL
 export const isRTL = (lang: string = i18n.language): boolean => lang === "fa";
 
 i18n

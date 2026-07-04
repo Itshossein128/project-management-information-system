@@ -2,6 +2,7 @@ import * as React from "react";
 
 import { cn } from "src/app/lib/utils";
 
+// Function to manage Textarea
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea

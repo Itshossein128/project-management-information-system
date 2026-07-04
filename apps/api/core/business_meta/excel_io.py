@@ -14,6 +14,7 @@ from .services import validate_row_data
 logger = logging.getLogger(__name__)
 
 
+# Function to handle export table to xlsx
 def export_table_to_xlsx(table: TableDefinition) -> bytes:
     """
     Export all rows of a dynamic table to .xlsx.
@@ -41,6 +42,7 @@ def export_table_to_xlsx(table: TableDefinition) -> bytes:
     return buf.getvalue()
 
 
+# Function to handle  cell value
 def _cell_value(val: Any) -> Any:
     """Normalise value for Excel (avoid None, keep numbers/dates as-is for display)."""
     if val is None:
@@ -50,6 +52,7 @@ def _cell_value(val: Any) -> Any:
     return val
 
 
+# Function to handle import rows from xlsx
 def import_rows_from_xlsx(table: TableDefinition, file_bytes: bytes) -> tuple[int, list[dict]]:
     """
     Parse .xlsx and create rows. First row = headers (must match field names).
@@ -104,6 +107,7 @@ def import_rows_from_xlsx(table: TableDefinition, file_bytes: bytes) -> tuple[in
     return created, errors
 
 
+# Function to handle  normalise import value
 def _normalise_import_value(raw: Any) -> Any:
     """Convert Excel cell value to something validate_row_data accepts."""
     if raw is None:

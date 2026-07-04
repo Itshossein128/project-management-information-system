@@ -36,6 +36,7 @@ interface BusinessesListResponse {
 }
 
 export default function BusinessSetup() {
+  // Variable holding navigate
   const navigate = useNavigate();
   const { hasRole, isLoading } = useAuth();
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
@@ -46,11 +47,14 @@ export default function BusinessSetup() {
   const [slug, setSlug] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
+  // Variable holding grid
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
+  // Variable holding ordering
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
     : undefined;
 
+  // Variable holding loadBusinesses
   const loadBusinesses = useCallback(() => {
     apiJson<BusinessesListResponse>(
       `/${PATHS.BUSINESS}/?${new URLSearchParams({
@@ -82,10 +86,12 @@ export default function BusinessSetup() {
     loadBusinesses();
   }, [hasRole, loadBusinesses]);
 
+  // Variable holding handleSubmitEdit
   const handleSubmitEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingId) return;
     setFormError(null);
+    // Variable holding payload
     const payload = {
       name: name.trim(),
       slug: slug.trim().toLowerCase().replace(/\s+/g, "_"),
@@ -106,6 +112,7 @@ export default function BusinessSetup() {
       setName("");
       setSlug("");
     } catch (err: unknown) {
+      // Variable holding msg
       const msg = err instanceof Error ? err.message : "Request failed";
       setFormError(typeof msg === "string" ? msg : "Request failed");
       if (
@@ -114,13 +121,16 @@ export default function BusinessSetup() {
         "errors" in err &&
         typeof (err as { errors: unknown }).errors === "object"
       ) {
+        // Function to manage errors
         const errors = (err as { errors: Record<string, string[]> }).errors;
+        // Variable holding first
         const first = Object.values(errors).flat()[0];
         if (first) setFormError(first);
       }
     }
   };
 
+  // Variable holding startEdit
   const startEdit = useCallback((b: BusinessItem) => {
     setEditingId(b.id);
     setName(b.name);
@@ -128,10 +138,12 @@ export default function BusinessSetup() {
     setFormError(null);
   }, []);
 
+  // Variable holding goToCreate
   const goToCreate = useCallback(() => {
     navigate(`/${PATHS.BUSINESS}/${PATHS.BUSINESS_CREATE}`);
   }, [navigate]);
 
+  // Variable holding columns
   const columns = useMemo<ColumnDef<BusinessItem>[]>(() => {
     return [
       {

@@ -6,6 +6,7 @@ import django.core.validators
 import django.utils.timezone
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
     initial = True
 

@@ -6,6 +6,7 @@ import django.db.models.deletion
 import re
 
 
+# Class representing Migration
 class Migration(migrations.Migration):
 
     initial = True

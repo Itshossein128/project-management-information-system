@@ -3,10 +3,14 @@ import { useThemeStore } from "@/app/store/themeStore";
 import { Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+// Function to manage ThemeToggle
 export function ThemeToggle() {
   const { t } = useTranslation();
+  // Variable holding theme
   const theme = useThemeStore((s) => s.theme);
+  // Variable holding toggleTheme
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
+  // Variable holding isDark
   const isDark = theme === "dark";
 
   return (

@@ -27,6 +27,7 @@ from .department_activity_services import (
 from .models import DepartmentActivityRecord
 
 
+# Class representing _DepartmentActivityDataBase
 class _DepartmentActivityDataBase(APIView):
     permission_classes = [
         IsAuthenticated,
@@ -35,12 +36,14 @@ class _DepartmentActivityDataBase(APIView):
         IsHrOrAdminOrReadOnly,
     ]
 
+    # Function to handle  get business
     def _get_business(self, business_pk: int) -> Business | None:
         try:
             return Business.objects.get(pk=business_pk)
         except Business.DoesNotExist:
             return None
 
+    # Function to handle  require department
     def _require_department(self, request) -> str | Response:
         department = require_valid_department(request.query_params.get('department'))
         if not department:
@@ -55,6 +58,7 @@ class _DepartmentActivityDataBase(APIView):
         return department
 
 
+# Class representing DepartmentActivityExportView
 class DepartmentActivityExportView(_DepartmentActivityDataBase):
     @extend_schema(
         summary='Export department activity records to Excel',
@@ -75,6 +79,7 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
         ],
         tags=['Business activity records'],
     )
+    # Function to handle get
     def get(self, request, business_pk: int):
         business = self._get_business(business_pk)
         if business is None:
@@ -95,6 +100,7 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
         return response
 
 
+# Class representing DepartmentActivityImportView
 class DepartmentActivityImportView(_DepartmentActivityDataBase):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -104,6 +110,7 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Business activity records'],
     )
+    # Function to handle post
     def post(self, request, business_pk: int):
         business = self._get_business(business_pk)
         if business is None:
@@ -131,11 +138,13 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
         return Response({'created': created, 'errors': errors})
 
 
+# Class representing _DepartmentActivityReportView
 class _DepartmentActivityReportView(_DepartmentActivityDataBase):
     period: str = 'daily'
     period_label: str = 'Daily report'
 
     @extend_schema(tags=['Business activity records'])
+    # Function to handle get
     def get(self, request, business_pk: int):
         business = self._get_business(business_pk)
         if business is None:
@@ -169,6 +178,7 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
         return response
 
 
+# Class representing DepartmentActivityDailyReportView
 class DepartmentActivityDailyReportView(_DepartmentActivityReportView):
     period = 'daily'
     period_label = 'Daily report'
@@ -179,10 +189,12 @@ class DepartmentActivityDailyReportView(_DepartmentActivityReportView):
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Business activity records'],
     )
+    # Function to handle get
     def get(self, request, business_pk: int):
         return super().get(request, business_pk)
 
 
+# Class representing DepartmentActivityWeeklyReportView
 class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
     period = 'weekly'
     period_label = 'Weekly report'
@@ -193,5 +205,6 @@ class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Business activity records'],
     )
+    # Function to handle get
     def get(self, request, business_pk: int):
         return super().get(request, business_pk)

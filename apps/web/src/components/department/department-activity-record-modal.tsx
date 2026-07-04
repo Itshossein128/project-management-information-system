@@ -30,6 +30,7 @@ const EMPTY_PAYLOAD: Omit<DepartmentActivityRecordPayload, "department"> = {
   description: "",
 };
 
+// Function to manage DepartmentActivityRecordModal
 export function DepartmentActivityRecordModal({
   open,
   onOpenChange,
@@ -37,17 +38,20 @@ export function DepartmentActivityRecordModal({
   department,
 }: DepartmentActivityRecordModalProps) {
   const { t } = useTranslation();
+  // Variable holding createMutation
   const createMutation = useCreateDepartmentActivityRecord(businessId);
 
   const [form, setForm] = useState(EMPTY_PAYLOAD);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Function to manage closeAndReset
   const closeAndReset = () => {
     onOpenChange(false);
     setSubmitError(null);
     setForm(EMPTY_PAYLOAD);
   };
 
+  // Variable holding payload
   const payload = useMemo<DepartmentActivityRecordPayload>(
     () => ({
       department,
@@ -56,6 +60,7 @@ export function DepartmentActivityRecordModal({
     [department, form],
   );
 
+  // Variable holding canSubmit
   const canSubmit =
     payload.date.trim() !== "" &&
     payload.location.trim() !== "" &&

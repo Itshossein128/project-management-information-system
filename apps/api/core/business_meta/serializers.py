@@ -19,9 +19,11 @@ from .models import (
     AssignmentStatus,
 )
 
+# Global variable SLUG_PATTERN
 SLUG_PATTERN = re.compile(r'^[a-z][a-z0-9_]*$')
 
 
+# Function to handle validate slug
 def validate_slug(value: str) -> str:
     if not value or not SLUG_PATTERN.match(value):
         raise serializers.ValidationError(
@@ -30,27 +32,35 @@ def validate_slug(value: str) -> str:
     return value
 
 
+# Class representing BusinessSerializer
 class BusinessSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = Business
         fields = ['id', 'name', 'slug', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    # Function to handle validate slug
     def validate_slug(self, value):
         return validate_slug(value)
 
 
+# Class representing TableDefinitionSerializer
 class TableDefinitionSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = TableDefinition
         fields = ['id', 'business', 'name', 'slug', 'ordering', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    # Function to handle validate slug
     def validate_slug(self, value):
         return validate_slug(value)
 
 
+# Class representing FieldDefinitionSerializer
 class FieldDefinitionSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = FieldDefinition
         fields = [
@@ -59,9 +69,11 @@ class FieldDefinitionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
+    # Function to handle validate slug
     def validate_slug(self, value):
         return validate_slug(value)
 
+    # Function to handle validate
     def validate(self, attrs):
         if attrs.get('field_type') == FieldType.REFERENCE and not attrs.get('target_table'):
             raise serializers.ValidationError(
@@ -70,12 +82,15 @@ class FieldDefinitionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+# Class representing RelationDefinitionSerializer
 class RelationDefinitionSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = RelationDefinition
         fields = ['id', 'from_table', 'to_table', 'from_field', 'to_field', 'kind', 'created_at']
         read_only_fields = ['id', 'created_at']
 
+    # Function to handle validate
     def validate(self, attrs):
         from_table = attrs.get('from_table')
         to_table = attrs.get('to_table')
@@ -96,31 +111,39 @@ class RelationDefinitionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+# Class representing TableDefinitionListSerializer
 class TableDefinitionListSerializer(serializers.ModelSerializer):
     """Light serializer for listing tables (e.g. under a business)."""
+    # Class representing Meta
     class Meta:
         model = TableDefinition
         fields = ['id', 'name', 'slug', 'ordering', 'created_at', 'updated_at']
 
 
+# Class representing TableDefinitionWithFieldsSerializer
 class TableDefinitionWithFieldsSerializer(serializers.ModelSerializer):
     """Table with nested field definitions for schema-aware UI."""
     fields = FieldDefinitionSerializer(many=True, read_only=True)
 
+    # Class representing Meta
     class Meta:
         model = TableDefinition
         fields = ['id', 'business', 'name', 'slug', 'ordering', 'fields', 'created_at', 'updated_at']
 
 
+# Class representing BusinessJobPositionSerializer
 class BusinessJobPositionSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = BusinessJobPosition
         fields = ['id', 'business', 'slug', 'label', 'ordering', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at', 'business']
 
+    # Function to handle validate slug
     def validate_slug(self, value: str) -> str:
         return validate_slug(value)
 
+    # Function to handle validate
     def validate(self, attrs):
         business = attrs.get('business') or getattr(self.instance, 'business', None)
         slug = attrs.get('slug') or getattr(self.instance, 'slug', None)
@@ -133,34 +156,43 @@ class BusinessJobPositionSerializer(serializers.ModelSerializer):
         return attrs
 
 
+# Class representing JobPositionNestedSerializer
 class JobPositionNestedSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = BusinessJobPosition
         fields = ['id', 'slug', 'label', 'ordering']
 
 
+# Class representing BusinessNestedMiniSerializer
 class BusinessNestedMiniSerializer(serializers.ModelSerializer):
+    # Class representing Meta
     class Meta:
         model = Business
         fields = ['id', 'name', 'slug']
 
 
+# Class representing UserNestedMiniSerializer
 class UserNestedMiniSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
 
+    # Class representing Meta
     class Meta:
         model = get_user_model()
         fields = ['id', 'phone_number', 'first_name', 'last_name', 'full_name']
 
+    # Function to handle get full name
     def get_full_name(self, obj) -> str:
         return obj.get_full_name()
 
 
+# Class representing UserBusinessAssignmentReadSerializer
 class UserBusinessAssignmentReadSerializer(serializers.ModelSerializer):
     user = UserNestedMiniSerializer(read_only=True)
     business = BusinessNestedMiniSerializer(read_only=True)
     job_position = JobPositionNestedSerializer(read_only=True)
 
+    # Class representing Meta
     class Meta:
         model = UserBusinessAssignment
         fields = [
@@ -197,9 +229,11 @@ class UserBusinessAssignmentReadSerializer(serializers.ModelSerializer):
         ]
 
 
+# Class representing UserBusinessAssignmentWriteSerializer
 class UserBusinessAssignmentWriteSerializer(serializers.ModelSerializer):
     """Update an existing assignment (job position + work details)."""
 
+    # Class representing Meta
     class Meta:
         model = UserBusinessAssignment
         fields = [
@@ -214,6 +248,7 @@ class UserBusinessAssignmentWriteSerializer(serializers.ModelSerializer):
             'status',
         ]
 
+    # Function to handle   init
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         business_pk = self.context.get('business_pk')
@@ -222,6 +257,7 @@ class UserBusinessAssignmentWriteSerializer(serializers.ModelSerializer):
                 business_id=business_pk
             )
 
+    # Function to handle validate job position
     def validate_job_position(self, jp: BusinessJobPosition) -> BusinessJobPosition:
         business_pk = self.context.get('business_pk')
         if business_pk is not None and jp.business_id != int(business_pk):
@@ -229,6 +265,7 @@ class UserBusinessAssignmentWriteSerializer(serializers.ModelSerializer):
         return jp
 
 
+# Class representing UserBusinessAssignmentCreateSerializer
 class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=17)
     first_name = serializers.CharField(max_length=150, allow_blank=True, default='')
@@ -243,6 +280,7 @@ class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
     end_date = serializers.DateField(required=False, allow_null=True)
     status = serializers.ChoiceField(choices=AssignmentStatus.choices, default=AssignmentStatus.ACTIVE)
 
+    # Function to handle   init
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         business_pk = self.context.get('business_pk')
@@ -251,6 +289,7 @@ class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
                 business_id=business_pk
             )
 
+    # Function to handle validate phone number
     def validate_phone_number(self, value: str) -> str:
         value = value.strip()
         try:
@@ -259,12 +298,14 @@ class UserBusinessAssignmentCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(list(exc.messages)) from exc
         return value
 
+    # Function to handle validate job position
     def validate_job_position(self, jp: BusinessJobPosition) -> BusinessJobPosition:
         business_pk = self.context['business_pk']
         if jp.business_id != int(business_pk):
             raise serializers.ValidationError('Job position must belong to this business.')
         return jp
 
+    # Function to handle create
     def create(self, validated_data):
         from business_meta.assignment_services import create_assignment_for_user
 

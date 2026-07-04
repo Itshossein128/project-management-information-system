@@ -32,18 +32,23 @@ interface BusinessDetail {
 export default function BusinessJobPositionsPage() {
   const { t } = useTranslation();
   const { businessId } = useParams();
+  // Variable holding navigate
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Variable holding businessIdNum
   const businessIdNum = businessId ? Number(businessId) : Number.NaN;
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [businessError, setBusinessError] = useState<string | null>(null);
 
+  // Variable holding grid
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
+  // Variable holding ordering
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
     : undefined;
 
+  // Variable holding jobsQuery
   const jobsQuery = useJobPositionsForBusinessQuery(
     businessId ?? "",
     {
@@ -57,8 +62,11 @@ export default function BusinessJobPositionsPage() {
     isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
   );
 
+  // Variable holding createJob
   const createJob = useCreateJobPosition(businessId ?? "");
+  // Variable holding updateJob
   const updateJob = useUpdateJobPosition(businessId ?? "");
+  // Variable holding deleteJob
   const deleteJob = useDeleteJobPosition(businessId ?? "");
 
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -90,12 +98,17 @@ export default function BusinessJobPositionsPage() {
 
   if (isLoading || !isAuthenticated) return null;
 
+  // Variable holding jobs
   const jobs = jobsQuery.data?.results ?? [];
+  // Variable holding count
   const count = jobsQuery.data?.count ?? 0;
+  // Variable holding loadingJobs
   const loadingJobs = jobsQuery.isFetching;
+  // Variable holding jobsError
   const jobsError =
     jobsQuery.error instanceof Error ? jobsQuery.error.message : null;
 
+  // Function to manage resetForm
   const resetForm = () => {
     setEditingId(null);
     setSlug("");
@@ -104,6 +117,7 @@ export default function BusinessJobPositionsPage() {
     setFormError(null);
   };
 
+  // Function to manage startEdit
   const startEdit = (jp: BusinessJobPosition) => {
     setEditingId(jp.id);
     setSlug(jp.slug);
@@ -113,16 +127,19 @@ export default function BusinessJobPositionsPage() {
     setShowForm(true);
   };
 
+  // Variable holding handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
+    // Variable holding orderNum
     const orderNum = Number.parseInt(orderingInput, 10);
     if (Number.isNaN(orderNum) || orderNum < 0) {
       setFormError("Ordering must be a non-negative integer.");
       return;
     }
 
+    // Variable holding slugTrim
     const slugTrim = slug.trim().toLowerCase().replace(/\s+/g, "-");
     if (!/^[a-z][a-z0-9-]*$/.test(slugTrim)) {
       setFormError(
@@ -151,6 +168,7 @@ export default function BusinessJobPositionsPage() {
     }
   };
 
+  // Variable holding handleDelete
   const handleDelete = async (jp: BusinessJobPosition, index: number) => {
     if (!window.confirm(`Delete job position “${jp.label}” (${jp.slug})?`))
       return;
@@ -161,6 +179,7 @@ export default function BusinessJobPositionsPage() {
     }
   };
 
+  // Variable holding columns
   const columns = useMemo<ColumnDef<BusinessJobPosition>[]>(() => {
     return [
       {

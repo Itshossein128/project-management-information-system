@@ -41,8 +41,10 @@ export const BUSINESS_DEPARTMENTS = [
   },
 ] as const satisfies readonly BusinessDepartmentDef[];
 
+// Function to manage buildBusinessNavItems
 export function buildBusinessNavItems(businessId: string): NavigationItem[] {
   return BUSINESS_DEPARTMENTS.map((dept) => {
+    // Variable holding base
     const base = `${PATHS.BUSINESS}/${businessId}/${dept.slug}`;
     return {
       label: dept.slug,
@@ -54,6 +56,7 @@ export function buildBusinessNavItems(businessId: string): NavigationItem[] {
   });
 }
 
+// Function to manage findDepartmentBySlug
 export function findDepartmentBySlug(
   slug: string | undefined,
 ): (typeof BUSINESS_DEPARTMENTS)[number] | undefined {

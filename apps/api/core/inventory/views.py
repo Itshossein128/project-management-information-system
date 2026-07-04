@@ -26,10 +26,12 @@ from .serializers import (
 )
 
 
+# Class representing DepartmentActivityRecordPagination
 class DepartmentActivityRecordPagination(DefaultPageNumberPagination):
     """Department activity grids use the shared default pagination."""
 
 
+# Class representing ItemViewSet
 class ItemViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing inventory items.
@@ -51,6 +53,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         tags=['Items']
     )
     @action(detail=False, methods=['get'])
+    # Function to handle export
     def export(self, request):
         """Export all items to Excel file"""
         items = Item.objects.all().values('id', 'name', 'quantity', 'category__name')
@@ -105,6 +108,7 @@ class ItemViewSet(viewsets.ModelViewSet):
         tags=['Items']
     )
     @action(detail=False, methods=['post'])
+    # Function to handle import items
     def import_items(self, request):
         """Import items from Excel file"""
         if 'file' not in request.FILES:
@@ -182,6 +186,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch space material request', tags=['Business inventory']),
     destroy=extend_schema(summary='Delete space material request', tags=['Business inventory']),
 )
+# Class representing SpaceMaterialRequestViewSet
 class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
     """
     Business-scoped CRUD for SpaceMaterialRequest.
@@ -190,6 +195,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
     serializer_class = SpaceMaterialRequestSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
+    # Function to handle get permissions
     def get_permissions(self):
         # Read: authenticated users who can view business data; Write: HR/admin; Visitors read-only.
         return [
@@ -199,6 +205,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
             IsHrOrAdminOrReadOnly(),
         ]
 
+    # Function to handle get queryset
     def get_queryset(self):
         business_pk = self.kwargs.get('business_pk')
         qs = SpaceMaterialRequest.objects.all()
@@ -226,6 +233,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
 
         return qs.select_related('business')
 
+    # Function to handle perform create
     def perform_create(self, serializer):
         business_pk = self.kwargs.get('business_pk')
         serializer.save(business_id=business_pk)
@@ -284,6 +292,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch department activity record', tags=['Business activity records']),
     destroy=extend_schema(summary='Delete department activity record', tags=['Business activity records']),
 )
+# Class representing DepartmentActivityRecordViewSet
 class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
     """
     Business-scoped CRUD for `DepartmentActivityRecord`.
@@ -313,6 +322,7 @@ class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
         '-unit',
     }
 
+    # Function to handle get permissions
     def get_permissions(self):
         return [
             IsAuthenticated(),
@@ -321,12 +331,14 @@ class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
             IsHrOrAdminOrReadOnly(),
         ]
 
+    # Function to handle get queryset
     def get_queryset(self):
         business_pk = self.kwargs.get('business_pk')
         if business_pk is None:
             return DepartmentActivityRecord.objects.none()
         return get_department_activity_queryset(business_pk, self.request.query_params)
 
+    # Function to handle perform create
     def perform_create(self, serializer):
         business_pk = self.kwargs.get('business_pk')
         serializer.save(business_id=business_pk)

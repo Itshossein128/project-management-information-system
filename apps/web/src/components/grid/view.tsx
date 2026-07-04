@@ -94,21 +94,28 @@ export function DataTable<TData>({
   const [rowSelectionInternal, setRowSelectionInternal] =
     useState<RowSelectionState>({});
 
+  // Variable holding sorting
   const sorting = sortingProp ?? sortingInternal;
+  // Variable holding pagination
   const pagination = paginationProp ?? paginationInternal;
+  // Variable holding pageCount
   const pageCount =
     pageCountProp ??
     (manual && totalCount > 0
       ? getPageCount(totalCount, pagination.pageSize)
       : undefined);
+  // Variable holding showPaginationFooter
   const showPaginationFooter =
     manual &&
     paginationProp != null &&
     onPaginationChange != null &&
     shouldShowPagination(totalCount, pagination.pageSize);
+  // Variable holding columnFilters
   const columnFilters = columnFiltersProp ?? columnFiltersInternal;
+  // Variable holding rowSelection
   const rowSelection = rowSelectionProp ?? rowSelectionInternal;
 
+  // Variable holding showToolbar
   const showToolbar =
     toolbar != null ||
     typeof onGlobalFilterChange === "function" ||
@@ -117,6 +124,7 @@ export function DataTable<TData>({
 
   useEffect(() => {
     if (!manual || !onPaginationChange || pageCount == null) return;
+    // Variable holding maxIndex
     const maxIndex = pageCount - 1;
     if (pagination.pageIndex > maxIndex) {
       onPaginationChange({ ...pagination, pageIndex: Math.max(0, maxIndex) });
@@ -130,6 +138,7 @@ export function DataTable<TData>({
     pagination,
   ]);
 
+  // Variable holding withSelectionColumns
   const withSelectionColumns = useMemo<ColumnDef<TData, unknown>[]>(() => {
     if (!enableRowSelection) return columns;
 
@@ -175,6 +184,7 @@ export function DataTable<TData>({
     return [selectionColumn, ...columns];
   }, [columns, enableRowSelection, name]);
 
+  // Variable holding table
   const table = useReactTable({
     data,
     columns: withSelectionColumns,
@@ -186,30 +196,35 @@ export function DataTable<TData>({
     manualFiltering: manual,
     manualPagination: manual,
     onSortingChange: (updater) => {
+      // Variable holding next
       const next =
         typeof updater === "function" ? updater(sorting) : updater;
       onSortingChange?.(next);
       setSortingInternal(next);
     },
     onPaginationChange: (updater) => {
+      // Variable holding next
       const next =
         typeof updater === "function" ? updater(pagination) : updater;
       onPaginationChange?.(next);
       setPaginationInternal(next);
     },
     onColumnFiltersChange: (updater) => {
+      // Variable holding next
       const next =
         typeof updater === "function" ? updater(columnFilters) : updater;
       onColumnFiltersChange?.(next);
       setColumnFiltersInternal(next);
     },
     onRowSelectionChange: (updater) => {
+      // Variable holding next
       const next =
         typeof updater === "function" ? updater(rowSelection) : updater;
       onRowSelectionChange?.(next);
       setRowSelectionInternal(next);
     },
     onGlobalFilterChange: (updater) => {
+      // Variable holding next
       const next = typeof updater === "function" ? updater(globalFilter ?? "") : updater;
       onGlobalFilterChange?.(String(next));
     },

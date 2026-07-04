@@ -63,6 +63,7 @@ export function JalaliDatePicker({
   minDate,
   maxDate,
 }: JalaliDatePickerProps) {
+  // Variable holding inputId
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
 
   return (
@@ -80,6 +81,7 @@ export function JalaliDatePicker({
           name={name}
           value={value || ""}
           onChange={(date) => {
+            // Variable holding next
             const next = Array.isArray(date) ? date[0] ?? null : date ?? null;
             onChange(dateObjectToIso(next as DateObject | null));
           }}

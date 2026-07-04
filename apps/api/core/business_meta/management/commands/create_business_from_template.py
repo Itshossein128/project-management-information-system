@@ -2,9 +2,11 @@ from django.core.management.base import BaseCommand
 from business_meta.services import create_business_from_template, get_available_templates
 
 
+# Class representing Command
 class Command(BaseCommand):
     help = 'Create a business with tables and fields from a template (e.g. warehouse).'
 
+    # Function to handle add arguments
     def add_arguments(self, parser):
         parser.add_argument('name', type=str, help='Business display name')
         parser.add_argument('slug', type=str, help='Unique slug (lowercase, letters, numbers, underscores)')
@@ -16,6 +18,7 @@ class Command(BaseCommand):
             help='Template identifier',
         )
 
+    # Function to handle handle
     def handle(self, *args, **options):
         name = options['name']
         slug = options['slug']

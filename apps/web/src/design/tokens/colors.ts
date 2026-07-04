@@ -4,6 +4,7 @@
  * or reference `palette` / `semantic` for programmatic styling.
  */
 
+// Variable holding palette
 export const palette = {
   brand: {
     50: "var(--palette-brand-50)",
@@ -100,6 +101,7 @@ export const palette = {
 } as const;
 
 /** Semantic tokens mapped in app.css — use via Tailwind utilities. */
+// Variable holding semantic
 export const semantic = {
   background: "var(--background)",
   foreground: "var(--foreground)",

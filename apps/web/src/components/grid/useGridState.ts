@@ -62,8 +62,11 @@ export interface UseGridStateResult {
 
 const DEFAULT_PAGE_SIZE = 20;
 
+// Function to manage useGridState
 export function useGridState(options: UseGridStateOptions = {}): UseGridStateResult {
+  // Variable holding pageSize
   const pageSize = options.initialPageSize ?? options.pageSize ?? DEFAULT_PAGE_SIZE;
+  // Variable holding debounceMs
   const debounceMs = options.searchDebounceMs ?? options.debounceMs ?? 350;
 
   const [sorting, setSorting] = useState<GridState["sorting"]>(
@@ -88,6 +91,7 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
   );
 
   useEffect(() => {
+    // Variable holding handle
     const handle = window.setTimeout(() => {
       setDebouncedSearch(searchInput);
     }, debounceMs);
@@ -98,10 +102,12 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [debouncedSearch]);
 
+  // Variable holding resetPage
   const resetPage = useCallback(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, []);
 
+  // Variable holding setSearch
   const setSearch = useCallback(
     (value: string) => {
       setSearchInput(value);
@@ -110,6 +116,7 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
     [resetPage],
   );
 
+  // Variable holding setSortingWithReset
   const setSortingWithReset = useCallback(
     (
       updater:
@@ -122,6 +129,7 @@ export function useGridState(options: UseGridStateOptions = {}): UseGridStateRes
     [resetPage],
   );
 
+  // Variable holding state
   const state = useMemo<GridState>(
     () => ({
       sorting,

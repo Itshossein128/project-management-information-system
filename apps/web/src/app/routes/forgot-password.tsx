@@ -27,11 +27,13 @@ export default function ForgotPassword() {
     setError(null);
     setSubmitting(true);
     try {
+      // Variable holding res
       const res = await apiFetch("/auth/forgot-password/", {
         method: "POST",
         body: JSON.stringify({ phone_number: phoneNumber }),
       });
       if (!res.ok) {
+        // Function to manage data
         const data = (await res.json().catch(() => ({}))) as {
           phone_number?: string[];
         };

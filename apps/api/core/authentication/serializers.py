@@ -16,6 +16,7 @@ from .services import (
 User = get_user_model()
 
 
+# Class representing UserRegistrationSerializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer for user registration.
@@ -34,6 +35,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         help_text="Must match the password field."
     )
 
+    # Class representing Meta
     class Meta:
         model = User
         fields = ['id', 'phone_number', 'password', 'password_confirm', 'first_name', 'last_name']
@@ -44,12 +46,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'last_name': {'required': True},
         }
 
+    # Function to handle validate phone number
     def validate_phone_number(self, value: str) -> str:
         """Validate phone number uniqueness."""
         if User.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("A user with this phone number already exists.")
         return value
 
+    # Function to handle validate
     def validate(self, attrs: dict) -> dict:
         """Validate password confirmation matches password."""
         if attrs['password'] != attrs['password_confirm']:
@@ -58,6 +62,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             })
         return attrs
 
+    # Function to handle create
     def create(self, validated_data: dict) -> User:
         """Create user using registration service."""
         validated_data.pop('password_confirm')
@@ -70,6 +75,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
 
 
+# Class representing UserSerializer
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for user data (read-only for authenticated endpoints).
@@ -83,6 +89,7 @@ class UserSerializer(serializers.ModelSerializer):
         help_text="Display name: first_name + last_name"
     )
 
+    # Class representing Meta
     class Meta:
         model = User
         fields = [
@@ -91,13 +98,16 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'date_joined', 'roles', 'full_name']
 
+    # Function to handle get roles
     def get_roles(self, obj) -> list[str]:
         return list(obj.groups.values_list('name', flat=True))
 
+    # Function to handle get full name
     def get_full_name(self, obj) -> str:
         return obj.get_full_name()
 
 
+# Class representing UserListSerializer
 class UserListSerializer(serializers.ModelSerializer):
     """
     User row for HR / admin list endpoint (read-only, includes account status).
@@ -108,6 +118,7 @@ class UserListSerializer(serializers.ModelSerializer):
         help_text="All business–job lines for the user, ordered by business name (UI may show first 2).",
     )
 
+    # Class representing Meta
     class Meta:
         model = User
         fields = [
@@ -133,12 +144,15 @@ class UserListSerializer(serializers.ModelSerializer):
             "assignments_preview",
         )
 
+    # Function to handle get roles
     def get_roles(self, obj) -> list[str]:
         return list(obj.groups.values_list("name", flat=True))
 
+    # Function to handle get full name
     def get_full_name(self, obj) -> str:
         return obj.get_full_name()
 
+    # Function to handle get assignments preview
     def get_assignments_preview(self, obj) -> list[dict]:
         from business_meta.models import UserBusinessAssignment
 
@@ -155,6 +169,7 @@ class UserListSerializer(serializers.ModelSerializer):
         ]
 
 
+# Class representing LoginSerializer
 class LoginSerializer(serializers.Serializer):
     """
     Serializer for login credentials.
@@ -169,6 +184,7 @@ class LoginSerializer(serializers.Serializer):
     )
 
 
+# Class representing ChangePasswordSerializer
 class ChangePasswordSerializer(serializers.Serializer):
     """
     Serializer for password change.
@@ -193,6 +209,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         help_text="Confirm new password"
     )
 
+    # Function to handle validate
     def validate(self, attrs: dict) -> dict:
         """Validate password confirmation matches."""
         if attrs['new_password'] != attrs['new_password_confirm']:
@@ -202,6 +219,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         return attrs
 
 
+# Class representing ForgotPasswordSerializer
 class ForgotPasswordSerializer(serializers.Serializer):
     """
     Serializer for forgot password request.
@@ -213,6 +231,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
     )
 
 
+# Class representing ResetPasswordSerializer
 class ResetPasswordSerializer(serializers.Serializer):
     """
     Serializer for password reset with token.
@@ -235,6 +254,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         help_text="Confirm new password"
     )
 
+    # Function to handle validate
     def validate(self, attrs: dict) -> dict:
         """Validate password confirmation matches."""
         if attrs['new_password'] != attrs['new_password_confirm']:

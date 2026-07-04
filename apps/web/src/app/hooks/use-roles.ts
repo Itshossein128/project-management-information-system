@@ -1,12 +1,14 @@
 import { ROLES } from "@/config/roles";
 import { useAuth } from "@/app/contexts/auth-context";
 
+// Function to manage useRoles
 export function useRoles(): {
   roles: ROLES[];
   hasRole: (role: ROLES) => boolean;
   hasAnyRole: (roles: readonly ROLES[]) => boolean;
 } {
   const { user, hasRole } = useAuth();
+  // Function to manage roles
   const roles = (user?.roles ?? []) as ROLES[];
 
   return {
@@ -23,13 +25,17 @@ export type Permission =
   | "job-positions:write"
   | "users:read";
 
+// Function to manage usePermission
 export function usePermission(): {
   can: (permission: Permission) => boolean;
 } {
   const { hasRole } = useAuth();
 
+  // Variable holding isAdmin
   const isAdmin = hasRole(ROLES.ADMIN);
+  // Variable holding isHr
   const isHr = hasRole(ROLES.HR);
+  // Variable holding isVisitor
   const isVisitor = hasRole(ROLES.VISITOR);
 
   return {
