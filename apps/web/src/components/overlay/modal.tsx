@@ -1,6 +1,7 @@
 import { Button } from "@/components/form";
 import { cn } from "@/app/lib/utils";
 import { useEffect } from "react";
+import { X } from "lucide-react";
 
 export interface ModalProps {
   open: boolean;
@@ -63,10 +64,11 @@ export function Modal({
             id={`button-close${idBase.charAt(0).toUpperCase() + idBase.slice(1)}Modal`}
             type="button"
             variant="ghost"
-            size="sm"
+            size="icon-sm"
+            aria-label="Close"
             onClick={() => onOpenChange(false)}
           >
-            ×
+            <X className="size-4" aria-hidden />
           </Button>
         </div>
         <div id={`modal-${idBase}Content`} className="min-h-0 flex-1 overflow-y-auto p-4">
