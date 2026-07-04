@@ -19,6 +19,12 @@
     "success": "موفق",
     "cancel": "لغو"
   },
+  "form": {
+    "sticky": {
+      "lockField": "قفل کردن مقدار فیلد",
+      "unlockField": "باز کردن قفل مقدار فیلد"
+    }
+  },
   "grid": {
     "pageInfo": "صفحه {{page}} از {{totalPages}} ({{count}} مورد)",
     "prev": "قبلی",

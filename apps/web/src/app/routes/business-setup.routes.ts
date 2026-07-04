@@ -1,19 +1,16 @@
 import { route } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "../routeVars";
 
-/**
- * Admin routes under `/businesses`.
- * Static segments (`create`, `.../setup`) must be registered before `businesses/:businessId`.
- * No pathless layout wrapper — avoids client/server route matching issues.
- */
-export const businessSetupRoutes = [
+export const projectRoutes = [
+  route(`${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`, ROUTES.BUSINESS_CREATE),
+  route(`${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_OVERVIEW}`, ROUTES.PROJECT_OVERVIEW),
+  route(`${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_WBS}`, ROUTES.PROJECT_WBS),
   route(
-    `${PATHS.BUSINESS}/${PATHS.BUSINESS_CREATE}`,
-    ROUTES.BUSINESS_CREATE,
+    `${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_MEMBERS}`,
+    ROUTES.PROJECT_MEMBERS,
   ),
-  route(
-    `${PATHS.BUSINESS}/:businessId/${PATHS.BUSINESS_ADMIN_SETUP}`,
-    ROUTES.BUSINESS_SETUP_SCHEMA,
-  ),
-  route(PATHS.BUSINESS, ROUTES.BUSINESS_SETUP),
+  route(PATHS.PROJECT, ROUTES.PROJECT_LIST),
 ];
+
+/** @deprecated use projectRoutes */
+export const businessSetupRoutes = projectRoutes;

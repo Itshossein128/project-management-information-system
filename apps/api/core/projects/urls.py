@@ -1,11 +1,11 @@
 from django.urls import path, include
 
 from projects.views import ProjectViewSet
+from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
 from business_meta.views import (
     TableDefinitionViewSet,
     FieldDefinitionViewSet,
     ProjectPositionViewSet,
-    ProjectMemberViewSet,
 )
 from business_meta.data_views import (
     DynamicRowsView,
@@ -27,21 +27,25 @@ position_detail = ProjectPositionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
-member_detail = ProjectMemberViewSet.as_view(
-    {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
-)
+member_detail = ProjectMemberViewSet.as_view({'patch': 'partial_update'})
+member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions'})
 
 urlpatterns = [
     path('', ProjectViewSet.as_view({'get': 'list', 'post': 'create'}), name='project-list'),
     path('templates/', ProjectViewSet.as_view({'get': 'templates'}), name='project-templates'),
     path('from_template/', ProjectViewSet.as_view({'post': 'from_template'}), name='project-from-template'),
     path('<uuid:project_pk>/', ProjectViewSet.as_view(
-        {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
+        {'get': 'retrieve', 'patch': 'partial_update'}
     ), name='project-detail'),
     path('<uuid:project_pk>/positions/', position_list, name='project-position-list'),
     path('<uuid:project_pk>/positions/<uuid:pk>/', position_detail, name='project-position-detail'),
     path('<uuid:project_pk>/members/', member_list, name='project-member-list'),
-    path('<uuid:project_pk>/members/<uuid:pk>/', member_detail, name='project-member-detail'),
+    path('<uuid:project_pk>/members/<uuid:user_id>/', member_detail, name='project-member-detail'),
+    path(
+        '<uuid:project_pk>/members/<uuid:user_id>/permissions/',
+        member_permissions,
+        name='project-member-permissions',
+    ),
     path('<uuid:project_pk>/tables/', table_list, name='tabledefinition-list'),
     path('<uuid:project_pk>/tables/<int:pk>/', table_detail, name='tabledefinition-detail'),
     path(
@@ -56,4 +60,5 @@ urlpatterns = [
     path('<uuid:project_pk>/tables/<str:table_slug>/rows/import/', DynamicRowsImportView.as_view(), name='dynamic-rows-import'),
     path('<uuid:project_pk>/tables/<str:table_slug>/rows/<str:row_id>/', DynamicRowDetailView.as_view(), name='dynamic-row-detail'),
     path('<uuid:project_pk>/', include('inventory.project_urls')),
+    path('<uuid:project_pk>/', include('wbs.urls')),
 ]

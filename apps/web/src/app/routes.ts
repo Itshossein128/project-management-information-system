@@ -14,7 +14,6 @@ export default [
   route(PATHS.FORGOT_PASSWORD, ROUTES.FORGOT_PASSWORD),
   route(PATHS.RESET_PASSWORD, ROUTES.RESET_PASSWORD),
 
-  // Auth → app shell: fixed sidebar (Home + HR); workflows use in-page links under `/hr/*` and `/businesses/:id/*`.
   layout(ROUTES.AUTH_LAYOUT, [
     layout(ROUTES.PROTECTED_LAYOUT, [
       route(PATHS.HOME, ROUTES.HOME),

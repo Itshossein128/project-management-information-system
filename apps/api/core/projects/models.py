@@ -1,5 +1,8 @@
 from django.conf import settings
 from django.db import models
+from treebeard.mp_tree import MP_Node
+
+import uuid
 
 from common.models import UUIDModel
 
@@ -36,6 +39,7 @@ class Project(UUIDModel):
     )
     cut_off_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'projects'
@@ -53,21 +57,16 @@ class Project(UUIDModel):
         return self.project_code
 
 
-class WBS(UUIDModel):
+class WBS(MP_Node):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='wbs_nodes')
-    parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='children',
-    )
     wbs_code = models.CharField(max_length=30)
     wbs_name = models.CharField(max_length=200)
-    level = models.SmallIntegerField()
     weight_physical = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     weight_financial = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     description = models.TextField(blank=True, default='')
+
+    node_order_by = ['wbs_code']
 
     class Meta:
         db_table = 'wbs'

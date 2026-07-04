@@ -19,6 +19,12 @@
     "success": "Success",
     "cancel": "Cancel"
   },
+  "form": {
+    "sticky": {
+      "lockField": "Lock field value",
+      "unlockField": "Unlock field value"
+    }
+  },
   "grid": {
     "pageInfo": "Page {{page}} of {{totalPages}} ({{count}} total)",
     "prev": "Previous",

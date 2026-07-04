@@ -1,3 +1,4 @@
+import { Lock, LockOpen } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/app/lib/utils";
@@ -22,6 +23,13 @@ export type FieldProps = {
   ids?: Partial<FieldIds>;
   /** Forwarded to the label `htmlFor` when provided. */
   htmlFor?: string;
+  /**
+   * When set, shows a lock toggle beside the label. While `true`, the parent
+   * should persist the field value across submit and page reload.
+   */
+  sticky?: boolean;
+  onStickyChange?: (sticky: boolean) => void;
+  stickyAriaLabel?: string;
   children: (ids: FieldIds) => React.ReactNode;
 };
 
@@ -33,6 +41,9 @@ export function Field({
   className,
   ids,
   htmlFor,
+  sticky,
+  onStickyChange,
+  stickyAriaLabel,
   children,
 }: FieldProps) {
   const resolvedIds: FieldIds = {
@@ -45,13 +56,34 @@ export function Field({
   return (
     <div id={resolvedIds.containerId} className={cn("grid gap-1.5", className)}>
       {label != null && (
-        <label
-          id={resolvedIds.labelId}
-          htmlFor={htmlFor}
-          className="text-sm font-medium leading-none"
-        >
-          {label}
-        </label>
+        <div className="flex items-center justify-between gap-2">
+          <label
+            id={resolvedIds.labelId}
+            htmlFor={htmlFor}
+            className="text-sm font-medium leading-none"
+          >
+            {label}
+          </label>
+          {onStickyChange != null ? (
+            <button
+              type="button"
+              id={`button-${name}StickyToggle`}
+              className={cn(
+                "text-muted-foreground hover:text-foreground inline-flex size-7 shrink-0 items-center justify-center rounded-md transition-colors",
+                sticky && "text-foreground",
+              )}
+              onClick={() => onStickyChange(!sticky)}
+              aria-label={stickyAriaLabel}
+              aria-pressed={sticky ?? false}
+            >
+              {sticky ? (
+                <Lock className="size-3.5" aria-hidden />
+              ) : (
+                <LockOpen className="size-3.5" aria-hidden />
+              )}
+            </button>
+          ) : null}
+        </div>
       )}
 
       {children(resolvedIds)}

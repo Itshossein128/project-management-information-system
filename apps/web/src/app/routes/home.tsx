@@ -13,11 +13,26 @@ import type { Route } from "./+types/home";
  * uses cards under each business (`/businesses/:id/...`).
  */
 export interface BusinessItem {
-  id: number;
+  id: string;
+  project_id?: string;
   name: string;
+  project_name?: string;
   slug: string;
-  created_at: string;
-  updated_at: string;
+  project_code?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+function projectIdOf(b: BusinessItem): string {
+  return b.project_id ?? b.id;
+}
+
+function projectNameOf(b: BusinessItem): string {
+  return b.project_name ?? b.name;
+}
+
+function projectCodeOf(b: BusinessItem): string {
+  return b.project_code ?? b.slug;
 }
 
 interface BusinessesListResponse {
@@ -83,9 +98,9 @@ export default function Home() {
         {businesses.length > 0
           ? businesses.map((b, index) => (
               <Link
-                key={b.id}
+                key={projectIdOf(b)}
                 id={`link-homeBusiness-${index}`}
-                to={`/${PATHS.BUSINESS}/${b.id}`}
+                to={`/${PATHS.BUSINESS}/${projectIdOf(b)}/${PATHS.PROJECT_OVERVIEW}`}
               >
                 <Card className='card-interactive h-full'>
                   <CardHeader>
@@ -93,7 +108,7 @@ export default function Home() {
                       className='text-base'
                       id={`text-homeBusinessName-${index}`}
                     >
-                      {b.name}
+                      {projectNameOf(b)}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -101,7 +116,7 @@ export default function Home() {
                       className='text-muted-foreground text-sm'
                       id={`text-homeBusinessSlug-${index}`}
                     >
-                      {t("home.businessSlugLabel", { slug: b.slug })}
+                      {t("home.businessSlugLabel", { slug: projectCodeOf(b) })}
                     </p>
                   </CardContent>
                 </Card>

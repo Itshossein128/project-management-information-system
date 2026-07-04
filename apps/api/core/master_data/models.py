@@ -21,6 +21,18 @@ class Unit(UUIDModel):
         return self.unit_name
 
 
+class Permission(UUIDModel):
+    codename = models.CharField(max_length=60, unique=True)
+    label = models.CharField(max_length=120)
+
+    class Meta:
+        db_table = 'permissions'
+        ordering = ['codename']
+
+    def __str__(self):
+        return self.codename
+
+
 class Role(UUIDModel):
     role_name = models.CharField(max_length=60, unique=True)
     description = models.TextField(blank=True, default='')
@@ -30,6 +42,18 @@ class Role(UUIDModel):
 
     def __str__(self):
         return self.role_name
+
+
+class RolePermission(UUIDModel):
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='role_permissions')
+    permission_codename = models.CharField(max_length=60)
+
+    class Meta:
+        db_table = 'role_permissions'
+        unique_together = [['role', 'permission_codename']]
+
+    def __str__(self):
+        return f'{self.role.role_name} — {self.permission_codename}'
 
 
 class ProjectPosition(UUIDModel):
@@ -60,6 +84,8 @@ class ProjectPosition(UUIDModel):
 
 class MemberStatus(models.TextChoices):
     ACTIVE = 'active', 'Active'
+    INACTIVE = 'inactive', 'Inactive'
+    INVITED = 'invited', 'Invited'
     SUSPENDED = 'suspended', 'Suspended'
     ARCHIVED = 'archived', 'Archived'
 
@@ -80,7 +106,10 @@ class ProjectMember(UUIDModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='project_memberships',
+        null=True,
+        blank=True,
     )
+    invited_email = models.EmailField(max_length=254, blank=True, default='')
     status = models.CharField(max_length=20, choices=MemberStatus.choices, default=MemberStatus.ACTIVE)
     joined_at = models.DateTimeField(auto_now_add=True)
     position = models.ForeignKey(
@@ -100,10 +129,21 @@ class ProjectMember(UUIDModel):
 
     class Meta:
         db_table = 'project_members'
-        unique_together = [['project', 'user']]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'user'],
+                condition=models.Q(user__isnull=False),
+                name='unique_project_user_member',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.user} @ {self.project}'
+
+    def has_permission(self, codename: str) -> bool:
+        from permissions.services import member_has_permission
+
+        return member_has_permission(self, codename)
 
 
 class ProjectMemberRole(UUIDModel):
@@ -116,3 +156,21 @@ class ProjectMemberRole(UUIDModel):
 
     def __str__(self):
         return f'{self.member_id} — {self.role.role_name}'
+
+
+class ProjectMemberPermissionOverride(UUIDModel):
+    member = models.ForeignKey(
+        ProjectMember,
+        on_delete=models.CASCADE,
+        related_name='permission_overrides',
+    )
+    permission_codename = models.CharField(max_length=60)
+    is_granted = models.BooleanField()
+
+    class Meta:
+        db_table = 'project_member_permission_overrides'
+        unique_together = [['member', 'permission_codename']]
+
+    def __str__(self):
+        state = 'grant' if self.is_granted else 'deny'
+        return f'{self.member_id} — {self.permission_codename} ({state})'

@@ -80,7 +80,7 @@ def get_department_activity_queryset(
     else:
         qs = qs.order_by('-date', '-created_at')
 
-    return qs.select_related('business')
+    return qs.select_related('project')
 
 
 def require_valid_department(department: str | None) -> str | None:

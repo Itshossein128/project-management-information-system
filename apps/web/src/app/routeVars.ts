@@ -15,7 +15,11 @@ export const ROUTES = {
   BUSINESS_JOB_POSITIONS: "routes/business-job-positions.tsx",
   BUSINESS_TABLE: "routes/business-table.tsx",
   BUSINESS_SETUP: "routes/business-setup.tsx",
-  BUSINESS_CREATE: "routes/business-create.tsx",
+  BUSINESS_CREATE: "routes/project-create-wizard.tsx",
+  PROJECT_LIST: "routes/project-list.tsx",
+  PROJECT_OVERVIEW: "routes/project-overview.tsx",
+  PROJECT_WBS: "routes/project-wbs.tsx",
+  PROJECT_MEMBERS: "routes/project-members.tsx",
   BUSINESS_SETUP_SCHEMA: "routes/business-setup-schema.tsx",
   USERS: "routes/hr/users.tsx",
   BUSINESS_BUILDINGS: "routes/business-buildings.tsx",
@@ -39,8 +43,13 @@ export const PATHS = {
   API_PROJECTS: "v1/projects",
   /** @deprecated use PROJECT */
   BUSINESS: "projects",
-  /** `/businesses/create` */
-  BUSINESS_CREATE: "create",
+  PROJECT_OVERVIEW: "overview",
+  PROJECT_WBS: "wbs",
+  PROJECT_SETTINGS: "settings",
+  PROJECT_MEMBERS: "members",
+  PROJECT_NEW: "new",
+  /** @deprecated use PROJECT_NEW */
+  BUSINESS_CREATE: "new",
   /** `/businesses/:id/setup` (tables & fields admin) */
   BUSINESS_ADMIN_SETUP: "setup",
   /** App HR area: `/hr` (hub) and `hr/...` sub-routes. */

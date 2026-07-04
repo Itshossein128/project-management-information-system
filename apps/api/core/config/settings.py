@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'treebeard',
     'common',
     'authentication',
     'master_data',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'storage',
     'events',
     'business_meta',
+    'wbs',
     'inventory',
 ]
 

@@ -12,6 +12,9 @@ export type TextAreaProps = Omit<React.ComponentProps<"textarea">, "name"> & {
   helpText?: FieldProps["helpText"];
   error?: FieldProps["error"];
   fieldClassName?: string;
+  sticky?: FieldProps["sticky"];
+  onStickyChange?: FieldProps["onStickyChange"];
+  stickyAriaLabel?: FieldProps["stickyAriaLabel"];
 };
 
 export function TextArea({
@@ -21,6 +24,9 @@ export function TextArea({
   helpText,
   error,
   fieldClassName,
+  sticky,
+  onStickyChange,
+  stickyAriaLabel,
   className,
   ...props
 }: TextAreaProps) {
@@ -33,7 +39,17 @@ export function TextArea({
     .join(" ");
 
   return (
-    <Field name={name} label={label} helpText={helpText} error={error} htmlFor={inputId} className={fieldClassName}>
+    <Field
+      name={name}
+      label={label}
+      helpText={helpText}
+      error={error}
+      htmlFor={inputId}
+      className={fieldClassName}
+      sticky={sticky}
+      onStickyChange={onStickyChange}
+      stickyAriaLabel={stickyAriaLabel}
+    >
       {() => (
         <textarea
           id={inputId}
