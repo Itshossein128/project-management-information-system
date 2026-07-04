@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from "lucide-react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -13,24 +14,31 @@ function PasswordInput({
   ...props
 }: React.ComponentProps<"input">) {
   const [visible, setVisible] = React.useState(false);
-  const inputId = typeof props.id === "string" && props.id.trim() ? props.id.trim() : "password";
+  const { t } = useTranslation();
+  const inputId =
+    typeof props.id === "string" && props.id.trim()
+      ? props.id.trim()
+      : "password";
 
   return (
-    <div className='relative'>
+    <div className="relative">
       <Input
-        dir='ltr'
+        dir="ltr"
         type={visible ? "text" : "password"}
-        autoComplete='current-password'
+        autoComplete="current-password"
         className={className}
         {...props}
       />
       <Button
         id={`button-togglePasswordVisibility-${inputId}`}
-        type='button'
-        variant='ghost'
-        size='icon'
-        aria-label={visible ? "Hide password" : "Show password"}
-        className='absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground'
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={
+          visible ? t("common.hidePassword") : t("common.showPassword")
+        }
+        title={visible ? t("common.hidePassword") : t("common.showPassword")}
+        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
         onClick={() => setVisible((v) => !v)}
       >
         {visible ? <EyeOff size={16} /> : <Eye size={16} />}
