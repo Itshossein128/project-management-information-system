@@ -5,10 +5,10 @@ from master_data.models import ProjectMember, ProjectMemberPermissionOverride, R
 
 def get_role_permission_codenames(member: ProjectMember) -> set[str]:
     codenames: set[str] = set()
-    for member_role in member.member_roles.select_related('role').all():
-        role_perms = RolePermission.objects.filter(role=member_role.role).values_list(
-            'permission_codename', flat=True
-        )
+    # ⚡ Bolt: Removed .select_related() and used .all() to utilize prefetch cache
+    for member_role in member.member_roles.all():
+        # ⚡ Bolt: Iterate over .all() to utilize prefetch cache instead of querying DB
+        role_perms = [rp.permission_codename for rp in member_role.role.role_permissions.all()]
         codenames.update(role_perms)
     return codenames
 
