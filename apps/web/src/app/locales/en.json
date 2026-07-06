@@ -279,5 +279,18 @@
     "tools": "Tools",
     "startDate": "Start date",
     "endDate": "End date"
+  },
+  "wbs": {
+    "expand": "Expand node",
+    "collapse": "Collapse node",
+    "edit": "Edit",
+    "weightWarning": "Children weight sum is not 100%",
+    "addChild": "Add child",
+    "deleteDisabled": "Remove children first",
+    "delete": "Delete",
+    "code": "WBS code",
+    "name": "Name",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

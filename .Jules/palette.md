@@ -9,3 +9,8 @@
 ## 2024-07-04 - Localized Password Toggle Aria Labels
 **Learning:** Hardcoded ARIA labels for icon-only buttons like the password visibility toggle reduce accessibility for non-English speakers (like Persian users in this app).
 **Action:** Always use i18n translation functions (`t("common.showPassword")`) for `aria-label` and `title` attributes on interactive elements, ensuring screen readers announce actions correctly in the user's selected language.
+## 2024-07-06 - Component Localization
+
+**Learning:** When adding ARIA labels or updating UI strings in icon-only buttons, it's a good practice to localize the new strings at the same time if the project uses i18n, to ensure the UI is consistent across languages.
+
+**Action:** When updating existing strings to include translation wrappers, always update all localized string resources (`en.json`, `fa.json`) to maintain parity.
