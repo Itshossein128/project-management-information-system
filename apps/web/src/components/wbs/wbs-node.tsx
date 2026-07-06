@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   createWBSNode,
   deleteWBSNode,
@@ -18,6 +19,7 @@ interface WBSNodeRowProps {
 }
 
 export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(true);
@@ -74,7 +76,12 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
         style={{ paddingInlineStart: indent + 8 }}
       >
         {hasChildren ? (
-          <button type="button" onClick={() => setExpanded(!expanded)} className="text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="text-muted-foreground"
+            aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
+          >
             {expanded ? <ChevronDown className="size-4" /> : <ChevronLeft className="size-4" />}
           </button>
         ) : (
@@ -104,7 +111,12 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
           </span>
         )}
 
-        <button type="button" className="opacity-0 group-hover:opacity-100" onClick={() => setEditing(true)}>
+        <button
+          type="button"
+          className="opacity-0 group-hover:opacity-100"
+          onClick={() => setEditing(true)}
+          aria-label={t("wbs.edit")}
+        >
           <Pencil className="size-3.5 text-muted-foreground" />
         </button>
 
@@ -113,18 +125,18 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
         )}
 
         {weightWarning && (
-          <span className="text-xs text-amber-600" title="مجموع وزن فرزندان 100% نیست">⚠</span>
+          <span className="text-xs text-amber-600" title={t("wbs.weightWarning")}>⚠</span>
         )}
 
         <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100">
-          <Button variant="ghost" size="icon-sm" onClick={() => setAddingChild(true)} title="افزودن فرزند">
+          <Button variant="ghost" size="icon-sm" onClick={() => setAddingChild(true)} title={t("wbs.addChild")}>
             <Plus className="size-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
             disabled={hasChildren}
-            title={hasChildren ? "ابتدا فرزندان را حذف کنید" : "حذف"}
+            title={hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
             onClick={() => deleteMutation.mutate()}
           >
             <Trash2 className="size-4" />
@@ -134,12 +146,12 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
 
       {addingChild && (
         <div className="flex flex-wrap gap-2 py-2" style={{ paddingInlineStart: indent + 32 }}>
-          <Input placeholder="کد WBS" value={childCode} onChange={(e) => setChildCode(e.target.value)} className="h-8 w-24" />
-          <Input placeholder="نام" value={childName} onChange={(e) => setChildName(e.target.value)} className="h-8 max-w-xs" />
+          <Input placeholder={t("wbs.code")} value={childCode} onChange={(e) => setChildCode(e.target.value)} className="h-8 w-24" />
+          <Input placeholder={t("wbs.name")} value={childName} onChange={(e) => setChildName(e.target.value)} className="h-8 max-w-xs" />
           <Button size="sm" variant="primary" loading={createMutation.isPending} onClick={() => createMutation.mutate()}>
-            ذخیره
+            {t("wbs.save")}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setAddingChild(false)}>انصراف</Button>
+          <Button size="sm" variant="ghost" onClick={() => setAddingChild(false)}>{t("wbs.cancel")}</Button>
         </div>
       )}
 
