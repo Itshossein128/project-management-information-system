@@ -13,9 +13,8 @@ class RoleSerializer(serializers.ModelSerializer):
         fields = ['id', 'role_name', 'description', 'permissions']
 
     def get_permissions(self, obj):
-        return list(
-            obj.role_permissions.values_list('permission_codename', flat=True)
-        )
+        # ⚡ Bolt: Iterating over .all() instead of .values_list() to utilize prefetch cache
+        return [rp.permission_codename for rp in obj.role_permissions.all()]
 
 
 class ProjectMemberListSerializer(serializers.ModelSerializer):
@@ -56,7 +55,8 @@ class ProjectMemberListSerializer(serializers.ModelSerializer):
         return ''
 
     def get_roles(self, obj):
-        return [mr.role.role_name for mr in obj.member_roles.select_related('role').all()]
+        # ⚡ Bolt: Removed .select_related() to prevent overriding prefetch cache
+        return [mr.role.role_name for mr in obj.member_roles.all()]
 
     def get_last_login(self, obj):
         if obj.user_id and obj.user.last_login:
