@@ -35,6 +35,8 @@ class AuditLogMiddlewareTests(APITestCase):
             {
                 'project_code': 'AUD-001',
                 'project_name': 'Audit Test Project',
+                'employer': 'Test Employer',
+                'start_date': '2023-01-01',
             },
             format='json',
         )
