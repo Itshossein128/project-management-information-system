@@ -83,7 +83,7 @@ class ProjectCreateEventIntegrationTests(APITestCase):
 
         response = self.client.post(
             reverse('project-list'),
-            {'project_code': 'evt-001', 'project_name': 'Event Test'},
+            {'project_code': 'evt-001', 'project_name': 'Event Test', 'employer': 'Test', 'start_date': '2023-01-01'},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

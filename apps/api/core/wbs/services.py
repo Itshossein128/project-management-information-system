@@ -126,6 +126,10 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for first_child position.')
         node.move(target_parent, pos='first-child')
+    elif pos == 'sorted_child':
+        if target_parent is None:
+            raise WBSValidationError('new_parent_id is required for sorted_child position.')
+        node.move(target_parent, pos='sorted-child')
     elif pos == 'last_child':
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for last_child position.')
