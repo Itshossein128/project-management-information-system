@@ -7,15 +7,21 @@ from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-gw$5z@-^7ca^l^uobo6x(y)i(l@_3!gkplz!6#*p6n6cl_!sgm',
-)
+_DEBUG = os.environ.get('DEBUG', 'true').lower() in ('1', 'true', 'yes')
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if _DEBUG:
+        SECRET_KEY = 'django-insecure-gw$5z@-^7ca^l^uobo6x(y)i(l@_3!gkplz!6#*p6n6cl_!sgm'
+    else:
+        raise ImproperlyConfigured(
+            'The SECRET_KEY environment variable must be set when DEBUG is False.'
+        )
 
-DEBUG = os.environ.get('DEBUG', 'true').lower() in ('1', 'true', 'yes')
+DEBUG = _DEBUG
 
 ALLOWED_HOSTS = [
     h.strip()

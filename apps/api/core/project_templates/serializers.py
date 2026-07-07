@@ -13,7 +13,7 @@ class ProjectTemplateWBSNodeSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
     activities = serializers.SerializerMethodField()
 
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = ProjectTemplateWBS
         fields = ['id', 'wbs_code', 'wbs_name', 'weight_physical', 'level', 'order', 'children', 'activities']
 
@@ -26,7 +26,7 @@ class ProjectTemplateWBSNodeSerializer(serializers.ModelSerializer):
 
 
 class ProjectTemplateActivitySerializer(serializers.ModelSerializer):
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = ProjectTemplateActivity
         fields = ['activity_code', 'activity_name', 'unit', 'duration_days', 'weight']
 
@@ -35,7 +35,7 @@ class ProjectTemplateListSerializer(serializers.ModelSerializer):
     template_id = serializers.UUIDField(source='id', read_only=True)
     wbs_node_count = serializers.SerializerMethodField()
 
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = ProjectTemplate
         fields = [
             'template_id', 'template_name', 'description', 'project_type',
@@ -62,7 +62,7 @@ class ProjectTemplateDetailSerializer(ProjectTemplateListSerializer):
 
 
 class ProjectTemplateCreateSerializer(serializers.ModelSerializer):
-    class Meta(serializers.ModelSerializer.Meta):
+    class Meta:
         model = ProjectTemplate
         fields = ['template_name', 'description', 'project_type']
 
