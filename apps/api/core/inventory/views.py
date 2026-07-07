@@ -6,7 +6,6 @@ from config.pagination import DefaultPageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
@@ -16,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
 
 from .department_activity_services import get_department_activity_queryset
+from .item_services import export_items_to_excel, import_items_from_excel
 from .models import (
     Item,
     Category,
@@ -56,15 +56,12 @@ class ItemViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def export(self, request):
         """Export all items to Excel file"""
-        items = Item.objects.all().values('id', 'name', 'quantity', 'category__name')
-        df = pd.DataFrame(list(items))
-        df.rename(columns={'category__name': 'category'}, inplace=True)
-        
+        file_bytes = export_items_to_excel()
         response = HttpResponse(
+            file_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = 'attachment; filename=items.xlsx'
-        df.to_excel(response, index=False, engine='openpyxl')
         return response
 
     @extend_schema(
@@ -116,50 +113,23 @@ class ItemViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        file = request.FILES['file']
         try:
-            df = pd.read_excel(file, engine='openpyxl')
-            
-            # Validate required columns
-            required_columns = ['name', 'quantity', 'category']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                return Response(
-                    {'error': f'Missing required columns: {", ".join(missing_columns)}'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            imported_count = 0
-            errors = []
-            
-            for index, row in df.iterrows():
-                try:
-                    category_name = row['category']
-                    category, created = Category.objects.get_or_create(name=category_name)
-                    
-                    Item.objects.create(
-                        name=row['name'],
-                        quantity=int(row['quantity']),
-                        category=category
-                    )
-                    imported_count += 1
-                except ValueError as e:
-                    errors.append(f'Row {index + 2}: Invalid data format (e.g., non-numeric quantity).')
-                except Exception as e:
-                    logger.exception('Failed to import row %s', index + 2)
-                    errors.append(f'Row {index + 2}: An unexpected error occurred.')  # +2 because Excel rows start at 1 and header is row 1
-            
+            imported_count, errors = import_items_from_excel(request.FILES['file'])
             return Response({
                 'message': f'Successfully imported {imported_count} items',
                 'imported_count': imported_count,
                 'errors': errors if errors else None
             }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            logger.exception('Failed to process Excel file')
+        except ValueError as e:
             return Response(
-                {'error': 'Error processing file. Please check the file format and try again.'},
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.exception('Failed to import items')
+            return Response(
+                {'error': 'An unexpected error occurred during import.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
