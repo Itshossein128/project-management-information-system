@@ -37,7 +37,8 @@ def member_has_permission(member: ProjectMember, codename: str) -> bool:
     if codename not in ALL_PERMISSION_CODENAMES:
         return False
 
-    override = member.permission_overrides.filter(permission_codename=codename).first()
+    # ⚡ Bolt: Iterate over prefetched .all() to avoid hitting the DB with .filter()
+    override = next((o for o in member.permission_overrides.all() if o.permission_codename == codename), None)
     if override is not None:
         return override.is_granted
 
