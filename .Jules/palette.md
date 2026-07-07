@@ -14,3 +14,7 @@
 **Learning:** When adding ARIA labels or updating UI strings in icon-only buttons, it's a good practice to localize the new strings at the same time if the project uses i18n, to ensure the UI is consistent across languages.
 
 **Action:** When updating existing strings to include translation wrappers, always update all localized string resources (`en.json`, `fa.json`) to maintain parity.
+
+## 2026-07-07 - Accessible Overlay Components
+**Learning:** Custom overlay components like Drawers require specific ARIA attributes (`role="dialog"`, `aria-modal="true"`, and `aria-labelledby`) to be correctly identified and read by screen readers. Furthermore, decorative icons within buttons that already have an `aria-label` should be explicitly hidden from screen readers using `aria-hidden`.
+**Action:** Always ensure custom overlays have `role="dialog"` and `aria-modal="true"`, map their titles using `aria-labelledby`, and add `aria-hidden` to redundant icons inside accessible buttons.
