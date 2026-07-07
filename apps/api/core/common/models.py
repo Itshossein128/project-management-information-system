@@ -16,6 +16,14 @@ class UUIDModel(models.Model):
         abstract = True
 
 
+class TimeStampedModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 class SoftDeleteQuerySet(models.QuerySet):
     def active(self):
         return self.filter(is_deleted=False)

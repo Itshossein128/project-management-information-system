@@ -1,5 +1,6 @@
 from django.db import models
 
+from common.models import TimeStampedModel
 from projects.models import Project
 
 
@@ -28,7 +29,7 @@ class Item(models.Model):
         return f'{self.name} ({self.quantity})'
 
 
-class SpaceMaterialRequest(models.Model):
+class SpaceMaterialRequest(TimeStampedModel):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
@@ -44,8 +45,6 @@ class SpaceMaterialRequest(models.Model):
     approved_quantity_technical_office = models.DecimalField(max_digits=14, decimal_places=3, default=0)
     deliverable_quantity_inventory_unit = models.DecimalField(max_digits=14, decimal_places=3, default=0)
     unit = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -67,7 +66,7 @@ class Department(models.TextChoices):
     ELECTRICAL = 'electrical', 'برق'
 
 
-class DepartmentActivityRecord(models.Model):
+class DepartmentActivityRecord(TimeStampedModel):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
@@ -80,8 +79,6 @@ class DepartmentActivityRecord(models.Model):
     contractor = models.CharField(max_length=255)
     unit = models.CharField(max_length=64)
     description = models.TextField(blank=True, default='')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-date', '-created_at']
