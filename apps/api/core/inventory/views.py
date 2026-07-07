@@ -6,7 +6,6 @@ from config.pagination import DefaultPageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
@@ -27,6 +26,7 @@ from .serializers import (
     SpaceMaterialRequestSerializer,
     DepartmentActivityRecordSerializer,
 )
+from .item_services import generate_items_excel, process_items_import
 
 
 class DepartmentActivityRecordPagination(DefaultPageNumberPagination):
@@ -56,15 +56,13 @@ class ItemViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def export(self, request):
         """Export all items to Excel file"""
-        items = Item.objects.all().values('id', 'name', 'quantity', 'category__name')
-        df = pd.DataFrame(list(items))
-        df.rename(columns={'category__name': 'category'}, inplace=True)
+        excel_bytes = generate_items_excel()
         
         response = HttpResponse(
+            excel_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = 'attachment; filename=items.xlsx'
-        df.to_excel(response, index=False, engine='openpyxl')
         return response
 
     @extend_schema(
@@ -117,50 +115,19 @@ class ItemViewSet(viewsets.ModelViewSet):
             )
         
         file = request.FILES['file']
-        try:
-            df = pd.read_excel(file, engine='openpyxl')
-            
-            # Validate required columns
-            required_columns = ['name', 'quantity', 'category']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                return Response(
-                    {'error': f'Missing required columns: {", ".join(missing_columns)}'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            imported_count = 0
-            errors = []
-            
-            for index, row in df.iterrows():
-                try:
-                    category_name = row['category']
-                    category, created = Category.objects.get_or_create(name=category_name)
-                    
-                    Item.objects.create(
-                        name=row['name'],
-                        quantity=int(row['quantity']),
-                        category=category
-                    )
-                    imported_count += 1
-                except ValueError as e:
-                    errors.append(f'Row {index + 2}: Invalid data format (e.g., non-numeric quantity).')
-                except Exception as e:
-                    logger.exception('Failed to import row %s', index + 2)
-                    errors.append(f'Row {index + 2}: An unexpected error occurred.')  # +2 because Excel rows start at 1 and header is row 1
-            
-            return Response({
-                'message': f'Successfully imported {imported_count} items',
-                'imported_count': imported_count,
-                'errors': errors if errors else None
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            logger.exception('Failed to process Excel file')
+        result = process_items_import(file)
+
+        if not result.get('success'):
             return Response(
-                {'error': 'Error processing file. Please check the file format and try again.'},
+                {'error': result.get('error')},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        return Response({
+            'message': result.get('message'),
+            'imported_count': result.get('imported_count'),
+            'errors': result.get('errors')
+        }, status=status.HTTP_201_CREATED)
 
 
 @extend_schema_view(
