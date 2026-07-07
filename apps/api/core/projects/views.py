@@ -121,4 +121,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
             project = create_project_from_template(name=name, project_code=code, template_id=template)
             return Response(ProjectDetailSerializer(project).data, status=status.HTTP_201_CREATED)
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception('Failed to create project from template')
+            error_message = str(e)
+            if 'Unknown template' in error_message:
+                safe_message = 'Unknown template. Please choose a valid template.'
+            elif 'already exists' in error_message:
+                safe_message = 'A project with this code already exists.'
+            else:
+                safe_message = 'Failed to create project from template. Please check the provided data.'
+            return Response({'error': safe_message}, status=status.HTTP_400_BAD_REQUEST)
