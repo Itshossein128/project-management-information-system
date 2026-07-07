@@ -1,0 +1,18 @@
+# IPCAS customer launcher settings (optional).
+# Copy to ipcas.config and edit if your setup differs.
+
+# Git remote used by update scripts
+GIT_REMOTE=origin
+
+# Branch to pull when updating
+GIT_BRANCH=main
+
+# Browser opens this URL after start / update
+APP_URL=http://localhost:8080
+
+# Health-check URL (API via Traefik)
+HEALTH_URL=http://localhost:8080/api/schema/
+
+# Seconds between health-check retries (max attempts in wait-for-stack scripts)
+WAIT_INTERVAL_SEC=2
+WAIT_MAX_ATTEMPTS=90

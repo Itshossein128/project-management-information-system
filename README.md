@@ -66,6 +66,21 @@ docker-compose up --build
 # Web direct:    http://localhost:3000
 ```
 
+## Customer PC deployment (no cloud host)
+
+For demos or evaluation on a customer machine, use the launcher scripts in [`customer/`](customer/README.md):
+
+| Step | Windows | Mac / Linux |
+|------|---------|-------------|
+| First install | `customer\install.bat` | `bash customer/install.sh` |
+| Start | `customer\start.bat` | `bash customer/start.sh` |
+| Stop | `customer\stop.bat` | `bash customer/stop.sh` |
+| Update from Git | `customer\update.bat` | `bash customer/update.sh` |
+
+Requires Docker Desktop + Git clone of this repo. Entry URL: **http://localhost:8080**. Demo login: `+10000000001` / `devpass123`.
+
+Uses `docker-compose.yml` + `docker-compose.customer.yml` (auto-seed, restart policies). See [customer/README.md](customer/README.md).
+
 ## Scripts
 
 | Command | Description |

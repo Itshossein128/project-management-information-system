@@ -1,20 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
+import { useState } from "react";
+import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
 import { fetchWBSTree } from "@/app/lib/api/wbs";
 import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
+import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
+import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/sprint-button";
 
-export default function ProjectWBSPage() {
-  const { projectId = "" } = useParams();
+function ProjectWBSContent() {
+  const { projectId } = useProjectParams();
+  const { has } = usePermission(projectId);
+  const canEditWBS = has("edit_wbs");
+  const qc = useQueryClient();
+  const [mspOpen, setMspOpen] = useState(false);
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+
   const { data: tree = [], isLoading } = useQuery({
     queryKey: ["wbs", projectId],
     queryFn: () => fetchWBSTree(projectId),
   });
 
   return (
-    <main className="page-main page-shell mx-auto max-w-5xl px-4 py-8">
+    <>
       <Breadcrumb
         items={[
           { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
@@ -23,10 +33,18 @@ export default function ProjectWBSPage() {
       />
       <PageHeader
         title="ساختار شکست کار"
+        subtitle={!canEditWBS ? "نمایش فقط خواندنی" : undefined}
         actions={
-          <Button variant="secondary" disabled title="در اسپرینت بعدی">
-            بارگذاری از اکسل
-          </Button>
+          canEditWBS ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => setSaveTemplateOpen(true)}>
+                ذخیره به‌عنوان قالب
+              </Button>
+              <Button variant="secondary" onClick={() => setMspOpen(true)}>
+                بارگذاری از MSP
+              </Button>
+            </div>
+          ) : undefined
         }
       />
 
@@ -35,12 +53,52 @@ export default function ProjectWBSPage() {
       ) : tree.length === 0 ? (
         <p className="text-muted-foreground">هنوز گره WBS ایجاد نشده است.</p>
       ) : (
-        <div className="rounded-lg border border-border">
-          {tree.map((node) => (
-            <WBSNodeRow key={node.wbs_id} node={node} projectId={projectId} />
-          ))}
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <div className="min-w-max">
+            {tree.map((node) => (
+              <WBSNodeRow
+                key={node.wbs_id}
+                node={node}
+                projectId={projectId}
+                canEdit={canEditWBS}
+              />
+            ))}
+          </div>
         </div>
       )}
+
+      {canEditWBS ? (
+        <>
+          <MspImportWizard
+            open={mspOpen}
+            onOpenChange={setMspOpen}
+            projectId={projectId}
+            onComplete={() => void qc.invalidateQueries({ queryKey: ["wbs", projectId] })}
+          />
+          <SaveAsTemplateModal
+            open={saveTemplateOpen}
+            onOpenChange={setSaveTemplateOpen}
+            projectId={projectId}
+          />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+function useProjectParams() {
+  const { projectId = "" } = useParams();
+  return { projectId };
+}
+
+export default function ProjectWBSPage() {
+  const { projectId } = useProjectParams();
+
+  return (
+    <main className="page-main page-shell mx-auto max-w-5xl px-4 py-8">
+      <ProjectProvider projectId={projectId}>
+        <ProjectWBSContent />
+      </ProjectProvider>
     </main>
   );
 }

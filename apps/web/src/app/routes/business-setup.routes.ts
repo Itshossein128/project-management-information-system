@@ -9,8 +9,8 @@ export const projectRoutes = [
     `${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_MEMBERS}`,
     ROUTES.PROJECT_MEMBERS,
   ),
+  route(`${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_WEATHER}`, ROUTES.PROJECT_WEATHER),
   route(PATHS.PROJECT, ROUTES.PROJECT_LIST),
+  route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`, ROUTES.SETTINGS_TEMPLATES),
+  route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`, ROUTES.SETTINGS_ROLES),
 ];
-
-/** @deprecated use projectRoutes */
-export const businessSetupRoutes = projectRoutes;

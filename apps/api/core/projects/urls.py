@@ -2,6 +2,7 @@ from django.urls import path, include
 
 from projects.views import ProjectViewSet
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
+from project_templates.views import SaveProjectAsTemplateView
 from business_meta.views import (
     TableDefinitionViewSet,
     FieldDefinitionViewSet,
@@ -28,7 +29,7 @@ position_detail = ProjectPositionViewSet.as_view(
 )
 member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
 member_detail = ProjectMemberViewSet.as_view({'patch': 'partial_update'})
-member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions'})
+member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions', 'delete': 'permissions'})
 
 urlpatterns = [
     path('', ProjectViewSet.as_view({'get': 'list', 'post': 'create'}), name='project-list'),
@@ -59,6 +60,9 @@ urlpatterns = [
     path('<uuid:project_pk>/tables/<str:table_slug>/rows/export/', DynamicRowsExportView.as_view(), name='dynamic-rows-export'),
     path('<uuid:project_pk>/tables/<str:table_slug>/rows/import/', DynamicRowsImportView.as_view(), name='dynamic-rows-import'),
     path('<uuid:project_pk>/tables/<str:table_slug>/rows/<str:row_id>/', DynamicRowDetailView.as_view(), name='dynamic-row-detail'),
+    path('<uuid:project_pk>/save-as-template/', SaveProjectAsTemplateView.as_view(), name='project-save-as-template'),
     path('<uuid:project_pk>/', include('inventory.project_urls')),
     path('<uuid:project_pk>/', include('wbs.urls')),
+    path('<uuid:project_pk>/', include('schedule.urls')),
+    path('<uuid:project_pk>/', include('field_reports.urls')),
 ]

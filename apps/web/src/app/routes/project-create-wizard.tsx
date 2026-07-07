@@ -1,23 +1,29 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { addMember } from "@/app/lib/api/members";
 import { createProject, type CreateProjectPayload } from "@/app/lib/api/projects";
+import {
+  applyProjectTemplate,
+  fetchProjectTemplate,
+  fetchProjectTemplates,
+  projectTypeLabels,
+  type ProjectTemplateListItem,
+} from "@/app/lib/api/templates";
 import { fetchRoles, lookupUsers, type Role, type UserLookupResult } from "@/app/lib/api/members";
 import { PATHS } from "@/app/routeVars";
+import { TemplateWBSPreviewTree } from "@/components/templates/template-wbs-preview-tree";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 import { Input } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
+import { LayoutTemplate } from "lucide-react";
 
-const CONTRACT_TYPES = [
-  { value: "unit_price", label: "فی واحد" },
-  { value: "lump_sum", label: "سرجمع" },
-  { value: "cost_plus", label: "Cost Plus" },
-  { value: "EPC", label: "EPC" },
-];
+const CONTRACT_TYPE_KEYS = ["unit_price", "lump_sum", "cost_plus", "EPC"] as const;
 
 interface DraftMember {
   user?: UserLookupResult;
@@ -35,6 +41,7 @@ function suggestCode(name: string) {
 }
 
 export default function ProjectCreateWizardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
   const [step, setStep] = useState(1);
@@ -57,8 +64,18 @@ export default function ProjectCreateWizardPage() {
   const [searchResults, setSearchResults] = useState<UserLookupResult[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const { data: roles = [] } = useQuery({ queryKey: ["roles"], queryFn: fetchRoles });
+  const { data: templates = [] } = useQuery({
+    queryKey: ["project-templates"],
+    queryFn: () => fetchProjectTemplates(),
+  });
+  const { data: selectedTemplateDetail } = useQuery({
+    queryKey: ["project-template", selectedTemplateId],
+    queryFn: () => fetchProjectTemplate(selectedTemplateId!),
+    enabled: Boolean(selectedTemplateId),
+  });
 
   const durationDays = useMemo(() => {
     if (!form.start_date || !form.planned_finish_date) return null;
@@ -78,14 +95,22 @@ export default function ProjectCreateWizardPage() {
           await addMember(project.project_id, { email: m.email, role_ids: [m.roleId] });
         }
       }
+      if (selectedTemplateId) {
+        await applyProjectTemplate(selectedTemplateId, project.project_id);
+      }
       return project;
     },
     onSuccess: (project) => {
-      toast.success("پروژه با موفقیت ایجاد شد");
-      navigate(`/${PATHS.PROJECT}/${project.project_id}/${PATHS.PROJECT_OVERVIEW}`);
+      if (selectedTemplateId) {
+        toast.success(t("projectWizard.wbsLoaded"));
+        navigate(`/${PATHS.PROJECT}/${project.project_id}/${PATHS.PROJECT_WBS}`);
+      } else {
+        toast.success(t("projectWizard.createSuccess"));
+        navigate(`/${PATHS.PROJECT}/${project.project_id}/${PATHS.PROJECT_OVERVIEW}`);
+      }
     },
     onError: (err: Error) => {
-      toast.error(err.message || "خطا در ایجاد پروژه");
+      toast.error(err.message || t("projectWizard.createError"));
     },
   });
 
@@ -108,17 +133,31 @@ export default function ProjectCreateWizardPage() {
     setInviteEmail("");
   };
 
-  const steps = ["اطلاعات پایه", "تاریخ و قرارداد", "تیم اولیه"];
+  const selectTemplate = (template: ProjectTemplateListItem | null) => {
+    setSelectedTemplateId(template?.template_id ?? null);
+    if (template) {
+      setForm((f) => ({
+        ...f,
+        contract_type: template.project_type === "epc" ? "EPC" : f.contract_type,
+      }));
+    }
+  };
+
+  const steps = [
+    t("projectWizard.stepBasic"),
+    t("projectWizard.stepDates"),
+    t("projectWizard.stepTeam"),
+  ];
 
   return (
     <main className="page-main page-shell mx-auto max-w-3xl px-4 py-8">
       <Breadcrumb
         items={[
-          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
-          { label: "ایجاد پروژه" },
+          { label: t("project.title"), href: `/${PATHS.PROJECT}` },
+          { label: t("projectWizard.breadcrumb") },
         ]}
       />
-      <PageHeader title="ایجاد پروژه جدید" />
+      <PageHeader title={t("projectWizard.title")} />
 
       <div className="mb-8 flex gap-2">
         {steps.map((label, i) => (
@@ -135,6 +174,52 @@ export default function ProjectCreateWizardPage() {
 
       {step === 1 && (
         <div className="space-y-4">
+          <div className="space-y-3">
+            <Label>{t("projectWizard.useTemplate")}</Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {templates.map((tpl) => (
+                <button
+                  key={tpl.template_id}
+                  type="button"
+                  onClick={() =>
+                    selectTemplate(
+                      selectedTemplateId === tpl.template_id ? null : tpl,
+                    )
+                  }
+                  className={`rounded-lg border p-3 text-start transition-colors ${
+                    selectedTemplateId === tpl.template_id
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    <LayoutTemplate className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium">{tpl.template_name}</p>
+                      {tpl.description ? (
+                        <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                          {tpl.description}
+                        </p>
+                      ) : null}
+                      <div className="mt-2">
+                        <Badge
+                          variant="info"
+                          label={projectTypeLabels[tpl.project_type]}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {selectedTemplateDetail?.wbs_tree?.length ? (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">{t("projectWizard.wbsPreview")}</p>
+                <TemplateWBSPreviewTree nodes={selectedTemplateDetail.wbs_tree} />
+              </div>
+            ) : null}
+          </div>
+
           <div>
             <Label>نام پروژه *</Label>
             <Input

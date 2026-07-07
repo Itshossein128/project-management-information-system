@@ -15,6 +15,7 @@ from wbs.serializers import (
     WBSMoveSerializer,
     WBSUpdateSerializer,
 )
+from wbs.tree_builder import build_nested_wbs_tree
 from wbs.services import (
     WBSConflictError,
     WBSValidationError,
@@ -26,32 +27,8 @@ from wbs.services import (
 )
 
 
-def _build_children_map(nodes):
-    by_id = {str(n.id): n for n in nodes}
-    children_map: dict[str, list] = {nid: [] for nid in by_id}
-
-    for node in nodes:
-        parent = node.get_parent()
-        if parent is not None:
-            children_map[str(parent.id)].append(node)
-
-    for key in children_map:
-        children_map[key].sort(key=lambda n: n.wbs_code)
-
-    return children_map
-
-
 def _serialize_tree(project_id):
-    nodes = list(build_tree_queryset(project_id))
-    children_map = _build_children_map(nodes)
-    roots = [n for n in nodes if n.depth == 1]
-    roots.sort(key=lambda n: n.wbs_code)
-    serializer = WBSTreeSerializer(
-        roots,
-        many=True,
-        context={'children_map': children_map},
-    )
-    return serializer.data
+    return build_nested_wbs_tree(project_id)
 
 
 @extend_schema_view(

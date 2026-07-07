@@ -1,0 +1,38 @@
+# Customer / demo overlay — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.customer.yml up -d
+#
+# Launcher scripts in customer/ pass these files automatically.
+
+services:
+  api:
+    environment:
+      SEED_DEMO_DATA: "true"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/schema/')\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    restart: unless-stopped
+
+  worker:
+    restart: unless-stopped
+
+  web:
+    restart: unless-stopped
+
+  traefik:
+    restart: unless-stopped
+
+  postgres:
+    restart: unless-stopped
+
+  rabbitmq:
+    restart: unless-stopped
+
+  minio:
+    restart: unless-stopped

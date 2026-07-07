@@ -5,7 +5,7 @@ import {
   route,
 } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "./routeVars";
-import { businessSetupRoutes } from "./routes/business-setup.routes";
+import { projectRoutes } from "./routes/business-setup.routes";
 
 export default [
   index(ROUTES.INDEX),
@@ -17,7 +17,7 @@ export default [
   layout(ROUTES.AUTH_LAYOUT, [
     layout(ROUTES.PROTECTED_LAYOUT, [
       route(PATHS.HOME, ROUTES.HOME),
-      ...businessSetupRoutes,
+      ...projectRoutes,
 
       route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
       route(`${PATHS.BUSINESS}/:businessId/job-positions`, ROUTES.BUSINESS_JOB_POSITIONS),

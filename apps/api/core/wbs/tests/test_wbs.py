@@ -72,3 +72,40 @@ class TestWBSTree:
         assert response.status_code == status.HTTP_201_CREATED
         assert 'warnings' in response.data
         assert any('exceeds 1.0' in w for w in response.data['warnings'])
+
+    def test_deep_tree_six_levels(self, auth_client, project):
+        parent = None
+        for i in range(1, 7):
+            code = '.'.join(str(j) for j in range(1, i + 1))
+            node, _ = create_wbs_node(
+                project_id=project.id,
+                parent_id=parent.id if parent else None,
+                wbs_code=code,
+                wbs_name=f'Level {i}',
+            )
+            parent = node
+        response = auth_client.get(f'/api/v1/projects/{project.id}/wbs/')
+        assert response.status_code == status.HTTP_200_OK
+        current = response.data[0]
+        depth = 1
+        while current.get('children'):
+            depth += 1
+            current = current['children'][0]
+        assert depth == 6
+
+    def test_max_depth_blocks_create(self, auth_client, project):
+        project.max_depth = 2
+        project.save(update_fields=['max_depth'])
+        root, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
+        child, _ = create_wbs_node(
+            project_id=project.id,
+            parent_id=root.id,
+            wbs_code='1.1',
+            wbs_name='Child',
+        )
+        response = auth_client.post(
+            f'/api/v1/projects/{project.id}/wbs/',
+            {'parent_id': str(child.id), 'wbs_code': '1.1.1', 'wbs_name': 'Too deep'},
+            format='json',
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

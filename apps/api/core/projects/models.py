@@ -38,6 +38,12 @@ class Project(UUIDModel):
         default=ProjectStatus.ACTIVE,
     )
     cut_off_date = models.DateField(null=True, blank=True)
+    max_depth = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text='Maximum WBS depth for this project. Null means unlimited.',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

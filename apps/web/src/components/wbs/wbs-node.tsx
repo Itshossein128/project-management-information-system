@@ -12,13 +12,21 @@ import { Button } from "@/components/ui/sprint-button";
 import { Input } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
 
+const INDENT_PX = 24;
+
 interface WBSNodeRowProps {
   node: WBSNode;
   projectId: string;
   depth?: number;
+  canEdit?: boolean;
 }
 
-export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
+export function WBSNodeRow({
+  node,
+  projectId,
+  depth = 0,
+  canEdit = true,
+}: WBSNodeRowProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
@@ -30,7 +38,8 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
   const [childName, setChildName] = useState("");
 
   const hasChildren = node.children.length > 0;
-  const indent = depth * 24;
+  const level = node.depth > 0 ? node.depth - 1 : depth;
+  const indent = level * INDENT_PX;
 
   const invalidate = () => void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
 
@@ -90,7 +99,7 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
 
         <span className="text-xs text-muted-foreground">{node.wbs_code}</span>
 
-        {editing ? (
+        {editing && canEdit ? (
           <Input
             className="h-8 max-w-xs"
             value={name}
@@ -105,20 +114,22 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
         ) : (
           <span
             className="font-medium"
-            onDoubleClick={() => setEditing(true)}
+            onDoubleClick={canEdit ? () => setEditing(true) : undefined}
           >
             {node.wbs_name}
           </span>
         )}
 
-        <button
-          type="button"
-          className="opacity-0 group-hover:opacity-100"
-          onClick={() => setEditing(true)}
-          aria-label={t("wbs.edit")}
-        >
-          <Pencil className="size-3.5 text-muted-foreground" />
-        </button>
+        {canEdit ? (
+          <button
+            type="button"
+            className="opacity-0 group-hover:opacity-100"
+            onClick={() => setEditing(true)}
+            aria-label={t("wbs.edit")}
+          >
+            <Pencil className="size-3.5 text-muted-foreground" />
+          </button>
+        ) : null}
 
         {weightPct != null && (
           <span className="text-xs text-muted-foreground">{weightPct}%</span>
@@ -128,23 +139,25 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
           <span className="text-xs text-amber-600" title={t("wbs.weightWarning")}>⚠</span>
         )}
 
-        <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100">
-          <Button variant="ghost" size="icon-sm" onClick={() => setAddingChild(true)} title={t("wbs.addChild")}>
-            <Plus className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            disabled={hasChildren}
-            title={hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
-            onClick={() => deleteMutation.mutate()}
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
+        {canEdit ? (
+          <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100">
+            <Button variant="ghost" size="icon-sm" onClick={() => setAddingChild(true)} title={t("wbs.addChild")}>
+              <Plus className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              disabled={hasChildren}
+              title={hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
+              onClick={() => deleteMutation.mutate()}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        ) : null}
       </div>
 
-      {addingChild && (
+      {canEdit && addingChild && (
         <div className="flex flex-wrap gap-2 py-2" style={{ paddingInlineStart: indent + 32 }}>
           <Input placeholder={t("wbs.code")} value={childCode} onChange={(e) => setChildCode(e.target.value)} className="h-8 w-24" />
           <Input placeholder={t("wbs.name")} value={childName} onChange={(e) => setChildName(e.target.value)} className="h-8 max-w-xs" />
@@ -157,7 +170,13 @@ export function WBSNodeRow({ node, projectId, depth = 0 }: WBSNodeRowProps) {
 
       {expanded &&
         node.children.map((child) => (
-          <WBSNodeRow key={child.wbs_id} node={child} projectId={projectId} depth={depth + 1} />
+          <WBSNodeRow
+            key={child.wbs_id}
+            node={child}
+            projectId={projectId}
+            depth={depth + 1}
+            canEdit={canEdit}
+          />
         ))}
     </div>
   );

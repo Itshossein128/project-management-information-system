@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import {
   fetchMembers,
   fetchRoles,
@@ -8,6 +9,7 @@ import {
   type ProjectMember,
   type Role,
 } from "@/app/lib/api/members";
+import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 import { AddMemberDrawer } from "@/components/projects/add-member-drawer";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +20,7 @@ import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
 import { useToast } from "@/components/ui/toast";
 
 export default function ProjectMembersPage() {
+  const { t } = useTranslation();
   const { projectId = "" } = useParams();
   const toast = useToast();
   const qc = useQueryClient();
@@ -35,17 +38,17 @@ export default function ProjectMembersPage() {
   const deactivateMutation = useMutation({
     mutationFn: (userId: string) => updateMember(projectId, userId, { status: "inactive" }),
     onSuccess: () => {
-      toast.success("عضو غیرفعال شد");
+      toast.success(t("projectMembers.deactivateSuccess"));
       setDeactivateTarget(null);
       void qc.invalidateQueries({ queryKey: ["members", projectId] });
     },
-    onError: () => toast.error("خطا در غیرفعال‌سازی"),
+    onError: () => toast.error(t("projectMembers.deactivateError")),
   });
 
   const columns = [
     {
       key: "name",
-      label: "نام",
+      label: t("projectMembers.name"),
       render: (row: ProjectMember) => (
         <span className={row.status === "inactive" ? "line-through opacity-60" : ""}>
           {row.full_name}
@@ -54,7 +57,7 @@ export default function ProjectMembersPage() {
     },
     {
       key: "roles",
-      label: "نقش‌ها",
+      label: t("projectMembers.roles"),
       render: (row: ProjectMember) => {
         const shown = row.roles.slice(0, 2);
         const extra = row.roles.length - 2;
@@ -70,28 +73,36 @@ export default function ProjectMembersPage() {
     },
     {
       key: "status",
-      label: "وضعیت",
+      label: t("projectMembers.status"),
       render: (row: ProjectMember) => (
         <Badge
           variant={row.status === "active" ? "success" : "neutral"}
-          label={row.status === "active" ? "فعال" : "غیرفعال"}
+          label={row.status === "active" ? t("projectMembers.active") : t("projectMembers.inactive")}
         />
       ),
     },
-    { key: "joined_at", label: "تاریخ عضویت", render: (r: ProjectMember) => r.joined_at?.slice(0, 10) ?? "—" },
-    { key: "last_login", label: "آخرین ورود", render: (r: ProjectMember) => r.last_login?.slice(0, 10) ?? "—" },
+    {
+      key: "joined_at",
+      label: t("projectMembers.joinedAt"),
+      render: (r: ProjectMember) => formatDisplayDate(r.joined_at?.slice(0, 10)),
+    },
+    {
+      key: "last_login",
+      label: t("projectMembers.lastLogin"),
+      render: (r: ProjectMember) => formatDisplayDate(r.last_login?.slice(0, 10)),
+    },
     {
       key: "actions",
-      label: "عملیات",
+      label: t("projectMembers.actions"),
       render: (row: ProjectMember) =>
         row.user_id ? (
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={() => { setEditMember(row); setDrawerOpen(true); }}>
-              ویرایش
+              {t("projectMembers.edit")}
             </Button>
             {row.status === "active" ? (
               <Button variant="ghost" size="sm" onClick={() => setDeactivateTarget(row)}>
-                غیرفعال
+                {t("projectMembers.deactivate")}
               </Button>
             ) : null}
           </div>
@@ -103,15 +114,15 @@ export default function ProjectMembersPage() {
     <main className="page-main page-shell mx-auto max-w-6xl px-4 py-8">
       <Breadcrumb
         items={[
-          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
-          { label: "اعضا" },
+          { label: t("project.title"), href: `/${PATHS.PROJECT}` },
+          { label: t("projectMembers.breadcrumb") },
         ]}
       />
       <PageHeader
-        title="مدیریت اعضا"
+        title={t("projectMembers.title")}
         actions={
           <Button variant="primary" onClick={() => { setEditMember(null); setDrawerOpen(true); }}>
-            افزودن عضو
+            {t("projectMembers.add")}
           </Button>
         }
       />
@@ -121,7 +132,7 @@ export default function ProjectMembersPage() {
         data={members}
         loading={isLoading}
         rowKey={(r) => r.user_id ?? r.invited_email ?? r.full_name}
-        emptyMessage="عضوی ثبت نشده است"
+        emptyMessage={t("projectMembers.empty")}
       />
 
       <AddMemberDrawer
@@ -135,18 +146,20 @@ export default function ProjectMembersPage() {
       <Modal
         open={Boolean(deactivateTarget)}
         onOpenChange={(o) => !o && setDeactivateTarget(null)}
-        title="غیرفعال‌سازی عضو"
+        title={t("projectMembers.deactivateTitle")}
         idBase="deactivateMember"
       >
-        <p className="mb-4 text-sm">آیا از غیرفعال کردن {deactivateTarget?.full_name} مطمئن هستید؟</p>
+        <p className="mb-4 text-sm">
+          {t("projectMembers.deactivateConfirm", { name: deactivateTarget?.full_name })}
+        </p>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setDeactivateTarget(null)}>انصراف</Button>
+          <Button variant="ghost" onClick={() => setDeactivateTarget(null)}>{t("common.cancel")}</Button>
           <Button
             variant="danger"
             loading={deactivateMutation.isPending}
             onClick={() => deactivateTarget?.user_id && deactivateMutation.mutate(deactivateTarget.user_id)}
           >
-            غیرفعال‌سازی
+            {t("projectMembers.deactivate")}
           </Button>
         </div>
       </Modal>

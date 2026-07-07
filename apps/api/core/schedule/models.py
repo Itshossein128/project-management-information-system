@@ -55,3 +55,35 @@ class ActivityProgress(UUIDModel):
     class Meta:
         db_table = 'activity_progress'
         unique_together = [['activity', 'report_date']]
+
+
+class MspImportStatus(models.TextChoices):
+    PENDING = 'pending', 'Pending'
+    RUNNING = 'running', 'Running'
+    DONE = 'done', 'Done'
+    FAILED = 'failed', 'Failed'
+
+
+class MspImportJob(UUIDModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='msp_import_jobs')
+    task_id = models.CharField(max_length=64, blank=True, default='')
+    status = models.CharField(max_length=20, choices=MspImportStatus.choices, default=MspImportStatus.PENDING)
+    progress_pct = models.PositiveSmallIntegerField(default=0)
+    filename = models.CharField(max_length=255, blank=True, default='')
+    replace_existing = models.BooleanField(default=False)
+    file_data = models.BinaryField(null=True, blank=True)
+    result = models.JSONField(default=dict, blank=True)
+    error_message = models.TextField(blank=True, default='')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='msp_import_jobs',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'msp_import_jobs'
+        ordering = ['-created_at']

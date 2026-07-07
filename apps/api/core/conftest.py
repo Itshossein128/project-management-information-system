@@ -62,6 +62,23 @@ def member(db, project, other_user, viewer_role):
 
 
 @pytest.fixture
+def site_supervisor_role(db):
+    return Role.objects.get(role_name='site_supervisor')
+
+
+@pytest.fixture
+def viewer_member(db, project, other_user, site_supervisor_role):
+    """Member with view_reports (site_supervisor role)."""
+    m = ProjectMember.objects.create(
+        project=project,
+        user=other_user,
+        status=MemberStatus.ACTIVE,
+    )
+    ProjectMemberRole.objects.create(member=m, role=site_supervisor_role)
+    return m
+
+
+@pytest.fixture
 def api_client():
     from rest_framework.test import APIClient
 

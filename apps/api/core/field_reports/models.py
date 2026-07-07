@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
 
-from common.models import UUIDModel
+from common.jalali import persian_day_of_week
+from common.models import AuditSoftDeleteModel, UUIDModel
 
 
 class ReportShift(models.TextChoices):
@@ -141,3 +142,44 @@ class DailyIncident(UUIDModel):
 
     class Meta:
         db_table = 'daily_incidents'
+
+
+class WeatherCondition(models.TextChoices):
+    SUNNY = 'sunny', 'آفتابی'
+    CLOUDY = 'cloudy', 'ابری'
+    PARTLY_CLOUDY = 'partly_cloudy', 'نیمه‌ابری'
+    RAINY = 'rainy', 'بارانی'
+    STORMY = 'stormy', 'طوفانی'
+    SNOWY = 'snowy', 'برفی'
+    FOGGY = 'foggy', 'مه‌آلود'
+
+
+class SiteStatus(models.TextChoices):
+    ACTIVE = 'active', 'فعال'
+    INACTIVE = 'inactive', 'غیرفعال'
+
+
+class WeatherLog(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='weather_logs')
+    log_date = models.DateField()
+    day_of_week = models.CharField(max_length=20, blank=True, default='')
+    temp_max = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    weather_condition = models.CharField(max_length=20, choices=WeatherCondition.choices)
+    site_status = models.CharField(max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE)
+
+    class Meta:
+        db_table = 'weather_logs'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'log_date'],
+                condition=models.Q(is_deleted=False),
+                name='unique_active_weather_log_per_date',
+            ),
+        ]
+        ordering = ['-log_date']
+
+    def save(self, *args, **kwargs):
+        if self.log_date:
+            self.day_of_week = persian_day_of_week(self.log_date)
+        super().save(*args, **kwargs)

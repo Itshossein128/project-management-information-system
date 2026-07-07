@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { FolderKanban } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { fetchProjects, type ProjectListItem } from "@/app/lib/api/projects";
+import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 import { Badge, projectStatusBadge, projectStatusLabels } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
@@ -13,12 +15,8 @@ function formatAmount(value: string | null) {
   return Number(value).toLocaleString("fa-IR");
 }
 
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  return value;
-}
-
 export default function ProjectListPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading } = useQuery({
     queryKey: ["projects"],
@@ -28,12 +26,12 @@ export default function ProjectListPage() {
   const projects = data?.results ?? [];
 
   const columns = [
-    { key: "project_code", label: "کد پروژه" },
-    { key: "project_name", label: "نام پروژه" },
-    { key: "employer", label: "کارفرما" },
+    { key: "project_code", label: t("project.code") },
+    { key: "project_name", label: t("project.name") },
+    { key: "employer", label: t("project.employer") },
     {
       key: "status",
-      label: "وضعیت",
+      label: t("project.status"),
       render: (row: ProjectListItem) => (
         <Badge
           variant={projectStatusBadge[row.status] ?? "neutral"}
@@ -43,17 +41,17 @@ export default function ProjectListPage() {
     },
     {
       key: "start_date",
-      label: "تاریخ شروع",
-      render: (row: ProjectListItem) => formatDate(row.start_date),
+      label: t("project.startDate"),
+      render: (row: ProjectListItem) => formatDisplayDate(row.start_date),
     },
     {
       key: "planned_finish_date",
-      label: "پایان برنامه‌ای",
-      render: (row: ProjectListItem) => formatDate(row.planned_finish_date),
+      label: t("project.plannedFinish"),
+      render: (row: ProjectListItem) => formatDisplayDate(row.planned_finish_date),
     },
     {
       key: "contract_amount",
-      label: "مبلغ قرارداد",
+      label: t("project.contractAmount"),
       render: (row: ProjectListItem) => formatAmount(row.contract_amount),
     },
     {
@@ -68,7 +66,7 @@ export default function ProjectListPage() {
             navigate(`/${PATHS.PROJECT}/${row.project_id}/${PATHS.PROJECT_OVERVIEW}`);
           }}
         >
-          مشاهده
+          {t("project.view")}
         </Button>
       ),
     },
@@ -76,13 +74,13 @@ export default function ProjectListPage() {
 
   return (
     <main className="page-main page-shell mx-auto max-w-6xl px-4 py-8">
-      <Breadcrumb items={[{ label: "پروژه‌ها" }]} />
+      <Breadcrumb items={[{ label: t("project.title") }]} />
       <PageHeader
-        title="پروژه‌ها"
-        subtitle="لیست پروژه‌هایی که عضو آن‌ها هستید"
+        title={t("project.title")}
+        subtitle={t("project.subtitle")}
         actions={
           <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant="primary">ایجاد پروژه جدید</Button>
+            <Button variant="primary">{t("project.create")}</Button>
           </Link>
         }
       />
@@ -90,9 +88,9 @@ export default function ProjectListPage() {
       {!isLoading && projects.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20 text-center text-muted-foreground">
           <FolderKanban className="size-12 opacity-40" />
-          <p>هنوز پروژه‌ای ایجاد نشده است</p>
+          <p>{t("project.empty")}</p>
           <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant="primary">ایجاد پروژه جدید</Button>
+            <Button variant="primary">{t("project.create")}</Button>
           </Link>
         </div>
       ) : (

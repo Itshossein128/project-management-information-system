@@ -122,10 +122,20 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         return Response(ProjectMemberListSerializer(member).data)
 
     @extend_schema(summary='Get member effective permissions', tags=['Project members'])
-    @action(detail=True, methods=['get', 'post'], url_path='permissions')
+    @action(detail=True, methods=['get', 'post', 'delete'], url_path='permissions')
     def permissions(self, request, project_pk=None, user_id=None):
         member = self._get_member_by_user(user_id)
         if request.method == 'GET':
+            return Response(EffectivePermissionsSerializer.from_member(member))
+
+        if request.method == 'DELETE':
+            codename = (request.query_params.get('permission_codename') or '').strip()
+            if not codename:
+                return Response(
+                    {'error': {'code': 'validation_error', 'message': 'permission_codename is required.', 'details': {}}},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            set_permission_override(member, codename, None)
             return Response(EffectivePermissionsSerializer.from_member(member))
 
         serializer = PermissionOverrideSerializer(data=request.data)
@@ -139,12 +149,15 @@ class ProjectMemberViewSet(viewsets.ViewSet):
 
 
 class RoleListView(APIView):
+    """Deprecated: use RoleViewSet at /api/v1/roles/. Kept for import compatibility."""
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(summary='List project roles', tags=['Project members'])
     def get(self, request):
-        roles = Role.objects.prefetch_related('role_permissions').order_by('role_name')
-        return Response(RoleSerializer(roles, many=True).data)
+        from projects.role_views import RoleViewSet
+
+        return RoleViewSet().list(request)
 
 
 class UserLookupView(APIView):

@@ -130,15 +130,23 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
     }
   }
   if (!res.ok) {
-    const apiError = data as ApiError & { detail?: unknown };
+    const apiError = data as ApiError & { detail?: unknown; error?: unknown };
+    const nested =
+      typeof apiError.error === "object" &&
+      apiError.error !== null &&
+      "message" in (apiError.error as object)
+        ? String((apiError.error as { message: string }).message)
+        : null;
     const detail =
       typeof apiError.detail === "string"
         ? apiError.detail
         : apiError.detail
           ? JSON.stringify(apiError.detail)
           : null;
+    const flatError = typeof apiError.error === "string" ? apiError.error : null;
     const message =
-      apiError.error ??
+      nested ??
+      flatError ??
       detail ??
       (raw && raw.trim() ? raw.trim() : null) ??
       (res.statusText || "Request failed");
@@ -162,6 +170,52 @@ export async function apiBlob(path: string): Promise<Blob> {
     throw new Error(msg);
   }
   return res.blob();
+}
+
+export async function apiFormData<T>(
+  path: string,
+  formData: FormData,
+  options: { method?: string } = {},
+): Promise<T> {
+  const res = await apiFetch(path, {
+    method: options.method ?? "POST",
+    headers: await getAuthHeadersNoContentType(),
+    body: formData,
+  });
+  const raw = await res.text();
+  let data: (T & ApiError) | (ApiError & { detail?: unknown }) = {};
+  if (raw) {
+    try {
+      data = JSON.parse(raw) as T & ApiError;
+    } catch {
+      data = {};
+    }
+  }
+  if (!res.ok) {
+    const apiError = data as ApiError & { detail?: unknown; error?: unknown };
+    const nested =
+      typeof apiError.error === "object" &&
+      apiError.error !== null &&
+      "message" in (apiError.error as object)
+        ? String((apiError.error as { message: string }).message)
+        : null;
+    const detail =
+      typeof apiError.detail === "string"
+        ? apiError.detail
+        : apiError.detail
+          ? JSON.stringify(apiError.detail)
+          : null;
+    const flatError = typeof apiError.error === "string" ? apiError.error : null;
+    const message =
+      nested ??
+      flatError ??
+      detail ??
+      (raw && raw.trim() ? raw.trim() : null) ??
+      (res.statusText || "Request failed");
+    throw new Error(message);
+  }
+  if (!raw) return {} as T;
+  return data as T;
 }
 
 export async function apiUploadFile<T = { created: number; errors: unknown[] }>(

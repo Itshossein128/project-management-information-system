@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   addMember,
+  clearMemberPermissionOverride,
   fetchMemberPermissions,
   lookupUsers,
   setMemberPermissionOverride,
@@ -10,6 +12,10 @@ import {
   type Role,
   type UserLookupResult,
 } from "@/app/lib/api/members";
+import {
+  groupPermissionsByModule,
+  PERMISSION_MODULE_ORDER,
+} from "@/app/lib/api/roles";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { Input } from "@/components/form";
@@ -32,6 +38,7 @@ export function AddMemberDrawer({
   editMember,
   roles,
 }: AddMemberDrawerProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
   const { has } = usePermission(projectId);
@@ -48,6 +55,16 @@ export function AddMemberDrawer({
     queryFn: () => fetchMemberPermissions(projectId, editMember!.user_id!),
     enabled: Boolean(editMember?.user_id && isOpen),
   });
+
+  const groupedPermissions = useMemo(
+    () => groupPermissionsByModule(permData?.permissions.map((p) => ({ codename: p.codename, label: p.label })) ?? []),
+    [permData?.permissions],
+  );
+
+  const grantedSummary = useMemo(() => {
+    if (!permData?.permissions) return [];
+    return permData.permissions.filter((p) => p.granted === true);
+  }, [permData?.permissions]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,7 +91,7 @@ export function AddMemberDrawer({
       return addMember(projectId, { email: inviteEmail, role_ids: selectedRoles });
     },
     onSuccess: () => {
-      toast.success("ذخیره شد");
+      toast.success(t("projectMembers.saved"));
       void qc.invalidateQueries({ queryKey: ["members", projectId] });
       onClose();
     },
@@ -95,41 +112,48 @@ export function AddMemberDrawer({
   const handleOverride = async (codename: string, state: "inherit" | "grant" | "deny") => {
     if (!editMember?.user_id) return;
     if (state === "inherit") {
-      toast.warning("حذف override — از API پشتیبانی محدود");
-      return;
+      await clearMemberPermissionOverride(projectId, editMember.user_id, codename);
+      toast.success(t("projectMembers.overrideReset"));
+    } else {
+      await setMemberPermissionOverride(projectId, editMember.user_id, {
+        permission_codename: codename,
+        is_granted: state === "grant",
+      });
     }
-    await setMemberPermissionOverride(projectId, editMember.user_id, {
-      permission_codename: codename,
-      is_granted: state === "grant",
-    });
     void qc.invalidateQueries({ queryKey: ["member-permissions", projectId, editMember.user_id] });
+  };
+
+  const overrideState = (codename: string): "inherit" | "grant" | "deny" => {
+    const entry = permData?.permissions.find((p) => p.codename === codename);
+    if (!entry || entry.granted === null) return "inherit";
+    return entry.granted ? "grant" : "deny";
   };
 
   return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={editMember ? "ویرایش عضو" : "افزودن عضو"}
+      title={editMember ? t("projectMembers.drawerEdit") : t("projectMembers.drawerAdd")}
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>انصراف</Button>
+          <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
           <Button
             variant="primary"
             loading={saveMutation.isPending}
             disabled={selectedRoles.length === 0}
             onClick={() => saveMutation.mutate()}
           >
-            ذخیره
+            {t("wbs.save")}
           </Button>
         </div>
       }
     >
       {!editMember && (
         <div className="mb-4 space-y-2">
-          <Label>جستجوی کاربر</Label>
+          <Label>{t("projectMembers.searchUser")}</Label>
           <div className="flex gap-2">
             <Input value={search} onChange={(e) => setSearch(e.target.value)} />
-            <Button variant="secondary" onClick={handleSearch}>جستجو</Button>
+            <Button variant="secondary" onClick={handleSearch}>{t("projectWizard.search")}</Button>
           </div>
           {results.map((u) => (
             <button
@@ -143,15 +167,19 @@ export function AddMemberDrawer({
           ))}
           {!selectedUser && search.length >= 2 && results.length === 0 && (
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">کاربر یافت نشد — دعوت‌نامه ارسال کنید</p>
-              <Input value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="ایمیل" />
+              <p className="text-sm text-muted-foreground">{t("projectWizard.userNotFound")}</p>
+              <Input
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder={t("projectWizard.email")}
+              />
             </div>
           )}
         </div>
       )}
 
       <div className="space-y-2">
-        <Label>نقش‌ها *</Label>
+        <Label>{t("projectMembers.rolesRequired")} *</Label>
         {roles.map((r) => (
           <label key={r.id} className="flex items-start gap-2 text-sm">
             <input
@@ -167,36 +195,82 @@ export function AddMemberDrawer({
         ))}
       </div>
 
-      {has("manage_members") && editMember && (
-        <div className="mt-6">
+      {has("manage_members") && editMember && permData && (
+        <div className="mt-6 space-y-3">
+          <div>
+            <p className="text-sm font-medium">{t("projectMembers.effectiveSummary")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {grantedSummary.length > 0
+                ? grantedSummary.map((p) => p.label).join(" · ")
+                : "—"}
+            </p>
+          </div>
+
           <button
             type="button"
             className="text-sm font-medium text-primary"
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
-            دسترسی‌های پیشرفته {showAdvanced ? "▲" : "▼"}
+            {t("projectMembers.advancedPermissions")} {showAdvanced ? "▲" : "▼"}
           </button>
-          {showAdvanced && permData?.permissions && (
-            <table className="mt-2 w-full text-xs">
-              <thead>
-                <tr>
-                  <th className="text-start">دسترسی</th>
-                  <th>ارث</th>
-                  <th>اعطا</th>
-                  <th>رد</th>
-                </tr>
-              </thead>
-              <tbody>
-                {permData.permissions.map((p) => (
-                  <tr key={p.codename}>
-                    <td className="py-1">{p.label}</td>
-                    <td><input type="radio" name={p.codename} onChange={() => handleOverride(p.codename, "inherit")} /></td>
-                    <td><input type="radio" name={p.codename} onChange={() => handleOverride(p.codename, "grant")} /></td>
-                    <td><input type="radio" name={p.codename} onChange={() => handleOverride(p.codename, "deny")} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {showAdvanced && permData.permissions && (
+            <div className="space-y-4">
+              {PERMISSION_MODULE_ORDER.map((mod) => {
+                const items = groupedPermissions[mod];
+                if (!items?.length) return null;
+                return (
+                  <div key={mod}>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">
+                      {t(`roles.modules.${mod}`)}
+                    </p>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr>
+                          <th className="text-start">{t("projectMembers.permission")}</th>
+                          <th>{t("projectMembers.inherit")}</th>
+                          <th>{t("projectMembers.grant")}</th>
+                          <th>{t("projectMembers.deny")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((p) => {
+                          const state = overrideState(p.codename);
+                          return (
+                            <tr key={p.codename}>
+                              <td className="py-1">{p.label}</td>
+                              <td>
+                                <input
+                                  type="radio"
+                                  name={p.codename}
+                                  checked={state === "inherit"}
+                                  onChange={() => handleOverride(p.codename, "inherit")}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="radio"
+                                  name={p.codename}
+                                  checked={state === "grant"}
+                                  onChange={() => handleOverride(p.codename, "grant")}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="radio"
+                                  name={p.codename}
+                                  checked={state === "deny"}
+                                  onChange={() => handleOverride(p.codename, "deny")}
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}

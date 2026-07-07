@@ -54,6 +54,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'contract_type',
             'status',
             'cut_off_date',
+            'max_depth',
             'created_at',
             'updated_at',
         ]

@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from projects.models import Activity, WBS
+from projects.models import Activity, Project, WBS
 
 
 class WBSConflictError(Exception):
@@ -68,8 +68,16 @@ def create_wbs_node(
         raise WBSValidationError('wbs_code must be unique within the project.')
 
     parent = None
+    new_depth = 1
     if parent_id:
         parent = WBS.objects.get(pk=parent_id, project_id=project_id)
+        new_depth = parent.depth + 1
+
+    project = Project.objects.get(pk=project_id)
+    if project.max_depth is not None and new_depth > project.max_depth:
+        raise WBSValidationError(
+            f'WBS depth {new_depth} exceeds project maximum of {project.max_depth}.'
+        )
 
     if parent:
         node = parent.add_child(

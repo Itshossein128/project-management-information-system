@@ -18,6 +18,7 @@ export interface Role {
   role_name: string;
   description: string;
   permissions: string[];
+  is_system?: boolean;
 }
 
 export interface UserLookupResult {
@@ -72,6 +73,17 @@ export function setMemberPermissionOverride(
   return apiJson<{ effective: Record<string, boolean | null>; permissions: PermissionSummary[] }>(
     `/${PATHS.API_PROJECTS}/${projectId}/members/${userId}/permissions/`,
     { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export function clearMemberPermissionOverride(
+  projectId: string,
+  userId: string,
+  permissionCodename: string,
+) {
+  return apiJson<{ effective: Record<string, boolean | null>; permissions: PermissionSummary[] }>(
+    `/${PATHS.API_PROJECTS}/${projectId}/members/${userId}/permissions/?permission_codename=${encodeURIComponent(permissionCodename)}`,
+    { method: "DELETE" },
   );
 }
 
