@@ -155,7 +155,7 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
         records = list(qs)
 
         pdf_bytes = generate_activity_report_pdf(
-            project=business,
+            business=business,
             department=department,
             department_label=department_display_label(department),
             period_label=self.period_label,
