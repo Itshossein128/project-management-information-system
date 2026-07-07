@@ -7,6 +7,7 @@ import re
 from django.db import models
 from django.core.validators import RegexValidator
 
+from common.models import TimeStampedModel
 from projects.models import Project
 
 SLUG_REGEX = re.compile(r'^[a-z][a-z0-9_]*$')
@@ -17,14 +18,12 @@ slug_validator = RegexValidator(
 )
 
 
-class TableDefinition(models.Model):
+class TableDefinition(TimeStampedModel):
     """A logical table (collection) within a project."""
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tables')
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=100, validators=[slug_validator])
     ordering = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['project', 'ordering', 'name']
@@ -42,7 +41,7 @@ class FieldType(models.TextChoices):
     REFERENCE = 'reference', 'Reference (FK to another table)'
 
 
-class FieldDefinition(models.Model):
+class FieldDefinition(TimeStampedModel):
     table = models.ForeignKey(TableDefinition, on_delete=models.CASCADE, related_name='fields')
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=100, validators=[slug_validator])
@@ -56,8 +55,6 @@ class FieldDefinition(models.Model):
         related_name='referencing_fields',
     )
     ordering = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['table', 'ordering', 'name']
@@ -105,15 +102,13 @@ class RelationDefinition(models.Model):
         return f'{self.from_table}.{self.from_field} -> {self.to_table}'
 
 
-class DynamicTableRow(models.Model):
+class DynamicTableRow(TimeStampedModel):
     table = models.ForeignKey(
         TableDefinition,
         on_delete=models.CASCADE,
         related_name='rows',
     )
     data = models.JSONField(default=dict)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']

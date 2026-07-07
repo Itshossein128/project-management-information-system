@@ -4,7 +4,7 @@ from treebeard.mp_tree import MP_Node
 
 import uuid
 
-from common.models import UUIDModel
+from common.models import TimeStampedModel, UUIDModel
 
 
 class ProjectStatus(models.TextChoices):
@@ -14,7 +14,7 @@ class ProjectStatus(models.TextChoices):
     HANDED_OVER = 'handed_over', 'Handed over'
 
 
-class Project(UUIDModel):
+class Project(UUIDModel, TimeStampedModel):
     project_code = models.CharField(max_length=30, unique=True)
     project_name = models.CharField(max_length=200)
     employer = models.CharField(max_length=120, blank=True, default='')
@@ -38,8 +38,6 @@ class Project(UUIDModel):
         default=ProjectStatus.ACTIVE,
     )
     cut_off_date = models.DateField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'projects'
