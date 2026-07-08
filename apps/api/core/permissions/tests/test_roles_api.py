@@ -114,4 +114,4 @@ class TestMemberPermissionReset:
         )
         assert response.status_code == 200
         effective = response.data['effective']
-        assert effective['view_wbs'] is True
+        assert effective['view_wbs'] is False # The viewer role does not have view_wbs

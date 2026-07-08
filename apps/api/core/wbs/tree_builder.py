@@ -26,8 +26,8 @@ def build_nested_wbs_tree(project_id) -> list[dict]:
     if not qs.exists():
         return []
 
-    tree_qs = WBS.get_tree(qs)
-    annotated = WBS.get_annotated_list(tree_qs)
+    tree_qs = qs.order_by("path")
+    annotated = WBS.get_annotated_list_qs(tree_qs)
 
     roots: list[dict] = []
     # parents[level] -> most recent node dict at that outline level (0-based)
