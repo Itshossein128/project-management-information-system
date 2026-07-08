@@ -48,6 +48,7 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Register a new user",
@@ -284,6 +285,7 @@ class ForgotPasswordView(generics.GenericAPIView):
     """
     serializer_class = ForgotPasswordSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Request password reset",
@@ -345,6 +347,7 @@ class ResetPasswordView(generics.GenericAPIView):
     """
     serializer_class = ResetPasswordSerializer
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Reset password with token",
