@@ -41,18 +41,28 @@ export function WBSNodeRow({
   const level = node.depth > 0 ? node.depth - 1 : depth;
   const indent = level * INDENT_PX;
 
-  const invalidate = () => void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
+  const invalidate = () =>
+    void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
 
   const updateMutation = useMutation({
-    mutationFn: (payload: { wbs_name?: string; weight_physical?: number | null }) =>
-      updateWBSNode(projectId, node.wbs_id, payload),
-    onSuccess: () => { invalidate(); setEditing(false); },
+    mutationFn: (payload: {
+      wbs_name?: string;
+      weight_physical?: number | null;
+    }) => updateWBSNode(projectId, node.wbs_id, payload),
+    onSuccess: () => {
+      invalidate();
+      setEditing(false);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const createMutation = useMutation({
     mutationFn: () =>
-      createWBSNode(projectId, { parent_id: node.wbs_id, wbs_code: childCode, wbs_name: childName }),
+      createWBSNode(projectId, {
+        parent_id: node.wbs_id,
+        wbs_code: childCode,
+        wbs_name: childName,
+      }),
     onSuccess: () => {
       invalidate();
       setAddingChild(false);
@@ -70,7 +80,9 @@ export function WBSNodeRow({
   });
 
   const weightPct =
-    node.weight_physical != null ? Math.round(Number(node.weight_physical) * 100) : null;
+    node.weight_physical != null
+      ? Math.round(Number(node.weight_physical) * 100)
+      : null;
 
   const childrenWeightSum = node.children.reduce(
     (sum, c) => sum + (c.weight_physical ? Number(c.weight_physical) : 0),
@@ -91,7 +103,11 @@ export function WBSNodeRow({
             className="text-muted-foreground"
             aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
           >
-            {expanded ? <ChevronDown className="size-4" /> : <ChevronLeft className="size-4" />}
+            {expanded ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronLeft className="size-4" />
+            )}
           </button>
         ) : (
           <span className="w-4" />
@@ -106,7 +122,10 @@ export function WBSNodeRow({
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") updateMutation.mutate({ wbs_name: name });
-              if (e.key === "Escape") { setEditing(false); setName(node.wbs_name); }
+              if (e.key === "Escape") {
+                setEditing(false);
+                setName(node.wbs_name);
+              }
             }}
             onBlur={() => updateMutation.mutate({ wbs_name: name })}
             autoFocus
@@ -136,18 +155,32 @@ export function WBSNodeRow({
         )}
 
         {weightWarning && (
-          <span className="text-xs text-amber-600" title={t("wbs.weightWarning")}>⚠</span>
+          <span
+            className="text-xs text-amber-600"
+            title={t("wbs.weightWarning")}
+          >
+            ⚠
+          </span>
         )}
 
         {canEdit ? (
           <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100">
-            <Button variant="ghost" size="icon-sm" onClick={() => setAddingChild(true)} title={t("wbs.addChild")}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setAddingChild(true)}
+              aria-label={t("wbs.addChild")}
+              title={t("wbs.addChild")}
+            >
               <Plus className="size-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon-sm"
               disabled={hasChildren}
+              aria-label={
+                hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")
+              }
               title={hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
               onClick={() => deleteMutation.mutate()}
             >
@@ -158,13 +191,37 @@ export function WBSNodeRow({
       </div>
 
       {canEdit && addingChild && (
-        <div className="flex flex-wrap gap-2 py-2" style={{ paddingInlineStart: indent + 32 }}>
-          <Input placeholder={t("wbs.code")} value={childCode} onChange={(e) => setChildCode(e.target.value)} className="h-8 w-24" />
-          <Input placeholder={t("wbs.name")} value={childName} onChange={(e) => setChildName(e.target.value)} className="h-8 max-w-xs" />
-          <Button size="sm" variant="primary" loading={createMutation.isPending} onClick={() => createMutation.mutate()}>
+        <div
+          className="flex flex-wrap gap-2 py-2"
+          style={{ paddingInlineStart: indent + 32 }}
+        >
+          <Input
+            placeholder={t("wbs.code")}
+            value={childCode}
+            onChange={(e) => setChildCode(e.target.value)}
+            className="h-8 w-24"
+          />
+          <Input
+            placeholder={t("wbs.name")}
+            value={childName}
+            onChange={(e) => setChildName(e.target.value)}
+            className="h-8 max-w-xs"
+          />
+          <Button
+            size="sm"
+            variant="primary"
+            loading={createMutation.isPending}
+            onClick={() => createMutation.mutate()}
+          >
             {t("wbs.save")}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setAddingChild(false)}>{t("wbs.cancel")}</Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setAddingChild(false)}
+          >
+            {t("wbs.cancel")}
+          </Button>
         </div>
       )}
 
