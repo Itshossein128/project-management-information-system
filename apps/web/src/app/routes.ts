@@ -7,8 +7,11 @@ import {
 import { PATHS, ROUTES } from "./routeVars";
 import { businessSetupRoutes } from "./routes/business-setup.routes";
 
+// Main routing configuration array for the application defining public, authenticated, and nested layout routes.
 export default [
+  // Public index/landing route
   index(ROUTES.INDEX),
+  // Authentication routes
   route(PATHS.LOGIN, ROUTES.LOGIN),
   route(PATHS.REGISTER, ROUTES.REGISTER),
   route(PATHS.FORGOT_PASSWORD, ROUTES.FORGOT_PASSWORD),

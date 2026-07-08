@@ -13,24 +13,32 @@ from .data_views import (
     DynamicRowsImportView,
 )
 
-# Nested: /api/businesses/<business_pk>/tables/ and .../tables/<pk>/
-# Fields: /api/businesses/<business_pk>/tables/<table_pk>/fields/
+# Dynamic table schema endpoints for listing and creating table definitions under a specific business
 table_list = TableDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Dynamic table schema endpoints for retrieving, updating, and deleting a specific table definition
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+
+# Dynamic field schema endpoints for listing and creating field definitions under a specific table
 field_list = FieldDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Dynamic field schema endpoints for retrieving, updating, and deleting a specific field definition
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Job position endpoints for listing and creating job positions for a business
 job_position_list = BusinessJobPositionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Job position endpoints for retrieving, updating, and deleting a specific job position
 job_position_detail = BusinessJobPositionViewSet.as_view(
     {
         'get': 'retrieve',
@@ -40,9 +48,12 @@ job_position_detail = BusinessJobPositionViewSet.as_view(
     }
 )
 
+# User assignment endpoints for listing and creating user assignments within a business
 assignment_list = UserBusinessAssignmentViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# User assignment endpoints for retrieving, updating, and deleting a specific user assignment
 assignment_detail = UserBusinessAssignmentViewSet.as_view(
     {
         'get': 'retrieve',
@@ -52,6 +63,7 @@ assignment_detail = UserBusinessAssignmentViewSet.as_view(
     }
 )
 
+# URL patterns routing business management, metadata, HR (jobs/assignments), and dynamic table/data features
 urlpatterns = [
     path(
         '',

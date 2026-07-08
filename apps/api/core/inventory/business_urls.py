@@ -8,20 +8,27 @@ from .department_activity_data_views import (
 )
 from .views import SpaceMaterialRequestViewSet, DepartmentActivityRecordViewSet
 
+# Viewset action configuration for listing and creating space material requests within a business context
 space_material_request_list = SpaceMaterialRequestViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Viewset action configuration for retrieving, updating, or deleting a specific space material request
 space_material_request_detail = SpaceMaterialRequestViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Viewset action configuration for listing and creating department activity records within a business context
 department_activity_record_list = DepartmentActivityRecordViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Viewset action configuration for retrieving, updating, or deleting a specific department activity record
 department_activity_record_detail = DepartmentActivityRecordViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Business-scoped URL patterns for inventory, loaded under /api/businesses/<int:business_pk>/
 urlpatterns = [
     path(
         '<int:business_pk>/space-material-requests/',

@@ -15,8 +15,10 @@ from .views import (
     SystemRolesListView,
 )
 
+# App name for namespace resolution in Django URL reversing
 app_name = 'authentication'
 
+# URL patterns defining the authentication and user management endpoints
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),

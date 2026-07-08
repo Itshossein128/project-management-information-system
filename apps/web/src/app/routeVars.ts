@@ -1,3 +1,4 @@
+// Constant object mapping route semantic names to their respective file paths in the application
 export const ROUTES = {
   INDEX: "routes/index.tsx",
   LOGIN: "routes/login.tsx",
