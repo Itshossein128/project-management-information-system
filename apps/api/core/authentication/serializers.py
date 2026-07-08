@@ -92,9 +92,11 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_joined', 'roles', 'full_name']
 
     def get_roles(self, obj) -> list[str]:
+        """Retrieve the list of role names (Django group names) assigned to the user."""
         return list(obj.groups.values_list('name', flat=True))
 
     def get_full_name(self, obj) -> str:
+        """Retrieve the user's full name."""
         return obj.get_full_name()
 
 
@@ -134,12 +136,18 @@ class UserListSerializer(serializers.ModelSerializer):
         )
 
     def get_roles(self, obj) -> list[str]:
+        """Retrieve the list of role names (Django group names) assigned to the user."""
         return list(obj.groups.values_list("name", flat=True))
 
     def get_full_name(self, obj) -> str:
+        """Retrieve the user's full name."""
         return obj.get_full_name()
 
     def get_assignments_preview(self, obj) -> list[dict]:
+        """
+        Retrieve a preview of the user's business assignments.
+        Uses pre-fetched assignments if available to optimize queries.
+        """
         from business_meta.models import UserBusinessAssignment
 
         rows = getattr(obj, "prefetched_assignments", None)

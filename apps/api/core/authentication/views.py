@@ -302,7 +302,10 @@ class ForgotPasswordView(generics.GenericAPIView):
         tags=['Authentication']
     )
     def post(self, request):
-        """Handle forgot password request."""
+        """
+        Handle forgot password request. Validates the provided phone number
+        and delegates to PasswordResetService to initiate the reset process (e.g. sending SMS).
+        """
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
@@ -361,7 +364,11 @@ class ResetPasswordView(generics.GenericAPIView):
         tags=['Authentication']
     )
     def post(self, request):
-        """Handle password reset."""
+        """
+        Handle password reset. Expects a valid token and new password data,
+        then completes the password reset process. (Note: Token storage/validation
+        needs full implementation in production).
+        """
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
@@ -455,11 +462,16 @@ class UserListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsHrOrAdmin]
 
     def get_serializer_class(self):
+        """Returns the appropriate serializer based on the HTTP request method."""
         if self.request.method == "POST":
             return UserRegistrationSerializer
         return UserListSerializer
 
     def get_queryset(self):
+        """
+        Retrieves the queryset of all users for the HR/Admin view.
+        Uses `prefetch_related` to optimize retrieval of user business assignments.
+        """
         return (
             User.objects.all()
             .order_by("-date_joined", "id")
@@ -490,6 +502,7 @@ class UserListView(generics.ListCreateAPIView):
         tags=["Authentication"],
     )
     def get(self, request, *args, **kwargs):
+        """Handles GET requests to list paginated users for HR/Admin."""
         return super().get(request, *args, **kwargs)
 
     @extend_schema(
@@ -511,6 +524,7 @@ class UserListView(generics.ListCreateAPIView):
         tags=["Authentication"],
     )
     def post(self, request, *args, **kwargs):
+        """Handles POST requests to create a new user account for HR/Admin."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -525,6 +539,11 @@ class UserAssignmentsListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Retrieves the user's business assignments.
+        Restricts access so a user can only view their own assignments,
+        unless they possess HR or Admin permissions.
+        """
         user_id = self.kwargs['user_id']
         u = self.request.user
         if u.id != int(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
@@ -541,6 +560,7 @@ class UserAssignmentsListView(generics.ListAPIView):
         tags=['Authentication'],
     )
     def get(self, request, *args, **kwargs):
+        """Handles GET requests to list all business assignments for the specific user."""
         return super().get(request, *args, **kwargs)
 
 
@@ -556,6 +576,10 @@ class SystemRolesListView(APIView):
         tags=['Authentication'],
     )
     def get(self, request):
+        """
+        Handles GET requests to list system roles.
+        Retrieves all Django Group instances and formats them for the frontend.
+        """
         data = [
             {'name': g.name, 'label': g.name.replace('-', ' ').title()}
             for g in Group.objects.all().order_by('name')

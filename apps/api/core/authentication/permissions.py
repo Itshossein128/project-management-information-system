@@ -15,10 +15,12 @@ class IsInGroup(permissions.BasePermission):
     role_name: str = ""
 
     def __init__(self, role_name: str = "", **kwargs):
+        """Initializes the permission class, setting the target role name."""
         super().__init__(**kwargs)
         self.role_name = role_name or getattr(self.__class__, "role_name", "")
 
     def has_permission(self, request, view) -> bool:
+        """Determines if the requesting user has the required group (role) assigned."""
         if not request.user or not request.user.is_authenticated:
             return False
         if not self.role_name:
@@ -60,6 +62,10 @@ class IsManagerOrHR(permissions.BasePermission):
     For unsafe methods, require Django group 'manager' or 'hr'.
     """
     def has_permission(self, request, view) -> bool:
+        """
+        Grants permission if the request method is safe, or if the user is
+        authenticated and belongs to the 'manager' or 'hr' group.
+        """
         if not request.user or not request.user.is_authenticated:
             return False
         if request.method in permissions.SAFE_METHODS:
@@ -73,6 +79,10 @@ class IsHrOrAdmin(permissions.BasePermission):
     Matches the HR users area in the frontend.
     """
     def has_permission(self, request, view) -> bool:
+        """
+        Grants permission to users who are authenticated and either have
+        'is_staff'/'is_superuser' flags or belong to the 'admin' or 'hr' group.
+        """
         if not request.user or not request.user.is_authenticated:
             return False
         u = request.user
