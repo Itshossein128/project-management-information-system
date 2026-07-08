@@ -94,8 +94,8 @@ class UserRegistrationView(generics.CreateAPIView):
 
         if serializer.is_valid():
             try:
-                user = serializer.save()
-                tokens = get_tokens_for_user(user)
+                service = UserRegistrationService()
+                user, tokens = service.register_and_generate_tokens(**serializer.validated_data)
                 return Response(
                     {
                         'access': tokens['access'],
