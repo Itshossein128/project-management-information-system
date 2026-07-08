@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from common.models import UUIDModel
+from common.models import TimeStampedModel, UUIDModel
 
 
 class BaselineSchedule(UUIDModel):
@@ -64,7 +64,7 @@ class MspImportStatus(models.TextChoices):
     FAILED = 'failed', 'Failed'
 
 
-class MspImportJob(UUIDModel):
+class MspImportJob(UUIDModel, TimeStampedModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='msp_import_jobs')
     task_id = models.CharField(max_length=64, blank=True, default='')
     status = models.CharField(max_length=20, choices=MspImportStatus.choices, default=MspImportStatus.PENDING)
@@ -81,8 +81,6 @@ class MspImportJob(UUIDModel):
         blank=True,
         related_name='msp_import_jobs',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'msp_import_jobs'
