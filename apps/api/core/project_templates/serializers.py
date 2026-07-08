@@ -18,8 +18,9 @@ class ProjectTemplateWBSNodeSerializer(serializers.ModelSerializer):
         fields = ['id', 'wbs_code', 'wbs_name', 'weight_physical', 'level', 'order', 'children', 'activities']
 
     def get_children(self, obj):
-        children = obj.children.all().order_by('order', 'wbs_code')
-        return ProjectTemplateWBSNodeSerializer(children, many=True).data
+        children_map = self.context.get('children_map', {})
+        children = children_map.get(str(obj.id), [])
+        return ProjectTemplateWBSNodeSerializer(children, many=True, context=self.context).data
 
     def get_activities(self, obj):
         return ProjectTemplateActivitySerializer(obj.activities.all(), many=True).data
@@ -54,11 +55,31 @@ class ProjectTemplateDetailSerializer(ProjectTemplateListSerializer):
         fields = [*ProjectTemplateListSerializer.Meta.fields, 'wbs_tree', 'roles']
 
     def get_wbs_tree(self, obj):
-        roots = obj.wbs_nodes.filter(parent__isnull=True).order_by('order', 'wbs_code')
-        return ProjectTemplateWBSNodeSerializer(roots, many=True).data
+        # ⚡ Bolt: Fetch all nodes and build the tree iteratively in memory to avoid N+1 recursive queries.
+        nodes = list(obj.wbs_nodes.all())
+        children_map = {}
+        roots = []
+        for node in nodes:
+            children_map[str(node.id)] = []
+
+        for node in nodes:
+            if node.parent_id:
+                parent_id_str = str(node.parent_id)
+                if parent_id_str in children_map:
+                    children_map[parent_id_str].append(node)
+            else:
+                roots.append(node)
+
+        # Sort roots and children according to the original logic
+        roots.sort(key=lambda x: (x.order, x.wbs_code))
+        for children in children_map.values():
+            children.sort(key=lambda x: (x.order, x.wbs_code))
+
+        return ProjectTemplateWBSNodeSerializer(roots, many=True, context={'children_map': children_map}).data
 
     def get_roles(self, obj):
-        return [tr.role.role_name for tr in obj.template_roles.select_related('role')]
+        # ⚡ Bolt: Removed .select_related() and used .all() to utilize prefetch cache and avoid N+1 queries.
+        return [tr.role.role_name for tr in obj.template_roles.all()]
 
 
 class ProjectTemplateCreateSerializer(serializers.ModelSerializer):

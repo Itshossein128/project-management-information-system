@@ -39,6 +39,11 @@ class ProjectTemplateViewSet(viewsets.ModelViewSet):
             qs = qs.filter(project_type=project_type)
         if is_system is not None:
             qs = qs.filter(is_system=is_system.lower() in ('1', 'true', 'yes'))
+
+        if self.action == 'retrieve':
+            # ⚡ Bolt: Add prefetch_related to avoid N+1 queries when loading nested WBS trees and roles
+            qs = qs.prefetch_related('wbs_nodes__activities', 'template_roles__role')
+
         return qs
 
     def perform_create(self, serializer):
