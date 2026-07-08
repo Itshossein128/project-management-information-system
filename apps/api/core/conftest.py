@@ -79,6 +79,29 @@ def viewer_member(db, project, other_user, site_supervisor_role):
 
 
 @pytest.fixture
+def wbs(db, project):
+    from wbs.services import create_wbs_node
+
+    node, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
+    return node
+
+
+@pytest.fixture
+def activity(db, project, wbs, user):
+    from projects.models import Activity
+
+    return Activity.objects.create(
+        project=project,
+        wbs=wbs,
+        activity_code='A1',
+        activity_name='Activity 1',
+        total_quantity=100,
+        created_by=user,
+        updated_by=user,
+    )
+
+
+@pytest.fixture
 def api_client():
     from rest_framework.test import APIClient
 

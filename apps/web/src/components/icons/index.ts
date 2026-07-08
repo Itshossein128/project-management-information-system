@@ -1,6 +1,7 @@
 import {
   FaBuilding,
   FaBusinessTime,
+  FaClipboardList,
   FaShieldAlt,
   FaTruck,
   FaUsers,
@@ -19,6 +20,7 @@ export const ICONS = {
   truck: FaTruck,
   warehouse: MdWarehouse,
   bolt: MdBolt,
+  clipboard: FaClipboardList,
 } as const;
 
 export type IconName = keyof typeof ICONS;

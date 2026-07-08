@@ -36,3 +36,11 @@ export function formatDisplayDate(iso: string | null | undefined): string {
   const jalali = isoToJalali(iso.slice(0, 10));
   return jalali || iso.slice(0, 10);
 }
+
+/** Format an ISO datetime as Jalali date + HH:MM (local wall-clock from the string). */
+export function formatDisplayDateTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const date = formatDisplayDate(iso.slice(0, 10));
+  const time = iso.slice(11, 16);
+  return time ? `${date} ${time}` : date;
+}

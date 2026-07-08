@@ -40,5 +40,12 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       path: `${base}/${PATHS.PROJECT_WEATHER}`,
       activePathPrefix: `${base}/${PATHS.PROJECT_WEATHER}`,
     },
+    {
+      label: "Daily Reports",
+      labelI18nKey: "nav.projectDailyReports",
+      icon: "clipboard" as IconName,
+      path: `${base}/${PATHS.PROJECT_DAILY_REPORTS}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_DAILY_REPORTS}`,
+    },
   ];
 }

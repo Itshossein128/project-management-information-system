@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Lock, Settings } from "lucide-react";
 import { Link, useParams } from "react-router";
@@ -5,6 +6,10 @@ import { useTranslation } from "react-i18next";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { fetchMembers } from "@/app/lib/api/members";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
+import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
+import { warmProjectCache } from "@/app/lib/offlineCache";
+import { isOfflineDBAvailable } from "@/app/lib/offlineDB";
+import { useToast } from "@/components/ui/toast";
 import { PATHS } from "@/app/routeVars";
 import { Badge, projectStatusBadge, projectStatusLabels } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
@@ -13,10 +18,22 @@ import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/pag
 function OverviewContent() {
   const { t } = useTranslation();
   const { projectId, project, isLoading } = useProject();
+  const isOnline = useOnlineStatus();
+  const toast = useToast();
+  const warmedRef = useRef(false);
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
   });
+
+  useEffect(() => {
+    if (!projectId || !isOnline || warmedRef.current) return;
+    if (!isOfflineDBAvailable()) return;
+    warmedRef.current = true;
+    void warmProjectCache(projectId).then(() => {
+      toast.success("💾 پروژه برای استفاده آفلاین ذخیره شد");
+    });
+  }, [projectId, isOnline, toast]);
 
   const MODULES = [
     {

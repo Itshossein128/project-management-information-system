@@ -12,6 +12,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { AuthProvider } from "./contexts/auth-context";
 import { ToastProvider } from "@/components/ui/toast";
+import { PwaManager } from "@/components/PwaManager";
 import "./lib/i18n";
 import { isRTL } from "./lib/i18n";
 
@@ -44,6 +45,7 @@ export default function App() {
     <AuthProvider>
       <ThemeSync />
       <ToastProvider>
+        <PwaManager />
         <Outlet />
       </ToastProvider>
     </AuthProvider>

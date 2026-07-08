@@ -46,6 +46,13 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_reports',
         'edit_reports',
     ],
+    'field_supervisor': [
+        'view_project',
+        'view_wbs',
+        'view_activities',
+        'view_reports',
+        'edit_reports',
+    ],
     'finance_manager': [
         'view_project',
         'view_costs',
@@ -83,6 +90,7 @@ DEFAULT_ROLE_DESCRIPTIONS: dict[str, str] = {
     'project_manager': 'Full access to all project modules.',
     'planning_engineer': 'Planning and scheduling access.',
     'site_supervisor': 'Site reporting and progress tracking.',
+    'field_supervisor': 'Field crew filling daily reports on mobile/tablet.',
     'finance_manager': 'Financial and contract management.',
     'procurement_officer': 'Procurement and document upload.',
     'document_controller': 'Document management.',

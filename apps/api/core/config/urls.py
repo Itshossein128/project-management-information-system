@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/v1/roles/', include('projects.role_urls')),
     path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
     path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),
+    path('api/v1/notifications/', include('notifications.urls')),
     path('api/relations/', include('business_meta.relations_urls')),
     path('api/', include('inventory.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

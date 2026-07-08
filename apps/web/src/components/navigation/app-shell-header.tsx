@@ -1,4 +1,5 @@
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/form";
 import { cn } from "@/app/lib/utils";
 import { useShellStore } from "@/app/store/shellStore";
@@ -60,6 +61,7 @@ export function AppShellHeader({ className }: AppShellHeaderProps) {
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+          <NotificationBell />
           <AppPreferencesBar />
           <span
             className="hidden max-w-[10rem] truncate text-muted-foreground text-sm sm:inline md:max-w-[14rem]"

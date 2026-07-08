@@ -25,6 +25,18 @@ import { LayoutTemplate } from "lucide-react";
 
 const CONTRACT_TYPE_KEYS = ["unit_price", "lump_sum", "cost_plus", "EPC"] as const;
 
+const CONTRACT_TYPE_LABELS: Record<(typeof CONTRACT_TYPE_KEYS)[number], string> = {
+  unit_price: "فی واحد",
+  lump_sum: "سرجمع",
+  cost_plus: "Cost Plus",
+  EPC: "EPC",
+};
+
+const CONTRACT_TYPES = CONTRACT_TYPE_KEYS.map((value) => ({
+  value,
+  label: CONTRACT_TYPE_LABELS[value],
+}));
+
 interface DraftMember {
   user?: UserLookupResult;
   email?: string;
