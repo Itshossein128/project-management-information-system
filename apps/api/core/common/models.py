@@ -42,7 +42,7 @@ class AllObjectsManager(models.Manager):
         return SoftDeleteQuerySet(self.model, using=self._db)
 
 
-class AuditSoftDeleteModel(UUIDModel):
+class AuditSoftDeleteModel(UUIDModel, TimeStampedModel):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(
@@ -57,8 +57,6 @@ class AuditSoftDeleteModel(UUIDModel):
         blank=True,
         related_name='+',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     objects = SoftDeleteManager()
     all_objects = AllObjectsManager()

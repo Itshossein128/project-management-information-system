@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from common.models import UUIDModel
+from common.models import TimeStampedModel, UUIDModel
 
 
 class ProjectType(models.TextChoices):
@@ -13,7 +13,7 @@ class ProjectType(models.TextChoices):
     OTHER = 'other', 'Other'
 
 
-class ProjectTemplate(UUIDModel):
+class ProjectTemplate(UUIDModel, TimeStampedModel):
     template_name = models.CharField(max_length=120)
     description = models.TextField(blank=True, default='')
     project_type = models.CharField(max_length=30, choices=ProjectType.choices, default=ProjectType.OTHER)
@@ -25,8 +25,6 @@ class ProjectTemplate(UUIDModel):
         blank=True,
         related_name='created_project_templates',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta(UUIDModel.Meta):
         db_table = 'project_templates'
