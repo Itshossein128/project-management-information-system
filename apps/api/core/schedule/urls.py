@@ -1,8 +1,26 @@
 from django.urls import path
 
+from schedule.activity_views import ActivityViewSet
 from schedule.views import MspImportPreviewView, MspImportStartView, MspImportStatusView
 
+activity_list = ActivityViewSet.as_view({'get': 'list', 'post': 'create'})
+activity_detail = ActivityViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+activity_weight_summary = ActivityViewSet.as_view({'get': 'weight_summary'})
+activity_network = ActivityViewSet.as_view({'get': 'network'})
+activity_relations = ActivityViewSet.as_view({'post': 'relations'})
+activity_relation_delete = ActivityViewSet.as_view({'delete': 'delete_relation'})
+
 urlpatterns = [
+    path('activities/', activity_list, name='activity-list'),
+    path('activities/weight-summary/', activity_weight_summary, name='activity-weight-summary'),
+    path('activities/network/', activity_network, name='activity-network'),
+    path('activities/<uuid:activity_id>/', activity_detail, name='activity-detail'),
+    path('activities/<uuid:activity_id>/relations/', activity_relations, name='activity-relations'),
+    path(
+        'activities/<uuid:activity_id>/relations/<uuid:relation_id>/',
+        activity_relation_delete,
+        name='activity-relation-delete',
+    ),
     path('import/msp/preview/', MspImportPreviewView.as_view(), name='msp-import-preview'),
     path('import/msp/', MspImportStartView.as_view(), name='msp-import-start'),
     path('import/msp/status/<uuid:task_id>/', MspImportStatusView.as_view(), name='msp-import-status'),

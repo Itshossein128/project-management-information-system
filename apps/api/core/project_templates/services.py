@@ -14,6 +14,7 @@ def apply_template_to_project(
     project: Project,
     *,
     force: bool = False,
+    user=None,
 ) -> dict:
     if WBS.objects.filter(project=project).exists() and not force:
         raise ValueError('Project already has WBS nodes. Pass force=true to replace.')
@@ -57,6 +58,8 @@ def apply_template_to_project(
                 activity_name=tact.activity_name,
                 unit_id=None,
                 weight=tact.weight,
+                created_by=user,
+                updated_by=user,
             )
 
     roles_added = 0

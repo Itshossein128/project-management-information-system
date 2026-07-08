@@ -24,6 +24,7 @@ def run_msp_import_task(self, job_id: str):
             filename=job.filename,
             replace=job.replace_existing,
             progress_callback=on_progress,
+            user=job.created_by,
         )
         job.status = MspImportStatus.DONE
         job.progress_pct = 100

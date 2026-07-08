@@ -20,6 +20,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/${PATHS.PROJECT_WBS}`,
     },
     {
+      label: "Activities",
+      labelI18nKey: "nav.projectActivities",
+      icon: "business" as IconName,
+      path: `${base}/${PATHS.PROJECT_ACTIVITIES}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_ACTIVITIES}`,
+    },
+    {
       label: "Members",
       labelI18nKey: "nav.projectMembers",
       icon: "users" as IconName,

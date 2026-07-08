@@ -42,13 +42,15 @@ class TestWBSTree:
         response = auth_client.delete(f'/api/v1/projects/{project.id}/wbs/{root.id}/')
         assert response.status_code == status.HTTP_409_CONFLICT
 
-    def test_delete_with_activities_returns_409(self, auth_client, project):
+    def test_delete_with_activities_returns_409(self, auth_client, project, user):
         node, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
         Activity.objects.create(
             project=project,
             wbs=node,
             activity_code='A1',
             activity_name='Activity 1',
+            created_by=user,
+            updated_by=user,
         )
         response = auth_client.delete(f'/api/v1/projects/{project.id}/wbs/{node.id}/')
         assert response.status_code == status.HTTP_409_CONFLICT

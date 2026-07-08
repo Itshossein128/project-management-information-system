@@ -38,9 +38,16 @@ class TestWBSServices:
         with pytest.raises(WBSConflictError):
             delete_wbs_node(root)
 
-    def test_delete_wbs_node_with_activities(self, project):
+    def test_delete_wbs_node_with_activities(self, project, user):
         node, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
-        Activity.objects.create(project=project, wbs=node, activity_code='A1', activity_name='Activity 1')
+        Activity.objects.create(
+            project=project,
+            wbs=node,
+            activity_code='A1',
+            activity_name='Activity 1',
+            created_by=user,
+            updated_by=user,
+        )
 
         with pytest.raises(WBSConflictError):
             delete_wbs_node(node)

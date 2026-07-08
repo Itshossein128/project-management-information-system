@@ -4,7 +4,9 @@ from treebeard.mp_tree import MP_Node
 
 import uuid
 
-from common.models import TimeStampedModel, UUIDModel
+from django.utils import timezone
+
+from common.models import AuditSoftDeleteModel, TimeStampedModel, UUIDModel
 
 
 class ProjectStatus(models.TextChoices):
@@ -89,9 +91,9 @@ class ActivityStatus(models.TextChoices):
     COMPLETED = 'completed', 'Completed'
 
 
-class Activity(UUIDModel):
+class Activity(AuditSoftDeleteModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='activities')
-    wbs = models.ForeignKey(WBS, on_delete=models.CASCADE, related_name='activities')
+    wbs = models.ForeignKey(WBS, on_delete=models.PROTECT, related_name='activities')
     activity_code = models.CharField(max_length=30)
     activity_name = models.CharField(max_length=200)
     unit = models.ForeignKey(
@@ -119,6 +121,7 @@ class Activity(UUIDModel):
         choices=ActivityStatus.choices,
         default=ActivityStatus.NOT_STARTED,
     )
+    description = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'activities'
@@ -126,6 +129,27 @@ class Activity(UUIDModel):
 
     def __str__(self):
         return f'{self.activity_code} — {self.activity_name}'
+
+    @property
+    def planned_duration(self):
+        if self.planned_start and self.planned_finish:
+            return (self.planned_finish - self.planned_start).days + 1
+        return None
+
+    @property
+    def actual_duration(self):
+        if self.actual_start and self.actual_finish:
+            return (self.actual_finish - self.actual_start).days
+        return None
+
+    @property
+    def is_overdue(self):
+        today = timezone.localdate()
+        return (
+            self.planned_finish is not None
+            and self.planned_finish < today
+            and self.status != ActivityStatus.COMPLETED
+        )
 
 
 class RelationType(models.TextChoices):
@@ -135,7 +159,7 @@ class RelationType(models.TextChoices):
     SF = 'SF', 'Start-to-Finish'
 
 
-class ActivityRelation(UUIDModel):
+class ActivityRelation(AuditSoftDeleteModel):
     predecessor = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
@@ -151,6 +175,13 @@ class ActivityRelation(UUIDModel):
 
     class Meta:
         db_table = 'activity_relations'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['predecessor', 'successor'],
+                condition=models.Q(is_deleted=False),
+                name='unique_active_activity_relation',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.predecessor_id} -> {self.successor_id} ({self.relation_type})'

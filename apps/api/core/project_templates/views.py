@@ -69,7 +69,7 @@ class ProjectTemplateViewSet(viewsets.ModelViewSet):
         project = get_object_or_404(Project, pk=project_id)
         force = request.query_params.get('force', 'false').lower() in ('1', 'true', 'yes')
         try:
-            result = apply_template_to_project(template, project, force=force)
+            result = apply_template_to_project(template, project, force=force, user=request.user)
         except ValueError as exc:
             return Response(
                 {'error': {'code': 'validation_error', 'message': str(exc), 'details': {}}},

@@ -207,16 +207,22 @@ def execute_msp_import(
     filename: str,
     replace: bool = False,
     progress_callback=None,
+    user=None,
 ) -> dict:
     parsed = parse_msp_xml(file_bytes)
     warnings = list(parsed.warnings)
 
     if replace:
-        ActivityRelation.objects.filter(
+        ActivityRelation._base_manager.filter(
             predecessor__project=project,
         ).delete()
-        Activity.objects.filter(project=project).delete()
+        Activity._base_manager.filter(project=project).delete()
         WBS.objects.filter(project=project).delete()
+
+    audit_user = user
+    if audit_user is None:
+        from django.contrib.auth import get_user_model
+        audit_user = get_user_model().objects.order_by('created_at').first()
 
     uid_to_activity: dict[str, Activity] = {}
     outline_to_wbs: dict[str, WBS] = {}
@@ -289,6 +295,8 @@ def execute_msp_import(
             activity_name=task.name,
             planned_start=task.start,
             planned_finish=task.finish,
+            created_by=audit_user,
+            updated_by=audit_user,
         )
         uid_to_activity[task.uid] = act
         activity_count += 1
@@ -329,7 +337,12 @@ def execute_msp_import(
             ActivityRelation.objects.get_or_create(
                 predecessor=predecessor,
                 successor=successor,
-                defaults={'relation_type': rel_type, 'lag_days': pred.get('lag', 0)},
+                defaults={
+                    'relation_type': rel_type,
+                    'lag_days': pred.get('lag', 0),
+                    'created_by': audit_user,
+                    'updated_by': audit_user,
+                },
             )
             relation_count += 1
 
