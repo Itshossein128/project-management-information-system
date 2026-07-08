@@ -13,24 +13,32 @@ from .data_views import (
     DynamicRowsImportView,
 )
 
-# Nested: /api/businesses/<business_pk>/tables/ and .../tables/<pk>/
-# Fields: /api/businesses/<business_pk>/tables/<table_pk>/fields/
+# Table definition viewsets for listing and creating table metadata within a business
 table_list = TableDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Table definition viewsets for detailed operations (retrieve, update, delete)
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+
+# Field definition viewsets for listing and creating fields within a specific table
 field_list = FieldDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Field definition viewsets for detailed operations (retrieve, update, delete)
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Job position viewsets for listing and creating job positions within a business
 job_position_list = BusinessJobPositionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# Job position viewsets for detailed operations (retrieve, update, delete)
 job_position_detail = BusinessJobPositionViewSet.as_view(
     {
         'get': 'retrieve',
@@ -40,9 +48,12 @@ job_position_detail = BusinessJobPositionViewSet.as_view(
     }
 )
 
+# User-business assignment viewsets for assigning users to businesses (list/create)
 assignment_list = UserBusinessAssignmentViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# User-business assignment viewsets for detailed operations (retrieve, update, delete)
 assignment_detail = UserBusinessAssignmentViewSet.as_view(
     {
         'get': 'retrieve',
@@ -52,6 +63,7 @@ assignment_detail = UserBusinessAssignmentViewSet.as_view(
     }
 )
 
+# URL routing for the business_meta app
 urlpatterns = [
     path(
         '',

@@ -1,3 +1,7 @@
+/**
+ * Maps logical route names to the physical file paths in the `routes/` directory.
+ * React Router v7 uses these strings to locate the component module for a route.
+ */
 export const ROUTES = {
   INDEX: "routes/index.tsx",
   LOGIN: "routes/login.tsx",
@@ -26,7 +30,10 @@ export const ROUTES = {
   BUSINESS_ELECTRICAL: "routes/business-electrical.tsx",
 } as const;
 
-/** URL segments (no leading slash). */
+/**
+ * URL path segments (no leading slash).
+ * Used to construct the actual URL patterns matched by the router.
+ */
 export const PATHS = {
   LOGIN: "login",
   REGISTER: "register",
