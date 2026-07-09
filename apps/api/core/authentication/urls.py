@@ -15,8 +15,12 @@ from .views import (
     SystemRolesListView,
 )
 
+# Defines the application namespace for reverse URL lookups related to authentication.
 app_name = 'authentication'
 
+# List of URL routes for authentication and user management endpoints.
+# Includes endpoints for registration, login, token refresh, password management,
+# and listing users/roles/assignments.
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),

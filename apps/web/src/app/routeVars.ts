@@ -1,3 +1,7 @@
+/**
+ * Maps logical route identifiers to their physical file paths within the React application.
+ * These are used by the React Router configuration to resolve which component to render for a route.
+ */
 export const ROUTES = {
   INDEX: "routes/index.tsx",
   LOGIN: "routes/login.tsx",
@@ -26,7 +30,10 @@ export const ROUTES = {
   BUSINESS_ELECTRICAL: "routes/business-electrical.tsx",
 } as const;
 
-/** URL segments (no leading slash). */
+/**
+ * Defines constant URL segments used in browser paths (no leading slashes).
+ * Centralizing these prevents typos and ensures consistency when building URLs.
+ */
 export const PATHS = {
   LOGIN: "login",
   REGISTER: "register",

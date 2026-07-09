@@ -13,24 +13,38 @@ from .data_views import (
     DynamicRowsImportView,
 )
 
-# Nested: /api/businesses/<business_pk>/tables/ and .../tables/<pk>/
-# Fields: /api/businesses/<business_pk>/tables/<table_pk>/fields/
+# View bindings for listing and creating table definitions nested under a business.
+# Maps GET to list and POST to create.
+# Nested under: /api/businesses/<business_pk>/tables/
 table_list = TableDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# View bindings for retrieving, updating, and deleting a specific table definition.
+# Maps GET to retrieve, PUT to update, PATCH to partial_update, and DELETE to destroy.
+# Nested under: /api/businesses/<business_pk>/tables/<pk>/
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+
+# View bindings for listing and creating field definitions nested under a specific table.
+# Maps GET to list and POST to create.
+# Nested under: /api/businesses/<business_pk>/tables/<table_pk>/fields/
 field_list = FieldDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# View bindings for retrieving, updating, and deleting a specific field definition.
+# Maps GET to retrieve, PUT to update, PATCH to partial_update, and DELETE to destroy.
+# Nested under: /api/businesses/<business_pk>/tables/<table_pk>/fields/<pk>/
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# View bindings for listing and creating job positions nested under a business.
+# Maps GET to list and POST to create.
 job_position_list = BusinessJobPositionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# View bindings for retrieving, updating, and deleting a specific job position.
 job_position_detail = BusinessJobPositionViewSet.as_view(
     {
         'get': 'retrieve',
@@ -40,9 +54,12 @@ job_position_detail = BusinessJobPositionViewSet.as_view(
     }
 )
 
+# View bindings for listing and creating user-business assignments nested under a business.
+# Maps GET to list and POST to create.
 assignment_list = UserBusinessAssignmentViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# View bindings for retrieving, updating, and deleting a specific user-business assignment.
 assignment_detail = UserBusinessAssignmentViewSet.as_view(
     {
         'get': 'retrieve',
@@ -52,6 +69,9 @@ assignment_detail = UserBusinessAssignmentViewSet.as_view(
     }
 )
 
+# List of URL routes for the business meta application.
+# Includes endpoints for managing businesses, templates, job positions, user assignments,
+# table definitions, field definitions, and dynamic data rows.
 urlpatterns = [
     path(
         '',

@@ -8,6 +8,9 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+# The primary list of URL routes for the backend application.
+# Routes are delegated to specific app modules (e.g., authentication, business_meta, inventory)
+# and include built-in Django admin as well as API schema documentation (Swagger/Redoc).
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),

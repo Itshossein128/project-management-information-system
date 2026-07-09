@@ -2,9 +2,10 @@ import { route } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "../routeVars";
 
 /**
- * Admin routes under `/businesses`.
- * Static segments (`create`, `.../setup`) must be registered before `businesses/:businessId`.
- * No pathless layout wrapper — avoids client/server route matching issues.
+ * Routing configuration for administration and setup routes under `/businesses`.
+ * Note: Static segments (`create`, `.../setup`) must be registered before the dynamic
+ * `businesses/:businessId` catch-all to ensure correct client/server route matching.
+ * This array avoids using a pathless layout wrapper for the same reason.
  */
 export const businessSetupRoutes = [
   route(

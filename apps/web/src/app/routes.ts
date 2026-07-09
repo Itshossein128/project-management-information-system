@@ -7,6 +7,11 @@ import {
 import { PATHS, ROUTES } from "./routeVars";
 import { businessSetupRoutes } from "./routes/business-setup.routes";
 
+/**
+ * Root routing configuration for the React application.
+ * This array defines all application routes, mapping URL paths to their corresponding component files.
+ * It includes public routes (auth), protected routes wrapped in layouts, and business-specific nested routes.
+ */
 export default [
   index(ROUTES.INDEX),
   route(PATHS.LOGIN, ROUTES.LOGIN),
