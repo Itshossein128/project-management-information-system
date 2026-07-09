@@ -1,4 +1,5 @@
 """Daily report CRUD, approval workflow, offline sync-batch and PDF export."""
+from common.viewsets import ProjectScopedViewSet
 from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -55,7 +56,7 @@ def _parse_filter_date(value):
     partial_update=extend_schema(summary='Update daily report header', tags=['Daily Reports']),
     destroy=extend_schema(summary='Soft-delete daily report', tags=['Daily Reports']),
 )
-class DailyReportViewSet(viewsets.ModelViewSet):
+class DailyReportViewSet(ProjectScopedViewSet):
     lookup_url_kwarg = 'pk'
     pagination_class = DefaultPageNumberPagination
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
@@ -63,9 +64,6 @@ class DailyReportViewSet(viewsets.ModelViewSet):
     view_permission = 'view_reports'
     edit_permission = 'edit_reports'
     approve_permission = 'approve_reports'
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
 
     @property
     def required_permission(self):
@@ -223,7 +221,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------------
 
 
-class DailyReportChildViewSet(viewsets.ModelViewSet):
+class DailyReportChildViewSet(ProjectScopedViewSet):
     lookup_url_kwarg = 'pk'
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
@@ -232,20 +230,6 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
 
     supports_batch = False
     upsert_keys: tuple[str, ...] = ()
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
 
     def get_report(self):
         if not hasattr(self, '_report'):

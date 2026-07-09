@@ -1,5 +1,6 @@
 """REST CRUD for project meta and dynamic schema."""
 from rest_framework import viewsets, permissions as drf_permissions
+from common.mixins import ProjectNestedViewSetMixin
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -31,7 +32,7 @@ from .serializers import (
     partial_update=extend_schema(summary='Patch table', tags=['Project meta']),
     destroy=extend_schema(summary='Delete table', tags=['Project meta']),
 )
-class TableDefinitionViewSet(viewsets.ModelViewSet):
+class TableDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = TableDefinitionSerializer
 
     def get_permissions(self):
@@ -39,23 +40,10 @@ class TableDefinitionViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated(), IsProjectMember()]
         return [IsBusinessSetup()]
 
-    def get_queryset(self):
-        project_pk = self.kwargs.get('project_pk')
-        if project_pk is not None:
-            return TableDefinition.objects.filter(project_id=project_pk)
-        return TableDefinition.objects.all()
-
     def get_serializer_class(self):
         if self.action == 'list':
             return TableDefinitionListSerializer
         return TableDefinitionSerializer
-
-    def perform_create(self, serializer):
-        project_pk = self.kwargs.get('project_pk')
-        if project_pk is not None:
-            serializer.save(project_id=project_pk)
-        else:
-            serializer.save()
 
     @extend_schema(summary='Get table by slug (with fields)', tags=['Project meta'])
     def by_slug(self, request, project_pk=None, table_slug=None):
@@ -73,7 +61,7 @@ class TableDefinitionViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch position', tags=['Project meta']),
     destroy=extend_schema(summary='Delete position', tags=['Project meta']),
 )
-class ProjectPositionViewSet(viewsets.ModelViewSet):
+class ProjectPositionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     serializer_class = ProjectPositionSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
@@ -83,10 +71,7 @@ class ProjectPositionViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
 
     def get_queryset(self):
-        return ProjectPosition.objects.filter(project_id=self.kwargs.get('project_pk')).select_related('project')
-
-    def perform_create(self, serializer):
-        serializer.save(project_id=self.kwargs.get('project_pk'))
+        return super().get_queryset().select_related('project')
 
     def perform_destroy(self, instance: ProjectPosition) -> None:
         if ProjectMember.objects.filter(position=instance).exists():
@@ -102,7 +87,7 @@ class ProjectPositionViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch member', tags=['Project meta']),
     destroy=extend_schema(summary='Remove member', tags=['Project meta']),
 )
-class ProjectMemberViewSet(viewsets.ModelViewSet):
+class ProjectMemberViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
     def get_permissions(self):
@@ -111,9 +96,13 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
 
     def get_queryset(self):
-        return ProjectMember.objects.filter(project_id=self.kwargs.get('project_pk')).select_related(
+        return super().get_queryset().select_related(
             'user', 'project', 'position'
         )
+
+    def perform_create(self, serializer):
+        # Disable mixin's perform_create logic
+        super(viewsets.ModelViewSet, self).perform_create(serializer)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -136,26 +125,16 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch field', tags=['Project meta']),
     destroy=extend_schema(summary='Delete field', tags=['Project meta']),
 )
-class FieldDefinitionViewSet(viewsets.ModelViewSet):
+class FieldDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
+    nested_url_kwarg = 'table_pk'
+    nested_model_field = 'table_id'
+
     serializer_class = FieldDefinitionSerializer
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return [IsAuthenticated(), IsProjectMember()]
         return [IsBusinessSetup()]
-
-    def get_queryset(self):
-        table_pk = self.kwargs.get('table_pk')
-        if table_pk is not None:
-            return FieldDefinition.objects.filter(table_id=table_pk)
-        return FieldDefinition.objects.all()
-
-    def perform_create(self, serializer):
-        table_pk = self.kwargs.get('table_pk')
-        if table_pk is not None:
-            serializer.save(table_id=table_pk)
-        else:
-            serializer.save()
 
 
 @extend_schema_view(

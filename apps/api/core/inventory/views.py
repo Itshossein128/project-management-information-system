@@ -12,6 +12,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
 
+from common.mixins import ProjectNestedViewSetMixin
 from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
 
 from .department_activity_services import get_department_activity_queryset
@@ -159,11 +160,12 @@ class ItemViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch space material request', tags=['Project inventory']),
     destroy=extend_schema(summary='Delete space material request', tags=['Project inventory']),
 )
-class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
+class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     """
     Project-scoped CRUD for SpaceMaterialRequest.
     """
 
+    queryset = SpaceMaterialRequest.objects.all()
     serializer_class = SpaceMaterialRequestSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
@@ -177,10 +179,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        project_pk = self.kwargs.get('project_pk')
-        qs = SpaceMaterialRequest.objects.all()
-        if project_pk is not None:
-            qs = qs.filter(project_id=project_pk)
+        qs = super().get_queryset()
 
         # Grid filters
         params = self.request.query_params
@@ -203,9 +202,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
 
         return qs.select_related('project')
 
-    def perform_create(self, serializer):
-        project_pk = self.kwargs.get('project_pk')
-        serializer.save(project_id=project_pk)
+
 
 
 @extend_schema_view(
@@ -261,7 +258,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(summary='Patch department activity record', tags=['Project activity records']),
     destroy=extend_schema(summary='Delete department activity record', tags=['Project activity records']),
 )
-class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
+class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     """
     Project-scoped CRUD for `DepartmentActivityRecord`.
 
@@ -304,6 +301,3 @@ class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
             return DepartmentActivityRecord.objects.none()
         return get_department_activity_queryset(project_pk, self.request.query_params)
 
-    def perform_create(self, serializer):
-        project_pk = self.kwargs.get('project_pk')
-        serializer.save(project_id=project_pk)
