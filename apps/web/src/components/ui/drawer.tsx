@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useEffect } from "react";
 import { cn } from "src/app/lib/utils";
 import { Button } from "src/components/ui/sprint-button";
+import { useTranslation } from "react-i18next";
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -11,7 +12,15 @@ export interface DrawerProps {
   footer?: React.ReactNode;
 }
 
-export function Drawer({ isOpen, onClose, title, children, footer }: DrawerProps) {
+export function Drawer({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footer,
+}: DrawerProps) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -28,7 +37,7 @@ export function Drawer({ isOpen, onClose, title, children, footer }: DrawerProps
       <button
         type="button"
         className="absolute inset-0 bg-black/40 transition-opacity"
-        aria-label="Close drawer"
+        aria-label={t("common.close")}
         onClick={onClose}
       />
       <aside
@@ -42,13 +51,22 @@ export function Drawer({ isOpen, onClose, title, children, footer }: DrawerProps
         )}
       >
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 id="drawer-title" className="text-base font-semibold">{title}</h2>
-          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
+          <h2 id="drawer-title" className="text-base font-semibold">
+            {title}
+          </h2>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            aria-label={t("common.close")}
+          >
             <X className="size-4" aria-hidden />
           </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
-        {footer ? <div className="border-t border-border p-4">{footer}</div> : null}
+        {footer ? (
+          <div className="border-t border-border p-4">{footer}</div>
+        ) : null}
       </aside>
     </div>
   );

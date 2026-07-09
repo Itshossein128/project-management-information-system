@@ -18,6 +18,7 @@
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
+    "close": "Close",
     "showPassword": "Show password",
     "hidePassword": "Hide password"
   },

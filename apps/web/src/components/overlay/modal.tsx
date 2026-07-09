@@ -2,6 +2,7 @@ import { Button } from "@/components/form";
 import { cn } from "@/app/lib/utils";
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface ModalProps {
   open: boolean;
@@ -21,6 +22,8 @@ export function Modal({
   children,
   className,
 }: ModalProps) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -65,17 +68,19 @@ export function Modal({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label="Close"
+            aria-label={t("common.close")}
             onClick={() => onOpenChange(false)}
           >
             <X className="size-4" aria-hidden />
           </Button>
         </div>
-        <div id={`modal-${idBase}Content`} className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div
+          id={`modal-${idBase}Content`}
+          className="min-h-0 flex-1 overflow-y-auto p-4"
+        >
           {children}
         </div>
       </div>
     </div>
   );
 }
-
