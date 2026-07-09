@@ -54,13 +54,24 @@ class AuditLogMiddleware(MiddlewareMixin):
                 path=request.path,
                 resource_type=resource_type,
                 resource_id=resource_id,
-                changes=changes if isinstance(changes, dict) else {'data': changes},
+                changes=AuditLogMiddleware._redact_data(changes if isinstance(changes, dict) else {'data': changes}),
                 ip_address=self._client_ip(request),
             )
             record_audit_log(payload)
         except Exception:
             logger.exception('Failed to write audit log')
         return response
+
+    @staticmethod
+    def _redact_data(data):
+        if isinstance(data, dict):
+            return {
+                k: '***REDACTED***' if any(s in k.lower() for s in ['password', 'token', 'secret', 'access', 'refresh']) else AuditLogMiddleware._redact_data(v)
+                for k, v in data.items()
+            }
+        elif isinstance(data, list):
+            return [AuditLogMiddleware._redact_data(item) for item in data]
+        return data
 
     @staticmethod
     def _client_ip(request):
