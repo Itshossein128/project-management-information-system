@@ -2,6 +2,7 @@
 from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from django.http import HttpResponse
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -212,10 +213,14 @@ class DailyReportViewSet(viewsets.ModelViewSet):
     @extend_schema(summary='Export report as PDF', tags=['Daily Reports'])
     @action(detail=True, methods=['get'])
     def pdf(self, request, *args, **kwargs):
-        from field_reports.pdf import render_daily_report_pdf
+        from field_reports.pdf import generate_daily_report_pdf
 
         instance = self.get_object()
-        return render_daily_report_pdf(instance)
+        pdf_bytes, filename = generate_daily_report_pdf(instance)
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
 
 
 # ---------------------------------------------------------------------------
