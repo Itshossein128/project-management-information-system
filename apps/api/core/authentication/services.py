@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 from authentication.models import PasswordResetToken
+from .utils import get_tokens_for_user
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -40,6 +41,18 @@ class UserRegistrationService:
         except Group.DoesNotExist:
             logger.warning("Group '%s' not found", DEFAULT_REGISTRATION_GROUP_NAME)
         return user
+
+    def register_and_generate_tokens(self, **validated_data) -> tuple[User, dict]:
+        # Pop standard items that aren't user fields (as the serializer validation handles them but keeps them in validated_data)
+        validated_data.pop('password_confirm', None)
+        password = validated_data.pop('password')
+        validated_data.pop('phone_number', None)
+        validated_data.pop('first_name', None)
+        validated_data.pop('last_name', None)
+
+        user = self.register_user(password=password, **validated_data)
+        tokens = get_tokens_for_user(user)
+        return user, tokens
 
 
 class PasswordResetService:
