@@ -10,7 +10,7 @@ import io
 import os
 
 from django.conf import settings
-from django.http import HttpResponse
+from typing import Tuple
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
@@ -70,7 +70,7 @@ def _fa(text) -> str:
     return text
 
 
-def render_daily_report_pdf(report) -> HttpResponse:
+def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
     font = _register_font()
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -184,12 +184,10 @@ def render_daily_report_pdf(report) -> HttpResponse:
         story.append(Paragraph(_fa(report.general_notes), normal))
 
     doc.build(story)
-    pdf = buf.getvalue()
+    pdf_bytes = buf.getvalue()
 
-    response = HttpResponse(pdf, content_type='application/pdf')
     filename = f'report_{jalali.replace("/", "-") or report.id}.pdf'
-    response['Content-Disposition'] = f'attachment; filename={filename}'
-    return response
+    return pdf_bytes, filename
 
 
 def _full_name(user) -> str:
