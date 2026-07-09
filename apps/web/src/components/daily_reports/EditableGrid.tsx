@@ -11,7 +11,13 @@ import {
 import { cn } from "@/app/lib/utils";
 import type { RowSyncStatus } from "@/app/lib/offlineWrite";
 
-export type CellType = "text" | "number" | "select" | "checkbox" | "time" | "combobox";
+export type CellType =
+  | "text"
+  | "number"
+  | "select"
+  | "checkbox"
+  | "time"
+  | "combobox";
 
 export interface GridColumn {
   key: string;
@@ -28,7 +34,11 @@ export interface GridColumn {
   computed?: (row: GridRow) => string | number;
 }
 
-export type GridRow = Record<string, unknown> & { id?: string; _dirty?: boolean; _key: string };
+export type GridRow = Record<string, unknown> & {
+  id?: string;
+  _dirty?: boolean;
+  _key: string;
+};
 
 export interface EditableGridProps {
   columns: GridColumn[];
@@ -49,8 +59,16 @@ const SYNC_META: Record<
   { Icon: typeof CheckCircle2; className: string; title: string }
 > = {
   synced: { Icon: CheckCircle2, className: "text-emerald-500", title: "همگام" },
-  pending: { Icon: Clock, className: "text-amber-500", title: "در صف همگام‌سازی" },
-  failed: { Icon: RefreshCw, className: "text-red-500", title: "ناموفق — تلاش مجدد" },
+  pending: {
+    Icon: Clock,
+    className: "text-amber-500",
+    title: "در صف همگام‌سازی",
+  },
+  failed: {
+    Icon: RefreshCw,
+    className: "text-red-500",
+    title: "ناموفق — تلاش مجدد",
+  },
   conflict: { Icon: AlertTriangle, className: "text-red-600", title: "تعارض" },
 };
 
@@ -67,6 +85,7 @@ function SyncCell({
       <button
         type="button"
         title={title}
+        aria-label={title}
         onClick={onRetry}
         className={cn("rounded p-1 hover:bg-muted", className)}
       >
@@ -75,7 +94,11 @@ function SyncCell({
     );
   }
   return (
-    <span title={title} className={cn("inline-flex", className)}>
+    <span
+      title={title}
+      aria-label={title}
+      className={cn("inline-flex", className)}
+    >
       <Icon className="size-4" />
     </span>
   );
@@ -105,7 +128,9 @@ export function EditableGrid({
 
   const setCell = (key: string, colKey: string, value: unknown) => {
     setRows((prev) =>
-      prev.map((r) => (r._key === key ? { ...r, [colKey]: value, _dirty: true } : r)),
+      prev.map((r) =>
+        r._key === key ? { ...r, [colKey]: value, _dirty: true } : r,
+      ),
     );
   };
 
@@ -115,7 +140,9 @@ export function EditableGrid({
     setSavingKey(row._key);
     try {
       await onSaveRow(row);
-      setRows((prev) => prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)));
+      setRows((prev) =>
+        prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)),
+      );
     } finally {
       setSavingKey(null);
     }
@@ -135,7 +162,10 @@ export function EditableGrid({
     }
   };
 
-  const listId = useMemo(() => `combo-${Math.random().toString(36).slice(2)}`, []);
+  const listId = useMemo(
+    () => `combo-${Math.random().toString(36).slice(2)}`,
+    [],
+  );
 
   return (
     <div className="space-y-3">
@@ -154,16 +184,27 @@ export function EditableGrid({
                 </th>
               ))}
               {syncStatusFor ? (
-                <th className="w-12 px-2 py-2 text-center font-medium">وضعیت</th>
+                <th className="w-12 px-2 py-2 text-center font-medium">
+                  وضعیت
+                </th>
               ) : null}
-              {!readOnly ? <th className="w-20 px-2 py-2 text-center font-medium">عملیات</th> : null}
+              {!readOnly ? (
+                <th className="w-20 px-2 py-2 text-center font-medium">
+                  عملیات
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length + 1 + (syncStatusFor ? 1 : 0) + (readOnly ? 0 : 1)}
+                  colSpan={
+                    columns.length +
+                    1 +
+                    (syncStatusFor ? 1 : 0) +
+                    (readOnly ? 0 : 1)
+                  }
                   className="px-3 py-6 text-center text-muted-foreground"
                 >
                   موردی ثبت نشده است
@@ -172,7 +213,9 @@ export function EditableGrid({
             ) : null}
             {rows.map((row, idx) => (
               <tr key={row._key} className="border-t border-border">
-                <td className="px-2 py-1 text-center text-muted-foreground">{idx + 1}</td>
+                <td className="px-2 py-1 text-center text-muted-foreground">
+                  {idx + 1}
+                </td>
                 {columns.map((col) => (
                   <td key={col.key} className="px-2 py-1">
                     {renderCell(col, row, setCell, readOnly, listId)}
@@ -183,7 +226,12 @@ export function EditableGrid({
                     {(() => {
                       const s = syncStatusFor(row);
                       return s ? (
-                        <SyncCell status={s} onRetry={onRetryRow ? () => onRetryRow(row) : undefined} />
+                        <SyncCell
+                          status={s}
+                          onRetry={
+                            onRetryRow ? () => onRetryRow(row) : undefined
+                          }
+                        />
                       ) : null;
                     })()}
                   </td>
@@ -194,11 +242,14 @@ export function EditableGrid({
                       <button
                         type="button"
                         title="ذخیره"
+                        aria-label="ذخیره"
                         disabled={!row._dirty || savingKey === row._key}
                         onClick={() => saveRow(row)}
                         className={cn(
                           "rounded p-1 hover:bg-muted disabled:opacity-30",
-                          row._dirty ? "text-emerald-600" : "text-muted-foreground",
+                          row._dirty
+                            ? "text-emerald-600"
+                            : "text-muted-foreground",
                         )}
                       >
                         <Save className="size-4" />
@@ -206,6 +257,7 @@ export function EditableGrid({
                       <button
                         type="button"
                         title="حذف"
+                        aria-label="حذف"
                         disabled={savingKey === row._key}
                         onClick={() => deleteRow(row)}
                         className="rounded p-1 text-red-600 hover:bg-muted disabled:opacity-30"
@@ -244,7 +296,11 @@ function renderCell(
   listId: string,
 ) {
   if (col.computed) {
-    return <span className="block px-1 text-muted-foreground">{col.computed(row)}</span>;
+    return (
+      <span className="block px-1 text-muted-foreground">
+        {col.computed(row)}
+      </span>
+    );
   }
   const value = row[col.key];
   const disabled = readOnly;
@@ -295,7 +351,9 @@ function renderCell(
             const text = e.target.value;
             setCell(row._key, col.key, text);
             if (col.refKey) {
-              const match = (col.comboOptions ?? []).find((o) => o.label === text);
+              const match = (col.comboOptions ?? []).find(
+                (o) => o.label === text,
+              );
               setCell(row._key, col.refKey, match ? match.value : null);
             }
           }}
@@ -311,7 +369,9 @@ function renderCell(
 
   return (
     <input
-      type={col.type === "number" ? "number" : col.type === "time" ? "time" : "text"}
+      type={
+        col.type === "number" ? "number" : col.type === "time" ? "time" : "text"
+      }
       className={inputClass}
       value={(value as string | number) ?? ""}
       placeholder={col.placeholder}
