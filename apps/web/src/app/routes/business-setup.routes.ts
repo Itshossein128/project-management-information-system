@@ -2,6 +2,7 @@ import { route } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "../routeVars";
 
 /**
+ * Array of route configurations for the business admin/setup section.
  * Admin routes under `/businesses`.
  * Static segments (`create`, `.../setup`) must be registered before `businesses/:businessId`.
  * No pathless layout wrapper — avoids client/server route matching issues.

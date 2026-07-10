@@ -1,3 +1,7 @@
+/**
+ * Global constant defining the file paths for React route components relative to the app directory.
+ * Used internally by React Router v7 configuration definitions to map logical routes to file components.
+ */
 export const ROUTES = {
   INDEX: "routes/index.tsx",
   LOGIN: "routes/login.tsx",

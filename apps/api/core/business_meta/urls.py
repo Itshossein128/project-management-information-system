@@ -13,24 +13,35 @@ from .data_views import (
     DynamicRowsImportView,
 )
 
-# Nested: /api/businesses/<business_pk>/tables/ and .../tables/<pk>/
-# Fields: /api/businesses/<business_pk>/tables/<table_pk>/fields/
+# View functions for TableDefinition endpoints (list and create actions)
+# Nested: /api/businesses/<business_pk>/tables/
 table_list = TableDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for TableDefinition endpoints (retrieve, update, and destroy actions)
+# Nested: /api/businesses/<business_pk>/tables/<pk>/
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+
+# View functions for FieldDefinition endpoints (list and create actions)
+# Fields: /api/businesses/<business_pk>/tables/<table_pk>/fields/
 field_list = FieldDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for FieldDefinition endpoints (retrieve, update, and destroy actions)
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# View functions for BusinessJobPosition endpoints (list and create actions)
 job_position_list = BusinessJobPositionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for BusinessJobPosition endpoints (retrieve, update, and destroy actions)
 job_position_detail = BusinessJobPositionViewSet.as_view(
     {
         'get': 'retrieve',
@@ -40,9 +51,12 @@ job_position_detail = BusinessJobPositionViewSet.as_view(
     }
 )
 
+# View functions for UserBusinessAssignment endpoints (list and create actions)
 assignment_list = UserBusinessAssignmentViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for UserBusinessAssignment endpoints (retrieve, update, and destroy actions)
 assignment_detail = UserBusinessAssignmentViewSet.as_view(
     {
         'get': 'retrieve',
@@ -52,6 +66,8 @@ assignment_detail = UserBusinessAssignmentViewSet.as_view(
     }
 )
 
+# URL routing configurations for the business_meta app.
+# Defines endpoints for managing businesses, table and field definitions, job positions, user assignments, and dynamic row operations.
 urlpatterns = [
     path(
         '',
