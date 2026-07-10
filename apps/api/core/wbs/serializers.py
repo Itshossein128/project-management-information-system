@@ -6,6 +6,8 @@ from projects.models import WBS
 class WBSTreeSerializer(serializers.ModelSerializer):
     wbs_id = serializers.UUIDField(source='id', read_only=True)
     depth = serializers.IntegerField(read_only=True)
+    weight_physical = serializers.DecimalField(max_digits=8, decimal_places=4, coerce_to_string=True, read_only=True)
+    weight_financial = serializers.DecimalField(max_digits=8, decimal_places=4, coerce_to_string=True, read_only=True)
     children = serializers.SerializerMethodField()
 
     class Meta:
@@ -62,5 +64,5 @@ class WBSUpdateSerializer(serializers.Serializer):
 class WBSMoveSerializer(serializers.Serializer):
     new_parent_id = serializers.UUIDField(required=False, allow_null=True)
     position = serializers.ChoiceField(
-        choices=['first-child', 'last-child', 'left', 'right', 'first_child', 'last_child'],
+        choices=['first-child', 'last-child', 'left', 'right', 'first_child', 'last_child', 'sorted_child', 'sorted-child'],
     )

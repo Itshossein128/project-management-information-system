@@ -46,7 +46,11 @@ def build_nested_wbs_tree(project_id) -> list[dict]:
 
         parents[level] = item
         # Drop deeper stale parents when going back up the tree
-        for stale in [k for k in parents if k > level]:
+        keys_to_delete = []
+        for k in parents.keys():
+            if k > level:
+                keys_to_delete.append(k)
+        for stale in keys_to_delete:
             del parents[stale]
 
     return roots
