@@ -82,7 +82,7 @@ export default function Login() {
         >
           <CardContent className='flex flex-col gap-4'>
             {error && (
-              <p className='text-sm text-destructive' role='alert'>
+              <p className='text-sm text-destructive' role='alert' data-testid='login-error'>
                 {error}
               </p>
             )}
