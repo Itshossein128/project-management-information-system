@@ -39,20 +39,12 @@ def import_items_from_excel(file) -> Tuple[int, List[str]]:
     if missing_columns:
         raise ValueError(f'Missing required columns: {", ".join(missing_columns)}')
 
-    imported_count = 0
-    errors = []
+    errors: list[str] = []
 
-    try:
-        # Get unique category names from the dataframe
-        unique_category_names = df['category'].dropna().unique().tolist()
-    except KeyError:
-        raise ValueError('Missing required columns: category')
-
-    # Fetch existing categories
+    unique_category_names = df['category'].dropna().unique().tolist()
     existing_categories = Category.objects.filter(name__in=unique_category_names)
     category_map = {c.name: c for c in existing_categories}
 
-    # Create missing categories in bulk
     missing_categories = [
         Category(name=name)
         for name in unique_category_names
@@ -60,17 +52,20 @@ def import_items_from_excel(file) -> Tuple[int, List[str]]:
     ]
     if missing_categories:
         created_categories = Category.objects.bulk_create(missing_categories)
-        for c in created_categories:
-            category_map[c.name] = c
+        for category in created_categories:
+            category_map[category.name] = category
 
-    items_to_create = []
+    items_to_create: list[Item] = []
 
     for row in df.itertuples(index=True):
         index = row.Index
         try:
             category_name = row.category
-            category = category_map.get(category_name)
+            if pd.isna(category_name):
+                errors.append(f'Row {index + 2}: Invalid data format (e.g., missing category).')
+                continue
 
+            category = category_map.get(category_name)
             if category is None:
                 errors.append(f'Row {index + 2}: Invalid data format (e.g., missing category).')
                 continue
@@ -80,21 +75,25 @@ def import_items_from_excel(file) -> Tuple[int, List[str]]:
                 Item(
                     name=row.name,
                     quantity=quantity,
-                    category=category
+                    category=category,
                 )
             )
-            imported_count += 1
         except ValueError:
             errors.append(f'Row {index + 2}: Invalid data format (e.g., non-numeric quantity).')
         except Exception:
             logger.exception('Failed to import row %s', index + 2)
             errors.append(f'Row {index + 2}: An unexpected error occurred.')
 
+    imported_count = 0
     if items_to_create:
         try:
-            Item.objects.bulk_create(items_to_create)
-        except Exception as e:
+            created = Item.objects.bulk_create(items_to_create)
+            imported_count = len(created)
+        except Exception:
             logger.exception('Failed to bulk create items')
-            raise ValueError('A database error occurred while saving the imported items. Please check the data and try again.')
+            raise ValueError(
+                'A database error occurred while saving the imported items. '
+                'Please check the data and try again.'
+            )
 
     return imported_count, errors
