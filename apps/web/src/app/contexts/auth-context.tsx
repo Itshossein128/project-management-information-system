@@ -58,26 +58,25 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
   const login = React.useCallback(async (creds: LoginCredentials) => {
     setIsLoading(true);
     try {
+      const data = await apiJson<AuthApiResponse>("/auth/login/", {
+        method: "POST",
+        body: JSON.stringify(creds),
+      });
 
-    const data = await apiJson<AuthApiResponse>("/auth/login/", {
-      method: "POST",
-      body: JSON.stringify(creds),
-    });
+      const raw = data.user as AuthUser & { groups?: string[] };
 
-    const raw = data.user as AuthUser & { groups?: string[] };
+      const userWithRoles: AuthUser = {
+        ...data.user,
+        roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
+      };
 
-    const userWithRoles: AuthUser = {
-      ...data.user,
-      roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
-    };
+      setStoredAuth(
+        { access: data.access, refresh: data.refresh },
+        userWithRoles,
+      );
 
-    setStoredAuth(
-      { access: data.access, refresh: data.refresh },
-      userWithRoles,
-    );
-
-    setUser(userWithRoles);
-    setIsLoading(false);
+      setUser(userWithRoles);
+      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       throw error;
