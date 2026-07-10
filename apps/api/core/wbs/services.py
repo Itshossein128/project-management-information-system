@@ -34,21 +34,26 @@ def _sibling_weight_sum(parent, field: str) -> Decimal:
 
 def check_weight_warnings(parent, project_id, field: str = 'weight_physical') -> list[str]:
     warnings = []
+    # ⚡ Bolt: Evaluate siblings as a list once and compute both totals in a single loop to avoid double evaluation
     if parent is None:
-        siblings = get_project_roots(project_id)
+        siblings = list(get_project_roots(project_id))
     else:
-        siblings = parent.get_children()
+        siblings = list(parent.get_children())
 
-    for weight_field in ('weight_physical', 'weight_financial'):
-        total = Decimal('0')
-        for node in siblings:
-            val = getattr(node, weight_field)
-            if val is not None:
-                total += val
-        if total > Decimal('1'):
-            warnings.append(
-                f'Sibling {weight_field.replace("_", " ")} weights sum to {total}, which exceeds 1.0.'
-            )
+    total_physical = Decimal('0')
+    total_financial = Decimal('0')
+
+    for node in siblings:
+        if node.weight_physical is not None:
+            total_physical += node.weight_physical
+        if node.weight_financial is not None:
+            total_financial += node.weight_financial
+
+    if total_physical > Decimal('1'):
+        warnings.append(f'Sibling weight physical weights sum to {total_physical}, which exceeds 1.0.')
+    if total_financial > Decimal('1'):
+        warnings.append(f'Sibling weight financial weights sum to {total_financial}, which exceeds 1.0.')
+
     return warnings
 
 
