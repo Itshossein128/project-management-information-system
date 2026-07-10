@@ -480,5 +480,8 @@
       "documents": "اسناد",
       "dashboard": "داشبورد"
     }
+  },
+  "notifications": {
+    "title": "اعلان‌ها"
   }
 }

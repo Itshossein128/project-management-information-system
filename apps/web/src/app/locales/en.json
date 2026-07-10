@@ -480,5 +480,8 @@
       "documents": "Documents",
       "dashboard": "Dashboard"
     }
+  },
+  "notifications": {
+    "title": "Notifications"
   }
 }
