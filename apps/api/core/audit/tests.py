@@ -5,9 +5,39 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from audit.middleware import AuditLogMiddleware
 from audit.models import AuditLog
 
 User = get_user_model()
+
+
+class AuditLogRedactionTests(APITestCase):
+    def test_redacts_sensitive_auth_fields(self):
+        payload = {
+            'username': 'auditor',
+            'password': 'plain-text',
+            'access_token': 'jwt-access',
+            'refresh_token': 'jwt-refresh',
+            'profile': {'api_secret': 'shh'},
+        }
+        redacted = AuditLogMiddleware._redact_data(payload)
+        self.assertEqual(redacted['username'], 'auditor')
+        self.assertEqual(redacted['password'], '***REDACTED***')
+        self.assertEqual(redacted['access_token'], '***REDACTED***')
+        self.assertEqual(redacted['refresh_token'], '***REDACTED***')
+        self.assertEqual(redacted['profile']['api_secret'], '***REDACTED***')
+
+    def test_preserves_non_sensitive_fields(self):
+        payload = {
+            'access_level': 'admin',
+            'refresh_rate': 30,
+            'items': [{'name': 'bolt', 'client_secret': 'hidden'}],
+        }
+        redacted = AuditLogMiddleware._redact_data(payload)
+        self.assertEqual(redacted['access_level'], 'admin')
+        self.assertEqual(redacted['refresh_rate'], 30)
+        self.assertEqual(redacted['items'][0]['name'], 'bolt')
+        self.assertEqual(redacted['items'][0]['client_secret'], '***REDACTED***')
 
 
 @override_settings(AUDIT_LOG_ASYNC=False)
