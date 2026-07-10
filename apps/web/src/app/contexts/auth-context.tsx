@@ -57,6 +57,7 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
 
   const login = React.useCallback(async (creds: LoginCredentials) => {
     setIsLoading(true);
+    try {
 
     const data = await apiJson<AuthApiResponse>("/auth/login/", {
       method: "POST",
@@ -77,6 +78,10 @@ const [user, setUser] = React.useState<AuthUser | null>(() => {
 
     setUser(userWithRoles);
     setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
   }, []);
 
   const logout = React.useCallback(() => {
