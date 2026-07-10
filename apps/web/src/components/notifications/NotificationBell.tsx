@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { useAuth } from "~/contexts/auth-context";
+import { useTranslation } from "react-i18next";
 import { useUnreadCount } from "@/app/hooks/useNotifications";
 import { NotificationPanel } from "./NotificationPanel";
 
 export function NotificationBell() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const enabled = Boolean(user);
   const { data: unread = 0 } = useUnreadCount(enabled);
@@ -34,7 +36,10 @@ export function NotificationBell() {
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        aria-label="اعلان‌ها"
+        aria-label={t("notifications.title")}
+        title={t("notifications.title")}
+        aria-expanded={open}
+        aria-haspopup="dialog"
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted",
