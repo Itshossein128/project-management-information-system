@@ -10,6 +10,21 @@ logger = logging.getLogger(__name__)
 
 AUDIT_METHODS = frozenset({'POST', 'PUT', 'PATCH', 'DELETE'})
 SKIP_PATH_PREFIXES = ('/api/schema/', '/api/docs/', '/api/redoc/', '/admin/')
+SENSITIVE_KEYS = frozenset({
+    'password',
+    'password1',
+    'password2',
+    'old_password',
+    'new_password',
+    'token',
+    'access_token',
+    'refresh_token',
+    'secret',
+    'api_key',
+    'api_secret',
+    'client_secret',
+    'authorization',
+})
 
 
 class AuditLogMiddleware(MiddlewareMixin):
@@ -54,13 +69,34 @@ class AuditLogMiddleware(MiddlewareMixin):
                 path=request.path,
                 resource_type=resource_type,
                 resource_id=resource_id,
-                changes=changes if isinstance(changes, dict) else {'data': changes},
+                changes=AuditLogMiddleware._redact_data(changes if isinstance(changes, dict) else {'data': changes}),
                 ip_address=self._client_ip(request),
             )
             record_audit_log(payload)
         except Exception:
             logger.exception('Failed to write audit log')
         return response
+
+    @staticmethod
+    def _is_sensitive_key(key: str) -> bool:
+        normalized = key.lower().replace('-', '_')
+        if normalized in SENSITIVE_KEYS:
+            return True
+        return any(
+            normalized.endswith(suffix)
+            for suffix in ('_password', '_token', '_secret')
+        )
+
+    @staticmethod
+    def _redact_data(data):
+        if isinstance(data, dict):
+            return {
+                k: '***REDACTED***' if AuditLogMiddleware._is_sensitive_key(k) else AuditLogMiddleware._redact_data(v)
+                for k, v in data.items()
+            }
+        if isinstance(data, list):
+            return [AuditLogMiddleware._redact_data(item) for item in data]
+        return data
 
     @staticmethod
     def _client_ip(request):
