@@ -5,7 +5,11 @@ import { useTranslation } from "react-i18next";
 import { fetchProjects, type ProjectListItem } from "@/app/lib/api/projects";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
-import { Badge, projectStatusBadge, projectStatusLabels } from "@/components/ui/badge";
+import {
+  Badge,
+  projectStatusBadge,
+  projectStatusLabels,
+} from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { DataTable } from "@/components/ui/data-table";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
@@ -47,7 +51,8 @@ export default function ProjectListPage() {
     {
       key: "planned_finish_date",
       label: t("project.plannedFinish"),
-      render: (row: ProjectListItem) => formatDisplayDate(row.planned_finish_date),
+      render: (row: ProjectListItem) =>
+        formatDisplayDate(row.planned_finish_date),
     },
     {
       key: "contract_amount",
@@ -59,11 +64,13 @@ export default function ProjectListPage() {
       label: "",
       render: (row: ProjectListItem) => (
         <Button
-          variant="ghost"
-          size="sm"
+          variant='ghost'
+          size='sm'
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/${PATHS.PROJECT}/${row.project_id}/${PATHS.PROJECT_OVERVIEW}`);
+            navigate(
+              `/${PATHS.PROJECT}/${row.project_id}/${PATHS.PROJECT_OVERVIEW}`,
+            );
           }}
         >
           {t("project.view")}
@@ -73,24 +80,24 @@ export default function ProjectListPage() {
   ];
 
   return (
-    <main className="page-main page-shell mx-auto max-w-6xl px-4 py-8">
+    <main className='page-main page-shell mx-auto  px-4 py-8'>
       <Breadcrumb items={[{ label: t("project.title") }]} />
       <PageHeader
         title={t("project.title")}
         subtitle={t("project.subtitle")}
         actions={
           <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant="primary">{t("project.create")}</Button>
+            <Button variant='primary'>{t("project.create")}</Button>
           </Link>
         }
       />
 
       {!isLoading && projects.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-20 text-center text-muted-foreground">
-          <FolderKanban className="size-12 opacity-40" />
+        <div className='flex flex-col items-center gap-4 py-20 text-center text-muted-foreground'>
+          <FolderKanban className='size-12 opacity-40' />
           <p>{t("project.empty")}</p>
           <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant="primary">{t("project.create")}</Button>
+            <Button variant='primary'>{t("project.create")}</Button>
           </Link>
         </div>
       ) : (
@@ -100,7 +107,9 @@ export default function ProjectListPage() {
           loading={isLoading}
           rowKey={(row) => row.project_id}
           onRowClick={(row) =>
-            navigate(`/${PATHS.PROJECT}/${row.project_id}/${PATHS.PROJECT_OVERVIEW}`)
+            navigate(
+              `/${PATHS.PROJECT}/${row.project_id}/${PATHS.PROJECT_OVERVIEW}`,
+            )
           }
         />
       )}

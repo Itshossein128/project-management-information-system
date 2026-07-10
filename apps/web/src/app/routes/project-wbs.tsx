@@ -7,7 +7,11 @@ import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
 import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
 import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
-import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import {
+  Breadcrumb,
+  LoadingSkeleton,
+  PageHeader,
+} from "@/components/layout/page-header";
 import { Button } from "@/components/ui/sprint-button";
 
 function ProjectWBSContent() {
@@ -32,15 +36,18 @@ function ProjectWBSContent() {
         ]}
       />
       <PageHeader
-        title="ساختار شکست کار"
+        title='ساختار شکست کار'
         subtitle={!canEditWBS ? "نمایش فقط خواندنی" : undefined}
         actions={
           canEditWBS ? (
-            <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" onClick={() => setSaveTemplateOpen(true)}>
+            <div className='flex flex-wrap gap-2'>
+              <Button
+                variant='secondary'
+                onClick={() => setSaveTemplateOpen(true)}
+              >
                 ذخیره به‌عنوان قالب
               </Button>
-              <Button variant="secondary" onClick={() => setMspOpen(true)}>
+              <Button variant='secondary' onClick={() => setMspOpen(true)}>
                 بارگذاری از MSP
               </Button>
             </div>
@@ -51,10 +58,10 @@ function ProjectWBSContent() {
       {isLoading ? (
         <LoadingSkeleton rows={10} />
       ) : tree.length === 0 ? (
-        <p className="text-muted-foreground">هنوز گره WBS ایجاد نشده است.</p>
+        <p className='text-muted-foreground'>هنوز گره WBS ایجاد نشده است.</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <div className="min-w-max">
+        <div className='overflow-x-auto rounded-lg border border-border'>
+          <div className='min-w-max'>
             {tree.map((node) => (
               <WBSNodeRow
                 key={node.wbs_id}
@@ -73,7 +80,9 @@ function ProjectWBSContent() {
             open={mspOpen}
             onOpenChange={setMspOpen}
             projectId={projectId}
-            onComplete={() => void qc.invalidateQueries({ queryKey: ["wbs", projectId] })}
+            onComplete={() =>
+              void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
+            }
           />
           <SaveAsTemplateModal
             open={saveTemplateOpen}
@@ -95,7 +104,7 @@ export default function ProjectWBSPage() {
   const { projectId } = useProjectParams();
 
   return (
-    <main className="page-main page-shell mx-auto max-w-5xl px-4 py-8">
+    <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <ProjectWBSContent />
       </ProjectProvider>

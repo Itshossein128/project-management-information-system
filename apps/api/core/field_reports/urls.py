@@ -11,6 +11,12 @@ from field_reports.daily_report_views import (
     DailyReportViewSet,
     LaborJobTitleListView,
 )
+from field_reports.standalone_forms_views import (
+    EquipmentLogSummaryView,
+    EquipmentLogViewSet,
+    LaborCampReportViewSet,
+    StandaloneManpowerViewSet,
+)
 from field_reports.views import WeatherLogViewSet
 
 weather_list = WeatherLogViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -45,6 +51,17 @@ concrete_list, concrete_detail = _child(DailyReportConcreteLogViewSet)
 labor_camp_list, labor_camp_detail = _child(DailyReportLaborCampViewSet)
 incident_list, incident_detail = _child(DailyReportIncidentViewSet)
 
+labor_camp_report_list = LaborCampReportViewSet.as_view({'get': 'list', 'post': 'create'})
+labor_camp_report_detail = LaborCampReportViewSet.as_view(
+    {'patch': 'partial_update', 'delete': 'destroy'},
+)
+equipment_log_list = EquipmentLogViewSet.as_view({'get': 'list', 'post': 'create'})
+equipment_log_detail = EquipmentLogViewSet.as_view(
+    {'patch': 'partial_update', 'delete': 'destroy'},
+)
+manpower_list = StandaloneManpowerViewSet.as_view({'get': 'list', 'post': 'create'})
+manpower_detail = StandaloneManpowerViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
+
 DR = 'daily-reports'
 RID = '<uuid:report_pk>'
 
@@ -53,6 +70,13 @@ urlpatterns = [
     path('weather/<uuid:pk>/', weather_detail, name='project-weather-detail'),
 
     path('manpower/job-titles/', LaborJobTitleListView.as_view(), name='labor-job-titles'),
+    path('manpower/', manpower_list, name='standalone-manpower-list'),
+    path('manpower/<uuid:pk>/', manpower_detail, name='standalone-manpower-detail'),
+    path('labor-camp/', labor_camp_report_list, name='labor-camp-list'),
+    path('labor-camp/<uuid:pk>/', labor_camp_report_detail, name='labor-camp-detail'),
+    path('equipment-log/', equipment_log_list, name='equipment-log-list'),
+    path('equipment-log/summary/', EquipmentLogSummaryView.as_view(), name='equipment-log-summary'),
+    path('equipment-log/<uuid:pk>/', equipment_log_detail, name='equipment-log-detail'),
 
     path(f'{DR}/', report_list, name='daily-report-list'),
     path(f'{DR}/sync-batch/', report_sync_batch, name='daily-report-sync-batch'),

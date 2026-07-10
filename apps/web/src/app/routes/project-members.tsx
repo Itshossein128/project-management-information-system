@@ -26,17 +26,22 @@ export default function ProjectMembersPage() {
   const qc = useQueryClient();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editMember, setEditMember] = useState<ProjectMember | null>(null);
-  const [deactivateTarget, setDeactivateTarget] = useState<ProjectMember | null>(null);
+  const [deactivateTarget, setDeactivateTarget] =
+    useState<ProjectMember | null>(null);
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
   });
 
-  const { data: roles = [] } = useQuery({ queryKey: ["roles"], queryFn: fetchRoles });
+  const { data: roles = [] } = useQuery({
+    queryKey: ["roles"],
+    queryFn: fetchRoles,
+  });
 
   const deactivateMutation = useMutation({
-    mutationFn: (userId: string) => updateMember(projectId, userId, { status: "inactive" }),
+    mutationFn: (userId: string) =>
+      updateMember(projectId, userId, { status: "inactive" }),
     onSuccess: () => {
       toast.success(t("projectMembers.deactivateSuccess"));
       setDeactivateTarget(null);
@@ -50,7 +55,9 @@ export default function ProjectMembersPage() {
       key: "name",
       label: t("projectMembers.name"),
       render: (row: ProjectMember) => (
-        <span className={row.status === "inactive" ? "line-through opacity-60" : ""}>
+        <span
+          className={row.status === "inactive" ? "line-through opacity-60" : ""}
+        >
           {row.full_name}
         </span>
       ),
@@ -62,11 +69,11 @@ export default function ProjectMembersPage() {
         const shown = row.roles.slice(0, 2);
         const extra = row.roles.length - 2;
         return (
-          <div className="flex flex-wrap gap-1">
+          <div className='flex flex-wrap gap-1'>
             {shown.map((r) => (
-              <Badge key={r} variant="info" label={r} />
+              <Badge key={r} variant='info' label={r} />
             ))}
-            {extra > 0 ? <Badge variant="neutral" label={`+${extra}`} /> : null}
+            {extra > 0 ? <Badge variant='neutral' label={`+${extra}`} /> : null}
           </div>
         );
       },
@@ -77,31 +84,48 @@ export default function ProjectMembersPage() {
       render: (row: ProjectMember) => (
         <Badge
           variant={row.status === "active" ? "success" : "neutral"}
-          label={row.status === "active" ? t("projectMembers.active") : t("projectMembers.inactive")}
+          label={
+            row.status === "active"
+              ? t("projectMembers.active")
+              : t("projectMembers.inactive")
+          }
         />
       ),
     },
     {
       key: "joined_at",
       label: t("projectMembers.joinedAt"),
-      render: (r: ProjectMember) => formatDisplayDate(r.joined_at?.slice(0, 10)),
+      render: (r: ProjectMember) =>
+        formatDisplayDate(r.joined_at?.slice(0, 10)),
     },
     {
       key: "last_login",
       label: t("projectMembers.lastLogin"),
-      render: (r: ProjectMember) => formatDisplayDate(r.last_login?.slice(0, 10)),
+      render: (r: ProjectMember) =>
+        formatDisplayDate(r.last_login?.slice(0, 10)),
     },
     {
       key: "actions",
       label: t("projectMembers.actions"),
       render: (row: ProjectMember) =>
         row.user_id ? (
-          <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={() => { setEditMember(row); setDrawerOpen(true); }}>
+          <div className='flex gap-1'>
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={() => {
+                setEditMember(row);
+                setDrawerOpen(true);
+              }}
+            >
               {t("projectMembers.edit")}
             </Button>
             {row.status === "active" ? (
-              <Button variant="ghost" size="sm" onClick={() => setDeactivateTarget(row)}>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => setDeactivateTarget(row)}
+              >
                 {t("projectMembers.deactivate")}
               </Button>
             ) : null}
@@ -111,7 +135,7 @@ export default function ProjectMembersPage() {
   ];
 
   return (
-    <main className="page-main page-shell mx-auto max-w-6xl px-4 py-8">
+    <main className='page-main page-shell mx-auto  px-4 py-8'>
       <Breadcrumb
         items={[
           { label: t("project.title"), href: `/${PATHS.PROJECT}` },
@@ -121,7 +145,13 @@ export default function ProjectMembersPage() {
       <PageHeader
         title={t("projectMembers.title")}
         actions={
-          <Button variant="primary" onClick={() => { setEditMember(null); setDrawerOpen(true); }}>
+          <Button
+            variant='primary'
+            onClick={() => {
+              setEditMember(null);
+              setDrawerOpen(true);
+            }}
+          >
             {t("projectMembers.add")}
           </Button>
         }
@@ -138,7 +168,10 @@ export default function ProjectMembersPage() {
       <AddMemberDrawer
         projectId={projectId}
         isOpen={drawerOpen}
-        onClose={() => { setDrawerOpen(false); setEditMember(null); }}
+        onClose={() => {
+          setDrawerOpen(false);
+          setEditMember(null);
+        }}
         editMember={editMember}
         roles={roles as Role[]}
       />
@@ -147,17 +180,24 @@ export default function ProjectMembersPage() {
         open={Boolean(deactivateTarget)}
         onOpenChange={(o) => !o && setDeactivateTarget(null)}
         title={t("projectMembers.deactivateTitle")}
-        idBase="deactivateMember"
+        idBase='deactivateMember'
       >
-        <p className="mb-4 text-sm">
-          {t("projectMembers.deactivateConfirm", { name: deactivateTarget?.full_name })}
+        <p className='mb-4 text-sm'>
+          {t("projectMembers.deactivateConfirm", {
+            name: deactivateTarget?.full_name,
+          })}
         </p>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setDeactivateTarget(null)}>{t("common.cancel")}</Button>
+        <div className='flex justify-end gap-2'>
+          <Button variant='ghost' onClick={() => setDeactivateTarget(null)}>
+            {t("common.cancel")}
+          </Button>
           <Button
-            variant="danger"
+            variant='danger'
             loading={deactivateMutation.isPending}
-            onClick={() => deactivateTarget?.user_id && deactivateMutation.mutate(deactivateTarget.user_id)}
+            onClick={() =>
+              deactivateTarget?.user_id &&
+              deactivateMutation.mutate(deactivateTarget.user_id)
+            }
           >
             {t("projectMembers.deactivate")}
           </Button>

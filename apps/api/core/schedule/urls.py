@@ -1,6 +1,14 @@
 from django.urls import path
 
 from schedule.activity_views import ActivityViewSet
+from schedule.progress_views import (
+    ProjectActivityProgressView,
+    ProjectManualProgressView,
+    ProjectProgressHistoryView,
+    ProjectProgressKpisView,
+    ProjectProgressSnapshotView,
+    ProjectSCurveView,
+)
 from schedule.views import MspImportPreviewView, MspImportStartView, MspImportStatusView
 
 activity_list = ActivityViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -24,4 +32,10 @@ urlpatterns = [
     path('import/msp/preview/', MspImportPreviewView.as_view(), name='msp-import-preview'),
     path('import/msp/', MspImportStartView.as_view(), name='msp-import-start'),
     path('import/msp/status/<uuid:task_id>/', MspImportStatusView.as_view(), name='msp-import-status'),
+    path('progress/', ProjectProgressSnapshotView.as_view(), name='project-progress-snapshot'),
+    path('progress/s-curve/', ProjectSCurveView.as_view(), name='project-progress-s-curve'),
+    path('progress/activities/', ProjectActivityProgressView.as_view(), name='project-progress-activities'),
+    path('progress/kpis/', ProjectProgressKpisView.as_view(), name='project-progress-kpis'),
+    path('progress/history/', ProjectProgressHistoryView.as_view(), name='project-progress-history'),
+    path('progress/manual/', ProjectManualProgressView.as_view(), name='project-progress-manual'),
 ]

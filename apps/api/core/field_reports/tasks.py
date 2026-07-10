@@ -44,8 +44,13 @@ def recalculate_activity_progress(report_id):
                 'actual_progress': progress_pct,
                 'cumulative_quantity': cumulative,
                 'updated_by': report.approved_by,
+                'source': ActivityProgress.ProgressSource.DAILY_REPORT,
             },
         )
+
+    from schedule.services.progress_service import invalidate_s_curve_cache
+
+    invalidate_s_curve_cache(report.project_id)
     return {'report_id': str(report_id), 'activities': linked_rows.count()}
 
 

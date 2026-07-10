@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 
 from common.models import TimeStampedModel, UUIDModel
 
@@ -20,6 +20,32 @@ class BaselineSchedule(UUIDModel):
     class Meta:
         db_table = 'baseline_schedules'
 
+    def save(self, *args, **kwargs):
+        becoming_current = False
+        if self.pk:
+            try:
+                old = BaselineSchedule.objects.get(pk=self.pk)
+                becoming_current = self.is_current and not old.is_current
+            except BaselineSchedule.DoesNotExist:
+                becoming_current = self.is_current
+        else:
+            becoming_current = self.is_current
+
+        if self.is_current:
+            with transaction.atomic():
+                BaselineSchedule.objects.filter(
+                    project_id=self.project_id,
+                    is_current=True,
+                ).exclude(pk=self.pk).update(is_current=False)
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
+
+        if becoming_current:
+            from schedule.tasks import compute_baseline_progress
+
+            compute_baseline_progress.delay(str(self.pk))
+
 
 class BaselineActivity(UUIDModel):
     baseline = models.ForeignKey(BaselineSchedule, on_delete=models.CASCADE, related_name='baseline_activities')
@@ -38,12 +64,22 @@ class BaselineActivity(UUIDModel):
 
 
 class ActivityProgress(UUIDModel):
+    class ProgressSource(models.TextChoices):
+        DAILY_REPORT = 'daily_report', 'Daily report'
+        MANUAL = 'manual', 'Manual'
+
     activity = models.ForeignKey('projects.Activity', on_delete=models.CASCADE, related_name='progress_entries')
     report_date = models.DateField()
     planned_progress = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
     actual_progress = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
     cumulative_quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
     deviation = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    source = models.CharField(
+        max_length=20,
+        choices=ProgressSource.choices,
+        default=ProgressSource.DAILY_REPORT,
+    )
+    notes = models.TextField(blank=True, default='')
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

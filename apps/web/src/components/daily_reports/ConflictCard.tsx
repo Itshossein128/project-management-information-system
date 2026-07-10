@@ -1,77 +1,116 @@
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { apiFetch } from "@/app/lib/api-client";
 import { useToast } from "@/components/ui/toast";
+import { Badge } from "@/components/ui/badge";
+import { ConflictMergeEditor } from "@/components/sync/ConflictMergeEditor";
 import {
-  clearSyncedItems,
   type ConflictEntry,
-  getQueueItem,
+  getConflictQueueEndpoint,
+  removeQueueItem,
   resolveConflict,
-  updateQueueItem,
 } from "@/app/lib/offlineDB";
 
 type Resolution = "local" | "server" | "merge";
 
-function pretty(value: unknown): string {
+const ENTITY_LABELS: Record<string, string> = {
+  daily_report: "گزارش روزانه",
+  daily_activity: "فعالیت",
+  daily_labor: "نیروی انسانی",
+  daily_equipment: "تجهیزات",
+  daily_material: "مصالح",
+  weather_log: "وضعیت جوی",
+};
+
+async function parseApiError(res: Response): Promise<string> {
+  const raw = await res.text();
+  if (!raw) return res.statusText || "خطا در ارتباط با سرور";
   try {
-    return JSON.stringify(value, null, 2);
+    const body = JSON.parse(raw) as {
+      error?: { message?: string } | string;
+      detail?: string;
+    };
+    if (typeof body.error === "object" && body.error?.message) return body.error.message;
+    if (typeof body.error === "string") return body.error;
+    if (body.detail) return body.detail;
   } catch {
-    return String(value);
+    /* fall through */
   }
+  return raw;
 }
 
 export function ConflictCard({
   conflict,
+  index,
   onResolved,
+  onRemoving,
 }: {
   conflict: ConflictEntry;
+  index: number;
   onResolved: () => void;
+  onRemoving?: () => void;
 }) {
   const toast = useToast();
   const [choice, setChoice] = useState<Resolution>("server");
-  const [mergeText, setMergeText] = useState(() => pretty(conflict.local_payload));
+  const [showMerge, setShowMerge] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [fading, setFading] = useState(false);
+
+  const conflictReason =
+    conflict.conflict_fields.length > 0
+      ? `فیلدهای متعارض: ${conflict.conflict_fields.join("، ")}`
+      : "تعارض در همگام‌سازی داده";
+
+  const finishResolve = (toastMsg: string) => {
+    setFading(true);
+    onRemoving?.();
+    window.setTimeout(() => {
+      toast.success(toastMsg);
+      onResolved();
+    }, 300);
+  };
+
+  const patchPayload = async (payload: unknown, toastMsg: string) => {
+    const queueInfo = await getConflictQueueEndpoint(conflict.queue_id);
+    if (!queueInfo) {
+      toast.error("رکورد صف همگام‌سازی یافت نشد");
+      return false;
+    }
+    const res = await apiFetch(queueInfo.endpoint, {
+      method: queueInfo.method === "PATCH" ? "PATCH" : "POST",
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const message = await parseApiError(res);
+      toast.error(message);
+      if (import.meta.env?.MODE === "test") {
+        console.warn("[DAILY_LOG] conflict PATCH failed:", message);
+      }
+      return false;
+    }
+    await resolveConflict(
+      conflict.conflict_id,
+      toastMsg.includes("ادغام") ? "resolved_merged" : "resolved_local",
+    );
+    await removeQueueItem(conflict.queue_id);
+    finishResolve(toastMsg);
+    return true;
+  };
 
   const apply = async () => {
+    if (choice === "merge") {
+      setShowMerge(true);
+      return;
+    }
     setBusy(true);
     try {
-      const queueItem = await getQueueItem(conflict.queue_id);
       if (choice === "server") {
-        // Discard the local change.
-        if (queueItem) {
-          await updateQueueItem(conflict.queue_id, { status: "synced" });
-          await clearSyncedItems();
-        }
         await resolveConflict(conflict.conflict_id, "resolved_server");
-      } else if (choice === "local") {
-        if (queueItem) {
-          await updateQueueItem(conflict.queue_id, {
-            status: "pending",
-            retry_count: 0,
-            error_message: null,
-          });
-        }
-        await resolveConflict(conflict.conflict_id, "resolved_local");
-      } else {
-        let merged: unknown;
-        try {
-          merged = JSON.parse(mergeText);
-        } catch {
-          toast.error("JSON نامعتبر است");
-          setBusy(false);
-          return;
-        }
-        if (queueItem) {
-          await updateQueueItem(conflict.queue_id, {
-            payload: merged,
-            status: "pending",
-            retry_count: 0,
-            error_message: null,
-          });
-        }
-        await resolveConflict(conflict.conflict_id, "resolved_merged");
+        await removeQueueItem(conflict.queue_id);
+        finishResolve("نسخه سرور اعمال شد");
+        return;
       }
-      toast.success("تعارض حل شد");
-      onResolved();
+      await patchPayload(conflict.local_payload, "نسخه شما اعمال شد");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -79,68 +118,97 @@ export function ConflictCard({
     }
   };
 
+  const handleMergeSave = async (merged: Record<string, unknown>) => {
+    setBusy(true);
+    try {
+      await patchPayload(merged, "نسخه ادغام شده ذخیره شد");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const entityLabel = ENTITY_LABELS[conflict.entity_type] ?? conflict.entity_type;
+  const shortId = conflict.conflict_id.slice(0, 8);
+
   return (
-    <div className="space-y-4 rounded-xl border border-red-300 bg-card p-4">
-      <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
-        <AlertTriangle className="size-5" />
-        <h3 className="font-semibold">
-          تعارض در {conflict.entity_type} — {new Date(conflict.created_at).toLocaleString("fa-IR")}
-        </h3>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <p className="mb-1 text-sm font-medium text-muted-foreground">نسخه محلی (شما)</p>
-          <pre className="max-h-52 overflow-auto rounded-md border border-border bg-muted/40 p-2 text-xs">
-            {pretty(conflict.local_payload)}
-          </pre>
-        </div>
-        <div>
-          <p className="mb-1 text-sm font-medium text-muted-foreground">نسخه سرور</p>
-          <pre className="max-h-52 overflow-auto rounded-md border border-border bg-muted/40 p-2 text-xs">
-            {pretty(conflict.server_payload)}
-          </pre>
+    <div
+      data-testid={`conflict-card-${index}`}
+      className={`space-y-4 rounded-xl border border-red-300 bg-card p-4 transition-opacity duration-300 ${fading ? "opacity-0" : "opacity-100"}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <AlertTriangle className="size-5 text-red-700 dark:text-red-300" />
+          <Badge variant="neutral" label={entityLabel} />
+          <span className="text-sm text-muted-foreground">
+            {new Date(conflict.created_at).toLocaleString("fa-IR")}
+          </span>
+          <span className="font-mono text-xs text-muted-foreground" title={conflict.conflict_id}>
+            #{shortId}
+          </span>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-4 text-sm">
-        {(
-          [
-            ["server", "استفاده از نسخه سرور (رد تغییرات محلی)"],
-            ["local", "استفاده از نسخه محلی (بازنویسی سرور)"],
-            ["merge", "ادغام دستی"],
-          ] as [Resolution, string][]
-        ).map(([value, label]) => (
-          <label key={value} className="flex items-center gap-2">
-            <input
-              type="radio"
-              name={`res-${conflict.conflict_id}`}
-              checked={choice === value}
-              onChange={() => setChoice(value)}
-            />
-            {label}
-          </label>
-        ))}
-      </div>
+      <p className="text-sm text-red-800 dark:text-red-200">{conflictReason}</p>
 
-      {choice === "merge" ? (
-        <textarea
-          className="min-h-[160px] w-full rounded-md border border-input bg-transparent p-2 font-mono text-xs"
-          value={mergeText}
-          onChange={(e) => setMergeText(e.target.value)}
+      {!showMerge ? (
+        <>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                data-testid="conflict-option-server"
+                name={`res-${conflict.conflict_id}`}
+                checked={choice === "server"}
+                onChange={() => setChoice("server")}
+              />
+              استفاده از نسخه سرور
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                data-testid="conflict-option-local"
+                name={`res-${conflict.conflict_id}`}
+                checked={choice === "local"}
+                onChange={() => setChoice("local")}
+              />
+              استفاده از نسخه من
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                data-testid="conflict-option-merge"
+                name={`res-${conflict.conflict_id}`}
+                checked={choice === "merge"}
+                onChange={() => setChoice("merge")}
+              />
+              ادغام دستی
+            </label>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              data-testid="conflict-apply-btn"
+              disabled={busy || !choice}
+              onClick={() => void apply()}
+              className="rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              اعمال تصمیم
+            </button>
+          </div>
+        </>
+      ) : (
+        <ConflictMergeEditor
+          localPayload={conflict.local_payload}
+          serverPayload={conflict.server_payload}
+          conflictFields={conflict.conflict_fields}
+          busy={busy}
+          onCancel={() => setShowMerge(false)}
+          onSave={(merged) => void handleMergeSave(merged)}
         />
-      ) : null}
-
-      <div className="flex justify-end">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={apply}
-          className="rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-        >
-          اعمال
-        </button>
-      </div>
+      )}
     </div>
   );
 }

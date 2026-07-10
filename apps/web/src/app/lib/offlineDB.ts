@@ -415,3 +415,16 @@ export async function resolveConflict(
   if (!existing) return;
   await db.put("conflict_log", { ...existing, status: resolution });
 }
+
+export async function removeQueueItem(queueId: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("offline_queue", queueId);
+}
+
+export async function getConflictQueueEndpoint(
+  queueId: string,
+): Promise<{ endpoint: string; method: QueueMethod } | null> {
+  const item = await getQueueItem(queueId);
+  if (!item) return null;
+  return { endpoint: item.endpoint, method: item.method };
+}

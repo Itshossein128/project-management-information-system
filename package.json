@@ -2,7 +2,7 @@
   "name": "building-management",
   "private": true,
   "scripts": {
-    "db:up": "docker-compose up -d postgres",
+    "db:up": "docker-compose up -d postgres redis",
     "db:migrate": "pnpm --filter api migrate",
     "db:seed": "pnpm --filter api seed",
     "dev": "pnpm db:up && concurrently -n web,api -c blue,green \"pnpm --filter web dev\" \"pnpm --filter api dev\"",

@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'projects',
     'schedule',
     'field_reports',
+    'hr',
+    'sub_reports',
     'notifications',
     'resources',
     'cost_control',

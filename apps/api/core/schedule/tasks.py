@@ -1,7 +1,40 @@
 from celery import shared_task
+from datetime import timedelta
 
-from schedule.models import MspImportJob, MspImportStatus
+from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus
 from schedule.services.msp_import import execute_msp_import
+
+
+@shared_task
+def compute_baseline_progress(baseline_id):
+    baseline = BaselineSchedule.objects.get(pk=baseline_id)
+    if not baseline.is_current:
+        return {'baseline_id': str(baseline_id), 'skipped': True}
+
+    count = 0
+    for ba in baseline.baseline_activities.filter(activity__is_deleted=False).select_related('activity'):
+        activity = ba.activity
+        if not ba.planned_start or not ba.planned_finish:
+            continue
+        total_days = (ba.planned_finish - ba.planned_start).days
+        if total_days <= 0:
+            continue
+        current = ba.planned_start
+        while current <= ba.planned_finish:
+            elapsed = (current - ba.planned_start).days
+            planned_pct = min(elapsed / total_days, 1.0)
+            ActivityProgress.objects.update_or_create(
+                activity=activity,
+                report_date=current,
+                defaults={'planned_progress': planned_pct},
+            )
+            count += 1
+            current += timedelta(days=1)
+
+    from schedule.services.progress_service import invalidate_s_curve_cache
+
+    invalidate_s_curve_cache(baseline.project_id)
+    return {'baseline_id': str(baseline_id), 'rows': count}
 
 
 @shared_task(bind=True)

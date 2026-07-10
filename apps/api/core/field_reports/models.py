@@ -180,7 +180,21 @@ class DailyReportActivity(ChildRowModel):
 
 
 class DailyReportLabor(ChildRowModel):
-    report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='labor_entries')
+    report = models.ForeignKey(
+        DailyReport,
+        on_delete=models.CASCADE,
+        related_name='labor_entries',
+        null=True,
+        blank=True,
+    )
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='standalone_labor_entries',
+        null=True,
+        blank=True,
+    )
+    report_date = models.DateField(null=True, blank=True)
     labor_category = models.CharField(max_length=10, choices=LaborCategory.choices)
     job_title = models.CharField(max_length=120)
     custom_title = models.CharField(max_length=120, blank=True, default='')
@@ -194,8 +208,13 @@ class DailyReportLabor(ChildRowModel):
         constraints = [
             models.UniqueConstraint(
                 fields=['report', 'labor_category', 'job_title'],
-                condition=models.Q(is_deleted=False),
+                condition=models.Q(is_deleted=False, report__isnull=False),
                 name='unique_active_labor_row',
+            ),
+            models.UniqueConstraint(
+                fields=['project', 'report_date', 'labor_category', 'job_title'],
+                condition=models.Q(is_deleted=False, report__isnull=True),
+                name='unique_standalone_labor_row',
             ),
         ]
 
@@ -203,6 +222,10 @@ class DailyReportLabor(ChildRowModel):
         self.total_count = (
             (self.shift_1_count or 0) + (self.shift_2_count or 0) + (self.shift_3_count or 0)
         )
+        if self.report_id and not self.report_date:
+            self.report_date = self.report.report_date
+        if self.report_id and not self.project_id:
+            self.project_id = self.report.project_id
         super().save(*args, **kwargs)
 
 
@@ -336,3 +359,44 @@ class WeatherLog(AuditSoftDeleteModel):
         if self.log_date:
             self.day_of_week = persian_day_of_week(self.log_date)
         super().save(*args, **kwargs)
+
+
+class LaborCampReport(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='labor_camp_reports')
+    report_date = models.DateField()
+    connex_number = models.CharField(max_length=60)
+    subcontractor_name = models.CharField(max_length=120)
+    total_residents = models.PositiveIntegerField()
+    present_count = models.PositiveIntegerField()
+    on_leave_count = models.PositiveIntegerField()
+    capacity = models.PositiveIntegerField()
+
+    class Meta:
+        db_table = 'labor_camp_reports'
+        ordering = ['-report_date', 'connex_number']
+
+
+class EquipmentLog(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='equipment_logs')
+    log_date = models.DateField()
+    equipment_name = models.CharField(max_length=120)
+    equipment_ref = models.CharField(max_length=60, blank=True, default='')
+    shift = models.CharField(max_length=10, choices=ReportShift.choices)
+    status = models.CharField(max_length=10, choices=EquipmentStatus.choices)
+    ownership_type = models.CharField(max_length=10, choices=OwnershipType.choices)
+    work_start = models.TimeField(null=True, blank=True)
+    work_end = models.TimeField(null=True, blank=True)
+    repair_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    productive_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    activity_ref = models.ForeignKey(
+        'projects.Activity',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='equipment_logs',
+    )
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'equipment_logs'
+        ordering = ['-log_date', 'equipment_name']

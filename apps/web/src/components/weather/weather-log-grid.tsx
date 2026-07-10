@@ -315,7 +315,18 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
                 >
                   <span className="font-medium">{day.format("D")}</span>
                   {log ? (
-                    <WeatherIcon condition={log.weather_condition} className="mt-1 size-4" />
+                    <>
+                      <WeatherIcon condition={log.weather_condition} className="mt-1 size-4" />
+                      {log.temp_min != null && log.temp_max != null ? (
+                        <span className="mt-0.5 text-[10px] leading-tight">
+                          {`${log.temp_min}–${log.temp_max}°`}
+                        </span>
+                      ) : null}
+                      <span
+                        className={`mt-0.5 size-1.5 rounded-full ${log.site_status === "active" ? "bg-emerald-500" : "bg-gray-400"}`}
+                        title={log.site_status_label}
+                      />
+                    </>
                   ) : inMonth ? (
                     <Plus className="mt-1 size-3 opacity-40" />
                   ) : null}

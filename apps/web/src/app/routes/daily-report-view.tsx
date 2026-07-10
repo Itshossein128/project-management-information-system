@@ -15,7 +15,11 @@ import {
   submitReport,
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
-import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import {
+  Breadcrumb,
+  LoadingSkeleton,
+  PageHeader,
+} from "@/components/layout/page-header";
 import { ActivityTab } from "@/components/daily_reports/ActivityTab";
 import { ApprovalStatusBar } from "@/components/daily_reports/ApprovalStatusBar";
 import { ConcreteTab } from "@/components/daily_reports/ConcreteTab";
@@ -53,10 +57,15 @@ export default function DailyReportViewPage() {
   );
 
   const refetch = () =>
-    queryClient.invalidateQueries({ queryKey: ["daily-report", projectId, reportId] });
+    queryClient.invalidateQueries({
+      queryKey: ["daily-report", projectId, reportId],
+    });
 
   const workflow = useMutation({
-    mutationFn: async (action: { type: "submit" | "review" | "approve" | "reject"; reason?: string }) => {
+    mutationFn: async (action: {
+      type: "submit" | "review" | "approve" | "reject";
+      reason?: string;
+    }) => {
       if (action.type === "submit") return submitReport(projectId, reportId);
       if (action.type === "review") return reviewReport(projectId, reportId);
       if (action.type === "approve") return approveReport(projectId, reportId);
@@ -90,7 +99,7 @@ export default function DailyReportViewPage() {
 
   if (reportQuery.isLoading || !report) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className='mx-auto  px-4 py-6'>
         <LoadingSkeleton rows={8} />
       </main>
     );
@@ -108,7 +117,7 @@ export default function DailyReportViewPage() {
   };
 
   return (
-    <main className="page-main page-shell mx-auto max-w-6xl px-4 py-6">
+    <main className='page-main page-shell mx-auto  px-4 py-6'>
       <Breadcrumb
         items={[
           { label: "گزارش‌های روزانه", href: base },
@@ -117,31 +126,35 @@ export default function DailyReportViewPage() {
       />
       <PageHeader
         title={`گزارش روزانه — ${formatDisplayDate(report.report_date)} (${report.day_of_week})`}
-        subtitle={report.prepared_by_name ? `تهیه‌کننده: ${report.prepared_by_name}` : undefined}
+        subtitle={
+          report.prepared_by_name
+            ? `تهیه‌کننده: ${report.prepared_by_name}`
+            : undefined
+        }
         actions={
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             {report.status === "draft" || report.status === "rejected" ? (
               <Link
                 to={`${base}/${reportId}/edit`}
-                className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted/40"
+                className='rounded-md border border-border px-4 py-2 text-sm hover:bg-muted/40'
               >
                 ویرایش
               </Link>
             ) : null}
             <button
-              type="button"
+              type='button'
               onClick={exportPdf}
               disabled={downloading}
-              className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50'
             >
-              <Download className="size-4" />
+              <Download className='size-4' />
               خروجی PDF
             </button>
           </div>
         }
       />
 
-      <div className="space-y-5">
+      <div className='space-y-5'>
         <ApprovalStatusBar
           report={report}
           canApprove={canApprove}
@@ -152,12 +165,15 @@ export default function DailyReportViewPage() {
           onReject={(reason) => workflow.mutate({ type: "reject", reason })}
         />
 
-        <div className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Info label="شیفت" value={report.shift} />
-          <Info label="وضعیت کارگاه" value={report.site_status_label} />
-          <Info label="وضعیت جوی" value={report.weather_condition_label ?? "—"} />
+        <div className='grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4'>
+          <Info label='شیفت' value={report.shift} />
+          <Info label='وضعیت کارگاه' value={report.site_status_label} />
           <Info
-            label="دما"
+            label='وضعیت جوی'
+            value={report.weather_condition_label ?? "—"}
+          />
+          <Info
+            label='دما'
             value={
               report.temp_max || report.temp_min
                 ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"}`
@@ -167,31 +183,31 @@ export default function DailyReportViewPage() {
         </div>
 
         {report.general_notes ? (
-          <div className="rounded-xl border border-border bg-card p-4">
-            <p className="mb-1 text-sm text-muted-foreground">توضیحات کلی</p>
-            <p className="text-sm">{report.general_notes}</p>
+          <div className='rounded-xl border border-border bg-card p-4'>
+            <p className='mb-1 text-sm text-muted-foreground'>توضیحات کلی</p>
+            <p className='text-sm'>{report.general_notes}</p>
           </div>
         ) : null}
 
-        <Section title="فعالیت‌های اجرایی">
+        <Section title='فعالیت‌های اجرایی'>
           <ActivityTab {...tabProps} />
         </Section>
-        <Section title="نیروی انسانی">
+        <Section title='نیروی انسانی'>
           <LaborTab {...tabProps} />
         </Section>
-        <Section title="ماشین‌آلات">
+        <Section title='ماشین‌آلات'>
           <EquipmentTab {...tabProps} />
         </Section>
-        <Section title="مصالح">
+        <Section title='مصالح'>
           <MaterialsTab {...tabProps} />
         </Section>
-        <Section title="بتن‌ریزی">
+        <Section title='بتن‌ریزی'>
           <ConcreteTab {...tabProps} />
         </Section>
-        <Section title="کمپ کارگری">
+        <Section title='کمپ کارگری'>
           <LaborCampTab {...tabProps} />
         </Section>
-        <Section title="حوادث و موانع">
+        <Section title='حوادث و موانع'>
           <IncidentsTab {...tabProps} />
         </Section>
       </div>
@@ -202,16 +218,22 @@ export default function DailyReportViewPage() {
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium">{value}</p>
+      <p className='text-xs text-muted-foreground'>{label}</p>
+      <p className='text-sm font-medium'>{value}</p>
     </div>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <h3 className="mb-3 text-base font-semibold">{title}</h3>
+    <div className='rounded-xl border border-border bg-card p-4'>
+      <h3 className='mb-3 text-base font-semibold'>{title}</h3>
       {children}
     </div>
   );

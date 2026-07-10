@@ -30,7 +30,9 @@ export default function SettingsRolesPage() {
   const canManage = hasRole(ROLES.ADMIN) || hasRole(ROLES.HR);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [draftPermissions, setDraftPermissions] = useState<Set<string>>(new Set());
+  const [draftPermissions, setDraftPermissions] = useState<Set<string>>(
+    new Set(),
+  );
   const [createOpen, setCreateOpen] = useState(false);
   const [roleName, setRoleName] = useState("");
   const [description, setDescription] = useState("");
@@ -83,7 +85,8 @@ export default function SettingsRolesPage() {
   });
 
   const savePermissionsMutation = useMutation({
-    mutationFn: () => setProjectRolePermissions(selectedId!, [...draftPermissions]),
+    mutationFn: () =>
+      setProjectRolePermissions(selectedId!, [...draftPermissions]),
     onSuccess: () => {
       toast.success(t("roles.updateSuccess"));
       void qc.invalidateQueries({ queryKey: ["project-roles"] });
@@ -104,14 +107,14 @@ export default function SettingsRolesPage() {
 
   if (!canManage) {
     return (
-      <main className="page-main page-shell mx-auto max-w-4xl px-4 py-8">
-        <p className="text-muted-foreground">{t("hrUsers.forbiddenBody")}</p>
+      <main className='page-main page-shell mx-auto max-w-4xl px-4 py-8'>
+        <p className='text-muted-foreground'>{t("hrUsers.forbiddenBody")}</p>
       </main>
     );
   }
 
   return (
-    <main className="page-main page-shell mx-auto max-w-6xl px-4 py-8">
+    <main className='page-main page-shell mx-auto  px-4 py-8'>
       <Breadcrumb
         items={[
           { label: t("settings.title") },
@@ -122,34 +125,36 @@ export default function SettingsRolesPage() {
         title={t("roles.title")}
         subtitle={t("roles.subtitle")}
         actions={
-          <Button variant="primary" onClick={() => setCreateOpen(true)}>
+          <Button variant='primary' onClick={() => setCreateOpen(true)}>
             {t("roles.create")}
           </Button>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <aside className="rounded-lg border border-border">
+      <div className='grid gap-6 lg:grid-cols-[280px_1fr]'>
+        <aside className='rounded-lg border border-border'>
           {rolesLoading ? (
-            <p className="p-4 text-sm text-muted-foreground">{t("templates.loading")}</p>
+            <p className='p-4 text-sm text-muted-foreground'>
+              {t("templates.loading")}
+            </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className='divide-y divide-border'>
               {roles.map((role) => (
                 <li key={role.id}>
                   <button
-                    type="button"
+                    type='button'
                     onClick={() => selectRole(role)}
                     className={`flex w-full items-start gap-2 px-4 py-3 text-start text-sm transition-colors hover:bg-muted/50 ${
                       selectedId === role.id ? "bg-primary/5" : ""
                     }`}
                   >
                     {role.is_system ? (
-                      <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <Lock className='mt-0.5 size-4 shrink-0 text-muted-foreground' />
                     ) : null}
-                    <span className="min-w-0 flex-1">
-                      <span className="font-medium">{role.role_name}</span>
+                    <span className='min-w-0 flex-1'>
+                      <span className='font-medium'>{role.role_name}</span>
                       {role.description ? (
-                        <span className="mt-0.5 block text-xs text-muted-foreground line-clamp-2">
+                        <span className='mt-0.5 block text-xs text-muted-foreground line-clamp-2'>
                           {role.description}
                         </span>
                       ) : null}
@@ -161,14 +166,18 @@ export default function SettingsRolesPage() {
           )}
         </aside>
 
-        <section className="rounded-lg border border-border p-4">
+        <section className='rounded-lg border border-border p-4'>
           {!selectedRole ? (
-            <p className="text-sm text-muted-foreground">{t("roles.selectRole")}</p>
+            <p className='text-sm text-muted-foreground'>
+              {t("roles.selectRole")}
+            </p>
           ) : (
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className='space-y-4'>
+              <div className='flex flex-wrap items-center justify-between gap-2'>
                 <div>
-                  <h2 className="text-lg font-semibold">{selectedRole.role_name}</h2>
+                  <h2 className='text-lg font-semibold'>
+                    {selectedRole.role_name}
+                  </h2>
                   <Badge
                     variant={selectedRole.is_system ? "neutral" : "info"}
                     label={
@@ -180,40 +189,44 @@ export default function SettingsRolesPage() {
                 </div>
                 {!selectedRole.is_system ? (
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant='ghost'
+                    size='sm'
                     onClick={() => setDeleteTarget(selectedRole)}
                   >
-                    <Trash2 className="size-4 text-destructive" />
+                    <Trash2 className='size-4 text-destructive' />
                     {t("roles.delete")}
                   </Button>
                 ) : null}
               </div>
 
               {selectedRole.is_system ? (
-                <p className="text-sm text-muted-foreground">{t("roles.systemReadOnly")}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {t("roles.systemReadOnly")}
+                </p>
               ) : null}
 
-              <h3 className="font-medium">{t("roles.permissions")}</h3>
-              <div className="space-y-4">
+              <h3 className='font-medium'>{t("roles.permissions")}</h3>
+              <div className='space-y-4'>
                 {PERMISSION_MODULE_ORDER.map((mod) => {
                   const items = grouped[mod];
                   if (!items?.length) return null;
                   return (
                     <div key={mod}>
-                      <p className="mb-2 text-sm font-medium text-muted-foreground">
+                      <p className='mb-2 text-sm font-medium text-muted-foreground'>
                         {t(`roles.modules.${mod}`)}
                       </p>
-                      <div className="grid gap-2 sm:grid-cols-2">
+                      <div className='grid gap-2 sm:grid-cols-2'>
                         {items.map((p) => (
                           <label
                             key={p.codename}
                             className={`flex items-center gap-2 rounded border border-border px-3 py-2 text-sm ${
-                              selectedRole.is_system ? "opacity-60" : "cursor-pointer"
+                              selectedRole.is_system
+                                ? "opacity-60"
+                                : "cursor-pointer"
                             }`}
                           >
                             <input
-                              type="checkbox"
+                              type='checkbox'
                               checked={draftPermissions.has(p.codename)}
                               disabled={selectedRole.is_system}
                               onChange={() => togglePermission(p.codename)}
@@ -228,9 +241,9 @@ export default function SettingsRolesPage() {
               </div>
 
               {!selectedRole.is_system ? (
-                <div className="flex justify-end pt-2">
+                <div className='flex justify-end pt-2'>
                   <Button
-                    variant="primary"
+                    variant='primary'
                     loading={savePermissionsMutation.isPending}
                     onClick={() => savePermissionsMutation.mutate()}
                   >
@@ -247,28 +260,31 @@ export default function SettingsRolesPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         title={t("roles.createTitle")}
-        idBase="createRole"
-        className="max-w-lg"
+        idBase='createRole'
+        className='max-w-lg'
       >
-        <div className="space-y-4">
+        <div className='space-y-4'>
           <div>
             <Label>{t("roles.roleName")} *</Label>
             <Input
               value={roleName}
               onChange={(e) => setRoleName(e.target.value)}
-              placeholder="custom_role"
+              placeholder='custom_role'
             />
           </div>
           <div>
             <Label>{t("roles.description")}</Label>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setCreateOpen(false)}>
+          <div className='flex justify-end gap-2'>
+            <Button variant='ghost' onClick={() => setCreateOpen(false)}>
               {t("common.cancel")}
             </Button>
             <Button
-              variant="primary"
+              variant='primary'
               loading={createMutation.isPending}
               disabled={!roleName.trim()}
               onClick={() => createMutation.mutate()}
@@ -283,19 +299,21 @@ export default function SettingsRolesPage() {
         open={Boolean(deleteTarget)}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
         title={t("roles.delete")}
-        idBase="deleteRole"
+        idBase='deleteRole'
       >
-        <p className="mb-4 text-sm">
+        <p className='mb-4 text-sm'>
           {t("roles.deleteConfirm", { name: deleteTarget?.role_name })}
         </p>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
+        <div className='flex justify-end gap-2'>
+          <Button variant='ghost' onClick={() => setDeleteTarget(null)}>
             {t("common.cancel")}
           </Button>
           <Button
-            variant="danger"
+            variant='danger'
             loading={deleteMutation.isPending}
-            onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+            onClick={() =>
+              deleteTarget && deleteMutation.mutate(deleteTarget.id)
+            }
           >
             {t("roles.delete")}
           </Button>
