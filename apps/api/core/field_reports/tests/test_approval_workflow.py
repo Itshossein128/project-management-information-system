@@ -27,6 +27,7 @@ def _add_activity(report):
         report=report,
         activity_description='کار اجرایی',
         shift=ActivityRowShift.SHIFT_1,
+        quantity_measured=False,
     )
 
 
@@ -78,3 +79,48 @@ class TestApprovalWorkflow:
         api_client.force_authenticate(user=other_user)
         response = api_client.post(f'{base_url}{draft_report.id}/approve/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_submit_blocks_measured_activity_without_quantity(
+        self, auth_client, base_url, draft_report,
+    ):
+        DailyReportActivity.objects.create(
+            report=draft_report,
+            activity_description='بتن‌ریزی',
+            shift=ActivityRowShift.SHIFT_1,
+            quantity_measured=True,
+            quantity=None,
+        )
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'submit_validation' in response.data
+
+    def test_submit_blocks_incomplete_equipment_times(
+        self, auth_client, base_url, draft_report,
+    ):
+        _add_activity(draft_report)
+        draft_report.equipment_entries.create(
+            equipment_name='جرثقیل',
+            shift='day',
+            status='active',
+            ownership_type='owned',
+            work_start='08:00',
+        )
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'submit_validation' in response.data
+
+    def test_submit_blocks_invalid_labor_camp_totals(
+        self, auth_client, base_url, draft_report,
+    ):
+        _add_activity(draft_report)
+        draft_report.labor_camp_entries.create(
+            connex_number='C-01',
+            subcontractor_name='پیمانکار الف',
+            total_residents=10,
+            present_count=7,
+            on_leave_count=1,
+            capacity=12,
+        )
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'submit_validation' in response.data

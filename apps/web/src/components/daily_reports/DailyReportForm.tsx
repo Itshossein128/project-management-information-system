@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { CloudOff, Save } from "lucide-react";
@@ -84,6 +84,8 @@ export function DailyReportForm({
   const [header, setHeader] = useState<HeaderState>(emptyHeaderState());
   const [activeTab, setActiveTab] = useState<TabKey>("activities");
   const { saveHeader: saveHeaderOffline, isOnline } = useDailyReportForm(projectId, reportId);
+  const lastSavedHeaderRef = useRef(JSON.stringify(headerToPayload(emptyHeaderState())));
+  const headerAutosaveTimerRef = useRef<number | null>(null);
 
   const reportQuery = useQuery({
     queryKey: ["daily-report", projectId, reportId],
@@ -93,7 +95,11 @@ export function DailyReportForm({
   const report = reportQuery.data ?? null;
 
   useEffect(() => {
-    if (report) setHeader(headerFromDetail(report));
+    if (report) {
+      const nextHeader = headerFromDetail(report);
+      setHeader(nextHeader);
+      lastSavedHeaderRef.current = JSON.stringify(headerToPayload(nextHeader));
+    }
   }, [report]);
 
   const activitiesQuery = useQuery({
@@ -153,6 +159,39 @@ export function DailyReportForm({
     },
     onError: (e) => toast.error((e as Error).message),
   });
+
+  useEffect(() => {
+    if (!editable || saveHeader.isPending || !header.report_date) return;
+    const payload = headerToPayload(header);
+    const payloadKey = JSON.stringify(payload);
+    if (payloadKey === lastSavedHeaderRef.current) return;
+    if (headerAutosaveTimerRef.current) {
+      window.clearTimeout(headerAutosaveTimerRef.current);
+    }
+    headerAutosaveTimerRef.current = window.setTimeout(async () => {
+      try {
+        const { reportId: savedId, offline } = await saveHeaderOffline(payload);
+        lastSavedHeaderRef.current = payloadKey;
+        if (!reportId) {
+          setReportId(savedId);
+          navigate(`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${savedId}/edit`, {
+            replace: true,
+          });
+          return;
+        }
+        if (!offline) {
+          refetch();
+        }
+      } catch {
+        // Keep autosave silent; manual save button still surfaces explicit errors.
+      }
+    }, 900);
+    return () => {
+      if (headerAutosaveTimerRef.current) {
+        window.clearTimeout(headerAutosaveTimerRef.current);
+      }
+    };
+  }, [editable, header, navigate, projectId, refetch, reportId, saveHeader.isPending, saveHeaderOffline]);
 
   const workflow = useMutation({
     mutationFn: async (action: { type: "submit" | "review" | "approve" | "reject"; reason?: string }) => {

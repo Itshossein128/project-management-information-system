@@ -44,7 +44,7 @@ export interface EditableGridProps {
   columns: GridColumn[];
   rows: GridRow[];
   makeEmptyRow: () => GridRow;
-  onSaveRow: (row: GridRow) => Promise<void>;
+  onSaveRow: (row: GridRow, options?: { silent?: boolean }) => Promise<void>;
   onDeleteRow: (row: GridRow) => Promise<void>;
   readOnly?: boolean;
   addLabel?: string;
@@ -121,6 +121,7 @@ export function EditableGrid({
 }: EditableGridProps) {
   const [rows, setRows] = useState<GridRow[]>(serverRows);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [autosavingKey, setAutosavingKey] = useState<string | null>(null);
 
   useEffect(() => {
     setRows(serverRows);
@@ -136,10 +137,10 @@ export function EditableGrid({
 
   const addRow = () => setRows((prev) => [...prev, makeEmptyRow()]);
 
-  const saveRow = async (row: GridRow) => {
+  const saveRow = async (row: GridRow, options?: { silent?: boolean }) => {
     setSavingKey(row._key);
     try {
-      await onSaveRow(row);
+      await onSaveRow(row, options);
       setRows((prev) =>
         prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)),
       );
@@ -147,6 +148,19 @@ export function EditableGrid({
       setSavingKey(null);
     }
   };
+
+  useEffect(() => {
+    if (readOnly || autosavingKey) return;
+    const nextDirtyRow = rows.find((r) => r._dirty && r._key !== savingKey);
+    if (!nextDirtyRow) return;
+    const timer = window.setTimeout(() => {
+      setAutosavingKey(nextDirtyRow._key);
+      void saveRow(nextDirtyRow, { silent: true }).finally(() => {
+        setAutosavingKey(null);
+      });
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [rows, readOnly, savingKey, autosavingKey]);
 
   const deleteRow = async (row: GridRow) => {
     if (!row.id) {

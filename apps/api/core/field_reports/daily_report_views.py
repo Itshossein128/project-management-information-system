@@ -49,6 +49,36 @@ def _parse_filter_date(value):
     return parse_jalali_or_gregorian(value)
 
 
+def _validate_report_ready_for_submit(report: DailyReport):
+    errors: list[str] = []
+
+    activities = list(report.activities.filter(is_deleted=False))
+    if not activities:
+        errors.append('گزارش باید حداقل یک فعالیت داشته باشد')
+    for idx, row in enumerate(activities, start=1):
+        if row.quantity_measured and row.quantity is None:
+            errors.append(f'ردیف فعالیت {idx}: در حالت اندازه‌گیری شده، مقدار باید ثبت شود')
+
+    equipment_rows = list(report.equipment_entries.filter(is_deleted=False))
+    for idx, row in enumerate(equipment_rows, start=1):
+        has_start = bool(row.work_start)
+        has_end = bool(row.work_end)
+        if has_start != has_end:
+            errors.append(f'ردیف ماشین‌آلات {idx}: ساعت شروع و پایان باید با هم ثبت شوند')
+
+    camp_rows = list(report.labor_camp_entries.filter(is_deleted=False))
+    for idx, row in enumerate(camp_rows, start=1):
+        if (row.present_count + row.on_leave_count) != row.total_residents:
+            errors.append(
+                f'ردیف کمپ {idx}: مجموع حاضر و مرخصی باید با کل ساکنین برابر باشد',
+            )
+        if row.total_residents > row.capacity:
+            errors.append(f'ردیف کمپ {idx}: کل ساکنین نمی‌تواند بیشتر از ظرفیت باشد')
+
+    if errors:
+        raise ValidationError({'submit_validation': errors})
+
+
 @extend_schema_view(
     list=extend_schema(summary='List daily reports', tags=['Daily Reports']),
     create=extend_schema(summary='Create daily report header', tags=['Daily Reports']),
@@ -158,8 +188,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
-        if not instance.activities.filter(is_deleted=False).exists():
-            raise ValidationError('گزارش باید حداقل یک فعالیت داشته باشد')
+        _validate_report_ready_for_submit(instance)
         services.submit_report(instance, request.user)
         return Response(DailyReportDetailSerializer(instance).data)
 

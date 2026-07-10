@@ -80,20 +80,25 @@ function CategoryPanel({
   const titleNames = useMemo(() => titles.map((t) => t.title), [titles]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     setDrafts(rowsForCategory(category, titleNames, existing));
+    setIsDirty(false);
   }, [category, titleNames, existing]);
 
   const setCount = (idx: number, field: keyof Draft, value: number) => {
+    setIsDirty(true);
     setDrafts((prev) => prev.map((d, i) => (i === idx ? { ...d, [field]: value } : d)));
   };
   const setCustomName = (idx: number, name: string) => {
+    setIsDirty(true);
     setDrafts((prev) =>
       prev.map((d, i) => (i === idx ? { ...d, job_title: name, custom_title: name } : d)),
     );
   };
-  const addCustom = () =>
+  const addCustom = () => {
+    setIsDirty(true);
     setDrafts((prev) => [
       ...prev,
       {
@@ -105,13 +110,14 @@ function CategoryPanel({
         shift_3_count: 0,
       },
     ]);
+  };
 
   const total = drafts.reduce(
     (sum, d) => sum + d.shift_1_count + d.shift_2_count + d.shift_3_count,
     0,
   );
 
-  const save = async () => {
+  const save = async (silent = false) => {
     const payload = drafts
       .filter((d) => d.job_title.trim() && (d.id || d.shift_1_count || d.shift_2_count || d.shift_3_count))
       .map((d) => ({
@@ -123,20 +129,35 @@ function CategoryPanel({
         shift_3_count: d.shift_3_count,
       }));
     if (payload.length === 0) {
-      toast.warning("موردی برای ذخیره وجود ندارد");
+      if (!silent) {
+        toast.warning("موردی برای ذخیره وجود ندارد");
+      }
       return;
     }
     setSaving(true);
     try {
       await batchSaveLabor(projectId, reportId, payload);
-      toast.success("نیروی انسانی ذخیره شد");
+      if (!silent) {
+        toast.success("نیروی انسانی ذخیره شد");
+      }
+      setIsDirty(false);
       onChanged();
     } catch (e) {
-      toast.error((e as Error).message);
+      if (!silent) {
+        toast.error((e as Error).message);
+      }
     } finally {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (readOnly || !isDirty || saving) return;
+    const timer = window.setTimeout(() => {
+      void save(true);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [isDirty, readOnly, saving, drafts]);
 
   return (
     <div className="space-y-3">
@@ -207,7 +228,9 @@ function CategoryPanel({
           </button>
           <button
             type="button"
-            onClick={save}
+            onClick={() => {
+              void save();
+            }}
             disabled={saving}
             className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-1.5 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >

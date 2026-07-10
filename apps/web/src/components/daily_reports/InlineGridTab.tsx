@@ -74,7 +74,7 @@ export function InlineGridTab({
     _key: r.id ?? generateUUID(),
   }));
 
-  const onSaveRow = async (row: GridRow) => {
+  const onSaveRow = async (row: GridRow, options?: { silent?: boolean }) => {
     const payload = toPayload(row);
     if (!isOnline && canOffline) {
       await queueChildWrite(
@@ -85,7 +85,9 @@ export function InlineGridTab({
         payload,
         row.id,
       );
-      toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
+      if (!options?.silent) {
+        toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
+      }
       await refreshSyncMap();
       return;
     }
@@ -95,16 +97,22 @@ export function InlineGridTab({
       } else {
         await createChildRow(projectId, reportId, resource, payload);
       }
-      toast.success("ذخیره شد");
+      if (!options?.silent) {
+        toast.success("ذخیره شد");
+      }
       onChanged();
     } catch (e) {
       if (typeof navigator !== "undefined" && !navigator.onLine && canOffline) {
         await queueChildWrite(projectId, reportId, resource, row.id ? "PATCH" : "POST", payload, row.id);
-        toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
+        if (!options?.silent) {
+          toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
+        }
         await refreshSyncMap();
         return;
       }
-      toast.error((e as Error).message);
+      if (!options?.silent) {
+        toast.error((e as Error).message);
+      }
       throw e;
     }
   };

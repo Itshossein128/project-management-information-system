@@ -51,11 +51,11 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
   const ordering = sortAsc ? sortKey : `-${sortKey}`;
 
   const calendarRange = useMemo(() => {
-    const start = calendarMonth.toFirstOfMonth();
-    const end = calendarMonth.toLastOfMonth();
+    const start = new DateObject(calendarMonth).toFirstOfMonth();
+    const end = new DateObject(calendarMonth).toLastOfMonth();
     return {
-      from: start.convert(undefined as unknown as never).format("YYYY-MM-DD"),
-      to: end.convert(undefined as unknown as never).format("YYYY-MM-DD"),
+      from: new DateObject(start).convert(undefined as unknown as never).format("YYYY-MM-DD"),
+      to: new DateObject(end).convert(undefined as unknown as never).format("YYYY-MM-DD"),
     };
   }, [calendarMonth]);
 
@@ -130,13 +130,15 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
   );
 
   const calendarDays = useMemo(() => {
-    const start = calendarMonth.toFirstOfWeek();
-    const end = calendarMonth.toLastOfWeek();
+    const monthStart = new DateObject(calendarMonth).toFirstOfMonth();
+    const monthEnd = new DateObject(calendarMonth).toLastOfMonth();
+    const start = new DateObject(monthStart).toFirstOfWeek();
+    const end = new DateObject(monthEnd).toLastOfWeek();
     const days: DateObject[] = [];
-    let cursor = start;
+    let cursor = new DateObject(start);
     while (cursor.toDays() <= end.toDays()) {
-      days.push(cursor);
-      cursor = cursor.add(1, "day");
+      days.push(new DateObject(cursor));
+      cursor = new DateObject(cursor).add(1, "day");
     }
     return days;
   }, [calendarMonth]);
@@ -162,7 +164,7 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setCalendarMonth((m) => m.subtract(1, "month"))}
+              onClick={() => setCalendarMonth((m) => new DateObject(m).subtract(1, "month"))}
             >
               ماه قبل
             </Button>
@@ -172,7 +174,7 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setCalendarMonth((m) => m.add(1, "month"))}
+              onClick={() => setCalendarMonth((m) => new DateObject(m).add(1, "month"))}
             >
               ماه بعد
             </Button>
