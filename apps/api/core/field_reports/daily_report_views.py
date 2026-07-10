@@ -84,7 +84,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = (
             DailyReport.objects.filter(project_id=self.get_project_id())
-            .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by')
+            .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by').prefetch_related('activities', 'labor_entries', 'equipment_entries', 'incidents')
         )
         params = self.request.query_params
         date_from = _parse_filter_date(params.get('date_from'))

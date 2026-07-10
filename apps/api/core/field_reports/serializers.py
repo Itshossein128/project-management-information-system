@@ -403,15 +403,15 @@ class DailyReportListSerializer(serializers.ModelSerializer):
         return _user_name(obj.approved_by)
 
     def get_activity_count(self, obj):
-        return obj.activities.filter(is_deleted=False).count()
+        return sum(1 for activity in obj.activities.all() if not activity.is_deleted)
 
     def get_labor_total(self, obj):
         return sum(
-            row.total_count for row in obj.labor_entries.filter(is_deleted=False)
+            row.total_count for row in obj.labor_entries.all() if not row.is_deleted
         )
 
     def get_equipment_count(self, obj):
-        return obj.equipment_entries.filter(is_deleted=False).count()
+        return sum(1 for equipment in obj.equipment_entries.all() if not equipment.is_deleted)
 
     def get_has_incidents(self, obj):
-        return obj.incidents.filter(is_deleted=False).exists()
+        return any(not incident.is_deleted for incident in obj.incidents.all())
