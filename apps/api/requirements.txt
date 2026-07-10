@@ -20,3 +20,4 @@ celery>=5.4
 celery-types>=0.24
 redis>=5.0
 jdatetime>=5.0.0
+defusedxml==0.7.1

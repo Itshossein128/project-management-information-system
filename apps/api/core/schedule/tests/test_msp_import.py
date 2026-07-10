@@ -67,3 +67,20 @@ def test_build_preview_returns_tree():
     assert len(preview['wbs_tree']) >= 1
     assert len(preview['activities']) == 1
     assert isinstance(preview['warnings'], list)
+
+
+def test_parse_msp_xml_blocks_billion_laughs():
+    malicious_xml = b"""<?xml version="1.0"?>
+<!DOCTYPE lolz [
+ <!ENTITY lol "lol">
+ <!ELEMENT lolz (#PCDATA)>
+ <!ENTITY lol1 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+ <!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
+]>
+<Project><Tasks><Task><Name>&lol2;</Name></Task></Tasks></Project>
+"""
+    try:
+        parse_msp_xml(malicious_xml)
+        assert False, 'expected ValueError due to defusedxml catching XML bomb'
+    except ValueError as exc:
+        assert str(exc) == 'Invalid XML'

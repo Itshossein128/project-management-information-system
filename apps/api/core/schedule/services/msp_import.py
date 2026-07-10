@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
+from defusedxml.common import DefusedXmlException
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
@@ -95,8 +96,8 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
     warnings: list[str] = []
     try:
         root = ET.fromstring(file_bytes)
-    except ET.ParseError as exc:
-        raise ValueError(f'Invalid XML: {exc}') from exc
+    except (ET.ParseError, DefusedXmlException):
+        raise ValueError('Invalid XML')
 
     if _local(root.tag) != 'Project':
         raise ValueError('File must be a Microsoft Project XML export with <Project> root.')
