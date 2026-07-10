@@ -82,14 +82,14 @@ export default function Login() {
         >
           <CardContent className='flex flex-col gap-4'>
             {error && (
-              <p className='text-sm text-destructive' role='alert'>
+              <p className='text-sm text-destructive' role='alert' data-testid='login-global-error'>
                 {error}
               </p>
             )}
             <div className='grid gap-2'>
               <Label htmlFor='login-phone'>{t("common.phoneNumber")}</Label>
               <Input
-                id='login-phone'
+                id='login-phone' data-testid='login-phone-input'
                 name='phone_number'
                 type='tel'
                 autoComplete='tel'
@@ -102,7 +102,7 @@ export default function Login() {
             <div className='grid gap-2'>
               <Label htmlFor='login-password'>{t("common.password")}</Label>
               <PasswordInput
-                id='login-password'
+                id='login-password' data-testid='login-password-input'
                 name='password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -111,7 +111,7 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className='flex flex-col gap-2 mt-6'>
-            <Button type='submit' className='w-full' disabled={submitting}>
+            <Button type='submit' data-testid='login-submit-btn' className='w-full' disabled={submitting}>
               {submitting ? t("login.signingIn") : t("common.signIn")}
             </Button>
             <Button
