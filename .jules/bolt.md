@@ -5,5 +5,9 @@
 **Learning:** In Django serializers and services, calling `.filter(...)` directly on a related manager (e.g., `member.permission_overrides.filter(...)`) executes a new database query, even if the related objects have been prefetched using `prefetch_related()`. This bypasses the prefetch cache and causes N+1 database queries.
 **Action:** Always iterate over `.all()` in Python using generator expressions (e.g., `next((o for o in member.permission_overrides.all() if ...), None)`) to utilize the prefetch cache when finding specific items in a prefetched collection.
 ## 2024-07-24 - ProjectNestedViewSetMixin implementation
- **Learning:** There were multiple ViewSets repeating URL kwarg `project_pk` retrieval, nested `get_queryset` filtering, and nested `perform_create` id assignment.
- **Action:** We implemented a `ProjectNestedViewSetMixin` in `apps/api/core/common/mixins.py` that abstracts away nested DRF ViewSet filtering and creation mapping. Use this mixin for ViewSets nested under an entity in DRF urls instead of manually pulling `.kwargs.get('project_pk')`.
+**Learning:** There were multiple ViewSets repeating URL kwarg `project_pk` retrieval, nested `get_queryset` filtering, and nested `perform_create` id assignment.
+**Action:** We implemented a `ProjectNestedViewSetMixin` in `apps/api/core/common/mixins.py` that abstracts away nested DRF ViewSet filtering and creation mapping. Use this mixin for ViewSets nested under an entity in DRF urls instead of manually pulling `.kwargs.get('project_pk')`.
+
+## 2026-07-10 - Prevent QuerySet Re-evaluation in WBS sibling checks
+**Learning:** In Django, iterating over a QuerySet multiple times (e.g., in a loop over different fields) evaluates the database query each time if the QuerySet isn't already fully evaluated and cached in memory. In `check_weight_warnings`, calling `parent.get_children()` returned a lazy QuerySet that was iterated over twice (for `weight_physical` and `weight_financial`), resulting in identical sequential database queries.
+**Action:** Always evaluate a QuerySet to a `list()` first when iterating over it multiple times for different calculations, or compute all needed aggregations in a single pass over the list.
