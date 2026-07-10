@@ -38,3 +38,23 @@ def test_import_items_from_excel():
     assert Item.objects.count() == 2
     assert Category.objects.count() == 1
     assert Category.objects.first().name == 'Cat 1'
+
+
+@pytest.mark.django_db
+def test_import_items_from_excel_skips_invalid_rows():
+    df = pd.DataFrame({
+        'name': ['Item A', 'Item B', 'Item C'],
+        'quantity': [100, 'bad', 300],
+        'category': ['Cat 1', 'Cat 1', None],
+    })
+    buf = io.BytesIO()
+    with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+    buf.seek(0)
+
+    imported_count, errors = import_items_from_excel(buf)
+
+    assert imported_count == 1
+    assert len(errors) == 2
+    assert Item.objects.count() == 1
+    assert Item.objects.get().name == 'Item A'
