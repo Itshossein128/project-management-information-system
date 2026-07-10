@@ -107,6 +107,9 @@ class ProjectMemberViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
         context['project_pk'] = self.kwargs.get('project_pk')
         return context
 
+    def perform_create(self, serializer):
+        # Member creation is handled entirely in ProjectMemberCreateSerializer.
+        serializer.save()
 
 @extend_schema_view(
     list=extend_schema(summary='List fields of a table', tags=['Project meta']),
