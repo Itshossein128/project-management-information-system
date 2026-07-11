@@ -20,22 +20,21 @@ export default defineConfig({
       name: "chromium-desktop",
       use: {
         ...devices["Desktop Chrome"],
-        channel: "chrome",
       },
     },
   ],
   webServer: [
     {
       command: "pnpm --filter api dev",
-      url: "http://127.0.0.1:8000/api/v1/roles/",
-      reuseExistingServer: true,
+      url: "http://127.0.0.1:8000/api/schema/",
+      reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       cwd: "../../..",
     },
     {
-      command: "pnpm --filter web dev -- --port 5173",
-      url: "http://127.0.0.1:5173/login",
-      reuseExistingServer: true,
+      command: "pnpm --filter web dev --host 127.0.0.1 --port 5173",
+      url: "http://127.0.0.1:5173/",
+      reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       cwd: "../../..",
     },
