@@ -1,3 +1,18 @@
+/**
+ * FLOW: Standard login and session management
+ * MODULE: Auth
+ * ROLES: ANY
+ * DECISION TREE:
+ *  - Provide credentials
+ *    - Valid -> Store token -> Redirect to /home
+ *    - Invalid -> Show error
+ *    - Unknown mobile -> Show error
+ *  - RTL layout validation
+ *
+ * BRANCHES TESTED: valid credentials, wrong password, RTL form layout
+ * BRANCHES DEFERRED: unknown mobile, expired token, logout, direct URL without auth, token refresh
+ */
+
 import { expect, test } from "@playwright/test";
 import { E2E_USERS, loginAs, loginViaUI } from "../helpers/auth";
 
