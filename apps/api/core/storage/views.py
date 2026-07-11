@@ -31,7 +31,15 @@ class UploadUrlView(APIView):
 
     @extend_schema(summary='Get presigned upload URL', tags=['Storage'])
     def post(self, request, project_pk):
-        filename = request.data.get('filename', 'file')
+        raw_filename = request.data.get('filename', 'file')
+
+        if not raw_filename or '..' in raw_filename or '/' in raw_filename or '\\' in raw_filename:
+            return Response({'error': 'Invalid filename.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        filename = os.path.basename(raw_filename)
+        if not filename:
+            return Response({'error': 'Invalid filename.'}, status=status.HTTP_400_BAD_REQUEST)
+
         content_type = request.data.get('content_type', 'application/octet-stream')
         file_id = uuid.uuid4()
         key = f'projects/{project_pk}/{file_id}/{filename}'

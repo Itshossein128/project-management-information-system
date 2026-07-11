@@ -142,6 +142,33 @@ class TestStorageViews:
         assert stored.content_type == 'application/pdf'
         assert stored.uploaded_by == auth_client.handler._force_user
 
+    def test_upload_url_view_directory_traversal(self, auth_client, project):
+        url = reverse('file-upload-url', kwargs={'project_pk': project.pk})
+
+        # Test path traversal with ..
+        response = auth_client.post(url, {
+            'filename': '../../../etc/passwd',
+            'content_type': 'text/plain'
+        })
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error'] == 'Invalid filename.'
+
+        # Test path traversal with slash
+        response = auth_client.post(url, {
+            'filename': '/etc/passwd',
+            'content_type': 'text/plain'
+        })
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error'] == 'Invalid filename.'
+
+        # Test backslash
+        response = auth_client.post(url, {
+            'filename': '..\\windows\\system32\\cmd.exe',
+            'content_type': 'application/x-msdownload'
+        })
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error'] == 'Invalid filename.'
+
     def test_confirm_upload_view(self, auth_client, stored_file):
         url = reverse('file-confirm', kwargs={'file_id': stored_file.pk})
         response = auth_client.post(url, {'size_bytes': 1024})
