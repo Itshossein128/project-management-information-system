@@ -79,7 +79,7 @@ For demos or evaluation on a customer machine, use the launcher scripts in [`cus
 
 Requires Docker Desktop + Git clone of this repo. Entry URL: **http://localhost:8080**. Demo login: `+10000000001` / `devpass123`.
 
-Uses `docker-compose.yml` + `docker-compose.customer.yml` (auto-seed, restart policies). See [customer/README.md](customer/README.md).
+Uses `docker-compose.customer.yml` (standalone demo stack, auto-seed, restart policies). See [customer/README.md](customer/README.md).
 
 ## Scripts
 

@@ -25,6 +25,8 @@ PERMISSIONS: dict[str, str] = {
     'edit_cashflow': 'Edit cash flow',
     'view_documents': 'View documents',
     'upload_documents': 'Upload documents',
+    'view_correspondence': 'View correspondence',
+    'edit_correspondence': 'Edit correspondence',
     'view_dashboard': 'View dashboard',
 }
 
@@ -41,6 +43,8 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_reports',
         'view_dashboard',
         'view_costs',
+        'view_cashflow',
+        'view_contracts',
     ],
     'site_supervisor': [
         'view_project',
@@ -84,6 +88,8 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_project',
         'view_documents',
         'upload_documents',
+        'view_correspondence',
+        'edit_correspondence',
     ],
     'viewer': [
         'view_project',

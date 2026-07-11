@@ -1,17 +1,38 @@
 # IPCAS — Customer PC deployment (Docker)
 
-Run IPCAS on a customer PC without cloud hosting. Updates are one double-click after you push to Git.
+Run IPCAS on a customer PC without cloud hosting. **Double-click** launcher scripts — no terminal commands needed on Windows.
 
 ## What you need on the PC
 
 | Requirement | Notes |
 |-------------|--------|
-| **Docker Desktop** | [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) — Windows or Mac |
-| **Git** | [git-scm.com](https://git-scm.com/) — required for updates |
+| **Docker Desktop** | [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) — Windows or Mac. On Windows, accept WSL2 when prompted during install. |
+| **Git** | Only needed if you use **Update** to pull new code. Not required for a one-time demo. |
 | **RAM** | 8 GB minimum, 16 GB recommended |
 | **Disk** | ~10 GB free |
 
-## One-time setup
+## Presenting to a non-technical customer (recommended)
+
+Do this **before** the meeting on your own machine (or the demo laptop) while online:
+
+| OS | Pre-build images |
+|----|------------------|
+| **Windows** | Double-click `customer\prepare.bat` |
+| **Mac / Linux** | Run `bash customer/prepare.sh` |
+
+On **demo day**, the customer only needs:
+
+1. **Docker Desktop** installed and running (whale icon in the tray).
+2. Copy the project folder (USB, zip, or Git clone).
+3. Double-click **`customer\start.bat`** (Windows) or run **`bash customer/start.sh`** (Mac/Linux).
+
+The browser opens to **http://localhost:8080**. Demo login: `+10000000001` / `devpass123`.
+
+Pin a desktop shortcut to `start.bat` so they can launch IPCAS with one click later.
+
+**First install** on a PC without pre-built images: use `install.bat` / `install.sh` instead (5–20 minutes, needs internet).
+
+## One-time setup (Git clone path)
 
 ### 1. Clone the repository
 
@@ -23,7 +44,7 @@ cd building-management
 For a **private** repository, set up access once:
 
 - **HTTPS:** Git Credential Manager (installed with Git for Windows) will prompt for username + personal access token.
-- **SSH:** Add the customer’s SSH key to the repository deploy keys.
+- **SSH:** Add the customer's SSH key to the repository deploy keys.
 
 ### 2. Install and start
 
@@ -32,7 +53,7 @@ For a **private** repository, set up access once:
 | **Windows** | Double-click `customer\install.bat` |
 | **Mac / Linux** | Run `bash customer/install.sh` |
 
-First start builds Docker images and may take **5–15 minutes**. The browser opens to:
+First start builds Docker images and may take **5–20 minutes**. The browser opens to:
 
 **http://localhost:8080**
 
@@ -53,7 +74,7 @@ First start builds Docker images and may take **5–15 minutes**. The browser op
 
 **Tip:** Pin shortcuts to the desktop for `start.bat` and `update.bat`.
 
-### What “Update” does
+### What "Update" does
 
 1. `git pull` from your repository (branch in `customer/ipcas.config`, default `main`)
 2. Rebuild Docker images if code changed
@@ -75,14 +96,17 @@ On first run, `.env` is created automatically from `.env.customer.example`.
 
 ## Troubleshooting
 
-**“Docker is not running”**  
+**"Docker is not installed"**  
+Install Docker Desktop, restart the PC if prompted, then try again.
+
+**"Docker is not running"**  
 Open Docker Desktop and wait until it shows **Running**, then try again.
 
 **Update fails with authentication**  
 Re-enter Git credentials, or switch the clone to SSH.
 
 **Port 8080 already in use**  
-Change `TRAEFIK_HTTP_PORT` in `.env` and `APP_URL` in `customer/ipcas.config`, then restart.
+Change `TRAEFIK_HTTP_PORT` in `.env` and `APP_URL` / `HEALTH_URL` in `customer/ipcas.config`, then restart.
 
 **View logs**
 
@@ -102,9 +126,10 @@ Then run install/start again.
 
 ## For developers (distributing to customers)
 
-1. Push releases to the branch customers track (usually `main`).
-2. Give customers: repository URL + this folder’s instructions.
-3. Optionally send a one-page PDF with screenshots of `install.bat` → browser login.
+1. Run `prepare.bat` / `prepare.sh` before handing off the folder or USB stick.
+2. Push releases to the branch customers track (usually `main`) if they use Update.
+3. Give customers: project folder + "open Docker Desktop, then double-click start.bat".
+4. Optionally send a one-page PDF with screenshots of Docker Desktop → `start.bat` → browser login.
 
 Technical stack started by these scripts:
 

@@ -36,6 +36,9 @@ def run_seed():
         return user
 
     u_admin = upsert_user('+10000000001', '10000000001', 'Admin User', 'admin')
+    u_admin.is_staff = True
+    u_admin.is_superuser = True
+    u_admin.save(update_fields=['is_staff', 'is_superuser'])
     u_hr = upsert_user('+10000000002', '10000000002', 'HR User', 'hr')
     u_visitor = upsert_user('+10000000003', '10000000003', 'Visitor User', 'visitor')
     u_worker = upsert_user('+10000000004', '10000000004', 'Worker User', None)
@@ -85,8 +88,13 @@ def run_seed():
 
 
 class Command(BaseCommand):
-    help = 'Seed development RBAC and sample projects. Password: devpass123'
+    help = 'Seed development RBAC and sample projects. Password: devpass123; Django admin: 10000000001'
 
     def handle(self, *args, **options):
         run_seed()
-        self.stdout.write(self.style.SUCCESS('Seeded groups, users, projects, members. Password: devpass123'))
+        self.stdout.write(
+            self.style.SUCCESS(
+                'Seeded groups, users, projects, members. Password: devpass123. '
+                'Django admin: username 10000000001 (or +10000000001).'
+            )
+        )

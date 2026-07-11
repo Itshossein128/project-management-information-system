@@ -1,0 +1,26 @@
+# Keep Docker build context small for customer installs.
+.git
+.github
+.cursor
+docs
+customer
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.venv
+**/venv
+**/node_modules
+**/.react-router
+**/build
+**/*.log
+**/.env
+**/.env.*
+!**/.env.customer.example
+!**/.env.example
+apps/api/.venv
+apps/api/venv
+apps/web/node_modules
+apps/web/build
+apps/web/.react-router

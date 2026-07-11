@@ -70,4 +70,8 @@ urlpatterns = [
     path('<uuid:project_pk>/', include('sub_reports.urls')),
     path('<uuid:project_pk>/', include('cost_control.urls')),
     path('<uuid:project_pk>/', include('resources.urls')),
+    path('<uuid:project_pk>/', include('cash_flow.urls')),
+    path('<uuid:project_pk>/', include('contracts.urls')),
+    path('<uuid:project_pk>/', include('subcontractors.urls')),
+    path('<uuid:project_pk>/', include('documents.urls')),
 ]

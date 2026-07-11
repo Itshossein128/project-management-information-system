@@ -5,8 +5,12 @@ if not defined ROOT_DIR (
 )
 cd /d "%ROOT_DIR%"
 
-docker compose -f docker-compose.yml -f docker-compose.customer.yml %*
+if not defined COMPOSE_PROJECT_NAME (
+  call "%ROOT_DIR%\customer\scripts\load-config.bat"
+)
+
+docker compose -f docker-compose.customer.yml %*
 if not errorlevel 1 exit /b %ERRORLEVEL%
 
-docker-compose -f docker-compose.yml -f docker-compose.customer.yml %*
+docker-compose -f docker-compose.customer.yml %*
 exit /b %ERRORLEVEL%

@@ -48,7 +48,7 @@ customer_compose() {
     cd "${root}"
     export COMPOSE_PROJECT_NAME
     # shellcheck disable=SC2086
-    ${compose_cmd} -f docker-compose.yml -f docker-compose.customer.yml "$@"
+    ${compose_cmd} -f docker-compose.customer.yml "$@"
   )
 }
 

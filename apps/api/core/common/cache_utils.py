@@ -29,6 +29,8 @@ def invalidate_project_caches(project_id) -> None:
         f'variance:{project_id}:*',
         f'activity_log:{project_id}:*',
         f'personnel_summary:{project_id}:*',
+        f'cashflow_monthly:{project_id}:*',
+        f'subcontractor_risk:{project_id}:*',
     ]
     for pattern in patterns:
         try:

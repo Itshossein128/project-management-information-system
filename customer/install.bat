@@ -5,6 +5,15 @@ set "ROOT_DIR=%CD%"
 
 call "%ROOT_DIR%\customer\scripts\load-config.bat"
 
+where docker >nul 2>&1
+if errorlevel 1 (
+  echo.
+  echo Docker is not installed. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
+  echo.
+  pause
+  exit /b 1
+)
+
 docker info >nul 2>&1
 if errorlevel 1 (
   echo.

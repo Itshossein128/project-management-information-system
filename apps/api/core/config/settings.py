@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'cost_control',
     'contracts',
     'cash_flow',
+    'subcontractors',
+    'documents',
     'economic',
     'risk',
     'alerts',
@@ -234,6 +236,27 @@ CELERY_RESULT_BACKEND = os.environ.get(
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_ALWAYS_EAGER = os.environ.get('CELERY_TASK_ALWAYS_EAGER', 'false').lower() in ('1', 'true', 'yes')
 CELERY_RESULT_EXTENDED = True
+
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    'monitor-ipc-delays': {
+        'task': 'contracts.tasks.monitor_ipc_payment_delays',
+        'schedule': crontab(hour=8, minute=0),
+    },
+    'monitor-guarantees': {
+        'task': 'contracts.tasks.monitor_guarantee_expiry',
+        'schedule': crontab(hour=8, minute=5),
+    },
+    'monitor-correspondence-due': {
+        'task': 'documents.tasks.monitor_correspondence_due',
+        'schedule': crontab(hour=8, minute=10),
+    },
+    'monitor-cash-gaps': {
+        'task': 'alerts.tasks.monitor_cash_gaps',
+        'schedule': crontab(hour=8, minute=15),
+    },
+}
 
 # Redis cache (rate limiting + API response caching)
 _redis_url = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
