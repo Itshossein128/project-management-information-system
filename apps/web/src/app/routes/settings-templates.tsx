@@ -115,6 +115,7 @@ export default function SettingsTemplatesPage() {
                   variant="ghost"
                   size="icon-sm"
                   title={t("templates.delete")}
+                  aria-label={t("templates.delete")}
                   onClick={() => deleteMutation.mutate(tpl.template_id)}
                   disabled={deleteMutation.isPending}
                 >
