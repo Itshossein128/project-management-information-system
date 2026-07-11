@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.response import Response
 
-from common.jalali import parse_jalali_or_gregorian, parse_date_optional
+from common.jalali import parse_date_optional
 from common.viewsets import ProjectScopedViewSet
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination

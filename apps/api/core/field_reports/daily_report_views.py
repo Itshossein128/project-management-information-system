@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from common.jalali import parse_jalali_or_gregorian, parse_date_optional
+from common.jalali import parse_date_optional
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
@@ -142,7 +142,6 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         if DailyReport.objects.filter(
             project_id=project_id, report_date=report_date, is_deleted=False,
         ).exists():
-            jalali = parse_date_optional  # noqa: F841 (kept for symmetry)
             raise ConflictError(
                 f'گزارش روزانه برای تاریخ {request.data.get("report_date")} قبلاً ثبت شده است',
             )
