@@ -2,17 +2,11 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.response import Response
 
-from common.jalali import parse_jalali_or_gregorian
+from common.jalali import parse_jalali_or_gregorian, parse_date_optional
 from common.viewsets import ProjectScopedViewSet
 from config.pagination import DefaultPageNumberPagination
 from risk.models import BarrierStatus, EventType, RiskEvent
 from risk.serializers import BarrierCreateSerializer, BarrierSerializer
-
-
-def _parse_filter_date(value):
-    if not value:
-        return None
-    return parse_jalali_or_gregorian(value)
 
 
 @extend_schema_view(
@@ -46,8 +40,8 @@ class BarrierLogViewSet(ProjectScopedViewSet):
             qs = qs.filter(impact_on_schedule=True)
         if params.get('impact_cost', '').lower() in ('1', 'true', 'yes'):
             qs = qs.filter(impact_on_cost=True)
-        date_from = _parse_filter_date(params.get('date_from'))
-        date_to = _parse_filter_date(params.get('date_to'))
+        date_from = parse_date_optional(params.get('date_from'))
+        date_to = parse_date_optional(params.get('date_to'))
         if date_from:
             qs = qs.filter(event_date__gte=date_from)
         if date_to:

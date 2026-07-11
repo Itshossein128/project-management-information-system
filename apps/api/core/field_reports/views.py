@@ -2,18 +2,12 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.response import Response
 
-from common.jalali import parse_jalali_or_gregorian
+from common.jalali import parse_jalali_or_gregorian, parse_date_optional
 from common.viewsets import ProjectScopedViewSet
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
 from field_reports.models import WeatherLog
 from field_reports.serializers import WeatherLogCreateSerializer, WeatherLogSerializer
-
-
-def _parse_filter_date(value: str | None):
-    if not value:
-        return None
-    return parse_jalali_or_gregorian(value)
 
 
 @extend_schema_view(
@@ -38,8 +32,8 @@ class WeatherLogViewSet(ProjectScopedViewSet):
         qs = super().get_queryset()
         params = self.request.query_params
 
-        date_from = _parse_filter_date(params.get('date_from'))
-        date_to = _parse_filter_date(params.get('date_to'))
+        date_from = parse_date_optional(params.get('date_from'))
+        date_to = parse_date_optional(params.get('date_to'))
         if date_from:
             qs = qs.filter(log_date__gte=date_from)
         if date_to:

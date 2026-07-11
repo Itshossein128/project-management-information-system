@@ -44,6 +44,13 @@ def parse_jalali_or_gregorian(value: str) -> datetime.date:
     return parsed
 
 
+def parse_date_optional(value: str | None) -> datetime.date | None:
+    """Accept an optional Jalali or ISO Gregorian date."""
+    if not value:
+        return None
+    return parse_jalali_or_gregorian(value)
+
+
 def persian_day_of_week(value: datetime.date | str) -> str:
     if isinstance(value, str):
         value = parse_jalali_or_gregorian(value)

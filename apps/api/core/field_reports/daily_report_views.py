@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from common.jalali import parse_jalali_or_gregorian
+from common.jalali import parse_jalali_or_gregorian, parse_date_optional
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
@@ -41,12 +41,6 @@ from field_reports.serializers import (
 from field_reports import services
 
 EDITABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
-
-
-def _parse_filter_date(value):
-    if not value:
-        return None
-    return parse_jalali_or_gregorian(value)
 
 
 def _validate_report_ready_for_submit(report: DailyReport):
@@ -117,8 +111,8 @@ class DailyReportViewSet(viewsets.ModelViewSet):
             .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by').prefetch_related('activities', 'labor_entries', 'equipment_entries', 'incidents')
         )
         params = self.request.query_params
-        date_from = _parse_filter_date(params.get('date_from'))
-        date_to = _parse_filter_date(params.get('date_to'))
+        date_from = parse_date_optional(params.get('date_from'))
+        date_to = parse_date_optional(params.get('date_to'))
         if date_from:
             qs = qs.filter(report_date__gte=date_from)
         if date_to:
@@ -148,7 +142,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         if DailyReport.objects.filter(
             project_id=project_id, report_date=report_date, is_deleted=False,
         ).exists():
-            jalali = _parse_filter_date  # noqa: F841 (kept for symmetry)
+            jalali = parse_date_optional  # noqa: F841 (kept for symmetry)
             raise ConflictError(
                 f'گزارش روزانه برای تاریخ {request.data.get("report_date")} قبلاً ثبت شده است',
             )
