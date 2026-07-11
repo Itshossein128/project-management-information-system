@@ -26,4 +26,8 @@ This file serves as a single source of truth for string variables associated wit
 - **`PATHS`**: URL segment strings representing the client-facing browser path (e.g., `LOGIN: "login"`).
 
 ## Sub-Route Configurations
-Route modularization occurs within the `src/app/routes/` directory. Check `src/app/routes/ROUTES.md` for specifics on the modularized routing chunks.
+Route modularization lives under `src/app/routes/`. See `src/app/routes/ROUTES.md` for details.
+
+**Currently wired:** only `business-setup.routes.ts` is imported by `routes.ts`.
+
+**Present but not imported yet:** `auth.routes.ts`, `hr.routes.ts`, and `business.routes.ts` are partial route chunks kept for future modularization; auth, HR, and business paths are still declared inline in `routes.ts`.
