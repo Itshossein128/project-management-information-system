@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 import defusedxml.ElementTree as ET
-from defusedxml.common import DefusedXmlException
+from defusedxml.common import DefusedXmlException, DTDForbidden
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Decimal
@@ -93,10 +93,12 @@ class ParseResult:
 
 
 def parse_msp_xml(file_bytes: bytes) -> ParseResult:
+    # defusedxml protects against XML bomb, XXE, and billion laughs attacks on
+    # user-uploaded MSP XML files. Never revert to stdlib xml.etree on user input.
     warnings: list[str] = []
     try:
         root = ET.fromstring(file_bytes)
-    except (ET.ParseError, DefusedXmlException):
+    except (ET.ParseError, DefusedXmlException, DTDForbidden):
         raise ValueError('Invalid XML')
 
     if _local(root.tag) != 'Project':

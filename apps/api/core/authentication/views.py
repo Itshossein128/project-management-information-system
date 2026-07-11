@@ -9,8 +9,9 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import Group
-from drf_spectacular.utils import extend_schema, OpenApiResponse
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from django.db.models import Prefetch
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -35,7 +36,7 @@ from .services import (
     PasswordChangeService
 )
 from .utils import authenticate_user, get_tokens_for_user
-from .throttles import LoginRateThrottle
+from .ratelimit_handlers import auth_ratelimit
 
 User = get_user_model()
 
@@ -48,7 +49,6 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
-    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Register a new user",
@@ -119,10 +119,10 @@ class UserRegistrationView(generics.CreateAPIView):
         )
 
 
+@auth_ratelimit('10/m')
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
-    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="User login",
@@ -278,6 +278,7 @@ class ChangePasswordView(generics.GenericAPIView):
             )
 
 
+@auth_ratelimit('5/m')
 class ForgotPasswordView(generics.GenericAPIView):
     """
     Forgot password endpoint.
@@ -285,7 +286,6 @@ class ForgotPasswordView(generics.GenericAPIView):
     """
     serializer_class = ForgotPasswordSerializer
     permission_classes = [AllowAny]
-    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Request password reset",
@@ -340,6 +340,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         return Response(localize_api_payload(result), status=status.HTTP_200_OK)
 
 
+@auth_ratelimit('5/m')
 class ResetPasswordView(generics.GenericAPIView):
     """
     Reset password endpoint with token.
@@ -347,7 +348,6 @@ class ResetPasswordView(generics.GenericAPIView):
     """
     serializer_class = ResetPasswordSerializer
     permission_classes = [AllowAny]
-    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         summary="Reset password with token",
@@ -405,6 +405,13 @@ class ResetPasswordView(generics.GenericAPIView):
                 ),
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+@auth_ratelimit('30/m')
+class TokenRefreshView(SimpleJWTTokenRefreshView):
+    """JWT refresh with IP rate limiting."""
+
+    permission_classes = [AllowAny]
 
 
 class LogoutView(generics.GenericAPIView):

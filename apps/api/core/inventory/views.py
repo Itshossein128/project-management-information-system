@@ -1,5 +1,6 @@
 import logging
 from django.shortcuts import render
+from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from config.pagination import DefaultPageNumberPagination
@@ -14,6 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
 from common.mixins import ProjectNestedViewSetMixin
+from common.validators import validate_xlsx_upload
 
 from .department_activity_services import get_department_activity_queryset
 from .item_services import export_items_to_excel, import_items_from_excel
@@ -113,6 +115,10 @@ class ItemViewSet(viewsets.ModelViewSet):
                 {'error': 'No file provided'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+        try:
+            validate_xlsx_upload(request.FILES['file'])
+        except ValidationError as exc:
+            return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             imported_count, errors = import_items_from_excel(request.FILES['file'])

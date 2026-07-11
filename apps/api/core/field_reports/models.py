@@ -240,6 +240,8 @@ class DailyReportEquipment(ChildRowModel):
     work_end = models.TimeField(null=True, blank=True)
     repair_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     productive_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    hourly_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    fuel_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     activity_ref = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,
@@ -264,6 +266,7 @@ class DailyReportMaterial(ChildRowModel):
     )
     material_description = models.CharField(max_length=200)
     quantity = models.DecimalField(max_digits=18, decimal_places=4)
+    unit_cost = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     unit = models.CharField(max_length=40)
     transaction_type = models.CharField(max_length=10, choices=MaterialTransactionType.choices)
     activity_ref = models.ForeignKey(
@@ -388,6 +391,8 @@ class EquipmentLog(AuditSoftDeleteModel):
     work_end = models.TimeField(null=True, blank=True)
     repair_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     productive_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    hourly_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    fuel_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     activity_ref = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,

@@ -15,7 +15,10 @@ from schedule.services.progress_service import (
 
 def compute_evm(project_id, as_of_date: date) -> dict:
     bac = (
-        Budget.objects.filter(project_id=project_id).aggregate(total=Sum('budget_amount'))['total'] or 0
+        Budget.objects.filter(project_id=project_id, is_deleted=False).aggregate(
+            total=Sum('budget_amount')
+        )['total']
+        or 0
     )
     actual_progress = get_project_progress_on_date(project_id, as_of_date)
     planned_progress = get_planned_progress_on_date(project_id, as_of_date)
@@ -27,6 +30,7 @@ def compute_evm(project_id, as_of_date: date) -> dict:
         ActualCost.objects.filter(
             project_id=project_id,
             cost_date__lte=as_of_date,
+            is_deleted=False,
         ).aggregate(total=Sum('amount'))['total']
         or 0
     )

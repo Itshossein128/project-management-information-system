@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 
-from common.models import UUIDModel
+from common.models import AuditSoftDeleteModel
 
 
 class CostCategory(models.TextChoices):
@@ -34,7 +35,7 @@ class ConfidenceLevel(models.TextChoices):
     LOW = 'low', 'Low'
 
 
-class CostPool(UUIDModel):
+class CostPool(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='cost_pools')
     pool_name = models.CharField(max_length=120, blank=True, default='')
     cost_category = models.CharField(max_length=40, choices=CostCategory.choices, blank=True, default='')
@@ -47,8 +48,27 @@ class CostPool(UUIDModel):
     class Meta:
         db_table = 'cost_pools'
 
+    @property
+    def remaining(self):
+        total = self.total_amount or 0
+        return total - (self.allocated_amount or 0)
 
-class Budget(UUIDModel):
+    def _update_status(self):
+        total = self.total_amount or 0
+        remaining = float(total) - float(self.allocated_amount or 0)
+        if remaining <= 0 and total:
+            self.status = PoolStatus.FULLY_ALLOCATED
+        elif remaining >= float(total):
+            self.status = PoolStatus.UNALLOCATED
+        else:
+            self.status = PoolStatus.PARTIALLY_ALLOCATED
+
+    def save(self, *args, **kwargs):
+        self._update_status()
+        super().save(*args, **kwargs)
+
+
+class Budget(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='budgets')
     activity = models.ForeignKey(
         'projects.Activity',
@@ -66,12 +86,27 @@ class Budget(UUIDModel):
     )
     cost_category = models.CharField(max_length=40, choices=CostCategory.choices)
     budget_amount = models.DecimalField(max_digits=18, decimal_places=2)
+    notes = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'budgets'
+        indexes = [
+            models.Index(fields=['project', 'cost_category'], name='budget_project_cat_idx'),
+        ]
+
+    def clean(self):
+        if not self.wbs_id and not self.activity_id:
+            raise ValidationError('At least one of wbs or activity must be set.')
+        if self.activity_id and not self.wbs_id:
+            self.wbs_id = self.activity.wbs_id
+
+    def save(self, *args, **kwargs):
+        if self.activity_id and not self.wbs_id:
+            self.wbs_id = self.activity.wbs_id
+        super().save(*args, **kwargs)
 
 
-class ActualCost(UUIDModel):
+class ActualCost(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='actual_costs')
     activity = models.ForeignKey(
         'projects.Activity',
@@ -116,6 +151,21 @@ class ActualCost(UUIDModel):
         blank=True,
         related_name='actual_costs',
     )
+    daily_report = models.ForeignKey(
+        'field_reports.DailyReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actual_costs',
+    )
 
     class Meta:
         db_table = 'actual_costs'
+        indexes = [
+            models.Index(fields=['project', 'cost_date'], name='actualcost_project_date_idx'),
+        ]
+
+    def save(self, *args, **kwargs):
+        if self.activity_id and not self.wbs_id:
+            self.wbs_id = self.activity.wbs_id
+        super().save(*args, **kwargs)

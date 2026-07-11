@@ -9,6 +9,16 @@ from projects.services import create_project_with_creator
 User = get_user_model()
 
 
+@pytest.fixture(autouse=True)
+def test_cache_backend(settings):
+    """Use in-memory cache in tests (ratelimit + API cache)."""
+    settings.CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+
+
 @pytest.fixture
 def user(db):
     return User.objects.create_user(

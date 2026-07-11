@@ -3,10 +3,12 @@ Data API: CRUD for dynamic table rows (Django DB / SQLite). Enforce access and v
 Excel export/import for table rows.
 """
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from projects.mixins import PROJECT_MEMBER_PERMISSIONS
-from rest_framework.parsers import MultiPartParser, FormParser
+from common.validators import validate_xlsx_upload
 import logging
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -149,8 +151,10 @@ class DynamicRowsImportView(APIView):
         file_obj = request.FILES.get('file')
         if not file_obj:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not (file_obj.name or '').lower().endswith('.xlsx'):
-            return Response({'error': 'File must be .xlsx'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_xlsx_upload(file_obj)
+        except ValidationError as exc:
+            return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             file_bytes = file_obj.read()

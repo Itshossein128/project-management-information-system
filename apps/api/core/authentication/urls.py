@@ -1,6 +1,6 @@
 """Authentication URL configuration."""
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView, TokenBlacklistView
+from rest_framework_simplejwt.views import TokenBlacklistView
 
 from .views import (
     UserRegistrationView,
@@ -9,6 +9,7 @@ from .views import (
     ChangePasswordView,
     ForgotPasswordView,
     ResetPasswordView,
+    TokenRefreshView,
     UserProfileView,
     UserListView,
     UserAssignmentsListView,

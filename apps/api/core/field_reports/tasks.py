@@ -50,8 +50,94 @@ def recalculate_activity_progress(report_id):
 
     from schedule.services.progress_service import invalidate_s_curve_cache
 
+    _auto_create_costs_from_report(report)
+    _auto_create_inventory_from_report(report)
     invalidate_s_curve_cache(report.project_id)
+    try:
+        from common.cache_utils import invalidate_project_caches
+
+        invalidate_project_caches(report.project_id)
+    except Exception:
+        pass
     return {'report_id': str(report_id), 'activities': linked_rows.count()}
+
+
+def _auto_create_costs_from_report(report):
+    """Create ActualCost rows from approved daily report equipment and material entries."""
+    from cost_control.models import ActualCost, CostType
+    from decimal import Decimal
+
+    for eq_entry in report.equipment_entries.filter(is_deleted=False):
+        if not eq_entry.productive_hours or not eq_entry.hourly_rate:
+            continue
+        amount = Decimal(str(eq_entry.productive_hours)) * Decimal(str(eq_entry.hourly_rate))
+        ActualCost.objects.get_or_create(
+            project=report.project,
+            daily_report=report,
+            activity=eq_entry.activity_ref,
+            cost_category='equipment',
+            defaults={
+                'cost_date': report.report_date,
+                'amount': amount,
+                'description': f'ماشین\u200cآلات: {eq_entry.equipment_name}',
+                'cost_type': CostType.DIRECT,
+                'approved_by': report.approved_by,
+                'created_by': report.approved_by or report.updated_by,
+                'updated_by': report.approved_by or report.updated_by,
+            },
+        )
+
+    for mat_entry in report.material_entries.filter(is_deleted=False):
+        if not mat_entry.unit_cost or not mat_entry.material_ref_id:
+            continue
+        amount = Decimal(str(mat_entry.quantity)) * Decimal(str(mat_entry.unit_cost))
+        ActualCost.objects.get_or_create(
+            project=report.project,
+            daily_report=report,
+            activity=mat_entry.activity_ref,
+            cost_category='material',
+            defaults={
+                'cost_date': report.report_date,
+                'amount': amount,
+                'description': f'مصالح: {mat_entry.material_description}',
+                'cost_type': CostType.DIRECT,
+                'approved_by': report.approved_by,
+                'created_by': report.approved_by or report.updated_by,
+                'updated_by': report.approved_by or report.updated_by,
+            },
+        )
+
+
+def _auto_create_inventory_from_report(report):
+    """Create inventory transactions from approved daily report material entries."""
+    from field_reports.models import MaterialTransactionType
+    from resources.models import InventoryTransaction, TransactionType
+
+    type_map = {
+        MaterialTransactionType.RECEIPT: TransactionType.IN,
+        MaterialTransactionType.ISSUE: TransactionType.OUT,
+        MaterialTransactionType.WASTE: TransactionType.WASTE,
+    }
+
+    for mat_entry in report.material_entries.filter(is_deleted=False):
+        if not mat_entry.material_ref_id:
+            continue
+        tx_type = type_map.get(mat_entry.transaction_type, TransactionType.OUT)
+        InventoryTransaction.objects.get_or_create(
+            project=report.project,
+            material=mat_entry.material_ref,
+            daily_report=report,
+            tx_type=tx_type,
+            defaults={
+                'tx_date': report.report_date,
+                'quantity': mat_entry.quantity,
+                'unit_cost': mat_entry.unit_cost,
+                'activity': mat_entry.activity_ref,
+                'notes': mat_entry.notes or '',
+                'created_by': report.approved_by or report.updated_by,
+                'updated_by': report.approved_by or report.updated_by,
+            },
+        )
 
 
 def notify_report_event(event: str, report_id: str, project_id: str) -> None:

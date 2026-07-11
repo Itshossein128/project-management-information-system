@@ -17,6 +17,11 @@ from field_reports.standalone_forms_views import (
     LaborCampReportViewSet,
     StandaloneManpowerViewSet,
 )
+from field_reports.report_views import (
+    ActivityLogFilterOptionsView,
+    ActivityLogView,
+    PersonnelSummaryView,
+)
 from field_reports.views import WeatherLogViewSet
 
 weather_list = WeatherLogViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -77,6 +82,10 @@ urlpatterns = [
     path('equipment-log/', equipment_log_list, name='equipment-log-list'),
     path('equipment-log/summary/', EquipmentLogSummaryView.as_view(), name='equipment-log-summary'),
     path('equipment-log/<uuid:pk>/', equipment_log_detail, name='equipment-log-detail'),
+
+    path('personnel-summary/', PersonnelSummaryView.as_view(), name='personnel-summary'),
+    path('activity-log/', ActivityLogView.as_view(), name='activity-log'),
+    path('activity-log/filters/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filters'),
 
     path(f'{DR}/', report_list, name='daily-report-list'),
     path(f'{DR}/sync-batch/', report_sync_batch, name='daily-report-sync-batch'),

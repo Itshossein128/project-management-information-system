@@ -1,6 +1,7 @@
 """
 Excel import/export and PDF report endpoints for department activity records.
 """
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +12,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from business_meta.models import Project
+from common.validators import validate_xlsx_upload
 from business_meta.permissions import CanViewBusinessAssignments, IsHrOrAdminOrReadOnly, IsVisitorReadOnly
 
 from .department_activity_io import (
@@ -116,8 +118,10 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
         file_obj = request.FILES.get('file')
         if not file_obj:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not (file_obj.name or '').lower().endswith('.xlsx'):
-            return Response({'error': 'File must be .xlsx'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_xlsx_upload(file_obj)
+        except ValidationError as exc:
+            return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             file_bytes = file_obj.read()

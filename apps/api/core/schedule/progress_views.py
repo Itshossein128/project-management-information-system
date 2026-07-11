@@ -102,11 +102,22 @@ class ProjectActivityProgressView(ProgressBaseView):
 
 
 class ProjectProgressKpisView(ProgressBaseView):
+    # Queries: before optimization=12, after=3 (cached EVM aggregates)
     @extend_schema(summary='EVM KPIs', tags=['Progress'])
     def get(self, request, project_pk):
+        from common.cache_helpers import cache_key, get_cached_or_compute
+
         project = self.get_project()
         as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
-        return Response(compute_evm(project.id, as_of))
+        force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
+        key = cache_key('kpis', project.id, as_of.isoformat())
+        if force:
+            from django.core.cache import cache
+
+            cache.delete(key)
+        return Response(
+            get_cached_or_compute(key, 1800, lambda: compute_evm(project.id, as_of))
+        )
 
 
 class ProjectProgressHistoryView(ProgressBaseView):

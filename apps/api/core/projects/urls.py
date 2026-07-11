@@ -68,4 +68,6 @@ urlpatterns = [
     path('<uuid:project_pk>/', include('risk.urls')),
     path('<uuid:project_pk>/', include('hr.urls')),
     path('<uuid:project_pk>/', include('sub_reports.urls')),
+    path('<uuid:project_pk>/', include('cost_control.urls')),
+    path('<uuid:project_pk>/', include('resources.urls')),
 ]
