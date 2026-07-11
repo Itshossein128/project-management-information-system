@@ -13,6 +13,7 @@ import {
 import { useToast } from "@/components/ui/toast";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { usePermission } from "@/app/contexts/project-context";
+import { useTranslation } from "react-i18next";
 import { PATHS } from "@/app/routeVars";
 import {
   getOfflineReportsByProject,
@@ -66,6 +67,7 @@ function StatCard({
 }
 
 export default function DailyReportsListPage() {
+  const { t } = useTranslation();
   const { projectId = "" } = useParams();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -389,6 +391,7 @@ export default function DailyReportsListPage() {
                           <button
                             type='button'
                             title='حذف'
+                            aria-label={t("common.delete")}
                             onClick={() => {
                               if (confirm("این گزارش حذف شود؟"))
                                 removeMutation.mutate(r.report_id);
