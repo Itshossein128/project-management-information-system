@@ -390,7 +390,7 @@ export default function DailyReportsListPage() {
                         {canEdit && r.status === "draft" ? (
                           <button
                             type='button'
-                            title='حذف'
+                            title={t("common.delete")}
                             aria-label={t("common.delete")}
                             onClick={() => {
                               if (confirm("این گزارش حذف شود؟"))
