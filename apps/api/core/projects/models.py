@@ -63,8 +63,7 @@ class Project(UUIDModel, TimeStampedModel):
         return self.project_code
 
 
-class WBS(MP_Node):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class WBS(UUIDModel, MP_Node):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='wbs_nodes')
     wbs_code = models.CharField(max_length=30)
     wbs_name = models.CharField(max_length=200)

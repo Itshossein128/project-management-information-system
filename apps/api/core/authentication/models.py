@@ -10,6 +10,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from common.models import UUIDModel
+
 phone_regex = RegexValidator(
     regex=r'^\+?1?\d{9,15}$',
     message=_('Phone number must be 9-15 digits, optionally starting with +.'),
@@ -44,8 +46,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(username, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class User(UUIDModel, AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=120, blank=True, default='')
     username = models.CharField(max_length=60, unique=True)
     email = models.EmailField(max_length=120, blank=True, null=True)
@@ -92,8 +93,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.mobile or ''
 
 
-class PasswordResetToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class PasswordResetToken(UUIDModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
     token_hash = models.CharField(max_length=128)
     expires_at = models.DateTimeField()
