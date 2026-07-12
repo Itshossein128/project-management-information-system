@@ -174,6 +174,13 @@ class DailyReportActivity(ChildRowModel):
     unit = models.CharField(max_length=40, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     notes = models.TextField(blank=True, default='')
+    photo_file = models.ForeignKey(
+        'storage.StoredFile',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_activities',
+    )
 
     class Meta:
         db_table = 'daily_report_activities'
@@ -202,6 +209,7 @@ class DailyReportLabor(ChildRowModel):
     shift_2_count = models.PositiveIntegerField(default=0)
     shift_3_count = models.PositiveIntegerField(default=0)
     total_count = models.PositiveIntegerField(default=0)
+    daily_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = 'daily_report_labor'

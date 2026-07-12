@@ -121,3 +121,26 @@ class MspImportJob(UUIDModel, TimeStampedModel):
     class Meta:
         db_table = 'msp_import_jobs'
         ordering = ['-created_at']
+
+
+class P6ImportJob(UUIDModel, TimeStampedModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='p6_import_jobs')
+    task_id = models.CharField(max_length=64, blank=True, default='')
+    status = models.CharField(max_length=20, choices=MspImportStatus.choices, default=MspImportStatus.PENDING)
+    progress_pct = models.PositiveSmallIntegerField(default=0)
+    filename = models.CharField(max_length=255, blank=True, default='')
+    replace_existing = models.BooleanField(default=False)
+    file_data = models.BinaryField(null=True, blank=True)
+    result = models.JSONField(default=dict, blank=True)
+    error_message = models.TextField(blank=True, default='')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='p6_import_jobs',
+    )
+
+    class Meta:
+        db_table = 'p6_import_jobs'
+        ordering = ['-created_at']

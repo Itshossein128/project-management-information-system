@@ -68,3 +68,17 @@ export function deleteWBSNode(projectId: string, wbsId: string) {
     method: "DELETE",
   });
 }
+
+export function moveWBSNode(
+  projectId: string,
+  wbsId: string,
+  payload: { new_parent_id?: string | null; position: string },
+) {
+  return apiJson<WBSNode>(
+    `/${PATHS.API_PROJECTS}/${projectId}/wbs/${wbsId}/move/`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}

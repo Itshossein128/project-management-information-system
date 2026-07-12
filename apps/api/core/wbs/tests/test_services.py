@@ -75,6 +75,19 @@ class TestWBSServices:
 
         moved_node = move_wbs_node(node2, new_parent_id=node1.id, position='sorted_child')
         assert moved_node.get_parent().id == node1.id
+        node2.refresh_from_db()
+        assert node2.wbs_code == '1.1'
+
+    def test_propagate_wbs_codes(self, project):
+        from wbs.services import propagate_project_wbs_codes
+
+        root, _ = create_wbs_node(project_id=project.id, wbs_code='X', wbs_name='Root')
+        child, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='Y', wbs_name='Child')
+        propagate_project_wbs_codes(project.id)
+        root.refresh_from_db()
+        child.refresh_from_db()
+        assert root.wbs_code == '1'
+        assert child.wbs_code == '1.1'
 
     def test_build_tree_queryset(self, project):
         create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root 1')

@@ -9,7 +9,14 @@ from schedule.progress_views import (
     ProjectProgressSnapshotView,
     ProjectSCurveView,
 )
-from schedule.views import MspImportPreviewView, MspImportStartView, MspImportStatusView
+from schedule.views import (
+    MspImportPreviewView,
+    MspImportStartView,
+    MspImportStatusView,
+    P6ImportPreviewView,
+    P6ImportStartView,
+    P6ImportStatusView,
+)
 
 activity_list = ActivityViewSet.as_view({'get': 'list', 'post': 'create'})
 activity_detail = ActivityViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
@@ -32,6 +39,9 @@ urlpatterns = [
     path('import/msp/preview/', MspImportPreviewView.as_view(), name='msp-import-preview'),
     path('import/msp/', MspImportStartView.as_view(), name='msp-import-start'),
     path('import/msp/status/<uuid:task_id>/', MspImportStatusView.as_view(), name='msp-import-status'),
+    path('import/p6/preview/', P6ImportPreviewView.as_view(), name='p6-import-preview'),
+    path('import/p6/', P6ImportStartView.as_view(), name='p6-import-start'),
+    path('import/p6/status/<uuid:task_id>/', P6ImportStatusView.as_view(), name='p6-import-status'),
     path('progress/', ProjectProgressSnapshotView.as_view(), name='project-progress-snapshot'),
     path('progress/s-curve/', ProjectSCurveView.as_view(), name='project-progress-s-curve'),
     path('progress/activities/', ProjectActivityProgressView.as_view(), name='project-progress-activities'),

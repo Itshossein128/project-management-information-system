@@ -131,6 +131,28 @@ def delete_wbs_node(node: WBS) -> None:
     node.delete()
 
 
+def propagate_project_wbs_codes(project_id) -> None:
+    """Recompute wbs_code for all nodes from tree order (root 1,2… children 1.1, 1.2…)."""
+    roots = list(get_project_roots(project_id).order_by('path'))
+    for idx, root in enumerate(roots, start=1):
+        _assign_node_code(root, str(idx))
+        _propagate_children_codes(root)
+
+
+def _propagate_children_codes(parent: WBS) -> None:
+    children = list(parent.get_children().order_by('path'))
+    for idx, child in enumerate(children, start=1):
+        code = f'{parent.wbs_code}.{idx}'
+        _assign_node_code(child, code)
+        _propagate_children_codes(child)
+
+
+def _assign_node_code(node: WBS, code: str) -> None:
+    if node.wbs_code != code:
+        node.wbs_code = code
+        node.save(update_fields=['wbs_code'])
+
+
 @transaction.atomic
 def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     target_parent = None
@@ -157,6 +179,7 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     else:
         raise WBSValidationError(f'Invalid position: {position}')
 
+    propagate_project_wbs_codes(node.project_id)
     return WBS.objects.get(pk=node.pk)
 
 

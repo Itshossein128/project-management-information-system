@@ -1,4 +1,5 @@
 import type { DailyReportDetail } from "@/app/lib/api/daily-reports";
+import { uploadProjectFile } from "@/app/lib/api/files";
 import type { GridColumn, GridRow } from "./EditableGrid";
 import { InlineGridTab } from "./InlineGridTab";
 
@@ -56,7 +57,10 @@ export function ActivityTab({
     { key: "quantity", header: "مقدار", type: "number", width: "90px" },
     { key: "quantity_measured", header: "اندازه‌گیری شده", type: "checkbox", width: "60px" },
     { key: "unit", header: "واحد", width: "80px" },
+    { key: "photo_file", header: "عکس", type: "photo", width: "90px" },
   ];
+
+  const handlePhotoUpload = (file: File) => uploadProjectFile(projectId, file);
 
   return (
     <InlineGridTab
@@ -65,6 +69,7 @@ export function ActivityTab({
       resource="activities"
       columns={columns}
       serverRows={report?.activities ?? []}
+      onPhotoUpload={readOnly ? undefined : handlePhotoUpload}
       emptyRow={() => ({
         activity_description: "",
         activity_ref: null,
@@ -78,6 +83,7 @@ export function ActivityTab({
         quantity: null,
         quantity_measured: true,
         unit: "",
+        photo_file: null,
       })}
       toPayload={(row: GridRow) => ({
         activity_description: row.activity_description ?? "",
@@ -92,6 +98,7 @@ export function ActivityTab({
         quantity: row.quantity_measured ? row.quantity ?? null : null,
         quantity_measured: row.quantity_measured ?? true,
         unit: row.unit ?? "",
+        photo_file: row.photo_file ?? null,
       })}
       onChanged={onChanged}
       readOnly={readOnly}

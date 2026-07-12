@@ -5,6 +5,7 @@ from cost_control.views import (
     BudgetBulkView,
     BudgetViewSet,
     CostPoolAllocateView,
+    CostPoolAutoAllocateView,
     CostPoolViewSet,
     CostSummaryView,
     GlobalSupplierListView,
@@ -32,6 +33,7 @@ urlpatterns = [
     path('cost-pools/', pool_list, name='cost-pool-list'),
     path('cost-pools/<uuid:pk>/', pool_detail, name='cost-pool-detail'),
     path('cost-pools/<uuid:pk>/allocate/', CostPoolAllocateView.as_view(), name='cost-pool-allocate'),
+    path('cost-pools/<uuid:pk>/auto-allocate/', CostPoolAutoAllocateView.as_view(), name='cost-pool-auto-allocate'),
     path('suppliers/', supplier_list, name='supplier-list'),
     path('suppliers/<uuid:pk>/', supplier_detail, name='supplier-detail'),
 ]

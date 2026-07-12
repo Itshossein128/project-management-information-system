@@ -44,7 +44,54 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 | Traefik API gateway | Yes — port 8080 in docker-compose |
 | RabbitMQ | Yes — port 5672 / management 15672 |
 | MinIO (S3) | Yes — port 9000 |
-| Offline PWA | Not yet (Sprint 5) |
+| Offline PWA | Partial — IndexedDB queue + sync UI; SW disabled in dev unless `VITE_ENABLE_SW=true` |
+
+## Sprint 2 completion checklist (Projects, WBS & Members)
+
+| Task | Status |
+|------|--------|
+| **F-05** Role & permission engine + project overrides | Done — `permissions/`, `HasProjectPermission` |
+| **C-01** Project CRUD + membership APIs | Done — `projects/`, `members/`, `positions/` |
+| **C-02** WBS tree API (insert, reorder, code propagation) | Done — CRUD + move + auto code propagation |
+| **UI-01** Design system / tokens | Partial — Shadcn-style primitives + CSS tokens |
+| **UI-02** Project list + creation wizard | Done |
+| **UI-15** Members management | Done — `project-members.tsx`; global roles in `settings-roles.tsx` |
+
+## Sprint 3 completion checklist (Activities & Schedule Baseline)
+
+| Task | Status |
+|------|--------|
+| **C-03** Activity CRUD + relation graph validation | Done |
+| **C-04** Baseline import (P6 XER + MSP XML) | Done — MSP XML + P6 XER import |
+| **UI-03** WBS tree editor (inline edit, drag-and-drop) | Done — inline edit + HTML5 drag reparent |
+| **partial O-01** PWA / IndexedDB bootstrap | Partial — offline DB + cache warm |
+
+## Sprint 4 completion checklist (Daily Report Online)
+
+| Task | Status |
+|------|--------|
+| **C-05** Daily report API + sub-entities | Done — activities, labor, equipment, materials, concrete, labor-camp, incidents |
+| **C-06** Approval workflow + event publish | Done — draft → submit → review → approve/reject |
+| **C-07** Progress recalculation on approval | Done — Celery task updates `ActivityProgress` |
+| **UI-04** Multi-discipline daily report form | Done — 7-tab form + photo attach on activities |
+
+## Sprint 5 completion checklist (Offline Sync)
+
+| Task | Status |
+|------|--------|
+| **O-01** Service Worker + PWA manifest | Partial — SW in prod; foreground sync via `useAutoSync` (not SW BackgroundSync) |
+| **O-02** Batch sync endpoint | Done — backend sync-batch; frontend wiring in progress |
+| **O-03** Conflict review UI | Partial — `sync-conflicts.tsx`; failed-queue UI pending |
+| **O-04** Sync status indicator | Partial — persistent online/offline badge in progress |
+| **Offline parity** | In progress — labor tab, photo queue, cached reference reads |
+
+## Sprint 6 completion checklist (Physical Progress & S-Curve)
+
+| Task | Status |
+|------|--------|
+| **C-08** Weighted progress + S-curve endpoint | Done — `schedule/progress_views.py` |
+| **K-01** EVM KPIs (partial) | Done — SPI, CPI, EAC, VAC via `/progress/kpis/` |
+| **UI-05** Progress dashboard | Done — `/projects/{id}/progress` |
 
 ## API paths
 
@@ -61,8 +108,9 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 | Task | Status |
 |------|--------|
 | **C-09** Budget ingestion + variance engine | Done — `cost_control/` budgets, variance, summary |
-| **C-10** Actual cost ledger + cost pool allocation | Done — actual costs, pools, allocate API |
+| **C-10** Actual cost ledger + cost pool allocation | Done — labor auto-cost, auto-allocate API, manual allocate |
 | **UI-06** Cost control screens | Done — `/projects/{id}/costs` (budget, actual, variance, pools) |
+| **Tests** | Done — `cost_control/tests/` in CI |
 
 ## Sprint 8 completion checklist (Contracts & IPC)
 

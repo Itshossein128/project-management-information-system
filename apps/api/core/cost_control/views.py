@@ -24,7 +24,11 @@ from cost_control.serializers import (
     SupplierSerializer,
 )
 from cost_control.services.budget_service import bulk_upsert_budgets, budget_summary, check_wbs_overrun
-from cost_control.services.cost_pool_service import AllocationExceededError, allocate_cost_pool
+from cost_control.services.cost_pool_service import (
+    AllocationExceededError,
+    allocate_cost_pool,
+    auto_allocate_cost_pool,
+)
 from cost_control.services.cost_summary_service import cost_summary
 from cost_control.services.variance_service import get_budget_vs_actual
 from permissions.project import HasProjectPermission, IsProjectMember
@@ -246,6 +250,25 @@ class CostPoolAllocateView(APIView):
         except AllocationExceededError as exc:
             raise ValidationError({'detail': str(exc)}) from exc
         return Response(CostPoolSerializer(pool).data)
+
+
+class CostPoolAutoAllocateView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_costs'
+
+    @extend_schema(summary='Auto-allocate cost pool by method', tags=['Cost control'])
+    def post(self, request, project_pk=None, pk=None):
+        pool = get_object_or_404(CostPool, pk=pk, project_id=project_pk, is_deleted=False)
+        method = request.data.get('method', 'by_budget_weight')
+        activity_ids = request.data.get('activity_ids')
+        try:
+            pool, allocations = auto_allocate_cost_pool(pool, method, request.user, activity_ids=activity_ids)
+        except ValueError as exc:
+            raise ValidationError({'method': str(exc)}) from exc
+        except AllocationExceededError as exc:
+            raise ValidationError({'detail': str(exc)}) from exc
+        _invalidate_cost_caches(project_pk)
+        return Response({'pool': CostPoolSerializer(pool).data, 'allocations': allocations})
 
 
 class SupplierViewSet(CostScopedViewSet):

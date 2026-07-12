@@ -106,6 +106,10 @@ def validate_msp_upload(file) -> None:
     validate_upload(file, allowed_extensions={'.xml'}, expected_mimes=MSP_MIMES)
 
 
+def validate_p6_upload(file) -> None:
+    validate_upload(file, allowed_extensions={'.xer'}, expected_mimes={'text/plain', 'application/octet-stream'})
+
+
 def validate_document_upload(file) -> None:
     validate_upload(
         file,

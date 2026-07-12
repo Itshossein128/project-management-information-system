@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import {
   createWBSNode,
   deleteWBSNode,
+  moveWBSNode,
   updateWBSNode,
   type WBSNode,
 } from "@/app/lib/api/wbs";
@@ -95,6 +96,28 @@ export function WBSNodeRow({
       <div
         className="group flex flex-wrap items-center gap-2 border-b border-border/50 py-2 pe-2"
         style={{ paddingInlineStart: indent + 8 }}
+        draggable={canEdit}
+        onDragStart={(e) => {
+          e.dataTransfer.setData("text/wbs-id", node.wbs_id);
+          e.dataTransfer.effectAllowed = "move";
+        }}
+        onDragOver={(e) => {
+          if (!canEdit) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }}
+        onDrop={(e) => {
+          if (!canEdit) return;
+          e.preventDefault();
+          const draggedId = e.dataTransfer.getData("text/wbs-id");
+          if (!draggedId || draggedId === node.wbs_id) return;
+          void moveWBSNode(projectId, draggedId, {
+            new_parent_id: node.wbs_id,
+            position: "last_child",
+          })
+            .then(() => invalidate())
+            .catch((err: Error) => toast.error(err.message));
+        }}
       >
         {hasChildren ? (
           <button

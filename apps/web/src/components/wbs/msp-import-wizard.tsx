@@ -4,8 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   fetchMspImportStatus,
+  fetchP6ImportStatus,
+  isP6File,
   previewMspImport,
+  previewP6Import,
   startMspImport,
+  startP6Import,
   type MspPreviewResult,
 } from "@/app/lib/api/msp";
 import { PATHS } from "@/app/routeVars";
@@ -59,7 +63,8 @@ export function MspImportWizard({
   }, [open, reset]);
 
   const previewMutation = useMutation({
-    mutationFn: (f: File) => previewMspImport(projectId, f),
+    mutationFn: (f: File) =>
+      isP6File(f) ? previewP6Import(projectId, f) : previewMspImport(projectId, f),
     onSuccess: (data) => {
       setPreview(data);
       setStep(2);
@@ -69,7 +74,9 @@ export function MspImportWizard({
 
   const importMutation = useMutation({
     mutationFn: (opts: { file: File; replace: boolean }) =>
-      startMspImport(projectId, opts.file, opts.replace),
+      isP6File(opts.file)
+        ? startP6Import(projectId, opts.file, opts.replace)
+        : startMspImport(projectId, opts.file, opts.replace),
     onSuccess: (data) => {
       setTaskId(data.task_id);
       setStep(3);
@@ -83,7 +90,9 @@ export function MspImportWizard({
 
     const poll = async () => {
       try {
-        const status = await fetchMspImportStatus(projectId, taskId);
+        const status = file && isP6File(file)
+          ? await fetchP6ImportStatus(projectId, taskId)
+          : await fetchMspImportStatus(projectId, taskId);
         if (cancelled) return;
         setProgress(status.progress_pct);
         if (status.status === "done" && status.result) {
@@ -111,12 +120,13 @@ export function MspImportWizard({
     return () => {
       cancelled = true;
     };
-  }, [step, taskId, projectId, onComplete]);
+  }, [step, taskId, projectId, onComplete, file]);
 
   const onFileSelect = (f: File | null) => {
     if (!f) return;
-    if (!f.name.toLowerCase().endsWith(".xml")) {
-      toast.error("فقط فایل‌های XML پذیرفته می‌شوند");
+    const lower = f.name.toLowerCase();
+    if (!lower.endsWith(".xml") && !lower.endsWith(".xer")) {
+      toast.error("فقط فایل‌های XML (MSP) یا XER (P6) پذیرفته می‌شوند");
       return;
     }
     setFile(f);
@@ -132,7 +142,7 @@ export function MspImportWizard({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="بارگذاری از Microsoft Project"
+      title="بارگذاری برنامه زمان‌بندی (MSP / P6)"
       idBase="mspImport"
       className="max-w-2xl"
     >
@@ -150,7 +160,7 @@ export function MspImportWizard({
       {step === 1 && (
         <div className="space-y-4">
           <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-            در Microsoft Project: File → Save As → فرمت XML (.xml) را انتخاب کنید.
+            Microsoft Project: File → Save As → XML (.xml). Primavera P6: Export → XER (.xer).
             فایل‌های باینری .mpp پشتیبانی نمی‌شوند.
           </div>
 

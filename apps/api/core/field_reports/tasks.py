@@ -107,6 +107,25 @@ def _auto_create_costs_from_report(report):
             },
         )
 
+    for labor_entry in report.labor_entries.filter(is_deleted=False):
+        if not labor_entry.daily_rate or not labor_entry.total_count:
+            continue
+        amount = Decimal(str(labor_entry.total_count)) * Decimal(str(labor_entry.daily_rate))
+        ActualCost.objects.get_or_create(
+            project=report.project,
+            daily_report=report,
+            cost_category='labor',
+            description=f'نیروی انسانی: {labor_entry.job_title}',
+            defaults={
+                'cost_date': report.report_date,
+                'amount': amount,
+                'cost_type': CostType.DIRECT,
+                'approved_by': report.approved_by,
+                'created_by': report.approved_by or report.updated_by,
+                'updated_by': report.approved_by or report.updated_by,
+            },
+        )
+
 
 def _auto_create_inventory_from_report(report):
     """Create inventory transactions from approved daily report material entries."""

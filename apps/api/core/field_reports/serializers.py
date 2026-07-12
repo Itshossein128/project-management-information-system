@@ -109,6 +109,7 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'unit',
             'execution_percentage',
             'notes',
+            'photo_file',
         ]
         read_only_fields = ['id']
 
@@ -127,6 +128,7 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'shift_2_count',
             'shift_3_count',
             'total_count',
+            'daily_rate',
         ]
         read_only_fields = ['id', 'total_count']
 
