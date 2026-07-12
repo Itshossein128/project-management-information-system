@@ -41,6 +41,7 @@ from .ratelimit_handlers import auth_ratelimit
 User = get_user_model()
 
 
+@auth_ratelimit('10/m')
 class UserRegistrationView(generics.CreateAPIView):
     """
     User registration endpoint.
