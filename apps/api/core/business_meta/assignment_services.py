@@ -1,29 +1,34 @@
-"""Business rules for user–business assignments (used by serializers)."""
+"""Business rules for project member assignments."""
 from django.contrib.auth import get_user_model
-from django.db import transaction
-from rest_framework.exceptions import ValidationError
 
-from business_meta.models import Business, BusinessJobPosition, UserBusinessAssignment
+from master_data.models import ProjectMember, ProjectPosition, MemberStatus
+from projects.models import Project
 
 User = get_user_model()
 
 
-@transaction.atomic
 def create_assignment_for_user(
     *,
-    business_id: int,
+    project_id,
     user,
-    job_position: BusinessJobPosition,
-    **assignment_fields,
-) -> UserBusinessAssignment:
-    if job_position.business_id != business_id:
-        raise ValidationError({'job_position': 'Job position does not belong to this business.'})
-    if UserBusinessAssignment.objects.filter(business_id=business_id, user=user).exists():
-        raise ValidationError({'user': 'This user is already assigned to this business.'})
-    business = Business.objects.get(pk=business_id)
-    return UserBusinessAssignment.objects.create(
-        business=business,
+    position: ProjectPosition,
+    **extra,
+) -> ProjectMember:
+    if position.project_id and str(position.project_id) != str(project_id):
+        raise ValueError('Position must belong to this project.')
+    if ProjectMember.objects.filter(project_id=project_id, user=user).exists():
+        raise ValueError('User is already a member of this project.')
+    Project.objects.get(pk=project_id)
+    return ProjectMember.objects.create(
+        project_id=project_id,
         user=user,
-        job_position=job_position,
-        **assignment_fields,
+        position=position,
+        status=extra.get('status', MemberStatus.ACTIVE),
+        wage=extra.get('wage', 0),
+        wage_type=extra.get('wage_type', 'hourly'),
+        weekly_total=extra.get('weekly_total', 0),
+        monthly_total=extra.get('monthly_total', 0),
+        tools=extra.get('tools') or [],
+        start_date=extra.get('start_date'),
+        end_date=extra.get('end_date'),
     )

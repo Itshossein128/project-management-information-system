@@ -1,6 +1,7 @@
 """
 Excel import/export and PDF report endpoints for department activity records.
 """
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +11,8 @@ from django.http import HttpResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
-from business_meta.models import Business
+from business_meta.models import Project
+from common.validators import validate_xlsx_upload
 from business_meta.permissions import CanViewBusinessAssignments, IsHrOrAdminOrReadOnly, IsVisitorReadOnly
 
 from .department_activity_io import (
@@ -35,10 +37,10 @@ class _DepartmentActivityDataBase(APIView):
         IsHrOrAdminOrReadOnly,
     ]
 
-    def _get_business(self, business_pk: int) -> Business | None:
+    def _get_business(self, project_pk: int) -> Project | None:
         try:
-            return Business.objects.get(pk=business_pk)
-        except Business.DoesNotExist:
+            return Project.objects.get(pk=project_pk)
+        except Project.DoesNotExist:
             return None
 
     def _require_department(self, request) -> str | Response:
@@ -73,18 +75,18 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             OpenApiParameter(name='search', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='ordering', type=OpenApiTypes.STR, required=False),
         ],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     )
-    def get(self, request, business_pk: int):
-        business = self._get_business(business_pk)
+    def get(self, request, project_pk: int):
+        business = self._get_business(project_pk)
         if business is None:
-            return Response({'error': 'Business not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         department = self._require_department(request)
         if isinstance(department, Response):
             return department
 
-        qs = get_department_activity_queryset(business_pk, request.query_params)
+        qs = get_department_activity_queryset(project_pk, request.query_params)
         xlsx_bytes = export_activities_to_xlsx(list(qs))
         filename = f'{department}_activity_export.xlsx'
         response = HttpResponse(
@@ -102,12 +104,12 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
         summary='Import department activity records from Excel',
         description='Upload .xlsx with activity columns. Requires `department` query parameter.',
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     )
-    def post(self, request, business_pk: int):
-        business = self._get_business(business_pk)
+    def post(self, request, project_pk: int):
+        business = self._get_business(project_pk)
         if business is None:
-            return Response({'error': 'Business not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         department = self._require_department(request)
         if isinstance(department, Response):
@@ -116,8 +118,10 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
         file_obj = request.FILES.get('file')
         if not file_obj:
             return Response({'error': 'No file uploaded.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not (file_obj.name or '').lower().endswith('.xlsx'):
-            return Response({'error': 'File must be .xlsx'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_xlsx_upload(file_obj)
+        except ValidationError as exc:
+            return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             file_bytes = file_obj.read()
@@ -135,11 +139,11 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
     period: str = 'daily'
     period_label: str = 'Daily report'
 
-    @extend_schema(tags=['Business activity records'])
-    def get(self, request, business_pk: int):
-        business = self._get_business(business_pk)
+    @extend_schema(tags=['Project activity records'])
+    def get(self, request, project_pk: int):
+        business = self._get_business(project_pk)
         if business is None:
-            return Response({'error': 'Business not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         department = self._require_department(request)
         if isinstance(department, Response):
@@ -147,7 +151,7 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
 
         date_from, date_to = get_report_date_range(self.period)
         qs = DepartmentActivityRecord.objects.filter(
-            business_id=business_pk,
+            project_id=project_pk,
             department=department,
             date__gte=date_from,
             date__lte=date_to,
@@ -177,10 +181,10 @@ class DepartmentActivityDailyReportView(_DepartmentActivityReportView):
         summary='Download daily department activity PDF',
         description='PDF for the previous calendar day for the given department.',
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     )
-    def get(self, request, business_pk: int):
-        return super().get(request, business_pk)
+    def get(self, request, project_pk: int):
+        return super().get(request, project_pk)
 
 
 class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
@@ -191,7 +195,7 @@ class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
         summary='Download weekly department activity PDF',
         description='PDF for the rolling last 7 days (including today) for the given department.',
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     )
-    def get(self, request, business_pk: int):
-        return super().get(request, business_pk)
+    def get(self, request, project_pk: int):
+        return super().get(request, project_pk)

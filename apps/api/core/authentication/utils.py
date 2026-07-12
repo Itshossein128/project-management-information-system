@@ -1,18 +1,11 @@
-"""
-Authentication utility functions.
-"""
-from typing import Optional
-from django.contrib.auth import get_user_model
+"""Authentication utilities."""
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
 
 def get_tokens_for_user(user) -> dict:
-    """
-    Build JWT access and refresh tokens with custom claims (groups, is_staff).
-    Single place for token payload so login and token refresh stay consistent.
-    """
     refresh = RefreshToken.for_user(user)
     role_names = list(user.groups.values_list('name', flat=True))
     refresh['groups'] = role_names
@@ -20,27 +13,11 @@ def get_tokens_for_user(user) -> dict:
     access = refresh.access_token
     access['groups'] = role_names
     access['is_staff'] = getattr(user, 'is_staff', False)
-    return {
-        'access': str(access),
-        'refresh': str(refresh),
-    }
+    return {'access': str(access), 'refresh': str(refresh)}
 
 
-def authenticate_user(phone_number: str, password: str) -> Optional[User]:
-    """
-    Authenticate user by phone number.
-
-    Args:
-        phone_number: User's phone number
-        password: User password
-
-    Returns:
-        User instance if authenticated, None otherwise
-    """
-    try:
-        user = User.objects.get(phone_number=phone_number)
-        if user.check_password(password):
-            return user
-    except User.DoesNotExist:
-        pass
-    return None
+def authenticate_user(login: str, password: str):
+    user = authenticate(request=None, login=login, password=password)
+    if user is not None:
+        return user
+    return authenticate(request=None, username=login, password=password)

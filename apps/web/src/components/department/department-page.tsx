@@ -35,7 +35,6 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const businessIdNum = businessId ? Number(businessId) : Number.NaN;
 
   const dept = findDepartmentBySlug(slug);
   const department = slug as DepartmentSlug;
@@ -67,7 +66,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       contractor: contractorFilter.trim() ? contractorFilter.trim() : undefined,
       unit: unitFilter.trim() ? unitFilter.trim() : undefined,
     },
-    isAuthenticated && Boolean(businessId) && !Number.isNaN(businessIdNum),
+    isAuthenticated && Boolean(businessId),
   );
 
   const rows = activityQuery.data?.results ?? [];
@@ -122,7 +121,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     setActionMessage(null);
     try {
       const blob = await apiBlob(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/export/?${activityExportParams.toString()}`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/export/?${activityExportParams.toString()}`,
       );
       downloadBlob(blob, `${department}_activity_export.xlsx`);
     } catch (e) {
@@ -149,7 +148,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         created: number;
         errors: { row: number; errors: Record<string, string> }[];
       }>(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/import/?department=${department}`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/import/?department=${department}`,
         file,
       );
       if (result.errors.length > 0) {
@@ -189,7 +188,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     setActionMessage(null);
     try {
       const blob = await apiBlob(
-        `/${PATHS.BUSINESS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/${period}/?department=${department}`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/${period}/?department=${department}`,
       );
       downloadBlob(blob, `${department}_${period}_report.pdf`);
     } catch (e) {
@@ -209,11 +208,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
 
   useEffect(() => {
     if (!isAuthenticated || !businessId) return;
-    if (Number.isNaN(businessIdNum)) {
-      setError("Invalid business");
-      return;
-    }
-    apiJson<BusinessDetail>(`/${PATHS.BUSINESS}/${businessIdNum}/`)
+    apiJson<BusinessDetail>(`/${PATHS.API_PROJECTS}/${businessId}/`)
       .then((b) => {
         setBusiness(b);
         setError(null);
@@ -221,7 +216,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       .catch((e) =>
         setError(e instanceof Error ? e.message : "Failed to load"),
       );
-  }, [isAuthenticated, businessId, businessIdNum]);
+  }, [isAuthenticated, businessId]);
 
   if (isLoading || !isAuthenticated) return null;
 

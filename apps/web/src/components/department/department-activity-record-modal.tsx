@@ -1,3 +1,4 @@
+import { useStickyFormFields } from "@/app/hooks/use-sticky-form-fields";
 import { useCreateDepartmentActivityRecord } from "@/app/hooks/queries";
 import type {
   DepartmentActivityRecordPayload,
@@ -30,6 +31,8 @@ const EMPTY_PAYLOAD: Omit<DepartmentActivityRecordPayload, "department"> = {
   description: "",
 };
 
+type FormField = keyof typeof EMPTY_PAYLOAD;
+
 export function DepartmentActivityRecordModal({
   open,
   onOpenChange,
@@ -39,14 +42,35 @@ export function DepartmentActivityRecordModal({
   const { t } = useTranslation();
   const createMutation = useCreateDepartmentActivityRecord(businessId);
 
-  const [form, setForm] = useState(EMPTY_PAYLOAD);
+  const stickyScope = `department-activity:${businessId}:${department}`;
+
+  const {
+    values: form,
+    setField,
+    sticky,
+    setSticky,
+    resetUnlocked,
+  } = useStickyFormFields({
+    scope: stickyScope,
+    initialValues: EMPTY_PAYLOAD,
+    defaultSticky: true,
+  });
+
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const closeAndReset = () => {
+    resetUnlocked();
     onOpenChange(false);
     setSubmitError(null);
-    setForm(EMPTY_PAYLOAD);
   };
+
+  const stickyFieldProps = (field: FormField) => ({
+    sticky: sticky[field],
+    onStickyChange: (next: boolean) => setSticky(field, next),
+    stickyAriaLabel: sticky[field]
+      ? t("form.sticky.unlockField")
+      : t("form.sticky.lockField"),
+  });
 
   const payload = useMemo<DepartmentActivityRecordPayload>(
     () => ({
@@ -112,8 +136,9 @@ export function DepartmentActivityRecordModal({
               id="input-departmentActivityDate"
               label={t("businessDepartment.activityLog.fields.date")}
               value={form.date}
-              onChange={(next) => setForm((p) => ({ ...p, date: next }))}
+              onChange={(next) => setField("date", next)}
               required
+              {...stickyFieldProps("date")}
             />
           </div>
 
@@ -125,15 +150,14 @@ export function DepartmentActivityRecordModal({
               name="departmentActivityUnit"
               label={t("businessDepartment.activityLog.fields.unit")}
               htmlFor="input-departmentActivityUnit"
+              {...stickyFieldProps("unit")}
             >
               {() => (
                 <Input
                   id="input-departmentActivityUnit"
                   name="departmentActivityUnit"
                   value={form.unit}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, unit: e.target.value }))
-                  }
+                  onChange={(e) => setField("unit", e.target.value)}
                   required
                 />
               )}
@@ -148,15 +172,14 @@ export function DepartmentActivityRecordModal({
               name="departmentActivityLocation"
               label={t("businessDepartment.activityLog.fields.location")}
               htmlFor="input-departmentActivityLocation"
+              {...stickyFieldProps("location")}
             >
               {() => (
                 <Input
                   id="input-departmentActivityLocation"
                   name="departmentActivityLocation"
                   value={form.location}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, location: e.target.value }))
-                  }
+                  onChange={(e) => setField("location", e.target.value)}
                   required
                 />
               )}
@@ -171,15 +194,14 @@ export function DepartmentActivityRecordModal({
               name="departmentActivityContractor"
               label={t("businessDepartment.activityLog.fields.contractor")}
               htmlFor="input-departmentActivityContractor"
+              {...stickyFieldProps("contractor")}
             >
               {() => (
                 <Input
                   id="input-departmentActivityContractor"
                   name="departmentActivityContractor"
                   value={form.contractor}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, contractor: e.target.value }))
-                  }
+                  onChange={(e) => setField("contractor", e.target.value)}
                   required
                 />
               )}
@@ -196,6 +218,7 @@ export function DepartmentActivityRecordModal({
                 "businessDepartment.activityLog.fields.activityDescription",
               )}
               htmlFor="input-departmentActivityActivityDescription"
+              {...stickyFieldProps("activity_description")}
             >
               {() => (
                 <Input
@@ -203,10 +226,7 @@ export function DepartmentActivityRecordModal({
                   name="departmentActivityActivityDescription"
                   value={form.activity_description}
                   onChange={(e) =>
-                    setForm((p) => ({
-                      ...p,
-                      activity_description: e.target.value,
-                    }))
+                    setField("activity_description", e.target.value)
                   }
                   required
                 />
@@ -223,10 +243,9 @@ export function DepartmentActivityRecordModal({
               name="departmentActivityDescription"
               label={t("businessDepartment.activityLog.fields.description")}
               value={form.description}
-              onChange={(e) =>
-                setForm((p) => ({ ...p, description: e.target.value }))
-              }
+              onChange={(e) => setField("description", e.target.value)}
               rows={4}
+              {...stickyFieldProps("description")}
             />
           </div>
         </div>
@@ -257,4 +276,3 @@ export function DepartmentActivityRecordModal({
     </Modal>
   );
 }
-

@@ -1,4 +1,5 @@
 # IPCAS — Integrated Project Control Automation System
+
 ## Engineering Blueprint (Rev. 2)
 
 > Converted from: طرح اولیه سیستم اتوماسیون یکپارچه کنترل پروژه‌های عمرانی
@@ -42,15 +43,17 @@ IPCAS is a **multi-tenant, project-scoped SaaS platform** for civil/construction
 
 ### 1.2 Service Breakdown
 
-| Service | Responsibility |
-|---|---|
-| **Core Service** | Projects, WBS, Activities, Users, Roles, Permissions |
-| **Field Sync Service** | Daily report ingestion, offline queue, sync reconciliation |
-| **Finance Service** | Costs, Budgets, Cash Flow, IPCs, Contracts |
-| **Report Service** | KPI aggregation, dashboards, PDF/Excel export |
-| **Economic Engine** | Inflation adjustment, payment delay analysis, scenario simulation (Monte Carlo) |
-| **Notification Service** | Automated alerts, webhook delivery, email/SMS |
-| **Document Service** | File upload, versioning, access control |
+
+| Service                  | Responsibility                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| **Core Service**         | Projects, WBS, Activities, Users, Roles, Permissions                            |
+| **Field Sync Service**   | Daily report ingestion, offline queue, sync reconciliation                      |
+| **Finance Service**      | Costs, Budgets, Cash Flow, IPCs, Contracts                                      |
+| **Report Service**       | KPI aggregation, dashboards, PDF/Excel export                                   |
+| **Economic Engine**      | Inflation adjustment, payment delay analysis, scenario simulation (Monte Carlo) |
+| **Notification Service** | Automated alerts, webhook delivery, email/SMS                                   |
+| **Document Service**     | File upload, versioning, access control                                         |
+
 
 ### 1.3 Offline-First Field Strategy
 
@@ -592,98 +595,115 @@ CREATE TABLE alert_log (
 
 #### Projects
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects` | List all projects the caller has access to |
-| `POST` | `/projects` | Create project |
-| `GET` | `/projects/{id}` | Project detail |
-| `PATCH` | `/projects/{id}` | Update project metadata |
-| `GET` | `/projects/{id}/health` | Dashboard KPI summary |
-| `GET` | `/projects/{id}/members` | List project members + roles |
-| `POST` | `/projects/{id}/members` | Add member (userId + roleIds + optional custom permissions) |
+
+| Method  | Path                     | Description                                                 |
+| ------- | ------------------------ | ----------------------------------------------------------- |
+| `GET`   | `/projects`              | List all projects the caller has access to                  |
+| `POST`  | `/projects`              | Create project                                              |
+| `GET`   | `/projects/{id}`         | Project detail                                              |
+| `PATCH` | `/projects/{id}`         | Update project metadata                                     |
+| `GET`   | `/projects/{id}/health`  | Dashboard KPI summary                                       |
+| `GET`   | `/projects/{id}/members` | List project members + roles                                |
+| `POST`  | `/projects/{id}/members` | Add member (userId + roleIds + optional custom permissions) |
+
 
 #### WBS & Activities
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/wbs` | Full WBS tree |
-| `POST` | `/projects/{id}/wbs` | Create WBS node |
-| `GET` | `/projects/{id}/activities` | List activities (filterable by wbs_id, status) |
-| `POST` | `/projects/{id}/activities` | Create activity |
-| `PATCH` | `/projects/{id}/activities/{actId}` | Update activity |
-| `GET` | `/projects/{id}/activities/{actId}/progress` | Progress history |
-| `POST` | `/projects/{id}/activities/{actId}/progress` | Record progress update |
+
+| Method  | Path                                         | Description                                    |
+| ------- | -------------------------------------------- | ---------------------------------------------- |
+| `GET`   | `/projects/{id}/wbs`                         | Full WBS tree                                  |
+| `POST`  | `/projects/{id}/wbs`                         | Create WBS node                                |
+| `GET`   | `/projects/{id}/activities`                  | List activities (filterable by wbs_id, status) |
+| `POST`  | `/projects/{id}/activities`                  | Create activity                                |
+| `PATCH` | `/projects/{id}/activities/{actId}`          | Update activity                                |
+| `GET`   | `/projects/{id}/activities/{actId}/progress` | Progress history                               |
+| `POST`  | `/projects/{id}/activities/{actId}/progress` | Record progress update                         |
+
 
 #### Daily Reports
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/daily-reports` | List reports (date range filter) |
-| `POST` | `/projects/{id}/daily-reports` | Create report (draft) |
-| `GET` | `/projects/{id}/daily-reports/{rId}` | Report detail with all sub-entities |
-| `PATCH` | `/projects/{id}/daily-reports/{rId}` | Update (while draft) |
-| `POST` | `/projects/{id}/daily-reports/{rId}/submit` | Submit for review |
-| `POST` | `/projects/{id}/daily-reports/{rId}/approve` | Approve (triggers progress recalculation) |
-| `POST` | `/projects/{id}/daily-reports/{rId}/reject` | Reject with reason |
-| `POST` | `/projects/{id}/daily-reports/sync-batch` | Offline sync — array of reports |
+
+| Method  | Path                                         | Description                               |
+| ------- | -------------------------------------------- | ----------------------------------------- |
+| `GET`   | `/projects/{id}/daily-reports`               | List reports (date range filter)          |
+| `POST`  | `/projects/{id}/daily-reports`               | Create report (draft)                     |
+| `GET`   | `/projects/{id}/daily-reports/{rId}`         | Report detail with all sub-entities       |
+| `PATCH` | `/projects/{id}/daily-reports/{rId}`         | Update (while draft)                      |
+| `POST`  | `/projects/{id}/daily-reports/{rId}/submit`  | Submit for review                         |
+| `POST`  | `/projects/{id}/daily-reports/{rId}/approve` | Approve (triggers progress recalculation) |
+| `POST`  | `/projects/{id}/daily-reports/{rId}/reject`  | Reject with reason                        |
+| `POST`  | `/projects/{id}/daily-reports/sync-batch`    | Offline sync — array of reports           |
+
 
 #### Cost Control
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/budgets` | Budget by WBS / activity / category |
-| `POST` | `/projects/{id}/budgets` | Upsert budget line |
-| `GET` | `/projects/{id}/costs` | Actual costs (filterable) |
-| `POST` | `/projects/{id}/costs` | Record actual cost |
-| `GET` | `/projects/{id}/costs/variance` | Budget vs actual by WBS |
-| `GET` | `/projects/{id}/cost-pools` | Historical unallocated cost pools |
-| `POST` | `/projects/{id}/cost-pools/{pId}/allocate` | Allocate pool to activities |
+
+| Method | Path                                       | Description                         |
+| ------ | ------------------------------------------ | ----------------------------------- |
+| `GET`  | `/projects/{id}/budgets`                   | Budget by WBS / activity / category |
+| `POST` | `/projects/{id}/budgets`                   | Upsert budget line                  |
+| `GET`  | `/projects/{id}/costs`                     | Actual costs (filterable)           |
+| `POST` | `/projects/{id}/costs`                     | Record actual cost                  |
+| `GET`  | `/projects/{id}/costs/variance`            | Budget vs actual by WBS             |
+| `GET`  | `/projects/{id}/cost-pools`                | Historical unallocated cost pools   |
+| `POST` | `/projects/{id}/cost-pools/{pId}/allocate` | Allocate pool to activities         |
+
 
 #### Contracts & IPCs
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/contracts` | List contracts |
-| `POST` | `/projects/{id}/contracts` | Create contract |
-| `GET` | `/projects/{id}/ipcs` | List IPCs |
-| `POST` | `/projects/{id}/ipcs` | Create IPC (auto-populates from latest progress data) |
-| `POST` | `/projects/{id}/ipcs/{ipcId}/submit` | Submit to employer |
-| `POST` | `/projects/{id}/ipcs/{ipcId}/approve` | Mark approved |
-| `POST` | `/projects/{id}/ipcs/{ipcId}/pay` | Record payment with actual date |
+
+| Method | Path                                  | Description                                           |
+| ------ | ------------------------------------- | ----------------------------------------------------- |
+| `GET`  | `/projects/{id}/contracts`            | List contracts                                        |
+| `POST` | `/projects/{id}/contracts`            | Create contract                                       |
+| `GET`  | `/projects/{id}/ipcs`                 | List IPCs                                             |
+| `POST` | `/projects/{id}/ipcs`                 | Create IPC (auto-populates from latest progress data) |
+| `POST` | `/projects/{id}/ipcs/{ipcId}/submit`  | Submit to employer                                    |
+| `POST` | `/projects/{id}/ipcs/{ipcId}/approve` | Mark approved                                         |
+| `POST` | `/projects/{id}/ipcs/{ipcId}/pay`     | Record payment with actual date                       |
+
 
 #### Cash Flow
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/cash-flow` | Actual transactions + rolling balance |
-| `POST` | `/projects/{id}/cash-flow/transactions` | Record cash in/out |
-| `GET` | `/projects/{id}/cash-flow/forecast` | Monthly forecast |
-| `PUT` | `/projects/{id}/cash-flow/forecast/{month}` | Update forecast month |
-| `GET` | `/projects/{id}/cash-flow/gap-analysis` | Periods with projected cash deficit |
+
+| Method | Path                                        | Description                           |
+| ------ | ------------------------------------------- | ------------------------------------- |
+| `GET`  | `/projects/{id}/cash-flow`                  | Actual transactions + rolling balance |
+| `POST` | `/projects/{id}/cash-flow/transactions`     | Record cash in/out                    |
+| `GET`  | `/projects/{id}/cash-flow/forecast`         | Monthly forecast                      |
+| `PUT`  | `/projects/{id}/cash-flow/forecast/{month}` | Update forecast month                 |
+| `GET`  | `/projects/{id}/cash-flow/gap-analysis`     | Periods with projected cash deficit   |
+
 
 #### Economic Engine
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/economic/snapshot` | Latest inflation-adjusted P&L |
-| `GET` | `/projects/{id}/economic/cash-flow-real` | Economic (real) cash flow curve |
-| `GET` | `/projects/{id}/economic/forecast` | EAC adjusted for inflation + CPI |
-| `POST` | `/projects/{id}/economic/simulate` | Run Monte Carlo (body: scenario params) |
-| `GET` | `/projects/{id}/economic/payment-delay` | IPC delay analysis |
-| `PUT` | `/inflation-indices/{name}/{date}` | Admin: update index value |
+
+| Method | Path                                     | Description                             |
+| ------ | ---------------------------------------- | --------------------------------------- |
+| `GET`  | `/projects/{id}/economic/snapshot`       | Latest inflation-adjusted P&L           |
+| `GET`  | `/projects/{id}/economic/cash-flow-real` | Economic (real) cash flow curve         |
+| `GET`  | `/projects/{id}/economic/forecast`       | EAC adjusted for inflation + CPI        |
+| `POST` | `/projects/{id}/economic/simulate`       | Run Monte Carlo (body: scenario params) |
+| `GET`  | `/projects/{id}/economic/payment-delay`  | IPC delay analysis                      |
+| `PUT`  | `/inflation-indices/{name}/{date}`       | Admin: update index value               |
+
 
 #### KPIs & Dashboard
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/projects/{id}/kpis` | All KPIs in one call (SPI, CPI, SV, CV, EV, PV, AC) |
-| `GET` | `/projects/{id}/s-curve` | S-Curve data: planned vs actual progress over time |
-| `GET` | `/projects/{id}/alerts` | Active alerts |
-| `POST` | `/projects/{id}/alerts/rules` | Create alert rule |
+
+| Method | Path                          | Description                                         |
+| ------ | ----------------------------- | --------------------------------------------------- |
+| `GET`  | `/projects/{id}/kpis`         | All KPIs in one call (SPI, CPI, SV, CV, EV, PV, AC) |
+| `GET`  | `/projects/{id}/s-curve`      | S-Curve data: planned vs actual progress over time  |
+| `GET`  | `/projects/{id}/alerts`       | Active alerts                                       |
+| `POST` | `/projects/{id}/alerts/rules` | Create alert rule                                   |
+
 
 ### 3.3 Key Response Shape Examples
 
-**`GET /projects/{id}/kpis`**
+`**GET /projects/{id}/kpis**`
+
 ```json
 {
   "as_of": "2025-04-15",
@@ -721,17 +741,20 @@ CREATE TABLE alert_log (
 ## 4. Feature Breakdown
 
 ### Module 1 — Project Foundation
+
 - Project creation with full metadata (employer, contractor, consultant, dates, contract amount, type, location)
 - Mid-project onboarding: cut-off date, Opening Snapshot (progress, cost, receivables, payables)
 - Cost pool definition for historical unallocated costs; 3-level allocation methods (by quantity, budget weight, labor/equipment hours)
 
 ### Module 2 — WBS & Activities
+
 - Hierarchical WBS tree (unlimited depth); drag-and-drop reorder
 - Activity definitions with physical weight, planned quantities, BoQ linkage
 - Predecessor/successor relationships (FS/SS/FF/SF with lag)
 - Import from Primavera P6 (XER) and Microsoft Project (XML)
 
 ### Module 3 — Schedule Control
+
 - Baseline versioning; compare two baselines
 - Progress tracking per activity per reporting period
 - Auto-computed: SPI, total float, free float, critical path highlighting
@@ -739,6 +762,7 @@ CREATE TABLE alert_log (
 - Delay analysis reports with schedule variance trending
 
 ### Module 4 — Daily Field Report
+
 - Multi-discipline entry (civil, mechanical, electrical, HSE, QC, procurement)
 - Offline-first mobile form; sync when online
 - Attach photos, link to WBS activity, record weather
@@ -747,13 +771,15 @@ CREATE TABLE alert_log (
 - Auto-triggers: on approval, progress recalculated and cost booked
 
 ### Module 5 — Physical Progress Control
+
 - Weighted average progress formula:
-  `Project Progress = Σ (Activity Progress × Weight)`
+`Project Progress = Σ (Activity Progress × Weight)`
 - Period and cumulative quantity tracking
 - S-Curve generation (planned vs actual)
 - Variance flagging: activities > 5% behind get auto-alert
 
 ### Module 6 — Cost & Budget Control
+
 - Budget per WBS level, per cost category
 - Actual cost entry with document reference
 - Earned Value Management: EV, AC, PV → CPI, SPI, CV, SV
@@ -761,6 +787,7 @@ CREATE TABLE alert_log (
 - Cost category analysis: labor, material, equipment, subcontract, overhead
 
 ### Module 7 — Cash Flow Management
+
 - Record actual receipts (from employer) and disbursements (subs, suppliers, salaries)
 - Monthly rolling forecast with confidence level
 - Gap analysis: months where outflow > inflow
@@ -768,6 +795,7 @@ CREATE TABLE alert_log (
 - Cash balance history chart
 
 ### Module 8 — Contracts & IPCs
+
 - Contract registry (main + subcontracts + purchase + equipment rental)
 - Guarantee bond tracking with expiry alerts
 - IPC generation: semi-automatic from approved progress data
@@ -775,50 +803,58 @@ CREATE TABLE alert_log (
 - IPC status tracking with dates (submitted → approved → paid) and delay monitoring
 
 ### Module 9 — Human Resources
+
 - Daily headcount log by discipline and role
 - Planned vs actual labor-hours
 - Labor productivity = executed quantity / labor hours
 - Workforce reports by crew/subcontractor
 
 ### Module 10 — Equipment
+
 - Equipment registry with ownership classification (own/rented)
 - Daily utilization log: work hours, idle hours, idle reason
 - Equipment productivity and utilization rate
 - Maintenance & repair cost tracking
 
 ### Module 11 — Materials & Warehouse
+
 - Inventory transactions (receipt, issue, waste, adjustment)
 - Running balance per material per project
 - Critical stock alerts (below minimum level)
 - Material consumption vs planned (waste ratio analysis)
 
 ### Module 12 — Procurement
+
 - Purchase request → approval → order → delivery workflow
 - Supplier comparison (quotes side-by-side)
 - Delivery delay tracking and impact on schedule
 - Linkage: procurement item → WBS activity needed date
 
 ### Module 13 — Subcontractor Control
+
 - Performance scorecard: progress, quality, HSE, payment compliance
 - Financial status: billed, paid, outstanding per sub
 - Non-conformance and warning log
 - Risk flag for subs behind schedule > threshold
 
 ### Module 14 — Delays, Barriers & Risk
+
 - Incident logging: delay / barrier / risk / claim / change order
 - Responsibility attribution (employer, contractor, force majeure)
 - Risk matrix: probability × severity
 - Claim documentation (timestamped, linked to daily reports and correspondence)
 
 ### Module 15 — Document Control
+
 - Versioned document store (drawings, contracts, correspondence, minutes)
 - Document categories, access levels (public / project / restricted)
 - Correspondence tracker with response-due-date and open/closed status
 - RFI and submittal registers
 
 ### Module 16 — Economic Engine
+
 - Inflation adjustment: per cost category, per month, using external indices (steel, cement, labor, CPI)
-  `Adjusted Cost = Nominal Cost × (Index_Current / Index_At_Cost_Date)`
+`Adjusted Cost = Nominal Cost × (Index_Current / Index_At_Cost_Date)`
 - Payment delay cost: `Financing Cost = IPC Amount × Annual Rate × Delay Days / 365`
 - Three P&L layers: accounting profit, real profit, economic profit
 - Working capital forecast: `Max(Cumulative Cost − Cumulative Payment)`
@@ -826,12 +862,14 @@ CREATE TABLE alert_log (
 - Output: P10/P50/P90 profit, probability of loss, tornado sensitivity chart
 
 ### Module 17 — Dashboard & Alerts
+
 - Executive dashboard: 10 core KPIs at a glance
 - Role-based dashboard variants (project manager, finance, field, executive)
 - 15+ configurable alert rules (critical path delays, budget overruns, liquidity gaps, guarantee expiries, missing daily reports, IPC approval delays)
 - Push notifications (email / SMS / in-app)
 
 ### Module 18 — Access Control
+
 - Three-tier model: System Level → Project Level → Custom Override
 - Per-project role assignment; one person can hold multiple roles
 - Permission matrix by module + CRUD action
@@ -844,93 +882,105 @@ CREATE TABLE alert_log (
 
 ### 5.1 Foundation Layer
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| F-01 | Design & migrate full DB schema (all 11 domains) | 5d | Backend |
-| F-02 | Auth service: JWT issuance, refresh, revocation | 2d | Backend |
-| F-03 | API gateway setup: routing, rate limiting, CORS | 2d | Infra |
-| F-04 | Multi-tenancy middleware (project-scoped data isolation) | 3d | Backend |
-| F-05 | Role & permission engine with project-scoped overrides | 3d | Backend |
-| F-06 | Audit log middleware (all write operations) | 2d | Backend |
-| F-07 | File storage service (S3-compatible, signed URLs) | 2d | Backend |
-| F-08 | Message bus setup (Kafka / RabbitMQ) with topic definitions | 2d | Infra |
+
+| #    | Task                                                        | Effort | Owner   |
+| ---- | ----------------------------------------------------------- | ------ | ------- |
+| F-01 | Design & migrate full DB schema (all 11 domains)            | 5d     | Backend |
+| F-02 | Auth service: JWT issuance, refresh, revocation             | 2d     | Backend |
+| F-03 | API gateway setup: routing, rate limiting, CORS             | 2d     | Infra   |
+| F-04 | Multi-tenancy middleware (project-scoped data isolation)    | 3d     | Backend |
+| F-05 | Role & permission engine with project-scoped overrides      | 3d     | Backend |
+| F-06 | Audit log middleware (all write operations)                 | 2d     | Backend |
+| F-07 | File storage service (S3-compatible, signed URLs)           | 2d     | Backend |
+| F-08 | Message bus setup (Kafka / RabbitMQ) with topic definitions | 2d     | Infra   |
+
 
 ### 5.2 Core Business Logic
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| C-01 | Project CRUD + membership management APIs | 3d | Backend |
-| C-02 | WBS tree API (insert, reorder, computed code propagation) | 3d | Backend |
-| C-03 | Activity CRUD + relation graph validation | 3d | Backend |
-| C-04 | Baseline schedule import (P6 XER + MSPROJECT XML parsers) | 5d | Backend |
-| C-05 | Daily report API + sub-entities (labor, equipment, materials) | 4d | Backend |
-| C-06 | Daily report approval workflow + event publish | 2d | Backend |
-| C-07 | Progress recalculation engine (triggered on report approval) | 3d | Backend |
-| C-08 | Physical progress API: weighted sum, S-curve data endpoint | 2d | Backend |
-| C-09 | Budget ingestion + variance engine | 3d | Backend |
-| C-10 | Actual cost ledger + cost pool allocation logic | 4d | Backend |
-| C-11 | Cash flow transaction API + gap analysis | 3d | Backend |
-| C-12 | Contract + IPC API with deduction engine | 5d | Backend |
-| C-13 | Inventory transaction ledger + running balance | 3d | Backend |
-| C-14 | Equipment log API + utilization calculations | 2d | Backend |
-| C-15 | Procurement request workflow (PR → PO → delivery) | 3d | Backend |
-| C-16 | Subcontractor scorecard & risk flag engine | 3d | Backend |
-| C-17 | Risk/delay register API + claim documentation linker | 2d | Backend |
-| C-18 | Document version control + correspondence tracker | 3d | Backend |
+
+| #    | Task                                                          | Effort | Owner   |
+| ---- | ------------------------------------------------------------- | ------ | ------- |
+| C-01 | Project CRUD + membership management APIs                     | 3d     | Backend |
+| C-02 | WBS tree API (insert, reorder, computed code propagation)     | 3d     | Backend |
+| C-03 | Activity CRUD + relation graph validation                     | 3d     | Backend |
+| C-04 | Baseline schedule import (P6 XER + MSPROJECT XML parsers)     | 5d     | Backend |
+| C-05 | Daily report API + sub-entities (labor, equipment, materials) | 4d     | Backend |
+| C-06 | Daily report approval workflow + event publish                | 2d     | Backend |
+| C-07 | Progress recalculation engine (triggered on report approval)  | 3d     | Backend |
+| C-08 | Physical progress API: weighted sum, S-curve data endpoint    | 2d     | Backend |
+| C-09 | Budget ingestion + variance engine                            | 3d     | Backend |
+| C-10 | Actual cost ledger + cost pool allocation logic               | 4d     | Backend |
+| C-11 | Cash flow transaction API + gap analysis                      | 3d     | Backend |
+| C-12 | Contract + IPC API with deduction engine                      | 5d     | Backend |
+| C-13 | Inventory transaction ledger + running balance                | 3d     | Backend |
+| C-14 | Equipment log API + utilization calculations                  | 2d     | Backend |
+| C-15 | Procurement request workflow (PR → PO → delivery)             | 3d     | Backend |
+| C-16 | Subcontractor scorecard & risk flag engine                    | 3d     | Backend |
+| C-17 | Risk/delay register API + claim documentation linker          | 2d     | Backend |
+| C-18 | Document version control + correspondence tracker             | 3d     | Backend |
+
 
 ### 5.3 Economic Engine
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| E-01 | Inflation index table + ingestion API | 1d | Backend |
-| E-02 | Cost-to-category inflation mapping (per project config) | 2d | Backend |
-| E-03 | Historical cost inflation adjuster (batch + incremental) | 3d | Backend |
-| E-04 | IPC payment delay calculator (planned vs actual dates) | 2d | Backend |
-| E-05 | Financing cost engine | 1d | Backend |
-| E-06 | Economic P&L snapshot generator (nightly cron) | 2d | Backend |
-| E-07 | Working capital forecast curve | 2d | Backend |
-| E-08 | Monte Carlo simulation engine (Python, NumPy/SciPy, 5k iterations) | 5d | Data/ML |
-| E-09 | Scenario API (define scenario params, get simulation result) | 2d | Backend |
-| E-10 | Sensitivity / tornado chart data endpoint | 1d | Backend |
+
+| #    | Task                                                               | Effort | Owner   |
+| ---- | ------------------------------------------------------------------ | ------ | ------- |
+| E-01 | Inflation index table + ingestion API                              | 1d     | Backend |
+| E-02 | Cost-to-category inflation mapping (per project config)            | 2d     | Backend |
+| E-03 | Historical cost inflation adjuster (batch + incremental)           | 3d     | Backend |
+| E-04 | IPC payment delay calculator (planned vs actual dates)             | 2d     | Backend |
+| E-05 | Financing cost engine                                              | 1d     | Backend |
+| E-06 | Economic P&L snapshot generator (nightly cron)                     | 2d     | Backend |
+| E-07 | Working capital forecast curve                                     | 2d     | Backend |
+| E-08 | Monte Carlo simulation engine (Python, NumPy/SciPy, 5k iterations) | 5d     | Data/ML |
+| E-09 | Scenario API (define scenario params, get simulation result)       | 2d     | Backend |
+| E-10 | Sensitivity / tornado chart data endpoint                          | 1d     | Backend |
+
 
 ### 5.4 KPIs & Alerts
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| K-01 | EVM calculation service (EV, PV, AC → CPI, SPI, EAC) | 3d | Backend |
-| K-02 | Unified KPI endpoint (`/kpis`) with caching | 2d | Backend |
-| K-03 | Alert rule engine (threshold evaluation on event stream) | 3d | Backend |
-| K-04 | Notification delivery (email, SMS, push, in-app) | 3d | Backend |
-| K-05 | Alert acknowledgement + log API | 1d | Backend |
+
+| #    | Task                                                     | Effort | Owner   |
+| ---- | -------------------------------------------------------- | ------ | ------- |
+| K-01 | EVM calculation service (EV, PV, AC → CPI, SPI, EAC)     | 3d     | Backend |
+| K-02 | Unified KPI endpoint (`/kpis`) with caching              | 2d     | Backend |
+| K-03 | Alert rule engine (threshold evaluation on event stream) | 3d     | Backend |
+| K-04 | Notification delivery (email, SMS, push, in-app)         | 3d     | Backend |
+| K-05 | Alert acknowledgement + log API                          | 1d     | Backend |
+
 
 ### 5.5 Offline Sync
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| O-01 | Service Worker setup in PWA with offline queue (IndexedDB) | 3d | Frontend |
-| O-02 | Batch sync endpoint: validate, deduplicate, apply | 3d | Backend |
-| O-03 | Conflict detection logic + UI for supervisor review | 3d | Frontend |
-| O-04 | Sync status indicator UI (offline badge, pending count) | 1d | Frontend |
+
+| #    | Task                                                       | Effort | Owner    |
+| ---- | ---------------------------------------------------------- | ------ | -------- |
+| O-01 | Service Worker setup in PWA with offline queue (IndexedDB) | 3d     | Frontend |
+| O-02 | Batch sync endpoint: validate, deduplicate, apply          | 3d     | Backend  |
+| O-03 | Conflict detection logic + UI for supervisor review        | 3d     | Frontend |
+| O-04 | Sync status indicator UI (offline badge, pending count)    | 1d     | Frontend |
+
 
 ### 5.6 Frontend
 
-| # | Task | Effort | Owner |
-|---|---|---|---|
-| UI-01 | Design system / component library (tokens, atoms) | 4d | Frontend |
-| UI-02 | Project list + creation wizard | 2d | Frontend |
-| UI-03 | WBS tree editor (drag-and-drop, inline edit) | 4d | Frontend |
-| UI-04 | Daily report form (multi-discipline, photo attach) | 5d | Frontend |
-| UI-05 | Progress dashboard with S-Curve chart | 3d | Frontend |
-| UI-06 | Cost control screens (budget vs actual, variance drill-down) | 3d | Frontend |
-| UI-07 | IPC wizard (auto-filled from progress, deduction table) | 4d | Frontend |
-| UI-08 | Cash flow chart + gap analysis view | 3d | Frontend |
-| UI-09 | Gantt chart (read-only, baseline comparison) | 5d | Frontend |
-| UI-10 | Executive dashboard with 10-KPI panel | 3d | Frontend |
-| UI-11 | Economic dashboard (3 profit layers, Monte Carlo results) | 4d | Frontend |
-| UI-12 | Alert center + rule configuration | 2d | Frontend |
-| UI-13 | Document archive + correspondence tracker | 3d | Frontend |
-| UI-14 | Risk register & matrix view | 2d | Frontend |
-| UI-15 | Access control admin (members, roles, permissions) | 3d | Frontend |
+
+| #     | Task                                                         | Effort | Owner    |
+| ----- | ------------------------------------------------------------ | ------ | -------- |
+| UI-01 | Design system / component library (tokens, atoms)            | 4d     | Frontend |
+| UI-02 | Project list + creation wizard                               | 2d     | Frontend |
+| UI-03 | WBS tree editor (drag-and-drop, inline edit)                 | 4d     | Frontend |
+| UI-04 | Daily report form (multi-discipline, photo attach)           | 5d     | Frontend |
+| UI-05 | Progress dashboard with S-Curve chart                        | 3d     | Frontend |
+| UI-06 | Cost control screens (budget vs actual, variance drill-down) | 3d     | Frontend |
+| UI-07 | IPC wizard (auto-filled from progress, deduction table)      | 4d     | Frontend |
+| UI-08 | Cash flow chart + gap analysis view                          | 3d     | Frontend |
+| UI-09 | Gantt chart (read-only, baseline comparison)                 | 5d     | Frontend |
+| UI-10 | Executive dashboard with 10-KPI panel                        | 3d     | Frontend |
+| UI-11 | Economic dashboard (3 profit layers, Monte Carlo results)    | 4d     | Frontend |
+| UI-12 | Alert center + rule configuration                            | 2d     | Frontend |
+| UI-13 | Document archive + correspondence tracker                    | 3d     | Frontend |
+| UI-14 | Risk register & matrix view                                  | 2d     | Frontend |
+| UI-15 | Access control admin (members, roles, permissions)           | 3d     | Frontend |
+
 
 ---
 
@@ -939,6 +989,7 @@ CREATE TABLE alert_log (
 > Assumes a team of 4 backend, 3 frontend, 1 data engineer, 1 DevOps, 1 QA.
 
 ### Sprint 1 — Infrastructure & Auth
+
 F-01, F-02, F-03, F-04, F-06, F-07, F-08
 
 **Goal:** DB migrated, auth works, API gateway live, S3 wired up, audit log on.
@@ -946,6 +997,7 @@ F-01, F-02, F-03, F-04, F-06, F-07, F-08
 ---
 
 ### Sprint 2 — Projects, WBS & Members
+
 F-05, C-01, C-02, UI-01, UI-02, UI-15
 
 **Goal:** Create projects, build WBS tree, assign members with roles. Design system initialized.
@@ -953,6 +1005,7 @@ F-05, C-01, C-02, UI-01, UI-02, UI-15
 ---
 
 ### Sprint 3 — Activities & Schedule Baseline
+
 C-03, C-04, UI-03, partial O-01
 
 **Goal:** Activities CRUD, P6/MSPROJECT import working, WBS tree editor shipped.
@@ -960,6 +1013,7 @@ C-03, C-04, UI-03, partial O-01
 ---
 
 ### Sprint 4 — Daily Report (Online)
+
 C-05, C-06, C-07, UI-04
 
 **Goal:** Field team can submit daily reports online. Approval workflow live. Progress auto-updates on approval.
@@ -967,6 +1021,7 @@ C-05, C-06, C-07, UI-04
 ---
 
 ### Sprint 5 — Offline Sync
+
 O-01 (complete), O-02, O-03, O-04
 
 **Goal:** Field supervisor can fill out daily report with no internet. Report syncs on next connection. Conflict UI working.
@@ -974,6 +1029,7 @@ O-01 (complete), O-02, O-03, O-04
 ---
 
 ### Sprint 6 — Physical Progress & S-Curve
+
 C-08, K-01 (partial), UI-05
 
 **Goal:** SPI, planned vs actual progress, S-curve chart. Dashboard progress panel live.
@@ -981,6 +1037,7 @@ C-08, K-01 (partial), UI-05
 ---
 
 ### Sprint 7 — Budget & Cost Control
+
 C-09, C-10, UI-06
 
 **Goal:** Budget entry per WBS, actual costs logged, cost pools for mid-project onboarding, variance report.
@@ -988,6 +1045,7 @@ C-09, C-10, UI-06
 ---
 
 ### Sprint 8 — Contracts & IPC
+
 C-12, UI-07
 
 **Goal:** Contracts registered. IPC wizard auto-fills from progress. Deductions calculated. Status workflow complete.
@@ -995,6 +1053,7 @@ C-12, UI-07
 ---
 
 ### Sprint 9 — Cash Flow & Procurement
+
 C-11, C-15, UI-08
 
 **Goal:** Cash flow ledger and gap analysis. Procurement request-to-delivery workflow.
@@ -1002,6 +1061,7 @@ C-11, C-15, UI-08
 ---
 
 ### Sprint 10 — Materials, Equipment & HR
+
 C-13, C-14, UI-04 (equipment/labor tabs polish)
 
 **Goal:** Inventory running balance, equipment utilization, labor productivity metrics.
@@ -1009,6 +1069,7 @@ C-13, C-14, UI-04 (equipment/labor tabs polish)
 ---
 
 ### Sprint 11 — Subcontractors, Risks & Documents
+
 C-16, C-17, C-18, UI-13, UI-14
 
 **Goal:** Subcontractor scorecards. Risk/delay register. Document archive + correspondence with due-date tracking.
@@ -1016,6 +1077,7 @@ C-16, C-17, C-18, UI-13, UI-14
 ---
 
 ### Sprint 12 — Economic Engine & Simulation
+
 E-01 through E-10, K-01 (complete), UI-11
 
 **Goal:** Inflation-adjusted costs, payment delay costing, Monte Carlo simulation, economic dashboard live.
@@ -1023,6 +1085,7 @@ E-01 through E-10, K-01 (complete), UI-11
 ---
 
 ### Sprint 13 — Alerts, Executive Dashboard & Polish
+
 K-02, K-03, K-04, K-05, UI-09, UI-10, UI-12, hardening, performance, E2E test pass
 
 **Goal:** All 15+ alert rules configurable. Executive dashboard with all KPIs. Gantt chart (read-only). Load testing passed. UAT sign-off.
@@ -1031,25 +1094,27 @@ K-02, K-03, K-04, K-05, UI-09, UI-10, UI-12, hardening, performance, E2E test pa
 
 ## Key Formulas Reference
 
-| Metric | Formula |
-|---|---|
-| Activity Progress | `Actual Qty / Total Qty` |
-| Project Progress | `Σ (Activity Progress × Weight)` |
-| Schedule Variance | `Actual Progress − Planned Progress` |
-| SPI | `EV / PV` |
-| CPI | `EV / AC` |
-| Cost Variance | `EV − AC` |
-| EAC | `BAC / CPI` |
-| Net Cash Flow | `Cash In − Cash Out` |
-| Cash Gap | `Available Cash − Required Cash` |
-| Working Capital | `Max(Cumulative Cost − Cumulative Payment)` |
-| Labor Productivity | `Executed Quantity / Labor Hours` |
-| Budget Consumption | `Actual Cost / Budget` |
-| Inflation Adj. Cost | `Nominal Cost × (Index_Now / Index_Then)` |
-| Financing Cost | `IPC Amount × Rate × Delay Days / 365` |
-| Accounting Profit | `Revenue − Actual Cost` |
-| Real Profit | `Revenue − Inflation Adjusted Cost` |
-| Economic Profit | `Revenue − Actual Cost − Financing Cost` |
+
+| Metric              | Formula                                     |
+| ------------------- | ------------------------------------------- |
+| Activity Progress   | `Actual Qty / Total Qty`                    |
+| Project Progress    | `Σ (Activity Progress × Weight)`            |
+| Schedule Variance   | `Actual Progress − Planned Progress`        |
+| SPI                 | `EV / PV`                                   |
+| CPI                 | `EV / AC`                                   |
+| Cost Variance       | `EV − AC`                                   |
+| EAC                 | `BAC / CPI`                                 |
+| Net Cash Flow       | `Cash In − Cash Out`                        |
+| Cash Gap            | `Available Cash − Required Cash`            |
+| Working Capital     | `Max(Cumulative Cost − Cumulative Payment)` |
+| Labor Productivity  | `Executed Quantity / Labor Hours`           |
+| Budget Consumption  | `Actual Cost / Budget`                      |
+| Inflation Adj. Cost | `Nominal Cost × (Index_Now / Index_Then)`   |
+| Financing Cost      | `IPC Amount × Rate × Delay Days / 365`      |
+| Accounting Profit   | `Revenue − Actual Cost`                     |
+| Real Profit         | `Revenue − Inflation Adjusted Cost`         |
+| Economic Profit     | `Revenue − Actual Cost − Financing Cost`    |
+
 
 ---
 

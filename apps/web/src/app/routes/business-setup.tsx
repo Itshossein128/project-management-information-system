@@ -53,7 +53,7 @@ export default function BusinessSetup() {
 
   const loadBusinesses = useCallback(() => {
     apiJson<BusinessesListResponse>(
-      `/${PATHS.BUSINESS}/?${new URLSearchParams({
+      `/${PATHS.API_PROJECTS}/?${new URLSearchParams({
         page: String(grid.query.pagination.pageIndex + 1),
         page_size: String(grid.query.pagination.pageSize),
         ...(grid.debouncedSearch?.trim()
@@ -97,7 +97,7 @@ export default function BusinessSetup() {
       return;
     }
     try {
-      await apiJson(`/${PATHS.BUSINESS}/${editingId}/`, {
+      await apiJson(`/${PATHS.API_PROJECTS}/${editingId}/`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
@@ -145,7 +145,10 @@ export default function BusinessSetup() {
         accessorKey: "slug",
         header: "Slug",
         cell: ({ row }) => (
-          <span id={`text-businessSlug-${row.index}`} className="font-mono text-muted-foreground">
+          <span
+            id={`text-businessSlug-${row.index}`}
+            className='font-mono text-muted-foreground'
+          >
             {row.original.slug}
           </span>
         ),
@@ -156,21 +159,21 @@ export default function BusinessSetup() {
         cell: ({ row }) => (
           <div
             id={`container-businessActions-${row.index}`}
-            className="flex flex-wrap gap-2"
+            className='flex flex-wrap gap-2'
           >
             <Link
               id={`button-businessSchema-${row.index}`}
               to={`/${PATHS.BUSINESS}/${row.original.id}/${PATHS.BUSINESS_ADMIN_SETUP}`}
             >
-              <Button variant="outline" size="sm" type="button">
+              <Button variant='outline' size='sm' type='button'>
                 Tables & fields
               </Button>
             </Link>
             <Button
               id={`button-businessEdit-${row.index}`}
-              variant="outline"
-              size="sm"
-              type="button"
+              variant='outline'
+              size='sm'
+              type='button'
               onClick={() => startEdit(row.original)}
             >
               Edit
@@ -184,94 +187,106 @@ export default function BusinessSetup() {
   if (isLoading || !hasRole(ROLES.BUSINESS_SETUP)) return null;
 
   return (
-    <div className="page-shell-padded">
-      <div className="page-main mx-auto max-w-5xl !p-0">
+    <div className='page-shell-padded'>
+      <div className='page-main mx-auto  !p-0'>
         <h1
-          id="text-pageTitle-businessSetup"
-          className="text-lg font-semibold sm:text-xl"
+          id='text-pageTitle-businessSetup'
+          className='text-lg font-semibold sm:text-xl'
         >
           Business setup
         </h1>
         <p
-          id="text-pageDescription-businessSetup"
-          className="mt-2 text-muted-foreground text-sm"
+          id='text-pageDescription-businessSetup'
+          className='mt-2 text-muted-foreground text-sm'
         >
           Create and edit businesses. Each business can have its own tables and
           fields.
         </p>
 
         {error && (
-          <p id="text-businessSetupError" className="mt-4 text-destructive text-sm">
+          <p
+            id='text-businessSetupError'
+            className='mt-4 text-destructive text-sm'
+          >
             {error}
           </p>
         )}
 
         <div
-          id="container-businessSetupToolbar"
-          className="mt-6 flex justify-end"
+          id='container-businessSetupToolbar'
+          className='mt-6 flex justify-end'
         >
-          <Button id="button-addBusiness" type="button" onClick={goToCreate}>
+          <Button id='button-addBusiness' type='button' onClick={goToCreate}>
             Add business
           </Button>
         </div>
 
         {editingId !== null && (
-          <Card id="container-businessForm" className="mt-4">
+          <Card id='container-businessForm' className='mt-4'>
             <CardHeader>
-              <CardTitle className="text-base">Edit business</CardTitle>
+              <CardTitle className='text-base'>Edit business</CardTitle>
             </CardHeader>
             <CardContent>
               <form
-                id="form-businessSetup"
+                id='form-businessSetup'
                 onSubmit={handleSubmitEdit}
-                className="space-y-4"
+                className='space-y-4'
               >
                 {formError && (
-                  <p id="text-businessFormError" className="text-destructive text-sm">
+                  <p
+                    id='text-businessFormError'
+                    className='text-destructive text-sm'
+                  >
                     {formError}
                   </p>
                 )}
                 <div>
-                  <Label id="text-businessNameInputLabel" htmlFor="input-businessName">
+                  <Label
+                    id='text-businessNameInputLabel'
+                    htmlFor='input-businessName'
+                  >
                     Name
                   </Label>
                   <Input
-                    id="input-businessName"
-                    name="businessName"
+                    id='input-businessName'
+                    name='businessName'
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    placeholder="e.g. Main Warehouse"
+                    placeholder='e.g. Main Warehouse'
                   />
                 </div>
                 <div>
-                  <Label id="text-businessSlugInputLabel" htmlFor="input-businessSlug">
+                  <Label
+                    id='text-businessSlugInputLabel'
+                    htmlFor='input-businessSlug'
+                  >
                     Slug
                   </Label>
                   <Input
-                    id="input-businessSlug"
-                    name="businessSlug"
+                    id='input-businessSlug'
+                    name='businessSlug'
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     required
-                    placeholder="e.g. main_warehouse"
+                    placeholder='e.g. main_warehouse'
                     disabled
                   />
                   <p
-                    id="text-businessSlugHelper"
-                    className="mt-1 text-muted-foreground text-xs"
+                    id='text-businessSlugHelper'
+                    className='mt-1 text-muted-foreground text-xs'
                   >
                     Slug cannot be changed after create.
                   </p>
                 </div>
-                <div id="container-businessFormActions" className="flex gap-2">
-                  <Button id="button-submitBusinessForm" type="submit">
+                <div id='container-businessFormActions' className='flex gap-2'>
+                  <Button id='button-submitBusinessForm' type='submit'>
                     Save
                   </Button>
                   <Button
-                    id="button-cancelBusinessForm"
-                    type="button"
-                    variant="outline"
+                    id='button-cancelBusinessForm'
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setEditingId(null);
                       setName("");
@@ -287,9 +302,9 @@ export default function BusinessSetup() {
           </Card>
         )}
 
-        <div id="container-businessesGrid" className="mt-6">
+        <div id='container-businessesGrid' className='mt-6'>
           <DataTable
-            name="businesses"
+            name='businesses'
             columns={columns}
             data={businesses}
             emptyMessage={

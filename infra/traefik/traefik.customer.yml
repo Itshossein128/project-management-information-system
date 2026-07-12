@@ -1,0 +1,12 @@
+# Customer / demo Traefik — single entry point on :8080 (no dashboard API on same port).
+entryPoints:
+  web:
+    address: ":8080"
+
+providers:
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+log:
+  level: INFO

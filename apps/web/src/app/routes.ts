@@ -5,7 +5,7 @@ import {
   route,
 } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "./routeVars";
-import { businessSetupRoutes } from "./routes/business-setup.routes";
+import { projectRoutes } from "./routes/business-setup.routes";
 
 /**
  * Main routing configuration array for React Router v7.
@@ -19,11 +19,10 @@ export default [
   route(PATHS.FORGOT_PASSWORD, ROUTES.FORGOT_PASSWORD),
   route(PATHS.RESET_PASSWORD, ROUTES.RESET_PASSWORD),
 
-  // Auth → app shell: fixed sidebar (Home + HR); workflows use in-page links under `/hr/*` and `/businesses/:id/*`.
   layout(ROUTES.AUTH_LAYOUT, [
     layout(ROUTES.PROTECTED_LAYOUT, [
       route(PATHS.HOME, ROUTES.HOME),
-      ...businessSetupRoutes,
+      ...projectRoutes,
 
       route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
       route(`${PATHS.BUSINESS}/:businessId/job-positions`, ROUTES.BUSINESS_JOB_POSITIONS),

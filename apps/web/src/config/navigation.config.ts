@@ -3,9 +3,7 @@ import type { NavigationItem } from "@/types/navigation";
 import { ROLES } from "./roles";
 
 /**
- * Global sidebar: identical on every page. In-app workflow uses cards and
- * in-page back links (`businesses/:id/...`, `/hr/...`); the sidebar only
- * exposes Home and the HR hub.
+ * Global sidebar: Home, Projects, HR hub, and settings for admins.
  */
 export const mainSidebarNavigation: NavigationItem[] = [
   {
@@ -16,11 +14,35 @@ export const mainSidebarNavigation: NavigationItem[] = [
     activeExact: true,
   },
   {
+    label: "Projects",
+    labelI18nKey: "nav.sidebarProjects",
+    icon: "building",
+    path: PATHS.PROJECT,
+    activePathPrefix: `/${PATHS.PROJECT}`,
+    activePathExclude: `^/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}$`,
+  },
+  {
     label: "HR",
     labelI18nKey: "nav.sidebarHr",
     icon: "users",
     path: PATHS.HR,
     roles: [ROLES.ADMIN, ROLES.HR],
     activePathPrefix: PATHS.HR,
+  },
+  {
+    label: "Templates",
+    labelI18nKey: "nav.settingsTemplates",
+    icon: "building",
+    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`,
+    roles: [ROLES.ADMIN, ROLES.HR, ROLES.BUSINESS_SETUP],
+    activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`,
+  },
+  {
+    label: "Roles",
+    labelI18nKey: "nav.settingsRoles",
+    icon: "shield",
+    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
+    roles: [ROLES.ADMIN, ROLES.HR],
+    activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
   },
 ];

@@ -38,7 +38,7 @@ export default function BusinessCreate() {
       return;
     }
     try {
-      await apiJson(`/${PATHS.BUSINESS}/`, {
+      await apiJson(`/${PATHS.API_PROJECTS}/`, {
         method: "POST",
         body: JSON.stringify(payload),
       });

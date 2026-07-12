@@ -3,6 +3,8 @@ import { cn } from "@/app/lib/utils";
 import { isRTL } from "@/app/lib/i18n";
 import { AppShellHeader } from "@/components/navigation/app-shell-header";
 import { Sidebar } from "@/components/navigation/sidebar";
+import { OfflineIndicator } from "@/components/ui/OfflineIndicator";
+import { useAutoSync } from "@/app/hooks/useAutoSync";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router";
@@ -13,6 +15,8 @@ export function AppShell() {
   const mobileNavOpen = useShellStore((s) => s.mobileNavOpen);
   const closeMobileNav = useShellStore((s) => s.closeMobileNav);
   const rtl = isRTL();
+
+  useAutoSync();
 
   useEffect(() => {
     closeMobileNav();
@@ -63,6 +67,7 @@ export function AppShell() {
           !rtl ? "lg:pe-[100px]" : "lg:ps-[100px]",
         )}
       >
+        <OfflineIndicator />
         <AppShellHeader className="z-20 shrink-0" />
 
         <main

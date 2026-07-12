@@ -1,24 +1,27 @@
-"""
-URL configuration for inventory-backend project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-"""
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-# Main URL routing definitions for the Django backend.
-# This list maps base paths to respective app URLs (authentication, businesses, relations, inventory)
-# and exposes OpenAPI schemas and Swagger/ReDoc documentations.
+from cost_control.urls import global_urlpatterns
+from projects.member_views import UserLookupView
+from projects.role_views import PermissionCatalogView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
-    path('api/businesses/', include('business_meta.urls')),
+    path('api/v1/', include('storage.urls')),
+    path('api/v1/project-templates/', include('project_templates.urls')),
+    path('api/v1/projects/', include('projects.urls')),
+    path('api/v1/roles/', include('projects.role_urls')),
+    path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
+    path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),
+    path('api/v1/notifications/', include('notifications.urls')),
+    *global_urlpatterns,
     path('api/relations/', include('business_meta.relations_urls')),
     path('api/', include('inventory.urls')),
-    # Swagger/OpenAPI documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema')),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
+
+handler403 = 'authentication.ratelimit_handlers.handle_ratelimit_403'

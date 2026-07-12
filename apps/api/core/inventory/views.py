@@ -1,18 +1,24 @@
+import logging
 from django.shortcuts import render
+from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from config.pagination import DefaultPageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-import pandas as pd
+
+logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
 
 from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
+from common.mixins import ProjectNestedViewSetMixin
+from common.validators import validate_xlsx_upload
 
 from .department_activity_services import get_department_activity_queryset
+from .item_services import export_items_to_excel, import_items_from_excel
 from .models import (
     Item,
     Category,
@@ -36,7 +42,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     
     Provides CRUD operations for items and Excel import/export functionality.
     """
-    queryset = Item.objects.all()
+    queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
 
     @extend_schema(
@@ -53,15 +59,12 @@ class ItemViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def export(self, request):
         """Export all items to Excel file"""
-        items = Item.objects.all().values('id', 'name', 'quantity', 'category__name')
-        df = pd.DataFrame(list(items))
-        df.rename(columns={'category__name': 'category'}, inplace=True)
-        
+        file_bytes = export_items_to_excel()
         response = HttpResponse(
+            file_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
         response['Content-Disposition'] = 'attachment; filename=items.xlsx'
-        df.to_excel(response, index=False, engine='openpyxl')
         return response
 
     @extend_schema(
@@ -112,47 +115,28 @@ class ItemViewSet(viewsets.ModelViewSet):
                 {'error': 'No file provided'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        file = request.FILES['file']
         try:
-            df = pd.read_excel(file, engine='openpyxl')
-            
-            # Validate required columns
-            required_columns = ['name', 'quantity', 'category']
-            missing_columns = [col for col in required_columns if col not in df.columns]
-            if missing_columns:
-                return Response(
-                    {'error': f'Missing required columns: {", ".join(missing_columns)}'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            imported_count = 0
-            errors = []
-            
-            for index, row in df.iterrows():
-                try:
-                    category_name = row['category']
-                    category, created = Category.objects.get_or_create(name=category_name)
-                    
-                    Item.objects.create(
-                        name=row['name'],
-                        quantity=int(row['quantity']),
-                        category=category
-                    )
-                    imported_count += 1
-                except Exception as e:
-                    errors.append(f'Row {index + 2}: {str(e)}')  # +2 because Excel rows start at 1 and header is row 1
-            
+            validate_xlsx_upload(request.FILES['file'])
+        except ValidationError as exc:
+            return Response({'error': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            imported_count, errors = import_items_from_excel(request.FILES['file'])
             return Response({
                 'message': f'Successfully imported {imported_count} items',
                 'imported_count': imported_count,
                 'errors': errors if errors else None
             }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
+        except ValueError as e:
             return Response(
-                {'error': f'Error processing file: {str(e)}'}, 
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.exception('Failed to import items')
+            return Response(
+                {'error': 'An unexpected error occurred during import.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
@@ -170,23 +154,23 @@ class ItemViewSet(viewsets.ModelViewSet):
             OpenApiParameter(name='space_name', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='material_code', type=OpenApiTypes.STR, required=False),
         ],
-        tags=['Business inventory'],
+        tags=['Project inventory'],
     ),
     create=extend_schema(
         summary='Create space material request for a business (form)',
         description='Form endpoint to create a new space material request under a business.',
-        tags=['Business inventory'],
+        tags=['Project inventory'],
     ),
-    retrieve=extend_schema(summary='Get space material request', tags=['Business inventory']),
-    update=extend_schema(summary='Update space material request', tags=['Business inventory']),
-    partial_update=extend_schema(summary='Patch space material request', tags=['Business inventory']),
-    destroy=extend_schema(summary='Delete space material request', tags=['Business inventory']),
+    retrieve=extend_schema(summary='Get space material request', tags=['Project inventory']),
+    update=extend_schema(summary='Update space material request', tags=['Project inventory']),
+    partial_update=extend_schema(summary='Patch space material request', tags=['Project inventory']),
+    destroy=extend_schema(summary='Delete space material request', tags=['Project inventory']),
 )
-class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
+class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     """
-    Business-scoped CRUD for SpaceMaterialRequest.
+    Project-scoped CRUD for SpaceMaterialRequest.
     """
-
+    queryset = SpaceMaterialRequest.objects.all()
     serializer_class = SpaceMaterialRequestSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
@@ -200,10 +184,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        qs = SpaceMaterialRequest.objects.all()
-        if business_pk is not None:
-            qs = qs.filter(business_id=business_pk)
+        qs = super().get_queryset()
 
         # Grid filters
         params = self.request.query_params
@@ -224,11 +205,7 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
         if material_code:
             qs = qs.filter(material_code__icontains=material_code)
 
-        return qs.select_related('business')
-
-    def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        serializer.save(business_id=business_pk)
+        return qs.select_related('project')
 
 
 @extend_schema_view(
@@ -272,26 +249,26 @@ class SpaceMaterialRequestViewSet(viewsets.ModelViewSet):
                 description='Page size (default 20, max 100).',
             ),
         ],
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     ),
     create=extend_schema(
         summary='Create department activity record',
         description='Form endpoint to create a new activity record under a business.',
-        tags=['Business activity records'],
+        tags=['Project activity records'],
     ),
-    retrieve=extend_schema(summary='Get department activity record', tags=['Business activity records']),
-    update=extend_schema(summary='Update department activity record', tags=['Business activity records']),
-    partial_update=extend_schema(summary='Patch department activity record', tags=['Business activity records']),
-    destroy=extend_schema(summary='Delete department activity record', tags=['Business activity records']),
+    retrieve=extend_schema(summary='Get department activity record', tags=['Project activity records']),
+    update=extend_schema(summary='Update department activity record', tags=['Project activity records']),
+    partial_update=extend_schema(summary='Patch department activity record', tags=['Project activity records']),
+    destroy=extend_schema(summary='Delete department activity record', tags=['Project activity records']),
 )
-class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
+class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     """
-    Business-scoped CRUD for `DepartmentActivityRecord`.
+    Project-scoped CRUD for `DepartmentActivityRecord`.
 
     Frontend per-department pages call this endpoint with `?department=<slug>`
     so the same model serves all six department grids.
     """
-
+    queryset = DepartmentActivityRecord.objects.all()
     serializer_class = DepartmentActivityRecordSerializer
     pagination_class = DepartmentActivityRecordPagination
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
@@ -322,11 +299,7 @@ class DepartmentActivityRecordViewSet(viewsets.ModelViewSet):
         ]
 
     def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        if business_pk is None:
-            return DepartmentActivityRecord.objects.none()
-        return get_department_activity_queryset(business_pk, self.request.query_params)
-
-    def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        serializer.save(business_id=business_pk)
+        project_pk = self.kwargs.get('project_pk')
+        if project_pk is None:
+            return self.queryset.none()
+        return get_department_activity_queryset(project_pk, self.request.query_params)

@@ -1,30 +1,21 @@
-"""
-REST CRUD for business meta. Protected by IsBusinessSetup.
-"""
-from rest_framework import viewsets, status, permissions as drf_permissions
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
+"""REST CRUD for project meta and dynamic schema."""
+from rest_framework import viewsets, permissions as drf_permissions
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
 
-from .models import (
-    Business,
-    UserBusinessAssignment,
-    BusinessJobPosition,
-    TableDefinition,
-    FieldDefinition,
-    RelationDefinition,
-)
-from .permissions import CanViewBusinessAssignments, IsVisitorReadOnly
-from .services import create_business_from_template, get_available_templates
+from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
+from common.mixins import ProjectNestedViewSetMixin
+from projects.permissions import IsProjectMember
+from master_data.models import ProjectMember, ProjectPosition
+from .models import TableDefinition, FieldDefinition, RelationDefinition
+from .permissions import CanViewProjectMembers, IsVisitorReadOnly
 from .serializers import (
-    BusinessSerializer,
-    BusinessJobPositionSerializer,
-    UserBusinessAssignmentReadSerializer,
-    UserBusinessAssignmentCreateSerializer,
-    UserBusinessAssignmentWriteSerializer,
+    ProjectPositionSerializer,
+    ProjectMemberReadSerializer,
+    ProjectMemberCreateSerializer,
+    ProjectMemberWriteSerializer,
     TableDefinitionSerializer,
     TableDefinitionListSerializer,
     TableDefinitionWithFieldsSerializer,
@@ -34,227 +25,126 @@ from .serializers import (
 
 
 @extend_schema_view(
-    list=extend_schema(summary='List businesses', tags=['Business meta']),
-    create=extend_schema(summary='Create business', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get business', tags=['Business meta']),
-    update=extend_schema(summary='Update business', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch business', tags=['Business meta']),
-    destroy=extend_schema(summary='Delete business', tags=['Business meta']),
+    list=extend_schema(summary='List tables of a project', tags=['Project meta']),
+    create=extend_schema(summary='Create table', tags=['Project meta']),
+    retrieve=extend_schema(summary='Get table', tags=['Project meta']),
+    update=extend_schema(summary='Update table', tags=['Project meta']),
+    partial_update=extend_schema(summary='Patch table', tags=['Project meta']),
+    destroy=extend_schema(summary='Delete table', tags=['Project meta']),
 )
-class BusinessViewSet(viewsets.ModelViewSet):
-    queryset = Business.objects.all()
-    serializer_class = BusinessSerializer
-
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated()]
-        return [IsBusinessSetup()]
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['business_pk'] = self.kwargs.get('business_pk')
-        return context
-
-    @extend_schema(
-        summary='List available templates',
-        description='Returns template ids and names for creating a business from a template.',
-        tags=['Business meta'],
-    )
-    @action(detail=False, methods=['get'], url_path='templates')
-    def templates(self, request):
-        return Response(get_available_templates())
-
-    @extend_schema(
-        summary='Create business from template',
-        description='Creates a new business with tables and fields defined by the template (e.g. warehouse).',
-        request={
-            'application/json': {
-                'type': 'object',
-                'required': ['name', 'slug', 'template'],
-                'properties': {
-                    'name': {'type': 'string', 'description': 'Business display name'},
-                    'slug': {'type': 'string', 'description': 'Unique slug (lowercase, letters, numbers, underscores)'},
-                    'template': {'type': 'string', 'enum': ['warehouse'], 'description': 'Template identifier'},
-                },
-            }
-        },
-        responses={
-            201: BusinessSerializer,
-            400: {'description': 'Bad request (unknown template or duplicate slug)'},
-        },
-        tags=['Business meta'],
-    )
-    @action(detail=False, methods=['post'], url_path='from_template')
-    def from_template(self, request):
-        name = request.data.get('name')
-        slug = request.data.get('slug')
-        template = request.data.get('template')
-        if not name or not slug or not template:
-            return Response(
-                {'error': 'name, slug, and template are required'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            business = create_business_from_template(name=name, slug=slug, template_id=template)
-            serializer = BusinessSerializer(business)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@extend_schema_view(
-    list=extend_schema(summary='List tables of a business', tags=['Business meta']),
-    create=extend_schema(summary='Create table', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get table', tags=['Business meta']),
-    update=extend_schema(summary='Update table', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch table', tags=['Business meta']),
-    destroy=extend_schema(summary='Delete table', tags=['Business meta']),
-)
-class TableDefinitionViewSet(viewsets.ModelViewSet):
+class TableDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = TableDefinition.objects.all()
     serializer_class = TableDefinitionSerializer
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve', 'by_slug'):
-            return [IsAuthenticated()]
+            return [IsAuthenticated(), IsProjectMember()]
         return [IsBusinessSetup()]
-
-    def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        if business_pk is not None:
-            return TableDefinition.objects.filter(business_id=business_pk)
-        return TableDefinition.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'list':
             return TableDefinitionListSerializer
         return TableDefinitionSerializer
 
-    def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        if business_pk is not None:
-            serializer.save(business_id=business_pk)
-        else:
-            serializer.save()
-
-    @extend_schema(summary='Get table by slug (with fields)', tags=['Business meta'])
-    def by_slug(self, request, business_pk=None, table_slug=None):
-        from rest_framework.exceptions import NotFound
-        table = TableDefinition.objects.filter(business_id=business_pk, slug=table_slug).first()
+    @extend_schema(summary='Get table by slug (with fields)', tags=['Project meta'])
+    def by_slug(self, request, project_pk=None, table_slug=None):
+        table = TableDefinition.objects.filter(project_id=project_pk, slug=table_slug).first()
         if table is None:
             raise NotFound('Table not found.')
-        serializer = TableDefinitionWithFieldsSerializer(table)
-        return Response(serializer.data)
+        return Response(TableDefinitionWithFieldsSerializer(table).data)
 
 
 @extend_schema_view(
-    list=extend_schema(summary='List job positions for a business', tags=['Business meta']),
-    create=extend_schema(summary='Create job position', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get job position', tags=['Business meta']),
-    update=extend_schema(summary='Update job position', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch job position', tags=['Business meta']),
-    destroy=extend_schema(summary='Delete job position', tags=['Business meta']),
+    list=extend_schema(summary='List project positions', tags=['Project meta']),
+    create=extend_schema(summary='Create position', tags=['Project meta']),
+    retrieve=extend_schema(summary='Get position', tags=['Project meta']),
+    update=extend_schema(summary='Update position', tags=['Project meta']),
+    partial_update=extend_schema(summary='Patch position', tags=['Project meta']),
+    destroy=extend_schema(summary='Delete position', tags=['Project meta']),
 )
-class BusinessJobPositionViewSet(viewsets.ModelViewSet):
-    """Per-business job titles (not system roles)."""
-    serializer_class = BusinessJobPositionSerializer
+class ProjectPositionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = ProjectPosition.objects.select_related('project')
+    serializer_class = ProjectPositionSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:
-            return [IsAuthenticated(), CanViewBusinessAssignments(), IsVisitorReadOnly()]
+            return [IsAuthenticated(), CanViewProjectMembers(), IsVisitorReadOnly()]
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
 
-    def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        return BusinessJobPosition.objects.filter(business_id=business_pk).select_related('business')
-
-    def perform_create(self, serializer):
-        business_pk = self.kwargs.get('business_pk')
-        serializer.save(business_id=business_pk)
-
-    def perform_destroy(self, instance: BusinessJobPosition) -> None:
-        if UserBusinessAssignment.objects.filter(job_position=instance).exists():
-            raise ValidationError(
-                'This job position is still assigned to one or more users; reassign or remove them first.'
-            )
+    def perform_destroy(self, instance: ProjectPosition) -> None:
+        if ProjectMember.objects.filter(position=instance).exists():
+            raise ValidationError('Position is still assigned to members.')
         super().perform_destroy(instance)
 
 
 @extend_schema_view(
-    list=extend_schema(summary='List user–business assignments', tags=['Business meta']),
-    create=extend_schema(summary='Assign user to business', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get assignment', tags=['Business meta']),
-    update=extend_schema(summary='Replace assignment', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch assignment', tags=['Business meta']),
-    destroy=extend_schema(summary='Remove assignment', tags=['Business meta']),
+    list=extend_schema(summary='List project members', tags=['Project meta']),
+    create=extend_schema(summary='Add project member', tags=['Project meta']),
+    retrieve=extend_schema(summary='Get member', tags=['Project meta']),
+    update=extend_schema(summary='Update member', tags=['Project meta']),
+    partial_update=extend_schema(summary='Patch member', tags=['Project meta']),
+    destroy=extend_schema(summary='Remove member', tags=['Project meta']),
 )
-class UserBusinessAssignmentViewSet(viewsets.ModelViewSet):
-    """
-    User–business assignments with wage, tools, dates, status.
-    Read: member of business or HR/admin. Write: HR/admin (visitors read-only).
-    """
+class ProjectMemberViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = ProjectMember.objects.select_related('user', 'project', 'position')
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:
-            return [IsAuthenticated(), CanViewBusinessAssignments(), IsVisitorReadOnly()]
+            return [IsAuthenticated(), CanViewProjectMembers(), IsVisitorReadOnly()]
         return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
-
-    def get_queryset(self):
-        business_pk = self.kwargs.get('business_pk')
-        return (
-            UserBusinessAssignment.objects.filter(business_id=business_pk)
-            .select_related('user', 'business', 'job_position')
-        )
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return UserBusinessAssignmentCreateSerializer
+            return ProjectMemberCreateSerializer
         if self.action in ('update', 'partial_update'):
-            return UserBusinessAssignmentWriteSerializer
-        return UserBusinessAssignmentReadSerializer
+            return ProjectMemberWriteSerializer
+        return ProjectMemberReadSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['business_pk'] = self.kwargs.get('business_pk')
+        context['project_pk'] = self.kwargs.get('project_pk')
         return context
 
-
-@extend_schema_view(
-    list=extend_schema(summary='List fields of a table', tags=['Business meta']),
-    create=extend_schema(summary='Create field', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get field', tags=['Business meta']),
-    update=extend_schema(summary='Update field', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch field', tags=['Business meta']),
-    destroy=extend_schema(summary='Delete field', tags=['Business meta']),
-)
-class FieldDefinitionViewSet(viewsets.ModelViewSet):
-    serializer_class = FieldDefinitionSerializer
-    permission_classes = [IsBusinessSetup]
-
-    def get_queryset(self):
-        table_pk = self.kwargs.get('table_pk')
-        if table_pk is not None:
-            return FieldDefinition.objects.filter(table_id=table_pk)
-        return FieldDefinition.objects.all()
-
     def perform_create(self, serializer):
-        table_pk = self.kwargs.get('table_pk')
-        if table_pk is not None:
-            serializer.save(table_id=table_pk)
-        else:
-            serializer.save()
+        # Member creation is handled entirely in ProjectMemberCreateSerializer.
+        serializer.save()
+
+@extend_schema_view(
+    list=extend_schema(summary='List fields of a table', tags=['Project meta']),
+    create=extend_schema(summary='Create field', tags=['Project meta']),
+    retrieve=extend_schema(summary='Get field', tags=['Project meta']),
+    update=extend_schema(summary='Update field', tags=['Project meta']),
+    partial_update=extend_schema(summary='Patch field', tags=['Project meta']),
+    destroy=extend_schema(summary='Delete field', tags=['Project meta']),
+)
+class FieldDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
+    queryset = FieldDefinition.objects.all()
+    serializer_class = FieldDefinitionSerializer
+    nested_url_kwarg = 'table_pk'
+    nested_model_field = 'table_id'
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [IsAuthenticated(), IsProjectMember()]
+        return [IsBusinessSetup()]
 
 
 @extend_schema_view(
-    list=extend_schema(summary='List relations', tags=['Business meta']),
-    create=extend_schema(summary='Create relation', tags=['Business meta']),
-    retrieve=extend_schema(summary='Get relation', tags=['Business meta']),
-    update=extend_schema(summary='Update relation', tags=['Business meta']),
-    partial_update=extend_schema(summary='Patch relation', tags=['Business meta']),
-    destroy=extend_schema(summary='Delete relation', tags=['Business meta']),
+    list=extend_schema(summary='List relations', tags=['Project meta']),
+    create=extend_schema(summary='Create relation', tags=['Project meta']),
+    retrieve=extend_schema(summary='Get relation', tags=['Project meta']),
+    update=extend_schema(summary='Update relation', tags=['Project meta']),
+    partial_update=extend_schema(summary='Patch relation', tags=['Project meta']),
+    destroy=extend_schema(summary='Delete relation', tags=['Project meta']),
 )
 class RelationDefinitionViewSet(viewsets.ModelViewSet):
     queryset = RelationDefinition.objects.all()
     serializer_class = RelationDefinitionSerializer
     permission_classes = [IsBusinessSetup]
+
+
+# Backward-compatible aliases
+BusinessJobPositionViewSet = ProjectPositionViewSet
+UserBusinessAssignmentViewSet = ProjectMemberViewSet

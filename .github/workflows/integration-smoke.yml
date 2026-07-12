@@ -1,0 +1,37 @@
+name: Integration Smoke
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "infra/traefik/**"
+      - "docker-compose.yml"
+      - "scripts/smoke-stack.sh"
+      - ".github/workflows/integration-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose up -d --build --wait postgres rabbitmq minio api traefik
+
+      - name: Migrate and seed
+        run: |
+          docker compose exec -T api python manage.py migrate --noinput
+          docker compose exec -T api python manage.py setup_event_topology
+          docker compose exec -T api python manage.py seed_rbac_dev || true
+
+      - name: Run smoke tests
+        env:
+          SMOKE_BASE_URL: http://localhost:8080
+          RABBITMQ_URL: amqp://ipcas:ipcas@localhost:5672/
+        run: bash scripts/smoke-stack.sh
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

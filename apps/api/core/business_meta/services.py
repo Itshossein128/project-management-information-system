@@ -1,9 +1,10 @@
 """
-Business logic for business_meta. Template application and validation.
+Business logic for project meta. Template application and validation.
 """
-from datetime import datetime
 from django.db import transaction
-from .models import Business, BusinessJobPosition, TableDefinition, FieldDefinition, FieldType
+
+from projects.models import Project
+from .models import TableDefinition, FieldDefinition, FieldType
 
 
 TEMPLATES = {
@@ -35,31 +36,23 @@ TEMPLATES = {
 
 
 def get_available_templates():
-    """Return list of template identifiers and labels."""
-    return [
-        {'id': k, 'name': v['name']}
-        for k, v in TEMPLATES.items()
-    ]
+    return [{'id': k, 'name': v['name']} for k, v in TEMPLATES.items()]
 
 
 @transaction.atomic
-def create_business_from_template(*, name: str, slug: str, template_id: str) -> Business:
-    """
-    Create a Business and its TableDefinitions and FieldDefinitions from a template.
-    Raises ValueError if template_id is unknown or slug is duplicate.
-    """
+def create_project_from_template(*, name: str, project_code: str, template_id: str) -> Project:
     if template_id not in TEMPLATES:
         raise ValueError(f'Unknown template: {template_id}. Available: {list(TEMPLATES.keys())}')
-    if Business.objects.filter(slug=slug).exists():
-        raise ValueError(f'Business with slug "{slug}" already exists.')
+    if Project.objects.filter(project_code=project_code).exists():
+        raise ValueError(f'Project with code "{project_code}" already exists.')
 
     template = TEMPLATES[template_id]
-    business = Business.objects.create(name=name, slug=slug)
+    project = Project.objects.create(project_name=name, project_code=project_code)
 
     tables_by_slug = {}
     for tdef in template['tables']:
         table = TableDefinition.objects.create(
-            business=business,
+            project=project,
             name=tdef['name'],
             slug=tdef['slug'],
             ordering=tdef['ordering'],
@@ -68,7 +61,6 @@ def create_business_from_template(*, name: str, slug: str, template_id: str) -> 
         for fdef in tdef['fields']:
             target_table = None
             if fdef['field_type'] == FieldType.REFERENCE:
-                # Reference to 'location' -> locations table
                 ref_slug = fdef.get('target_table_slug')
                 if ref_slug and ref_slug in tables_by_slug:
                     target_table = tables_by_slug[ref_slug]
@@ -80,29 +72,16 @@ def create_business_from_template(*, name: str, slug: str, template_id: str) -> 
                 required=fdef.get('required', False),
                 target_table=target_table,
             )
+    return project
 
-    # Default per-business job positions (same keys as legacy global role seeds)
-    for slug, label, ordering in (
-        ('worker', 'Worker', 0),
-        ('engineer', 'Engineer', 1),
-        ('manager', 'Manager', 2),
-        ('accountant', 'Accountant', 3),
-        ('site_engineer', 'Site engineer', 4),
-    ):
-        BusinessJobPosition.objects.get_or_create(
-            business=business,
-            slug=slug,
-            defaults={'label': label, 'ordering': ordering},
-        )
 
-    return business
+create_business_from_template = create_project_from_template
 
 
 def validate_row_data(field_defs, data):
-    """
-    Validate payload against field definitions. Return (cleaned_data, errors).
-    data: dict keyed by field slug. Only allowed keys are field slugs.
-    """
+    """Validate payload against field definitions. Return (cleaned_data, errors)."""
+    from datetime import datetime
+
     cleaned = {}
     errors = {}
     for fdef in field_defs:
@@ -147,7 +126,6 @@ def validate_row_data(field_defs, data):
                 cleaned[slug] = value
             elif value is not None:
                 errors[slug] = 'Reference must be a string (target row id).'
-    # Reject unknown keys
     allowed = {f.slug for f in field_defs}
     for key in data:
         if key not in allowed and not key.startswith('_'):

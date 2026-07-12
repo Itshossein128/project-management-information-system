@@ -38,6 +38,9 @@ export interface JalaliDatePickerProps {
   /** Optional ISO bounds (Gregorian). */
   minDate?: string;
   maxDate?: string;
+  sticky?: FieldProps["sticky"];
+  onStickyChange?: FieldProps["onStickyChange"];
+  stickyAriaLabel?: FieldProps["stickyAriaLabel"];
 }
 
 /**
@@ -62,6 +65,9 @@ export function JalaliDatePicker({
   id,
   minDate,
   maxDate,
+  sticky,
+  onStickyChange,
+  stickyAriaLabel,
 }: JalaliDatePickerProps) {
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
 
@@ -73,6 +79,9 @@ export function JalaliDatePicker({
       error={error}
       htmlFor={inputId}
       className={fieldClassName}
+      sticky={sticky}
+      onStickyChange={onStickyChange}
+      stickyAriaLabel={stickyAriaLabel}
     >
       {() => (
         <DatePicker

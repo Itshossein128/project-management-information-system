@@ -15,7 +15,7 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from business_meta.models import Business
+from business_meta.models import Project
 
 from .models import Department, DepartmentActivityRecord
 
@@ -100,7 +100,7 @@ def _parse_date_value(raw: Any) -> date | None:
 
 
 def import_activities_from_xlsx(
-    business: Business,
+    business: Project,
     department: str,
     file_bytes: bytes,
 ) -> tuple[int, list[dict]]:
@@ -164,7 +164,7 @@ def import_activities_from_xlsx(
 
         try:
             DepartmentActivityRecord.objects.create(
-                business=business,
+                project=business,
                 department=department,
                 date=activity_date,
                 location=str(values['location']).strip()[:255],
@@ -183,7 +183,7 @@ def import_activities_from_xlsx(
 
 def generate_activity_report_pdf(
     *,
-    business: Business,
+    business: Project,
     department: str,
     department_label: str,
     period_label: str,

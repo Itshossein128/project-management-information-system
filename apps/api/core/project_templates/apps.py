@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class ProjectTemplatesConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'project_templates'
+    verbose_name = 'Project templates'

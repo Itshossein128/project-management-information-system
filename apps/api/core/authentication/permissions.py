@@ -3,7 +3,11 @@ Role-based permission classes (SOLID: one concern per class).
 Use Django's Group model; role names match group names (e.g. visitor, manager, commentor, human-resource).
 Designed so you can apply these per route/endpoint/operation later.
 """
+from typing import cast
+
 from rest_framework import permissions
+
+from .models import User
 
 
 class IsInGroup(permissions.BasePermission):
@@ -23,7 +27,8 @@ class IsInGroup(permissions.BasePermission):
             return False
         if not self.role_name:
             return True
-        return request.user.groups.filter(name=self.role_name).exists()
+        user = cast(User, request.user)
+        return user.groups.filter(name=self.role_name).exists()
 
 
 class IsVisitor(IsInGroup):
@@ -64,7 +69,8 @@ class IsManagerOrHR(permissions.BasePermission):
             return False
         if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user.groups.filter(name__in=("manager", "hr")).exists()
+        user = cast(User, request.user)
+        return user.groups.filter(name__in=("manager", "hr")).exists()
 
 
 class IsHrOrAdmin(permissions.BasePermission):
@@ -75,7 +81,7 @@ class IsHrOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
-        u = request.user
+        u = cast(User, request.user)
         if u.is_superuser or u.is_staff:
             return True
         return u.groups.filter(name__in=("admin", "hr")).exists()

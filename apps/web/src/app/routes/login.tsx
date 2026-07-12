@@ -13,6 +13,7 @@ import {
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { redirect, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
 import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
@@ -27,7 +28,6 @@ export async function loader({ request }: { request: Request }) {
 export default function Login() {
   const { t } = useTranslation();
   const { login, isAuthenticated, isLoading } = useAuth();
-  console.log("isLoading", isLoading);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") ?? "/home";
@@ -43,25 +43,29 @@ export default function Login() {
   }, [isLoading, isAuthenticated, navigate, redirectTo]);
 
   async function handleSubmit(e: React.FormEvent) {
-    console.log("fired");
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
       await login({ phone_number: phoneNumber, password });
     } catch (err) {
-      console.log("injas");
       setError(err instanceof Error ? err.message : t("login.failed"));
       setSubmitting(false);
     }
   }
 
-  if (isLoading) {
-    return null;
-  }
+  const busy = submitting || isLoading;
 
   if (isAuthenticated) {
-    return null;
+    return (
+      <div className='flex min-h-svh items-center justify-center p-4'>
+        <Loader2
+          className='h-8 w-8 animate-spin text-muted-foreground'
+          aria-hidden='true'
+        />
+        <span className='sr-only'>{t("login.signingIn")}</span>
+      </div>
+    );
   }
 
   return (
@@ -82,14 +86,14 @@ export default function Login() {
         >
           <CardContent className='flex flex-col gap-4'>
             {error && (
-              <p className='text-sm text-destructive' role='alert' data-testid='login-error'>
+              <p className='text-sm text-destructive' role='alert' data-testid='login-global-error'>
                 {error}
               </p>
             )}
             <div className='grid gap-2'>
               <Label htmlFor='login-phone'>{t("common.phoneNumber")}</Label>
               <Input
-                id='login-phone'
+                id='login-phone' data-testid='login-phone-input'
                 name='phone_number'
                 type='tel'
                 autoComplete='tel'
@@ -102,7 +106,7 @@ export default function Login() {
             <div className='grid gap-2'>
               <Label htmlFor='login-password'>{t("common.password")}</Label>
               <PasswordInput
-                id='login-password'
+                id='login-password' data-testid='login-password-input'
                 name='password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -111,8 +115,11 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className='flex flex-col gap-2 mt-6'>
-            <Button type='submit' className='w-full' disabled={submitting}>
-              {submitting ? t("login.signingIn") : t("common.signIn")}
+            <Button type='submit' data-testid='login-submit-btn' className='w-full' disabled={busy}>
+              {busy && (
+                <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+              )}
+              {busy ? t("login.signingIn") : t("common.signIn")}
             </Button>
             <Button
               type='button'

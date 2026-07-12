@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import {
   Button,
@@ -15,10 +16,19 @@ import {
 } from "@/components/form";
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { apiFetch } from "~/lib/api-client";
+import { useAuth } from "src/app/contexts/auth-context";
+import type { AuthUser } from "src/app/lib/auth-types";
+
+interface RegisterAuthResponse {
+  access: string;
+  refresh: string;
+  user: AuthUser;
+}
 
 export default function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { establishSession } = useAuth();
   const [form, setForm] = useState({
     phone_number: "",
     first_name: "",
@@ -64,7 +74,9 @@ export default function Register() {
         }
         return;
       }
-      navigate("/login", { replace: true });
+      const data = (await res.json()) as RegisterAuthResponse;
+      establishSession(data);
+      navigate("/home", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t("register.failed"));
     } finally {
@@ -184,6 +196,9 @@ export default function Register() {
           </CardContent>
           <CardFooter className='flex flex-col gap-2'>
             <Button type='submit' className='w-full' disabled={submitting}>
+              {submitting && (
+                <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
+              )}
               {submitting ? t("register.creating") : t("common.register")}
             </Button>
             <Button type='button' variant='link' asChild>

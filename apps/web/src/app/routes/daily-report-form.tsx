@@ -1,0 +1,11 @@
+import { useParams } from "react-router";
+import { DailyReportForm } from "@/components/daily_reports/DailyReportForm";
+
+export default function DailyReportNewPage() {
+  const { projectId = "" } = useParams();
+  return (
+    <main className='page-main page-shell mx-auto  px-4 py-6'>
+      <DailyReportForm projectId={projectId} />
+    </main>
+  );
+}

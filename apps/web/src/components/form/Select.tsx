@@ -5,6 +5,14 @@
 import * as React from "react";
 import { cn } from "@/app/lib/utils";
 import { Field, type FieldProps } from "./Field";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 export type SelectOption = {
   value: string;
@@ -12,8 +20,10 @@ export type SelectOption = {
   disabled?: boolean;
 };
 
-export type SelectProps = Omit<React.ComponentProps<"select">, "name" | "children"> & {
+export type SelectProps = Omit<React.ComponentProps<"select">, "name" | "children" | "value" | "onChange" | "dir"> & {
   name: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   label?: FieldProps["label"];
   helpText?: FieldProps["helpText"];
   error?: FieldProps["error"];
@@ -32,6 +42,9 @@ export function Select({
   className,
   options,
   placeholder,
+  value,
+  onChange,
+  disabled,
   ...props
 }: SelectProps) {
   const selectId = typeof id === "string" && id.trim() ? id.trim() : `select-${name}`;
@@ -42,36 +55,51 @@ export function Select({
     .filter(Boolean)
     .join(" ");
 
+  const { i18n } = useTranslation();
+  const dir = i18n.dir();
+
+  // Extract events and aria props that are safe for buttons
+  const { "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, style, onBlur, onFocus } = props;
+
   return (
     <Field name={name} label={label} helpText={helpText} error={error} htmlFor={selectId} className={fieldClassName}>
       {() => (
-        <select
-          id={selectId}
+        <ShadcnSelect
           name={name}
-          data-slot='select'
-          aria-invalid={error != null || undefined}
-          aria-describedby={describedBy || undefined}
-          className={cn(
-            "border-input bg-transparent dark:bg-input/30 h-9 w-full rounded-md border px-3 text-base shadow-xs outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-            "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-            "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-            className,
-          )}
-          {...props}
+          value={value}
+          onValueChange={(newVal) => {
+            if (onChange) {
+              onChange({
+                target: { name, value: newVal },
+                currentTarget: { name, value: newVal },
+              } as React.ChangeEvent<HTMLSelectElement>);
+            }
+          }}
+          disabled={disabled}
+          dir={dir}
         >
-          {placeholder != null && (
-            <option id={`text-${name}SelectPlaceholder`} value='' disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value} disabled={opt.disabled}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id={selectId}
+            className={cn("w-full", className)}
+            aria-invalid={error != null || undefined}
+            aria-describedby={describedBy || undefined}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
+            style={style}
+            onBlur={onBlur as unknown as React.FocusEventHandler<HTMLButtonElement>}
+            onFocus={onFocus as unknown as React.FocusEventHandler<HTMLButtonElement>}
+          >
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value} disabled={opt.disabled}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </ShadcnSelect>
       )}
     </Field>
   );
 }
-

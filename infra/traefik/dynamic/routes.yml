@@ -1,0 +1,57 @@
+http:
+  middlewares:
+    api-read-ratelimit:
+      rateLimit:
+        average: 150
+        burst: 300
+    api-write-ratelimit:
+      rateLimit:
+        average: 40
+        burst: 80
+    login-ratelimit:
+      rateLimit:
+        average: 10
+        period: 1m
+        burst: 5
+
+  routers:
+    api-login:
+      rule: PathPrefix(`/api/auth/login`)
+      entryPoints:
+        - web
+      middlewares:
+        - login-ratelimit
+      service: api
+      priority: 100
+    api-write:
+      rule: PathPrefix(`/api`) && (Method(`POST`) || Method(`PUT`) || Method(`PATCH`) || Method(`DELETE`))
+      entryPoints:
+        - web
+      middlewares:
+        - api-write-ratelimit
+      service: api
+      priority: 90
+    api-read:
+      rule: PathPrefix(`/api`)
+      entryPoints:
+        - web
+      middlewares:
+        - api-read-ratelimit
+      service: api
+      priority: 80
+    web:
+      rule: PathPrefix(`/`)
+      entryPoints:
+        - web
+      service: web
+      priority: 1
+
+  services:
+    api:
+      loadBalancer:
+        servers:
+          - url: http://api:8000
+    web:
+      loadBalancer:
+        servers:
+          - url: http://web:3000

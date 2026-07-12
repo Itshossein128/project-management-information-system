@@ -71,7 +71,7 @@ export default function BusinessTablePage() {
     setSchemaLoading(true);
     setError(null);
     apiJson<TableSchema>(
-      `/${PATHS.BUSINESS}/${businessId}/tables/by_slug/${tableSlug}/`,
+      `/${PATHS.API_PROJECTS}/${businessId}/tables/by_slug/${tableSlug}/`,
       { signal: controller.signal },
     )
       .then((s) => {
@@ -106,7 +106,7 @@ export default function BusinessTablePage() {
     setRowsLoading(true);
     setError(null);
     apiJson<RowResponse>(
-      `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/?page=${page}&page_size=${pageSize}`,
+      `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/?page=${page}&page_size=${pageSize}`,
       { signal: controller.signal },
     )
       .then((r) => {
@@ -141,7 +141,7 @@ export default function BusinessTablePage() {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const res = await apiFetch(
-        `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/${rowId}/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/${rowId}/`,
         { method: "DELETE", signal: controller.signal },
       );
       if (res.ok) {
@@ -175,7 +175,7 @@ export default function BusinessTablePage() {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       const created = await apiJson<Record<string, unknown>>(
-        `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/`,
         {
           method: "POST",
           body: JSON.stringify(payload),
@@ -202,7 +202,7 @@ export default function BusinessTablePage() {
     setError(null);
     try {
       const blob = await apiBlob(
-        `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/export/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/export/`,
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -232,7 +232,7 @@ export default function BusinessTablePage() {
         created: number;
         errors: { row: number; errors: Record<string, string> }[];
       }>(
-        `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/import/`,
+        `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/import/`,
         file,
       );
       const msg =
@@ -243,7 +243,7 @@ export default function BusinessTablePage() {
       if (result.created > 0) {
         setPage(1);
         const r = await apiJson<RowResponse>(
-          `/${PATHS.BUSINESS}/${businessId}/tables/${tableSlug}/rows/?page=1&page_size=${pageSize}`,
+          `/${PATHS.API_PROJECTS}/${businessId}/tables/${tableSlug}/rows/?page=1&page_size=${pageSize}`,
         );
         setRows(r.results);
         setTotal(r.total);

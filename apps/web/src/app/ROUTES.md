@@ -1,33 +1,31 @@
-# Main Application Routes
+# Frontend Routing Documentation
 
-This document outlines the high-level routing structure managed by React Router v7 at the root level of the `apps/web/src/app` directory.
+This directory contains the routing configuration for the React application, leveraging React Router v7. The routing is structured to separate concerns between core configuration, route path constants, and logically grouped route modules.
 
-## Core Routing Files
+## Architecture & Core Files
 
-### `routes.ts`
-This is the central route configuration file. It exports an array of routes utilizing React Router's mapping functions (`route`, `layout`, `index`).
+*   **`react-router.config.ts`**: (Root level) Configuration object for React Router v7. It sets the base directory for the application source and enables Server-Side Rendering (SSR).
+*   **`routeVars.ts`**: Centralized registry for all route paths. It exports two main constants:
+    *   `ROUTES`: Maps logical route identifiers to their physical component file paths (e.g., `LOGIN: "routes/login.tsx"`).
+    *   `PATHS`: Defines the actual URL segments used in the browser (e.g., `BUSINESS_CREATE: "create"`). This ensures consistency and prevents typos across the app.
+*   **`routes.ts`**: The root routing configuration array. It composes the full application route tree by combining public routes, protected layout wrappers, and nested route modules.
 
-**Structure:**
-- **Public/Auth Routes:** Standalone routes for `login`, `register`, `forgot-password`, and `reset-password`.
-- **Authenticated Shell:** A wrapper layout (`AUTH_LAYOUT`) ensures users are authenticated before accessing nested features.
-- **Protected Business Area:** A layout wrapper (`PROTECTED_LAYOUT`) that includes paths specifically tailored to business operations:
-  - Homepage (`HOME`).
-  - Business setup and admin configurations.
-  - Department specific routes (Buildings, Mechanical, Security, Machinery, Warehouse, Electrical).
-  - Dynamic Table interfaces.
-- **Human Resources (HR) Hub:** A deeply nested protected layout (`HR_PROTECTED_LAYOUT`) tailored to internal company management:
-  - HR Dashboard/Hub.
-  - User management (`USERS`).
-  - Job Position management (`HR_JOB_POSITIONS`).
+## Sub-Route Modules (`/routes/`)
 
-### `routeVars.ts`
-This file serves as a single source of truth for string variables associated with routing.
-- **`ROUTES`**: An object linking logical route constants to physical React component filepaths within the `routes` directory (e.g., `LOGIN: "routes/login.tsx"`).
-- **`PATHS`**: URL segment strings representing the client-facing browser path (e.g., `LOGIN: "login"`).
+To keep the root `routes.ts` file maintainable, specific logical sections of the application have their routes abstracted into separate files within the `src/app/routes/` directory.
 
-## Sub-Route Configurations
-Route modularization lives under `src/app/routes/`. See `src/app/routes/ROUTES.md` for details.
+### `auth.routes.ts`
+*   **Purpose**: Handles public-facing authentication pages.
+*   **Routes Included**: User Login (`/login`) and Registration (`/register`).
 
-**Currently wired:** only `business-setup.routes.ts` is imported by `routes.ts`.
+### `hr.routes.ts`
+*   **Purpose**: Manages routes specific to the Human Resources module.
+*   **Routes Included**: User Management (`/hr/users`). Note that it wraps these inside a specific HR protected layout (`HR_PROTECTED_LAYOUT`).
 
-**Present but not imported yet:** `auth.routes.ts`, `hr.routes.ts`, and `business.routes.ts` are partial route chunks kept for future modularization; auth, HR, and business paths are still declared inline in `routes.ts`.
+### `business-setup.routes.ts`
+*   **Purpose**: Configures administration and setup routes for businesses.
+*   **Important Note**: Static segments (like `/businesses/create` and `/businesses/:businessId/setup`) are registered here. They must be loaded *before* the dynamic `:businessId` catch-all route to prevent client/server matching conflicts.
+
+### `business.routes.ts`
+*   **Purpose**: Configures the primary workspace routes for a specific business entity.
+*   **Routes Included**: The business dashboard root (`/businesses/:businessId`) and dynamic table data views (`/businesses/:businessId/tables/:tableSlug`).
