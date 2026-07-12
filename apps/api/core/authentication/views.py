@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from django.db.models import Prefetch
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from common.i18n import localize_api_payload
@@ -33,7 +33,8 @@ from .permissions import IsHrOrAdmin
 from .services import (
     UserRegistrationService,
     PasswordResetService,
-    PasswordChangeService
+    PasswordChangeService,
+    LoginService
 )
 from .utils import authenticate_user, get_tokens_for_user
 from .ratelimit_handlers import auth_ratelimit
@@ -177,23 +178,14 @@ class LoginView(generics.GenericAPIView):
         login = serializer.validated_data['login']
         password = serializer.validated_data['password']
 
-        user = authenticate_user(login, password)
-
-        if user is None:
+        service = LoginService()
+        try:
+            user, tokens = service.authenticate_and_issue_tokens(login, password)
+        except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    {'error': _('Invalid credentials. Please check your phone number and password.')}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
-        if not user.is_active:
-            return Response(
-                localize_api_payload({'error': _('User account is disabled.')}),
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        tokens = get_tokens_for_user(user)
         return Response({
             'access': tokens['access'],
             'refresh': tokens['refresh'],
@@ -271,9 +263,7 @@ class ChangePasswordView(generics.GenericAPIView):
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -400,9 +390,7 @@ class ResetPasswordView(generics.GenericAPIView):
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

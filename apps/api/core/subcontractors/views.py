@@ -17,6 +17,7 @@ from subcontractors.serializers import (
     WarningSerializer,
 )
 from subcontractors.services.risk_service import compute_risk_flag
+from subcontractors.services.performance import SubcontractorPerformanceService
 
 
 class SubScopedViewSet(viewsets.ModelViewSet):
@@ -75,16 +76,8 @@ class ScoreCreateView(APIView):
         sub = Subcontractor.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
         ser = PerformanceScoreSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        score = SubcontractorPerformanceScore.objects.create(
-            subcontractor=sub,
-            evaluator=request.user,
-            created_by=request.user,
-            updated_by=request.user,
-            **ser.validated_data,
-        )
-        flag, reasons = compute_risk_flag(sub)
-        if flag:
-            _fire_risk_alert(sub, reasons)
+        service = SubcontractorPerformanceService()
+        score = service.create_score(sub, ser.validated_data, request.user)
         return Response(PerformanceScoreSerializer(score).data, status=201)
 
 
@@ -96,16 +89,8 @@ class WarningCreateView(APIView):
         sub = Subcontractor.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
         ser = WarningSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        w = SubcontractorWarning.objects.create(
-            subcontractor=sub,
-            issued_by=request.user,
-            created_by=request.user,
-            updated_by=request.user,
-            **ser.validated_data,
-        )
-        flag, reasons = compute_risk_flag(sub)
-        if flag:
-            _fire_risk_alert(sub, reasons)
+        service = SubcontractorPerformanceService()
+        w = service.create_warning(sub, ser.validated_data, request.user)
         return Response(WarningSerializer(w).data, status=201)
 
 
