@@ -1,5 +1,7 @@
 import type { DailyReportDetail } from "@/app/lib/api/daily-reports";
 import { uploadProjectFile } from "@/app/lib/api/files";
+import { generateUUID, savePendingPhoto } from "@/app/lib/offlineDB";
+import { isNetworkError } from "@/app/lib/offlineWrite";
 import type { GridColumn, GridRow } from "./EditableGrid";
 import { InlineGridTab } from "./InlineGridTab";
 
@@ -60,7 +62,21 @@ export function ActivityTab({
     { key: "photo_file", header: "عکس", type: "photo", width: "90px" },
   ];
 
-  const handlePhotoUpload = (file: File) => uploadProjectFile(projectId, file);
+  const handlePhotoUpload = async (file: File) => {
+    if (isNetworkError()) {
+      const photoId = generateUUID();
+      const data = await file.arrayBuffer();
+      await savePendingPhoto({
+        photo_id: photoId,
+        project_id: projectId,
+        filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        data,
+      });
+      return `pending:${photoId}`;
+    }
+    return uploadProjectFile(projectId, file);
+  };
 
   return (
     <InlineGridTab

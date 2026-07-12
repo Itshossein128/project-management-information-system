@@ -118,6 +118,54 @@ export async function buildChildRowSyncMap(
   return map;
 }
 
+/** Queue labor batch for offline sync via sync-batch payload. */
+export async function queueLaborBatch(
+  projectId: string,
+  reportRef: string,
+  rows: unknown[],
+): Promise<void> {
+  const { updateOfflineReport, getOfflineReport } = await import("@/app/lib/offlineDB");
+  const existing = (await getOfflineReport(reportRef)) ?? {
+    local_id: reportRef,
+    project_id: projectId,
+    report_date: "",
+    status: "draft",
+    updated_at: new Date().toISOString(),
+  };
+  await saveOfflineReport({
+    ...existing,
+    local_id: reportRef,
+    project_id: projectId,
+    labor: rows,
+    _dirty: true,
+    _offline: true,
+    updated_at: new Date().toISOString(),
+  } as OfflineReport);
+
+  const queue = await getQueueByProject(projectId);
+  const headerEntry = queue.find(
+    (q) => q.entity_type === "daily_report" && q.local_id === reportRef && q.status === "pending",
+  );
+  if (!headerEntry) {
+    await addToQueue({
+      queue_id: generateUUID(),
+      entity_type: "daily_report",
+      project_id: projectId,
+      method: "POST",
+      endpoint: `${reportBase(projectId)}/`,
+      payload: { ...existing, labor: rows, local_id: reportRef },
+      created_at: new Date().toISOString(),
+      status: "pending",
+      retry_count: 0,
+      error_message: null,
+      local_id: reportRef,
+      server_id: null,
+    });
+  } else {
+    await updateOfflineReport(reportRef, { labor: rows, _dirty: true });
+  }
+}
+
 /** Queue a child-row write against the report (server id or offline local id). */
 export async function queueChildWrite(
   projectId: string,

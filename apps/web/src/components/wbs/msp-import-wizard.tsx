@@ -174,7 +174,7 @@ export function MspImportWizard({
             <label className="cursor-pointer">
               <input
                 type="file"
-                accept=".xml,application/xml,text/xml"
+                accept=".xml,.xer,application/xml,text/xml"
                 className="sr-only"
                 onChange={(e) => onFileSelect(e.target.files?.[0] ?? null)}
               />

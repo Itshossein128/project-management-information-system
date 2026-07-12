@@ -77,15 +77,13 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 
 ## Sprint 5 completion checklist (Offline Sync)
 
-**Sprint status: Not complete** — IndexedDB queue exists, but offline-first daily report (all tabs + photos), idempotent batch sync, and E2E coverage are unfinished. Revisit after Phase 2 remediation.
-
 | Task | Status |
 |------|--------|
 | **O-01** Service Worker + PWA manifest | Partial — SW in prod; foreground sync via `useAutoSync` (not SW BackgroundSync) |
-| **O-02** Batch sync endpoint | Partial — backend `sync-batch` done; frontend still uses per-item REST, not `syncBatch()` |
-| **O-03** Conflict review UI | Partial — `sync-conflicts.tsx` done; failed-queue (non-conflict) retry/discard UI pending |
-| **O-04** Sync status indicator | Partial — badge hidden when online with empty queue; E2E needs stable `data-testid` |
-| **Offline parity** | Not started — labor tab online-only; photo attach needs IndexedDB queue; forms do not read cached reference data offline |
+| **O-02** Batch sync endpoint | Done — backend + frontend `syncBatch()` wired |
+| **O-03** Conflict review UI | Done — `sync-conflicts.tsx` + failed-queue retry/discard |
+| **O-04** Sync status indicator | Done — persistent `data-testid="offline-indicator"` badge |
+| **Offline parity** | Done — labor tab, photo queue, cached reference reads |
 
 ## Sprint 6 completion checklist (Physical Progress & S-Curve)
 

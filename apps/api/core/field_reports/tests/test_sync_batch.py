@@ -115,3 +115,50 @@ class TestSyncBatch:
         child_errors = response.data['results'][0]['child_errors']
         assert child_errors
         assert child_errors[0]['section'] == 'activities'
+
+    def test_resync_same_payload_no_duplicate_children(self, auth_client, sync_url, project, user):
+        existing = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-11',
+            status=ReportStatus.DRAFT,
+            local_id='resync-1',
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [
+            {
+                'local_id': 'resync-1',
+                'report_date': '2024-09-11',
+                'activities': [
+                    {'activity_description': 'کار اول', 'shift': 'shift_1'},
+                ],
+            },
+        ]
+        first = auth_client.post(sync_url, payload, format='json')
+        assert first.data['summary']['merged'] == 1
+        existing.refresh_from_db()
+        assert existing.activities.count() == 1
+
+        second = auth_client.post(sync_url, payload, format='json')
+        assert second.data['summary']['merged'] == 1
+        existing.refresh_from_db()
+        assert existing.activities.count() == 1
+
+    def test_under_review_existing_is_conflict(self, auth_client, sync_url, project, user):
+        DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-12',
+            status=ReportStatus.UNDER_REVIEW,
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [{'local_id': 'l5', 'report_date': '2024-09-12', 'activities': []}]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['conflicts'] == 1
+        assert response.data['results'][0]['status'] == 'conflict'
+
+    def test_invalid_date_returns_error(self, auth_client, sync_url):
+        payload = [{'local_id': 'bad-date', 'report_date': 'not-a-date', 'site_status': 'active'}]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['errors'] == 1
+        assert response.data['results'][0]['status'] == 'error'

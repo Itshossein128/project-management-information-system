@@ -321,11 +321,18 @@ export function fetchReportPdf(projectId: string, reportId: string) {
 export interface SyncBatchResult {
   results: Array<{
     local_id: string | null;
-    status: "created" | "merged" | "skipped" | "conflict";
+    status: "created" | "merged" | "skipped" | "conflict" | "error";
     server_id: string | null;
     conflict_reason: string | null;
+    child_errors?: unknown[];
   }>;
-  summary: { created: number; merged: number; skipped: number; conflicts: number };
+  summary: {
+    created: number;
+    merged: number;
+    skipped: number;
+    conflicts: number;
+    errors: number;
+  };
 }
 
 export function syncBatch(projectId: string, reports: unknown[]) {

@@ -29,3 +29,35 @@ class TestP6ImportParser:
     def test_invalid_xer_raises(self):
         with pytest.raises(ValueError):
             parse_p6_xer(b'not an xer file')
+
+
+@pytest.mark.django_db
+class TestP6ImportIntegration:
+    def test_execute_p6_import_creates_activities(self, project, user):
+        from projects.models import Activity
+        from schedule.services.p6_import import execute_p6_import
+
+        result = execute_p6_import(
+            project,
+            SAMPLE_XER,
+            filename='sample.xer',
+            replace=True,
+            user=user,
+        )
+        assert result['activities_created'] >= 1
+        assert Activity.objects.filter(project=project).exists()
+
+    def test_p6_import_api_start(self, auth_client, project, settings):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from schedule.models import P6ImportJob
+
+        settings.CELERY_TASK_ALWAYS_EAGER = True
+        url = f'/api/v1/projects/{project.id}/import/p6/'
+        upload = SimpleUploadedFile('sample.xer', SAMPLE_XER, content_type='application/octet-stream')
+        response = auth_client.post(
+            url,
+            {'file': upload, 'replace': 'true'},
+            format='multipart',
+        )
+        assert response.status_code == 202
+        assert P6ImportJob.objects.filter(pk=response.data['task_id']).exists()

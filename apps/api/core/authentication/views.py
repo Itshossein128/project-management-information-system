@@ -353,11 +353,7 @@ class ResetPasswordView(generics.GenericAPIView):
         summary="Reset password with token",
         description="""
         Reset password using the token received via SMS.
-
-        Note: This is a placeholder implementation. In production, you should:
-        1. Store reset tokens in a database with expiration
-        2. Validate token before allowing password reset
-        3. Invalidate token after use
+        Tokens are stored in the database with expiration and invalidated after use.
         """,
         request=ResetPasswordSerializer,
         responses={

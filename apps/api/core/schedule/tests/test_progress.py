@@ -145,3 +145,67 @@ class TestProgressService:
         )
         recalculate_activity_progress(str(report.id))
         assert deleted == [project.id]
+
+    def test_kpis_endpoint(self, project, activity, auth_client, user, wbs):
+        from cost_control.models import ActualCost, Budget, CostCategory
+        from decimal import Decimal
+
+        activity.weight = 1.0
+        activity.save(update_fields=['weight'])
+        Budget.objects.create(
+            project=project,
+            wbs=wbs,
+            activity=activity,
+            cost_category=CostCategory.LABOR,
+            budget_amount=Decimal('1000000'),
+            created_by=user,
+            updated_by=user,
+        )
+        ActualCost.objects.create(
+            project=project,
+            activity=activity,
+            cost_date='2024-10-01',
+            cost_category=CostCategory.LABOR,
+            amount=Decimal('400000'),
+            created_by=user,
+            updated_by=user,
+        )
+        ActivityProgress.objects.create(
+            activity=activity,
+            report_date='2024-10-01',
+            planned_progress=0.5,
+            actual_progress=0.4,
+        )
+        response = auth_client.get(f'/api/v1/projects/{project.id}/progress/kpis/')
+        assert response.status_code == 200
+        assert response.data['bac'] is not None
+
+    def test_s_curve_endpoint(self, project, activity, auth_client):
+        activity.weight = 1.0
+        activity.save(update_fields=['weight'])
+        url = f'/api/v1/projects/{project.id}/progress/s-curve/?interval=weekly'
+        response = auth_client.get(url)
+        assert response.status_code == 200
+        assert 'results' in response.data
+
+    def test_progress_history_endpoint(self, project, user, activity, auth_client):
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-10-01',
+            status=ReportStatus.APPROVED,
+            approved_by=user,
+            created_by=user,
+            updated_by=user,
+        )
+        DailyReportActivity.objects.create(
+            report=report,
+            activity_ref=activity,
+            activity_description='work',
+            shift=ActivityRowShift.SHIFT_1,
+            quantity=10,
+            quantity_measured=True,
+        )
+        url = f'/api/v1/projects/{project.id}/progress/history/'
+        response = auth_client.get(url)
+        assert response.status_code == 200
+        assert isinstance(response.data, list)

@@ -226,3 +226,51 @@ class TestLaborAutoCost:
         _auto_create_costs_from_report(report)
         cost = ActualCost.objects.get(project=project, daily_report=report, cost_category='equipment')
         assert cost.amount == Decimal('800000')
+
+
+@pytest.mark.django_db
+class TestCostControlPermissions:
+    def test_unauthenticated_budget_list_returns_401(self, api_client, costs_base):
+        response = api_client.get(f'{costs_base}budgets/')
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_viewer_cannot_create_budget(self, api_client, member, costs_base, wbs):
+        api_client.force_authenticate(user=member.user)
+        response = api_client.post(
+            f'{costs_base}budgets/',
+            {
+                'wbs': str(wbs.id),
+                'cost_category': 'labor',
+                'budget_amount': '1000',
+            },
+            format='json',
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_auto_allocate_by_hours(self, auth_client, costs_base, cost_pool, project, user, activity):
+        from decimal import Decimal
+        from field_reports.models import DailyReport, DailyReportEquipment, ReportStatus
+
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-01',
+            status=ReportStatus.APPROVED,
+            created_by=user,
+            updated_by=user,
+        )
+        DailyReportEquipment.objects.create(
+            report=report,
+            equipment_name='لودر',
+            shift='day',
+            status='active',
+            ownership_type='owned',
+            productive_hours=Decimal('10'),
+            activity_ref=activity,
+        )
+        response = auth_client.post(
+            f'{costs_base}cost-pools/{cost_pool.id}/auto-allocate/',
+            {'method': 'by_hours'},
+            format='json',
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['allocations']

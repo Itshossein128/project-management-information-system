@@ -9,7 +9,7 @@
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 
 export const OFFLINE_DB_NAME = "ipcas-offline";
-export const OFFLINE_DB_VERSION = 1;
+export const OFFLINE_DB_VERSION = 2;
 
 export type EntityType =
   | "daily_report"
@@ -103,6 +103,14 @@ export interface QueueStats {
   total: number;
 }
 
+export interface PendingPhoto {
+  photo_id: string;
+  project_id: string;
+  filename: string;
+  content_type: string;
+  data: ArrayBuffer;
+}
+
 interface IpcasDB extends DBSchema {
   offline_queue: {
     key: string;
@@ -145,6 +153,10 @@ interface IpcasDB extends DBSchema {
     value: ConflictEntry;
     indexes: { project_id: string; status: string };
   };
+  pending_photos: {
+    key: string;
+    value: PendingPhoto;
+  };
 }
 
 let dbPromise: Promise<IDBPDatabase<IpcasDB>> | null = null;
@@ -171,44 +183,49 @@ export function initDB(): Promise<IDBPDatabase<IpcasDB>> {
   }
   if (!dbPromise) {
     dbPromise = openDB<IpcasDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
-      upgrade(db) {
-        const queue = db.createObjectStore("offline_queue", { keyPath: "queue_id" });
-        queue.createIndex("entity_type", "entity_type");
-        queue.createIndex("project_id", "project_id");
-        queue.createIndex("created_at", "created_at");
-        queue.createIndex("status", "status");
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const queue = db.createObjectStore("offline_queue", { keyPath: "queue_id" });
+          queue.createIndex("entity_type", "entity_type");
+          queue.createIndex("project_id", "project_id");
+          queue.createIndex("created_at", "created_at");
+          queue.createIndex("status", "status");
 
-        const reports = db.createObjectStore("offline_daily_reports", {
-          keyPath: "local_id",
-        });
-        reports.createIndex("project_id", "project_id");
-        reports.createIndex("report_date", "report_date");
-        reports.createIndex("status", "status");
+          const reports = db.createObjectStore("offline_daily_reports", {
+            keyPath: "local_id",
+          });
+          reports.createIndex("project_id", "project_id");
+          reports.createIndex("report_date", "report_date");
+          reports.createIndex("status", "status");
 
-        db.createObjectStore("cached_projects", { keyPath: "project_id" });
+          db.createObjectStore("cached_projects", { keyPath: "project_id" });
 
-        const wbs = db.createObjectStore("cached_wbs", { keyPath: "wbs_id" });
-        wbs.createIndex("project_id", "project_id");
+          const wbs = db.createObjectStore("cached_wbs", { keyPath: "wbs_id" });
+          wbs.createIndex("project_id", "project_id");
 
-        const activities = db.createObjectStore("cached_activities", {
-          keyPath: "activity_id",
-        });
-        activities.createIndex("project_id", "project_id");
-        activities.createIndex("wbs_id", "wbs_id");
+          const activities = db.createObjectStore("cached_activities", {
+            keyPath: "activity_id",
+          });
+          activities.createIndex("project_id", "project_id");
+          activities.createIndex("wbs_id", "wbs_id");
 
-        const titles = db.createObjectStore("cached_manpower_titles", {
-          keyPath: "id",
-        });
-        titles.createIndex("category", "category");
+          const titles = db.createObjectStore("cached_manpower_titles", {
+            keyPath: "id",
+          });
+          titles.createIndex("category", "category");
 
-        const subs = db.createObjectStore("cached_subcontractors", { keyPath: "id" });
-        subs.createIndex("project_id", "project_id");
+          const subs = db.createObjectStore("cached_subcontractors", { keyPath: "id" });
+          subs.createIndex("project_id", "project_id");
 
-        const conflicts = db.createObjectStore("conflict_log", {
-          keyPath: "conflict_id",
-        });
-        conflicts.createIndex("project_id", "project_id");
-        conflicts.createIndex("status", "status");
+          const conflicts = db.createObjectStore("conflict_log", {
+            keyPath: "conflict_id",
+          });
+          conflicts.createIndex("project_id", "project_id");
+          conflicts.createIndex("status", "status");
+        }
+        if (oldVersion < 2 && !db.objectStoreNames.contains("pending_photos")) {
+          db.createObjectStore("pending_photos", { keyPath: "photo_id" });
+        }
       },
     });
   }
@@ -262,6 +279,12 @@ export async function clearSyncedItems(): Promise<void> {
     all.filter((item) => item.status === "synced").map((item) => tx.store.delete(item.queue_id)),
   );
   await tx.done;
+}
+
+export async function getFailedQueue(): Promise<QueueItem[]> {
+  const db = await getDB();
+  const all = await db.getAll("offline_queue");
+  return all.filter((i) => i.status === "failed");
 }
 
 export async function getQueueStats(): Promise<QueueStats> {
@@ -419,6 +442,27 @@ export async function resolveConflict(
 export async function removeQueueItem(queueId: string): Promise<void> {
   const db = await getDB();
   await db.delete("offline_queue", queueId);
+}
+
+export async function savePendingPhoto(photo: PendingPhoto): Promise<void> {
+  const db = await getDB();
+  await db.put("pending_photos", photo);
+}
+
+export async function getPendingPhoto(photoId: string): Promise<PendingPhoto | undefined> {
+  const db = await getDB();
+  return db.get("pending_photos", photoId);
+}
+
+export async function deletePendingPhoto(photoId: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("pending_photos", photoId);
+}
+
+export async function listPendingPhotos(projectId: string): Promise<PendingPhoto[]> {
+  const db = await getDB();
+  const all = await db.getAll("pending_photos");
+  return all.filter((p) => p.project_id === projectId);
 }
 
 export async function getConflictQueueEndpoint(

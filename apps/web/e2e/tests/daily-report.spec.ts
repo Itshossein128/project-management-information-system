@@ -22,4 +22,16 @@ test.describe("Daily reports — Sprint 4 smoke", () => {
       timeout: 15_000,
     });
   });
+
+  test("new daily report form route renders", async ({ page }) => {
+    await page.goto("/projects");
+    const firstProjectLink = page.locator('a[href*="/projects/"]').first();
+    const href = await firstProjectLink.getAttribute("href");
+    test.skip(!href, "No projects in dev database");
+
+    await page.goto(`${href}/daily-reports/new`);
+    await expect(page.getByRole("button", { name: /فعالیت|نیروی انسانی/i }).first()).toBeVisible({
+      timeout: 15_000,
+    });
+  });
 });

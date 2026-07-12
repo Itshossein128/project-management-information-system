@@ -14,7 +14,8 @@ test.describe("Offline sync — Sprint 5 smoke", () => {
   test("project shell shows connectivity indicator after login", async ({ page }) => {
     await page.goto("/projects");
     await expect(page.locator("body")).toBeVisible();
-    const indicator = page.getByText(/آنلاین|offline|همگام|online/i).first();
+    const indicator = page.getByTestId("offline-indicator");
     await expect(indicator).toBeVisible({ timeout: 15_000 });
+    await expect(indicator).toContainText(/آنلاین|offline|online/i);
   });
 });

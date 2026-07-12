@@ -8,6 +8,8 @@ import {
   type LaborCategory,
   type LaborRow,
 } from "@/app/lib/api/daily-reports";
+import { isNetworkError, queueLaborBatch } from "@/app/lib/offlineWrite";
+import { getCachedManpowerTitles } from "@/app/lib/offlineDB";
 import type { DailyTabProps } from "./ActivityTab";
 
 interface Draft {
@@ -75,7 +77,17 @@ function CategoryPanel({
   const toast = useToast();
   const { data: titles = [] } = useQuery({
     queryKey: ["job-titles", projectId, category],
-    queryFn: () => fetchJobTitles(projectId, category),
+    queryFn: async () => {
+      if (isNetworkError()) {
+        const cached = await getCachedManpowerTitles(category);
+        return cached.map((t) => ({
+          id: String(t.id),
+          category: t.category as LaborCategory,
+          title: String(t.title ?? ""),
+        }));
+      }
+      return fetchJobTitles(projectId, category);
+    },
   });
   const titleNames = useMemo(() => titles.map((t) => t.title), [titles]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -136,9 +148,12 @@ function CategoryPanel({
     }
     setSaving(true);
     try {
-      await batchSaveLabor(projectId, reportId, payload);
-      if (!silent) {
-        toast.success("نیروی انسانی ذخیره شد");
+      if (isNetworkError()) {
+        await queueLaborBatch(projectId, reportId, payload);
+        if (!silent) toast.success("نیروی انسانی در صف آفلاین ذخیره شد");
+      } else {
+        await batchSaveLabor(projectId, reportId, payload);
+        if (!silent) toast.success("نیروی انسانی ذخیره شد");
       }
       setIsDirty(false);
       onChanged();

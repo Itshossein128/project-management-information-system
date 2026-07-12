@@ -85,11 +85,33 @@ def _child_serializers():
 
 MERGEABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
 
+CHILD_RELATED_NAMES = {
+    'activities': 'activities',
+    'labor': 'labor_entries',
+    'equipment': 'equipment_entries',
+    'materials': 'material_entries',
+    'concrete_logs': 'concrete_logs',
+    'labor_camp': 'labor_camp_entries',
+    'incidents': 'incidents',
+}
 
-def _create_children(report, payload) -> list[dict]:
+
+def _child_sections_in_payload(payload) -> list[str]:
+    return [key for key in CHILD_SERIALIZER_MAP if key in payload]
+
+
+def _clear_child_sections(report, section_keys: list[str]) -> None:
+    for key in section_keys:
+        related = getattr(report, CHILD_RELATED_NAMES[key])
+        related.all().delete()
+
+
+def _create_children(report, payload, sections: list[str] | None = None) -> list[dict]:
     serializers_map = _child_serializers()
     child_errors = []
-    for key, serializer_cls in serializers_map.items():
+    keys = sections if sections is not None else list(CHILD_SERIALIZER_MAP.keys())
+    for key in keys:
+        serializer_cls = serializers_map[key]
         rows = payload.get(key) or []
         for idx, row in enumerate(rows):
             serializer = serializer_cls(data=row)
@@ -99,6 +121,13 @@ def _create_children(report, payload) -> list[dict]:
                 child_errors.append({'section': key, 'index': idx, 'errors': serializer.errors})
                 logger.warning('sync-batch skipped invalid %s row: %s', key, serializer.errors)
     return child_errors
+
+
+def _replace_children(report, payload) -> list[dict]:
+    sections = _child_sections_in_payload(payload)
+    if sections:
+        _clear_child_sections(report, sections)
+    return _create_children(report, payload, sections=sections or None)
 
 
 def sync_batch(project_id, user, reports: list) -> dict:
@@ -132,12 +161,12 @@ def sync_batch(project_id, user, reports: list) -> dict:
         if report_date is None:
             results.append({
                 'local_id': local_id,
-                'status': 'conflict',
+                'status': 'error',
                 'server_id': None,
                 'conflict_reason': 'تاریخ نامعتبر',
-                'child_errors': [],
+                'child_errors': [{'section': 'header', 'errors': {'report_date': ['تاریخ نامعتبر']}}],
             })
-            counts['conflicts'] += 1
+            counts['errors'] += 1
             continue
 
         existing = None
@@ -174,7 +203,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
 
         with transaction.atomic():
             if existing:
-                child_errors = _create_children(existing, item)
+                child_errors = _replace_children(existing, item)
                 existing.synced_from_offline = True
                 existing.updated_by = user
                 if local_id and not existing.local_id:
