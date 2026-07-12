@@ -119,6 +119,18 @@ class LeaveRequestViewSet(ProjectScopedViewSet):
             updated_by=self.request.user,
         )
 
+    def partial_update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.status != LeaveStatus.DRAFT:
+            return Response({'error': {'message': 'فقط درخواست‌های پیش‌نویس قابل ویرایش هستند.'}}, status=400)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.status != LeaveStatus.DRAFT:
+            return Response({'error': {'message': 'فقط درخواست‌های پیش‌نویس قابل حذف هستند.'}}, status=400)
+        return super().destroy(request, *args, **kwargs)
+
     @action(detail=True, methods=['post'], url_path='submit')
     def submit(self, request, project_pk=None, pk=None):
         obj = self.get_object()
