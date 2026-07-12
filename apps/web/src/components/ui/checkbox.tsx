@@ -1,33 +1,30 @@
-import * as React from "react";
+import * as React from "react"
+import { CheckIcon } from "lucide-react"
+import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 
-import { cn } from "src/app/lib/utils";
+import { cn } from "@/app/lib/utils"
 
-export interface CheckboxProps
-  extends Omit<React.ComponentProps<"input">, "type"> {
-  indeterminate?: boolean;
-}
-
-function Checkbox({ className, indeterminate, ...props }: CheckboxProps) {
-  const ref = React.useRef<HTMLInputElement | null>(null);
-
-  React.useEffect(() => {
-    if (!ref.current) return;
-    ref.current.indeterminate = Boolean(indeterminate);
-  }, [indeterminate]);
-
+function Checkbox({
+  className,
+  ...props
+}: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
-    <input
-      ref={ref}
-      type="checkbox"
+    <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] dark:bg-input/30 h-4 w-4 rounded-sm border bg-transparent shadow-xs outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        "accent-primary",
-        className,
+        "peer size-4 shrink-0 rounded-[4px] border border-input shadow-xs transition-shadow outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-input/30 dark:aria-invalid:ring-destructive/40 dark:data-[state=checked]:bg-primary",
+        className
       )}
       {...props}
-    />
-  );
+    >
+      <CheckboxPrimitive.Indicator
+        data-slot="checkbox-indicator"
+        className="grid place-content-center text-current transition-none"
+      >
+        <CheckIcon className="size-3.5" />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  )
 }
 
-export { Checkbox };
+export { Checkbox }
