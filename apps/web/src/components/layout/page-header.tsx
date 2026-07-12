@@ -29,18 +29,23 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
     <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1">
-        {items.map((item, i) => (
-          <li key={item.label} className="flex items-center gap-1">
-            {i > 0 ? <span aria-hidden>/</span> : null}
-            {item.href ? (
-              <Link to={item.href} className="hover:text-foreground">
-                {item.label}
-              </Link>
-            ) : (
-              <span className="text-foreground">{item.label}</span>
-            )}
-          </li>
-        ))}
+        {items.map((item, i) => {
+          const isLast = i === items.length - 1;
+          return (
+            <li key={item.label} className="flex items-center gap-1">
+              {i > 0 ? <span aria-hidden>/</span> : null}
+              {item.href && !isLast ? (
+                <Link to={item.href} className="hover:text-foreground">
+                  {item.label}
+                </Link>
+              ) : (
+                <span className="text-foreground" aria-current={isLast ? "page" : undefined}>
+                  {item.label}
+                </span>
+              )}
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

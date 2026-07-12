@@ -19,3 +19,7 @@
 **Learning:** Custom overlay components like Drawers require specific ARIA attributes (`role="dialog"`, `aria-modal="true"`, and `aria-labelledby`) to be correctly identified and read by screen readers. Furthermore, decorative icons within buttons that already have an `aria-label` should be explicitly hidden from screen readers using `aria-hidden`.
 **Action:** Always ensure custom overlays have `role="dialog"` and `aria-modal="true"`, map their titles using `aria-labelledby`, and add `aria-hidden` to redundant icons inside accessible buttons.
 ## 2026-07-09 - Added aria-labels to icon-only buttons in EditableGrid\n**Learning:** Icon-only buttons (like Save and Delete actions in grids) often miss accessibility attributes, making them difficult for screen reader users to identify.\n**Action:** Add `aria-label` alongside `title` on icon-only interactive elements to ensure both visual hover states and screen reader announcements are informative.
+
+## 2024-07-12 - Breadcrumb Current Page Accessibility
+**Learning:** In the `Breadcrumb` component (`apps/web/src/components/layout/page-header.tsx`), adding `aria-current="page"` to the last item improves screen-reader accessibility by explicitly marking the active page. Additionally, removing the `href` link for the last item prevents redundant and potentially confusing navigation.
+**Action:** Always ensure breadcrumb patterns do not link the active page and use `aria-current="page"` to communicate state to assistive technologies.
