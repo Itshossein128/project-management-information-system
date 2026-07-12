@@ -47,19 +47,24 @@ def auto_populate_ipc(ipc_id):
 
         unit_price = item.unit_price or Decimal('0')
         qty_cum = qty_previous + qty_current
+        audit_user = ipc.updated_by or ipc.created_by
+        defaults = {
+            'description': item.description,
+            'unit': item.unit.name if item.unit_id else '',
+            'unit_price': unit_price,
+            'qty_previous': qty_previous,
+            'qty_current': round(qty_current, 4),
+            'qty_cumulative': qty_cum,
+            'amount_current': unit_price * qty_current,
+            'amount_cumulative': unit_price * qty_cum,
+        }
+        if audit_user:
+            defaults['created_by'] = audit_user
+            defaults['updated_by'] = audit_user
         IPCItem.objects.update_or_create(
             ipc=ipc,
             contract_item=item,
-            defaults={
-                'description': item.description,
-                'unit': item.unit.name if item.unit_id else '',
-                'unit_price': unit_price,
-                'qty_previous': qty_previous,
-                'qty_current': round(qty_current, 4),
-                'qty_cumulative': qty_cum,
-                'amount_current': unit_price * qty_current,
-                'amount_cumulative': unit_price * qty_cum,
-            },
+            defaults=defaults,
         )
 
     gross = IPCItem.objects.filter(ipc=ipc, is_deleted=False).aggregate(
@@ -126,8 +131,10 @@ def apply_deductions(ipc_id):
             ))
 
     for d in deductions:
-        d.created_by = ipc.updated_by or ipc.created_by
-        d.updated_by = ipc.updated_by
+        audit_user = ipc.updated_by or ipc.created_by
+        if audit_user:
+            d.created_by = audit_user
+            d.updated_by = audit_user
         d.save()
 
     total_deductions = sum(float(d.amount) for d in deductions)

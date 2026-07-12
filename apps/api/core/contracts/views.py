@@ -1,5 +1,6 @@
 """Contract and IPC API views."""
 
+import logging
 from datetime import date, timedelta
 
 from django.db import models
@@ -14,7 +15,7 @@ from drf_spectacular.utils import extend_schema
 
 from cash_flow.models import CashTransaction, CashTransactionType, InflowCategory, OutflowCategory
 from common.jalali import parse_jalali_or_gregorian
-from contracts.models import ChangeOrder, ChangeOrderStatus, Contract, ContractItem, ContractType, IPC, IPCItem, IPCStatus
+from contracts.models import ChangeOrder, ChangeOrderStatus, Contract, ContractItem, ContractType, IPC, IPCDeduction, IPCItem, IPCStatus
 from contracts.serializers import (
     ChangeOrderSerializer,
     ContractDetailSerializer,
@@ -22,12 +23,43 @@ from contracts.serializers import (
     ContractListSerializer,
     ContractWriteSerializer,
     IPCCreateSerializer,
+    IPCDeductionSerializer,
     IPCDetailSerializer,
     IPCItemSerializer,
     IPCListSerializer,
 )
 from contracts.services.ipc_service import apply_deductions, auto_populate_ipc, next_change_number, next_ipc_number
 from permissions.project import HasProjectPermission, IsProjectMember
+
+logger = logging.getLogger(__name__)
+
+MANUAL_DEDUCTION_TYPES = frozenset({'material_price_diff', 'other'})
+
+FK_ITEM_FIELDS = {
+    'activity': 'projects.Activity',
+    'unit': 'master_data.Unit',
+}
+
+
+def _resolve_fk_fields(payload: dict) -> dict:
+    """Convert UUID strings in FK fields to model instances for ORM create/update."""
+    from decimal import Decimal
+    from django.apps import apps
+
+    resolved = dict(payload)
+    for field in ('unit_price', 'quantity'):
+        if field in resolved and resolved[field] is not None and resolved[field] != '':
+            resolved[field] = Decimal(str(resolved[field]))
+    for field, model_label in FK_ITEM_FIELDS.items():
+        if field not in resolved:
+            continue
+        raw = resolved.pop(field)
+        if raw in (None, ''):
+            resolved[f'{field}_id'] = None
+            continue
+        model = apps.get_model(model_label)
+        resolved[f'{field}_id'] = raw if hasattr(raw, 'pk') else raw
+    return resolved
 
 
 def _invalidate(project_id):
@@ -152,7 +184,7 @@ class ContractItemsBulkView(APIView):
         saved = []
         for row in rows:
             item_id = row.get('id')
-            payload = {k: v for k, v in row.items() if k != 'id'}
+            payload = _resolve_fk_fields({k: v for k, v in row.items() if k != 'id'})
             if item_id:
                 item = get_object_or_404(ContractItem, pk=item_id, contract=contract)
                 for k, v in payload.items():
@@ -321,12 +353,15 @@ class IPCItemUpdateView(APIView):
     required_permission = 'edit_ipcs'
 
     def patch(self, request, project_pk=None, pk=None, itemid=None):
+        from decimal import Decimal
+
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
         item = get_object_or_404(IPCItem, pk=itemid, ipc=ipc, is_deleted=False)
         qty_current = request.data.get('qty_current', item.qty_current)
+        qty_current = Decimal(str(qty_current))
         item.qty_current = qty_current
-        item.qty_cumulative = (item.qty_previous or 0) + qty_current
-        unit_price = item.unit_price or 0
+        item.qty_cumulative = Decimal(str(item.qty_previous or 0)) + qty_current
+        unit_price = Decimal(str(item.unit_price or 0))
         item.amount_current = unit_price * qty_current
         item.amount_cumulative = unit_price * item.qty_cumulative
         item.updated_by = request.user
@@ -341,16 +376,106 @@ class IPCItemUpdateView(APIView):
         return Response(IPCDetailSerializer(ipc).data)
 
 
+def _publish_ipc_submitted(ipc):
+    try:
+        from events.publisher import EventPublisher
+
+        EventPublisher().publish(
+            'ipc.submitted',
+            {
+                'ipc_id': str(ipc.id),
+                'ipc_number': ipc.ipc_number,
+                'contract_id': str(ipc.contract_id),
+                'gross_amount': str(ipc.gross_amount or 0),
+            },
+            project_id=str(ipc.project_id),
+        )
+    except Exception:  # noqa: BLE001 - event bus optional in dev/tests
+        logger.warning('Could not publish ipc.submitted for %s', ipc.id, exc_info=True)
+
+
 class IPCSubmitView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
-    required_permission = 'edit_contracts'
+    required_permission = 'edit_ipcs'
 
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        if ipc.status != IPCStatus.DRAFT:
+            return Response({'detail': 'Only draft IPCs can be submitted.'}, status=400)
         ipc.status = IPCStatus.SUBMITTED
         ipc.submitted_date = date.today()
+        ipc.rejection_reason = ''
         ipc.updated_by = request.user
         ipc.save()
+        _publish_ipc_submitted(ipc)
+        return Response(IPCDetailSerializer(ipc).data)
+
+
+class IPCDeductionListView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_ipcs'
+
+    @extend_schema(summary='Add manual IPC deduction', tags=['Contracts'])
+    def post(self, request, project_pk=None, pk=None):
+        ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        if ipc.status != IPCStatus.DRAFT:
+            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
+        deduction_type = request.data.get('deduction_type', '')
+        if deduction_type not in MANUAL_DEDUCTION_TYPES:
+            return Response(
+                {'detail': 'Only material_price_diff and other deductions can be added manually.'},
+                status=400,
+            )
+        amount = request.data.get('amount')
+        if amount is None:
+            return Response({'detail': 'amount is required.'}, status=400)
+        deduction = IPCDeduction.objects.create(
+            ipc=ipc,
+            deduction_type=deduction_type,
+            amount=amount,
+            description=request.data.get('description', ''),
+            created_by=request.user,
+            updated_by=request.user,
+        )
+        apply_deductions(ipc.id)
+        ipc.refresh_from_db()
+        return Response(IPCDetailSerializer(ipc).data, status=201)
+
+
+class IPCDeductionDetailView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_ipcs'
+
+    def patch(self, request, project_pk=None, pk=None, did=None):
+        ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        if ipc.status != IPCStatus.DRAFT:
+            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
+        deduction = get_object_or_404(
+            IPCDeduction, pk=did, ipc=ipc, is_deleted=False, deduction_type__in=MANUAL_DEDUCTION_TYPES
+        )
+        if 'amount' in request.data:
+            deduction.amount = request.data['amount']
+        if 'description' in request.data:
+            deduction.description = request.data['description']
+        deduction.updated_by = request.user
+        deduction.save()
+        apply_deductions(ipc.id)
+        ipc.refresh_from_db()
+        return Response(IPCDetailSerializer(ipc).data)
+
+    def delete(self, request, project_pk=None, pk=None, did=None):
+        ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        if ipc.status != IPCStatus.DRAFT:
+            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
+        deduction = get_object_or_404(
+            IPCDeduction, pk=did, ipc=ipc, is_deleted=False, deduction_type__in=MANUAL_DEDUCTION_TYPES
+        )
+        deduction.is_deleted = True
+        deduction.deleted_at = timezone.now()
+        deduction.updated_by = request.user
+        deduction.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        apply_deductions(ipc.id)
+        ipc.refresh_from_db()
         return Response(IPCDetailSerializer(ipc).data)
 
 

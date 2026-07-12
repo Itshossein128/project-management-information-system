@@ -19,6 +19,8 @@ function ContractsContent() {
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_contracts");
+  const canEdit = has("edit_contracts");
+  const canViewIpcs = has("view_ipcs");
   const [tab, setTab] = useState<Tab>("contracts");
 
   const { data: contracts, isLoading: cloading } = useQuery({
@@ -30,7 +32,7 @@ function ContractsContent() {
   const { data: ipcs, isLoading: iloading } = useQuery({
     queryKey: ["ipcs", projectId],
     queryFn: () => fetchIPCs(projectId),
-    enabled: canView && tab === "ipcs",
+    enabled: canViewIpcs && tab === "ipcs",
   });
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
@@ -50,7 +52,17 @@ function ContractsContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="قراردادها" subtitle={project.project_name} />
+      <PageHeader
+        title="قراردادها"
+        subtitle={project.project_name}
+        actions={
+          canEdit ? (
+            <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_CONTRACTS}/${PATHS.PROJECT_NEW}`}>
+              <Button variant="primary">قرارداد جدید</Button>
+            </Link>
+          ) : undefined
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border p-4">
@@ -131,7 +143,14 @@ function ContractsContent() {
               <tbody>
                 {(ipcs?.results ?? []).map((i) => (
                   <tr key={i.id} className="border-t">
-                    <td className="px-3 py-2">{i.ipc_number}</td>
+                    <td className="px-3 py-2">
+                      <Link
+                        className="text-primary underline"
+                        to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_IPCS}/${i.id}`}
+                      >
+                        {i.ipc_number}
+                      </Link>
+                    </td>
                     <td className="px-3 py-2">{i.contract_number}</td>
                     <td className="px-3 py-2">{formatFaAmount(i.gross_amount)}</td>
                     <td className="px-3 py-2">{formatFaAmount(i.net_amount ?? 0)}</td>

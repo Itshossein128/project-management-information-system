@@ -1,5 +1,5 @@
 import { PATHS } from "@/app/routeVars";
-import { apiJson } from "@/app/lib/api-client";
+import { apiBlob, apiJson } from "@/app/lib/api-client";
 
 const base = (projectId: string) => `/${PATHS.API_PROJECTS}/${projectId}`;
 
@@ -26,6 +26,7 @@ export interface ContractDetail extends ContractRow {
   retention_pct: number;
   insurance_pct: number;
   tax_pct: number;
+  advance_amount: number;
   performance_guarantee_amount: number | null;
   performance_guarantee_expiry: string | null;
   advance_guarantee_amount: number | null;
@@ -161,9 +162,93 @@ export function approveIPC(projectId: string, id: string) {
   return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/approve/`, { method: "POST" });
 }
 
-export function payIPC(projectId: string, id: string) {
-  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/pay/`, { method: "POST" });
+export function payIPC(projectId: string, id: string, actualPaymentDate?: string) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/pay/`, {
+    method: "POST",
+    body: JSON.stringify(
+      actualPaymentDate ? { actual_payment_date: actualPaymentDate } : {},
+    ),
+  });
 }
+
+export function rejectIPC(projectId: string, id: string, reason = "") {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/reject/`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function updateIPCItem(
+  projectId: string,
+  ipcId: string,
+  itemId: string,
+  qtyCurrent: number,
+) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${ipcId}/items/${itemId}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ qty_current: qtyCurrent }),
+  });
+}
+
+export function addIPCDeduction(
+  projectId: string,
+  ipcId: string,
+  body: { deduction_type: string; amount: number; description?: string },
+) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${ipcId}/deductions/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateIPCDeduction(
+  projectId: string,
+  ipcId: string,
+  deductionId: string,
+  body: { amount?: number; description?: string },
+) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${ipcId}/deductions/${deductionId}/`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteIPCDeduction(projectId: string, ipcId: string, deductionId: string) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${ipcId}/deductions/${deductionId}/`, {
+    method: "DELETE",
+  });
+}
+
+export function downloadIPCPdf(projectId: string, ipcId: string) {
+  return apiBlob(`${base(projectId)}/ipcs/${ipcId}/pdf/`);
+}
+
+export function createChangeOrder(
+  projectId: string,
+  contractId: string,
+  body: { description: string; amount_change: number },
+) {
+  return apiJson<ChangeOrderRow>(`${base(projectId)}/contracts/${contractId}/change-orders/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function approveChangeOrder(projectId: string, contractId: string, changeOrderId: string) {
+  return apiJson<ChangeOrderRow>(
+    `${base(projectId)}/contracts/${contractId}/change-orders/${changeOrderId}/approve/`,
+    { method: "POST" },
+  );
+}
+
+export const DEDUCTION_TYPE_LABELS: Record<string, string> = {
+  retention: "سپرده",
+  tax: "مالیات",
+  insurance: "بیمه",
+  advance_recovery: "استهلاک پیش‌پرداخت",
+  material_price_diff: "اختلاف قیمت مصالح",
+  other: "سایر",
+};
 
 export function formatFaAmount(value: number | null | undefined) {
   return new Intl.NumberFormat("fa-IR").format(Math.round(Number(value ?? 0)));

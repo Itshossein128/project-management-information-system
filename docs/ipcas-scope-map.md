@@ -56,4 +56,42 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 
 Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 
+## Sprint 7 completion checklist (Budget & Cost Control)
+
+| Task | Status |
+|------|--------|
+| **C-09** Budget ingestion + variance engine | Done — `cost_control/` budgets, variance, summary |
+| **C-10** Actual cost ledger + cost pool allocation | Done — actual costs, pools, allocate API |
+| **UI-06** Cost control screens | Done — `/projects/{id}/costs` (budget, actual, variance, pools) |
+
+## Sprint 8 completion checklist (Contracts & IPC)
+
+| Task | Status |
+|------|--------|
+| **C-12** Contract + IPC API with deduction engine | Done — `contracts/` CRUD, IPC workflow, PDF, manual deductions |
+| **C-12** IPC auto-populate from progress | Done — `ipc_service.auto_populate_ipc` |
+| **C-12** IPC submit event | Done — `ipc.submitted` on submit |
+| **UI-07** Contract registry UI | Done — list, create, detail, BoQ, change orders |
+| **UI-07** IPC wizard + detail | Done — wizard drawer, detail page, workflow bar, PDF |
+| **Tests** | Done — `contracts/tests/` (service, workflow, CRUD) |
+| **Seed** | Done — `python manage.py seed_contracts_demo --project-id=<uuid>` |
+
+### Sprint 8 API paths
+
+- Contracts: `GET/POST /api/v1/projects/{id}/contracts/`
+- Contract detail: `GET/PATCH /api/v1/projects/{id}/contracts/{id}/`
+- BoQ bulk: `POST /api/v1/projects/{id}/contracts/{id}/items/`
+- Change orders: `POST .../change-orders/`, `POST .../change-orders/{id}/approve/`
+- IPCs: `GET/POST /api/v1/projects/{id}/ipcs/`
+- IPC workflow: `POST .../ipcs/{id}/populate|submit|approve|pay|reject`
+- Manual deductions: `POST/PATCH/DELETE .../ipcs/{id}/deductions/`
+- PDF: `GET .../ipcs/{id}/pdf/`
+
+### Sprint 8 frontend routes
+
+- `/projects/{id}/contracts` — list + KPIs
+- `/projects/{id}/contracts/new` — create form
+- `/projects/{id}/contracts/{contractId}` — detail (info, BoQ, change orders, IPC wizard)
+- `/projects/{id}/ipcs/{ipcId}` — IPC detail + workflow
+
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)

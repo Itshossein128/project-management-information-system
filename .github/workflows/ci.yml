@@ -129,6 +129,8 @@ jobs:
         working-directory: apps/api/core
       - run: python manage.py setup_event_topology
         working-directory: apps/api/core
+      - run: pytest contracts --cov=contracts --cov-report=term-missing --cov-fail-under=100
+        working-directory: apps/api/core
       - run: pytest projects wbs permissions
         working-directory: apps/api/core
       - run: python manage.py test events authentication audit storage

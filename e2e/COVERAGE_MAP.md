@@ -10,6 +10,7 @@ Last updated: 2025-07-10
 | WBS Editor | 24 | 0 | 0% | 2025-07-09 |
 | Members & ACL | 16 | 0 | 0% | 2025-07-09 |
 | Activities | 20 | 0 | 0% | 2025-07-09 |
+| Contracts & IPC | 12 | 2 | 16.7% | 2026-07-11 |
 
 ## Untested Branches (priority queue)
 

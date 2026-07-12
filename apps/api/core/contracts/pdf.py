@@ -24,10 +24,16 @@ def render_ipc_pdf(ipc) -> bytes:
     story.append(Spacer(1, 12))
 
     contract = ipc.contract
+    period_label = '—'
+    if ipc.period_start and ipc.period_end:
+        period_label = (
+            f'{gregorian_to_jalali(ipc.period_start) or "—"} '
+            f'تا {gregorian_to_jalali(ipc.period_end) or "—"}'
+        )
     meta = [
         [_fa('قرارداد'), _fa(contract.contract_number or '—')],
         [_fa('طرف مقابل'), _fa(contract.counterparty or '—')],
-        [_fa('دوره'), _fa(f'{gregorian_to_jalali(ipc.period_start) or "—"} تا {gregorian_to_jalali(ipc.period_end) or "—"}')],
+        [_fa('دوره'), _fa(period_label)],
         [_fa('مبلغ ناخالص'), _fa(f'{float(ipc.gross_amount or 0):,.0f}')],
         [_fa('مبلغ خالص'), _fa(f'{float(ipc.net_amount or 0):,.0f}')],
         [_fa('وضعیت'), _fa(ipc.status)],

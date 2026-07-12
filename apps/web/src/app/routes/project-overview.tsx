@@ -66,11 +66,12 @@ function OverviewContent() {
       title: t("projectOverview.moduleReports"),
       enabled: false,
     },
-    { key: "costs", title: t("projectOverview.moduleCosts"), enabled: false },
+    { key: "costs", title: t("projectOverview.moduleCosts"), href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_COSTS}`, enabled: true },
     {
       key: "contracts",
       title: t("projectOverview.moduleContracts"),
-      enabled: false,
+      href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_CONTRACTS}`,
+      enabled: true,
     },
     {
       key: "documents",
