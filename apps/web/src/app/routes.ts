@@ -7,6 +7,7 @@ import {
 import { PATHS, ROUTES } from "./routeVars";
 import { projectRoutes } from "./routes/business-setup.routes";
 
+// Default export of application route configuration.
 export default [
   index(ROUTES.INDEX),
   route(PATHS.LOGIN, ROUTES.LOGIN),

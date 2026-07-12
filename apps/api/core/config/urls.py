@@ -6,6 +6,7 @@ from cost_control.urls import global_urlpatterns
 from projects.member_views import UserLookupView
 from projects.role_views import PermissionCatalogView
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
@@ -24,4 +25,5 @@ urlpatterns = [
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
+# Definition of handler403.
 handler403 = 'authentication.ratelimit_handlers.handle_ratelimit_403'

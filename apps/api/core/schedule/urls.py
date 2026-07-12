@@ -11,13 +11,20 @@ from schedule.progress_views import (
 )
 from schedule.views import MspImportPreviewView, MspImportStartView, MspImportStatusView
 
+# Viewset action routing for activity_list.
 activity_list = ActivityViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for activity_detail.
 activity_detail = ActivityViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+# Definition of activity_weight_summary.
 activity_weight_summary = ActivityViewSet.as_view({'get': 'weight_summary'})
+# Definition of activity_network.
 activity_network = ActivityViewSet.as_view({'get': 'network'})
+# Definition of activity_relations.
 activity_relations = ActivityViewSet.as_view({'post': 'relations'})
+# Definition of activity_relation_delete.
 activity_relation_delete = ActivityViewSet.as_view({'delete': 'delete_relation'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('activities/', activity_list, name='activity-list'),
     path('activities/weight-summary/', activity_weight_summary, name='activity-weight-summary'),

@@ -16,8 +16,10 @@ from .views import (
     SystemRolesListView,
 )
 
+# Namespace for the app URLs.
 app_name = 'authentication'
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('register/', UserRegistrationView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),

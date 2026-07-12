@@ -8,9 +8,12 @@ from subcontractors.views import (
     WarningPatchView,
 )
 
+# Viewset action routing for sub_list.
 sub_list = SubcontractorViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for sub_detail.
 sub_detail = SubcontractorViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('subcontractors/', sub_list, name='subcontractor-list'),
     path('subcontractors/risk-summary/', RiskSummaryView.as_view(), name='subcontractor-risk-summary'),

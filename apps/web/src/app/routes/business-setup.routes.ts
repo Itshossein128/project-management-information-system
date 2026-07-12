@@ -1,6 +1,7 @@
 import { route } from "@react-router/dev/routes";
 import { PATHS, ROUTES } from "../routeVars";
 
+// Configuration array for projectRoutes routing.
 export const projectRoutes = [
   route(`${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`, ROUTES.BUSINESS_CREATE),
   route(`${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_OVERVIEW}`, ROUTES.PROJECT_OVERVIEW),

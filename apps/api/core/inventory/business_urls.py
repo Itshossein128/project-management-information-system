@@ -8,20 +8,25 @@ from .department_activity_data_views import (
 )
 from .views import SpaceMaterialRequestViewSet, DepartmentActivityRecordViewSet
 
+# Viewset action routing for space_material_request_list.
 space_material_request_list = SpaceMaterialRequestViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for space_material_request_detail.
 space_material_request_detail = SpaceMaterialRequestViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Viewset action routing for department_activity_record_list.
 department_activity_record_list = DepartmentActivityRecordViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for department_activity_record_detail.
 department_activity_record_detail = DepartmentActivityRecordViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path(
         '<int:business_pk>/space-material-requests/',

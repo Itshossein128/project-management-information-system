@@ -10,9 +10,12 @@ from cash_flow.views import (
     ReceivablesView,
 )
 
+# Viewset action routing for transaction_list.
 transaction_list = CashTransactionViewSet.as_view({'post': 'create'})
+# Viewset action routing for transaction_detail.
 transaction_detail = CashTransactionViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('cash-flow/', CashFlowListView.as_view(), name='cash-flow-list'),
     path('cash-flow/transactions/', transaction_list, name='cash-transaction-create'),

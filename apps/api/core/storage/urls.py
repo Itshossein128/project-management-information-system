@@ -2,6 +2,7 @@ from django.urls import path
 
 from storage.views import UploadUrlView, ConfirmUploadView, DownloadUrlView
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path(
         'projects/<uuid:project_pk>/files/upload-url/',

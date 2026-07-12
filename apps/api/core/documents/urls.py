@@ -8,13 +8,20 @@ from documents.views import (
     ProjectDocumentViewSet,
 )
 
+# Viewset action routing for doc_list.
 doc_list = ProjectDocumentViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for doc_detail.
 doc_detail = ProjectDocumentViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'})
+# Viewset action routing for corr_list.
 corr_list = CorrespondenceViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for corr_detail.
 corr_detail = CorrespondenceViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
+# Viewset action routing for meeting_list.
 meeting_list = MeetingMinutesViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for meeting_detail.
 meeting_detail = MeetingMinutesViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('documents/', doc_list, name='document-list'),
     path('documents/<uuid:pk>/', doc_detail, name='document-detail'),

@@ -18,19 +18,24 @@ from .data_views import (
 table_list = TableDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for table_detail.
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+# Viewset action routing for field_list.
 field_list = FieldDefinitionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for field_detail.
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# Viewset action routing for job_position_list.
 job_position_list = BusinessJobPositionViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for job_position_detail.
 job_position_detail = BusinessJobPositionViewSet.as_view(
     {
         'get': 'retrieve',
@@ -40,9 +45,11 @@ job_position_detail = BusinessJobPositionViewSet.as_view(
     }
 )
 
+# Viewset action routing for assignment_list.
 assignment_list = UserBusinessAssignmentViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+# Viewset action routing for assignment_detail.
 assignment_detail = UserBusinessAssignmentViewSet.as_view(
     {
         'get': 'retrieve',
@@ -52,6 +59,7 @@ assignment_detail = UserBusinessAssignmentViewSet.as_view(
     }
 )
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path(
         '',

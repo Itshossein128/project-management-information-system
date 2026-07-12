@@ -18,11 +18,16 @@ from contracts.views import (
     IPCViewSet,
 )
 
+# Viewset action routing for contract_list.
 contract_list = ContractViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for contract_detail.
 contract_detail = ContractViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+# Viewset action routing for ipc_list.
 ipc_list = IPCViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for ipc_detail.
 ipc_detail = IPCViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('contracts/', contract_list, name='contract-list'),
     path('contracts/<uuid:pk>/', contract_detail, name='contract-detail'),

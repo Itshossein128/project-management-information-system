@@ -1,3 +1,4 @@
+// Constants defining route file locations.
 export const ROUTES = {
   INDEX: "routes/index.tsx",
   LOGIN: "routes/login.tsx",

@@ -15,22 +15,32 @@ from business_meta.data_views import (
     DynamicRowsImportView,
 )
 
+# Viewset action routing for table_list.
 table_list = TableDefinitionViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for table_detail.
 table_detail = TableDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+# Viewset action routing for field_list.
 field_list = FieldDefinitionViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for field_detail.
 field_detail = FieldDefinitionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+# Viewset action routing for position_list.
 position_list = ProjectPositionViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for position_detail.
 position_detail = ProjectPositionViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
+# Viewset action routing for member_list.
 member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for member_detail.
 member_detail = ProjectMemberViewSet.as_view({'patch': 'partial_update'})
+# Definition of member_permissions.
 member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions', 'delete': 'permissions'})
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('', ProjectViewSet.as_view({'get': 'list', 'post': 'create'}), name='project-list'),
     path('templates/', ProjectViewSet.as_view({'get': 'templates'}), name='project-templates'),

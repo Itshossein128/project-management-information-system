@@ -24,23 +24,34 @@ from field_reports.report_views import (
 )
 from field_reports.views import WeatherLogViewSet
 
+# Viewset action routing for weather_list.
 weather_list = WeatherLogViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for weather_detail.
 weather_detail = WeatherLogViewSet.as_view(
     {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'},
 )
 
+# Viewset action routing for report_list.
 report_list = DailyReportViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for report_detail.
 report_detail = DailyReportViewSet.as_view(
     {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'},
 )
+# Definition of report_sync_batch.
 report_sync_batch = DailyReportViewSet.as_view({'post': 'sync_batch'})
+# Definition of report_submit.
 report_submit = DailyReportViewSet.as_view({'post': 'submit'})
+# Definition of report_review.
 report_review = DailyReportViewSet.as_view({'post': 'review'})
+# Definition of report_approve.
 report_approve = DailyReportViewSet.as_view({'post': 'approve'})
+# Definition of report_reject.
 report_reject = DailyReportViewSet.as_view({'post': 'reject'})
+# Definition of report_pdf.
 report_pdf = DailyReportViewSet.as_view({'get': 'pdf'})
 
 
+# Function _child handles specific URL routing logic.
 def _child(viewset):
     return (
         viewset.as_view({'get': 'list', 'post': 'create'}),
@@ -56,20 +67,29 @@ concrete_list, concrete_detail = _child(DailyReportConcreteLogViewSet)
 labor_camp_list, labor_camp_detail = _child(DailyReportLaborCampViewSet)
 incident_list, incident_detail = _child(DailyReportIncidentViewSet)
 
+# Viewset action routing for labor_camp_report_list.
 labor_camp_report_list = LaborCampReportViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for labor_camp_report_detail.
 labor_camp_report_detail = LaborCampReportViewSet.as_view(
     {'patch': 'partial_update', 'delete': 'destroy'},
 )
+# Viewset action routing for equipment_log_list.
 equipment_log_list = EquipmentLogViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for equipment_log_detail.
 equipment_log_detail = EquipmentLogViewSet.as_view(
     {'patch': 'partial_update', 'delete': 'destroy'},
 )
+# Viewset action routing for manpower_list.
 manpower_list = StandaloneManpowerViewSet.as_view({'get': 'list', 'post': 'create'})
+# Viewset action routing for manpower_detail.
 manpower_detail = StandaloneManpowerViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
 
+# Definition of DR.
 DR = 'daily-reports'
+# Definition of RID.
 RID = '<uuid:report_pk>'
 
+# List of URL patterns for urlpatterns routing.
 urlpatterns = [
     path('weather/', weather_list, name='project-weather-list'),
     path('weather/<uuid:pk>/', weather_detail, name='project-weather-detail'),
