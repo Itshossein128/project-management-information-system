@@ -24,6 +24,10 @@ SENSITIVE_KEYS = frozenset({
     'api_secret',
     'client_secret',
     'authorization',
+    'phone_number',
+    'mobile',
+    'otp',
+    'verification_code',
 })
 
 
