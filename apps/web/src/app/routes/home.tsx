@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/form";
+import { Card, CardHeader, CardTitle } from "@/components/form";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { apiJson } from "~/lib/api-client";
@@ -33,6 +35,11 @@ function projectNameOf(b: BusinessItem): string {
 
 function projectCodeOf(b: BusinessItem): string {
   return b.project_code ?? b.slug;
+}
+
+function monogramOf(name: string): string {
+  const trimmed = name.trim();
+  return trimmed ? Array.from(trimmed)[0].toUpperCase() : "؟";
 }
 
 interface BusinessesListResponse {
@@ -79,9 +86,14 @@ export default function Home() {
 
   return (
     <main className='page-main' id='container-homeBusinessPicker'>
-      <h1 className='text-page-title mb-6' id='text-homePageTitle'>
-        {t("home.chooseBusinessTitle")}
-      </h1>
+      <div className='mb-6'>
+        <h1 className='text-page-title' id='text-homePageTitle'>
+          {t("home.chooseBusinessTitle")}
+        </h1>
+        <p className='mt-1 max-w-2xl text-sm text-muted-foreground'>
+          {t("home.chooseBusinessSubtitle")}
+        </p>
+      </div>
 
       {businessesError && (
         <p
@@ -100,25 +112,37 @@ export default function Home() {
               <Link
                 key={projectIdOf(b)}
                 id={`link-homeBusiness-${index}`}
+                className='group block'
                 to={`/${PATHS.BUSINESS}/${projectIdOf(b)}/${PATHS.PROJECT_OVERVIEW}`}
               >
                 <Card className='card-interactive h-full'>
-                  <CardHeader>
-                    <CardTitle
-                      className='text-base'
-                      id={`text-homeBusinessName-${index}`}
+                  <CardHeader className='flex flex-row items-center gap-3 space-y-0'>
+                    <div
+                      aria-hidden='true'
+                      className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-base font-semibold text-secondary-foreground'
                     >
-                      {projectNameOf(b)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p
-                      className='text-muted-foreground text-sm'
+                      {monogramOf(projectNameOf(b))}
+                    </div>
+                    <div className='min-w-0 flex-1'>
+                      <CardTitle
+                        className='truncate text-base'
+                        id={`text-homeBusinessName-${index}`}
+                      >
+                        {projectNameOf(b)}
+                      </CardTitle>
+                      <Badge
+                        className='mt-1'
+                        label={t("home.businessSlugLabel", {
+                          slug: projectCodeOf(b),
+                        })}
+                      />
+                    </div>
+                    <ChevronLeft
+                      aria-hidden='true'
                       id={`text-homeBusinessSlug-${index}`}
-                    >
-                      {t("home.businessSlugLabel", { slug: projectCodeOf(b) })}
-                    </p>
-                  </CardContent>
+                      className='h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:-translate-x-0.5 ltr:rotate-180 ltr:group-hover:translate-x-0.5'
+                    />
+                  </CardHeader>
                 </Card>
               </Link>
             ))
