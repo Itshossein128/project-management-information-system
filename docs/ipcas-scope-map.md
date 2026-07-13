@@ -142,4 +142,74 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 - `/projects/{id}/contracts/{contractId}` — detail (info, BoQ, change orders, IPC wizard)
 - `/projects/{id}/ipcs/{ipcId}` — IPC detail + workflow
 
+## Sprint 9 completion checklist (Subcontractors, Alerts, Economic Engine & Gantt)
+
+| Task | Status |
+|------|--------|
+| **C-16** Subcontractor registry + scorecard + risk flag engine | Done — `subcontractors/` CRUD, scores, warnings, risk-summary |
+| **K-03** Configurable alert rule engine | Done — `alerts/services/alert_engine.py` (12+ alert types) |
+| **K-05** Alert acknowledgement + log API | Done — alert log list, acknowledge, active counts |
+| **E-06** Economic P&L snapshot generator | Done — `economic/services/snapshot_service.py` + nightly Celery task |
+| **E-07** Monte Carlo simulation | Done — async `POST .../economic/simulate/` |
+| **UI-09** Gantt chart (read-only, baseline comparison) | Done — frappe-gantt UI + PDF export |
+| **UI-11** Economic dashboard | Done — `/projects/{id}/economic` (3 profit layers, simulation) |
+| **UI-12** Alert center + rule configuration | Done — `/projects/{id}/alerts` |
+| **Tests** | Done — `alerts/tests/`, `economic/tests/`, `subcontractors/tests/`, `schedule/tests/test_gantt.py` |
+
+### Sprint 9 API paths
+
+All paths are under `/api/v1/projects/{id}/` unless noted.
+
+**Subcontractors** (`view_contracts` / `edit_contracts`):
+
+- `GET/POST .../subcontractors/` — list (filters: `status`, `discipline`, `risk_only=true`) or create
+- `GET .../subcontractors/risk-summary/` — at-risk subcontractors (cached 1h)
+- `GET/PATCH/DELETE .../subcontractors/{id}/` — detail, update, soft-delete
+- `GET/POST .../subcontractors/{id}/scores/` — performance scores + trend
+- `PATCH/DELETE .../subcontractors/{id}/scores/{scid}/`
+- `GET/POST .../subcontractors/{id}/warnings/`
+- `PATCH .../subcontractors/{id}/warnings/{wid}/` — resolve warnings
+
+**Alerts** (`view_project` / `edit_project`):
+
+- `GET/POST .../alert-rules/` — list (project + system rules) or create project rule
+- `PATCH/DELETE .../alert-rules/{rid}/` — update; delete only project-owned rules
+- `GET .../alerts/` — log (query: `acknowledged=false`, `alert_type`, `date_from`, `date_to`; max 200)
+- `GET .../alerts/active/` — unacknowledged counts by type (cached 5 min)
+- `POST .../alerts/{lid}/acknowledge/`
+
+**Economic** (`view_dashboard`):
+
+- `GET .../economic/snapshot/` — P&L snapshot (`?as_of=` Jalali or Gregorian; generates on demand)
+- `GET .../economic/history/` — snapshot time series
+- `GET .../economic/financing-cost/` — payment delay / financing cost
+- `GET .../economic/inflation-indices/` — latest index values
+- `POST .../economic/simulate/` — Monte Carlo (`iterations`, `scenario_params`) → `202` + `task_id`
+- `GET .../economic/simulate/status/{task_id}/`
+- `GET .../economic/simulate/latest/`
+- `PUT /api/v1/inflation-indices/{name}/{date}/` — admin upsert (staff only)
+
+**Schedule / Gantt** (`view_activities`):
+
+- `GET .../gantt/` — task data for chart (`?baseline_id=` optional)
+- `GET .../gantt/pdf/` — PDF table export
+
+### Sprint 9 frontend routes
+
+- `/projects/{id}/subcontractors` — registry with risk badges
+- `/projects/{id}/subcontractors/{subId}` — detail (scores, warnings, radar chart, financials)
+- `/projects/{id}/alerts` — alert center + rule editor
+- `/projects/{id}/economic` — 3-layer P&L + Monte Carlo results
+- `/projects/{id}/schedule/gantt` — read-only Gantt with baseline selector + PDF export
+
+### Sprint 9 operational notes
+
+- **Alert evaluation:** `run_daily_alert_checks` Celery beat task scans all active projects; `monitor_cash_gaps` watches cash-flow forecasts. Real-time re-checks fire via Django signals on daily-report approval, actual-cost save, inventory transaction, subcontractor score, and correspondence save.
+- **Cooldown:** Each `AlertRule` has `cooldown_hours` (default 24) — duplicate `trigger_reference` within cooldown is suppressed.
+- **Economic snapshots:** `generate_daily_snapshots` Celery task runs nightly for active projects. Snapshots are also generated on first `GET .../economic/snapshot/` for a date.
+- **Monte Carlo:** Requires Celery worker (`CELERY_TASK_ALWAYS_EAGER=true` runs inline in local dev without RabbitMQ).
+- **Risk flag criteria:** overall score &lt; 6, unresolved written/final/suspension warnings, suspended status, or &gt;15% progress lag vs plan on linked contract activities.
+
+See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `subcontractors/ENDPOINTS.md`.
+
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)

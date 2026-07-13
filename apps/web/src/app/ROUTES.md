@@ -26,6 +26,20 @@ To keep the root `routes.ts` file maintainable, specific logical sections of the
 *   **Purpose**: Configures administration and setup routes for businesses.
 *   **Important Note**: Static segments (like `/businesses/create` and `/businesses/:businessId/setup`) are registered here. They must be loaded *before* the dynamic `:businessId` catch-all route to prevent client/server matching conflicts.
 
+### `business-setup.routes.ts` — Project workspace routes (Sprint 9 additions)
+
+Project routes live in `projectRoutes` exported from `business-setup.routes.ts`. Recent Sprint 9 screens:
+
+| Route | Component | Purpose |
+|-------|-----------|---------|
+| `/projects/:projectId/subcontractors` | `project-subcontractors.tsx` | Registry with risk badges and filters |
+| `/projects/:projectId/subcontractors/:subId` | `project-subcontractor-detail.tsx` | Scorecard, warnings, radar chart |
+| `/projects/:projectId/alerts` | `project-alerts.tsx` | Alert log + rule configuration |
+| `/projects/:projectId/economic` | `project-economic.tsx` | 3-layer P&L + Monte Carlo |
+| `/projects/:projectId/schedule/gantt` | `project-schedule-gantt.tsx` | Read-only Gantt (frappe-gantt) + PDF export |
+
+Navigation entries are defined in `src/config/project-navigation.config.ts` (`buildProjectNavItems`). API clients for these modules are in `src/app/lib/api/{subcontractors,alerts,economic,gantt}.ts`.
+
 ### `business.routes.ts`
 *   **Purpose**: Configures the primary workspace routes for a specific business entity.
 *   **Routes Included**: The business dashboard root (`/businesses/:businessId`) and dynamic table data views (`/businesses/:businessId/tables/:tableSlug`).
