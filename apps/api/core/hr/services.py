@@ -38,7 +38,7 @@ def manager_approve_overtime(overtime_request, user, approved: bool, approved_ho
 
     overtime_request.manager_approved = approved
     overtime_request.updated_by = user
-    overtime_request.save()
+    overtime_request.save(update_fields=['approved_hours', 'status', 'manager_approved', 'updated_by', 'updated_at'])
     return overtime_request
 
 
