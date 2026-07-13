@@ -104,4 +104,6 @@ urlpatterns = [
     path('<uuid:project_pk>/', include('contracts.urls')),
     path('<uuid:project_pk>/', include('subcontractors.urls')),
     path('<uuid:project_pk>/', include('documents.urls')),
+    path('<uuid:project_pk>/', include('alerts.urls')),
+    path('<uuid:project_pk>/', include('economic.urls')),
 ]

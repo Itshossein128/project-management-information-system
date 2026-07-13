@@ -27,6 +27,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/${PATHS.PROJECT_ACTIVITIES}`,
     },
     {
+      label: "گانت",
+      labelI18nKey: "nav.projectGantt",
+      icon: "business" as IconName,
+      path: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
+      activePathPrefix: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
+    },
+    {
       label: "Members",
       labelI18nKey: "nav.projectMembers",
       icon: "users" as IconName,
@@ -102,6 +109,20 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "clipboard" as IconName,
       path: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
       activePathPrefix: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
+    },
+    {
+      label: "هشدارها",
+      labelI18nKey: "nav.projectAlerts",
+      icon: "bolt" as IconName,
+      path: `${base}/${PATHS.PROJECT_ALERTS}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_ALERTS}`,
+    },
+    {
+      label: "تحلیل اقتصادی",
+      labelI18nKey: "nav.projectEconomic",
+      icon: "dashboard" as IconName,
+      path: `${base}/${PATHS.PROJECT_ECONOMIC}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_ECONOMIC}`,
     },
     {
       label: "Daily Reports",

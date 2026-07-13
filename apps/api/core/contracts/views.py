@@ -235,6 +235,10 @@ class ChangeOrderDetailView(APIView):
         return Response(serializer.data)
 
 
+def _contract_adjusted_base(contract):
+    return contract.adjusted_amount if contract.adjusted_amount is not None else (contract.original_amount or 0)
+
+
 class ChangeOrderApproveView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'edit_contracts'
@@ -244,15 +248,46 @@ class ChangeOrderApproveView(APIView):
         co = get_object_or_404(
             ChangeOrder, pk=chid, contract_id=pk, contract__project_id=project_pk, is_deleted=False
         )
+        if co.status == ChangeOrderStatus.APPROVED:
+            return Response(ChangeOrderSerializer(co).data)
+        contract = co.contract
+        new_adjusted = _contract_adjusted_base(contract) + co.amount_change
+        if new_adjusted < 0:
+            return Response(
+                {'detail': 'مبلغ تعدیل‌شده قرارداد نمی‌تواند منفی باشد'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         co.status = ChangeOrderStatus.APPROVED
         co.approved_date = date.today()
         co.updated_by = request.user
         co.save()
-        contract = co.contract
-        base = contract.adjusted_amount if contract.adjusted_amount is not None else (contract.original_amount or 0)
-        contract.adjusted_amount = base + co.amount_change
+        contract.adjusted_amount = new_adjusted
         contract.updated_by = request.user
         contract.save(update_fields=['adjusted_amount', 'updated_by', 'updated_at'])
+        return Response(ChangeOrderSerializer(co).data)
+
+
+class ChangeOrderRejectView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_contracts'
+
+    @extend_schema(summary='Reject change order', tags=['Contracts'])
+    def post(self, request, project_pk=None, pk=None, chid=None):
+        co = get_object_or_404(
+            ChangeOrder, pk=chid, contract_id=pk, contract__project_id=project_pk, is_deleted=False
+        )
+        was_approved = co.status == ChangeOrderStatus.APPROVED
+        co.status = ChangeOrderStatus.REJECTED
+        co.approved_date = None
+        co.updated_by = request.user
+        co.save()
+        if was_approved:
+            contract = co.contract
+            contract.adjusted_amount = _contract_adjusted_base(contract) - co.amount_change
+            if contract.adjusted_amount < 0:
+                contract.adjusted_amount = 0
+            contract.updated_by = request.user
+            contract.save(update_fields=['adjusted_amount', 'updated_by', 'updated_at'])
         return Response(ChangeOrderSerializer(co).data)
 
 
@@ -494,29 +529,58 @@ class IPCApproveView(APIView):
         return Response(IPCDetailSerializer(ipc).data)
 
 
-def _create_ipc_cash_transaction(ipc, user, payment_date=None):
+def _ipc_cash_transaction_defaults(ipc, user, payment_date):
     contract = ipc.contract
-    payment_date = payment_date or date.today()
     if contract.contract_type == ContractType.MAIN:
         tx_type = CashTransactionType.IN
         category = InflowCategory.IPC_RECEIPT
-    else:
+    elif contract.contract_type == ContractType.SUBCONTRACT:
         tx_type = CashTransactionType.OUT
         category = OutflowCategory.SUBCONTRACTOR_PAYMENT
+    elif contract.contract_type == ContractType.PURCHASE:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.SUPPLIER_PAYMENT
+    elif contract.contract_type == ContractType.EQUIPMENT_RENTAL:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.EQUIPMENT_RENTAL
+    else:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.OTHER_EXPENSE
 
-    CashTransaction.objects.create(
-        project_id=ipc.project_id,
-        tx_date=payment_date,
-        tx_type=tx_type,
-        category=category,
-        amount=ipc.net_amount or ipc.gross_amount,
-        description=f'IPC #{ipc.ipc_number} - {contract.contract_number}',
-        ipc=ipc,
-        contract=contract,
-        counterparty=contract.counterparty,
-        created_by=user,
-        updated_by=user,
-    )
+    return {
+        'project_id': ipc.project_id,
+        'tx_date': payment_date,
+        'tx_type': tx_type,
+        'category': category,
+        'amount': ipc.net_amount or ipc.gross_amount,
+        'description': (
+            f'صدور موقت شماره {ipc.ipc_number} — '
+            f'قرارداد {contract.contract_number or contract.counterparty}'
+        ),
+        'contract': contract,
+        'counterparty': contract.counterparty,
+        'is_forecast': False,
+        'actual_date': payment_date,
+        'updated_by': user,
+        'is_deleted': False,
+        'deleted_at': None,
+    }
+
+
+def _upsert_ipc_cash_transaction(ipc, user, payment_date=None):
+    payment_date = payment_date or date.today()
+    defaults = _ipc_cash_transaction_defaults(ipc, user, payment_date)
+    existing = CashTransaction.objects.filter(ipc=ipc, is_deleted=False).first()
+    if existing:
+        for field, value in defaults.items():
+            setattr(existing, field, value)
+        existing.save()
+    else:
+        CashTransaction.objects.create(
+            ipc=ipc,
+            created_by=user,
+            **defaults,
+        )
     _invalidate(ipc.project_id)
 
 
@@ -532,8 +596,7 @@ class IPCPayView(APIView):
         ipc.actual_payment_date = payment_date
         ipc.updated_by = request.user
         ipc.save()
-        if not CashTransaction.objects.filter(ipc=ipc, is_deleted=False).exists():
-            _create_ipc_cash_transaction(ipc, request.user, payment_date)
+        _upsert_ipc_cash_transaction(ipc, request.user, payment_date)
         return Response(IPCDetailSerializer(ipc).data)
 
 

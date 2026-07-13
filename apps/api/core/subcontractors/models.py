@@ -45,10 +45,17 @@ class SubcontractorPerformanceScore(AuditSoftDeleteModel):
     class Meta:
         db_table = 'subcontractor_performance_scores'
 
+    SCORE_FIELDS = (
+        'progress_score',
+        'quality_score',
+        'hse_score',
+        'payment_compliance_score',
+        'cooperation_score',
+    )
+
     def compute_overall(self):
         if self.progress_score is None or self.hse_score is None:
             return None
-        parts = []
         weights = [
             (self.progress_score, 0.3),
             (self.quality_score, 0.25),
@@ -56,10 +63,15 @@ class SubcontractorPerformanceScore(AuditSoftDeleteModel):
             (self.payment_compliance_score, 0.1),
             (self.cooperation_score, 0.1),
         ]
+        weighted_sum = 0.0
+        weight_total = 0.0
         for val, w in weights:
             if val is not None:
-                parts.append(float(val) * w)
-        return round(sum(parts), 2) if parts else None
+                weighted_sum += float(val) * w
+                weight_total += w
+        if weight_total == 0:
+            return None
+        return round(weighted_sum / weight_total, 2)
 
     def save(self, *args, **kwargs):
         self.overall_score = self.compute_overall()
@@ -81,6 +93,7 @@ class SubcontractorWarning(AuditSoftDeleteModel):
     issued_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='sub_warnings')
     resolved = models.BooleanField(default=False)
     resolved_date = models.DateField(null=True, blank=True)
+    resolution_notes = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'subcontractor_warnings'
