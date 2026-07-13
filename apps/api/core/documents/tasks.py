@@ -25,16 +25,26 @@ def monitor_correspondence_due():
 
 
 def _notify_roles(project_id, role_names, message):
-    from master_data.models import ProjectMember, ProjectMemberRole
+    from master_data.models import ProjectMember
 
-    members = ProjectMember.objects.filter(project_id=project_id, status='active')
+    members = ProjectMember.objects.filter(project_id=project_id, status='active').prefetch_related(
+        'member_roles__role'
+    )
+
+    notifications_to_create = []
+
     for m in members:
-        roles = ProjectMemberRole.objects.filter(member=m).select_related('role')
+        roles = m.member_roles.all()
         if any(r.role.role_name in role_names for r in roles):
-            Notification.objects.create(
-                user_id=m.user_id,
-                project_id=project_id,
-                notification_type=NotificationType.GENERIC,
-                title='مهلت مکاتبه',
-                message=message,
+            notifications_to_create.append(
+                Notification(
+                    user_id=m.user_id,
+                    project_id=project_id,
+                    notification_type=NotificationType.GENERIC,
+                    title='مهلت مکاتبه',
+                    message=message,
+                )
             )
+
+    if notifications_to_create:
+        Notification.objects.bulk_create(notifications_to_create)
