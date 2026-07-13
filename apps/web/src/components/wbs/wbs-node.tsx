@@ -165,7 +165,7 @@ export function WBSNodeRow({
         {canEdit ? (
           <button
             type="button"
-            className="opacity-0 group-hover:opacity-100"
+            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
             onClick={() => setEditing(true)}
             aria-label={t("wbs.edit")}
           >
@@ -187,7 +187,7 @@ export function WBSNodeRow({
         )}
 
         {canEdit ? (
-          <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100">
+          <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
             <Button
               variant="ghost"
               size="icon-sm"
