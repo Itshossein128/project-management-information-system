@@ -78,7 +78,19 @@ It uses JSON Web Tokens (JWT) for authentication. All endpoints are grouped unde
 *   **Permissions:** `IsAuthenticated` (with object-level checks)
 
 ### 11. System Roles
-*   **URL:** `/roles/`
+*   **URL:** `/system-roles/`
 *   **Method:** `GET`
 *   **Description:** Returns a read-only list of available system roles (Django Groups).
 *   **Permissions:** `IsAuthenticated`
+
+### 12. Token Verify
+*   **URL:** `/token/verify/`
+*   **Method:** `POST`
+*   **Description:** Verifies the validity of a JWT token.
+*   **Permissions:** `AllowAny`
+
+### 13. Token Blacklist
+*   **URL:** `/token/blacklist/`
+*   **Method:** `POST`
+*   **Description:** Blacklists a specific JWT token.
+*   **Permissions:** `AllowAny`

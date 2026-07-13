@@ -80,15 +80,15 @@ This module handles the core project management functionality within IPCAS, incl
 
 ### 7. Dynamic Data (Rows)
 *   **URL:** `/<project_pk>/tables/<table_slug>/rows/`
-*   **Methods:** `GET`, `POST` (Implied via `DynamicRowsView`)
+*   **Methods:** `GET`, `POST`
 *   **Description:** Fetch or insert data rows for a specific dynamic table.
 
 *   **URL:** `/<project_pk>/tables/<table_slug>/rows/<row_id>/`
-*   **Methods:** `GET`, `PUT`, `PATCH`, `DELETE` (Implied via `DynamicRowDetailView`)
+*   **Methods:** `GET`, `PUT`, `PATCH`, `DELETE`
 *   **Description:** Manage a specific data row within a dynamic table.
 
 *   **URL:** `/<project_pk>/tables/<table_slug>/rows/export/`
-*   **Method:** `GET` (or `POST`, check view implementation)
+*   **Method:** `GET`
 *   **Description:** Export data from a dynamic table.
 
 *   **URL:** `/<project_pk>/tables/<table_slug>/rows/import/`
