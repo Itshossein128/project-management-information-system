@@ -110,3 +110,5 @@ The `projects` module acts as the root for many other domain-specific endpoints,
 *   `/contracts/`
 *   `/subcontractors/`
 *   `/documents/`
+*   `/alerts/`
+*   `/economic/`
