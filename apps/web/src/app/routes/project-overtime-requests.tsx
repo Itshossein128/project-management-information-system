@@ -4,9 +4,11 @@ import { useParams } from "react-router";
 import {
   createOvertimeRequest,
   fetchOvertimeRequests,
+  managerApproveOvertime,
   submitOvertime,
+  supervisorApproveOvertime,
 } from "@/app/lib/api/hr-forms";
-import { ProjectProvider, useProject } from "@/app/contexts/project-context";
+import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
   Breadcrumb,
   LoadingSkeleton,
@@ -20,6 +22,8 @@ import { useToast } from "@/components/ui/toast";
 
 function Content() {
   const { projectId } = useProject();
+  const { has } = usePermission(projectId);
+  const canApprove = has("approve_reports");
   const toast = useToast();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"mine" | "all">("mine");
@@ -125,6 +129,54 @@ function Content() {
                     }
                   >
                     ارسال
+                  </Button>
+                ) : null}
+                {canApprove && r.status === "submitted" ? (
+                  <>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        supervisorApproveOvertime(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید سرپرست");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید سرپرست
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        supervisorApproveOvertime(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
+                ) : null}
+                {canApprove && r.status === "supervisor_approved" ? (
+                  <Button
+                    size='sm'
+                    variant='ghost'
+                    onClick={() =>
+                      managerApproveOvertime(projectId, r.id, true)
+                        .then(() => {
+                          toast.success("تأیید مدیر");
+                          void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                        })
+                        .catch((e: Error) => toast.error(e.message))
+                    }
+                  >
+                    تأیید مدیر
                   </Button>
                 ) : null}
               </td>

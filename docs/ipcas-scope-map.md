@@ -156,7 +156,7 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 | **UI-12** Alert center + rule configuration | Done — `/projects/{id}/alerts` |
 | **Tests** | Done — `alerts/tests/`, `economic/tests/`, `subcontractors/tests/`, `schedule/tests/test_gantt.py` |
 
-### Sprint 9 API paths
+### Sprint 9 API paths (subcontractors, alerts, economic, gantt)
 
 All paths are under `/api/v1/projects/{id}/` unless noted.
 
@@ -194,7 +194,7 @@ All paths are under `/api/v1/projects/{id}/` unless noted.
 - `GET .../gantt/` — task data for chart (`?baseline_id=` optional)
 - `GET .../gantt/pdf/` — PDF table export
 
-### Sprint 9 frontend routes
+### Sprint 9 frontend routes (subcontractors, alerts, economic, gantt)
 
 - `/projects/{id}/subcontractors` — registry with risk badges
 - `/projects/{id}/subcontractors/{subId}` — detail (scores, warnings, radar chart, financials)
@@ -211,5 +211,42 @@ All paths are under `/api/v1/projects/{id}/` unless noted.
 - **Risk flag criteria:** overall score &lt; 6, unresolved written/final/suspension warnings, suspended status, or &gt;15% progress lag vs plan on linked contract activities.
 
 See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `subcontractors/ENDPOINTS.md`.
+
+## Sprint 9 completion checklist (Cash Flow & Procurement)
+
+| Task | Status |
+|------|--------|
+| **C-11** Cash flow transaction API + gap analysis | Done — `cash_flow/` app + `/projects/{id}/cash-flow` UI |
+| **C-15** Procurement request workflow (PR → PO → delivery) | Partial — `MaterialRequest` status fields only; full workflow deferred |
+| **UI-08** Cash flow chart + gap analysis view | Done — `project-cash-flow.tsx` |
+
+## Sprint 10 completion checklist (Materials, Equipment & HR)
+
+| Task | Status |
+|------|--------|
+| **C-13** Inventory ledger + running balance + consumption analytics | Done — `resources/` balance + `material-balance/consumption/` |
+| **C-13** Tests | Done — `resources/tests/test_balance.py` |
+| **C-14** Equipment registry + utilization API | Done — `equipment/`, `equipment-utilization/` |
+| **C-14** Tests | Done — `field_reports/tests/test_equipment_utilization.py` |
+| **Labor productivity API** | Done — `labor-productivity/` |
+| **UI-04** Daily report labor/equipment tab polish | Done — idle hours, registry combobox, work_hours columns |
+| **Equipment + labor dashboards** | Done — `equipment-utilization`, `labor-productivity` routes |
+| **HR approval UI** | Done — leave/overtime approve actions in web UI |
+| **Nav grouping** | Done — Resources section in project sidebar |
+
+### Sprint 10 API paths
+
+- Materials consumption: `GET /api/v1/projects/{id}/material-balance/consumption/`
+- Equipment registry: `GET/POST /api/v1/projects/{id}/equipment/`
+- Equipment utilization: `GET /api/v1/projects/{id}/equipment-utilization/`
+- Utilization summary: `GET /api/v1/projects/{id}/equipment-utilization/summary/`
+- Labor productivity: `GET /api/v1/projects/{id}/labor-productivity/`
+
+### Sprint 10 frontend routes
+
+- `/projects/{id}/material-balance` — balance + consumption% + low-stock alert link
+- `/projects/{id}/equipment-utilization` — fleet KPIs + registry CRUD
+- `/projects/{id}/labor-productivity` — productivity by activity/discipline/job title
+- Resources nav: equipment log, manpower, labor camp, leave, overtime
 
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)

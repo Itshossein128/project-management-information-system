@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import type { DailyTabProps } from "./ActivityTab";
 import type { GridColumn, GridRow } from "./EditableGrid";
+import { fetchEquipmentRegistry } from "@/app/lib/api/equipment";
 import { InlineGridTab } from "./InlineGridTab";
 
 function toHours(time: unknown): number | null {
@@ -27,8 +29,28 @@ export function EquipmentTab({
   onChanged,
   activityOptions,
 }: DailyTabProps) {
+  const { data: registry = [] } = useQuery({
+    queryKey: ["equipment-registry", projectId],
+    queryFn: async () => {
+      const res = await fetchEquipmentRegistry(projectId);
+      return Array.isArray(res) ? res : res.results;
+    },
+    enabled: Boolean(projectId),
+  });
+
+  const equipmentOptions = registry.map((e) => ({
+    value: e.equipment_name,
+    label: `${e.equipment_code} — ${e.equipment_name}`,
+  }));
+
   const columns: GridColumn[] = [
-    { key: "equipment_name", header: "دستگاه", width: "150px" },
+    {
+      key: "equipment_name",
+      header: "دستگاه",
+      type: equipmentOptions.length > 0 ? "combobox" : undefined,
+      comboOptions: equipmentOptions,
+      width: "150px",
+    },
     {
       key: "shift",
       header: "شیفت",
@@ -64,6 +86,8 @@ export function EquipmentTab({
     { key: "work_start", header: "شروع", type: "time", width: "100px" },
     { key: "work_end", header: "پایان", type: "time", width: "100px" },
     { key: "repair_hours", header: "تعمیرات", type: "number", width: "80px" },
+    { key: "idle_hours", header: "بیکاری", type: "number", width: "80px" },
+    { key: "idle_reason", header: "علت بیکاری", width: "120px" },
     {
       key: "productive_hours",
       header: "کارکرد",
@@ -101,6 +125,8 @@ export function EquipmentTab({
         work_start: "",
         work_end: "",
         repair_hours: 0,
+        idle_hours: null,
+        idle_reason: "",
         activity_ref: null,
         activity_description: "",
         notes: "",
@@ -113,6 +139,8 @@ export function EquipmentTab({
         work_start: row.work_start || null,
         work_end: row.work_end || null,
         repair_hours: row.repair_hours ?? 0,
+        idle_hours: row.idle_hours ?? null,
+        idle_reason: row.idle_reason ?? "",
         productive_hours: computeProductiveHours(row),
         activity_ref: row.activity_ref ?? null,
         notes: row.notes ?? "",

@@ -49,7 +49,8 @@ class DisciplineSubReportSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'status']
 
     def get_activity_count(self, obj):
-        return obj.activities.filter(is_deleted=False).count()
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
+        return sum(1 for activity in obj.activities.all() if not activity.is_deleted)
 
     def create(self, validated_data):
         activities = validated_data.pop('activities', [])

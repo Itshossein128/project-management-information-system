@@ -11,6 +11,7 @@ from drf_spectacular.utils import extend_schema
 from common.jalali import parse_jalali_or_gregorian
 from field_reports.models import DailyReportActivity
 from field_reports.services.activity_log import activity_log_queryset, serialize_activity_log_row
+from field_reports.services.labor_productivity import labor_productivity_report
 from field_reports.services.personnel_summary import personnel_summary
 from permissions.project import HasProjectPermission, IsProjectMember
 
@@ -56,6 +57,24 @@ class PersonnelSummaryView(APIView):
                 ),
             )
         )
+
+
+class LaborProductivityView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_reports'
+
+    @extend_schema(summary='Labor productivity metrics', tags=['Reports'])
+    def get(self, request, project_pk=None):
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+        data = labor_productivity_report(
+            project_pk,
+            date_from=parse_jalali_or_gregorian(date_from) if date_from else None,
+            date_to=parse_jalali_or_gregorian(date_to) if date_to else None,
+            activity_id=request.query_params.get('activity_id'),
+            group_by=request.query_params.get('group_by', 'activity'),
+        )
+        return Response(data)
 
 
 class ActivityLogView(APIView):

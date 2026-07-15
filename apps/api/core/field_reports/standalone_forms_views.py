@@ -129,6 +129,7 @@ class EquipmentLogSerializer(serializers.ModelSerializer):
         model = EquipmentLog
         fields = [
             'id',
+            'equipment',
             'log_date',
             'equipment_name',
             'equipment_ref',
@@ -138,7 +139,11 @@ class EquipmentLogSerializer(serializers.ModelSerializer):
             'work_start',
             'work_end',
             'repair_hours',
+            'idle_hours',
+            'idle_reason',
             'productive_hours',
+            'hourly_rate',
+            'fuel_cost',
             'activity_ref',
             'notes',
             'warning',
@@ -237,6 +242,8 @@ class StandaloneManpowerSerializer(serializers.ModelSerializer):
             'shift_2_count',
             'shift_3_count',
             'total_count',
+            'work_hours',
+            'overtime_hours',
         ]
         read_only_fields = ['id', 'total_count']
 

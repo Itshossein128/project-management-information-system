@@ -266,10 +266,12 @@ export function TransactionsTab({
     <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-3">
         <JalaliDateRangePicker
-          from={dateFrom}
-          to={dateTo}
-          onFromChange={setDateFrom}
-          onToChange={setDateTo}
+          name="cashflow-range"
+          value={{ from: dateFrom, to: dateTo }}
+          onChange={({ from, to }) => {
+            setDateFrom(from);
+            setDateTo(to);
+          }}
         />
         <select
           className="rounded-md border border-input bg-background px-3 py-2 text-sm"

@@ -69,11 +69,45 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/${PATHS.PROJECT_MATERIAL_BALANCE}`,
     },
     {
-      label: "گزارش نفرات",
-      labelI18nKey: "nav.projectPersonnelSummary",
+      label: "منابع",
+      labelI18nKey: "nav.projectResources",
       icon: "users" as IconName,
-      path: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
-      activePathPrefix: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
+      path: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+      children: [
+        {
+          label: "بهره‌وری ماشین‌آلات",
+          path: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+        },
+        {
+          label: "کارکرد ماشین‌آلات",
+          path: `${base}/${PATHS.PROJECT_EQUIPMENT_LOG}`,
+        },
+        {
+          label: "بهره‌وری نیروی انسانی",
+          path: `${base}/${PATHS.PROJECT_LABOR_PRODUCTIVITY}`,
+        },
+        {
+          label: "گزارش نفرات",
+          path: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
+        },
+        {
+          label: "نیروی انسانی",
+          path: `${base}/${PATHS.PROJECT_MANPOWER}`,
+        },
+        {
+          label: "کمپ کارگری",
+          path: `${base}/${PATHS.PROJECT_LABOR_CAMP}`,
+        },
+        {
+          label: "مرخصی",
+          path: `${base}/${PATHS.PROJECT_LEAVE}`,
+        },
+        {
+          label: "اضافه‌کار",
+          path: `${base}/${PATHS.PROJECT_OVERTIME}`,
+        },
+      ],
     },
     {
       label: "بانک فعالیت‌ها",
