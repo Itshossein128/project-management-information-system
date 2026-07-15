@@ -244,9 +244,9 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'contracts.tasks.monitor_ipc_payment_delays',
         'schedule': crontab(hour=8, minute=0),
     },
-    'monitor-guarantees': {
+    'monitor-guarantee-expiry': {
         'task': 'contracts.tasks.monitor_guarantee_expiry',
-        'schedule': crontab(hour=8, minute=5),
+        'schedule': crontab(hour=7, minute=30),
     },
     'monitor-correspondence-due': {
         'task': 'documents.tasks.monitor_correspondence_due',
@@ -255,6 +255,14 @@ CELERY_BEAT_SCHEDULE = {
     'monitor-cash-gaps': {
         'task': 'alerts.tasks.monitor_cash_gaps',
         'schedule': crontab(hour=8, minute=15),
+    },
+    'run-daily-alert-checks': {
+        'task': 'alerts.tasks.run_daily_alert_checks',
+        'schedule': crontab(hour=23, minute=0),
+    },
+    'generate-daily-economic-snapshots': {
+        'task': 'economic.tasks.generate_daily_snapshots',
+        'schedule': crontab(hour=1, minute=0),
     },
 }
 

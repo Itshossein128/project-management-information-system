@@ -10,8 +10,14 @@ from django.conf import settings
 def upload_file_to_s3(file_obj, project_id, prefix='documents') -> tuple[str, str, int]:
     """Upload file and return (url, filename, size_kb)."""
     import boto3
+    import os
 
-    ext = (file_obj.name or '').rsplit('.', 1)[-1] if file_obj.name else 'bin'
+    original_name = file_obj.name or ''
+
+    # Standardize path separators and just use the basename to discard path components.
+    safe_name = os.path.basename(original_name.replace('\\', '/'))
+
+    ext = safe_name.rsplit('.', 1)[-1] if safe_name else 'bin'
     key = f'{prefix}/{project_id}/{uuid.uuid4()}.{ext}'
     client = boto3.client(
         's3',
@@ -31,4 +37,4 @@ def upload_file_to_s3(file_obj, project_id, prefix='documents') -> tuple[str, st
         ExpiresIn=3600,
     )
     size_kb = max(1, (getattr(file_obj, 'size', 0) or 0) // 1024)
-    return url, file_obj.name or key, size_kb
+    return url, safe_name or key, size_kb

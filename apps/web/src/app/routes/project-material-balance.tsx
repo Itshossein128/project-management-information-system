@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
   createInventoryTransaction,
   createMaterialRequest,
   fetchInventoryTransactions,
   fetchMaterialBalance,
+  fetchMaterialConsumption,
   fetchMaterialRequests,
   fetchMaterials,
 } from "@/app/lib/api/materials";
+import { fetchSuppliers } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
@@ -37,6 +39,15 @@ function BalanceTab({ projectId }: { projectId: string }) {
       }),
   });
 
+  const { data: consumption } = useQuery({
+    queryKey: ["material-consumption", projectId],
+    queryFn: () => fetchMaterialConsumption(projectId),
+  });
+
+  const consumptionById = new Map(
+    (consumption?.materials ?? []).map((m) => [m.material_id, m]),
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
@@ -61,7 +72,7 @@ function BalanceTab({ projectId }: { projectId: string }) {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
-                {["کد", "مصالح", "واحد", "درخواست", "ورود", "خروج", "موجودی", "حداقل", "وضعیت"].map(
+                {["کد", "مصالح", "واحد", "درخواست", "ورود", "خروج", "موجودی", "مصرف%", "حداقل", "وضعیت"].map(
                   (h) => (
                     <th key={h} className="px-3 py-2 text-start">
                       {h}
@@ -73,12 +84,14 @@ function BalanceTab({ projectId }: { projectId: string }) {
             <tbody>
               {data.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={10} className="px-3 py-6 text-center text-muted-foreground">
                     موردی یافت نشد
                   </td>
                 </tr>
               ) : (
-                data.map((r) => (
+                data.map((r) => {
+                  const cons = consumptionById.get(r.material_id);
+                  return (
                   <tr
                     key={r.material_id}
                     className={`border-t border-border ${r.is_low_stock ? "bg-red-50 dark:bg-red-950/20" : ""}`}
@@ -90,16 +103,25 @@ function BalanceTab({ projectId }: { projectId: string }) {
                     <td className="px-3 py-2">{r.total_received}</td>
                     <td className="px-3 py-2">{r.total_issued}</td>
                     <td className="px-3 py-2 font-medium">{r.current_balance}</td>
+                    <td className="px-3 py-2">
+                      {cons?.consumption_pct != null ? `${cons.consumption_pct}%` : "—"}
+                    </td>
                     <td className="px-3 py-2">{r.min_stock_level ?? "—"}</td>
                     <td className="px-3 py-2">
                       {r.is_low_stock ? (
-                        <span className="text-xs text-red-600">کمبود</span>
+                        <Link
+                          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_ALERTS}?type=low_stock`}
+                          className="text-xs text-red-600 hover:underline"
+                        >
+                          کمبود
+                        </Link>
                       ) : (
                         <span className="text-xs text-emerald-600">عادی</span>
                       )}
                     </td>
                   </tr>
-                ))
+                );
+                })
               )}
             </tbody>
           </table>
@@ -230,6 +252,13 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
   const [txDate, setTxDate] = useState("");
   const [txType, setTxType] = useState("in");
   const [quantity, setQuantity] = useState("");
+  const [supplierId, setSupplierId] = useState("");
+
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ["suppliers", projectId],
+    queryFn: () => fetchSuppliers(projectId),
+    enabled: canEdit,
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["inventory-transactions", projectId],
@@ -252,6 +281,7 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
         tx_date: txDate,
         tx_type: txType,
         quantity: Number(quantity),
+        supplier: supplierId || undefined,
       }),
     onSuccess: () => {
       toast.success("تراکنش ثبت شد");
@@ -306,6 +336,21 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span>تأمین‌کننده</span>
+            <select
+              className="rounded-md border px-3 py-2"
+              value={supplierId}
+              onChange={(e) => setSupplierId(e.target.value)}
+            >
+              <option value="">—</option>
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.supplier_name}
+                </option>
+              ))}
+            </select>
           </label>
           <Button
             variant="primary"

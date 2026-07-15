@@ -128,6 +128,8 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'shift_2_count',
             'shift_3_count',
             'total_count',
+            'work_hours',
+            'overtime_hours',
             'daily_rate',
         ]
         read_only_fields = ['id', 'total_count']
@@ -138,6 +140,7 @@ class DailyReportEquipmentSerializer(serializers.ModelSerializer):
         model = DailyReportEquipment
         fields = [
             'id',
+            'equipment',
             'equipment_name',
             'equipment_ref',
             'shift',
@@ -146,7 +149,11 @@ class DailyReportEquipmentSerializer(serializers.ModelSerializer):
             'work_start',
             'work_end',
             'repair_hours',
+            'idle_hours',
+            'idle_reason',
             'productive_hours',
+            'hourly_rate',
+            'fuel_cost',
             'activity_ref',
             'notes',
         ]

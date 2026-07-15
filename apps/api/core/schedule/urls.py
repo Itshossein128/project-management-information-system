@@ -9,6 +9,7 @@ from schedule.progress_views import (
     ProjectProgressSnapshotView,
     ProjectSCurveView,
 )
+from schedule.gantt_views import GanttDataView, GanttPdfView
 from schedule.views import (
     MspImportPreviewView,
     MspImportStartView,
@@ -48,4 +49,6 @@ urlpatterns = [
     path('progress/kpis/', ProjectProgressKpisView.as_view(), name='project-progress-kpis'),
     path('progress/history/', ProjectProgressHistoryView.as_view(), name='project-progress-history'),
     path('progress/manual/', ProjectManualProgressView.as_view(), name='project-progress-manual'),
+    path('gantt/', GanttDataView.as_view(), name='project-gantt'),
+    path('gantt/pdf/', GanttPdfView.as_view(), name='project-gantt-pdf'),
 ]

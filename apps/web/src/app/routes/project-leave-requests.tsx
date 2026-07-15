@@ -1,8 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { createLeaveRequest, fetchLeaveRequests } from "@/app/lib/api/hr-forms";
-import { ProjectProvider, useProject } from "@/app/contexts/project-context";
+import {
+  createLeaveRequest,
+  fetchLeaveRequests,
+  managerApproveLeave,
+  securityApproveLeave,
+  submitLeave,
+  supervisorApproveLeave,
+} from "@/app/lib/api/hr-forms";
+import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
   Breadcrumb,
   LoadingSkeleton,
@@ -16,6 +23,8 @@ import { useToast } from "@/components/ui/toast";
 
 function Content() {
   const { projectId } = useProject();
+  const { has } = usePermission(projectId);
+  const canApprove = has("approve_reports");
   const toast = useToast();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"mine" | "all">("mine");
@@ -77,7 +86,7 @@ function Content() {
       <table className='w-full text-sm border rounded-lg'>
         <thead className='bg-muted/50'>
           <tr>
-            {["تاریخ", "نوع", "نام", "واحد", "وضعیت"].map((h) => (
+            {["تاریخ", "نوع", "نام", "واحد", "وضعیت", ""].map((h) => (
               <th key={h} className='px-3 py-2 text-start'>
                 {h}
               </th>
@@ -98,6 +107,72 @@ function Content() {
                   variant={r.status === "rejected" ? "danger" : "neutral"}
                   label={r.status}
                 />
+              </td>
+              <td className='px-3 py-2 space-x-1'>
+                {r.status === "draft" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      submitLeave(projectId, r.id)
+                        .then(() => {
+                          toast.success("ارسال شد");
+                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                        })
+                        .catch((e: Error) => toast.error(e.message))
+                    }
+                  >
+                    ارسال
+                  </Button>
+                ) : null}
+                {canApprove && r.status === "submitted" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      supervisorApproveLeave(projectId, r.id, true)
+                        .then(() => {
+                          toast.success("تأیید سرپرست");
+                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                        })
+                        .catch((e: Error) => toast.error(e.message))
+                    }
+                  >
+                    تأیید سرپرست
+                  </Button>
+                ) : null}
+                {canApprove && r.status === "supervisor_approved" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      managerApproveLeave(projectId, r.id, true)
+                        .then(() => {
+                          toast.success("تأیید مدیر");
+                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                        })
+                        .catch((e: Error) => toast.error(e.message))
+                    }
+                  >
+                    تأیید مدیر
+                  </Button>
+                ) : null}
+                {canApprove && r.status === "manager_approved" && r.request_type === "mission" ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      securityApproveLeave(projectId, r.id, true)
+                        .then(() => {
+                          toast.success("تأیید حراست");
+                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                        })
+                        .catch((e: Error) => toast.error(e.message))
+                    }
+                  >
+                    تأیید حراست
+                  </Button>
+                ) : null}
               </td>
             </tr>
           ))}

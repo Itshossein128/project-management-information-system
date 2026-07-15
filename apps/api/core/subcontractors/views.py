@@ -1,13 +1,15 @@
 from datetime import date
 
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema
 
 from common.cache_helpers import cache_key, get_cached_or_compute, params_fingerprint
+from common.cache_utils import invalidate_project_caches
 from permissions.project import HasProjectPermission, IsProjectMember
 from subcontractors.models import Subcontractor, SubcontractorPerformanceScore, SubcontractorWarning
 from subcontractors.serializers import (
@@ -16,7 +18,12 @@ from subcontractors.serializers import (
     SubcontractorSerializer,
     WarningSerializer,
 )
-from subcontractors.services.risk_service import compute_risk_flag
+from subcontractors.services.performance import SubcontractorPerformanceService
+from subcontractors.services.risk_service import average_overall_score, compute_risk_flag, score_trend
+
+
+def _invalidate_subcontractor_caches(project_id):
+    invalidate_project_caches(project_id)
 
 
 class SubScopedViewSet(viewsets.ModelViewSet):
@@ -43,9 +50,11 @@ class SubScopedViewSet(viewsets.ModelViewSet):
             created_by=self.request.user,
             updated_by=self.request.user,
         )
+        _invalidate_subcontractor_caches(self.kwargs['project_pk'])
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
+        _invalidate_subcontractor_caches(self.kwargs['project_pk'])
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -53,6 +62,7 @@ class SubScopedViewSet(viewsets.ModelViewSet):
         instance.deleted_at = timezone.now()
         instance.updated_by = request.user
         instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        _invalidate_subcontractor_caches(self.kwargs['project_pk'])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -62,50 +72,125 @@ class SubcontractorViewSet(SubScopedViewSet):
             return SubcontractorDetailSerializer
         return SubcontractorSerializer
 
+    def _filter_queryset(self, qs, request):
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        discipline = request.query_params.get('discipline')
+        if discipline:
+            qs = qs.filter(discipline__icontains=discipline)
+        if request.query_params.get('risk_only') == 'true':
+            at_risk_ids = []
+            for sub in qs:
+                if compute_risk_flag(sub)[0]:
+                    at_risk_ids.append(sub.id)
+            qs = qs.filter(id__in=at_risk_ids)
+        return qs
+
     def list(self, request, *args, **kwargs):
-        qs = self.get_queryset()
+        qs = self._filter_queryset(self.get_queryset(), request)
         return Response({'results': SubcontractorSerializer(qs, many=True).data})
 
 
-class ScoreCreateView(APIView):
+class ScoreListCreateView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'edit_contracts'
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+        return [IsAuthenticated(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.request.method == 'GET':
+            return 'view_contracts'
+        return 'edit_contracts'
+
+    @extend_schema(summary='List performance scores', tags=['Subcontractors'])
+    def get(self, request, project_pk=None, pk=None):
+        sub = get_object_or_404(Subcontractor, pk=pk, project_id=project_pk, is_deleted=False)
+        scores = sub.scores.filter(is_deleted=False).order_by('-score_date')
+        return Response({
+            'results': PerformanceScoreSerializer(scores, many=True).data,
+            'average_overall': average_overall_score(sub),
+            'trend': score_trend(sub),
+        })
+
+    @extend_schema(summary='Create performance score', tags=['Subcontractors'])
     def post(self, request, project_pk=None, pk=None):
-        sub = Subcontractor.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
+        sub = get_object_or_404(Subcontractor, pk=pk, project_id=project_pk, is_deleted=False)
         ser = PerformanceScoreSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        score = SubcontractorPerformanceScore.objects.create(
-            subcontractor=sub,
-            evaluator=request.user,
-            created_by=request.user,
-            updated_by=request.user,
-            **ser.validated_data,
-        )
-        flag, reasons = compute_risk_flag(sub)
-        if flag:
-            _fire_risk_alert(sub, reasons)
+        service = SubcontractorPerformanceService()
+        score = service.create_score(sub, ser.validated_data, request.user)
+        _invalidate_subcontractor_caches(project_pk)
         return Response(PerformanceScoreSerializer(score).data, status=201)
 
 
-class WarningCreateView(APIView):
+class ScoreDetailView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'edit_contracts'
 
+    def patch(self, request, project_pk=None, pk=None, scid=None):
+        score = get_object_or_404(
+            SubcontractorPerformanceScore,
+            pk=scid,
+            subcontractor_id=pk,
+            subcontractor__project_id=project_pk,
+            is_deleted=False,
+        )
+        ser = PerformanceScoreSerializer(score, data=request.data, partial=True)
+        ser.is_valid(raise_exception=True)
+        for attr, val in ser.validated_data.items():
+            setattr(score, attr, val)
+        score.updated_by = request.user
+        score.save()
+        _invalidate_subcontractor_caches(project_pk)
+        return Response(PerformanceScoreSerializer(score).data)
+
+    def delete(self, request, project_pk=None, pk=None, scid=None):
+        score = get_object_or_404(
+            SubcontractorPerformanceScore,
+            pk=scid,
+            subcontractor_id=pk,
+            subcontractor__project_id=project_pk,
+            is_deleted=False,
+        )
+        score.is_deleted = True
+        score.deleted_at = timezone.now()
+        score.updated_by = request.user
+        score.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        _invalidate_subcontractor_caches(project_pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class WarningListCreateView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+        return [IsAuthenticated(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.request.method == 'GET':
+            return 'view_contracts'
+        return 'edit_contracts'
+
+    def get(self, request, project_pk=None, pk=None):
+        sub = get_object_or_404(Subcontractor, pk=pk, project_id=project_pk, is_deleted=False)
+        warnings = sub.warnings.filter(is_deleted=False).order_by('-warning_date')
+        return Response({'results': WarningSerializer(warnings, many=True).data})
+
     def post(self, request, project_pk=None, pk=None):
-        sub = Subcontractor.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
+        sub = get_object_or_404(Subcontractor, pk=pk, project_id=project_pk, is_deleted=False)
         ser = WarningSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        w = SubcontractorWarning.objects.create(
-            subcontractor=sub,
-            issued_by=request.user,
-            created_by=request.user,
-            updated_by=request.user,
-            **ser.validated_data,
-        )
-        flag, reasons = compute_risk_flag(sub)
-        if flag:
-            _fire_risk_alert(sub, reasons)
+        service = SubcontractorPerformanceService()
+        w = service.create_warning(sub, ser.validated_data, request.user)
+        _invalidate_subcontractor_caches(project_pk)
         return Response(WarningSerializer(w).data, status=201)
 
 
@@ -114,14 +199,22 @@ class WarningPatchView(APIView):
     required_permission = 'edit_contracts'
 
     def patch(self, request, project_pk=None, pk=None, wid=None):
-        w = SubcontractorWarning.objects.get(
-            pk=wid, subcontractor_id=pk, subcontractor__project_id=project_pk, is_deleted=False
+        w = get_object_or_404(
+            SubcontractorWarning,
+            pk=wid,
+            subcontractor_id=pk,
+            subcontractor__project_id=project_pk,
+            is_deleted=False,
         )
         ser = WarningSerializer(w, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        if ser.validated_data.get('resolved') and not w.resolved_date:
+        for attr, val in ser.validated_data.items():
+            setattr(w, attr, val)
+        if w.resolved and not w.resolved_date:
             w.resolved_date = date.today()
-        ser.save(updated_by=request.user)
+        w.updated_by = request.user
+        w.save()
+        _invalidate_subcontractor_caches(project_pk)
         return Response(WarningSerializer(w).data)
 
 
@@ -148,11 +241,3 @@ class RiskSummaryView(APIView):
 
         data = get_cached_or_compute(key, 3600, compute)
         return Response({'results': data})
-
-
-def _fire_risk_alert(sub, reasons):
-    try:
-        from alerts.services.evaluation import fire_subcontractor_at_risk
-        fire_subcontractor_at_risk(sub, reasons)
-    except Exception:
-        pass
