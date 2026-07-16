@@ -1,0 +1,39 @@
+name: Bug report
+description: Something broken in API or web UI
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - frontend (apps/web)
+        - backend (apps/api)
+        - e2e / Playwright
+        - infra / Docker
+        - docs
+        - unclear
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, expected vs actual.
+      placeholder: |
+        1. Open /projects/...
+        2. Click ...
+        3. See error ...
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "local pnpm dev / Docker full stack / deployed"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Paste API error JSON, browser console, or stack traces (redact secrets).
