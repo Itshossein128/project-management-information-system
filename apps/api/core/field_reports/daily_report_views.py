@@ -242,7 +242,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         pdf_bytes, filename = generate_daily_report_pdf(instance)
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
 
