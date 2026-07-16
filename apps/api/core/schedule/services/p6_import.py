@@ -197,10 +197,11 @@ def execute_p6_import(
     total = len(summary_tasks) + len(leaf_tasks)
     done = 0
 
+    existing_wbs = {wbs.wbs_code: wbs for wbs in WBS.objects.filter(project=project)}
     for task in sorted(summary_tasks, key=lambda t: (t.outline_level, t.wbs_code)):
         code = task.wbs_code
-        if WBS.objects.filter(project=project, wbs_code=code).exists():
-            outline_to_wbs[task.outline_number] = WBS.objects.get(project=project, wbs_code=code)
+        if code in existing_wbs:
+            outline_to_wbs[task.outline_number] = existing_wbs[code]
             warnings.append(f'Duplicate WBS code "{code}" — skipped.')
             continue
         level = task.outline_level
@@ -216,6 +217,10 @@ def execute_p6_import(
         if progress_callback:
             progress_callback(int(done / max(total, 1) * 80))
 
+    existing_activities = set(Activity.objects.filter(project=project).values_list('activity_code', flat=True))
+    activities_to_create = []
+    task_uid_to_activity_index = {}
+
     for task in leaf_tasks:
         parent_key = '.'.join(task.outline_number.split('.')[:-1])
         wbs = outline_to_wbs.get(parent_key)
@@ -230,10 +235,11 @@ def execute_p6_import(
             warnings.append(f'Activity "{task.name}" has no WBS parent.')
             continue
         code = task.wbs_code
-        if Activity.objects.filter(project=project, activity_code=code).exists():
+        if code in existing_activities:
             warnings.append(f'Duplicate activity code "{code}" — skipped.')
             continue
-        act = Activity.objects.create(
+
+        activities_to_create.append(Activity(
             project=project,
             wbs=wbs,
             activity_code=code,
@@ -242,10 +248,15 @@ def execute_p6_import(
             planned_finish=task.finish,
             created_by=audit_user,
             updated_by=audit_user,
-        )
-        uid_to_activity[task.uid] = act
+        ))
+        task_uid_to_activity_index[task.uid] = len(activities_to_create) - 1
+        existing_activities.add(code)
         activity_count += 1
         done += 1
+
+    created_activities = Activity.objects.bulk_create(activities_to_create)
+    for task_uid, index in task_uid_to_activity_index.items():
+        uid_to_activity[task_uid] = created_activities[index]
 
     baseline = BaselineSchedule.objects.create(
         project=project,
@@ -253,19 +264,23 @@ def execute_p6_import(
         is_current=True,
     )
 
+    baseline_activities_to_create = []
     for task in leaf_tasks:
         if task.uid not in uid_to_activity:
             continue
         act = uid_to_activity[task.uid]
-        BaselineActivity.objects.create(
+        baseline_activities_to_create.append(BaselineActivity(
             baseline=baseline,
             activity=act,
             planned_start=task.start,
             planned_finish=task.finish,
             planned_duration=task.duration_days,
             planned_progress=task.percent_complete,
-        )
+        ))
 
+    BaselineActivity.objects.bulk_create(baseline_activities_to_create)
+
+    relations_to_create = []
     for task in leaf_tasks:
         if task.uid not in uid_to_activity:
             continue
@@ -276,17 +291,17 @@ def execute_p6_import(
                 warnings.append(f'Predecessor {pred["uid"]} not found for {task.name}.')
                 continue
             rel_type = P6_RELATION_MAP.get(pred['type'], RelationType.FS)
-            ActivityRelation.objects.get_or_create(
+            relations_to_create.append(ActivityRelation(
                 predecessor=predecessor,
                 successor=successor,
-                defaults={
-                    'relation_type': rel_type,
-                    'lag_days': pred.get('lag', 0),
-                    'created_by': audit_user,
-                    'updated_by': audit_user,
-                },
-            )
+                relation_type=rel_type,
+                lag_days=pred.get('lag', 0),
+                created_by=audit_user,
+                updated_by=audit_user,
+            ))
             relation_count += 1
+
+    ActivityRelation.objects.bulk_create(relations_to_create, ignore_conflicts=True)
 
     if progress_callback:
         progress_callback(100)

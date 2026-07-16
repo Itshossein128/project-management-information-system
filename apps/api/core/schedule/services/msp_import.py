@@ -242,14 +242,15 @@ def execute_msp_import(
     total = len(summary_tasks) + len([t for t in parsed.tasks if not t.is_summary])
     done = 0
 
+    existing_wbs = {wbs.wbs_code: wbs for wbs in WBS.objects.filter(project=project)}
     for task in sorted(summary_tasks, key=lambda t: t.outline_number):
         code = task.wbs_code or task.outline_number
         if not code:
             warnings.append(f'Summary task "{task.name}" has no WBS code.')
             continue
-        if WBS.objects.filter(project=project, wbs_code=code).exists():
+        if code in existing_wbs:
             warnings.append(f'Duplicate WBS code "{code}" — skipped.')
-            outline_to_wbs[task.outline_number] = WBS.objects.get(project=project, wbs_code=code)
+            outline_to_wbs[task.outline_number] = existing_wbs[code]
             continue
 
         level = task.outline_level
@@ -275,6 +276,10 @@ def execute_msp_import(
         if progress_callback:
             progress_callback(int(done / max(total, 1) * 80))
 
+    existing_activities = set(Activity.objects.filter(project=project).values_list('activity_code', flat=True))
+    activities_to_create = []
+    task_uid_to_activity_index = {}
+
     for task in parsed.tasks:
         if task.is_summary:
             continue
@@ -287,11 +292,11 @@ def execute_msp_import(
             continue
 
         code = task.wbs_code or task.uid
-        if Activity.objects.filter(project=project, activity_code=code).exists():
+        if code in existing_activities:
             warnings.append(f'Duplicate activity code "{code}" — skipped.')
             continue
 
-        act = Activity.objects.create(
+        activities_to_create.append(Activity(
             project=project,
             wbs=wbs,
             activity_code=code,
@@ -300,10 +305,15 @@ def execute_msp_import(
             planned_finish=task.finish,
             created_by=audit_user,
             updated_by=audit_user,
-        )
-        uid_to_activity[task.uid] = act
+        ))
+        task_uid_to_activity_index[task.uid] = len(activities_to_create) - 1
+        existing_activities.add(code)
         activity_count += 1
         done += 1
+
+    created_activities = Activity.objects.bulk_create(activities_to_create)
+    for task_uid, index in task_uid_to_activity_index.items():
+        uid_to_activity[task_uid] = created_activities[index]
 
     baseline = BaselineSchedule.objects.create(
         project=project,
@@ -311,11 +321,12 @@ def execute_msp_import(
         is_current=True,
     )
 
+    baseline_activities_to_create = []
     for task in parsed.tasks:
         if task.is_summary or task.uid not in uid_to_activity:
             continue
         act = uid_to_activity[task.uid]
-        BaselineActivity.objects.create(
+        baseline_activities_to_create.append(BaselineActivity(
             baseline=baseline,
             activity=act,
             planned_start=task.start,
@@ -325,8 +336,11 @@ def execute_msp_import(
             total_float=task.total_slack,
             free_float=task.free_slack,
             is_critical=task.is_critical,
-        )
+        ))
 
+    BaselineActivity.objects.bulk_create(baseline_activities_to_create)
+
+    relations_to_create = []
     for task in parsed.tasks:
         if task.uid not in uid_to_activity:
             continue
@@ -337,17 +351,16 @@ def execute_msp_import(
                 warnings.append(f'Predecessor UID {pred["uid"]} not found for {task.name}.')
                 continue
             rel_type = MSP_RELATION_MAP.get(pred['type'], RelationType.FS)
-            ActivityRelation.objects.get_or_create(
+            relations_to_create.append(ActivityRelation(
                 predecessor=predecessor,
                 successor=successor,
-                defaults={
-                    'relation_type': rel_type,
-                    'lag_days': pred.get('lag', 0),
-                    'created_by': audit_user,
-                    'updated_by': audit_user,
-                },
-            )
+                relation_type=rel_type,
+                lag_days=pred.get('lag', 0),
+                created_by=audit_user,
+                updated_by=audit_user,
+            ))
             relation_count += 1
+    ActivityRelation.objects.bulk_create(relations_to_create, ignore_conflicts=True)
 
     if progress_callback:
         progress_callback(100)

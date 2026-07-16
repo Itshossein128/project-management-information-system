@@ -143,12 +143,13 @@ def apply_deductions(ipc_id):
                 description='استهلاک پیش‌پرداخت',
             ))
 
+    audit_user = ipc.updated_by or ipc.created_by
     for d in deductions:
-        audit_user = ipc.updated_by or ipc.created_by
         if audit_user:
             d.created_by = audit_user
             d.updated_by = audit_user
-        d.save()
+
+    IPCDeduction.objects.bulk_create(deductions)
 
     total_deductions = sum(float(d.amount) for d in deductions)
     manual = IPCDeduction.objects.filter(
