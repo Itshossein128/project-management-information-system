@@ -42,22 +42,29 @@ def get_project_progress_on_date(project_id, on_date: date) -> float:
         is_deleted=False,
         weight__isnull=False,
     )
-    total_weight = sum(float(a.weight) for a in activities)
+    # ⚡ Bolt: Evaluate activities once
+    activities_list = list(activities)
+    total_weight = sum(float(a.weight) for a in activities_list)
     if total_weight == 0:
         return 0.0
 
-    weighted_sum = 0.0
-    for activity in activities:
-        progress = (
-            ActivityProgress.objects.filter(
-                activity=activity,
-                report_date__lte=on_date,
-                actual_progress__isnull=False,
-            )
-            .order_by('-report_date')
-            .first()
+    # ⚡ Bolt: Fetch latest actual_progress for all activities in one query
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity__project_id=project_id,
+            activity__is_deleted=False,
+            activity__weight__isnull=False,
+            report_date__lte=on_date,
+            actual_progress__isnull=False,
         )
-        actual = float(progress.actual_progress) if progress else 0.0
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.actual_progress) for p in progresses}
+
+    weighted_sum = 0.0
+    for activity in activities_list:
+        actual = progress_map.get(activity.id, 0.0)
         weighted_sum += float(activity.weight) * actual
 
     return weighted_sum / total_weight
@@ -69,22 +76,29 @@ def get_planned_progress_on_date(project_id, on_date: date) -> float:
         is_deleted=False,
         weight__isnull=False,
     )
-    total_weight = sum(float(a.weight) for a in activities)
+    # ⚡ Bolt: Evaluate activities once
+    activities_list = list(activities)
+    total_weight = sum(float(a.weight) for a in activities_list)
     if total_weight == 0:
         return 0.0
 
-    weighted_sum = 0.0
-    for activity in activities:
-        progress = (
-            ActivityProgress.objects.filter(
-                activity=activity,
-                report_date__lte=on_date,
-                planned_progress__isnull=False,
-            )
-            .order_by('-report_date')
-            .first()
+    # ⚡ Bolt: Fetch latest planned_progress for all activities in one query
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity__project_id=project_id,
+            activity__is_deleted=False,
+            activity__weight__isnull=False,
+            report_date__lte=on_date,
+            planned_progress__isnull=False,
         )
-        planned = float(progress.planned_progress) if progress else 0.0
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.planned_progress) for p in progresses}
+
+    weighted_sum = 0.0
+    for activity in activities_list:
+        planned = progress_map.get(activity.id, 0.0)
         weighted_sum += float(activity.weight) * planned
 
     return weighted_sum / total_weight
@@ -189,14 +203,25 @@ def get_progress_snapshot(project_id, as_of: date) -> dict:
     spi = round(actual / planned, 3) if planned else None
 
     activities = Activity.objects.filter(project_id=project_id, is_deleted=False)
-    weighted = activities.filter(weight__isnull=False)
+    # ⚡ Bolt: Evaluate activities once
+    activities_list = list(activities)
+    weighted = [a for a in activities_list if a.weight is not None]
+
+    # ⚡ Bolt: Fetch latest progress for all activities in one query
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity__project_id=project_id,
+            activity__is_deleted=False,
+            report_date__lte=as_of,
+        )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: p for p in progresses}
+
     behind = 0
     for activity in weighted:
-        latest = (
-            ActivityProgress.objects.filter(activity=activity, report_date__lte=as_of)
-            .order_by('-report_date')
-            .first()
-        )
+        latest = progress_map.get(activity.id)
         if not latest:
             continue
         planned_a = float(latest.planned_progress or 0)
@@ -216,16 +241,17 @@ def get_progress_snapshot(project_id, as_of: date) -> dict:
         .first()
     )
 
+    # ⚡ Bolt: Calculate counts from the already evaluated list
     return {
         'as_of_date': as_of.strftime('%Y-%m-%d'),
         'planned_progress_pct': round(planned * 100, 2),
         'actual_progress_pct': round(actual * 100, 2),
         'schedule_variance_pct': round((actual - planned) * 100, 2),
         'spi': spi,
-        'activities_total': activities.count(),
-        'activities_completed': activities.filter(status=ActivityStatus.COMPLETED).count(),
-        'activities_in_progress': activities.filter(status=ActivityStatus.IN_PROGRESS).count(),
-        'activities_not_started': activities.filter(status=ActivityStatus.NOT_STARTED).count(),
+        'activities_total': len(activities_list),
+        'activities_completed': sum(1 for a in activities_list if a.status == ActivityStatus.COMPLETED),
+        'activities_in_progress': sum(1 for a in activities_list if a.status == ActivityStatus.IN_PROGRESS),
+        'activities_not_started': sum(1 for a in activities_list if a.status == ActivityStatus.NOT_STARTED),
         'activities_behind_schedule': behind,
         'last_approved_report_date': (
             last_report.report_date.strftime('%Y-%m-%d') if last_report else None
@@ -244,13 +270,24 @@ def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, sta
     if status:
         qs = qs.filter(status=status)
 
-    rows = []
-    for activity in qs:
-        latest = (
-            ActivityProgress.objects.filter(activity=activity, report_date__lte=as_of)
-            .order_by('-report_date')
-            .first()
+    # ⚡ Bolt: Evaluate activities once
+    activities_list = list(qs)
+
+    # ⚡ Bolt: Fetch latest progress for only the relevant activities in one query
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity_id__in=[a.id for a in activities_list],
+            report_date__lte=as_of,
         )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: p for p in progresses}
+
+    rows = []
+    for activity in activities_list:
+        latest = progress_map.get(activity.id)
+
         planned = float(latest.planned_progress or 0) if latest else 0.0
         actual = float(latest.actual_progress or 0) if latest else 0.0
         variance = actual - planned
