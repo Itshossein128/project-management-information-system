@@ -42,7 +42,7 @@ export function NotificationBell() {
         aria-haspopup="dialog"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted",
+          "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
           open && "bg-muted",
         )}
       >
