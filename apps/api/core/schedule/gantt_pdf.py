@@ -9,6 +9,7 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from django.utils.dateparse import parse_date
 from common.jalali import gregorian_to_jalali
 from field_reports.pdf import _fa, _register_font
 from projects.models import Project
@@ -28,8 +29,11 @@ def render_gantt_pdf(project_id, gantt_data: dict) -> bytes:
 
     rows = [[_fa(h) for h in ['کد WBS', 'فعالیت', 'شروع', 'پایان', 'پیشرفت', 'وضعیت']]]
     for task in gantt_data.get('tasks', []):
-        start_j = gregorian_to_jalali(task['start']) if task.get('start') else '—'
-        end_j = gregorian_to_jalali(task['end']) if task.get('end') else '—'
+        start_val = parse_date(task['start']) if isinstance(task.get('start'), str) else task.get('start')
+        end_val = parse_date(task['end']) if isinstance(task.get('end'), str) else task.get('end')
+
+        start_j = gregorian_to_jalali(start_val) if start_val else '—'
+        end_j = gregorian_to_jalali(end_val) if end_val else '—'
         rows.append([
             _fa(task.get('wbs_code', '')),
             _fa(task.get('name', '')),
