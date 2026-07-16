@@ -11,6 +11,12 @@ from schedule.models import ActivityProgress
 
 
 def auto_populate_ipc(ipc_id):
+    """
+    Automatically populates the items of an Interim Payment Certificate (IPC) based on
+    the schedule of values (SoV) defined in its parent contract.
+    It links each IPC item to a contract item, carrying over the cumulative quantities
+    from the previous IPC to serve as the baseline for the current period's claim.
+    """
     ipc = IPC.objects.get(pk=ipc_id)
     contract = ipc.contract
 
@@ -75,6 +81,13 @@ def auto_populate_ipc(ipc_id):
 
 
 def apply_deductions(ipc_id):
+    """
+    Recalculates and applies standard automatic deductions (such as retention, tax, and
+    advance payment recovery) to an IPC based on its contract's terms and the current
+    gross amount claimed.
+    It preserves manually entered deductions (e.g., material price differences) and
+    updates the IPC's final net amount.
+    """
     ipc = IPC.objects.get(pk=ipc_id)
     contract = ipc.contract
     gross = float(ipc.gross_amount or 0)
