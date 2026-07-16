@@ -13,3 +13,7 @@
 ## 2026-07-14 - Resolve N+1 query in SubReportSerializer
 **Learning:** Calling `.filter()` or `.count()` on a related manager (e.g. `obj.activities.filter(is_deleted=False).count()`) in a DRF `SerializerMethodField` bypasses Django's `prefetch_related` cache entirely, causing a severe N+1 query issue when serializing lists.
 **Action:** When a queryset in the view uses `prefetch_related`, serializer methods should retrieve the related collection via `.all()` and iterate over it in python (e.g. `sum(1 for activity in obj.activities.all() if not activity.is_deleted)`) to maintain optimal performance.
+
+## 2025-03-01 - Avoid N+1 query loop when fetching latest related record
+**Learning:** Looping over a queryset and using `.filter(...).order_by('date').first()` on a related model creates severe N+1 queries.
+**Action:** When needing the "latest" related record for multiple parent records, use `.distinct('parent_id')` with `.order_by('parent_id', '-date')` to fetch them all in a single query, map them in Python by `parent_id`, and pull from the map during iteration.
