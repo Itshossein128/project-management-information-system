@@ -1,0 +1,40 @@
+# Dependabot = an automated "dependency agent".
+# It opens PRs when npm/pip/GitHub Actions packages have updates.
+# Docs: https://docs.github.com/en/code-security/dependabot
+version: 2
+updates:
+  # Root pnpm workspace (web + shared packages)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    groups:
+      web-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Django API Python deps
+  - package-ecosystem: "pip"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Keep Actions themselves up to date (checkout, setup-node, …)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "ci"

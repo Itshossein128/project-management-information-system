@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Engineering blueprint
+    url: https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/IPCAS_Engineering_Blueprint.md
+    about: Read the target architecture before large feature requests.
+  - name: Scope map
+    url: https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/ipcas-scope-map.md
+    about: See what is already implemented vs planned.

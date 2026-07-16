@@ -100,8 +100,7 @@ class MspImportStatus(models.TextChoices):
     FAILED = 'failed', 'Failed'
 
 
-class MspImportJob(UUIDModel, TimeStampedModel):
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='msp_import_jobs')
+class BaseImportJob(UUIDModel, TimeStampedModel):
     task_id = models.CharField(max_length=64, blank=True, default='')
     status = models.CharField(max_length=20, choices=MspImportStatus.choices, default=MspImportStatus.PENDING)
     progress_pct = models.PositiveSmallIntegerField(default=0)
@@ -110,6 +109,13 @@ class MspImportJob(UUIDModel, TimeStampedModel):
     file_data = models.BinaryField(null=True, blank=True)
     result = models.JSONField(default=dict, blank=True)
     error_message = models.TextField(blank=True, default='')
+
+    class Meta:
+        abstract = True
+
+
+class MspImportJob(BaseImportJob):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='msp_import_jobs')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -123,16 +129,8 @@ class MspImportJob(UUIDModel, TimeStampedModel):
         ordering = ['-created_at']
 
 
-class P6ImportJob(UUIDModel, TimeStampedModel):
+class P6ImportJob(BaseImportJob):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='p6_import_jobs')
-    task_id = models.CharField(max_length=64, blank=True, default='')
-    status = models.CharField(max_length=20, choices=MspImportStatus.choices, default=MspImportStatus.PENDING)
-    progress_pct = models.PositiveSmallIntegerField(default=0)
-    filename = models.CharField(max_length=255, blank=True, default='')
-    replace_existing = models.BooleanField(default=False)
-    file_data = models.BinaryField(null=True, blank=True)
-    result = models.JSONField(default=dict, blank=True)
-    error_message = models.TextField(blank=True, default='')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
