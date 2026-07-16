@@ -27,9 +27,20 @@ def render_gantt_pdf(project_id, gantt_data: dict) -> bytes:
     ]
 
     rows = [[_fa(h) for h in ['کد WBS', 'فعالیت', 'شروع', 'پایان', 'پیشرفت', 'وضعیت']]]
+
+    from datetime import date
+
     for task in gantt_data.get('tasks', []):
-        start_j = gregorian_to_jalali(task['start']) if task.get('start') else '—'
-        end_j = gregorian_to_jalali(task['end']) if task.get('end') else '—'
+        start_val = task.get('start')
+        if start_val and isinstance(start_val, str):
+            start_val = date.fromisoformat(start_val)
+        start_j = gregorian_to_jalali(start_val) if start_val else '—'
+
+        end_val = task.get('end')
+        if end_val and isinstance(end_val, str):
+            end_val = date.fromisoformat(end_val)
+        end_j = gregorian_to_jalali(end_val) if end_val else '—'
+
         rows.append([
             _fa(task.get('wbs_code', '')),
             _fa(task.get('name', '')),
