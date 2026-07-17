@@ -17,3 +17,7 @@
 ## 2025-03-01 - Avoid N+1 query loop when fetching latest related record
 **Learning:** Looping over a queryset and using `.filter(...).order_by('date').first()` on a related model creates severe N+1 queries.
 **Action:** When needing the "latest" related record for multiple parent records, use `.distinct('parent_id')` with `.order_by('parent_id', '-date')` to fetch them all in a single query, map them in Python by `parent_id`, and pull from the map during iteration.
+
+## 2026-07-17 - Resolve N+1 query in Subcontractor API
+**Learning:** Using `.filter()`, `.count()`, or `.exists()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer or looped service function completely bypasses Django's `prefetch_related` cache, leading to severe N+1 query performance degradation.
+**Action:** Always prefetch related collections in the viewset (`.prefetch_related('scores', 'warnings')`), and strictly iterate over `.all()` in Python (using list comprehensions, `max()`, `sum()`, or `any()`) when serializing or computing logic for lists of objects.
