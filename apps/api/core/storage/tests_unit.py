@@ -151,7 +151,7 @@ class TestStorageViews:
             'content_type': 'text/plain'
         })
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data['error'] == 'Invalid filename.'
+        assert response.data['error'] == 'Invalid request.'
 
         # Test path traversal with slash
         response = auth_client.post(url, {
@@ -159,7 +159,7 @@ class TestStorageViews:
             'content_type': 'text/plain'
         })
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data['error'] == 'Invalid filename.'
+        assert response.data['error'] == 'Invalid request.'
 
         # Test backslash
         response = auth_client.post(url, {
@@ -167,7 +167,7 @@ class TestStorageViews:
             'content_type': 'application/x-msdownload'
         })
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.data['error'] == 'Invalid filename.'
+        assert response.data['error'] == 'Invalid request.'
 
     def test_confirm_upload_view(self, auth_client, stored_file):
         url = reverse('file-confirm', kwargs={'file_id': stored_file.pk})
