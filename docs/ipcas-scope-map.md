@@ -11,7 +11,11 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 | `project_positions` | `master_data.ProjectPosition` | API: `.../positions/` |
 | `users` | `authentication.User` | UUID PK; login via `username` or `mobile` |
 | `daily_reports` | `field_reports.DailyReport` | Schema ready; UI still uses department logs |
-| Materials ledger | `resources.Material` + legacy `Item` | Legacy global `Item` deprecated |
+| Materials ledger | `resources.Material` + legacy `Item` | Legacy global `Item` deprecated; see deprecation below |
+
+## Legacy inventory deprecation (`/api/items/`)
+
+The global `inventory.Item` API at `/api/items/` is **deprecated**. New work must use project-scoped `resources.Material` at `/api/v1/projects/{uuid}/materials/`. The legacy endpoint stays mounted until frontend callers finish migrating to material-balance; then remove `inventory.Item` and `/api/items/`.
 
 ## Sprint 1 completion checklist
 
@@ -53,9 +57,10 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 | **F-05** Role & permission engine + project overrides | Done — `permissions/`, `HasProjectPermission` |
 | **C-01** Project CRUD + membership APIs | Done — `projects/`, `members/`, `positions/` |
 | **C-02** WBS tree API (insert, reorder, code propagation) | Done — CRUD + move + auto code propagation |
-| **UI-01** Design system / tokens | Partial — Shadcn-style primitives + CSS tokens |
+| **UI-01** Design system / tokens | Partial — Shadcn-style primitives + CSS tokens; expand as needed |
 | **UI-02** Project list + creation wizard | Done |
 | **UI-15** Members management | Done — `project-members.tsx`; global roles in `settings-roles.tsx` |
+| **Sprint 2 hardening** | Done — permission guard fix, `view_wbs` on WBS reads, project settings UI, WBS root bootstrap, `/home` → `/projects` |
 
 ## Sprint 3 completion checklist (Activities & Schedule Baseline)
 
@@ -248,5 +253,26 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - `/projects/{id}/equipment-utilization` — fleet KPIs + registry CRUD
 - `/projects/{id}/labor-productivity` — productivity by activity/discipline/job title
 - Resources nav: equipment log, manpower, labor camp, leave, overtime
+
+
+## Sprint 12 completion checklist (Economic Engine & Simulation)
+
+| Task | Status |
+|------|--------|
+| **E-02** Cost-to-category inflation mapping API | Done — `economic/inflation-mappings/` (global + project CRUD) |
+| **E-07** Working capital forecast curve | Done — `economic/working-capital/` |
+| **E-08** Monte Carlo productivity + WC P90 | Done — `monte_carlo_service` extended |
+| **E-09** Forecast + sensitivity APIs | Done — `economic/forecast/`, `economic/sensitivity/` |
+| **E-10** Real cash flow curve | Done — `economic/cash-flow-real/` |
+| **Tests** | Done — `economic/tests/test_economic_forecast.py`, `test_inflation_mappings_api.py`, `test_monte_carlo_extended.py`, `test_simulate_api.py` |
+
+### Sprint 12 API paths
+
+- `GET /api/v1/projects/{id}/economic/forecast/` — inflation-adjusted EAC / EVM
+- `GET /api/v1/projects/{id}/economic/working-capital/` — WC curve
+- `GET /api/v1/projects/{id}/economic/cash-flow-real/` — real vs nominal outflows
+- `GET/POST /api/v1/projects/{id}/economic/inflation-mappings/` — mapping list/create
+- `DELETE /api/v1/projects/{id}/economic/inflation-mappings/{mapping_id}/`
+- `GET /api/v1/projects/{id}/economic/sensitivity/` — latest tornado chart data
 
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)

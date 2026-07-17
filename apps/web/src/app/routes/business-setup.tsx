@@ -21,7 +21,7 @@ import { PATHS } from "@/app/routeVars";
 import { ROLES } from "@/config/roles";
 
 export interface BusinessItem {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   created_at: string;
@@ -41,7 +41,7 @@ export default function BusinessSetup() {
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
   const [count, setCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
@@ -87,13 +87,10 @@ export default function BusinessSetup() {
     if (!editingId) return;
     setFormError(null);
     const payload = {
-      name: name.trim(),
-      slug: slug.trim().toLowerCase().replace(/\s+/g, "_"),
+      project_name: name.trim(),
     };
-    if (!payload.slug || !/^[a-z][a-z0-9_]*$/.test(payload.slug)) {
-      setFormError(
-        "Slug must start with a letter, then only lowercase letters, numbers, underscores.",
-      );
+    if (!slug.trim()) {
+      setFormError("Slug is required.");
       return;
     }
     try {

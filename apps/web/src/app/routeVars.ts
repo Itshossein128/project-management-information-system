@@ -25,6 +25,7 @@ export const ROUTES = {
   PROJECT_WBS: "routes/project-wbs.tsx",
   PROJECT_ACTIVITIES: "routes/project-activities.tsx",
   PROJECT_MEMBERS: "routes/project-members.tsx",
+  PROJECT_SETTINGS_PAGE: "routes/project-settings.tsx",
   PROJECT_WEATHER: "routes/project-weather.tsx",
   PROJECT_PROGRESS: "routes/project-progress.tsx",
   PROJECT_COSTS: "routes/project-costs.tsx",

@@ -13,9 +13,9 @@ import {
 } from "@/components/form";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { useAuth } from "src/app/contexts/auth-context";
-import { apiJson } from "src/app/lib/api-client";
-import { PATHS } from "src/app/routeVars";
+import { useAuth } from "@/app/contexts/auth-context";
+import { apiJson } from "@/app/lib/api-client";
+import { PATHS } from "@/app/routeVars";
 import { ROLES } from "@/config/roles";
 
 const FIELD_TYPES = [
@@ -27,7 +27,7 @@ const FIELD_TYPES = [
 ] as const;
 
 interface BusinessDetail {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }

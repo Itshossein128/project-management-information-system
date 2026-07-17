@@ -34,6 +34,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
     },
     {
+      label: "Settings",
+      labelI18nKey: "nav.projectSettings",
+      icon: "business" as IconName,
+      path: `${base}/${PATHS.PROJECT_SETTINGS}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_SETTINGS}`,
+    },
+    {
       label: "Members",
       labelI18nKey: "nav.projectMembers",
       icon: "users" as IconName,

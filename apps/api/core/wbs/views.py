@@ -39,12 +39,12 @@ class WBSViewSet(viewsets.ViewSet):
     lookup_url_kwarg = 'wbs_id'
 
     def get_permissions(self):
-        if self.action in ('list', 'flat'):
-            return [IsAuthenticated(), IsProjectMember()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     @property
     def required_permission(self):
+        if self.action in ('list', 'flat'):
+            return 'view_wbs'
         return 'edit_wbs'
 
     def list(self, request, project_pk=None):

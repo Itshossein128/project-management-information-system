@@ -1,97 +1,65 @@
-# Inventory Management Backend
+# IPCAS API (`apps/api`)
 
-A Django REST Framework backend for inventory management with CRUD operations, one-to-many relationships, and Excel import/export capabilities.
+Django 4.2 + Django REST Framework backend for the IPCAS construction management platform.
 
-## Project Structure
+## Layout
 
 ```
-inventory-backend/
-├── core/                    # Django project directory
-│   ├── config/             # Project settings and configuration
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   ├── wsgi.py
-│   │   └── asgi.py
-│   ├── inventory/          # Inventory app
-│   │   ├── models.py       # Category and Item models
-│   │   ├── views.py        # API viewsets
-│   │   ├── serializers.py  # DRF serializers
-│   │   ├── urls.py         # App-level URL routing
-│   │   └── admin.py        # Django admin configuration
+apps/api/
+├── core/                    # Django project root (manage.py lives here)
+│   ├── config/              # Settings, root URLs, Celery
+│   ├── authentication/      # JWT auth, users, password reset
+│   ├── projects/            # Projects, tenancy middleware, nested routes
+│   ├── master_data/         # Roles, permissions, project members/positions
+│   ├── business_meta/       # Dynamic tables, fields, rows, Excel IO
+│   ├── permissions/         # Project-scoped permission classes
+│   ├── audit/               # Write audit log (sync or async)
+│   ├── storage/             # MinIO presigned URLs
+│   ├── events/              # RabbitMQ event publisher + worker
+│   ├── inventory/           # Legacy items + department activity logs
+│   ├── resources/           # Materials ledger (blueprint inventory)
+│   ├── wbs/, schedule/, field_reports/, cost_control/, contracts/, …
 │   └── manage.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Features
+## Requirements
 
-- RESTful API for inventory management
-- One-to-many relationship: Items belong to Categories
-- Django Admin interface for data management
-- Django REST Framework for API endpoints
+- PostgreSQL (`DATABASE_URL`) — no SQLite fallback
+- Redis (cache + rate limiting)
+- Optional Docker stack: Traefik (`:8080`), MinIO, RabbitMQ, Celery worker
 
-## Setup
-
-1. Create and activate virtual environment:
+From monorepo root:
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+pnpm db:migrate
+pnpm db:seed          # dev users, sample projects (password: devpass123)
+pnpm dev:api          # http://localhost:8000
 ```
 
-2. Install dependencies:
+## Key endpoints
+
+| Area | Path |
+|------|------|
+| Auth | `/api/auth/login/`, `logout/`, `token/refresh/`, `forgot-password/` |
+| Projects | `/api/v1/projects/` |
+| Dynamic tables | `/api/v1/projects/{uuid}/tables/...` |
+| API docs | `/api/docs/`, `/api/schema/` |
+| Schema verify | `python manage.py verify_blueprint_schema` |
+
+## Tests
 
 ```bash
-pip install -r requirements.txt
+cd apps/api/core
+../.venv/bin/python -m pytest
+# or: ../.venv/bin/python manage.py test <app>
 ```
 
-3. Navigate to the Django project directory:
+Integration tests (`*_integration.py`) need RabbitMQ + MinIO (Docker).
 
-```bash
-cd core
-```
+## References
 
-4. Run migrations:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-5. Create superuser (optional):
-
-```bash
-python manage.py createsuperuser
-```
-
-6. Run development server:
-
-```bash
-python manage.py runserver
-```
-
-## API Endpoints
-
-- `GET/POST /api/items/` - List all items or create a new item
-- `GET/PUT/PATCH/DELETE /api/items/{id}/` - Retrieve, update, or delete a specific item
-- `GET /admin/` - Django admin interface
-
-## Models
-
-### Category
-
-- `name` (CharField): Category name
-
-### Item
-
-- `name` (CharField): Item name
-- `quantity` (IntegerField): Item quantity
-- `category` (ForeignKey): Reference to Category
-
-## Future Enhancements
-
-- Excel import/export functionality
-- Authentication and authorization
-- Pagination and filtering
-- Search functionality
-- API documentation (Swagger/OpenAPI)
+- Blueprint: `docs/IPCAS_Engineering_Blueprint.md`
+- Implementation status: `docs/ipcas-scope-map.md`
+- Per-app endpoint notes: `core/*/ENDPOINTS.md`

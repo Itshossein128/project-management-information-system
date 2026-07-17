@@ -108,6 +108,7 @@ def create_wbs_node(
         )
         warnings = check_weight_warnings(None, project_id)
 
+    propagate_project_wbs_codes(project_id)
     return node, warnings
 
 
@@ -128,7 +129,9 @@ def delete_wbs_node(node: WBS) -> None:
         raise WBSConflictError('Cannot delete a WBS node that has children.')
     if Activity.objects.filter(wbs=node).exists():
         raise WBSConflictError('Cannot delete a WBS node that has activities attached.')
+    project_id = node.project_id
     node.delete()
+    propagate_project_wbs_codes(project_id)
 
 
 def propagate_project_wbs_codes(project_id) -> None:

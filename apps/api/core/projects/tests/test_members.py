@@ -39,3 +39,12 @@ class TestProjectMembersAPI:
         assert response.status_code == status.HTTP_200_OK
         member.refresh_from_db()
         assert member.status == MemberStatus.INACTIVE
+
+    def test_member_can_read_effective_permissions(self, api_client, project, other_user, member):
+        api_client.force_authenticate(user=other_user)
+        response = api_client.get(
+            f'/api/v1/projects/{project.id}/members/{other_user.id}/permissions/',
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert 'effective' in response.data
+        assert response.data['effective']['view_wbs'] is True

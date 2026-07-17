@@ -13,9 +13,6 @@ from .models import TableDefinition, FieldDefinition, RelationDefinition
 from .permissions import CanViewProjectMembers, IsVisitorReadOnly
 from .serializers import (
     ProjectPositionSerializer,
-    ProjectMemberReadSerializer,
-    ProjectMemberCreateSerializer,
-    ProjectMemberWriteSerializer,
     TableDefinitionSerializer,
     TableDefinitionListSerializer,
     TableDefinitionWithFieldsSerializer,
@@ -79,39 +76,6 @@ class ProjectPositionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary='List project members', tags=['Project meta']),
-    create=extend_schema(summary='Add project member', tags=['Project meta']),
-    retrieve=extend_schema(summary='Get member', tags=['Project meta']),
-    update=extend_schema(summary='Update member', tags=['Project meta']),
-    partial_update=extend_schema(summary='Patch member', tags=['Project meta']),
-    destroy=extend_schema(summary='Remove member', tags=['Project meta']),
-)
-class ProjectMemberViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
-    queryset = ProjectMember.objects.select_related('user', 'project', 'position')
-    http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
-
-    def get_permissions(self):
-        if self.request.method in drf_permissions.SAFE_METHODS:
-            return [IsAuthenticated(), CanViewProjectMembers(), IsVisitorReadOnly()]
-        return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return ProjectMemberCreateSerializer
-        if self.action in ('update', 'partial_update'):
-            return ProjectMemberWriteSerializer
-        return ProjectMemberReadSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['project_pk'] = self.kwargs.get('project_pk')
-        return context
-
-    def perform_create(self, serializer):
-        # Member creation is handled entirely in ProjectMemberCreateSerializer.
-        serializer.save()
-
-@extend_schema_view(
     list=extend_schema(summary='List fields of a table', tags=['Project meta']),
     create=extend_schema(summary='Create field', tags=['Project meta']),
     retrieve=extend_schema(summary='Get field', tags=['Project meta']),
@@ -145,6 +109,5 @@ class RelationDefinitionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsBusinessSetup]
 
 
-# Backward-compatible aliases
+# Backward-compatible alias
 BusinessJobPositionViewSet = ProjectPositionViewSet
-UserBusinessAssignmentViewSet = ProjectMemberViewSet

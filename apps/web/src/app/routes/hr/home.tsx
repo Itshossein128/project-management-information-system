@@ -90,7 +90,7 @@ export default function HrHubPage() {
 
         {canBusinessSetup && (
           <>
-            <Link id='link-hrHubBusinesses' to={`/${PATHS.BUSINESS}`}>
+            <Link id='link-hrHubBusinesses' to={`/${PATHS.BUSINESS}/setup`}>
               <Card className='card-interactive h-full'>
                 <CardHeader>
                   <CardTitle

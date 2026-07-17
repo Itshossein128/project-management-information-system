@@ -35,7 +35,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
     lookup_url_kwarg = 'user_id'
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve_permissions'):
+        if self.action in ('list', 'permissions'):
             return [IsAuthenticated(), IsProjectMember()]
         return [IsAuthenticated(), HasProjectPermission()]
 
