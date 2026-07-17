@@ -15,10 +15,19 @@ class WBSValidationError(Exception):
 
 
 def get_project_roots(project_id):
+    """
+    Retrieves all root nodes (depth=1) of the WBS tree for a specific project.
+    Root nodes have no parent and represent the highest level of the breakdown structure.
+    """
     return WBS.get_root_nodes().filter(project_id=project_id)
 
 
 def _sibling_weight_sum(parent, field: str) -> Decimal:
+    """
+    Calculates the total sum of a specific weight field (physical or financial)
+    across all sibling nodes under a given parent.
+    If parent is None, it calculates the sum across all root nodes in the project.
+    """
     if parent is None:
         siblings = get_project_roots(parent.project_id if hasattr(parent, 'project_id') else parent)
     else:
@@ -33,6 +42,11 @@ def _sibling_weight_sum(parent, field: str) -> Decimal:
 
 
 def check_weight_warnings(parent, project_id, field: str = 'weight_physical') -> list[str]:
+    """
+    Validates that the sum of weights (both physical and financial) for a group
+    of sibling nodes does not exceed 1.0 (100%). Returns a list of warning messages if exceeded.
+    This is used to warn users if their breakdown exceeds the parent's total allocation.
+    """
     warnings = []
     if parent is None:
         siblings = list(get_project_roots(project_id))
@@ -71,6 +85,11 @@ def create_wbs_node(
     weight_financial=None,
     description: str = '',
 ) -> tuple[WBS, list[str]]:
+    """
+    Creates a new WBS node within the tree hierarchy and attaches it to a project.
+    Validates max depth constraints and returns any weight capacity warnings.
+    If parent_id is provided, it's added as a child; otherwise, it's created as a root node.
+    """
     wbs_code = wbs_code.strip()
     if WBS.objects.filter(project_id=project_id, wbs_code=wbs_code).exists():
         raise WBSValidationError('wbs_code must be unique within the project.')
@@ -132,7 +151,11 @@ def delete_wbs_node(node: WBS) -> None:
 
 
 def propagate_project_wbs_codes(project_id) -> None:
-    """Recompute wbs_code for all nodes from tree order (root 1,2… children 1.1, 1.2…)."""
+    """
+    Recomputes and normalizes the hierarchical wbs_code (e.g., 1, 1.1, 1.1.2) for all nodes
+    in a project based on their structural tree order (path).
+    This is typically called after nodes are moved or structurally modified.
+    """
     # ⚡ Bolt: Iterative single-query traversal instead of recursive N+1 query pattern
     qs = WBS.objects.filter(project_id=project_id).order_by('path')
 
@@ -175,6 +198,11 @@ def propagate_project_wbs_codes(project_id) -> None:
 
 @transaction.atomic
 def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
+    """
+    Moves an existing WBS node to a new location in the tree hierarchy using django-treebeard's move logic.
+    Supports positions like 'first-child', 'last-child', 'left' (sibling), and 'right' (sibling).
+    Automatically triggers a full recomputation of WBS codes for the project afterwards.
+    """
     target_parent = None
     if new_parent_id:
         target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id)
