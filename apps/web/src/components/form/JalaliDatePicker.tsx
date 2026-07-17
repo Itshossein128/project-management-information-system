@@ -1,9 +1,14 @@
 import { cn } from "@/app/lib/utils";
-import DatePicker from "react-multi-date-picker";
+import MultiDatePicker from "react-multi-date-picker";
 import type { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import { Field, type FieldProps } from "./Field";
+
+/** Vite SSR may expose the CJS module namespace; unwrap to the real component. */
+const DatePicker =
+  (MultiDatePicker as unknown as { default?: typeof MultiDatePicker }).default ??
+  MultiDatePicker;
 
 const ISO_DATE_FORMAT = "YYYY-MM-DD";
 

@@ -57,9 +57,10 @@ export function ConflictCard({
   const [fading, setFading] = useState(false);
 
   const conflictReason =
-    conflict.conflict_fields.length > 0
+    conflict.conflict_reason ||
+    (conflict.conflict_fields.length > 0
       ? `فیلدهای متعارض: ${conflict.conflict_fields.join("، ")}`
-      : "تعارض در همگام‌سازی داده";
+      : "تعارض در همگام‌سازی داده");
 
   const finishResolve = (toastMsg: string) => {
     setFading(true);

@@ -6,7 +6,7 @@
 | WBS | Tree Operations | 3 | 10 | 30% |
 | ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
-| DAILY REPORT | Create & Workflow | 2 | 20 | 10% |
+| DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
 | OFFLINE | Sync & Conflict | 2 | 15 | 13% |
 | FINANCE | Budget & Cost | 0 | 15 | 0% |
 

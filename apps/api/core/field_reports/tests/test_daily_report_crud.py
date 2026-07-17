@@ -34,9 +34,28 @@ class TestDailyReportCrud:
             {'report_date': '1403/03/12', 'site_status': 'active'},
             format='json',
         )
-        # 1403/03/12 == 2024-06-01
+        # 1403/03/12 == 2024-06-01; default shift is full for both
         assert response.status_code == status.HTTP_409_CONFLICT
 
+    def test_same_date_different_shift_allowed(self, auth_client, reports_url, project, user):
+        DailyReport.objects.create(
+            project=project,
+            report_date='2024-06-01',
+            shift='day',
+            created_by=user,
+            updated_by=user,
+        )
+        response = auth_client.post(
+            reports_url,
+            {
+                'report_date': '1403/03/12',
+                'shift': 'night',
+                'site_status': 'active',
+            },
+            format='json',
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['shift'] == 'night'
     def test_viewer_cannot_create(self, api_client, other_user, viewer_member, reports_url):
         # site_supervisor has edit_reports; use plain viewer member instead
         api_client.force_authenticate(user=other_user)

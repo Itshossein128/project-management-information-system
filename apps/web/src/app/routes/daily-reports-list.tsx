@@ -36,12 +36,16 @@ import {
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { Select } from "@/components/form";
+import { Button } from "@/components/ui/sprint-button";
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "", label: "همه وضعیت‌ها" },
@@ -162,7 +166,7 @@ export default function DailyReportsListPage() {
     setFilters((prev) => ({ ...prev, page: 1, ...patch }));
 
   return (
-    <main className='page-main page-shell mx-auto  px-4 py-6'>
+    <main className='page-main page-shell mx-auto  px-4 py-6' data-testid="daily-reports-list">
       <Breadcrumb
         items={[
           {
@@ -178,6 +182,7 @@ export default function DailyReportsListPage() {
           canEdit ? (
             <Link
               to={`${base}/${PATHS.PROJECT_NEW}`}
+              data-testid="daily-report-new-btn"
               className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90'
             >
               <Plus className='size-4' />
@@ -195,6 +200,7 @@ export default function DailyReportsListPage() {
           </span>
           <button
             type='button'
+            data-testid='daily-reports-sync-now'
             disabled={!isOnline || syncing}
             onClick={syncNow}
             className='inline-flex items-center gap-1 rounded-md bg-amber-600 px-3 py-1.5 text-white hover:bg-amber-700 disabled:opacity-50'
@@ -254,52 +260,56 @@ export default function DailyReportsListPage() {
       </div>
 
       <div className='mb-4 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3'>
-        <div>
-          <label className='mb-1 block text-xs text-muted-foreground'>
-            از تاریخ
-          </label>
-          <JalaliDatePicker
-            name='date_from'
-            value={filters.date_from ?? ""}
-            onChange={(iso) => setFilter({ date_from: iso || undefined })}
-          />
-        </div>
-        <div>
-          <label className='mb-1 block text-xs text-muted-foreground'>
-            تا تاریخ
-          </label>
-          <JalaliDatePicker
-            name='date_to'
-            value={filters.date_to ?? ""}
-            onChange={(iso) => setFilter({ date_to: iso || undefined })}
-          />
-        </div>
-        <div>
-          <label className='mb-1 block text-xs text-muted-foreground'>
-            وضعیت
-          </label>
-          <select
-            className='h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm'
-            value={filters.status ?? ""}
-            onChange={(e) =>
-              setFilter({
-                status: (e.target.value || undefined) as
-                  | ReportStatus
-                  | undefined,
-              })
-            }
-          >
-            {STATUS_FILTERS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <JalaliDatePicker
+          name='date_from'
+          label='از تاریخ'
+          value={filters.date_from ?? ""}
+          onChange={(iso) => setFilter({ date_from: iso || undefined })}
+        />
+        <JalaliDatePicker
+          name='date_to'
+          label='تا تاریخ'
+          value={filters.date_to ?? ""}
+          onChange={(iso) => setFilter({ date_to: iso || undefined })}
+        />
+        <Select
+          name='status'
+          label='وضعیت'
+          value={filters.status ?? "all"}
+          onChange={(e) =>
+            setFilter({
+              status: (e.target.value === "all" ? undefined : e.target.value) as
+                | ReportStatus
+                | undefined,
+            })
+          }
+          options={STATUS_FILTERS.map((s) => ({
+            value: s.value || "all",
+            label: s.label,
+          }))}
+        />
       </div>
 
       {listQuery.isLoading ? (
         <LoadingSkeleton rows={6} />
+      ) : listQuery.isError ? (
+        <QueryErrorState onRetry={() => void listQuery.refetch()} />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={<FileText />}
+          title='گزارشی یافت نشد'
+          description='گزارش جدیدی بسازید یا فیلترها را تغییر دهید.'
+          action={
+            canEdit ? (
+              <Link to={`${base}/${PATHS.PROJECT_NEW}`}>
+                <Button variant='primary'>
+                  <Plus className='size-4' />
+                  گزارش جدید
+                </Button>
+              </Link>
+            ) : null
+          }
+        />
       ) : (
         <div className='overflow-x-auto rounded-xl border border-border'>
           <table className='w-full min-w-[760px] text-sm'>
@@ -319,16 +329,6 @@ export default function DailyReportsListPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={9}
-                    className='px-3 py-8 text-center text-muted-foreground'
-                  >
-                    گزارشی یافت نشد
-                  </td>
-                </tr>
-              ) : null}
               {rows.map((r) => {
                 const canEditRow =
                   r.status === "draft" || r.status === "rejected";
@@ -336,6 +336,7 @@ export default function DailyReportsListPage() {
                   <tr
                     key={r.report_id}
                     className='border-t border-border hover:bg-muted/20'
+                    data-testid={`daily-report-row-${r.report_id}`}
                   >
                     <td className='px-3 py-2'>
                       {formatDisplayDate(r.report_date)}
@@ -374,6 +375,7 @@ export default function DailyReportsListPage() {
                         <Link
                           to={`${base}/${r.report_id}/view`}
                           title='مشاهده'
+                          aria-label='مشاهده'
                           className='rounded p-1 text-muted-foreground hover:bg-muted'
                         >
                           <Eye className='size-4' />
@@ -382,6 +384,8 @@ export default function DailyReportsListPage() {
                           <Link
                             to={`${base}/${r.report_id}/edit`}
                             title='ویرایش'
+                            aria-label='ویرایش'
+                            data-testid={`daily-report-edit-${r.report_id}`}
                             className='rounded p-1 text-blue-600 hover:bg-muted'
                           >
                             <Pencil className='size-4' />
@@ -390,6 +394,7 @@ export default function DailyReportsListPage() {
                         <Link
                           to={`${base}/${r.report_id}/view`}
                           title='خروجی PDF'
+                          aria-label='خروجی PDF'
                           className='rounded p-1 text-muted-foreground hover:bg-muted'
                         >
                           <FileText className='size-4' />

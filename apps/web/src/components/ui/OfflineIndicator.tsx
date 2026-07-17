@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
-import { AlertTriangle, CloudOff, RefreshCw, Wifi } from "lucide-react";
+import { AlertTriangle, CloudOff, RefreshCw } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import {
@@ -17,6 +17,7 @@ const EMPTY_STATS: QueueStats = { pending: 0, syncing: 0, failed: 0, total: 0 };
 
 /**
  * Full-width connectivity banner rendered above the app header.
+ * Hidden when online with an empty sync queue (no permanent chrome noise).
  */
 export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
@@ -60,8 +61,8 @@ export function OfflineIndicator() {
         className="flex w-full items-center justify-between gap-3 bg-red-600 px-4 py-2 text-sm text-white"
       >
         <span className="flex items-center gap-2">
-          <AlertTriangle className="size-4" />
-          {`⚠ ${conflicts} تعارض داده نیاز به بررسی دارد`}
+          <AlertTriangle className="size-4" aria-hidden />
+          {`${conflicts} تعارض داده نیاز به بررسی دارد`}
         </span>
         {conflictsHref ? (
           <Link
@@ -81,7 +82,7 @@ export function OfflineIndicator() {
         data-testid="offline-indicator"
         className="flex w-full items-center gap-2 bg-blue-600 px-4 py-2 text-sm text-white"
       >
-        <RefreshCw className="size-4 animate-spin" />
+        <RefreshCw className="size-4 animate-spin" aria-hidden />
         {`در حال همگام‌سازی... (${stats.syncing} مورد)`}
       </div>
     );
@@ -94,8 +95,8 @@ export function OfflineIndicator() {
         className="flex w-full items-center justify-between gap-3 bg-amber-500 px-4 py-2 text-sm text-amber-950"
       >
         <span className="flex items-center gap-2">
-          <CloudOff className="size-4" />
-          offline — داده‌ها به صورت محلی ذخیره می‌شوند
+          <CloudOff className="size-4" aria-hidden />
+          آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند
         </span>
         {stats.pending > 0 ? (
           <span className="rounded-full bg-amber-950/15 px-3 py-0.5 font-medium">
@@ -116,7 +117,7 @@ export function OfflineIndicator() {
         )}
       >
         <span className="flex items-center gap-2">
-          <CloudOff className="size-4" />
+          <CloudOff className="size-4" aria-hidden />
           {stats.failed > 0
             ? `${stats.failed} مورد ناموفق — ${stats.pending} در صف`
             : `${stats.pending} مورد در انتظار همگام‌سازی`}
@@ -130,13 +131,5 @@ export function OfflineIndicator() {
     );
   }
 
-  return (
-    <div
-      data-testid="offline-indicator"
-      className="flex w-full items-center gap-2 bg-emerald-700 px-4 py-1.5 text-xs text-white"
-    >
-      <Wifi className="size-3.5" />
-      آنلاین
-    </div>
-  );
+  return null;
 }

@@ -7,16 +7,30 @@ import {
   addToQueue,
   type EntityType,
   generateUUID,
+  getOfflineReport,
   getQueueByProject,
   getUnresolvedConflicts,
   isOfflineDBAvailable,
   type OfflineReport,
   type QueueMethod,
   saveOfflineReport,
+  updateOfflineReport,
 } from "@/app/lib/offlineDB";
 import type { ChildResource, HeaderPayload } from "@/app/lib/api/daily-reports";
 
 export type RowSyncStatus = "synced" | "pending" | "failed" | "conflict";
+
+export interface LaborBatchMeta {
+  report_date?: string;
+  shift?: string;
+  weather_condition?: string | null;
+  site_status?: string;
+  general_notes?: string;
+  temp_min?: number | string | null;
+  temp_max?: number | string | null;
+  /** Server-side labor rows used to seed IndexedDB on first offline save. */
+  existing_labor?: unknown[];
+}
 
 const reportBase = (projectId: string) => `/${PATHS.API_PROJECTS}/${projectId}/daily-reports`;
 
@@ -68,7 +82,7 @@ export async function queueReportHeader(
     retry_count: 0,
     error_message: null,
     local_id: localId,
-    server_id: reportRef && !reportRef.includes("-") ? reportRef : null,
+    server_id: reportRef ?? null,
   });
 
   return localId;
@@ -118,51 +132,96 @@ export async function buildChildRowSyncMap(
   return map;
 }
 
+function mergeLaborByCategory(existing: unknown[] | undefined, incoming: unknown[]): unknown[] {
+  const prev = Array.isArray(existing) ? existing : [];
+  const categories = new Set(
+    incoming
+      .map((row) => (row as { labor_category?: string }).labor_category)
+      .filter((c): c is string => Boolean(c)),
+  );
+  const kept = prev.filter(
+    (row) => !categories.has(String((row as { labor_category?: string }).labor_category ?? "")),
+  );
+  return [...kept, ...incoming];
+}
+
 /** Queue labor batch for offline sync via sync-batch payload. */
 export async function queueLaborBatch(
   projectId: string,
   reportRef: string,
   rows: unknown[],
+  meta: LaborBatchMeta = {},
 ): Promise<void> {
-  const { updateOfflineReport, getOfflineReport } = await import("@/app/lib/offlineDB");
-  const existing = (await getOfflineReport(reportRef)) ?? {
+  const existing = await getOfflineReport(reportRef);
+  const reportDate =
+    (typeof existing?.report_date === "string" && existing.report_date) ||
+    meta.report_date ||
+    "";
+  if (!reportDate) {
+    throw new Error("تاریخ گزارش برای ذخیره آفلاین نیروی انسانی مشخص نیست");
+  }
+
+  const mergedLabor = mergeLaborByCategory(
+    (existing?.labor as unknown[] | undefined) ?? meta.existing_labor,
+    rows,
+  );
+
+  const base: OfflineReport = {
+    ...(existing ?? {}),
     local_id: reportRef,
     project_id: projectId,
-    report_date: "",
-    status: "draft",
+    report_date: reportDate,
+    status: (existing?.status as string | undefined) ?? "draft",
     updated_at: new Date().toISOString(),
-  };
-  await saveOfflineReport({
-    ...existing,
-    local_id: reportRef,
-    project_id: projectId,
-    labor: rows,
+    shift: meta.shift ?? (existing?.shift as string | undefined) ?? "full",
+    weather_condition: meta.weather_condition ?? existing?.weather_condition ?? null,
+    site_status: meta.site_status ?? existing?.site_status ?? "active",
+    general_notes: meta.general_notes ?? existing?.general_notes ?? "",
+    temp_min: meta.temp_min ?? existing?.temp_min ?? null,
+    temp_max: meta.temp_max ?? existing?.temp_max ?? null,
+    labor: mergedLabor,
     _dirty: true,
     _offline: true,
-    updated_at: new Date().toISOString(),
-  } as OfflineReport);
+  };
+
+  await saveOfflineReport(base);
 
   const queue = await getQueueByProject(projectId);
   const headerEntry = queue.find(
     (q) => q.entity_type === "daily_report" && q.local_id === reportRef && q.status === "pending",
   );
+  const headerPayload = {
+    local_id: reportRef,
+    report_date: reportDate,
+    shift: base.shift,
+    weather_condition: base.weather_condition,
+    site_status: base.site_status,
+    general_notes: base.general_notes,
+    temp_min: base.temp_min,
+    temp_max: base.temp_max,
+    labor: mergedLabor,
+  };
+
   if (!headerEntry) {
+    const hasServerId = Boolean(reportRef && reportRef.length > 20);
     await addToQueue({
       queue_id: generateUUID(),
       entity_type: "daily_report",
       project_id: projectId,
-      method: "POST",
-      endpoint: `${reportBase(projectId)}/`,
-      payload: { ...existing, labor: rows, local_id: reportRef },
+      method: hasServerId ? "PATCH" : "POST",
+      endpoint: hasServerId
+        ? `${reportBase(projectId)}/${reportRef}/`
+        : `${reportBase(projectId)}/`,
+      payload: headerPayload,
       created_at: new Date().toISOString(),
       status: "pending",
       retry_count: 0,
       error_message: null,
       local_id: reportRef,
-      server_id: null,
+      server_id: hasServerId ? reportRef : null,
     });
   } else {
-    await updateOfflineReport(reportRef, { labor: rows, _dirty: true });
+    await updateOfflineReport(reportRef, { labor: mergedLabor, _dirty: true });
   }
 }
 

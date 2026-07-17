@@ -10,7 +10,7 @@ Maps the **engineering blueprint** to the **monorepo implementation**.
 | `project_members` | `master_data.ProjectMember` | API: `.../members/` |
 | `project_positions` | `master_data.ProjectPosition` | API: `.../positions/` |
 | `users` | `authentication.User` | UUID PK; login via `username` or `mobile` |
-| `daily_reports` | `field_reports.DailyReport` | Schema ready; UI still uses department logs |
+| `daily_reports` | `field_reports.DailyReport` | Online UI at `/projects/{id}/daily-reports` (Sprint 4) |
 | Materials ledger | `resources.Material` + legacy `Item` | Legacy global `Item` deprecated; see deprecation below |
 
 ## Legacy inventory deprecation (`/api/items/`)
@@ -77,20 +77,23 @@ The global `inventory.Item` API at `/api/items/` is **deprecated**. New work mus
 
 | Task | Status |
 |------|--------|
-| **C-05** Daily report API + sub-entities | Done — activities, labor, equipment, materials, concrete, labor-camp, incidents |
-| **C-06** Approval workflow + event publish | Done — draft → submit → review → approve/reject |
-| **C-07** Progress recalculation on approval | Done — Celery task updates `ActivityProgress` |
-| **UI-04** Multi-discipline daily report form | Done — 7-tab form + photo attach on activities |
+| **C-05** Daily report API + sub-entities | Done — activities, labor, equipment, materials (+`unit_cost`), concrete, labor-camp, incidents; unique `(project, date, shift)` |
+| **C-06** Approval workflow + event publish | Done — draft → submit → review → approve/reject; `daily-report.approved` published; rejection cleared on resubmit |
+| **C-07** Progress recalculation on approval | Done — direct Celery enqueue on approve + event consumer handler (idempotent) |
+| **UI-04** Multi-discipline daily report form | Done — 7-tab form + photo attach/preview on activities; materials unit cost column |
+| **E2E** Create & approval workflow | Done — list/form smoke + submit→approve (`daily-report.spec.ts`) |
+
+Known gaps (non-blocking): labor model is Shiraz job-title grid (not blueprint type/discipline); photo upload needs MinIO; multi-discipline = entity tabs (not civil/electrical sub-reports).
 
 ## Sprint 5 completion checklist (Offline Sync)
 
 | Task | Status |
 |------|--------|
 | **O-01** Service Worker + PWA manifest | Partial — SW in prod; foreground sync via `useAutoSync` (not SW BackgroundSync) |
-| **O-02** Batch sync endpoint | Done — backend + frontend `syncBatch()` wired |
-| **O-03** Conflict review UI | Done — `sync-conflicts.tsx` + failed-queue retry/discard |
+| **O-02** Batch sync endpoint | Done — shift-aware upsert, header merge, conflict snapshot |
+| **O-03** Conflict review UI | Done — `sync-conflicts.tsx` + field-level merge from server snapshot |
 | **O-04** Sync status indicator | Done — persistent `data-testid="offline-indicator"` badge |
-| **Offline parity** | Done — labor tab, photo queue, cached reference reads |
+| **Offline parity** | Done — labor tab (category-safe queue), photo queue, cached reference reads |
 
 ## Sprint 6 completion checklist (Physical Progress & S-Curve)
 

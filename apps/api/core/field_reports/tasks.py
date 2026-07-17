@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 def recalculate_activity_progress(report_id):
     """Recompute cumulative progress for activities linked to an approved report.
 
-    Triggered on the ``daily-report.approved`` event.
+    Enqueued on approve (direct Celery path for reliability without a consumer)
+    and by the ``daily-report.approved`` event handler when the worker is running.
+    Idempotent via ``ActivityProgress.update_or_create``.
     """
     from field_reports.models import DailyReport, DailyReportActivity, ReportStatus
     from schedule.models import ActivityProgress

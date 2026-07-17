@@ -45,7 +45,15 @@ export function ConflictMergeEditor({
   const conflictSet = useMemo(() => new Set(conflictFields), [conflictFields]);
 
   const allKeys = useMemo(() => {
-    const keys = new Set([...Object.keys(local), ...Object.keys(server)]);
+    const keys = new Set(
+      [...Object.keys(local), ...Object.keys(server)].filter((k) => {
+        const v = local[k] ?? server[k];
+        if (Array.isArray(v)) return false;
+        if (v !== null && typeof v === "object") return false;
+        if (k.endsWith("_label") || k.endsWith("_name")) return false;
+        return true;
+      }),
+    );
     const ordered = [...conflictFields.filter((k) => keys.has(k))];
     for (const k of keys) {
       if (!conflictSet.has(k)) ordered.push(k);

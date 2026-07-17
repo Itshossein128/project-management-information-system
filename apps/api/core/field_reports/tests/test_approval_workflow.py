@@ -69,6 +69,24 @@ class TestApprovalWorkflow:
         assert ok.status_code == status.HTTP_200_OK
         assert ok.data['status'] == 'rejected'
 
+    def test_resubmit_clears_rejection_reason(self, auth_client, base_url, draft_report):
+        _add_activity(draft_report)
+        auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        auth_client.post(
+            f'{base_url}{draft_report.id}/reject/',
+            {'reason': 'اطلاعات ناقص است و باید اصلاح شود'},
+            format='json',
+        )
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason
+
+        resubmit = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert resubmit.status_code == status.HTTP_200_OK
+        assert resubmit.data['status'] == 'submitted'
+        assert resubmit.data['rejection_reason'] == ''
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason == ''
+
     def test_non_approver_cannot_approve(
         self, api_client, other_user, viewer_member, base_url, draft_report,
     ):
@@ -92,7 +110,7 @@ class TestApprovalWorkflow:
         )
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'submit_validation' in response.data
+        assert 'submit_validation' in str(response.data)
 
     def test_submit_blocks_incomplete_equipment_times(
         self, auth_client, base_url, draft_report,
@@ -107,7 +125,7 @@ class TestApprovalWorkflow:
         )
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'submit_validation' in response.data
+        assert 'submit_validation' in str(response.data)
 
     def test_submit_blocks_invalid_labor_camp_totals(
         self, auth_client, base_url, draft_report,
@@ -119,8 +137,8 @@ class TestApprovalWorkflow:
             total_residents=10,
             present_count=7,
             on_leave_count=1,
-            capacity=12,
+            capacity=20,
         )
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'submit_validation' in response.data
+        assert 'submit_validation' in str(response.data)

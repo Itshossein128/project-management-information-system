@@ -30,8 +30,21 @@ def handle_default(topic: str, envelope: dict[str, Any]) -> None:
     logger.info('Received event topic=%s project_id=%s', topic, envelope.get('project_id'))
 
 
+def handle_daily_report_approved(envelope: dict[str, Any]) -> None:
+    """Enqueue progress recalculation when a daily report is approved."""
+    payload = envelope.get('payload') or {}
+    report_id = payload.get('report_id')
+    if not report_id:
+        logger.warning('daily-report.approved missing report_id in payload')
+        return
+    from field_reports.tasks import recalculate_activity_progress
+
+    recalculate_activity_progress.delay(str(report_id))
+
+
 TOPIC_HANDLERS: dict[str, Callable[[dict[str, Any]], None]] = {
     'audit.log': handle_audit_log,
+    'daily-report.approved': handle_daily_report_approved,
 }
 
 

@@ -32,11 +32,15 @@ export function ApprovalStatusBar({
   const status = report.status;
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+    <div className="space-y-3 rounded-xl border border-border bg-card p-4" data-testid="approval-status-bar">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">وضعیت:</span>
-          <Badge variant={STATUS_BADGE[status]} label={STATUS_LABELS[status]} />
+          <Badge
+            variant={STATUS_BADGE[status]}
+            label={STATUS_LABELS[status]}
+            data-testid="report-status-badge"
+          />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {status === "draft" || status === "rejected" ? (
@@ -44,6 +48,7 @@ export function ApprovalStatusBar({
               type="button"
               disabled={busy}
               onClick={onSubmit}
+              data-testid="report-submit-btn"
               className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-1.5 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               <Send className="size-4" />
@@ -55,6 +60,7 @@ export function ApprovalStatusBar({
               type="button"
               disabled={busy}
               onClick={onReview}
+              data-testid="report-review-btn"
               className="inline-flex items-center gap-1 rounded-md border border-border px-4 py-1.5 text-sm hover:bg-muted/40 disabled:opacity-50"
             >
               <Clock className="size-4" />
@@ -67,6 +73,7 @@ export function ApprovalStatusBar({
                 type="button"
                 disabled={busy}
                 onClick={onApprove}
+                data-testid="report-approve-btn"
                 className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-4 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
               >
                 <CheckCircle2 className="size-4" />
@@ -76,6 +83,7 @@ export function ApprovalStatusBar({
                 type="button"
                 disabled={busy}
                 onClick={() => setRejecting((v) => !v)}
+                data-testid="report-reject-btn"
                 className="inline-flex items-center gap-1 rounded-md bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
               >
                 <XCircle className="size-4" />
@@ -92,6 +100,7 @@ export function ApprovalStatusBar({
             className="min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
             placeholder="دلیل رد را وارد کنید (حداقل ۱۰ کاراکتر)"
             value={reason}
+            data-testid="report-reject-reason"
             onChange={(e) => setReason(e.target.value)}
           />
           <div className="flex justify-end gap-2">
@@ -106,6 +115,7 @@ export function ApprovalStatusBar({
               type="button"
               disabled={reason.trim().length < 10 || busy}
               onClick={() => onReject(reason.trim())}
+              data-testid="report-reject-confirm-btn"
               className="rounded-md bg-red-600 px-3 py-1 text-sm text-white disabled:opacity-50"
             >
               ثبت رد

@@ -140,11 +140,16 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         project_id = self.get_project_id()
         report_date = serializer.validated_data['report_date']
+        shift = serializer.validated_data.get('shift') or 'full'
         if DailyReport.objects.filter(
-            project_id=project_id, report_date=report_date, is_deleted=False,
+            project_id=project_id,
+            report_date=report_date,
+            shift=shift,
+            is_deleted=False,
         ).exists():
             raise ConflictError(
-                f'گزارش روزانه برای تاریخ {request.data.get("report_date")} قبلاً ثبت شده است',
+                f'گزارش روزانه برای تاریخ {request.data.get("report_date")} '
+                f'و شیفت {shift} قبلاً ثبت شده است',
             )
         instance = serializer.save(
             project_id=project_id,

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -26,10 +26,11 @@ function isNavActive(
     activeExact?: boolean;
   },
 ): boolean {
-  const base = `/${path}`.replace(/\/+$/, "") || "/";
+  const base = `/${path}`.replace(/\/+/g, "/") || "/";
 
   if (options.activePathPrefix) {
-    const prefix = `/${options.activePathPrefix}`;
+    const prefix =
+      `/${options.activePathPrefix}`.replace(/\/+/g, "/") || "/";
     const prefixMatches =
       pathname === prefix || pathname.startsWith(`${prefix}/`);
     if (!prefixMatches) return false;
@@ -51,6 +52,15 @@ function childPathIsNavigable(path: string): boolean {
   return !path.includes(":");
 }
 
+function normalizeNavPath(path: string): string {
+  return `/${path}`.replace(/\/+/g, "/");
+}
+
+function isChildRouteActive(pathname: string, childPath: string): boolean {
+  const childTo = normalizeNavPath(childPath);
+  return pathname === childTo || pathname.startsWith(`${childTo}/`);
+}
+
 export const SidebarItem = ({
   name,
   label,
@@ -64,9 +74,10 @@ export const SidebarItem = ({
   const { t } = useTranslation();
   const location = useLocation();
   const Icon = ICONS[icon];
-  const [expanded, setExpanded] = useState(false);
+  /** `null` = follow auto-expand from route; boolean = user override. */
+  const [manualExpanded, setManualExpanded] = useState<boolean | null>(null);
 
-  const to = `/${path}`.replace(/\/+/g, "/");
+  const to = normalizeNavPath(path);
 
   const active = useMemo(
     () =>
@@ -81,6 +92,21 @@ export const SidebarItem = ({
   const hasChildren = Boolean(children?.length);
   const navigableChildren =
     children?.filter((c) => childPathIsNavigable(c.path)) ?? [];
+
+  const childActive = useMemo(
+    () =>
+      (children ?? [])
+        .filter((c) => childPathIsNavigable(c.path))
+        .some((c) => isChildRouteActive(location.pathname, c.path)),
+    [location.pathname, children],
+  );
+
+  useEffect(() => {
+    setManualExpanded(null);
+  }, [location.pathname]);
+
+  const routeExpanded = active || childActive;
+  const expanded = manualExpanded ?? routeExpanded;
 
   const itemActiveClass =
     "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-sm)] ring-1 ring-sidebar-ring/30";
@@ -118,7 +144,7 @@ export const SidebarItem = ({
                 "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:outline-none",
               )}
-              onClick={() => setExpanded((e) => !e)}
+              onClick={() => setManualExpanded(!expanded)}
             >
               <ChevronDown
                 className={cn(
@@ -137,7 +163,7 @@ export const SidebarItem = ({
                 <li key={`${child.path}-${index}`}>
                   <NavLink
                     id={`button-sidebarSubnav-${name}-${index}`}
-                    to={`/${child.path}`.replace(/\/+/g, "/")}
+                    to={normalizeNavPath(child.path)}
                     className={({ isActive }) =>
                       cn(
                         "block rounded-md px-2 py-1.5 text-[11px] leading-snug transition-colors",

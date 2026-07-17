@@ -98,3 +98,85 @@ export async function moveWbsViaApi(
     throw new Error(`moveWbsViaApi failed: ${res.status()} ${await res.text()}`);
   }
 }
+
+/** Create an activity via API. Returns activity id. */
+export async function createActivityViaApi(
+  page: Page,
+  projectBasePath: string,
+  opts: { code: string; name: string; wbsId: string; totalQuantity?: number },
+): Promise<string> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/activities/`, {
+    headers: await authHeaders(page),
+    data: {
+      activity_code: opts.code,
+      activity_name: opts.name,
+      wbs_id: opts.wbsId,
+      status: "not_started",
+      ...(opts.totalQuantity != null ? { total_quantity: opts.totalQuantity } : {}),
+    },
+  });
+  if (!res.ok()) {
+    throw new Error(`createActivityViaApi failed: ${res.status()} ${await res.text()}`);
+  }
+  const body = (await res.json()) as { activity_id?: string; id?: string };
+  const id = body.activity_id ?? body.id;
+  if (!id) throw new Error(`createActivityViaApi missing id: ${JSON.stringify(body)}`);
+  return id;
+}
+
+/** Create a draft daily report with one activity row. Returns report id. */
+export async function createDailyReportViaApi(
+  page: Page,
+  projectBasePath: string,
+  opts: {
+    reportDate?: string;
+    shift?: "day" | "night" | "full";
+    activityId?: string;
+    activityDescription?: string;
+    quantity?: number;
+  } = {},
+): Promise<string> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const headers = await authHeaders(page);
+  const createRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/`, {
+    headers,
+    data: {
+      report_date: opts.reportDate ?? "1404/04/26",
+      shift: opts.shift ?? "full",
+      site_status: "active",
+      weather_condition: "sunny",
+    },
+  });
+  if (!createRes.ok()) {
+    throw new Error(`createDailyReportViaApi failed: ${createRes.status()} ${await createRes.text()}`);
+  }
+  const created = (await createRes.json()) as { report_id?: string; id?: string };
+  const reportId = created.report_id ?? created.id;
+  if (!reportId) {
+    throw new Error(`createDailyReportViaApi missing id: ${JSON.stringify(created)}`);
+  }
+
+  const activityRes = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/activities/`,
+    {
+      headers,
+      data: {
+        activity_ref: opts.activityId ?? null,
+        activity_description: opts.activityDescription ?? "E2E activity row",
+        shift: "shift_1",
+        quantity: opts.quantity ?? 10,
+        quantity_measured: true,
+        unit: "m3",
+      },
+    },
+  );
+  if (!activityRes.ok()) {
+    throw new Error(
+      `createDailyReportViaApi activity failed: ${activityRes.status()} ${await activityRes.text()}`,
+    );
+  }
+  return reportId;
+}

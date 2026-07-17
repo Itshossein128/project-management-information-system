@@ -8,6 +8,7 @@ import { apiFetch } from "@/app/lib/api-client";
 import { syncBatch, type SyncBatchResult } from "@/app/lib/api/daily-reports";
 import {
   addConflict,
+  addToQueue,
   clearSyncedItems,
   deletePendingPhoto,
   generateUUID,
@@ -15,6 +16,7 @@ import {
   getPendingPhoto,
   getPendingQueue,
   type QueueItem,
+  removeQueueItem,
   updateOfflineReport,
   updateQueueItem,
 } from "@/app/lib/offlineDB";
@@ -247,15 +249,40 @@ async function syncProjectBatch(
       }
       synced += Math.max(queueIds.length, 1);
     } else if (row.status === "conflict") {
-      for (const id of queueIds) {
+      let ids = queueIds;
+      if (ids.length === 0 && localId) {
+        const orphanId = generateUUID();
+        await addToQueue({
+          queue_id: orphanId,
+          entity_type: "daily_report",
+          project_id: projectId,
+          method: "POST",
+          endpoint: `/v1/projects/${projectId}/daily-reports/`,
+          payload: batchPayloads[i],
+          created_at: new Date().toISOString(),
+          status: "failed",
+          retry_count: 0,
+          error_message: row.conflict_reason ?? "تعارض داده",
+          local_id: localId,
+          server_id: row.server_id,
+        });
+        ids = [orphanId];
+      }
+      const serverPayload =
+        row.server_payload && typeof row.server_payload === "object"
+          ? row.server_payload
+          : { server_id: row.server_id, reason: row.conflict_reason };
+      const conflictFields = row.conflict_fields ?? [];
+      for (const id of ids) {
         await addConflict({
           conflict_id: generateUUID(),
           queue_id: id,
           project_id: projectId,
           entity_type: "daily_report",
           local_payload: batchPayloads[i],
-          server_payload: { server_id: row.server_id, reason: row.conflict_reason },
-          conflict_fields: [],
+          server_payload: serverPayload,
+          conflict_fields: conflictFields,
+          conflict_reason: row.conflict_reason,
           status: "unresolved",
           created_at: new Date().toISOString(),
         });
@@ -264,7 +291,7 @@ async function syncProjectBatch(
           error_message: row.conflict_reason ?? "تعارض داده",
         });
       }
-      conflicts += Math.max(queueIds.length, 1);
+      conflicts += Math.max(ids.length, 1);
     } else if (row.status === "error" || row.status === "skipped") {
       for (const id of queueIds) {
         await updateQueueItem(id, {
@@ -363,6 +390,5 @@ export async function retryFailedQueueItem(queueId: string): Promise<void> {
 }
 
 export async function discardFailedQueueItem(queueId: string): Promise<void> {
-  const { removeQueueItem } = await import("@/app/lib/offlineDB");
   await removeQueueItem(queueId);
 }
