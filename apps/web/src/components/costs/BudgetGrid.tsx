@@ -10,6 +10,9 @@ import {
   type CostCategory,
 } from "@/app/lib/api/costs";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -39,18 +42,18 @@ export function BudgetGrid({
   const [edits, setEdits] = useState<Record<string, number>>({});
   const [editingCell, setEditingCell] = useState<string | null>(null);
 
-  const { data: budgetData, isLoading: budgetsLoading } = useQuery({
+  const { data: budgetData, isLoading: budgetsLoading, isError: budgetsError, refetch: refetchBudgets } = useQuery({
     queryKey: ["budgets", projectId],
     queryFn: () => fetchBudgets(projectId),
   });
 
-  const { data: wbsFlat = [], isLoading: wbsLoading } = useQuery({
+  const { data: wbsFlat = [], isLoading: wbsLoading, isError: wbsError, refetch: refetchWbs } = useQuery({
     queryKey: ["wbs-flat", projectId],
     queryFn: () => fetchWBSFlat(projectId),
     enabled: mode === "wbs",
   });
 
-  const { data: activitiesData, isLoading: actLoading } = useQuery({
+  const { data: activitiesData, isLoading: actLoading, isError: actError, refetch: refetchActs } = useQuery({
     queryKey: ["activities", projectId, "budget-grid"],
     queryFn: () => fetchActivities(projectId, { per_page: 500 }),
     enabled: mode === "activity",
@@ -155,14 +158,26 @@ export function BudgetGrid({
   });
 
   const isLoading = budgetsLoading || (mode === "wbs" ? wbsLoading : actLoading);
+  const isError = budgetsError || (mode === "wbs" ? wbsError : actError);
   const hasEdits = Object.keys(edits).length > 0;
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">در حال بارگذاری ماتریس بودجه…</p>;
+    return <LoadingSkeleton rows={8} />;
+  }
+  if (isError) {
+    return (
+      <QueryErrorState
+        onRetry={() => {
+          void refetchBudgets();
+          if (mode === "wbs") void refetchWbs();
+          else void refetchActs();
+        }}
+      />
+    );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="budget-grid">
       {budgetData?.warning ? (
         <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
           {budgetData.warning}
@@ -196,6 +211,7 @@ export function BudgetGrid({
           <Button
             variant="primary"
             size="sm"
+            data-testid="budget-save-btn"
             loading={saveMutation.isPending}
             onClick={() => saveMutation.mutate()}
           >
@@ -204,8 +220,18 @@ export function BudgetGrid({
         ) : null}
       </div>
 
+      {rows.length === 0 ? (
+        <EmptyState
+          title={mode === "wbs" ? "ساختار WBS خالی است" : "فعالیتی ثبت نشده"}
+          description={
+            mode === "wbs"
+              ? "ابتدا ساختار شکست کار را تعریف کنید تا ماتریس بودجه نمایش داده شود."
+              : "ابتدا فعالیت‌ها را تعریف کنید تا ماتریس بودجه نمایش داده شود."
+          }
+        />
+      ) : (
       <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[900px] text-sm">
+        <table className="w-full min-w-[900px] text-sm" data-testid="budget-matrix">
           <thead className="bg-muted/50">
             <tr>
               <th className="sticky start-0 z-10 bg-muted/50 px-3 py-2 text-start">کد</th>
@@ -237,6 +263,7 @@ export function BudgetGrid({
                         <input
                           autoFocus
                           className="w-24 rounded border px-1 py-0.5 text-center text-xs"
+                          data-testid={`budget-input-${row.code}-${cat.value}`}
                           defaultValue={amount ? String(amount) : ""}
                           onBlur={(e) => {
                             const val = parseFaAmount(e.target.value);
@@ -251,6 +278,7 @@ export function BudgetGrid({
                         <button
                           type="button"
                           className="w-full rounded px-1 py-0.5 hover:bg-muted/60 disabled:cursor-default"
+                          data-testid={`budget-cell-${row.code}-${cat.value}`}
                           disabled={!canEdit}
                           onClick={() => canEdit && setEditingCell(k)}
                         >
@@ -279,6 +307,7 @@ export function BudgetGrid({
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 from datetime import date
 
+from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -10,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from common.cache_helpers import cache_key, get_cached_or_compute
 from common.jalali import parse_jalali_or_gregorian
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Activity, Project
@@ -20,6 +22,7 @@ from schedule.services.progress_service import (
     get_progress_history,
     get_progress_snapshot,
     get_s_curve_data,
+    invalidate_s_curve_cache,
 )
 
 
@@ -105,15 +108,11 @@ class ProjectProgressKpisView(ProgressBaseView):
     # Queries: before optimization=12, after=3 (cached EVM aggregates)
     @extend_schema(summary='EVM KPIs', tags=['Progress'])
     def get(self, request, project_pk):
-        from common.cache_helpers import cache_key, get_cached_or_compute
-
         project = self.get_project()
         as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
         force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
         key = cache_key('kpis', project.id, as_of.isoformat())
         if force:
-            from django.core.cache import cache
-
             cache.delete(key)
         return Response(
             get_cached_or_compute(key, 1800, lambda: compute_evm(project.id, as_of))
@@ -165,8 +164,6 @@ class ProjectManualProgressView(ProgressBaseView):
                 'updated_by': request.user,
             },
         )
-
-        from schedule.services.progress_service import invalidate_s_curve_cache
 
         invalidate_s_curve_cache(project.id)
 

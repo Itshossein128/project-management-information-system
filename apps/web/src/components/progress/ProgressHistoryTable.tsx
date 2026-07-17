@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { PATHS } from "@/app/routeVars";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import type { ProgressHistoryRow } from "@/app/lib/api/progress";
+import { EmptyState } from "@/components/layout/empty-state";
 import { cn } from "@/app/lib/utils";
 
 export function ProgressHistoryTable({
@@ -13,9 +14,10 @@ export function ProgressHistoryTable({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-        هنوز گزارش تأیید‌شده‌ای ثبت نشده است
-      </p>
+      <EmptyState
+        title="هنوز گزارش تأیید‌شده‌ای ثبت نشده است"
+        description="پس از تأیید گزارش‌های روزانه، تاریخچه پیشرفت اینجا نمایش داده می‌شود."
+      />
     );
   }
 

@@ -18,6 +18,8 @@ import { ContractBoQGrid } from "@/components/contracts/ContractBoQGrid";
 import { ContractSummaryCards } from "@/components/contracts/ContractSummaryCards";
 import { IPCWizard } from "@/components/contracts/IPCWizard";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -37,7 +39,7 @@ function ContractDetailContent() {
   const [values, setValues] = useState<ContractFormValues | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  const { data: contract, isLoading } = useQuery({
+  const { data: contract, isLoading, isError, refetch } = useQuery({
     queryKey: ["contract", projectId, contractId],
     queryFn: () => fetchContract(projectId, contractId),
     enabled: canView && Boolean(contractId),
@@ -54,15 +56,17 @@ function ContractDetailContent() {
   });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
   if (!canView) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به قراردادها ندارید.
-      </p>
+      <EmptyState
+        title="دسترسی ندارید"
+        description="دسترسی به قراردادها ندارید."
+      />
     );
   }
-  if (!contract) return <p>قرارداد یافت نشد</p>;
+  if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
+  if (!contract) return <EmptyState title="قرارداد یافت نشد" />;
 
   const startEdit = () => {
     setValues(contractDetailToForm(contract));

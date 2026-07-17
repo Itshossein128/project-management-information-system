@@ -15,6 +15,9 @@ import {
 } from "@/app/lib/api/cashflow";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -213,7 +216,7 @@ export function TransactionsTab({
     };
   }, [dateFrom, dateTo, txType, category, isForecast, counterparty]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["cash-flow", projectId, params],
     queryFn: () => fetchCashFlowList(projectId, params),
   });
@@ -321,11 +324,22 @@ export function TransactionsTab({
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">در حال بارگذاری...</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : rows.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-          تراکنشی یافت نشد
-        </p>
+        <EmptyState
+          title="تراکنشی یافت نشد"
+          description="تراکنش جدیدی ثبت کنید یا فیلترها را تغییر دهید."
+          action={
+            canEdit ? (
+              <Button variant="primary" onClick={() => setDrawerOpen(true)}>
+                <Plus className="size-4" />
+                افزودن تراکنش
+              </Button>
+            ) : null
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full min-w-[900px] text-sm">

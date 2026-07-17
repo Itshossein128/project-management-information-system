@@ -9,12 +9,26 @@ from datetime import date, timedelta
 import redis
 from django.conf import settings
 
+from field_reports.models import DailyReport, ReportStatus
 from projects.models import Activity, ActivityStatus
 from schedule.models import ActivityProgress
 
 logger = logging.getLogger(__name__)
 
 S_CURVE_TTL = 3600
+
+# Module 5: activities more than 5% behind schedule are flagged.
+BEHIND_SCHEDULE_THRESHOLD = 0.05
+
+
+def is_activity_behind(
+    planned: float,
+    actual: float,
+    *,
+    threshold: float = BEHIND_SCHEDULE_THRESHOLD,
+) -> bool:
+    """True when lag (planned − actual) exceeds the Module 5 threshold."""
+    return (planned - actual) > threshold
 
 
 def _redis_client():
@@ -26,13 +40,22 @@ def s_curve_cache_key(project_id, date_from: date, date_to: date, interval: str)
 
 
 def invalidate_s_curve_cache(project_id) -> None:
+    """Invalidate S-curve Redis keys and Django-cached EVM KPI payloads for a project."""
     try:
         client = _redis_client()
-        pattern = f"s_curve:{project_id}:*"
-        for key in client.scan_iter(match=pattern):
-            client.delete(key)
+        for pattern in (f's_curve:{project_id}:*', f'*kpis:{project_id}:*'):
+            for key in client.scan_iter(match=pattern):
+                client.delete(key)
     except Exception:  # noqa: BLE001 - cache is best-effort
-        logger.warning('Failed to invalidate s-curve cache for project %s', project_id, exc_info=True)
+        logger.warning(
+            'Failed to invalidate progress caches for project %s',
+            project_id,
+            exc_info=True,
+        )
+
+
+# Alias used by callers that want the broader name.
+invalidate_progress_caches = invalidate_s_curve_cache
 
 
 def get_project_progress_on_date(project_id, on_date: date) -> float:
@@ -226,10 +249,8 @@ def get_progress_snapshot(project_id, as_of: date) -> dict:
             continue
         planned_a = float(latest.planned_progress or 0)
         actual_a = float(latest.actual_progress or 0)
-        if actual_a < planned_a:
+        if is_activity_behind(planned_a, actual_a):
             behind += 1
-
-    from field_reports.models import DailyReport, ReportStatus
 
     last_report = (
         DailyReport.objects.filter(
@@ -291,7 +312,7 @@ def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, sta
         planned = float(latest.planned_progress or 0) if latest else 0.0
         actual = float(latest.actual_progress or 0) if latest else 0.0
         variance = actual - planned
-        behind = actual < planned
+        behind = is_activity_behind(planned, actual)
         if is_behind is not None and behind != is_behind:
             continue
         rows.append({
@@ -316,9 +337,8 @@ def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, sta
 
 
 def get_progress_history(project_id):
-    from field_reports.models import DailyReport, ReportStatus
-
-    reports = (
+    """Progress at each approved report date — single chronological sweep (not O(n) recompute)."""
+    reports = list(
         DailyReport.objects.filter(
             project_id=project_id,
             status=ReportStatus.APPROVED,
@@ -327,12 +347,56 @@ def get_progress_history(project_id):
         .select_related('approved_by')
         .order_by('report_date')
     )
+    if not reports:
+        return []
+
+    activities_list = list(
+        Activity.objects.filter(
+            project_id=project_id,
+            is_deleted=False,
+            weight__isnull=False,
+        )
+    )
+    total_weight = sum(float(a.weight) for a in activities_list)
+    activity_ids = [a.id for a in activities_list]
+
+    all_progress = list(
+        ActivityProgress.objects.filter(activity_id__in=activity_ids).order_by(
+            'report_date',
+            'activity_id',
+        )
+    )
+
+    latest_planned: dict = {}
+    latest_actual: dict = {}
+    progress_idx = 0
     history = []
+
     for report in reports:
-        planned = get_planned_progress_on_date(project_id, report.report_date)
-        actual = get_project_progress_on_date(project_id, report.report_date)
+        on_date = report.report_date
+        while progress_idx < len(all_progress) and all_progress[progress_idx].report_date <= on_date:
+            row = all_progress[progress_idx]
+            if row.planned_progress is not None:
+                latest_planned[row.activity_id] = float(row.planned_progress)
+            if row.actual_progress is not None:
+                latest_actual[row.activity_id] = float(row.actual_progress)
+            progress_idx += 1
+
+        if total_weight == 0:
+            planned = 0.0
+            actual = 0.0
+        else:
+            planned = (
+                sum(float(a.weight) * latest_planned.get(a.id, 0.0) for a in activities_list)
+                / total_weight
+            )
+            actual = (
+                sum(float(a.weight) * latest_actual.get(a.id, 0.0) for a in activities_list)
+                / total_weight
+            )
+
         history.append({
-            'date': report.report_date.strftime('%Y-%m-%d'),
+            'date': on_date.strftime('%Y-%m-%d'),
             'planned_pct': round(planned * 100, 2),
             'actual_pct': round(actual * 100, 2),
             'variance_pct': round((actual - planned) * 100, 2),

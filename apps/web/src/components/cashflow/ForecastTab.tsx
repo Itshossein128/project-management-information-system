@@ -9,6 +9,8 @@ import {
   type ForecastRow,
 } from "@/app/lib/api/cashflow";
 import { CashFlowChart, monthLabel } from "@/components/cashflow/CashFlowChart";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
 
 function ForecastRowEditor({
@@ -101,7 +103,12 @@ function ForecastRowEditor({
 export function ForecastTab({ projectId }: { projectId: string }) {
   const todayIso = new Date().toISOString().slice(0, 10);
 
-  const { data: forecastData, isLoading: forecastLoading } = useQuery({
+  const {
+    data: forecastData,
+    isLoading: forecastLoading,
+    isError: forecastError,
+    refetch: refetchForecast,
+  } = useQuery({
     queryKey: ["cash-forecast", projectId],
     queryFn: () => fetchForecast(projectId),
   });
@@ -112,6 +119,7 @@ export function ForecastTab({ projectId }: { projectId: string }) {
   });
 
   const rows = useMemo(() => {
+    if (forecastError) return [];
     const existing = forecastData?.results ?? [];
     if (existing.length >= 12) return existing.slice(0, 12);
     const result = [...existing];
@@ -130,14 +138,16 @@ export function ForecastTab({ projectId }: { projectId: string }) {
       });
     }
     return result;
-  }, [forecastData?.results]);
+  }, [forecastData?.results, forecastError]);
 
   const chartData = monthlyData?.results ?? [];
 
   return (
     <div className="space-y-6">
       {forecastLoading ? (
-        <p className="text-muted-foreground">در حال بارگذاری...</p>
+        <LoadingSkeleton rows={8} />
+      ) : forecastError ? (
+        <QueryErrorState onRetry={() => void refetchForecast()} />
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full min-w-[1000px] text-sm">

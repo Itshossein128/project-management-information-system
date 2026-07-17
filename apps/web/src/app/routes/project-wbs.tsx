@@ -8,11 +8,13 @@ import { WBSNodeRow } from "@/components/wbs/wbs-node";
 import { WbsEmptyState } from "@/components/wbs/wbs-empty-state";
 import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
 import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
+import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function ProjectWBSContent() {
@@ -23,7 +25,7 @@ function ProjectWBSContent() {
   const [mspOpen, setMspOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
-  const { data: tree = [], isLoading } = useQuery({
+  const { data: tree = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["wbs", projectId],
     queryFn: () => fetchWBSTree(projectId),
   });
@@ -33,6 +35,10 @@ function ProjectWBSContent() {
       <Breadcrumb
         items={[
           { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          {
+            label: "نمای کلی",
+            href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
+          },
           { label: "WBS" },
         ]}
       />
@@ -62,6 +68,8 @@ function ProjectWBSContent() {
 
       {isLoading ? (
         <LoadingSkeleton rows={10} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : tree.length === 0 ? (
         canEditWBS ? (
           <WbsEmptyState
@@ -71,7 +79,10 @@ function ProjectWBSContent() {
             }
           />
         ) : (
-          <p className='text-muted-foreground'>هنوز گره WBS ایجاد نشده است.</p>
+          <EmptyState
+            title="هنوز گره WBS ایجاد نشده است"
+            description="این صفحه فقط‌خواندنی است؛ برای ایجاد ساختار به مجوز ویرایش نیاز دارید."
+          />
         )
       ) : (
         <div className='overflow-x-auto rounded-lg border border-border'>

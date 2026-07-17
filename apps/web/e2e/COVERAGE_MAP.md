@@ -8,7 +8,11 @@
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
 | DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
 | OFFLINE | Sync & Conflict | 2 | 15 | 13% |
-| FINANCE | Budget & Cost | 0 | 15 | 0% |
+| FINANCE | Budget & Cost | 5 | 15 | 33% |
+
+## Sprint 7 coverage notes
+
+- `e2e/tests/sprint7-costs.spec.ts` — costs KPIs (incl. committed), budget grid upsert, actual cost create, variance tab, cost pool create + manual allocate
 
 ## Sprint 3 coverage notes
 

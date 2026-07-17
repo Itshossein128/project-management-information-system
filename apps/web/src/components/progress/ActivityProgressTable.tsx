@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { PATHS } from "@/app/routeVars";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import type { ActivityProgressRow } from "@/app/lib/api/progress";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { MiniProgressBar } from "@/components/progress/MiniProgressBar";
 import { cn } from "@/app/lib/utils";
@@ -22,9 +23,10 @@ export function ActivityProgressTable({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-        فعالیتی با وزن تعریف‌شده یافت نشد
-      </p>
+      <EmptyState
+        title="فعالیتی با وزن تعریف‌شده یافت نشد"
+        description="برای نمایش پیشرفت، وزن فعالیت‌ها را در فهرست فعالیت‌ها تنظیم کنید."
+      />
     );
   }
 

@@ -6,8 +6,12 @@ import "frappe-gantt/dist/frappe-gantt.css";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import { fetchActivity } from "@/app/lib/api/activities";
 import { downloadGanttPdf, fetchGantt } from "@/app/lib/api/gantt";
+import { PATHS } from "@/app/routeVars";
 import { ActivityDrawer } from "@/components/activities/activity-drawer";
-import { LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { Checkbox, Select } from "@/components/form";
+import { EmptyState } from "@/components/layout/empty-state";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -24,7 +28,12 @@ function GanttContent() {
   const [baselineId, setBaselineId] = useState("");
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
 
-  const { data, isLoading: loadingGantt } = useQuery({
+  const {
+    data,
+    isLoading: loadingGantt,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["gantt", projectId, baselineId],
     queryFn: () => fetchGantt(projectId, baselineId || undefined),
     enabled: canView,
@@ -35,6 +44,11 @@ function GanttContent() {
     queryFn: () => fetchActivity(projectId, selectedActivityId!),
     enabled: Boolean(selectedActivityId),
   });
+
+  const chartTasks =
+    data?.tasks
+      ?.filter((t) => t.start && t.end)
+      .filter((t) => !criticalOnly || t.is_critical) ?? [];
 
   useEffect(() => {
     if (!data?.tasks?.length || !containerRef.current) return;
@@ -49,8 +63,15 @@ function GanttContent() {
         end: t.end!,
         progress: t.progress,
         dependencies: t.dependencies || undefined,
-        custom_class: t.is_critical ? "bar-critical" : t.status === "completed" ? "bar-done" : "bar-normal",
+        custom_class:
+          t.is_critical
+            ? "bar-critical"
+            : t.status === "completed"
+              ? "bar-done"
+              : "bar-normal",
       }));
+
+    if (tasks.length === 0) return;
 
     containerRef.current.innerHTML = "";
     ganttRef.current = new Gantt(containerRef.current, tasks, {
@@ -77,26 +98,50 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
-  if (!canView) return <p className="p-8 text-center text-muted-foreground">دسترسی ندارید.</p>;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!canView) {
+    return (
+      <EmptyState
+        title="دسترسی ندارید"
+        description="برای مشاهده گانت به مجوز فعالیت‌ها نیاز است."
+      />
+    );
+  }
+  if (isError) {
+    return <QueryErrorState onRetry={() => void refetch()} />;
+  }
 
   return (
     <div className="space-y-4">
+      <Breadcrumb
+        items={[
+          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          {
+            label: project.project_name,
+            href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
+          },
+          { label: "گانت" },
+        ]}
+      />
       <PageHeader title="گانت" subtitle={project.project_name} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          className="rounded border px-2 py-1.5 text-sm"
-          value={baselineId}
-          onChange={(e) => setBaselineId(e.target.value)}
-        >
-          <option value="">خط مبنای جاری</option>
-          {(data?.baselines ?? []).map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.name}{b.is_current ? " (جاری)" : ""}
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-wrap items-end gap-3">
+        <Select
+          name="gantt_baseline"
+          label="خط مبنا"
+          value={baselineId || "current"}
+          onChange={(e) =>
+            setBaselineId(e.target.value === "current" ? "" : e.target.value)
+          }
+          options={[
+            { value: "current", label: "خط مبنای جاری" },
+            ...(data?.baselines ?? []).map((b) => ({
+              value: b.id,
+              label: `${b.name}${b.is_current ? " (جاری)" : ""}`,
+            })),
+          ]}
+          fieldClassName="min-w-[12rem]"
+        />
         {(["Day", "Week", "Month", "Year"] as const).map((mode) => (
           <Button
             key={mode}
@@ -104,16 +149,33 @@ function GanttContent() {
             size="sm"
             onClick={() => setViewMode(mode)}
           >
-            {mode === "Day" ? "روز" : mode === "Week" ? "هفته" : mode === "Month" ? "ماه" : "سال"}
+            {mode === "Day"
+              ? "روز"
+              : mode === "Week"
+                ? "هفته"
+                : mode === "Month"
+                  ? "ماه"
+                  : "سال"}
           </Button>
         ))}
-        <Button variant="secondary" size="sm" onClick={() => ganttRef.current?.scroll_current?.()}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => ganttRef.current?.scroll_current?.()}
+        >
           امروز
         </Button>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={criticalOnly} onChange={(e) => setCriticalOnly(e.target.checked)} />
-          فقط مسیر بحرانی
-        </label>
+        <Checkbox
+          name="critical_only"
+          label="فقط مسیر بحرانی"
+          checked={criticalOnly}
+          onChange={(e) =>
+            setCriticalOnly(
+              Boolean((e.target as unknown as { value: boolean }).value),
+            )
+          }
+          fieldClassName="pb-2"
+        />
         <Button variant="secondary" size="sm" onClick={() => void exportPdf()}>
           خروجی PDF
         </Button>
@@ -123,7 +185,17 @@ function GanttContent() {
         <p className="text-sm text-muted-foreground">خط مبنا: {data.baseline_name}</p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-lg border p-4 gantt-container" ref={containerRef} />
+      {chartTasks.length === 0 ? (
+        <EmptyState
+          title="فعالیتی برای نمایش در گانت نیست"
+          description="فعالیت‌ها باید تاریخ شروع و پایان برنامه‌ای داشته باشند."
+        />
+      ) : (
+        <div
+          className="gantt-container overflow-x-auto rounded-lg border p-4"
+          ref={containerRef}
+        />
+      )}
 
       <style>{`
         .bar-critical .bar { fill: #dc2626 !important; }
@@ -150,7 +222,9 @@ export default function ProjectScheduleGanttPage() {
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>
-      <GanttContent />
+      <main className="page-main page-shell mx-auto max-w-[100vw] px-4 py-8">
+        <GanttContent />
+      </main>
     </ProjectProvider>
   );
 }

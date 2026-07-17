@@ -1,6 +1,7 @@
 import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
+import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
@@ -12,7 +13,7 @@ function WeatherPageContent() {
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
 
   return (
     <>

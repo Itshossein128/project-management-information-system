@@ -6,9 +6,17 @@ import {
 } from "@/app/lib/api/cashflow";
 import { monthLabel } from "@/components/cashflow/CashFlowChart";
 import { WaterfallChart } from "@/components/cashflow/WaterfallChart";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 
 export function GapAnalysisTab({ projectId }: { projectId: string }) {
-  const { data: gapData, isLoading } = useQuery({
+  const {
+    data: gapData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["cash-gap", projectId],
     queryFn: () => fetchGapAnalysis(projectId),
   });
@@ -23,10 +31,12 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
       {isLoading ? (
-        <p className="text-muted-foreground">در حال بارگذاری...</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : gaps.length === 0 ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-8 text-center text-emerald-800">
-          ✓ در بازه پیش‌بینی شده کمبود نقدینگی وجود ندارد
+          در بازه پیش‌بینی شده کمبود نقدینگی وجود ندارد
         </div>
       ) : (
         <>

@@ -12,7 +12,9 @@ import {
 } from "@/app/lib/api/progress";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
 import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer";
@@ -44,7 +46,12 @@ function ProgressPageContent() {
   const effectiveFrom = dateRange.from || project?.start_date || todayIso();
   const effectiveTo = dateRange.to || todayIso();
 
-  const { data: snapshot, isLoading: snapshotLoading } = useQuery({
+  const {
+    data: snapshot,
+    isLoading: snapshotLoading,
+    isError: snapshotError,
+    refetch: refetchSnapshot,
+  } = useQuery({
     queryKey: ["progress-snapshot", projectId],
     queryFn: () => fetchProgressSnapshot(projectId),
     enabled: canView && Boolean(projectId),
@@ -115,13 +122,17 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (snapshotError) {
+    return <QueryErrorState onRetry={() => void refetchSnapshot()} />;
+  }
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده داشبورد را ندارد.
-      </p>
+      <EmptyState
+        title="دسترسی ندارید"
+        description="نقش شما مجوز مشاهده داشبورد را ندارد."
+      />
     );
   }
 
@@ -159,7 +170,10 @@ function ProgressPageContent() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7">
+      <div
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7"
+        data-testid="progress-kpi-grid"
+      >
         <KPICard
           title="پیشرفت فیزیکی"
           value={`${(snapshot?.actual_progress_pct ?? 0).toFixed(1)}٪`}
@@ -238,7 +252,10 @@ function ProgressPageContent() {
         />
       </div>
 
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <section
+        className="space-y-3 rounded-xl border border-border bg-card p-4"
+        data-testid="progress-s-curve"
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">منحنی S</h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -257,6 +274,7 @@ function ProgressPageContent() {
               variant="ghost"
               onClick={() => setForceRefresh(true)}
               title="بازخوانی بدون کش"
+              aria-label="بازخوانی بدون کش"
             >
               <RefreshCw className="size-4" />
             </Button>
