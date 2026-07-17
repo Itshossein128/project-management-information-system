@@ -42,7 +42,10 @@ class SubScopedViewSet(viewsets.ModelViewSet):
         return self.edit_permission
 
     def get_queryset(self):
-        return Subcontractor.objects.filter(project_id=self.kwargs['project_pk'], is_deleted=False)
+        return Subcontractor.objects.filter(
+            project_id=self.kwargs['project_pk'],
+            is_deleted=False
+        ).prefetch_related('scores', 'warnings')
 
     def perform_create(self, serializer):
         serializer.save(
