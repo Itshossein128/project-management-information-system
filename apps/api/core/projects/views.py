@@ -118,7 +118,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            project = create_project_from_template(name=name, project_code=code, template_id=template)
+            project = create_project_from_template(
+                name=name,
+                project_code=code,
+                template_id=template,
+                creator=request.user,
+            )
             return Response(ProjectDetailSerializer(project).data, status=status.HTTP_201_CREATED)
         except ValueError as e:
             logger.exception('Failed to create project from template')

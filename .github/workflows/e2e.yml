@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "apps/api/**"
       - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "apps/api/**"
       - ".github/workflows/e2e.yml"
   workflow_dispatch:
 
@@ -34,13 +36,18 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm --filter web exec playwright install --with-deps chromium
-        working-directory: /home/hossein/Desktop/projects/mehdi/building-management
 
       - name: Build web app
         run: pnpm --filter web build
 
       - name: Run Playwright smoke tests
-        run: pnpm --filter web exec playwright test e2e/tests/offline-sync.spec.ts e2e/tests/daily-report.spec.ts e2e/tests/contracts-ipc.spec.ts
-        working-directory: /home/hossein/Desktop/projects/mehdi/building-management
+        run: >
+          pnpm --filter web exec playwright test
+          e2e/tests/auth-login.spec.ts
+          e2e/tests/projects.spec.ts
+          e2e/tests/members-wbs.spec.ts
+          e2e/tests/offline-sync.spec.ts
+          e2e/tests/daily-report.spec.ts
+          e2e/tests/contracts-ipc.spec.ts
         env:
           CI: "true"

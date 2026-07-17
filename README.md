@@ -6,7 +6,7 @@ Monorepo for the IPCAS construction project management platform: React Router we
 
 ```
 apps/web/     React Router 7 + Vite frontend
-apps/api/     Django 4.2 + DRF backend (IPCAS Sprint 1 foundation)
+apps/api/     Django 4.2 + DRF backend (IPCAS Sprint 1–2 foundation + later domains)
 docs/         Engineering blueprint and scope map
 infra/        Traefik gateway config
 packages/     Shared packages (future)
@@ -27,7 +27,9 @@ Smoke test (full stack): `bash scripts/smoke-stack.sh` after `docker compose up`
 
 ## Current scope vs blueprint
 
-Sprint 1 (Infrastructure & Auth) is implemented: full blueprint UUID schema, JWT with revocation, Traefik gateway, tenancy middleware, audit log (sync or async via RabbitMQ), MinIO storage, RabbitMQ events + worker consumer. See [docs/ipcas-scope-map.md](docs/ipcas-scope-map.md).
+**Sprint 1** (Infrastructure & Auth) and **Sprint 2** (Projects, WBS & Members) are complete: UUID schema, JWT with revocation, Traefik gateway, tenancy middleware, audit log (sync or async via RabbitMQ), MinIO storage, RabbitMQ events + worker, role/permission engine, project CRUD + members, WBS tree API, project list/wizard UI, and members/roles admin. Design system baseline: CSS tokens + Shadcn-style primitives under `apps/web/src/components/ui/` (Dialog/Tabs/DropdownMenu deferred until needed).
+
+Later sprints (schedule, daily reports, cost, contracts, etc.) are tracked in [docs/ipcas-scope-map.md](docs/ipcas-scope-map.md).
 
 **API:** `/api/v1/projects/` (UUID). **Frontend routes:** `/projects/{uuid}/...`
 

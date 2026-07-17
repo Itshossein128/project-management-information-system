@@ -57,7 +57,7 @@ The global `inventory.Item` API at `/api/items/` is **deprecated**. New work mus
 | **F-05** Role & permission engine + project overrides | Done — `permissions/`, `HasProjectPermission` |
 | **C-01** Project CRUD + membership APIs | Done — `projects/`, `members/`, `positions/` |
 | **C-02** WBS tree API (insert, reorder, code propagation) | Done — CRUD + move + auto code propagation |
-| **UI-01** Design system / tokens | Partial — Shadcn-style primitives + CSS tokens; expand as needed |
+| **UI-01** Design system / tokens | Done — CSS tokens (`apps/web/src/design/tokens/`) + Shadcn-style primitives in `components/ui/` (button, input, select, drawer, data-table, etc.); Dialog/Tabs/DropdownMenu deferred until a feature needs them |
 | **UI-02** Project list + creation wizard | Done |
 | **UI-15** Members management | Done — `project-members.tsx`; global roles in `settings-roles.tsx` |
 | **Sprint 2 hardening** | Done — permission guard fix, `view_wbs` on WBS reads, project settings UI, WBS root bootstrap, `/home` → `/projects` |

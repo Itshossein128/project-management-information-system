@@ -35,8 +35,13 @@ class ProjectMemberViewSet(viewsets.ViewSet):
     lookup_url_kwarg = 'user_id'
 
     def get_permissions(self):
-        if self.action in ('list', 'permissions'):
+        if self.action == 'list':
             return [IsAuthenticated(), IsProjectMember()]
+        if self.action == 'permissions':
+            # GET: any project member; POST/DELETE: manage_members required
+            if self.request.method in ('GET', 'HEAD', 'OPTIONS'):
+                return [IsAuthenticated(), IsProjectMember()]
+            return [IsAuthenticated(), HasProjectPermission()]
         return [IsAuthenticated(), HasProjectPermission()]
 
     @property
@@ -136,6 +141,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             set_permission_override(member, codename, None)
+            member = self._get_member_by_user(user_id)
             return Response(EffectivePermissionsSerializer.from_member(member))
 
         serializer = PermissionOverrideSerializer(data=request.data)
@@ -145,6 +151,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
             serializer.validated_data['permission_codename'],
             serializer.validated_data['is_granted'],
         )
+        member = self._get_member_by_user(user_id)
         return Response(EffectivePermissionsSerializer.from_member(member))
 
 
