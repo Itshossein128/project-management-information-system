@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
+  Camera,
   CheckCircle2,
   Clock,
   Plus,
@@ -17,7 +18,8 @@ export type CellType =
   | "select"
   | "checkbox"
   | "time"
-  | "combobox";
+  | "combobox"
+  | "photo";
 
 export interface GridColumn {
   key: string;
@@ -52,6 +54,8 @@ export interface EditableGridProps {
   /** Per-row offline sync status, keyed by row id. */
   syncStatusFor?: (row: GridRow) => RowSyncStatus | undefined;
   onRetryRow?: (row: GridRow) => void;
+  /** Upload handler for photo column cells — returns stored file id. */
+  onPhotoUpload?: (file: File) => Promise<string>;
 }
 
 const SYNC_META: Record<
@@ -118,6 +122,7 @@ export function EditableGrid({
   footer,
   syncStatusFor,
   onRetryRow,
+  onPhotoUpload,
 }: EditableGridProps) {
   const [rows, setRows] = useState<GridRow[]>(serverRows);
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -232,7 +237,7 @@ export function EditableGrid({
                 </td>
                 {columns.map((col) => (
                   <td key={col.key} className="px-2 py-1">
-                    {renderCell(col, row, setCell, readOnly, listId)}
+                    {renderCell(col, row, setCell, readOnly, listId, onPhotoUpload)}
                   </td>
                 ))}
                 {syncStatusFor ? (
@@ -308,6 +313,7 @@ function renderCell(
   setCell: (key: string, colKey: string, value: unknown) => void,
   readOnly: boolean | undefined,
   listId: string,
+  onPhotoUpload?: (file: File) => Promise<string>,
 ) {
   if (col.computed) {
     return (
@@ -328,6 +334,39 @@ function renderCell(
         onChange={(e) => setCell(row._key, col.key, e.target.checked)}
         className="size-4"
       />
+    );
+  }
+
+  if (col.type === "photo") {
+    const fileId = (value as string | null) ?? null;
+    return (
+      <label
+        className={cn(
+          "inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-border px-2 py-1 text-xs",
+          readOnly && "pointer-events-none opacity-50",
+          fileId && "border-emerald-400 text-emerald-700",
+        )}
+      >
+        <Camera className="size-3.5" />
+        {fileId ? "عکس" : "افزودن"}
+        <input
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          disabled={readOnly || !onPhotoUpload}
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file || !onPhotoUpload) return;
+            try {
+              const id = await onPhotoUpload(file);
+              setCell(row._key, col.key, id);
+            } catch {
+              /* caller may toast */
+            }
+            e.target.value = "";
+          }}
+        />
+      </label>
     );
   }
 

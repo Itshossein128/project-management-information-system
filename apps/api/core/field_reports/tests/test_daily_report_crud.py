@@ -120,4 +120,8 @@ class TestJobTitles:
         url = f'/api/v1/projects/{project.id}/manpower/job-titles/'
         response = auth_client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 66
+        assert len(response.data) == 65
+        titles = {row['title'] for row in response.data}
+        assert 'مدیرشعبه' in titles
+        assert 'کارگر ساده' in titles
+        assert 'اپراتور تاور' in titles

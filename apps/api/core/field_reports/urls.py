@@ -17,9 +17,15 @@ from field_reports.standalone_forms_views import (
     LaborCampReportViewSet,
     StandaloneManpowerViewSet,
 )
+from field_reports.equipment_views import (
+    EquipmentUtilizationSummaryView,
+    EquipmentUtilizationView,
+    EquipmentViewSet,
+)
 from field_reports.report_views import (
     ActivityLogFilterOptionsView,
     ActivityLogView,
+    LaborProductivityView,
     PersonnelSummaryView,
 )
 from field_reports.views import WeatherLogViewSet
@@ -67,6 +73,11 @@ equipment_log_detail = EquipmentLogViewSet.as_view(
 manpower_list = StandaloneManpowerViewSet.as_view({'get': 'list', 'post': 'create'})
 manpower_detail = StandaloneManpowerViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
 
+equipment_registry_list = EquipmentViewSet.as_view({'get': 'list', 'post': 'create'})
+equipment_registry_detail = EquipmentViewSet.as_view(
+    {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'},
+)
+
 DR = 'daily-reports'
 RID = '<uuid:report_pk>'
 
@@ -82,8 +93,17 @@ urlpatterns = [
     path('equipment-log/', equipment_log_list, name='equipment-log-list'),
     path('equipment-log/summary/', EquipmentLogSummaryView.as_view(), name='equipment-log-summary'),
     path('equipment-log/<uuid:pk>/', equipment_log_detail, name='equipment-log-detail'),
+    path('equipment/', equipment_registry_list, name='equipment-registry-list'),
+    path('equipment/<uuid:pk>/', equipment_registry_detail, name='equipment-registry-detail'),
+    path('equipment-utilization/', EquipmentUtilizationView.as_view(), name='equipment-utilization'),
+    path(
+        'equipment-utilization/summary/',
+        EquipmentUtilizationSummaryView.as_view(),
+        name='equipment-utilization-summary',
+    ),
 
     path('personnel-summary/', PersonnelSummaryView.as_view(), name='personnel-summary'),
+    path('labor-productivity/', LaborProductivityView.as_view(), name='labor-productivity'),
     path('activity-log/', ActivityLogView.as_view(), name='activity-log'),
     path('activity-log/filters/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filters'),
 

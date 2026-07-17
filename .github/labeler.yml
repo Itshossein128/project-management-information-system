@@ -1,0 +1,29 @@
+# Path → label mapping for pull_request_labeler.yml
+# Example: a PR that only touches apps/web gets the "frontend" label.
+
+frontend:
+  - changed-files:
+      - any-glob-to-any-file: "apps/web/**"
+
+backend:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/**"
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file: "docs/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "infra/**"
+          - "docker-compose*.yml"
+          - "Dockerfile*"
+
+e2e:
+  - changed-files:
+      - any-glob-to-any-file: "apps/web/e2e/**"

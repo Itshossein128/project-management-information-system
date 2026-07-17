@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from django.db.models import Prefetch
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from common.i18n import localize_api_payload
@@ -33,7 +33,8 @@ from .permissions import IsHrOrAdmin
 from .services import (
     UserRegistrationService,
     PasswordResetService,
-    PasswordChangeService
+    PasswordChangeService,
+    LoginService
 )
 from .utils import authenticate_user, get_tokens_for_user
 from .ratelimit_handlers import auth_ratelimit
@@ -41,6 +42,7 @@ from .ratelimit_handlers import auth_ratelimit
 User = get_user_model()
 
 
+@auth_ratelimit('10/m')
 class UserRegistrationView(generics.CreateAPIView):
     """
     User registration endpoint.
@@ -177,23 +179,14 @@ class LoginView(generics.GenericAPIView):
         login = serializer.validated_data['login']
         password = serializer.validated_data['password']
 
-        user = authenticate_user(login, password)
-
-        if user is None:
+        service = LoginService()
+        try:
+            user, tokens = service.authenticate_and_issue_tokens(login, password)
+        except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    {'error': _('Invalid credentials. Please check your phone number and password.')}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
-        if not user.is_active:
-            return Response(
-                localize_api_payload({'error': _('User account is disabled.')}),
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        tokens = get_tokens_for_user(user)
         return Response({
             'access': tokens['access'],
             'refresh': tokens['refresh'],
@@ -271,9 +264,7 @@ class ChangePasswordView(generics.GenericAPIView):
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -353,11 +344,7 @@ class ResetPasswordView(generics.GenericAPIView):
         summary="Reset password with token",
         description="""
         Reset password using the token received via SMS.
-
-        Note: This is a placeholder implementation. In production, you should:
-        1. Store reset tokens in a database with expiration
-        2. Validate token before allowing password reset
-        3. Invalidate token after use
+        Tokens are stored in the database with expiration and invalidated after use.
         """,
         request=ResetPasswordSerializer,
         responses={
@@ -400,9 +387,7 @@ class ResetPasswordView(generics.GenericAPIView):
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response(
-                localize_api_payload(
-                    e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}
-                ),
+                localize_api_payload(e.detail),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

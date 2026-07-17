@@ -28,6 +28,7 @@ export interface InlineGridTabProps {
   readOnly?: boolean;
   addLabel?: string;
   footer?: (rows: GridRow[]) => React.ReactNode;
+  onPhotoUpload?: (file: File) => Promise<string>;
 }
 
 /** Generic inline-editable tab backed by a daily-report child endpoint. */
@@ -43,6 +44,7 @@ export function InlineGridTab({
   readOnly,
   addLabel,
   footer,
+  onPhotoUpload,
 }: InlineGridTabProps) {
   const toast = useToast();
   const isOnline = useOnlineStatus();
@@ -164,6 +166,7 @@ export function InlineGridTab({
           : undefined
       }
       onRetryRow={() => void onRetryRow()}
+      onPhotoUpload={onPhotoUpload}
     />
   );
 }

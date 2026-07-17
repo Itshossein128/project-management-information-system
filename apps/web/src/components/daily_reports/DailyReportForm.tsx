@@ -16,6 +16,9 @@ import {
   reviewReport,
   submitReport,
 } from "@/app/lib/api/daily-reports";
+import { getCachedActivities, getCachedSubcontractors } from "@/app/lib/offlineDB";
+import { warmProjectCache } from "@/app/lib/offlineCache";
+import { isNetworkError } from "@/app/lib/offlineWrite";
 import { isoToJalali, jalaliToIso } from "@/app/lib/jalali-utils";
 import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
 import { ActivityTab } from "./ActivityTab";
@@ -102,13 +105,32 @@ export function DailyReportForm({
     }
   }, [report]);
 
+  useEffect(() => {
+    if (projectId) void warmProjectCache(projectId);
+  }, [projectId]);
+
   const activitiesQuery = useQuery({
     queryKey: ["activities-lite", projectId],
-    queryFn: () => fetchActivities(projectId, { per_page: 500 }),
+    queryFn: async () => {
+      if (isNetworkError()) {
+        const cached = await getCachedActivities(projectId);
+        return {
+          results: cached.map((a) => ({
+            activity_id: String(a.activity_id),
+            activity_code: String(a.activity_code ?? ""),
+            activity_name: String(a.activity_name ?? ""),
+          })),
+        };
+      }
+      return fetchActivities(projectId, { per_page: 500 });
+    },
   });
   const subcontractorsQuery = useQuery({
     queryKey: ["subcontractors", projectId],
     queryFn: async () => {
+      if (isNetworkError()) {
+        return getCachedSubcontractors(projectId);
+      }
       try {
         const data = await apiJson<{ results?: unknown[] } | unknown[]>(
           `/${PATHS.API_PROJECTS}/${projectId}/contracts/`,

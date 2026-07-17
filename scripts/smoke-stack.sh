@@ -18,8 +18,31 @@ ACCESS_TOKEN="$(python3 -c "import json,sys; print(json.load(sys.stdin)['access'
 test -n "${ACCESS_TOKEN}"
 
 echo "==> Smoke: authenticated project list"
-curl -sf "${BASE_URL}/api/v1/projects/" \
-  -H "Authorization: Bearer ${ACCESS_TOKEN}" >/dev/null
+PROJECTS_JSON="$(curl -sf "${BASE_URL}/api/v1/projects/" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}")"
+echo "${PROJECTS_JSON}" >/dev/null
+
+PROJECT_ID="$(python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['id'] if d else '')" <<<"${PROJECTS_JSON}")"
+
+if [[ -n "${PROJECT_ID}" ]]; then
+  echo "==> Smoke: daily report sync-batch"
+  curl -sf -X POST "${BASE_URL}/api/v1/projects/${PROJECT_ID}/daily-reports/sync-batch/" \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+    -H 'Content-Type: application/json' \
+    -d '[{"local_id":"smoke-1","report_date":"2024-12-01","site_status":"active"}]' >/dev/null
+
+  echo "==> Smoke: progress s-curve"
+  curl -sf "${BASE_URL}/api/v1/projects/${PROJECT_ID}/progress/s-curve/?interval=daily" \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" >/dev/null || true
+
+  echo "==> Smoke: cost summary"
+  curl -sf "${BASE_URL}/api/v1/projects/${PROJECT_ID}/costs/summary/" \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" >/dev/null || true
+
+  echo "==> Smoke: contracts list"
+  curl -sf "${BASE_URL}/api/v1/projects/${PROJECT_ID}/contracts/" \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" >/dev/null || true
+fi
 
 echo "==> Smoke: RabbitMQ management API"
 curl -sf -u "${RABBITMQ_USER}:${RABBITMQ_PASS}" \

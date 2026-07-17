@@ -12,6 +12,7 @@ from contracts.tasks import (
     send_ipc_delay_notification,
 )
 from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole
+from alerts.models import AlertLog
 from notifications.models import Notification
 
 
@@ -43,7 +44,9 @@ def test_send_ipc_delay_notification(db, project, contract, user, finance_manage
     assert Notification.objects.filter(project=project).exists()
 
 
-def test_monitor_ipc_payment_delays(db, project, contract, user):
+def test_monitor_ipc_payment_delays(db, project, contract, user, finance_manager_role):
+    member = ProjectMember.objects.get(project=project, user=user)
+    ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     IPC.objects.create(
         project=project,
         contract=contract,
@@ -53,12 +56,14 @@ def test_monitor_ipc_payment_delays(db, project, contract, user):
         created_by=user,
         updated_by=user,
     )
-    with patch('contracts.tasks.send_ipc_delay_notification.delay') as mock_delay:
-        monitor_ipc_payment_delays()
-    mock_delay.assert_called_once()
+    monitor_ipc_payment_delays()
+    assert AlertLog.objects.filter(project=project).exists()
+    assert Notification.objects.filter(project=project).exists()
 
 
-def test_monitor_guarantee_expiry(db, project, user):
+def test_monitor_guarantee_expiry(db, project, user, finance_manager_role):
+    member = ProjectMember.objects.get(project=project, user=user)
+    ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     Contract.objects.create(
         project=project,
         contract_number='G-1',
@@ -67,6 +72,6 @@ def test_monitor_guarantee_expiry(db, project, user):
         created_by=user,
         updated_by=user,
     )
-    with patch('contracts.tasks._notify_project_roles') as mock_notify:
-        monitor_guarantee_expiry()
-    mock_notify.assert_called_once()
+    monitor_guarantee_expiry()
+    assert AlertLog.objects.filter(project=project, message__contains='حسن انجام کار').exists()
+    assert Notification.objects.filter(project=project).exists()

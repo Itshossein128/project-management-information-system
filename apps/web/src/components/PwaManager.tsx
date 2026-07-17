@@ -14,7 +14,7 @@ export function PwaManager() {
       });
     }
 
-    if (import.meta.env.DEV) return;
+    if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_SW !== "true") return;
     let cancelled = false;
     void import("virtual:pwa-register")
       .then(({ registerSW }) => {

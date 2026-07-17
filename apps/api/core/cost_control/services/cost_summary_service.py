@@ -5,10 +5,12 @@ from __future__ import annotations
 from datetime import date
 
 from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.db.models.functions import TruncMonth
 
 import jdatetime
 
+from contracts.models import Contract, ContractStatus
 from cost_control.models import ActualCost, Budget, CostCategory
 from cost_control.services.variance_service import get_budget_vs_actual
 
@@ -68,10 +70,19 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
 
     consumption = float(total_actual) / float(total_budget) * 100 if total_budget else None
 
+    total_committed = (
+        Contract.objects.filter(
+            project_id=project_id,
+            is_deleted=False,
+            status__in=[ContractStatus.ACTIVE, ContractStatus.SUSPENDED],
+        ).aggregate(total=Sum(Coalesce('adjusted_amount', 'original_amount')))['total']
+        or 0
+    )
+
     return {
         'total_budget': float(total_budget),
         'total_actual': float(total_actual),
-        'total_committed': 0,
+        'total_committed': float(total_committed),
         'budget_consumption_pct': round(consumption, 2) if consumption is not None else None,
         'by_category': by_category,
         'by_wbs': get_budget_vs_actual(project_id, group_by='wbs', as_of_date=as_of_date),

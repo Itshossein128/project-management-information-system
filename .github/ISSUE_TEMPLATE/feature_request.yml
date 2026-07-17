@@ -1,0 +1,38 @@
+name: Feature request
+description: New capability mapped to IPCAS blueprint / sprint scope
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: blueprint
+    attributes:
+      label: Blueprint module
+      description: From docs/IPCAS_Engineering_Blueprint.md or ipcas-scope-map.md
+      placeholder: "e.g. Field Reports / Resources / HR"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Who needs this and why?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed slice
+      description: Smallest useful PR (API + UI + test).
+      placeholder: |
+        - API endpoint(s)
+        - Web route/page
+        - Test idea
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Before opening
+      options:
+        - label: Checked docs/ipcas-scope-map.md for existing work
+        - label: Identified roles/permissions impact (if any)

@@ -54,6 +54,20 @@ class UserRegistrationService:
         tokens = get_tokens_for_user(user)
         return user, tokens
 
+class LoginService:
+    def authenticate_and_issue_tokens(self, login: str, password: str):
+        from authentication.utils import authenticate_user, get_tokens_for_user
+        from rest_framework.exceptions import ValidationError
+        from django.utils.translation import gettext_lazy as _
+
+        user = authenticate_user(login, password)
+        if not user:
+            raise ValidationError({'error': _('Invalid credentials. Please check your phone number and password.')})
+        if not user.is_active:
+            raise ValidationError({'error': _('User account is disabled.')})
+        tokens = get_tokens_for_user(user)
+        return user, tokens
+
 
 class PasswordResetService:
     token_length = 6

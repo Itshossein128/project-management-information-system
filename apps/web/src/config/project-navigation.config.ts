@@ -27,6 +27,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/${PATHS.PROJECT_ACTIVITIES}`,
     },
     {
+      label: "گانت",
+      labelI18nKey: "nav.projectGantt",
+      icon: "business" as IconName,
+      path: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
+      activePathPrefix: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
+    },
+    {
       label: "Members",
       labelI18nKey: "nav.projectMembers",
       icon: "users" as IconName,
@@ -62,11 +69,45 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       activePathPrefix: `${base}/${PATHS.PROJECT_MATERIAL_BALANCE}`,
     },
     {
-      label: "گزارش نفرات",
-      labelI18nKey: "nav.projectPersonnelSummary",
+      label: "منابع",
+      labelI18nKey: "nav.projectResources",
       icon: "users" as IconName,
-      path: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
-      activePathPrefix: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
+      path: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+      children: [
+        {
+          label: "بهره‌وری ماشین‌آلات",
+          path: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
+        },
+        {
+          label: "کارکرد ماشین‌آلات",
+          path: `${base}/${PATHS.PROJECT_EQUIPMENT_LOG}`,
+        },
+        {
+          label: "بهره‌وری نیروی انسانی",
+          path: `${base}/${PATHS.PROJECT_LABOR_PRODUCTIVITY}`,
+        },
+        {
+          label: "گزارش نفرات",
+          path: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
+        },
+        {
+          label: "نیروی انسانی",
+          path: `${base}/${PATHS.PROJECT_MANPOWER}`,
+        },
+        {
+          label: "کمپ کارگری",
+          path: `${base}/${PATHS.PROJECT_LABOR_CAMP}`,
+        },
+        {
+          label: "مرخصی",
+          path: `${base}/${PATHS.PROJECT_LEAVE}`,
+        },
+        {
+          label: "اضافه‌کار",
+          path: `${base}/${PATHS.PROJECT_OVERTIME}`,
+        },
+      ],
     },
     {
       label: "بانک فعالیت‌ها",
@@ -102,6 +143,20 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "clipboard" as IconName,
       path: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
       activePathPrefix: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
+    },
+    {
+      label: "هشدارها",
+      labelI18nKey: "nav.projectAlerts",
+      icon: "bolt" as IconName,
+      path: `${base}/${PATHS.PROJECT_ALERTS}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_ALERTS}`,
+    },
+    {
+      label: "تحلیل اقتصادی",
+      labelI18nKey: "nav.projectEconomic",
+      icon: "dashboard" as IconName,
+      path: `${base}/${PATHS.PROJECT_ECONOMIC}`,
+      activePathPrefix: `${base}/${PATHS.PROJECT_ECONOMIC}`,
     },
     {
       label: "Daily Reports",

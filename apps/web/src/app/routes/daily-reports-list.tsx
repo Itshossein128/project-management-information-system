@@ -15,11 +15,14 @@ import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { usePermission } from "@/app/contexts/project-context";
 import { useTranslation } from "react-i18next";
 import { PATHS } from "@/app/routeVars";
+import { warmProjectCache } from "@/app/lib/offlineCache";
 import {
+  getFailedQueue,
   getOfflineReportsByProject,
   getQueueStats,
   isOfflineDBAvailable,
   type OfflineReport,
+  type QueueItem,
 } from "@/app/lib/offlineDB";
 import { syncPendingQueue } from "@/app/lib/syncService";
 import {
@@ -100,6 +103,10 @@ export default function DailyReportsListPage() {
     } catch {
       /* db not ready */
     }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (projectId) void warmProjectCache(projectId);
   }, [projectId]);
 
   useEffect(() => {

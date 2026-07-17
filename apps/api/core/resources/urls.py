@@ -5,6 +5,7 @@ from resources.views import (
     InventoryTransactionViewSet,
     MaterialBalanceDetailView,
     MaterialBalanceListView,
+    MaterialConsumptionView,
     MaterialRequestViewSet,
     MaterialViewSet,
 )
@@ -25,5 +26,6 @@ urlpatterns = [
     path('inventory-transactions/balance/', InventoryRunningBalanceView.as_view(), name='inventory-tx-balance'),
     path('inventory-transactions/<uuid:pk>/', tx_detail, name='inventory-tx-detail'),
     path('material-balance/', MaterialBalanceListView.as_view(), name='material-balance-list'),
+    path('material-balance/consumption/', MaterialConsumptionView.as_view(), name='material-balance-consumption'),
     path('material-balance/<uuid:mid>/', MaterialBalanceDetailView.as_view(), name='material-balance-detail'),
 ]

@@ -131,6 +131,48 @@ def delete_wbs_node(node: WBS) -> None:
     node.delete()
 
 
+def propagate_project_wbs_codes(project_id) -> None:
+    """Recompute wbs_code for all nodes from tree order (root 1,2… children 1.1, 1.2…)."""
+    # ⚡ Bolt: Iterative single-query traversal instead of recursive N+1 query pattern
+    qs = WBS.objects.filter(project_id=project_id).order_by('path')
+
+    annotated = WBS.get_annotated_list_qs(qs)
+
+    level_counters = {}
+    level_codes = {}
+    updates = []
+
+    for node, info in annotated:
+        depth = info['level'] + 1
+
+        if depth not in level_counters:
+            level_counters[depth] = 1
+        else:
+            level_counters[depth] += 1
+
+        keys_to_delete = [k for k in level_counters.keys() if k > depth]
+        for k in keys_to_delete:
+            del level_counters[k]
+
+        counter = level_counters[depth]
+
+        if depth == 1:
+            code = str(counter)
+        else:
+            parent_code = level_codes.get(depth - 1, "")
+            code = f"{parent_code}.{counter}"
+
+        level_codes[depth] = code
+
+        if node.wbs_code != code:
+            node.wbs_code = code
+            updates.append(node)
+
+    if updates:
+        # ⚡ Bolt: Bulk update efficiently updates DB in a single roundtrip
+        WBS.objects.bulk_update(updates, ['wbs_code'], batch_size=1000)
+
+
 @transaction.atomic
 def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     target_parent = None
@@ -157,6 +199,7 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     else:
         raise WBSValidationError(f'Invalid position: {position}')
 
+    propagate_project_wbs_codes(node.project_id)
     return WBS.objects.get(pk=node.pk)
 
 

@@ -3,6 +3,7 @@ from django.urls import path
 from contracts.views import (
     ChangeOrderApproveView,
     ChangeOrderDetailView,
+    ChangeOrderRejectView,
     ChangeOrderView,
     ContractItemsBulkView,
     ContractViewSet,
@@ -37,6 +38,11 @@ urlpatterns = [
         'contracts/<uuid:pk>/change-orders/<uuid:chid>/approve/',
         ChangeOrderApproveView.as_view(),
         name='change-order-approve',
+    ),
+    path(
+        'contracts/<uuid:pk>/change-orders/<uuid:chid>/reject/',
+        ChangeOrderRejectView.as_view(),
+        name='change-order-reject',
     ),
     path('ipcs/', ipc_list, name='ipc-list'),
     path('ipcs/<uuid:pk>/', ipc_detail, name='ipc-detail'),

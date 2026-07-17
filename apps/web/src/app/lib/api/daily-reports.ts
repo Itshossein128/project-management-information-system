@@ -70,18 +70,23 @@ export interface LaborRow {
   shift_2_count: number;
   shift_3_count: number;
   total_count: number;
+  work_hours?: number | null;
+  overtime_hours?: number | null;
 }
 
 export interface EquipmentRow {
   id: string;
   equipment_name: string;
   equipment_ref: string;
+  equipment?: string | null;
   shift: ReportShift;
   status: "active" | "standby" | "broken";
   ownership_type: "owned" | "rented";
   work_start: string | null;
   work_end: string | null;
   repair_hours: string;
+  idle_hours?: string | null;
+  idle_reason?: string;
   productive_hours: string | null;
   activity_ref: string | null;
   notes: string;
@@ -321,11 +326,18 @@ export function fetchReportPdf(projectId: string, reportId: string) {
 export interface SyncBatchResult {
   results: Array<{
     local_id: string | null;
-    status: "created" | "merged" | "skipped" | "conflict";
+    status: "created" | "merged" | "skipped" | "conflict" | "error";
     server_id: string | null;
     conflict_reason: string | null;
+    child_errors?: unknown[];
   }>;
-  summary: { created: number; merged: number; skipped: number; conflicts: number };
+  summary: {
+    created: number;
+    merged: number;
+    skipped: number;
+    conflicts: number;
+    errors: number;
+  };
 }
 
 export function syncBatch(projectId: string, reports: unknown[]) {

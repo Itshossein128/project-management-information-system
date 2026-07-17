@@ -13,9 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
-from cash_flow.models import CashTransaction, CashTransactionType, InflowCategory, OutflowCategory
 from common.jalali import parse_jalali_or_gregorian
-from contracts.models import ChangeOrder, ChangeOrderStatus, Contract, ContractItem, ContractType, IPC, IPCDeduction, IPCItem, IPCStatus
+from contracts.models import ChangeOrder, ChangeOrderStatus, Contract, ContractItem, IPC, IPCDeduction, IPCItem, IPCStatus
 from contracts.serializers import (
     ChangeOrderSerializer,
     ContractDetailSerializer,
@@ -28,46 +27,25 @@ from contracts.serializers import (
     IPCItemSerializer,
     IPCListSerializer,
 )
-from contracts.services.ipc_service import apply_deductions, auto_populate_ipc, next_change_number, next_ipc_number
+from contracts.services.contract_service import bulk_upsert_contract_items, approve_change_order, reject_change_order
+from contracts.services.ipc_service import (
+    apply_deductions,
+    auto_populate_ipc,
+    next_change_number,
+    next_ipc_number,
+    submit_ipc,
+    approve_ipc,
+    pay_ipc,
+    reject_ipc,
+    update_ipc_item,
+    add_manual_deduction,
+    update_manual_deduction,
+    delete_manual_deduction,
+    MANUAL_DEDUCTION_TYPES
+)
 from permissions.project import HasProjectPermission, IsProjectMember
 
 logger = logging.getLogger(__name__)
-
-MANUAL_DEDUCTION_TYPES = frozenset({'material_price_diff', 'other'})
-
-FK_ITEM_FIELDS = {
-    'activity': 'projects.Activity',
-    'unit': 'master_data.Unit',
-}
-
-
-def _resolve_fk_fields(payload: dict) -> dict:
-    """Convert UUID strings in FK fields to model instances for ORM create/update."""
-    from decimal import Decimal
-    from django.apps import apps
-
-    resolved = dict(payload)
-    for field in ('unit_price', 'quantity'):
-        if field in resolved and resolved[field] is not None and resolved[field] != '':
-            resolved[field] = Decimal(str(resolved[field]))
-    for field, model_label in FK_ITEM_FIELDS.items():
-        if field not in resolved:
-            continue
-        raw = resolved.pop(field)
-        if raw in (None, ''):
-            resolved[f'{field}_id'] = None
-            continue
-        model = apps.get_model(model_label)
-        resolved[f'{field}_id'] = raw if hasattr(raw, 'pk') else raw
-    return resolved
-
-
-def _invalidate(project_id):
-    try:
-        from common.cache_utils import invalidate_project_caches
-        invalidate_project_caches(project_id)
-    except Exception:
-        pass
 
 
 class ContractScopedViewSet(viewsets.ModelViewSet):
@@ -181,24 +159,7 @@ class ContractItemsBulkView(APIView):
     def post(self, request, project_pk=None, pk=None):
         contract = get_object_or_404(Contract, pk=pk, project_id=project_pk, is_deleted=False)
         rows = request.data if isinstance(request.data, list) else request.data.get('items', [])
-        saved = []
-        for row in rows:
-            item_id = row.get('id')
-            payload = _resolve_fk_fields({k: v for k, v in row.items() if k != 'id'})
-            if item_id:
-                item = get_object_or_404(ContractItem, pk=item_id, contract=contract)
-                for k, v in payload.items():
-                    setattr(item, k, v)
-                item.updated_by = request.user
-                item.save()
-            else:
-                item = ContractItem.objects.create(
-                    contract=contract,
-                    created_by=request.user,
-                    updated_by=request.user,
-                    **payload,
-                )
-            saved.append(item)
+        saved = bulk_upsert_contract_items(contract, rows, request.user)
         return Response(ContractItemSerializer(saved, many=True).data)
 
 
@@ -244,15 +205,26 @@ class ChangeOrderApproveView(APIView):
         co = get_object_or_404(
             ChangeOrder, pk=chid, contract_id=pk, contract__project_id=project_pk, is_deleted=False
         )
-        co.status = ChangeOrderStatus.APPROVED
-        co.approved_date = date.today()
-        co.updated_by = request.user
-        co.save()
-        contract = co.contract
-        base = contract.adjusted_amount if contract.adjusted_amount is not None else (contract.original_amount or 0)
-        contract.adjusted_amount = base + co.amount_change
-        contract.updated_by = request.user
-        contract.save(update_fields=['adjusted_amount', 'updated_by', 'updated_at'])
+        try:
+            co = approve_change_order(co, request.user)
+            return Response(ChangeOrderSerializer(co).data)
+        except ValueError as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class ChangeOrderRejectView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_contracts'
+
+    @extend_schema(summary='Reject change order', tags=['Contracts'])
+    def post(self, request, project_pk=None, pk=None, chid=None):
+        co = get_object_or_404(
+            ChangeOrder, pk=chid, contract_id=pk, contract__project_id=project_pk, is_deleted=False
+        )
+        co = reject_change_order(co, request.user)
         return Response(ChangeOrderSerializer(co).data)
 
 
@@ -353,45 +325,11 @@ class IPCItemUpdateView(APIView):
     required_permission = 'edit_ipcs'
 
     def patch(self, request, project_pk=None, pk=None, itemid=None):
-        from decimal import Decimal
-
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
         item = get_object_or_404(IPCItem, pk=itemid, ipc=ipc, is_deleted=False)
         qty_current = request.data.get('qty_current', item.qty_current)
-        qty_current = Decimal(str(qty_current))
-        item.qty_current = qty_current
-        item.qty_cumulative = Decimal(str(item.qty_previous or 0)) + qty_current
-        unit_price = Decimal(str(item.unit_price or 0))
-        item.amount_current = unit_price * qty_current
-        item.amount_cumulative = unit_price * item.qty_cumulative
-        item.updated_by = request.user
-        item.save()
-        gross = IPCItem.objects.filter(ipc=ipc, is_deleted=False).aggregate(
-            total=Sum('amount_current')
-        )['total'] or 0
-        ipc.gross_amount = gross
-        ipc.save(update_fields=['gross_amount', 'updated_at'])
-        apply_deductions(ipc.id)
-        ipc.refresh_from_db()
+        ipc = update_ipc_item(ipc, item, qty_current, request.user)
         return Response(IPCDetailSerializer(ipc).data)
-
-
-def _publish_ipc_submitted(ipc):
-    try:
-        from events.publisher import EventPublisher
-
-        EventPublisher().publish(
-            'ipc.submitted',
-            {
-                'ipc_id': str(ipc.id),
-                'ipc_number': ipc.ipc_number,
-                'contract_id': str(ipc.contract_id),
-                'gross_amount': str(ipc.gross_amount or 0),
-            },
-            project_id=str(ipc.project_id),
-        )
-    except Exception:  # noqa: BLE001 - event bus optional in dev/tests
-        logger.warning('Could not publish ipc.submitted for %s', ipc.id, exc_info=True)
 
 
 class IPCSubmitView(APIView):
@@ -400,15 +338,11 @@ class IPCSubmitView(APIView):
 
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        if ipc.status != IPCStatus.DRAFT:
-            return Response({'detail': 'Only draft IPCs can be submitted.'}, status=400)
-        ipc.status = IPCStatus.SUBMITTED
-        ipc.submitted_date = date.today()
-        ipc.rejection_reason = ''
-        ipc.updated_by = request.user
-        ipc.save()
-        _publish_ipc_submitted(ipc)
-        return Response(IPCDetailSerializer(ipc).data)
+        try:
+            ipc = submit_ipc(ipc, request.user)
+            return Response(IPCDetailSerializer(ipc).data)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=400)
 
 
 class IPCDeductionListView(APIView):
@@ -418,28 +352,21 @@ class IPCDeductionListView(APIView):
     @extend_schema(summary='Add manual IPC deduction', tags=['Contracts'])
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        if ipc.status != IPCStatus.DRAFT:
-            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
         deduction_type = request.data.get('deduction_type', '')
-        if deduction_type not in MANUAL_DEDUCTION_TYPES:
-            return Response(
-                {'detail': 'Only material_price_diff and other deductions can be added manually.'},
-                status=400,
-            )
         amount = request.data.get('amount')
         if amount is None:
             return Response({'detail': 'amount is required.'}, status=400)
-        deduction = IPCDeduction.objects.create(
-            ipc=ipc,
-            deduction_type=deduction_type,
-            amount=amount,
-            description=request.data.get('description', ''),
-            created_by=request.user,
-            updated_by=request.user,
-        )
-        apply_deductions(ipc.id)
-        ipc.refresh_from_db()
-        return Response(IPCDetailSerializer(ipc).data, status=201)
+        try:
+            ipc = add_manual_deduction(
+                ipc,
+                deduction_type,
+                amount,
+                request.data.get('description', ''),
+                request.user
+            )
+            return Response(IPCDetailSerializer(ipc).data, status=201)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=400)
 
 
 class IPCDeductionDetailView(APIView):
@@ -448,35 +375,31 @@ class IPCDeductionDetailView(APIView):
 
     def patch(self, request, project_pk=None, pk=None, did=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        if ipc.status != IPCStatus.DRAFT:
-            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
         deduction = get_object_or_404(
             IPCDeduction, pk=did, ipc=ipc, is_deleted=False, deduction_type__in=MANUAL_DEDUCTION_TYPES
         )
-        if 'amount' in request.data:
-            deduction.amount = request.data['amount']
-        if 'description' in request.data:
-            deduction.description = request.data['description']
-        deduction.updated_by = request.user
-        deduction.save()
-        apply_deductions(ipc.id)
-        ipc.refresh_from_db()
-        return Response(IPCDetailSerializer(ipc).data)
+        try:
+            ipc = update_manual_deduction(
+                ipc,
+                deduction,
+                request.data.get('amount'),
+                request.data.get('description'),
+                request.user
+            )
+            return Response(IPCDetailSerializer(ipc).data)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=400)
 
     def delete(self, request, project_pk=None, pk=None, did=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        if ipc.status != IPCStatus.DRAFT:
-            return Response({'detail': 'Deductions can only be edited on draft IPCs.'}, status=400)
         deduction = get_object_or_404(
             IPCDeduction, pk=did, ipc=ipc, is_deleted=False, deduction_type__in=MANUAL_DEDUCTION_TYPES
         )
-        deduction.is_deleted = True
-        deduction.deleted_at = timezone.now()
-        deduction.updated_by = request.user
-        deduction.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        apply_deductions(ipc.id)
-        ipc.refresh_from_db()
-        return Response(IPCDetailSerializer(ipc).data)
+        try:
+            ipc = delete_manual_deduction(ipc, deduction, request.user)
+            return Response(IPCDetailSerializer(ipc).data)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=400)
 
 
 class IPCApproveView(APIView):
@@ -485,39 +408,8 @@ class IPCApproveView(APIView):
 
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        ipc.status = IPCStatus.APPROVED
-        ipc.approval_date = date.today()
-        if not ipc.planned_payment_date:
-            ipc.planned_payment_date = date.today() + timedelta(days=30)
-        ipc.updated_by = request.user
-        ipc.save()
+        ipc = approve_ipc(ipc, request.user)
         return Response(IPCDetailSerializer(ipc).data)
-
-
-def _create_ipc_cash_transaction(ipc, user, payment_date=None):
-    contract = ipc.contract
-    payment_date = payment_date or date.today()
-    if contract.contract_type == ContractType.MAIN:
-        tx_type = CashTransactionType.IN
-        category = InflowCategory.IPC_RECEIPT
-    else:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.SUBCONTRACTOR_PAYMENT
-
-    CashTransaction.objects.create(
-        project_id=ipc.project_id,
-        tx_date=payment_date,
-        tx_type=tx_type,
-        category=category,
-        amount=ipc.net_amount or ipc.gross_amount,
-        description=f'IPC #{ipc.ipc_number} - {contract.contract_number}',
-        ipc=ipc,
-        contract=contract,
-        counterparty=contract.counterparty,
-        created_by=user,
-        updated_by=user,
-    )
-    _invalidate(ipc.project_id)
 
 
 class IPCPayView(APIView):
@@ -525,15 +417,11 @@ class IPCPayView(APIView):
     required_permission = 'approve_ipcs'
 
     def post(self, request, project_pk=None, pk=None):
+        from datetime import date
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
         payment_date_raw = request.data.get('actual_payment_date')
         payment_date = parse_jalali_or_gregorian(payment_date_raw) if payment_date_raw else date.today()
-        ipc.status = IPCStatus.PAID
-        ipc.actual_payment_date = payment_date
-        ipc.updated_by = request.user
-        ipc.save()
-        if not CashTransaction.objects.filter(ipc=ipc, is_deleted=False).exists():
-            _create_ipc_cash_transaction(ipc, request.user, payment_date)
+        ipc = pay_ipc(ipc, request.user, payment_date)
         return Response(IPCDetailSerializer(ipc).data)
 
 
@@ -543,10 +431,7 @@ class IPCRejectView(APIView):
 
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        ipc.status = IPCStatus.DRAFT
-        ipc.rejection_reason = request.data.get('reason', '')
-        ipc.updated_by = request.user
-        ipc.save()
+        ipc = reject_ipc(ipc, request.user, request.data.get('reason', ''))
         return Response(IPCDetailSerializer(ipc).data)
 
 

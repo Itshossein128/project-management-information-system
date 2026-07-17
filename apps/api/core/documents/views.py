@@ -10,7 +10,6 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
 from common.jalali import parse_jalali_or_gregorian
-from common.validators import validate_document_upload
 from documents.models import Correspondence, CorrStatus, DocumentRevision, MeetingMinutes, ProjectDocument
 from documents.serializers import (
     CorrespondenceSerializer,
@@ -20,7 +19,7 @@ from documents.serializers import (
     ProjectDocumentSerializer,
 )
 from documents.services.correspondence_service import generate_corr_number
-from documents.services.upload_service import upload_file_to_s3
+from documents.services.document_service import create_project_document, create_document_revision
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
@@ -75,37 +74,12 @@ class ProjectDocumentViewSet(DocScopedViewSet):
 
     @extend_schema(summary='Upload project document', tags=['Documents'])
     def create(self, request, *args, **kwargs):
-        file_obj = request.FILES.get('file')
-        if file_obj:
-            validate_document_upload(file_obj)
-            url, name, size_kb = upload_file_to_s3(file_obj, self.kwargs['project_pk'])
-        else:
-            url, name, size_kb = '', '', None
-
-        doc = ProjectDocument.objects.create(
+        doc = create_project_document(
             project_id=self.kwargs['project_pk'],
-            title=request.data.get('title', name or 'Untitled'),
-            doc_type=request.data.get('doc_type', 'other'),
-            doc_code=request.data.get('doc_code', ''),
-            discipline=request.data.get('discipline', ''),
-            revision=request.data.get('revision', ''),
-            revision_date=parse_jalali_or_gregorian(request.data['revision_date'])
-            if request.data.get('revision_date') else None,
-            access_level=request.data.get('access_level', 'project'),
-            tags=request.data.get('tags', ''),
-            file_url=url,
-            file_name=name,
-            file_size_kb=size_kb,
-            uploaded_by=request.user,
-            created_by=request.user,
-            updated_by=request.user,
+            user=request.user,
+            data=request.data,
+            file_obj=request.FILES.get('file'),
         )
-        if request.data.get('related_activity'):
-            doc.related_activity_id = request.data['related_activity']
-            doc.save(update_fields=['related_activity'])
-        if request.data.get('related_wbs'):
-            doc.related_wbs_id = request.data['related_wbs']
-            doc.save(update_fields=['related_wbs'])
         return Response(ProjectDocumentDetailSerializer(doc).data, status=201)
 
 
@@ -116,26 +90,12 @@ class DocumentRevisionUploadView(APIView):
 
     def post(self, request, project_pk=None, pk=None):
         doc = ProjectDocument.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
-        file_obj = request.FILES.get('file')
-        validate_document_upload(file_obj)
-        url, name, size_kb = upload_file_to_s3(file_obj, project_pk)
-        rev_label = request.data.get('revision_label', doc.revision or 'Rev')
-        rev_date = parse_jalali_or_gregorian(request.data.get('revision_date')) or date.today()
-        DocumentRevision.objects.create(
-            document=doc,
-            revision_label=rev_label,
-            revision_date=rev_date,
-            file_url=url,
-            change_description=request.data.get('change_description', ''),
-            uploaded_by=request.user,
+        create_document_revision(
+            doc=doc,
+            user=request.user,
+            data=request.data,
+            file_obj=request.FILES.get('file'),
         )
-        doc.revision = rev_label
-        doc.revision_date = rev_date
-        doc.file_url = url
-        doc.file_name = name
-        doc.file_size_kb = size_kb
-        doc.updated_by = request.user
-        doc.save()
         return Response(ProjectDocumentDetailSerializer(doc).data)
 
 

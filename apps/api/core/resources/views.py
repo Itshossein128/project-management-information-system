@@ -17,6 +17,7 @@ from resources.serializers import (
     MaterialSerializer,
 )
 from resources.services.balance_service import compute_material_balance, material_balance_list, running_balance
+from resources.services.consumption_service import material_consumption_report
 
 
 class MaterialViewSet(ProjectScopedViewSet):
@@ -104,6 +105,22 @@ class MaterialBalanceDetailView(APIView):
             many=True,
         ).data
         return Response({**balance, 'requests': requests, 'transactions': transactions})
+
+
+class MaterialConsumptionView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_reports'
+
+    @extend_schema(summary='Material consumption vs planned', tags=['Materials'])
+    def get(self, request, project_pk=None):
+        data = material_consumption_report(
+            project_pk,
+            material_id=request.query_params.get('material_id'),
+            activity_id=request.query_params.get('activity_id'),
+            date_from=request.query_params.get('date_from'),
+            date_to=request.query_params.get('date_to'),
+        )
+        return Response(data)
 
 
 class InventoryRunningBalanceView(APIView):

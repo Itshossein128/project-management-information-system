@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
-from cost_control.urls import global_urlpatterns
+from cost_control.urls import global_urlpatterns as cost_global_urlpatterns
+from economic.urls import global_urlpatterns as economic_global_urlpatterns
 from projects.member_views import UserLookupView
 from projects.role_views import PermissionCatalogView
 
@@ -16,7 +17,8 @@ urlpatterns = [
     path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
     path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),
     path('api/v1/notifications/', include('notifications.urls')),
-    *global_urlpatterns,
+    *cost_global_urlpatterns,
+    *economic_global_urlpatterns,
     path('api/relations/', include('business_meta.relations_urls')),
     path('api/', include('inventory.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

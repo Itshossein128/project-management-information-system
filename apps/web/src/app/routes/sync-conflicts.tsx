@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { PATHS } from "@/app/routeVars";
 import {
   type ConflictEntry,
+  getFailedQueue,
   getUnresolvedConflicts,
   isOfflineDBAvailable,
+  type QueueItem,
 } from "@/app/lib/offlineDB";
+import { discardFailedQueueItem, retryFailedQueueItem } from "@/app/lib/syncService";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
 import { ConflictCard } from "@/components/daily_reports/ConflictCard";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +20,7 @@ export default function SyncConflictsPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
+  const [failedItems, setFailedItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
   const navigatedRef = useRef(false);
@@ -29,8 +33,12 @@ export default function SyncConflictsPage() {
       return;
     }
     try {
-      const next = await getUnresolvedConflicts(projectId);
+      const [next, failed] = await Promise.all([
+        getUnresolvedConflicts(projectId),
+        getFailedQueue(),
+      ]);
       setConflicts(next.filter((c) => !removingIds.has(c.conflict_id)));
+      setFailedItems(failed.filter((f) => f.project_id === projectId));
     } catch {
       /* db not ready */
     } finally {
@@ -111,6 +119,45 @@ export default function SyncConflictsPage() {
           ))}
         </div>
       )}
+
+      {failedItems.length > 0 ? (
+        <section className="mt-8 space-y-3">
+          <h2 className="text-lg font-semibold">صف ناموفق ({failedItems.length})</h2>
+          {failedItems.map((item) => (
+            <div
+              key={item.queue_id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-card p-4 text-sm"
+            >
+              <div>
+                <p className="font-medium">{item.entity_type}</p>
+                <p className="text-muted-foreground">{item.error_message ?? "خطای نامشخص"}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 hover:bg-muted/40"
+                  onClick={() => {
+                    void retryFailedQueueItem(item.queue_id).then(() => load());
+                  }}
+                >
+                  <RefreshCw className="size-4" />
+                  تلاش مجدد
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-3 py-1.5 text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    void discardFailedQueueItem(item.queue_id).then(() => load());
+                  }}
+                >
+                  <Trash2 className="size-4" />
+                  حذف
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
     </main>
   );
 }

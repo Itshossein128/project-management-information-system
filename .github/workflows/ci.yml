@@ -133,5 +133,7 @@ jobs:
         working-directory: apps/api/core
       - run: pytest projects wbs permissions
         working-directory: apps/api/core
+      - run: pytest field_reports schedule cost_control sub_reports --cov-fail-under=80
+        working-directory: apps/api/core
       - run: python manage.py test events authentication audit storage
         working-directory: apps/api/core

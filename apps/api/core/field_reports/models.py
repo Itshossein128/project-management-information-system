@@ -174,6 +174,13 @@ class DailyReportActivity(ChildRowModel):
     unit = models.CharField(max_length=40, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     notes = models.TextField(blank=True, default='')
+    photo_file = models.ForeignKey(
+        'storage.StoredFile',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_activities',
+    )
 
     class Meta:
         db_table = 'daily_report_activities'
@@ -202,6 +209,9 @@ class DailyReportLabor(ChildRowModel):
     shift_2_count = models.PositiveIntegerField(default=0)
     shift_3_count = models.PositiveIntegerField(default=0)
     total_count = models.PositiveIntegerField(default=0)
+    work_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    daily_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         db_table = 'daily_report_labor'
@@ -231,6 +241,13 @@ class DailyReportLabor(ChildRowModel):
 
 class DailyReportEquipment(ChildRowModel):
     report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='equipment_entries')
+    equipment = models.ForeignKey(
+        'field_reports.Equipment',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_entries',
+    )
     equipment_name = models.CharField(max_length=120)
     equipment_ref = models.CharField(max_length=60, blank=True, default='')
     shift = models.CharField(max_length=10, choices=ReportShift.choices)
@@ -239,6 +256,8 @@ class DailyReportEquipment(ChildRowModel):
     work_start = models.TimeField(null=True, blank=True)
     work_end = models.TimeField(null=True, blank=True)
     repair_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    idle_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    idle_reason = models.TextField(blank=True, default='')
     productive_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     hourly_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     fuel_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
@@ -379,8 +398,41 @@ class LaborCampReport(AuditSoftDeleteModel):
         ordering = ['-report_date', 'connex_number']
 
 
+class Equipment(AuditSoftDeleteModel):
+    """Project equipment registry (master list)."""
+
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='equipment_registry')
+    equipment_code = models.CharField(max_length=30)
+    equipment_name = models.CharField(max_length=120)
+    equipment_type = models.CharField(max_length=80, blank=True, default='')
+    ownership_type = models.CharField(max_length=10, choices=OwnershipType.choices, default=OwnershipType.OWNED)
+    plate_number = models.CharField(max_length=30, blank=True, default='')
+    default_hourly_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'equipment_registry'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'equipment_code'],
+                name='uniq_equipment_project_code',
+            ),
+        ]
+        ordering = ['equipment_name']
+
+    def __str__(self):
+        return self.equipment_name
+
+
 class EquipmentLog(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='equipment_logs')
+    equipment = models.ForeignKey(
+        Equipment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='logs',
+    )
     log_date = models.DateField()
     equipment_name = models.CharField(max_length=120)
     equipment_ref = models.CharField(max_length=60, blank=True, default='')
@@ -390,6 +442,8 @@ class EquipmentLog(AuditSoftDeleteModel):
     work_start = models.TimeField(null=True, blank=True)
     work_end = models.TimeField(null=True, blank=True)
     repair_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    idle_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    idle_reason = models.TextField(blank=True, default='')
     productive_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     hourly_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     fuel_cost = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)

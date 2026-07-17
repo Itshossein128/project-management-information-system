@@ -1,5 +1,7 @@
 """MSP XML import parser tests (no database required)."""
 
+import pytest
+
 from schedule.services.msp_import import build_preview, parse_msp_xml
 
 SAMPLE_MSP_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
@@ -84,3 +86,39 @@ def test_parse_msp_xml_blocks_billion_laughs():
         assert False, 'expected ValueError due to defusedxml catching XML bomb'
     except ValueError as exc:
         assert str(exc) == 'Invalid XML'
+
+
+@pytest.mark.django_db
+class TestMspImportIntegration:
+    def test_execute_msp_import_creates_activities(self, project, user):
+        from projects.models import Activity
+        from schedule.services.msp_import import execute_msp_import
+
+        result = execute_msp_import(
+            project,
+            SAMPLE_MSP_XML,
+            filename='sample.xml',
+            replace=True,
+            user=user,
+        )
+        assert result['activities_created'] >= 1
+        assert Activity.objects.filter(project=project).exists()
+
+    def test_msp_import_api_start_and_status(self, auth_client, project, settings):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from schedule.models import MspImportJob
+
+        settings.CELERY_TASK_ALWAYS_EAGER = True
+        url = f'/api/v1/projects/{project.id}/import/msp/'
+        upload = SimpleUploadedFile('sample.xml', SAMPLE_MSP_XML, content_type='application/xml')
+        response = auth_client.post(
+            url,
+            {'file': upload, 'replace': 'true'},
+            format='multipart',
+        )
+        assert response.status_code == 202
+        job = MspImportJob.objects.get(pk=response.data['task_id'])
+        status_url = f'/api/v1/projects/{project.id}/import/msp/status/{job.id}/'
+        status_resp = auth_client.get(status_url)
+        assert status_resp.status_code == 200
+        assert status_resp.data['status'] in ('done', 'running', 'pending')

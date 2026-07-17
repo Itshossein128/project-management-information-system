@@ -9,7 +9,7 @@ from projects.models import Project
 from master_data.models import ProjectMember
 from storage.models import StoredFile
 from storage.permissions import CanAccessStoredFile
-from storage.views import s3_client
+from storage.services import s3_client
 
 @pytest.fixture
 def api_client():
@@ -114,14 +114,14 @@ class TestCanAccessStoredFile:
 @pytest.mark.django_db
 class TestStorageViews:
 
-    @patch('storage.views.boto3')
+    @patch('storage.services.boto3')
     def test_s3_client(self, mock_boto3):
         # Coverage for line 19 (s3_client)
         s3_client()
         assert mock_boto3.client.called
         assert mock_boto3.client.call_args[0][0] == 's3'
 
-    @patch('storage.views.s3_client')
+    @patch('storage.services.s3_client')
     def test_upload_url_view(self, mock_s3_client, auth_client, project):
         mock_s3 = MagicMock()
         mock_s3.generate_presigned_url.return_value = "https://fake-s3.url/upload"
@@ -196,7 +196,7 @@ class TestStorageViews:
         response = auth_client.post(url, {'size_bytes': 1024})
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    @patch('storage.views.s3_client')
+    @patch('storage.services.s3_client')
     def test_download_url_view(self, mock_s3_client, auth_client, stored_file):
         mock_s3 = MagicMock()
         mock_s3.generate_presigned_url.return_value = "https://fake-s3.url/download"

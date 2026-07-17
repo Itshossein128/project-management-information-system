@@ -1,8 +1,9 @@
 from celery import shared_task
 from datetime import timedelta
 
-from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus
+from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus, P6ImportJob
 from schedule.services.msp_import import execute_msp_import
+from schedule.services.p6_import import execute_p6_import
 
 
 @shared_task
@@ -37,11 +38,10 @@ def compute_baseline_progress(baseline_id):
     return {'baseline_id': str(baseline_id), 'rows': count}
 
 
-@shared_task(bind=True)
-def run_msp_import_task(self, job_id: str):
-    job = MspImportJob.objects.select_related('project').get(pk=job_id)
+def _run_import_task(task_instance, job_model, job_id, execute_func):
+    job = job_model.objects.select_related('project').get(pk=job_id)
     job.status = MspImportStatus.RUNNING
-    job.task_id = self.request.id or ''
+    job.task_id = task_instance.request.id or ''
     job.save(update_fields=['status', 'task_id', 'updated_at'])
 
     file_bytes = bytes(job.file_data or b'')
@@ -51,7 +51,7 @@ def run_msp_import_task(self, job_id: str):
         job.save(update_fields=['progress_pct', 'updated_at'])
 
     try:
-        result = execute_msp_import(
+        result = execute_func(
             job.project,
             file_bytes,
             filename=job.filename,
@@ -69,3 +69,13 @@ def run_msp_import_task(self, job_id: str):
         job.error_message = str(exc)
         job.save(update_fields=['status', 'error_message', 'updated_at'])
         raise
+
+
+@shared_task(bind=True)
+def run_msp_import_task(self, job_id: str):
+    return _run_import_task(self, MspImportJob, job_id, execute_msp_import)
+
+
+@shared_task(bind=True)
+def run_p6_import_task(self, job_id: str):
+    return _run_import_task(self, P6ImportJob, job_id, execute_p6_import)

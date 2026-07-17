@@ -150,3 +150,43 @@ export function createInventoryTransaction(
     body: JSON.stringify(body),
   });
 }
+
+export interface MaterialConsumptionRow {
+  material_id: string;
+  material_code: string;
+  material_name: string;
+  estimated_total_qty: number | null;
+  total_received: number;
+  total_issued: number;
+  total_waste: number;
+  consumption_pct: number | null;
+  waste_pct: number | null;
+}
+
+export interface RunningBalancePoint {
+  date: string;
+  transaction_type: string;
+  qty: number;
+  running_balance: number;
+}
+
+export function fetchMaterialConsumption(
+  projectId: string,
+  params: { material_id?: string; activity_id?: string; date_from?: string; date_to?: string } = {},
+) {
+  const search = new URLSearchParams();
+  if (params.material_id) search.set("material_id", params.material_id);
+  if (params.activity_id) search.set("activity_id", params.activity_id);
+  if (params.date_from) search.set("date_from", params.date_from);
+  if (params.date_to) search.set("date_to", params.date_to);
+  const qs = search.toString();
+  return apiJson<{ materials: MaterialConsumptionRow[]; activities: unknown[] }>(
+    `${base(projectId)}/material-balance/consumption/${qs ? `?${qs}` : ""}`,
+  );
+}
+
+export function fetchRunningBalance(projectId: string, materialId: string) {
+  return apiJson<RunningBalancePoint[]>(
+    `${base(projectId)}/inventory-transactions/balance/?material_id=${materialId}`,
+  );
+}

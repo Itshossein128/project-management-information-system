@@ -1,4 +1,7 @@
 import type { DailyReportDetail } from "@/app/lib/api/daily-reports";
+import { uploadProjectFile } from "@/app/lib/api/files";
+import { generateUUID, savePendingPhoto } from "@/app/lib/offlineDB";
+import { isNetworkError } from "@/app/lib/offlineWrite";
 import type { GridColumn, GridRow } from "./EditableGrid";
 import { InlineGridTab } from "./InlineGridTab";
 
@@ -56,7 +59,24 @@ export function ActivityTab({
     { key: "quantity", header: "مقدار", type: "number", width: "90px" },
     { key: "quantity_measured", header: "اندازه‌گیری شده", type: "checkbox", width: "60px" },
     { key: "unit", header: "واحد", width: "80px" },
+    { key: "photo_file", header: "عکس", type: "photo", width: "90px" },
   ];
+
+  const handlePhotoUpload = async (file: File) => {
+    if (isNetworkError()) {
+      const photoId = generateUUID();
+      const data = await file.arrayBuffer();
+      await savePendingPhoto({
+        photo_id: photoId,
+        project_id: projectId,
+        filename: file.name,
+        content_type: file.type || "application/octet-stream",
+        data,
+      });
+      return `pending:${photoId}`;
+    }
+    return uploadProjectFile(projectId, file);
+  };
 
   return (
     <InlineGridTab
@@ -65,6 +85,7 @@ export function ActivityTab({
       resource="activities"
       columns={columns}
       serverRows={report?.activities ?? []}
+      onPhotoUpload={readOnly ? undefined : handlePhotoUpload}
       emptyRow={() => ({
         activity_description: "",
         activity_ref: null,
@@ -78,6 +99,7 @@ export function ActivityTab({
         quantity: null,
         quantity_measured: true,
         unit: "",
+        photo_file: null,
       })}
       toPayload={(row: GridRow) => ({
         activity_description: row.activity_description ?? "",
@@ -92,6 +114,7 @@ export function ActivityTab({
         quantity: row.quantity_measured ? row.quantity ?? null : null,
         quantity_measured: row.quantity_measured ?? true,
         unit: row.unit ?? "",
+        photo_file: row.photo_file ?? null,
       })}
       onChanged={onChanged}
       readOnly={readOnly}
