@@ -8,20 +8,28 @@ from .department_activity_data_views import (
 )
 from .views import SpaceMaterialRequestViewSet, DepartmentActivityRecordViewSet
 
+# View functions for SpaceMaterialRequest endpoints (list and create actions)
 space_material_request_list = SpaceMaterialRequestViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for SpaceMaterialRequest endpoints (retrieve, update, and destroy actions)
 space_material_request_detail = SpaceMaterialRequestViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# View functions for DepartmentActivityRecord endpoints (list and create actions)
 department_activity_record_list = DepartmentActivityRecordViewSet.as_view(
     {'get': 'list', 'post': 'create'}
 )
+
+# View functions for DepartmentActivityRecord endpoints (retrieve, update, and destroy actions)
 department_activity_record_detail = DepartmentActivityRecordViewSet.as_view(
     {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
+# URL routing configurations for business-scoped inventory APIs.
+# Defines endpoints for space material requests, department activity records (CRUD, export, import, and reports).
 urlpatterns = [
     path(
         '<int:business_pk>/space-material-requests/',

@@ -5,6 +5,7 @@
 - `login-password-input`
 - `login-submit-btn`
 - `login-global-error`
+- `login-error`: For displaying login error messages (apps/web/src/app/routes/login.tsx).
 
 ## Projects
 - `create-project-btn`

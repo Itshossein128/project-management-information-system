@@ -16,6 +16,7 @@ from .views import (
     SystemRolesListView,
 )
 
+# Application namespace for reversing URLs.
 app_name = 'authentication'
 
 # Authentication endpoints

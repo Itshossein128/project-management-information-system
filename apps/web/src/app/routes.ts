@@ -7,6 +7,11 @@ import {
 import { PATHS, ROUTES } from "./routeVars";
 import { projectRoutes } from "./routes/business-setup.routes";
 
+/**
+ * Main routing configuration array for React Router v7.
+ * Uses utility methods like `index`, `route`, and `layout` to construct the route hierarchy.
+ * Auth routes are placed at the top level, while protected routes and layouts handle authenticated pages (HR and Business).
+ */
 export default [
   index(ROUTES.INDEX),
   route(PATHS.LOGIN, ROUTES.LOGIN),
