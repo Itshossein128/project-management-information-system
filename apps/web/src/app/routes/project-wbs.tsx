@@ -48,8 +48,12 @@ function ProjectWBSContent() {
               >
                 ذخیره به‌عنوان قالب
               </Button>
-              <Button variant='secondary' onClick={() => setMspOpen(true)}>
-                بارگذاری از MSP
+              <Button
+                variant='secondary'
+                onClick={() => setMspOpen(true)}
+                data-testid="msp-import-btn"
+              >
+                بارگذاری از MSP / P6
               </Button>
             </div>
           ) : undefined

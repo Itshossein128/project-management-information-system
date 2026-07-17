@@ -1,11 +1,17 @@
 | Module | Flow | Tested Branches | Total Branches | Coverage Score |
 |---|---|---|---|---|
-| AUTH | Standard login and session management | 0 | 8 | 0% |
-| AUTH | Role-based redirect after login | 0 | 8 | 0% |
-| PROJECT | List & Create | 0 | 10 | 0% |
-| WBS | Tree Operations | 0 | 10 | 0% |
-| ACTIVITIES | CRUD & Relations | 0 | 10 | 0% |
-| SCHEDULE | Baseline & Import | 0 | 10 | 0% |
-| DAILY REPORT | Create & Workflow | 0 | 20 | 0% |
-| OFFLINE | Sync & Conflict | 0 | 15 | 0% |
+| AUTH | Standard login and session management | 2 | 8 | 25% |
+| AUTH | Role-based redirect after login | 1 | 8 | 12% |
+| PROJECT | List & Create | 4 | 10 | 40% |
+| WBS | Tree Operations | 3 | 10 | 30% |
+| ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
+| SCHEDULE | Baseline & Import | 2 | 10 | 20% |
+| DAILY REPORT | Create & Workflow | 2 | 20 | 10% |
+| OFFLINE | Sync & Conflict | 2 | 15 | 13% |
 | FINANCE | Budget & Cost | 0 | 15 | 0% |
+
+## Sprint 3 coverage notes
+
+- `e2e/tests/sprint3-schedule.spec.ts` — WBS rename + reparent (`sorted_child`), activity create + FS relation + cycle reject, MSP XML preview→import
+- WBS DnD affordance asserted via `draggable`; reparent exercised through the same move API the drop handler calls
+- BoQ linkage on activities is deferred (not in e2e scope)

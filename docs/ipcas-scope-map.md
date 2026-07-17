@@ -68,8 +68,10 @@ The global `inventory.Item` API at `/api/items/` is **deprecated**. New work mus
 |------|--------|
 | **C-03** Activity CRUD + relation graph validation | Done |
 | **C-04** Baseline import (P6 XER + MSP XML) | Done — MSP XML + P6 XER import |
-| **UI-03** WBS tree editor (inline edit, drag-and-drop) | Done — inline edit + HTML5 drag reparent |
+| **UI-03** WBS tree editor (inline edit, drag-and-drop) | Done — inline edit + HTML5 drag **reparent** (`sorted_child`; sibling before/after reorder not shipped) |
 | **partial O-01** PWA / IndexedDB bootstrap | Partial — offline DB + cache warm |
+
+**Deferred (Module 2 nuance):** Activity ↔ BoQ linkage is not modeled on `Activity` yet; schedule baseline does not depend on it.
 
 ## Sprint 4 completion checklist (Daily Report Online)
 

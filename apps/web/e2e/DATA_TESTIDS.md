@@ -14,3 +14,9 @@
 - `project-employer-input`
 - `project-submit-btn`
 - `project-card`
+
+## WBS / Schedule (Sprint 3)
+- `wbs-node-{code}` — tree node wrapper (`data-wbs-id`)
+- `wbs-row-{code}` — draggable row
+- `msp-import-btn` — open MSP/P6 import wizard
+

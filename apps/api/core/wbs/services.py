@@ -211,10 +211,11 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
         target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id)
 
     pos = position.replace('-', '_')
+    # treebeard requires sorted-* positions when node_order_by is set on the model.
     if pos == 'first_child':
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for first_child position.')
-        node.move(target_parent, pos='first-child')
+        node.move(target_parent, pos='sorted-child')
     elif pos == 'sorted_child':
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for sorted_child position.')
@@ -222,11 +223,11 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     elif pos == 'last_child':
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for last_child position.')
-        node.move(target_parent, pos='last-child')
+        node.move(target_parent, pos='sorted-child')
     elif pos in ('left', 'right'):
         if target_parent is None:
             raise WBSValidationError('new_parent_id is required for sibling positioning.')
-        node.move(target_parent, pos=pos)
+        node.move(target_parent, pos='sorted-sibling')
     else:
         raise WBSValidationError(f'Invalid position: {position}')
 

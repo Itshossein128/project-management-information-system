@@ -32,8 +32,8 @@ export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
   return (
     <div className='mx-auto max-w-md space-y-4 rounded-lg border border-border p-6'>
       <p className='text-muted-foreground text-sm'>
-        هنوز گره WBS ایجاد نشده است. اولین گره ریشه را اضافه کنید یا از MSP
-        بارگذاری کنید.
+        هنوز گره WBS ایجاد نشده است. اولین گره ریشه را اضافه کنید یا از MSP /
+        P6 بارگذاری کنید.
       </p>
       <div>
         <Label htmlFor='input-rootWbsCode'>کد WBS</Label>

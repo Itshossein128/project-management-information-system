@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-Monorepo (pnpm workspace): `apps/web` (React Router 7 + Vite frontend) and `apps/api` (Django 4.2 + DRF backend — IPCAS Sprint 1–2 foundation plus later domain apps; see `docs/ipcas-scope-map.md`). Standard commands live in `README.md` / `package.json` scripts; this section only covers non-obvious cloud caveats. The update script already runs `pnpm install` (against the npmjs registry), creates the API venv at `apps/api/.venv`, installs `requirements.txt`, and creates `.env` from `.env.example`.
+Monorepo (pnpm workspace): `apps/web` (React Router 7 + Vite frontend) and `apps/api` (Django 4.2 + DRF backend — IPCAS Sprint 1–3+ domains; see `docs/ipcas-scope-map.md`). Standard commands live in `README.md` / `package.json` scripts; this section only covers non-obvious cloud caveats. The update script already runs `pnpm install` (against the npmjs registry), creates the API venv at `apps/api/.venv`, installs `requirements.txt`, and creates `.env` from `.env.example`.
 
 ### Services (local Docker-less dev)
 

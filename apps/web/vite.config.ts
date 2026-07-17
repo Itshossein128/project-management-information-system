@@ -1,9 +1,16 @@
 import path from "node:path";
+import { createRequire } from "node:module";
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
+
+const require = createRequire(import.meta.url);
+const frappeGanttCss = path.join(
+  path.dirname(require.resolve("frappe-gantt")),
+  "frappe-gantt.css",
+);
 
 export default defineConfig({
   plugins: [
@@ -63,8 +70,14 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Package exports omit a CSS subpath; alias so Vite can resolve the stylesheet.
+      "frappe-gantt/dist/frappe-gantt.css": frappeGanttCss,
     },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "@tanstack/react-query"],
   },
 });

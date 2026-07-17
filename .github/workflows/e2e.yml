@@ -46,8 +46,11 @@ jobs:
           e2e/tests/auth-login.spec.ts
           e2e/tests/projects.spec.ts
           e2e/tests/members-wbs.spec.ts
+          e2e/tests/sprint3-schedule.spec.ts
           e2e/tests/offline-sync.spec.ts
           e2e/tests/daily-report.spec.ts
           e2e/tests/contracts-ipc.spec.ts
         env:
           CI: "true"
+          CELERY_TASK_ALWAYS_EAGER: "true"
+          AUDIT_LOG_ASYNC: "false"
