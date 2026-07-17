@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { apiFetch } from "@/app/lib/api-client";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
@@ -57,9 +57,10 @@ export function ConflictCard({
   const [fading, setFading] = useState(false);
 
   const conflictReason =
-    conflict.conflict_fields.length > 0
+    conflict.conflict_reason ||
+    (conflict.conflict_fields.length > 0
       ? `فیلدهای متعارض: ${conflict.conflict_fields.join("، ")}`
-      : "تعارض در همگام‌سازی داده";
+      : "تعارض در همگام‌سازی داده");
 
   const finishResolve = (toastMsg: string) => {
     setFading(true);
@@ -192,9 +193,11 @@ export function ConflictCard({
               type="button"
               data-testid="conflict-apply-btn"
               disabled={busy || !choice}
+              aria-busy={busy}
               onClick={() => void apply()}
-              className="rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
+              {busy && choice !== "merge" && <Loader2 className="size-4 animate-spin" />}
               اعمال تصمیم
             </button>
           </div>

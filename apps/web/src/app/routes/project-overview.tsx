@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Lock, Settings } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
@@ -17,6 +17,7 @@ import {
   projectStatusLabels,
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
+import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
@@ -48,40 +49,41 @@ function OverviewContent() {
       key: "wbs",
       title: t("projectOverview.moduleWbs"),
       href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_WBS}`,
-      enabled: true,
     },
     {
       key: "weather",
       title: t("projectOverview.moduleWeather"),
       href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_WEATHER}`,
-      enabled: true,
     },
     {
       key: "schedule",
       title: t("projectOverview.moduleSchedule"),
-      enabled: false,
+      href: (id: string) => `/${PATHS.PROJECT}/${id}/schedule/${PATHS.PROJECT_GANTT}`,
     },
     {
       key: "reports",
       title: t("projectOverview.moduleReports"),
-      enabled: false,
+      href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_DAILY_REPORTS}`,
     },
-    { key: "costs", title: t("projectOverview.moduleCosts"), href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_COSTS}`, enabled: true },
+    {
+      key: "costs",
+      title: t("projectOverview.moduleCosts"),
+      href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_COSTS}`,
+    },
     {
       key: "contracts",
       title: t("projectOverview.moduleContracts"),
       href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_CONTRACTS}`,
-      enabled: true,
     },
     {
       key: "documents",
       title: t("projectOverview.moduleDocuments"),
-      enabled: false,
+      href: (id: string) => `/${PATHS.PROJECT}/${id}/${PATHS.PROJECT_DOCUMENTS}`,
     },
   ];
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <p>{t("project.notFound")}</p>;
+  if (!project) return <EmptyState title={t("project.notFound")} />;
 
   return (
     <>
@@ -143,46 +145,39 @@ function OverviewContent() {
 
       <h2 className='mb-3 text-lg font-semibold'>{t("project.modules")}</h2>
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-        {MODULES.map((mod) =>
-          mod.enabled && mod.href ? (
-            <Link
-              key={mod.key}
-              to={mod.href(projectId)}
-              className='flex items-center justify-between rounded-lg border border-border p-4 hover:bg-muted/40'
-            >
-              <span>{mod.title}</span>
-              <ArrowLeft className='size-4' />
-            </Link>
-          ) : (
-            <div
-              key={mod.key}
-              className='flex items-center justify-between rounded-lg border border-dashed border-border p-4 text-muted-foreground'
-              title={t("project.comingSoon")}
-            >
-              <span>{mod.title}</span>
-              <Lock className='size-4' />
-            </div>
-          ),
-        )}
+        {MODULES.map((mod) => (
+          <Link
+            key={mod.key}
+            to={mod.href(projectId)}
+            className='flex items-center justify-between rounded-lg border border-border p-4 hover:bg-muted/40'
+          >
+            <span>{mod.title}</span>
+            <ArrowLeft className='size-4' />
+          </Link>
+        ))}
       </div>
 
       <h2 className='mb-3 text-lg font-semibold'>
         {t("project.activeMembers")}
       </h2>
-      <ul className='space-y-2'>
-        {members
-          .filter((m) => m.status === "active")
-          .slice(0, 6)
-          .map((m) => (
-            <li
-              key={m.user_id ?? m.invited_email}
-              className='flex justify-between rounded border border-border px-3 py-2 text-sm'
-            >
-              <span>{m.full_name}</span>
-              <span className='text-muted-foreground'>{m.roles[0] ?? "—"}</span>
-            </li>
-          ))}
-      </ul>
+      {members.filter((m) => m.status === "active").length === 0 ? (
+        <EmptyState title={t("projectMembers.empty")} className="py-8" />
+      ) : (
+        <ul className='space-y-2'>
+          {members
+            .filter((m) => m.status === "active")
+            .slice(0, 6)
+            .map((m) => (
+              <li
+                key={m.user_id ?? m.invited_email}
+                className='flex justify-between rounded border border-border px-3 py-2 text-sm'
+              >
+                <span>{m.full_name}</span>
+                <span className='text-muted-foreground'>{m.roles[0] ?? "—"}</span>
+              </li>
+            ))}
+        </ul>
+      )}
     </>
   );
 }

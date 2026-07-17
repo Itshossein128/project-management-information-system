@@ -1,3 +1,4 @@
+import { Input, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { cn } from "@/app/lib/utils";
 import {
@@ -53,30 +54,41 @@ function Segmented<T extends string>({
   options,
   onChange,
   disabled,
+  label,
 }: {
   value: T;
   options: { value: T; label: string }[];
   onChange: (v: T) => void;
   disabled?: boolean;
+  label: string;
 }) {
   return (
-    <div className="inline-flex rounded-lg border border-border p-1">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          disabled={disabled}
-          onClick={() => onChange(o.value)}
-          className={cn(
-            "rounded-md px-3 py-1 text-sm transition",
-            value === o.value
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-muted/40",
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="inline-flex rounded-lg border border-border p-1"
+    >
+      {options.map((o) => {
+        const selected = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={disabled}
+            onClick={() => onChange(o.value)}
+            className={cn(
+              "rounded-md px-3 py-1 text-sm transition",
+              selected
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted/40",
+            )}
+          >
+            {o.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -96,18 +108,17 @@ export function ReportHeader({
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <JalaliDatePicker
+          name="report_date"
+          label="تاریخ گزارش"
+          value={value.report_date}
+          onChange={(iso) => set("report_date", iso)}
+          disabled={readOnly}
+        />
         <div>
-          <label className="mb-1 block text-sm text-muted-foreground">تاریخ گزارش</label>
-          <JalaliDatePicker
-            name="report_date"
-            value={value.report_date}
-            onChange={(iso) => set("report_date", iso)}
-            disabled={readOnly}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm text-muted-foreground">شیفت</label>
+          <p className="mb-1 text-sm text-muted-foreground">شیفت</p>
           <Segmented
+            label="شیفت"
             value={value.shift}
             options={SHIFTS}
             onChange={(v) => set("shift", v)}
@@ -115,8 +126,9 @@ export function ReportHeader({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-muted-foreground">وضعیت کارگاه</label>
+          <p className="mb-1 text-sm text-muted-foreground">وضعیت کارگاه</p>
           <Segmented<SiteStatus>
+            label="وضعیت کارگاه"
             value={value.site_status}
             options={[
               { value: "active", label: "فعال" },
@@ -127,21 +139,31 @@ export function ReportHeader({
           />
         </div>
         <div className="flex items-end gap-2">
-          <div>
-            <label className="mb-1 block text-sm text-muted-foreground">حداکثر دما</label>
-            <input
+          <div className="flex-1">
+            <label
+              htmlFor="report-temp-max"
+              className="mb-1 block text-sm text-muted-foreground"
+            >
+              حداکثر دما
+            </label>
+            <Input
+              id="report-temp-max"
               type="number"
-              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
               value={value.temp_max}
               disabled={readOnly}
               onChange={(e) => set("temp_max", e.target.value)}
             />
           </div>
-          <div>
-            <label className="mb-1 block text-sm text-muted-foreground">حداقل دما</label>
-            <input
+          <div className="flex-1">
+            <label
+              htmlFor="report-temp-min"
+              className="mb-1 block text-sm text-muted-foreground"
+            >
+              حداقل دما
+            </label>
+            <Input
+              id="report-temp-min"
               type="number"
-              className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
               value={value.temp_min}
               disabled={readOnly}
               onChange={(e) => set("temp_min", e.target.value)}
@@ -151,37 +173,50 @@ export function ReportHeader({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm text-muted-foreground">وضعیت جوی</label>
-        <div className="flex flex-wrap gap-2">
-          {(Object.keys(WEATHER_META) as WeatherCondition[]).map((w) => (
-            <button
-              key={w}
-              type="button"
-              disabled={readOnly}
-              onClick={() => set("weather_condition", w)}
-              className={cn(
-                "rounded-full border px-3 py-1 text-sm transition",
-                value.weather_condition === w
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:bg-muted/40",
-              )}
-            >
-              <span className="me-1">{WEATHER_META[w].icon}</span>
-              {WEATHER_META[w].label}
-            </button>
-          ))}
+        <p className="mb-1 text-sm text-muted-foreground" id="weather-label">
+          وضعیت جوی
+        </p>
+        <div
+          role="radiogroup"
+          aria-labelledby="weather-label"
+          className="flex flex-wrap gap-2"
+        >
+          {(Object.keys(WEATHER_META) as WeatherCondition[]).map((w) => {
+            const selected = value.weather_condition === w;
+            return (
+              <button
+                key={w}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={WEATHER_META[w].label}
+                disabled={readOnly}
+                onClick={() => set("weather_condition", w)}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-sm transition",
+                  selected
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted/40",
+                )}
+              >
+                <span className="me-1" aria-hidden>
+                  {WEATHER_META[w].icon}
+                </span>
+                {WEATHER_META[w].label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm text-muted-foreground">توضیحات کلی</label>
-        <textarea
-          className="min-h-[64px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-          value={value.general_notes}
-          disabled={readOnly}
-          onChange={(e) => set("general_notes", e.target.value)}
-        />
-      </div>
+      <TextArea
+        name="general_notes"
+        label="توضیحات کلی"
+        rows={3}
+        value={value.general_notes}
+        disabled={readOnly}
+        onChange={(e) => set("general_notes", e.target.value)}
+      />
     </div>
   );
 }

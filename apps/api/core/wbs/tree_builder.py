@@ -20,7 +20,9 @@ def node_to_dict(node: WBS) -> dict:
 
 def build_nested_wbs_tree(project_id) -> list[dict]:
     """
-    Build nested WBS JSON using treebeard's annotated list (iterative, any depth).
+    Builds a fully nested, hierarchical JSON representation of the WBS tree
+    for a specific project. It uses django-treebeard's get_annotated_list_qs
+    to fetch the nodes iteratively without recursive database calls, ensuring optimal performance.
     """
     qs = WBS.objects.filter(project_id=project_id)
     if not qs.exists():

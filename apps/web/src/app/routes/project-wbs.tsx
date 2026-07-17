@@ -5,6 +5,7 @@ import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
 import { fetchWBSTree } from "@/app/lib/api/wbs";
 import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
+import { WbsEmptyState } from "@/components/wbs/wbs-empty-state";
 import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
 import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
 import {
@@ -47,8 +48,12 @@ function ProjectWBSContent() {
               >
                 ذخیره به‌عنوان قالب
               </Button>
-              <Button variant='secondary' onClick={() => setMspOpen(true)}>
-                بارگذاری از MSP
+              <Button
+                variant='secondary'
+                onClick={() => setMspOpen(true)}
+                data-testid="msp-import-btn"
+              >
+                بارگذاری از MSP / P6
               </Button>
             </div>
           ) : undefined
@@ -58,7 +63,16 @@ function ProjectWBSContent() {
       {isLoading ? (
         <LoadingSkeleton rows={10} />
       ) : tree.length === 0 ? (
-        <p className='text-muted-foreground'>هنوز گره WBS ایجاد نشده است.</p>
+        canEditWBS ? (
+          <WbsEmptyState
+            projectId={projectId}
+            onCreated={() =>
+              void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
+            }
+          />
+        ) : (
+          <p className='text-muted-foreground'>هنوز گره WBS ایجاد نشده است.</p>
+        )
       ) : (
         <div className='overflow-x-auto rounded-lg border border-border'>
           <div className='min-w-max'>

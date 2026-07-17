@@ -24,6 +24,7 @@ export function MaterialsTab({
       ],
     },
     { key: "quantity", header: "مقدار", type: "number", width: "100px" },
+    { key: "unit_cost", header: "فی واحد", type: "number", width: "100px" },
     { key: "unit", header: "واحد", width: "90px" },
     {
       key: "activity_description",
@@ -46,6 +47,7 @@ export function MaterialsTab({
         material_description: "",
         transaction_type: "issue",
         quantity: null,
+        unit_cost: null,
         unit: "",
         activity_ref: null,
         activity_description: "",
@@ -55,6 +57,7 @@ export function MaterialsTab({
         material_description: row.material_description ?? "",
         transaction_type: row.transaction_type ?? "issue",
         quantity: row.quantity ?? 0,
+        unit_cost: row.unit_cost ?? null,
         unit: row.unit ?? "",
         activity_ref: row.activity_ref ?? null,
         notes: row.notes ?? "",

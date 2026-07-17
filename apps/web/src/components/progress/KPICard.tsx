@@ -13,7 +13,7 @@ export function KPICard({
   value: string;
   subtitle?: string;
   trend?: { label: string; positive: boolean } | null;
-  footer?: string;
+  footer?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -32,7 +32,7 @@ export function KPICard({
         </p>
       ) : null}
       {children}
-      {footer ? <p className="mt-2 text-xs text-muted-foreground">{footer}</p> : null}
+      {footer ? <div className="mt-2 text-xs text-muted-foreground">{footer}</div> : null}
     </div>
   );
 }

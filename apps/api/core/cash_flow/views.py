@@ -21,6 +21,7 @@ from cash_flow.services.cashflow_service import (
 )
 from common.cache_helpers import cache_key, get_cached_or_compute, params_fingerprint
 from common.jalali import parse_jalali_or_gregorian
+from common.viewsets import ProjectScopedViewSet
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
@@ -39,46 +40,16 @@ class CashFlowPagination(PageNumberPagination):
     max_page_size = 200
 
 
-class CashFlowScopedViewSet(viewsets.ModelViewSet):
-    lookup_url_kwarg = 'pk'
+class CashFlowScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_cashflow'
     edit_permission = 'edit_cashflow'
     pagination_class = CashFlowPagination
 
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+    def post_save(self, instance):
+        _invalidate_cashflow_caches(self.kwargs['project_pk'])
 
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
-
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
-        _invalidate_cashflow_caches(self.get_project_id())
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
-        _invalidate_cashflow_caches(self.get_project_id())
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        _invalidate_cashflow_caches(self.get_project_id())
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post_delete(self, instance):
+        _invalidate_cashflow_caches(self.kwargs['project_pk'])
 
 
 class CashFlowListView(APIView):

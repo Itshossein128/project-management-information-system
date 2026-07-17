@@ -62,15 +62,17 @@ def financial_summary(sub: Subcontractor) -> dict:
 def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
     reasons = []
 
-    latest = sub.scores.filter(is_deleted=False).order_by('-score_date').first()
+    valid_scores = [s for s in sub.scores.all() if not s.is_deleted]
+    latest = max(valid_scores, key=lambda x: x.score_date) if valid_scores else None
     if latest and latest.overall_score is not None and float(latest.overall_score) < 6:
         reasons.append('آخرین نمره عملکرد کمتر از 6 است')
 
-    if sub.warnings.filter(
-        is_deleted=False,
-        resolved=False,
-        warning_type__in=[WarningType.WRITTEN, WarningType.FINAL, WarningType.CONTRACT_SUSPENSION],
-    ).exists():
+    has_critical_warning = any(
+        w.warning_type in [WarningType.WRITTEN, WarningType.FINAL, WarningType.CONTRACT_SUSPENSION]
+        for w in sub.warnings.all()
+        if not w.is_deleted and not w.resolved
+    )
+    if has_critical_warning:
         reasons.append('اخطار کتبی یا نهایی حل نشده دارد')
 
     if sub.status == SubcontractorStatus.SUSPENDED:

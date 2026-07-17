@@ -59,6 +59,7 @@ export interface ActivityRow {
   unit: string | null;
   execution_percentage: string | null;
   notes: string;
+  photo_file: string | null;
 }
 
 export interface LaborRow {
@@ -97,6 +98,7 @@ export interface MaterialRow {
   material_ref: string | null;
   material_description: string;
   quantity: string;
+  unit_cost: string | null;
   unit: string;
   transaction_type: "receipt" | "issue" | "waste";
   activity_ref: string | null;
@@ -329,6 +331,8 @@ export interface SyncBatchResult {
     status: "created" | "merged" | "skipped" | "conflict" | "error";
     server_id: string | null;
     conflict_reason: string | null;
+    server_payload?: Record<string, unknown> | null;
+    conflict_fields?: string[];
     child_errors?: unknown[];
   }>;
   summary: {

@@ -152,10 +152,12 @@ export function DailyReportForm({
   );
   const subcontractorOptions = useMemo(
     () =>
-      (subcontractorsQuery.data as Array<Record<string, unknown>>).map((c) => ({
-        value: String(c.id ?? c.contract_id ?? ""),
-        label: String(c.counterparty ?? c.name ?? c.contract_number ?? ""),
-      })),
+      (Array.isArray(subcontractorsQuery.data) ? subcontractorsQuery.data : []).map(
+        (c) => ({
+          value: String(c.id ?? c.contract_id ?? ""),
+          label: String(c.counterparty ?? c.name ?? c.contract_number ?? ""),
+        }),
+      ),
     [subcontractorsQuery.data],
   );
 
@@ -255,7 +257,7 @@ export function DailyReportForm({
   const listHref = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}`;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" data-testid="daily-report-form">
       <Breadcrumb
         items={[
           { label: "گزارش‌های روزانه", href: listHref },
@@ -290,6 +292,7 @@ export function DailyReportForm({
             type="button"
             onClick={() => saveHeader.mutate()}
             disabled={saveHeader.isPending || !header.report_date}
+            data-testid="daily-report-save-header"
             className="inline-flex items-center gap-1 rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             <Save className="size-4" />
@@ -309,6 +312,7 @@ export function DailyReportForm({
               key={t.key}
               type="button"
               onClick={() => setActiveTab(t.key)}
+              data-testid={`report-tab-${t.key}`}
               className={
                 activeTab === t.key
                   ? "rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"

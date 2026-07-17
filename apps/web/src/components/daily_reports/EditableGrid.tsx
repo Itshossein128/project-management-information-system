@@ -4,11 +4,13 @@ import {
   Camera,
   CheckCircle2,
   Clock,
+  ExternalLink,
   Plus,
   RefreshCw,
   Save,
   Trash2,
 } from "lucide-react";
+import { getDownloadUrl } from "@/app/lib/api/files";
 import { cn } from "@/app/lib/utils";
 import type { RowSyncStatus } from "@/app/lib/offlineWrite";
 
@@ -297,6 +299,7 @@ export function EditableGrid({
         <button
           type="button"
           onClick={addRow}
+          data-testid="grid-add-row-btn"
           className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/40"
         >
           <Plus className="size-4" />
@@ -340,33 +343,19 @@ function renderCell(
   if (col.type === "photo") {
     const fileId = (value as string | null) ?? null;
     return (
-      <label
-        className={cn(
-          "inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-border px-2 py-1 text-xs",
-          readOnly && "pointer-events-none opacity-50",
-          fileId && "border-emerald-400 text-emerald-700",
-        )}
-      >
-        <Camera className="size-3.5" />
-        {fileId ? "عکس" : "افزودن"}
-        <input
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          disabled={readOnly || !onPhotoUpload}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file || !onPhotoUpload) return;
-            try {
-              const id = await onPhotoUpload(file);
-              setCell(row._key, col.key, id);
-            } catch {
-              /* caller may toast */
-            }
-            e.target.value = "";
-          }}
-        />
-      </label>
+      <PhotoCell
+        fileId={fileId}
+        readOnly={Boolean(readOnly)}
+        disabled={Boolean(readOnly) || !onPhotoUpload}
+        onUpload={
+          onPhotoUpload
+            ? async (file) => {
+                const id = await onPhotoUpload(file);
+                setCell(row._key, col.key, id);
+              }
+            : undefined
+        }
+      />
     );
   }
 
@@ -441,5 +430,97 @@ function renderCell(
         )
       }
     />
+  );
+}
+
+function PhotoCell({
+  fileId,
+  readOnly,
+  disabled,
+  onUpload,
+}: {
+  fileId: string | null;
+  readOnly: boolean;
+  disabled: boolean;
+  onUpload?: (file: File) => Promise<void>;
+}) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const isPending = Boolean(fileId?.startsWith("pending:"));
+  const canPreview = Boolean(fileId && !isPending);
+
+  useEffect(() => {
+    if (!canPreview || !fileId) {
+      setPreviewUrl(null);
+      return;
+    }
+    let cancelled = false;
+    void getDownloadUrl(fileId)
+      .then((res) => {
+        if (!cancelled) setPreviewUrl(res.download_url);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canPreview, fileId]);
+
+  return (
+    <div className="flex items-center gap-1.5" data-testid="photo-cell">
+      {previewUrl ? (
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noreferrer"
+          title="مشاهده عکس"
+          data-testid="photo-preview-link"
+          className="inline-flex size-9 overflow-hidden rounded border border-border"
+        >
+          <img src={previewUrl} alt="" className="size-full object-cover" />
+        </a>
+      ) : fileId ? (
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 rounded border border-emerald-400 px-2 py-1 text-xs text-emerald-700",
+            isPending && "border-amber-400 text-amber-700",
+          )}
+          title={isPending ? "در صف آفلاین" : "عکس ذخیره شده"}
+        >
+          <Camera className="size-3.5" />
+          {isPending ? "صف" : "عکس"}
+          {!isPending ? <ExternalLink className="size-3 opacity-50" /> : null}
+        </span>
+      ) : null}
+      {!readOnly ? (
+        <label
+          className={cn(
+            "inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-border px-2 py-1 text-xs",
+            disabled && "pointer-events-none opacity-50",
+            fileId && "border-emerald-400 text-emerald-700",
+          )}
+        >
+          <Camera className="size-3.5" />
+          {fileId ? "تعویض" : "افزودن"}
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            disabled={disabled}
+            data-testid="photo-upload-input"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file || !onUpload) return;
+              try {
+                await onUpload(file);
+              } catch {
+                /* caller may toast */
+              }
+              e.target.value = "";
+            }}
+          />
+        </label>
+      ) : null}
+    </div>
   );
 }

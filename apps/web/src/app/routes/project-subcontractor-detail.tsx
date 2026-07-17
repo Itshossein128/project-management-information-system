@@ -5,7 +5,6 @@ import { ProjectProvider, usePermission, useProject } from "@/app/contexts/proje
 import {
   computeOverallLive,
   createScore,
-  createSubcontractor,
   createWarning,
   fetchSubcontractor,
   formatFaAmount,
@@ -19,11 +18,14 @@ import {
 } from "@/app/lib/api/subcontractors";
 import { fetchIPCs, IPC_STATUS_LABELS } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
+import { JalaliDatePicker, Select, TextArea } from "@/components/form";
+import { EmptyState } from "@/components/layout/empty-state";
+import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { PerformanceRadarChart } from "@/components/subcontractors/PerformanceRadarChart";
 import { RiskBadge } from "@/components/subcontractors/RiskBadge";
 import { ScoreSlider } from "@/components/subcontractors/ScoreSlider";
 import { WarningTimeline } from "@/components/subcontractors/WarningTimeline";
-import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -74,7 +76,12 @@ function SubcontractorDetailContent() {
     resolution_notes: "",
   });
 
-  const { data: sub, isLoading } = useQuery({
+  const {
+    data: sub,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["subcontractor", projectId, subId],
     queryFn: () => fetchSubcontractor(projectId, subId),
     enabled: canView && Boolean(subId),
@@ -159,20 +166,63 @@ function SubcontractorDetailContent() {
     XLSX.writeFile(wb, `sub-${sub?.company_name ?? subId}.xlsx`);
   };
 
-  if (projectLoading || isLoading) return <LoadingSkeleton rows={12} />;
-  if (!project || !sub) return <p>پیمانکار یافت نشد</p>;
-  if (!canView) return <p className="p-8 text-center text-muted-foreground">دسترسی ندارید.</p>;
+  if (projectLoading || (canView && isLoading)) {
+    return (
+      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+        <LoadingSkeleton rows={12} />
+      </main>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+        <EmptyState
+          title="دسترسی ندارید"
+          description="برای مشاهده جزئیات پیمانکار به مجوز قراردادها نیاز است."
+        />
+      </main>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+        <QueryErrorState onRetry={() => void refetch()} />
+      </main>
+    );
+  }
+
+  if (!project || !sub) {
+    return (
+      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+        <EmptyState title="پیمانکار یافت نشد" />
+      </main>
+    );
+  }
 
   const latest = sub.performance_history[0] ?? null;
   const fin = sub.financial_status;
+  const tabs = [
+    ["performance", "عملکرد"],
+    ["financial", "وضعیت مالی"],
+    ["warnings", "هشدارها"],
+    ["activities", "گزارش فعالیت‌ها"],
+  ] as const;
 
   return (
-    <div className="space-y-6">
+    <main className="page-main page-shell mx-auto max-w-7xl space-y-6 px-4 py-8">
       <Breadcrumb
         items={[
           { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
-          { label: project.project_name, href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}` },
-          { label: "پیمانکاران فرعی", href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SUBCONTRACTORS}` },
+          {
+            label: project.project_name,
+            href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
+          },
+          {
+            label: "پیمانکاران فرعی",
+            href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SUBCONTRACTORS}`,
+          },
           { label: sub.company_name },
         ]}
       />
@@ -192,7 +242,7 @@ function SubcontractorDetailContent() {
             </div>
           </div>
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 text-sm">
+        <div className="mt-4 grid gap-4 text-sm md:grid-cols-2">
           <div className="space-y-1">
             <p>مسئول: {sub.responsible_person || "—"}</p>
             <p>تلفن: {sub.phone || "—"}</p>
@@ -200,7 +250,11 @@ function SubcontractorDetailContent() {
           <div className="space-y-1">
             {sub.contract_summary ? (
               <>
-                <p>قرارداد: {sub.contract_summary.contract_number || sub.contract_summary.counterparty}</p>
+                <p>
+                  قرارداد:{" "}
+                  {sub.contract_summary.contract_number ||
+                    sub.contract_summary.counterparty}
+                </p>
                 <p>مبلغ: {formatFaAmount(sub.contract_summary.adjusted_amount)} ریال</p>
               </>
             ) : (
@@ -210,17 +264,12 @@ function SubcontractorDetailContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["performance", "عملکرد"],
-            ["financial", "وضعیت مالی"],
-            ["warnings", "هشدارها"],
-            ["activities", "گزارش فعالیت‌ها"],
-          ] as const
-        ).map(([key, label]) => (
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="بخش‌های پیمانکار">
+        {tabs.map(([key, label]) => (
           <Button
             key={key}
+            role="tab"
+            aria-selected={tab === key}
             variant={tab === key ? "primary" : "secondary"}
             size="sm"
             onClick={() => setTab(key)}
@@ -231,7 +280,7 @@ function SubcontractorDetailContent() {
       </div>
 
       {tab === "performance" ? (
-        <div className="space-y-6">
+        <div className="space-y-6" role="tabpanel">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className={`text-4xl font-bold ${scoreColor(latest?.overall_score)}`}>
@@ -246,41 +295,62 @@ function SubcontractorDetailContent() {
             ) : null}
           </div>
           <PerformanceRadarChart latest={latest} history={sub.performance_history} />
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  {["تاریخ", "پیشرفت", "کیفیت", "HSE", "پرداخت", "همکاری", "نمره کل"].map((h) => (
-                    <th key={h} className="px-3 py-2 text-start">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sub.performance_history.map((s) => (
-                  <tr key={s.id} className="border-t">
-                    <td className="px-3 py-2">{s.score_date}</td>
-                    <td className="px-3 py-2">{s.progress_score ?? "—"}</td>
-                    <td className="px-3 py-2">{s.quality_score ?? "—"}</td>
-                    <td className="px-3 py-2">{s.hse_score ?? "—"}</td>
-                    <td className="px-3 py-2">{s.payment_compliance_score ?? "—"}</td>
-                    <td className="px-3 py-2">{s.cooperation_score ?? "—"}</td>
-                    <td className={`px-3 py-2 font-medium ${scoreBg(s.overall_score)} ${scoreColor(s.overall_score)}`}>
-                      {s.overall_score?.toFixed(1) ?? "—"}
-                    </td>
+          {sub.performance_history.length === 0 ? (
+            <EmptyState
+              title="ارزیابی ثبت نشده"
+              description="اولین ارزیابی عملکرد را ثبت کنید."
+              action={
+                canEdit ? (
+                  <Button variant="primary" onClick={() => setScoreDrawer(true)}>
+                    ثبت ارزیابی جدید
+                  </Button>
+                ) : null
+              }
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    {["تاریخ", "پیشرفت", "کیفیت", "HSE", "پرداخت", "همکاری", "نمره کل"].map(
+                      (h) => (
+                        <th key={h} className="px-3 py-2 text-start">
+                          {h}
+                        </th>
+                      ),
+                    )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {sub.performance_history.map((s) => (
+                    <tr key={s.id} className="border-t">
+                      <td className="px-3 py-2">{s.score_date}</td>
+                      <td className="px-3 py-2">{s.progress_score ?? "—"}</td>
+                      <td className="px-3 py-2">{s.quality_score ?? "—"}</td>
+                      <td className="px-3 py-2">{s.hse_score ?? "—"}</td>
+                      <td className="px-3 py-2">{s.payment_compliance_score ?? "—"}</td>
+                      <td className="px-3 py-2">{s.cooperation_score ?? "—"}</td>
+                      <td
+                        className={`px-3 py-2 font-medium ${scoreBg(s.overall_score)} ${scoreColor(s.overall_score)}`}
+                      >
+                        {s.overall_score?.toFixed(1) ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       ) : null}
 
       {tab === "financial" ? (
-        <div className="space-y-6">
+        <div className="space-y-6" role="tabpanel">
           {!sub.contract ? (
-            <p className="rounded-lg border p-6 text-muted-foreground">
-              این پیمانکار به قراردادی متصل نیست. برای مشاهده وضعیت مالی، ابتدا قرارداد را انتخاب کنید.
-            </p>
+            <EmptyState
+              title="قراردادی متصل نیست"
+              description="برای مشاهده وضعیت مالی، ابتدا قرارداد را انتخاب کنید."
+            />
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-4">
@@ -298,7 +368,9 @@ function SubcontractorDetailContent() {
               </div>
               <div className="rounded-lg border p-4">
                 <p className="mb-2 text-sm">
-                  پیش‌پرداخت: {formatFaAmount(fin.advance_paid)} — استهلاک: {formatFaAmount(fin.advance_recovered)} — مانده: {formatFaAmount(fin.advance_remaining)}
+                  پیش‌پرداخت: {formatFaAmount(fin.advance_paid)} — استهلاک:{" "}
+                  {formatFaAmount(fin.advance_recovered)} — مانده:{" "}
+                  {formatFaAmount(fin.advance_remaining)}
                 </p>
                 <div className="h-3 overflow-hidden rounded-full bg-muted">
                   <div
@@ -309,37 +381,45 @@ function SubcontractorDetailContent() {
                   />
                 </div>
               </div>
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      {["شماره IPC", "ناخالص", "خالص", "وضعیت", "تأخیر"].map((h) => (
-                        <th key={h} className="px-3 py-2 text-start">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(ipcs?.results ?? []).map((ipc) => (
-                      <tr key={ipc.id} className="border-t">
-                        <td className="px-3 py-2">{ipc.ipc_number}</td>
-                        <td className="px-3 py-2">{formatFaAmount(ipc.gross_amount)}</td>
-                        <td className="px-3 py-2">{formatFaAmount(ipc.net_amount ?? 0)}</td>
-                        <td className="px-3 py-2">{IPC_STATUS_LABELS[ipc.status] ?? ipc.status}</td>
-                        <td className={`px-3 py-2 ${ipc.days_overdue ? "text-red-600" : ""}`}>
-                          {ipc.days_overdue ? `${ipc.days_overdue} روز` : "—"}
-                        </td>
+              {(ipcs?.results?.length ?? 0) === 0 ? (
+                <EmptyState title="صورت وضعیتی ثبت نشده" />
+              ) : (
+                <div className="overflow-x-auto rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        {["شماره IPC", "ناخالص", "خالص", "وضعیت", "تأخیر"].map((h) => (
+                          <th key={h} className="px-3 py-2 text-start">
+                            {h}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {(ipcs?.results ?? []).map((ipc) => (
+                        <tr key={ipc.id} className="border-t">
+                          <td className="px-3 py-2">{ipc.ipc_number}</td>
+                          <td className="px-3 py-2">{formatFaAmount(ipc.gross_amount)}</td>
+                          <td className="px-3 py-2">{formatFaAmount(ipc.net_amount ?? 0)}</td>
+                          <td className="px-3 py-2">
+                            {IPC_STATUS_LABELS[ipc.status] ?? ipc.status}
+                          </td>
+                          <td className={`px-3 py-2 ${ipc.days_overdue ? "text-red-600" : ""}`}>
+                            {ipc.days_overdue ? `${ipc.days_overdue} روز` : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </>
           )}
         </div>
       ) : null}
 
       {tab === "warnings" ? (
-        <div className="space-y-4">
+        <div className="space-y-4" role="tabpanel">
           <div className="flex justify-end">
             {canEdit ? (
               <Button variant="primary" onClick={() => setWarningDrawer(true)}>
@@ -347,59 +427,86 @@ function SubcontractorDetailContent() {
               </Button>
             ) : null}
           </div>
-          <WarningTimeline
-            warnings={sub.warnings}
-            canEdit={canEdit}
-            onResolve={(w) => setResolveModal(w)}
-          />
+          {sub.warnings.length === 0 ? (
+            <EmptyState
+              title="اخطاری ثبت نشده"
+              action={
+                canEdit ? (
+                  <Button variant="primary" onClick={() => setWarningDrawer(true)}>
+                    صدور اخطار
+                  </Button>
+                ) : null
+              }
+            />
+          ) : (
+            <WarningTimeline
+              warnings={sub.warnings}
+              canEdit={canEdit}
+              onResolve={(w) => setResolveModal(w)}
+            />
+          )}
         </div>
       ) : null}
 
       {tab === "activities" ? (
-        <div className="space-y-4">
+        <div className="space-y-4" role="tabpanel">
           <div className="flex flex-wrap items-end gap-3">
-            <label className="text-sm">
-              از
-              <input type="date" className="ms-2 rounded border px-2 py-1" value={activityFrom} onChange={(e) => setActivityFrom(e.target.value)} />
-            </label>
-            <label className="text-sm">
-              تا
-              <input type="date" className="ms-2 rounded border px-2 py-1" value={activityTo} onChange={(e) => setActivityTo(e.target.value)} />
-            </label>
+            <JalaliDatePicker
+              name="activity_from"
+              label="از تاریخ"
+              value={activityFrom}
+              onChange={setActivityFrom}
+              fieldClassName="min-w-[10rem]"
+            />
+            <JalaliDatePicker
+              name="activity_to"
+              label="تا تاریخ"
+              value={activityTo}
+              onChange={setActivityTo}
+              fieldClassName="min-w-[10rem]"
+            />
             <Button variant="secondary" onClick={exportExcel}>
               خروجی اکسل
             </Button>
           </div>
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  {["تاریخ", "شیفت", "شرح", "نفر", "مقدار", "گزارش"].map((h) => (
-                    <th key={h} className="px-3 py-2 text-start">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredActivities.map((a) => (
-                  <tr key={a.id} className="border-t">
-                    <td className="px-3 py-2">{a.report_date}</td>
-                    <td className="px-3 py-2">{a.shift}</td>
-                    <td className="px-3 py-2">{a.activity_description}</td>
-                    <td className="px-3 py-2">{a.headcount ?? "—"}</td>
-                    <td className="px-3 py-2">{a.quantity != null ? `${a.quantity} ${a.unit ?? ""}` : "—"}</td>
-                    <td className="px-3 py-2">
-                      <Link
-                        to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${a.report_id}/view`}
-                        className="text-primary underline"
-                      >
-                        مشاهده
-                      </Link>
-                    </td>
+          {filteredActivities.length === 0 ? (
+            <EmptyState title="فعالیتی در این بازه یافت نشد" />
+          ) : (
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    {["تاریخ", "شیفت", "شرح", "نفر", "مقدار", "گزارش"].map((h) => (
+                      <th key={h} className="px-3 py-2 text-start">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredActivities.map((a) => (
+                    <tr key={a.id} className="border-t">
+                      <td className="px-3 py-2">{a.report_date}</td>
+                      <td className="px-3 py-2">{a.shift}</td>
+                      <td className="px-3 py-2">{a.activity_description}</td>
+                      <td className="px-3 py-2">{a.headcount ?? "—"}</td>
+                      <td className="px-3 py-2">
+                        {a.quantity != null ? `${a.quantity} ${a.unit ?? ""}` : "—"}
+                      </td>
+                      <td className="px-3 py-2">
+                        <Link
+                          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${a.report_id}/view`}
+                          className="text-primary underline"
+                        >
+                          مشاهده
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -408,35 +515,60 @@ function SubcontractorDetailContent() {
         onClose={() => setScoreDrawer(false)}
         title="ثبت ارزیابی جدید"
         footer={
-          <Button variant="primary" onClick={() => saveScore.mutate()} disabled={saveScore.isPending}>
+          <Button
+            variant="primary"
+            loading={saveScore.isPending}
+            onClick={() => saveScore.mutate()}
+            disabled={saveScore.isPending}
+          >
             ذخیره
           </Button>
         }
       >
         <div className="space-y-4">
-          <label className="block text-sm">
-            تاریخ
-            <input
-              type="date"
-              className="mt-1 w-full rounded border px-3 py-2"
-              value={scoreForm.score_date}
-              onChange={(e) => setScoreForm({ ...scoreForm, score_date: e.target.value })}
-            />
-          </label>
-          <ScoreSlider label="پیشرفت کاری" value={scoreForm.progress_score} onChange={(v) => setScoreForm({ ...scoreForm, progress_score: v })} />
-          <ScoreSlider label="کیفیت اجرا" value={scoreForm.quality_score} onChange={(v) => setScoreForm({ ...scoreForm, quality_score: v })} />
-          <ScoreSlider label="HSE" value={scoreForm.hse_score} onChange={(v) => setScoreForm({ ...scoreForm, hse_score: v })} />
-          <ScoreSlider label="پرداخت" value={scoreForm.payment_compliance_score} onChange={(v) => setScoreForm({ ...scoreForm, payment_compliance_score: v })} />
-          <ScoreSlider label="همکاری" value={scoreForm.cooperation_score} onChange={(v) => setScoreForm({ ...scoreForm, cooperation_score: v })} />
+          <JalaliDatePicker
+            name="score_date"
+            label="تاریخ"
+            value={scoreForm.score_date}
+            onChange={(iso) => setScoreForm({ ...scoreForm, score_date: iso })}
+            required
+          />
+          <ScoreSlider
+            label="پیشرفت کاری"
+            value={scoreForm.progress_score}
+            onChange={(v) => setScoreForm({ ...scoreForm, progress_score: v })}
+          />
+          <ScoreSlider
+            label="کیفیت اجرا"
+            value={scoreForm.quality_score}
+            onChange={(v) => setScoreForm({ ...scoreForm, quality_score: v })}
+          />
+          <ScoreSlider
+            label="HSE"
+            value={scoreForm.hse_score}
+            onChange={(v) => setScoreForm({ ...scoreForm, hse_score: v })}
+          />
+          <ScoreSlider
+            label="پرداخت"
+            value={scoreForm.payment_compliance_score}
+            onChange={(v) =>
+              setScoreForm({ ...scoreForm, payment_compliance_score: v })
+            }
+          />
+          <ScoreSlider
+            label="همکاری"
+            value={scoreForm.cooperation_score}
+            onChange={(v) => setScoreForm({ ...scoreForm, cooperation_score: v })}
+          />
           {liveOverall != null ? (
             <div className="rounded-lg bg-amber-50 p-4 text-center">
               <p className="text-sm text-amber-800">نمره کل محاسبه شده</p>
               <p className="text-2xl font-bold text-amber-900">{liveOverall.toFixed(1)}</p>
             </div>
           ) : null}
-          <textarea
-            className="w-full rounded border px-3 py-2 text-sm"
-            placeholder="یادداشت"
+          <TextArea
+            name="score_notes"
+            label="یادداشت"
             rows={3}
             value={scoreForm.notes}
             onChange={(e) => setScoreForm({ ...scoreForm, notes: e.target.value })}
@@ -451,6 +583,7 @@ function SubcontractorDetailContent() {
         footer={
           <Button
             variant="primary"
+            loading={saveWarning.isPending}
             onClick={() => saveWarning.mutate()}
             disabled={saveWarning.isPending || warningForm.reason.length < 20}
           >
@@ -459,41 +592,81 @@ function SubcontractorDetailContent() {
         }
       >
         <div className="space-y-4">
-          <input type="date" className="w-full rounded border px-3 py-2" value={warningForm.warning_date} onChange={(e) => setWarningForm({ ...warningForm, warning_date: e.target.value })} />
-          <div className="space-y-2">
-            {Object.entries(WARNING_TYPE_LABELS).map(([k, label]) => (
-              <label key={k} className="flex items-center gap-2 text-sm">
-                <input type="radio" name="wtype" checked={warningForm.warning_type === k} onChange={() => setWarningForm({ ...warningForm, warning_type: k })} />
-                {label}
-              </label>
-            ))}
-          </div>
-          <textarea
-            className="w-full rounded border px-3 py-2 text-sm"
-            placeholder="دلیل (حداقل 20 کاراکتر)"
+          <JalaliDatePicker
+            name="warning_date"
+            label="تاریخ"
+            value={warningForm.warning_date}
+            onChange={(iso) => setWarningForm({ ...warningForm, warning_date: iso })}
+            required
+          />
+          <Select
+            name="warning_type"
+            label="نوع اخطار"
+            value={warningForm.warning_type}
+            onChange={(e) =>
+              setWarningForm({ ...warningForm, warning_type: e.target.value })
+            }
+            options={Object.entries(WARNING_TYPE_LABELS).map(([k, label]) => ({
+              value: k,
+              label,
+            }))}
+          />
+          <TextArea
+            name="warning_reason"
+            label="دلیل"
+            helpText="حداقل ۲۰ کاراکتر"
             rows={4}
             value={warningForm.reason}
             onChange={(e) => setWarningForm({ ...warningForm, reason: e.target.value })}
+            error={
+              warningForm.reason.length > 0 && warningForm.reason.length < 20
+                ? "حداقل ۲۰ کاراکتر وارد کنید"
+                : undefined
+            }
           />
         </div>
       </Drawer>
 
-      {resolveModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-lg bg-background p-6 shadow-xl">
-            <h3 className="text-lg font-semibold">ثبت رفع مشکل</h3>
-            <div className="mt-4 space-y-3">
-              <input type="date" className="w-full rounded border px-3 py-2" value={resolveForm.resolved_date} onChange={(e) => setResolveForm({ ...resolveForm, resolved_date: e.target.value })} />
-              <textarea className="w-full rounded border px-3 py-2 text-sm" rows={3} placeholder="یادداشت رفع" value={resolveForm.resolution_notes} onChange={(e) => setResolveForm({ ...resolveForm, resolution_notes: e.target.value })} />
-            </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setResolveModal(null)}>انصراف</Button>
-              <Button variant="primary" onClick={() => saveResolve.mutate()} disabled={saveResolve.isPending}>ثبت رفع مشکل</Button>
-            </div>
+      <Drawer
+        isOpen={Boolean(resolveModal)}
+        onClose={() => setResolveModal(null)}
+        title="ثبت رفع مشکل"
+        footer={
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={() => setResolveModal(null)}>
+              انصراف
+            </Button>
+            <Button
+              variant="primary"
+              loading={saveResolve.isPending}
+              onClick={() => saveResolve.mutate()}
+              disabled={saveResolve.isPending}
+            >
+              ثبت رفع مشکل
+            </Button>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          <JalaliDatePicker
+            name="resolved_date"
+            label="تاریخ رفع"
+            value={resolveForm.resolved_date}
+            onChange={(iso) => setResolveForm({ ...resolveForm, resolved_date: iso })}
+            required
+          />
+          <TextArea
+            name="resolution_notes"
+            label="یادداشت رفع"
+            rows={3}
+            value={resolveForm.resolution_notes}
+            onChange={(e) =>
+              setResolveForm({ ...resolveForm, resolution_notes: e.target.value })
+            }
+          />
         </div>
-      ) : null}
-    </div>
+      </Drawer>
+    </main>
   );
 }
 

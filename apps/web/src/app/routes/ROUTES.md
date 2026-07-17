@@ -5,9 +5,10 @@ This directory contains segmented routing definitions. Only some chunks are impo
 ## Route Chunks
 
 ### `business-setup.routes.ts` (active)
-- **Purpose**: Business admin/setup routes under `/businesses`.
-- **Imported by**: `routes.ts` via `...businessSetupRoutes`.
-- **Important**: Static segments (`create`, `.../setup`) are registered before dynamic `:businessId` routes to avoid client/server matching conflicts.
+- **Purpose**: IPCAS project workspace routes under `/projects`.
+- **Imported by**: `routes.ts` via `...projectRoutes`.
+
+Schema-admin routes (`/projects/setup`, `/projects/:businessId/setup`) are registered in `routes.ts` before dynamic `:businessId` catch-all routes.
 
 ### `auth.routes.ts` (not imported yet)
 - **Purpose**: Partial auth route chunk (`login`, `register` only).

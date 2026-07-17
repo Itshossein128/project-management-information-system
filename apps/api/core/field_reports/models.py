@@ -138,9 +138,9 @@ class DailyReport(AuditSoftDeleteModel):
         ordering = ['-report_date']
         constraints = [
             models.UniqueConstraint(
-                fields=['project', 'report_date'],
+                fields=['project', 'report_date', 'shift'],
                 condition=models.Q(is_deleted=False),
-                name='unique_active_daily_report_per_date',
+                name='unique_active_daily_report_per_date_shift',
             ),
         ]
 

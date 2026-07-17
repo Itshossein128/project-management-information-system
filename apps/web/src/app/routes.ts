@@ -24,6 +24,8 @@ export default [
       route(PATHS.HOME, ROUTES.HOME),
       ...projectRoutes,
 
+      route(`${PATHS.BUSINESS}/setup`, ROUTES.BUSINESS_SETUP),
+      route(`${PATHS.BUSINESS}/:businessId/setup`, ROUTES.BUSINESS_SETUP_SCHEMA),
       route(`${PATHS.BUSINESS}/:businessId/tables/:tableSlug`, ROUTES.BUSINESS_TABLE),
       route(`${PATHS.BUSINESS}/:businessId/job-positions`, ROUTES.BUSINESS_JOB_POSITIONS),
       route(`${PATHS.BUSINESS}/:businessId/users`, ROUTES.BUSINESS_USERS),

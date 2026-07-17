@@ -44,7 +44,7 @@ export async function loginViaUI(
   await page.locator("#login-phone").fill(user.phone);
   await page.locator("#login-password").fill(user.password);
   await Promise.all([
-    page.waitForURL(/\/home/, { timeout: 15_000 }),
+    page.waitForURL(/\/projects\/?$/, { timeout: 15_000 }),
     page.locator('button[type="submit"]').click(),
   ]);
 }

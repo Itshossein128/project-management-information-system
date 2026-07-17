@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
   fetchActivityProgress,
@@ -19,6 +19,7 @@ import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer
 import { ProgressHistoryTable } from "@/components/progress/ProgressHistoryTable";
 import { SCurveChart } from "@/components/progress/SCurveChart";
 import { Button } from "@/components/ui/sprint-button";
+import { fetchEconomicForecast, formatFaAmount } from "@/app/lib/api/economic";
 import { PATHS } from "@/app/routeVars";
 
 type Interval = "daily" | "weekly" | "monthly";
@@ -52,6 +53,12 @@ function ProgressPageContent() {
   const { data: kpis } = useQuery({
     queryKey: ["progress-kpis", projectId],
     queryFn: () => fetchProgressKpis(projectId),
+    enabled: canView && Boolean(projectId),
+  });
+
+  const { data: economicForecast } = useQuery({
+    queryKey: ["economic-forecast", projectId],
+    queryFn: () => fetchEconomicForecast(projectId),
     enabled: canView && Boolean(projectId),
   });
 
@@ -152,7 +159,7 @@ function ProgressPageContent() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7">
         <KPICard
           title="پیشرفت فیزیکی"
           value={`${(snapshot?.actual_progress_pct ?? 0).toFixed(1)}٪`}
@@ -180,6 +187,54 @@ function ProgressPageContent() {
           title="EAC (برآورد هزینه تکمیل)"
           value={kpis?.ac && kpis.eac != null ? kpis.eac.toLocaleString("fa-IR") : "—"}
           footer={!kpis?.ac ? "داده هزینه در دسترس نیست" : undefined}
+        />
+        <KPICard
+          title="ETC (باقی‌مانده تکمیل)"
+          value={
+            economicForecast?.etc_to_complete != null
+              ? formatFaAmount(economicForecast.etc_to_complete)
+              : kpis?.etc != null
+                ? formatFaAmount(kpis.etc)
+                : "—"
+          }
+          footer={
+            <Link
+              className="text-primary underline"
+              to={`/projects/${projectId}/${PATHS.PROJECT_ECONOMIC}`}
+            >
+              تحلیل اقتصادی
+            </Link>
+          }
+        />
+        <KPICard
+          title="VAC (انحراف تکمیل)"
+          value={
+            economicForecast?.vac != null
+              ? formatFaAmount(economicForecast.vac)
+              : kpis?.vac != null
+                ? formatFaAmount(kpis.vac)
+                : "—"
+          }
+        />
+        <KPICard
+          title="EAC (تعدیل تورم)"
+          value={
+            economicForecast?.eac_inflation_adjusted != null
+              ? formatFaAmount(economicForecast.eac_inflation_adjusted)
+              : "—"
+          }
+          footer={
+            economicForecast?.inflation_factor != null ? (
+              <>ضریب تورم: {economicForecast.inflation_factor.toFixed(2)}</>
+            ) : (
+              <Link
+                className="text-primary underline"
+                to={`/projects/${projectId}/${PATHS.PROJECT_ECONOMIC}`}
+              >
+                تحلیل اقتصادی
+              </Link>
+            )
+          }
         />
       </div>
 

@@ -43,12 +43,18 @@ class SubcontractorSerializer(serializers.ModelSerializer):
         return obj._risk_cache
 
     def get_latest_score(self, obj):
-        s = obj.scores.filter(is_deleted=False).order_by('-score_date').first()
-        return float(s.overall_score) if s and s.overall_score is not None else None
+        valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
+        if not valid_scores:
+            return None
+        s = max(valid_scores, key=lambda x: x.score_date)
+        return float(s.overall_score) if s.overall_score is not None else None
 
     def get_latest_score_date(self, obj):
-        s = obj.scores.filter(is_deleted=False).order_by('-score_date').first()
-        return s.score_date.isoformat() if s else None
+        valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
+        if not valid_scores:
+            return None
+        s = max(valid_scores, key=lambda x: x.score_date)
+        return s.score_date.isoformat()
 
     def get_financial_summary(self, obj):
         from subcontractors.services.risk_service import financial_summary
@@ -65,14 +71,12 @@ class SubcontractorSerializer(serializers.ModelSerializer):
         return self._risk(obj)[1]
 
     def get_warning_count(self, obj):
-        return obj.warnings.filter(is_deleted=False, resolved=False).count()
+        return sum(1 for w in obj.warnings.all() if not w.is_deleted and not w.resolved)
 
     def get_active_warning_types(self, obj):
-        return list(
-            obj.warnings.filter(is_deleted=False, resolved=False)
-            .values_list('warning_type', flat=True)
-            .distinct()
-        )
+        return list(set(
+            w.warning_type for w in obj.warnings.all() if not w.is_deleted and not w.resolved
+        ))
 
 
 class SubcontractorDetailSerializer(SubcontractorSerializer):

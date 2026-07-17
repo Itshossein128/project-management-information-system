@@ -46,10 +46,17 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
     inflation = rng.normal(params['inflation_rate_mean'], params['inflation_rate_std'], n).clip(0, None)
     delay = rng.normal(params['payment_delay_mean'], params['payment_delay_std'], n).clip(0, None)
     overrun = rng.normal(params['cost_overrun_mean'], params['cost_overrun_std'], n).clip(0.5, 2.0)
+    productivity = rng.normal(
+        params['productivity_factor_mean'], params['productivity_factor_std'], n
+    ).clip(0.3, 2.0)
 
-    adjusted_cost = eac * overrun * (1 + inflation)
+    adjusted_cost = eac * overrun * (1 + inflation) / productivity
     financing = revenue * 0.28 * delay / 365
     profit = revenue - adjusted_cost - financing
+
+    payment_ratio = np.clip(1.0 - delay / 365.0, 0.05, 1.0)
+    working_capital = np.maximum(adjusted_cost - revenue * payment_ratio, 0.0)
+    max_wc_p90 = float(np.percentile(working_capital, 90))
 
     p10 = float(np.percentile(profit, 10))
     p50 = float(np.percentile(profit, 50))
@@ -57,10 +64,15 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
     prob_loss = float(np.mean(profit < 0))
 
     sensitivity = []
-    base_profit = revenue - eac * params['cost_overrun_mean'] * (1 + params['inflation_rate_mean']) - revenue * 0.28 * params['payment_delay_mean'] / 365
+    base_profit = (
+        revenue
+        - eac * params['cost_overrun_mean'] * (1 + params['inflation_rate_mean']) / params['productivity_factor_mean']
+        - revenue * 0.28 * params['payment_delay_mean'] / 365
+    )
 
     def quick_profit(p):
-        c = eac * p['cost_overrun_mean'] * (1 + p['inflation_rate_mean'])
+        prod = max(float(p['productivity_factor_mean']), 0.3)
+        c = eac * p['cost_overrun_mean'] * (1 + p['inflation_rate_mean']) / prod
         f = revenue * 0.28 * p['payment_delay_mean'] / 365
         return revenue - c - f
 
@@ -68,6 +80,7 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
         ('تورم', 'inflation_rate_mean', 'inflation_rate_std'),
         ('تأخیر پرداخت', 'payment_delay_mean', 'payment_delay_std'),
         ('اضافه هزینه', 'cost_overrun_mean', 'cost_overrun_std'),
+        ('بهره‌وری', 'productivity_factor_mean', 'productivity_factor_std'),
     ]:
         low_param = {**params, mean_key: params[mean_key] - params[std_key]}
         high_param = {**params, mean_key: params[mean_key] + params[std_key]}
@@ -86,7 +99,7 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
         p50_profit=p50,
         p90_profit=p90,
         prob_of_loss=prob_loss,
-        max_working_capital=0,
+        max_working_capital=max_wc_p90,
         sensitivity_json=sensitivity,
         scenario_params_json=params,
     )
@@ -96,6 +109,7 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
         'p50': p50,
         'p90': p90,
         'prob_of_loss': prob_loss,
+        'max_working_capital': max_wc_p90,
         'sensitivity': sensitivity,
         'iterations': n,
         'base_profit': base_profit,

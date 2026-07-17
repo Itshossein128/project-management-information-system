@@ -1,10 +1,14 @@
 """
 Business logic for project meta. Template application and validation.
 """
+from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from projects.models import Project
+from projects.services import attach_creator_as_member
 from .models import TableDefinition, FieldDefinition, FieldType
+
+User = get_user_model()
 
 
 TEMPLATES = {
@@ -40,7 +44,13 @@ def get_available_templates():
 
 
 @transaction.atomic
-def create_project_from_template(*, name: str, project_code: str, template_id: str) -> Project:
+def create_project_from_template(
+    *,
+    name: str,
+    project_code: str,
+    template_id: str,
+    creator: User,
+) -> Project:
     if template_id not in TEMPLATES:
         raise ValueError(f'Unknown template: {template_id}. Available: {list(TEMPLATES.keys())}')
     if Project.objects.filter(project_code=project_code).exists():
@@ -72,6 +82,8 @@ def create_project_from_template(*, name: str, project_code: str, template_id: s
                 required=fdef.get('required', False),
                 target_table=target_table,
             )
+
+    attach_creator_as_member(project=project, creator=creator)
     return project
 
 

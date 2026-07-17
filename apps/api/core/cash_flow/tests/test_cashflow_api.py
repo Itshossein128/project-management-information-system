@@ -71,10 +71,11 @@ def test_monthly_summary(auth_client, project, cash_tx):
 
 def test_gap_analysis(auth_client, project, user):
     from cash_flow.models import CashFlowForecast
+    from datetime import date
 
     CashFlowForecast.objects.create(
         project=project,
-        month='2024-05-01',
+        month=date(2024, 5, 1),
         expected_inflow='100',
         expected_outflow='500',
         created_by=user,

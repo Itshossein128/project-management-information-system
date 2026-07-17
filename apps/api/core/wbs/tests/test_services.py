@@ -142,19 +142,20 @@ class TestWBSServicesExtended:
         total = _sibling_weight_sum(root1, 'weight_physical')
         assert total == Decimal('0.8')
 
-    def test_move_wbs_node_invalid(self, project):
+    def test_move_wbs_node_reparent_under_sibling(self, project):
+        """last_child / first_child map to sorted-child when node_order_by is set."""
         root, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
         child1, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.1', wbs_name='Child 1')
         child2, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.2', wbs_name='Child 2')
 
-        with pytest.raises(Exception):
-            move_wbs_node(child2, new_parent_id=child1.id, position='right')
-        with pytest.raises(Exception):
-            move_wbs_node(child2, new_parent_id=child1.id, position='left')
-        with pytest.raises(Exception):
-            move_wbs_node(child2, new_parent_id=child1.id, position='first_child')
-        with pytest.raises(Exception):
-            move_wbs_node(child2, new_parent_id=child1.id, position='last_child')
+        moved = move_wbs_node(child2, new_parent_id=child1.id, position='last_child')
+        assert moved.get_parent().id == child1.id
+        assert moved.wbs_code == '1.1.1'
+
+        # Move back under root via first_child alias
+        child2.refresh_from_db()
+        moved_back = move_wbs_node(child2, new_parent_id=root.id, position='first_child')
+        assert moved_back.get_parent().id == root.id
 
     def test_max_depth_exceeded(self, project):
         project.max_depth = 2

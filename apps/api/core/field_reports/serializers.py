@@ -168,6 +168,7 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
             'material_ref',
             'material_description',
             'quantity',
+            'unit_cost',
             'unit',
             'transaction_type',
             'activity_ref',

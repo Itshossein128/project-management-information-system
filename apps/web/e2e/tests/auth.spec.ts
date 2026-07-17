@@ -59,8 +59,8 @@ test.describe('Authentication Flow', () => {
 
     await page.click('button[type="submit"]');
 
-    // 4. Verify successful navigation
-    await page.waitForURL('**/home*', { timeout: 10000 });
-    await expect(page).toHaveURL(/.*\/home.*/);
+    // 4. Verify successful navigation (/home redirects to /projects)
+    await page.waitForURL('**/projects*', { timeout: 10000 });
+    await expect(page).toHaveURL(/\/projects\/?$/);
   });
 });

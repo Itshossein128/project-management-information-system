@@ -6,22 +6,25 @@ globs:
 
 # Backend Advisor — IPCAS Monorepo
 
-Django 4.2 + Django REST Framework API in `apps/api/`. PostgreSQL is required (`DATABASE_URL`). No SQLite fallback.
+Django 4.2 + Django REST Framework API in `apps/api/core/`. PostgreSQL is required (`DATABASE_URL`). No SQLite fallback.
 
 ## Stack
 
 - **Framework:** Django + DRF
 - **Database:** PostgreSQL (via `dj-database-url` + `psycopg`)
-- **Auth:** JWT (`djangorestframework-simplejwt`), Django `Group` for roles
+- **Auth:** JWT (`djangorestframework-simplejwt`), Django `Group` for global roles; project roles via `master_data`
 - **API docs:** drf-spectacular at `/api/schema/`, `/api/docs/`
 - **Excel:** pandas + openpyxl in services/views
+- **Infra (Sprint 1):** Traefik gateway, MinIO storage, RabbitMQ events, Redis cache, audit middleware
 
 ## Architecture
 
 - Monolithic API under `apps/api/core/`
-- Apps: `authentication`, `business_meta`, `inventory`, `config`
+- **Foundation:** `authentication`, `projects`, `master_data`, `permissions`, `audit`, `storage`, `events`
+- **Dynamic schema:** `business_meta` (`TableDefinition`, `FieldDefinition`, `DynamicTableRow` JSONField)
+- **Domain apps:** `wbs`, `schedule`, `field_reports`, `resources`, `cost_control`, `contracts`, `cash_flow`, `economic`, `risk`, `alerts`, `documents`, `hr`, `inventory` (legacy), etc.
 - Business logic in `services.py`; thin views/viewsets
-- Dynamic row data in `DynamicTableRow` (PostgreSQL `JSONField`)
+- Project tenancy: `/api/v1/projects/{uuid}/` + `projects.middleware.ProjectTenancyMiddleware`
 
 ## Code organization
 
@@ -37,9 +40,13 @@ Document endpoints with drf-spectacular: `summary`, `description`, `tags`, respo
 ## Security
 
 - JWT on protected endpoints
-- Permission classes in `authentication/permissions.py` and `business_meta/permissions.py`
+- Permission classes in `authentication/permissions.py`, `permissions/project.py`, `business_meta/permissions.py`
 - Validate inputs; use ORM/queryset filtering (no raw SQL from user strings)
+
+## Naming
+
+Blueprint **Project** maps to `projects.Project` and `/api/v1/projects/{uuid}/`. `Business` aliases in `business_meta` are deprecated.
 
 ## Blueprint reference
 
-Full target spec: `docs/IPCAS_Engineering_Blueprint.md`. Current code maps `Business` → blueprint `Project`. See `docs/ipcas-scope-map.md`.
+Full target spec: `docs/IPCAS_Engineering_Blueprint.md`. Status: `docs/ipcas-scope-map.md`.

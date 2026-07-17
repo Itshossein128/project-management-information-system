@@ -7,13 +7,6 @@ import { ROLES } from "./roles";
  */
 export const mainSidebarNavigation: NavigationItem[] = [
   {
-    label: "Home",
-    labelI18nKey: "nav.sidebarHome",
-    icon: "dashboard",
-    path: PATHS.HOME,
-    activeExact: true,
-  },
-  {
     label: "Projects",
     labelI18nKey: "nav.sidebarProjects",
     icon: "building",

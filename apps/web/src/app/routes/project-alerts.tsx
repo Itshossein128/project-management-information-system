@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Bell } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -12,7 +13,10 @@ import {
   type AlertLogEntry,
   type AlertRule,
 } from "@/app/lib/api/alerts";
+import { Checkbox, Field, Input, Select } from "@/components/form";
+import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -46,12 +50,22 @@ function AlertCenterContent() {
     cooldown_hours: 48,
   });
 
-  const { data: alerts, isLoading: loadingAlerts } = useQuery({
+  const {
+    data: alerts,
+    isLoading: loadingAlerts,
+    isError: alertsError,
+    refetch: refetchAlerts,
+  } = useQuery({
     queryKey: ["alerts", projectId],
     queryFn: () => fetchAlerts(projectId, { acknowledged: "false" }),
   });
 
-  const { data: rules, isLoading: loadingRules } = useQuery({
+  const {
+    data: rules,
+    isLoading: loadingRules,
+    isError: rulesError,
+    refetch: refetchRules,
+  } = useQuery({
     queryKey: ["alert-rules", projectId],
     queryFn: () => fetchAlertRules(projectId),
     enabled: tab === "rules" && canManage,
@@ -95,7 +109,12 @@ function AlertCenterContent() {
   });
 
   if (isLoading || loadingAlerts) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) {
+    return <EmptyState title="پروژه یافت نشد" />;
+  }
+  if (alertsError) {
+    return <QueryErrorState onRetry={() => void refetchAlerts()} />;
+  }
 
   const grouped = groupByType(alerts?.results ?? []);
 
@@ -124,7 +143,11 @@ function AlertCenterContent() {
             ) : null}
           </div>
           {grouped.size === 0 ? (
-            <p className="rounded-lg border p-8 text-center text-muted-foreground">هشدار فعالی وجود ندارد.</p>
+            <EmptyState
+              icon={<Bell />}
+              title="هشدار فعالی وجود ندارد"
+              description="وقتی آستانه‌ای رد شود، هشدارها اینجا نمایش داده می‌شوند."
+            />
           ) : (
             Array.from(grouped.entries()).map(([type, items]) => (
               <div key={type} className="rounded-lg border">
@@ -155,7 +178,21 @@ function AlertCenterContent() {
           <div className="flex justify-end">
             <Button variant="primary" onClick={() => setRuleDrawer(true)}>افزودن قانون هشدار</Button>
           </div>
-          {loadingRules ? <LoadingSkeleton rows={6} /> : (
+          {loadingRules ? (
+            <LoadingSkeleton rows={6} />
+          ) : rulesError ? (
+            <QueryErrorState onRetry={() => void refetchRules()} />
+          ) : (rules?.results?.length ?? 0) === 0 ? (
+            <EmptyState
+              title="قانونی تعریف نشده"
+              description="اولین قانون هشدار را اضافه کنید."
+              action={
+                <Button variant="primary" onClick={() => setRuleDrawer(true)}>
+                  افزودن قانون هشدار
+                </Button>
+              }
+            />
+          ) : (
             <div className="overflow-x-auto rounded-lg border">
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
@@ -175,14 +212,17 @@ function AlertCenterContent() {
                       <td className="px-3 py-2">{r.threshold_value ?? "—"}</td>
                       <td className="px-3 py-2">{r.notify_roles}</td>
                       <td className="px-3 py-2">
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={r.is_active}
-                            onChange={(e) => toggleRule.mutate({ id: r.id, is_active: e.target.checked })}
-                          />
-                          فعال
-                        </label>
+                        <Checkbox
+                          name={`rule-active-${r.id}`}
+                          label="فعال"
+                          checked={r.is_active}
+                          onChange={(e) => {
+                            const checked = Boolean(
+                              (e.target as unknown as { value: boolean }).value,
+                            );
+                            toggleRule.mutate({ id: r.id, is_active: checked });
+                          }}
+                        />
                       </td>
                       <td className="px-3 py-2">{r.is_system ? "—" : "قابل حذف"}</td>
                     </tr>
@@ -198,25 +238,83 @@ function AlertCenterContent() {
         isOpen={ruleDrawer}
         onClose={() => setRuleDrawer(false)}
         title="افزودن قانون هشدار"
-        footer={<Button variant="primary" onClick={() => createRule.mutate()} disabled={createRule.isPending}>ذخیره</Button>}
+        footer={
+          <Button
+            variant="primary"
+            loading={createRule.isPending}
+            onClick={() => createRule.mutate()}
+            disabled={createRule.isPending || !ruleForm.name.trim()}
+          >
+            ذخیره
+          </Button>
+        }
       >
-        <div className="space-y-3">
-          <select
-            className="w-full rounded border px-3 py-2 text-sm"
+        <div className="space-y-4">
+          <Select
+            name="alert_type"
+            label="نوع هشدار"
             value={ruleForm.alert_type}
             onChange={(e) => {
               const t = e.target.value;
               setRuleForm({ ...ruleForm, alert_type: t, name: ALERT_TYPE_LABELS[t] ?? t });
             }}
+            options={Object.entries(ALERT_TYPE_LABELS).map(([k, v]) => ({
+              value: k,
+              label: v,
+            }))}
+          />
+          <Field name="rule_name" label="نام" htmlFor="alert-rule-name">
+            {() => (
+              <Input
+                id="alert-rule-name"
+                name="rule_name"
+                value={ruleForm.name}
+                onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })}
+              />
+            )}
+          </Field>
+          <Field name="threshold_value" label="آستانه" htmlFor="alert-rule-threshold">
+            {() => (
+              <Input
+                id="alert-rule-threshold"
+                name="threshold_value"
+                type="number"
+                value={ruleForm.threshold_value}
+                onChange={(e) =>
+                  setRuleForm({ ...ruleForm, threshold_value: Number(e.target.value) })
+                }
+              />
+            )}
+          </Field>
+          <Field
+            name="notify_roles"
+            label="نقش‌های گیرنده"
+            helpText="با ویرگول جدا کنید"
+            htmlFor="alert-rule-roles"
           >
-            {Object.entries(ALERT_TYPE_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-          <input className="w-full rounded border px-3 py-2 text-sm" value={ruleForm.name} onChange={(e) => setRuleForm({ ...ruleForm, name: e.target.value })} />
-          <input type="number" className="w-full rounded border px-3 py-2 text-sm" value={ruleForm.threshold_value} onChange={(e) => setRuleForm({ ...ruleForm, threshold_value: Number(e.target.value) })} />
-          <input className="w-full rounded border px-3 py-2 text-sm" placeholder="نقش‌ها (comma-separated)" value={ruleForm.notify_roles} onChange={(e) => setRuleForm({ ...ruleForm, notify_roles: e.target.value })} />
-          <input type="number" className="w-full rounded border px-3 py-2 text-sm" value={ruleForm.cooldown_hours} onChange={(e) => setRuleForm({ ...ruleForm, cooldown_hours: Number(e.target.value) })} />
+            {() => (
+              <Input
+                id="alert-rule-roles"
+                name="notify_roles"
+                value={ruleForm.notify_roles}
+                onChange={(e) => setRuleForm({ ...ruleForm, notify_roles: e.target.value })}
+                placeholder="project_manager, site_engineer"
+              />
+            )}
+          </Field>
+          <Field name="cooldown_hours" label="فاصله تکرار (ساعت)" htmlFor="alert-rule-cooldown">
+            {() => (
+              <Input
+                id="alert-rule-cooldown"
+                name="cooldown_hours"
+                type="number"
+                value={ruleForm.cooldown_hours}
+                onChange={(e) =>
+                  setRuleForm({ ...ruleForm, cooldown_hours: Number(e.target.value) })
+                }
+              />
+            )}
+          </Field>
         </div>
       </Drawer>
     </div>

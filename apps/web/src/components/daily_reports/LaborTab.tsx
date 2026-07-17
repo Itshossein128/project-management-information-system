@@ -8,7 +8,7 @@ import {
   type LaborCategory,
   type LaborRow,
 } from "@/app/lib/api/daily-reports";
-import { isNetworkError, queueLaborBatch } from "@/app/lib/offlineWrite";
+import { isNetworkError, queueLaborBatch, type LaborBatchMeta } from "@/app/lib/offlineWrite";
 import { getCachedManpowerTitles } from "@/app/lib/offlineDB";
 import type { DailyTabProps } from "./ActivityTab";
 
@@ -70,6 +70,7 @@ function CategoryPanel({
   reportId,
   category,
   existing,
+  reportMeta,
   readOnly,
   onChanged,
 }: {
@@ -77,6 +78,7 @@ function CategoryPanel({
   reportId: string;
   category: LaborCategory;
   existing: LaborRow[];
+  reportMeta: LaborBatchMeta;
   readOnly?: boolean;
   onChanged: () => void;
 }) {
@@ -159,7 +161,7 @@ function CategoryPanel({
     setSaving(true);
     try {
       if (isNetworkError()) {
-        await queueLaborBatch(projectId, reportId, payload);
+        await queueLaborBatch(projectId, reportId, payload, reportMeta);
         if (!silent) toast.success("نیروی انسانی در صف آفلاین ذخیره شد");
       } else {
         await batchSaveLabor(projectId, reportId, payload);
@@ -301,6 +303,16 @@ export function LaborTab({ projectId, reportId, report, readOnly, onChanged }: D
   }
 
   const existing = report?.labor ?? [];
+  const reportMeta: LaborBatchMeta = {
+    report_date: report?.report_date,
+    shift: report?.shift,
+    weather_condition: report?.weather_condition,
+    site_status: report?.site_status,
+    general_notes: report?.general_notes,
+    temp_min: report?.temp_min,
+    temp_max: report?.temp_max,
+    existing_labor: existing,
+  };
 
   return (
     <div className="space-y-4">
@@ -326,6 +338,7 @@ export function LaborTab({ projectId, reportId, report, readOnly, onChanged }: D
         reportId={reportId}
         category={active}
         existing={existing}
+        reportMeta={reportMeta}
         readOnly={readOnly}
         onChanged={onChanged}
       />

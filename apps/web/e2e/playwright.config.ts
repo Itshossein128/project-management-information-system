@@ -20,6 +20,10 @@ export default defineConfig({
       name: "chromium-desktop",
       use: {
         ...devices["Desktop Chrome"],
+        // Local fallback when Playwright CDN is unreachable: PW_CHANNEL=chrome
+        ...(process.env.PW_CHANNEL
+          ? { channel: process.env.PW_CHANNEL as "chrome" | "chromium" | "msedge" }
+          : {}),
       },
     },
   ],
@@ -30,6 +34,11 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       cwd: "../../..",
+      env: {
+        ...process.env,
+        CELERY_TASK_ALWAYS_EAGER: "true",
+        AUDIT_LOG_ASYNC: "false",
+      },
     },
     {
       command: "pnpm --filter web dev --host 127.0.0.1 --port 5173",

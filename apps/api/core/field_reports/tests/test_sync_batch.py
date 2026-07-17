@@ -162,3 +162,98 @@ class TestSyncBatch:
         response = auth_client.post(sync_url, payload, format='json')
         assert response.data['summary']['errors'] == 1
         assert response.data['results'][0]['status'] == 'error'
+
+    def test_multi_shift_same_date_creates_independently(self, auth_client, sync_url, project, user):
+        DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-13',
+            shift='day',
+            status=ReportStatus.DRAFT,
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [
+            {
+                'local_id': 'night-1',
+                'report_date': '2024-09-13',
+                'shift': 'night',
+                'site_status': 'active',
+                'activities': [
+                    {'activity_description': 'کار شب', 'shift': 'shift_2'},
+                ],
+            },
+        ]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['summary']['created'] == 1
+        assert response.data['results'][0]['status'] == 'created'
+        assert DailyReport.objects.filter(
+            project=project, report_date='2024-09-13', is_deleted=False,
+        ).count() == 2
+
+    def test_draft_merge_applies_header_fields(self, auth_client, sync_url, project, user):
+        existing = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-14',
+            shift='full',
+            status=ReportStatus.DRAFT,
+            weather_condition='sunny',
+            site_status='active',
+            general_notes='قدیمی',
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [
+            {
+                'local_id': 'hdr-merge',
+                'report_date': '2024-09-14',
+                'shift': 'full',
+                'weather_condition': 'rainy',
+                'site_status': 'inactive',
+                'general_notes': 'به‌روز از آفلاین',
+                'temp_min': 8,
+                'temp_max': 18,
+            },
+        ]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['merged'] == 1
+        existing.refresh_from_db()
+        assert existing.weather_condition == 'rainy'
+        assert existing.site_status == 'inactive'
+        assert existing.general_notes == 'به‌روز از آفلاین'
+        assert float(existing.temp_min) == 8.0
+        assert float(existing.temp_max) == 18.0
+        assert existing.synced_from_offline is True
+
+    def test_conflict_includes_server_payload_and_fields(self, auth_client, sync_url, project, user):
+        DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-15',
+            shift='full',
+            status=ReportStatus.APPROVED,
+            weather_condition='sunny',
+            site_status='active',
+            general_notes='سرور',
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [
+            {
+                'local_id': 'conflict-snap',
+                'report_date': '2024-09-15',
+                'shift': 'full',
+                'weather_condition': 'cloudy',
+                'site_status': 'inactive',
+                'general_notes': 'کلاینت',
+            },
+        ]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['conflicts'] == 1
+        result = response.data['results'][0]
+        assert result['status'] == 'conflict'
+        assert result['server_payload'] is not None
+        assert result['server_payload']['weather_condition'] == 'sunny'
+        assert result['server_payload']['general_notes'] == 'سرور'
+        assert 'weather_condition' in result['conflict_fields']
+        assert 'site_status' in result['conflict_fields']
+        assert 'general_notes' in result['conflict_fields']

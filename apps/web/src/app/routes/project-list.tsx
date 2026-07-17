@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { DataTable } from "@/components/ui/data-table";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 
 function formatAmount(value: string | null) {
   if (!value) return "—";
@@ -22,7 +24,7 @@ function formatAmount(value: string | null) {
 export default function ProjectListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: fetchProjects,
   });
@@ -92,14 +94,18 @@ export default function ProjectListPage() {
         }
       />
 
-      {!isLoading && projects.length === 0 ? (
-        <div className='flex flex-col items-center gap-4 py-20 text-center text-muted-foreground'>
-          <FolderKanban className='size-12 opacity-40' />
-          <p>{t("project.empty")}</p>
-          <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant='primary'>{t("project.create")}</Button>
-          </Link>
-        </div>
+      {isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : !isLoading && projects.length === 0 ? (
+        <EmptyState
+          icon={<FolderKanban />}
+          title={t("project.empty")}
+          action={
+            <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
+              <Button variant='primary'>{t("project.create")}</Button>
+            </Link>
+          }
+        />
       ) : (
         <DataTable
           columns={columns}

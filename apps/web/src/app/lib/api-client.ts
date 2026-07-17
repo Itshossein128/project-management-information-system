@@ -101,10 +101,16 @@ export async function apiFetch(
   retried = false,
 ): Promise<Response> {
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
+  // FormData must not carry Content-Type: application/json — the browser sets multipart boundary.
+  const baseHeaders = isFormData
+    ? await getAuthHeadersNoContentType()
+    : await getAuthHeaders();
   const res = await fetch(url, {
     ...options,
     headers: {
-      ...(await getAuthHeaders()),
+      ...baseHeaders,
       ...(options.headers as Record<string, string>),
     },
   });

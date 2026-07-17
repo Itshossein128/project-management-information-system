@@ -35,13 +35,30 @@ class TestDailyReportModel:
         assert report.synced_from_offline is False
         assert report.is_deleted is False
 
-    def test_unique_active_report_per_date(self, project, user):
+    def test_unique_active_report_per_date_shift(self, project, user):
         DailyReport.objects.create(
-            project=project, report_date='2024-03-01', created_by=user, updated_by=user,
+            project=project,
+            report_date='2024-03-01',
+            shift=ReportShift.DAY,
+            created_by=user,
+            updated_by=user,
         )
+        # Same date, different shift is allowed (blueprint UNIQUE project+date+shift).
+        night = DailyReport.objects.create(
+            project=project,
+            report_date='2024-03-01',
+            shift=ReportShift.NIGHT,
+            created_by=user,
+            updated_by=user,
+        )
+        assert night.id is not None
         with pytest.raises(IntegrityError):
             DailyReport.objects.create(
-                project=project, report_date='2024-03-01', created_by=user, updated_by=user,
+                project=project,
+                report_date='2024-03-01',
+                shift=ReportShift.DAY,
+                created_by=user,
+                updated_by=user,
             )
 
 

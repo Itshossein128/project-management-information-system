@@ -92,6 +92,7 @@ export interface ConflictEntry {
   local_payload: unknown;
   server_payload: unknown;
   conflict_fields: string[];
+  conflict_reason?: string | null;
   status: ConflictStatus;
   created_at: string;
 }

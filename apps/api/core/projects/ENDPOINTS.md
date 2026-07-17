@@ -2,7 +2,7 @@
 
 This module handles the core project management functionality within IPCAS, including projects, project members, roles, templates, and dynamic data tables.
 
-## Base URL: `/api/projects/` (or equivalent, see `urls.py`)
+## Base URL: `/api/v1/projects/`
 
 ## Endpoints
 

@@ -4,7 +4,7 @@
  * ROLES: ANY
  * DECISION TREE:
  *  - Provide credentials
- *    - Valid -> Store token -> Redirect to /home
+ *    - Valid -> Store token -> Redirect to /home -> /projects
  *    - Invalid -> Show error
  *    - Unknown mobile -> Show error
  *  - RTL layout validation
@@ -32,12 +32,12 @@ test.describe("Auth — login", () => {
 
   test("logs in via UI with valid credentials", async ({ page }) => {
     await loginViaUI(page, E2E_USERS.admin);
-    await expect(page).toHaveURL(/\/home/);
+    await expect(page).toHaveURL(/\/projects\/?$/);
   });
 
-  test("logs in via API helper and reaches home", async ({ page }) => {
+  test("logs in via API helper and /home redirects to projects", async ({ page }) => {
     await loginAs(page, E2E_USERS.admin);
     await page.goto("/home");
-    await expect(page).toHaveURL(/\/home/);
+    await expect(page).toHaveURL(/\/projects\/?$/);
   });
 });

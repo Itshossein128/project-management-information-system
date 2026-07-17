@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import Group
 from rest_framework import status
 
 from master_data.models import MemberStatus, ProjectMember, Role
@@ -49,6 +50,39 @@ class TestProjectCreate:
             user=user,
             status=MemberStatus.ACTIVE,
         ).exists()
+
+
+@pytest.mark.django_db
+class TestProjectFromTemplate:
+    def test_from_template_attaches_creator_as_member(self, api_client, user):
+        Group.objects.get_or_create(name='business-setup')
+        user.groups.add(Group.objects.get(name='business-setup'))
+        api_client.force_authenticate(user=user)
+
+        response = api_client.post(
+            '/api/v1/projects/from_template/',
+            {
+                'name': 'Warehouse From Template',
+                'slug': 'WH-TMPL-001',
+                'template': 'warehouse',
+            },
+            format='json',
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        project_id = response.data['project_id']
+        assert ProjectMember.objects.filter(
+            project_id=project_id,
+            user=user,
+            status=MemberStatus.ACTIVE,
+        ).exists()
+
+        list_response = api_client.get('/api/v1/projects/')
+        assert list_response.status_code == status.HTTP_200_OK
+        codes = [p['project_code'] for p in list_response.data['results']]
+        assert 'WH-TMPL-001' in codes
+
+        detail = api_client.get(f'/api/v1/projects/{project_id}/')
+        assert detail.status_code == status.HTTP_200_OK
 
 
 @pytest.mark.django_db

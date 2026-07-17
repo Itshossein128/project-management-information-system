@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 function asRecord(value: unknown): Record<string, unknown> {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -45,7 +46,15 @@ export function ConflictMergeEditor({
   const conflictSet = useMemo(() => new Set(conflictFields), [conflictFields]);
 
   const allKeys = useMemo(() => {
-    const keys = new Set([...Object.keys(local), ...Object.keys(server)]);
+    const keys = new Set(
+      [...Object.keys(local), ...Object.keys(server)].filter((k) => {
+        const v = local[k] ?? server[k];
+        if (Array.isArray(v)) return false;
+        if (v !== null && typeof v === "object") return false;
+        if (k.endsWith("_label") || k.endsWith("_name")) return false;
+        return true;
+      }),
+    );
     const ordered = [...conflictFields.filter((k) => keys.has(k))];
     for (const k of keys) {
       if (!conflictSet.has(k)) ordered.push(k);
@@ -137,9 +146,11 @@ export function ConflictMergeEditor({
           type="button"
           data-testid="conflict-merge-save-btn"
           disabled={busy}
+          aria-busy={busy}
           onClick={() => onSave(merged)}
-          className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
+          {busy && <Loader2 className="size-4 animate-spin" />}
           ذخیره نسخه ادغام شده
         </button>
       </div>

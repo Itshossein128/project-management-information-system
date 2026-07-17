@@ -7,11 +7,11 @@ import {
 export async function loader({ request }: { request: Request }) {
   // Client: use localStorage
   if (typeof window !== "undefined") {
-    if (hasStoredSession()) throw redirect("/home");
+    if (hasStoredSession()) throw redirect("/projects");
     throw redirect("/login");
   }
   // Server: use cookie so SSR respects auth
-  if (getAccessTokenFromRequest(request)) throw redirect("/home");
+  if (getAccessTokenFromRequest(request)) throw redirect("/projects");
   throw redirect("/login");
 }
 

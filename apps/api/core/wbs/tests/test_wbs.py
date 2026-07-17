@@ -112,6 +112,30 @@ class TestWBSTree:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    def test_member_without_view_wbs_cannot_list(self, api_client, project, db):
+        from django.contrib.auth import get_user_model
+        from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
+
+        User = get_user_model()
+        restricted = User.objects.create_user(
+            username='procuser',
+            mobile='+989121234570',
+            full_name='Proc User',
+            password='testpass123',
+        )
+        role = Role.objects.get(role_name='procurement_officer')
+        member = ProjectMember.objects.create(
+            project=project,
+            user=restricted,
+            status=MemberStatus.ACTIVE,
+        )
+        ProjectMemberRole.objects.create(member=member, role=role)
+        create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
+
+        api_client.force_authenticate(user=restricted)
+        response = api_client.get(f'/api/v1/projects/{project.id}/wbs/')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
 
 from unittest.mock import patch
 from wbs.services import WBSValidationError

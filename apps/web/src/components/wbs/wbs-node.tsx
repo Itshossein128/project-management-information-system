@@ -92,10 +92,11 @@ export function WBSNodeRow({
   const weightWarning = hasChildren && Math.abs(childrenWeightSum - 1) > 0.01;
 
   return (
-    <div>
+    <div data-testid={`wbs-node-${node.wbs_code}`} data-wbs-id={node.wbs_id}>
       <div
         className="group flex flex-wrap items-center gap-2 border-b border-border/50 py-2 pe-2"
         style={{ paddingInlineStart: indent + 8 }}
+        data-testid={`wbs-row-${node.wbs_code}`}
         draggable={canEdit}
         onDragStart={(e) => {
           e.dataTransfer.setData("text/wbs-id", node.wbs_id);
@@ -113,7 +114,7 @@ export function WBSNodeRow({
           if (!draggedId || draggedId === node.wbs_id) return;
           void moveWBSNode(projectId, draggedId, {
             new_parent_id: node.wbs_id,
-            position: "last_child",
+            position: "sorted_child",
           })
             .then(() => invalidate())
             .catch((err: Error) => toast.error(err.message));

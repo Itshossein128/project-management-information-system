@@ -85,3 +85,46 @@ Set `CELERY_TASK_ALWAYS_EAGER=true` in `.env` so Monte Carlo runs inline. Snapsh
 - **Costs:** `cost_control.ActualCost` ledger
 - **Inflation:** `InflationIndex` + optional `CostCategoryInflationMapping` per project
 - **Financing:** IPC planned vs actual payment dates
+
+## Sprint 12 endpoints
+
+### 7. Economic forecast (EAC + CPI)
+
+*   **URL:** `/economic/forecast/`
+*   **Method:** `GET`
+*   **Query:** `as_of` — optional Jalali or Gregorian date (defaults to today).
+*   **Response:** EVM metrics plus `eac_inflation_adjusted`, `inflation_factor`, `cpi`, `bac`, etc.
+
+### 8. Working capital curve
+
+*   **URL:** `/economic/working-capital/`
+*   **Method:** `GET`
+*   **Response:** Monthly `points` with cumulative cost/payment and `peak_working_capital`.
+
+### 9. Real (inflation-adjusted) cash flow
+
+*   **URL:** `/economic/cash-flow-real/`
+*   **Method:** `GET`
+*   **Query:** `as_of` — optional cutoff date.
+*   **Response:** `as_of_date` and monthly `points` (`nominal_outflow`, `real_outflow`, `inflow`, net fields).
+
+### 10. Cost category inflation mappings
+
+*   **URL:** `/economic/inflation-mappings/`
+*   **Method:** `GET` — global seed mappings plus project overrides (`is_global` on each row).
+*   **Method:** `POST` — create project mapping (`edit_cashflow`); body: `cost_category`, `index_name`, `weight`.
+
+*   **URL:** `/economic/inflation-mappings/{mapping_id}/`
+*   **Method:** `DELETE` — remove project-owned mapping only (`edit_cashflow`).
+
+### 11. Sensitivity tornado (latest simulation)
+
+*   **URL:** `/economic/sensitivity/`
+*   **Method:** `GET`
+*   **Response:** `{ "sensitivity": [ { variable, low_profit, high_profit, impact }, ... ] }` from latest `SimulationResult`.
+
+### Monte Carlo updates (Sprint 12)
+
+- Scenario params include `productivity_factor_mean` / `productivity_factor_std` (affects cost via EAC overrun path).
+- `max_working_capital` on stored results is the P90 of per-iteration working capital (`adjusted cost − delayed collections`).
+- `GET .../simulate/latest/` serializer adds `p10`, `p50`, `p90` aliases alongside `p10_profit`, etc.

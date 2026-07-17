@@ -24,11 +24,13 @@ import { usePermission } from "@/app/contexts/project-context";
 import { ActivityDrawer } from "@/components/activities/activity-drawer";
 import { AddRelationModal } from "@/components/activities/add-relation-modal";
 import { NetworkDiagramView } from "@/components/activities/network-diagram-view";
+import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Modal } from "@/components/overlay/modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
-import { Input } from "@/components/form";
+import { Checkbox, Field, Input, Select } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/app/lib/utils";
 
@@ -78,7 +80,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     is_overdue: overdueOnly || undefined,
   };
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["activities", projectId, listParams],
     queryFn: () => fetchActivities(projectId, listParams),
     enabled: viewMode === "table",
@@ -147,57 +149,98 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end gap-3">
           {viewMode === "table" ? (
             <>
-              <div className="relative">
-                <Search className="absolute start-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  className="ps-8 w-48"
-                  placeholder="جستجو…"
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                />
-              </div>
-              <select
-                className="rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-                value={wbsFilter}
-                onChange={(e) => { setWbsFilter(e.target.value); setPage(1); }}
-              >
-                <option value="">همه WBS</option>
-                {wbsFlat.map((n) => (
-                  <option key={n.wbs_id} value={n.wbs_id}>{n.wbs_code} — {n.wbs_name}</option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value as ActivityStatus | ""); setPage(1); }}
-              >
-                <option value="">همه وضعیت‌ها</option>
-                {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>{v.label}</option>
-                ))}
-              </select>
-              <select
-                className="rounded-md border border-border bg-background px-2 py-1.5 text-sm"
-                value={responsibleFilter}
-                onChange={(e) => { setResponsibleFilter(e.target.value); setPage(1); }}
-              >
-                <option value="">همه مسئولین</option>
-                {members.filter((m) => m.user_id).map((m) => (
-                  <option key={m.user_id!} value={m.user_id!}>{m.full_name}</option>
-                ))}
-              </select>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={overdueOnly}
-                  onChange={(e) => { setOverdueOnly(e.target.checked); setPage(1); }}
-                />
-                معوق
-              </label>
+              <Field name="activity_search" label="جستجو" htmlFor="activity-search">
+                {() => (
+                  <div className="relative">
+                    <Search className="absolute start-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="activity-search"
+                      className="w-48 ps-8"
+                      placeholder="جستجو…"
+                      value={search}
+                      onChange={(e) => {
+                        setSearch(e.target.value);
+                        setPage(1);
+                      }}
+                    />
+                  </div>
+                )}
+              </Field>
+              <Select
+                name="wbs_filter"
+                label="WBS"
+                value={wbsFilter || "all"}
+                onChange={(e) => {
+                  setWbsFilter(e.target.value === "all" ? "" : e.target.value);
+                  setPage(1);
+                }}
+                options={[
+                  { value: "all", label: "همه WBS" },
+                  ...wbsFlat.map((n) => ({
+                    value: n.wbs_id,
+                    label: `${n.wbs_code} — ${n.wbs_name}`,
+                  })),
+                ]}
+                fieldClassName="min-w-[10rem]"
+              />
+              <Select
+                name="status_filter"
+                label="وضعیت"
+                value={statusFilter || "all"}
+                onChange={(e) => {
+                  setStatusFilter(
+                    e.target.value === "all"
+                      ? ""
+                      : (e.target.value as ActivityStatus),
+                  );
+                  setPage(1);
+                }}
+                options={[
+                  { value: "all", label: "همه وضعیت‌ها" },
+                  ...Object.entries(STATUS_LABELS).map(([k, v]) => ({
+                    value: k,
+                    label: v.label,
+                  })),
+                ]}
+                fieldClassName="min-w-[9rem]"
+              />
+              <Select
+                name="responsible_filter"
+                label="مسئول"
+                value={responsibleFilter || "all"}
+                onChange={(e) => {
+                  setResponsibleFilter(
+                    e.target.value === "all" ? "" : e.target.value,
+                  );
+                  setPage(1);
+                }}
+                options={[
+                  { value: "all", label: "همه مسئولین" },
+                  ...members
+                    .filter((m) => m.user_id)
+                    .map((m) => ({
+                      value: m.user_id!,
+                      label: m.full_name,
+                    })),
+                ]}
+                fieldClassName="min-w-[9rem]"
+              />
+              <Checkbox
+                name="overdue_only"
+                label="فقط معوق"
+                checked={overdueOnly}
+                onChange={(e) => {
+                  setOverdueOnly(
+                    Boolean((e.target as unknown as { value: boolean }).value),
+                  );
+                  setPage(1);
+                }}
+                fieldClassName="pb-2"
+              />
             </>
           ) : null}
         </div>
@@ -235,10 +278,20 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
         <NetworkDiagramView projectId={projectId} onNodeClick={(id) => void openFromNetwork(id)} />
       ) : isLoading ? (
         <LoadingSkeleton rows={8} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : activities.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
-          فعالیتی یافت نشد.
-        </div>
+        <EmptyState
+          title="فعالیتی یافت نشد"
+          description="فعالیت جدیدی اضافه کنید یا فیلترها را تغییر دهید."
+          action={
+            canEdit ? (
+              <Button variant="primary" onClick={openCreate}>
+                افزودن فعالیت
+              </Button>
+            ) : null
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full min-w-[960px] text-sm">

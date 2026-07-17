@@ -64,7 +64,7 @@ class ItemViewSet(viewsets.ModelViewSet):
             file_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename=items.xlsx'
+        response["Content-Disposition"] = "attachment; filename=\"items.xlsx\""
         return response
 
     @extend_schema(

@@ -20,6 +20,8 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityTab } from "@/components/daily_reports/ActivityTab";
 import { ApprovalStatusBar } from "@/components/daily_reports/ApprovalStatusBar";
 import { ConcreteTab } from "@/components/daily_reports/ConcreteTab";
@@ -97,15 +99,51 @@ export default function DailyReportViewPage() {
     }
   };
 
-  if (reportQuery.isLoading || !report) {
+  if (reportQuery.isLoading) {
     return (
-      <main className='mx-auto  px-4 py-6'>
+      <main className='page-main page-shell mx-auto px-4 py-6'>
         <LoadingSkeleton rows={8} />
       </main>
     );
   }
 
   const base = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}`;
+
+  if (reportQuery.isError) {
+    return (
+      <main className='page-main page-shell mx-auto px-4 py-6'>
+        <Breadcrumb
+          items={[
+            { label: "گزارش‌های روزانه", href: base },
+            { label: "خطا" },
+          ]}
+        />
+        <QueryErrorState onRetry={() => void reportQuery.refetch()} />
+      </main>
+    );
+  }
+
+  if (!report) {
+    return (
+      <main className='page-main page-shell mx-auto px-4 py-6'>
+        <Breadcrumb
+          items={[
+            { label: "گزارش‌های روزانه", href: base },
+            { label: "یافت نشد" },
+          ]}
+        />
+        <EmptyState
+          title='گزارش یافت نشد'
+          action={
+            <Link to={base} className='text-sm text-primary underline'>
+              بازگشت به فهرست
+            </Link>
+          }
+        />
+      </main>
+    );
+  }
+
   const tabProps = {
     projectId,
     reportId,

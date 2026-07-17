@@ -40,6 +40,7 @@ export function NotificationBell() {
         title={t("notifications.title")}
         aria-expanded={open}
         aria-haspopup="dialog"
+        aria-controls={open ? "notification-panel" : undefined}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",

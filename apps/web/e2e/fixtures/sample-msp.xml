@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Tasks>
+    <Task>
+      <UID>1</UID>
+      <ID>1</ID>
+      <Name>Phase 1</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <OutlineNumber>1</OutlineNumber>
+      <WBS>1</WBS>
+      <Summary>1</Summary>
+    </Task>
+    <Task>
+      <UID>2</UID>
+      <ID>2</ID>
+      <Name>Sub phase</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <OutlineNumber>1.1</OutlineNumber>
+      <WBS>1.1</WBS>
+      <Summary>1</Summary>
+    </Task>
+    <Task>
+      <UID>3</UID>
+      <ID>3</ID>
+      <Name>Activity A</Name>
+      <OutlineLevel>3</OutlineLevel>
+      <OutlineNumber>1.1.1</OutlineNumber>
+      <WBS>1.1.1</WBS>
+      <Summary>0</Summary>
+      <Duration>PT40H0M0S</Duration>
+      <PercentComplete>0</PercentComplete>
+      <Start>2026-01-01T08:00:00</Start>
+      <Finish>2026-01-06T17:00:00</Finish>
+    </Task>
+  </Tasks>
+</Project>
