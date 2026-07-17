@@ -31,15 +31,23 @@ class ProjectScopedViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(project_id=self.get_project_id())
 
+    def post_save(self, instance):
+        pass
+
+    def post_delete(self, instance):
+        pass
+
     def perform_create(self, serializer):
         serializer.save(
             project_id=self.get_project_id(),
             created_by=self.request.user,
             updated_by=self.request.user,
         )
+        self.post_save(serializer.instance)
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
+        self.post_save(serializer.instance)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -47,4 +55,5 @@ class ProjectScopedViewSet(viewsets.ModelViewSet):
         instance.deleted_at = timezone.now()
         instance.updated_by = request.user
         instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        self.post_delete(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
