@@ -36,6 +36,11 @@ def _serialize_tree(project_id):
     create=extend_schema(summary='Create WBS node', tags=['WBS']),
 )
 class WBSViewSet(viewsets.ViewSet):
+    """
+    Handles API requests for managing the Work Breakdown Structure (WBS) tree.
+    Provides endpoints to list the tree, view it as a flat list, create, update,
+    delete, and move WBS nodes within a specific project.
+    """
     lookup_url_kwarg = 'wbs_id'
 
     def get_permissions(self):
