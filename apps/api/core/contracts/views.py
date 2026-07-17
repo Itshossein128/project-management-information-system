@@ -625,5 +625,5 @@ class IPCPdfView(APIView):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
         pdf_bytes = render_ipc_pdf(ipc)
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="ipc-{ipc.ipc_number}.pdf"'
+        response["Content-Disposition"] = f"attachment; filename=\"ipc-{ipc.ipc_number}.pdf\""
         return response
