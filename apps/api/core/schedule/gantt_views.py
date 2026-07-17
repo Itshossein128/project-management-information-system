@@ -39,5 +39,5 @@ class GanttPdfView(APIView):
         data = get_gantt_data(project_pk, baseline_id)
         pdf_bytes = render_gantt_pdf(project_pk, data)
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="gantt.pdf"'
+        response["Content-Disposition"] = "attachment; filename=\"gantt.pdf\""
         return response

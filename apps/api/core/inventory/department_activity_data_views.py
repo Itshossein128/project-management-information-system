@@ -93,7 +93,7 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             xlsx_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
         return response
 
 
@@ -169,7 +169,7 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
         )
         filename = f'{department}_{self.period}_report_{date_from}_{date_to}.pdf'
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
         return response
 
 
