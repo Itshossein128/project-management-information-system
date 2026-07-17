@@ -1,12 +1,12 @@
 # IPCAS E2E Coverage Map
-Last updated: 2025-07-10
+Last updated: 2025-07-15
 
 ## Coverage by Module
 
 | Module | Total Branches | Tested | Coverage % | Last Updated |
 |--------|---------------|--------|------------|--------------|
 | Auth | 8 | 5 | 62.5% | 2025-07-10 |
-| Projects | 15 | 0 | 0% | 2025-07-09 |
+| Projects | 15 | 5 | 33.3% | 2025-07-15 |
 | WBS Editor | 24 | 0 | 0% | 2025-07-09 |
 | Members & ACL | 16 | 0 | 0% | 2025-07-09 |
 | Activities | 20 | 0 | 0% | 2025-07-09 |
