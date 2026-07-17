@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from common.jalali import parse_jalali_or_gregorian
 from common.models import AuditSoftDeleteModel
 
 
@@ -94,5 +95,12 @@ class CashFlowForecast(AuditSoftDeleteModel):
 
     def save(self, *args, **kwargs):
         if self.month:
-            self.month = self.month.replace(day=1)
+            if isinstance(self.month, str):
+                parsed = parse_jalali_or_gregorian(self.month)
+                if parsed:
+                    self.month = parsed
+            try:
+                self.month = self.month.replace(day=1)
+            except TypeError:
+                pass
         super().save(*args, **kwargs)
