@@ -2,8 +2,14 @@ import { useNavigate } from "react-router";
 import { Check, CheckCheck } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
-import type { AppNotification, NotificationType } from "@/app/lib/api/notifications";
-import { useNotificationActions, useNotificationList } from "@/app/hooks/useNotifications";
+import type {
+  AppNotification,
+  NotificationType,
+} from "@/app/lib/api/notifications";
+import {
+  useNotificationActions,
+  useNotificationList,
+} from "@/app/hooks/useNotifications";
 
 const TYPE_ACCENT: Record<NotificationType, string> = {
   report_submitted: "bg-amber-500",
@@ -12,7 +18,13 @@ const TYPE_ACCENT: Record<NotificationType, string> = {
   generic: "bg-sky-500",
 };
 
-export function NotificationPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function NotificationPanel({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const navigate = useNavigate();
   const { data, isLoading } = useNotificationList(open);
   const { markRead, markAllRead } = useNotificationActions();
@@ -42,9 +54,13 @@ export function NotificationPanel({ open, onClose }: { open: boolean; onClose: (
 
       <div className="max-h-96 overflow-y-auto">
         {isLoading ? (
-          <p className="px-4 py-6 text-center text-sm text-muted-foreground">در حال بارگذاری...</p>
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+            در حال بارگذاری...
+          </p>
         ) : !data || data.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-muted-foreground">اعلانی وجود ندارد</p>
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+            اعلانی وجود ندارد
+          </p>
         ) : (
           <ul className="divide-y divide-border">
             {data.map((n) => (
@@ -75,13 +91,18 @@ export function NotificationPanel({ open, onClose }: { open: boolean; onClose: (
                         {n.title}
                       </span>
                       {!n.is_read ? (
-                        <Check
-                          className="size-3.5 shrink-0 text-muted-foreground hover:text-primary"
+                        <button
+                          type="button"
+                          className="rounded-sm text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                          aria-label="خواندن"
+                          title="خواندن"
                           onClick={(e) => {
                             e.stopPropagation();
                             markRead.mutate(n.id);
                           }}
-                        />
+                        >
+                          <Check className="size-3.5 shrink-0" />
+                        </button>
                       ) : null}
                     </span>
                     {n.message ? (
