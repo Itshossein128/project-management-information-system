@@ -14,6 +14,7 @@ from drf_spectacular.utils import extend_schema
 
 from common.jalali import parse_jalali_or_gregorian
 from common.serializers import JalaliDateField
+from common.viewsets import ProjectScopedViewSet
 from cost_control.models import ActualCost, Budget, CostPool
 from cost_control.serializers import (
     ActualCostSerializer,
@@ -44,48 +45,15 @@ def _invalidate_cost_caches(project_id):
         pass
 
 
-class CostScopedViewSet(viewsets.ModelViewSet):
-    lookup_url_kwarg = 'pk'
+class CostScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+    def post_save(self, instance):
+        _invalidate_cost_caches(self.kwargs['project_pk'])
 
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
-
-    def get_queryset(self):
-        return self.queryset.filter(project_id=self.get_project_id())
-
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
-        _invalidate_cost_caches(self.get_project_id())
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
-        _invalidate_cost_caches(self.get_project_id())
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        _invalidate_cost_caches(self.get_project_id())
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def post_delete(self, instance):
+        _invalidate_cost_caches(self.kwargs['project_pk'])
 
 
 class BudgetViewSet(CostScopedViewSet):
