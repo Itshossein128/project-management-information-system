@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 
 import boto3
 from botocore.config import Config
@@ -15,6 +16,8 @@ from projects.permissions import IsProjectMember
 from storage.permissions import CanAccessStoredFile
 from storage.services import generate_upload_url, confirm_upload, generate_download_url
 
+logger = logging.getLogger(__name__)
+
 
 class UploadUrlView(APIView):
     permission_classes = [IsAuthenticated, IsProjectMember]
@@ -28,7 +31,8 @@ class UploadUrlView(APIView):
             result = generate_upload_url(project_pk, request.user, raw_filename, content_type)
             return Response(result)
         except ValueError as exc:
-            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception('Failed to generate upload URL')
+            return Response({'error': 'Invalid request.'}, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as exc:
             return Response({'detail': exc.detail}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -46,7 +50,8 @@ class ConfirmUploadView(APIView):
         except ValueError as exc:
             if str(exc) == 'Not found.':
                 return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception('Failed to confirm file upload')
+            return Response({'detail': 'Invalid request.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DownloadUrlView(APIView):
@@ -60,4 +65,5 @@ class DownloadUrlView(APIView):
         except ValueError as exc:
             if str(exc) == 'Not found.':
                 return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.exception('Failed to generate download URL')
+            return Response({'detail': 'Invalid request.'}, status=status.HTTP_400_BAD_REQUEST)

@@ -11,3 +11,8 @@
 **Vulnerability:** The document upload service was passing unsanitized client-provided filenames directly to AWS S3 key construction in `apps/api/core/documents/services/upload_service.py`. While the core prefix included a UUID mitigating direct overwrites, extracting paths or persisting malicious names in the database posed a risk for downstream consumers.
 **Learning:** Overly aggressive validation (like raising an error if `..` is present) can break valid filenames (e.g. `draft..v1.pdf`). It is safer to rely on `os.path.basename` to extract the file correctly while discarding the path.
 **Prevention:** Always sanitize `file_obj.name` using `os.path.basename` (after converting backslashes if necessary for cross-platform robustness) before using or returning it in the upload pipeline.
+
+## 2024-05-24 - Fail Securely in HTTP Responses
+**Vulnerability:** Found `ValueError` exceptions being cast to string and returned directly in 400 Bad Request responses within `apps/api/core/storage/views.py`.
+**Learning:** Returning `str(exc)` can leak sensitive internal information, stack traces, or validation details that an attacker could use to probe the system. This violates the principle of failing securely.
+**Prevention:** Always catch exceptions, log the full details server-side using `logger.exception(...)` so debugging information is preserved internally, and return generic, safe messages like `'Invalid request.'` to the client. Keep any specific safe messages (like `'Not found.'` mapped to 404) explicitly checked, rather than relying on dynamic error strings.
