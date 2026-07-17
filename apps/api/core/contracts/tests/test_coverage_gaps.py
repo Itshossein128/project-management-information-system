@@ -4,7 +4,8 @@ from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 from contracts.models import ContractItem, IPCDeduction
-from contracts.views import _invalidate, _resolve_fk_fields
+from contracts.services.contract_service import _resolve_fk_fields
+from contracts.services.ipc_service import _invalidate
 
 BASE = '/api/v1/projects/{project_id}'
 
@@ -100,7 +101,7 @@ def test_pay_invalidates_cache(finance_client, project, ipc_with_item):
     ipc_with_item.net_amount = Decimal('1000')
     ipc_with_item.save()
     url = f'{BASE.format(project_id=project.id)}/ipcs/{ipc_with_item.id}/pay/'
-    with patch('contracts.views._invalidate') as mock_inv:
+    with patch('contracts.services.ipc_service._invalidate') as mock_inv:
         resp = finance_client.post(url)
     assert resp.status_code == 200
     mock_inv.assert_called_once()

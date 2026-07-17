@@ -2,12 +2,101 @@
 
 from __future__ import annotations
 
+import logging
+from datetime import date
 from decimal import Decimal
 
 from django.db.models import Sum
+from django.utils import timezone
 
-from contracts.models import ContractItem, IPC, IPCDeduction, IPCItem, IPCStatus
+from contracts.models import ContractType, ContractItem, IPC, IPCDeduction, IPCItem, IPCStatus
+from cash_flow.models import CashTransaction, CashTransactionType, InflowCategory, OutflowCategory
 from schedule.models import ActivityProgress
+
+logger = logging.getLogger(__name__)
+
+MANUAL_DEDUCTION_TYPES = frozenset({'material_price_diff', 'other'})
+
+
+def _invalidate(project_id):
+    try:
+        from common.cache_utils import invalidate_project_caches
+        invalidate_project_caches(project_id)
+    except Exception:
+        pass
+
+
+def _publish_ipc_submitted(ipc):
+    try:
+        from events.publisher import EventPublisher
+
+        EventPublisher().publish(
+            'ipc.submitted',
+            {
+                'ipc_id': str(ipc.id),
+                'ipc_number': ipc.ipc_number,
+                'contract_id': str(ipc.contract_id),
+                'gross_amount': str(ipc.gross_amount or 0),
+            },
+            project_id=str(ipc.project_id),
+        )
+    except Exception:  # noqa: BLE001 - event bus optional in dev/tests
+        logger.warning('Could not publish ipc.submitted for %s', ipc.id, exc_info=True)
+
+
+def _ipc_cash_transaction_defaults(ipc, user, payment_date):
+    contract = ipc.contract
+    if contract.contract_type == ContractType.MAIN:
+        tx_type = CashTransactionType.IN
+        category = InflowCategory.IPC_RECEIPT
+    elif contract.contract_type == ContractType.SUBCONTRACT:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.SUBCONTRACTOR_PAYMENT
+    elif contract.contract_type == ContractType.PURCHASE:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.SUPPLIER_PAYMENT
+    elif contract.contract_type == ContractType.EQUIPMENT_RENTAL:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.EQUIPMENT_RENTAL
+    else:
+        tx_type = CashTransactionType.OUT
+        category = OutflowCategory.OTHER_EXPENSE
+
+    return {
+        'project_id': ipc.project_id,
+        'tx_date': payment_date,
+        'tx_type': tx_type,
+        'category': category,
+        'amount': ipc.net_amount or ipc.gross_amount,
+        'description': (
+            f'صدور موقت شماره {ipc.ipc_number} — '
+            f'قرارداد {contract.contract_number or contract.counterparty}'
+        ),
+        'contract': contract,
+        'counterparty': contract.counterparty,
+        'is_forecast': False,
+        'actual_date': payment_date,
+        'updated_by': user,
+        'is_deleted': False,
+        'deleted_at': None,
+    }
+
+
+def _upsert_ipc_cash_transaction(ipc, user, payment_date=None):
+    payment_date = payment_date or date.today()
+    defaults = _ipc_cash_transaction_defaults(ipc, user, payment_date)
+    existing = CashTransaction.objects.filter(ipc=ipc, is_deleted=False).first()
+    if existing:
+        for field, value in defaults.items():
+            setattr(existing, field, value)
+        existing.save()
+    else:
+        CashTransaction.objects.create(
+            ipc=ipc,
+            created_by=user,
+            **defaults,
+        )
+    _invalidate(ipc.project_id)
 
 
 def auto_populate_ipc(ipc_id):
@@ -173,3 +262,106 @@ def next_change_number(contract_id) -> int:
 
     last = ChangeOrder.objects.filter(contract_id=contract_id, is_deleted=False).order_by('-change_number').first()
     return (last.change_number + 1) if last else 1
+
+
+def submit_ipc(ipc, user):
+    if ipc.status != IPCStatus.DRAFT:
+        raise ValueError('Only draft IPCs can be submitted.')
+    ipc.status = IPCStatus.SUBMITTED
+    ipc.submitted_date = date.today()
+    ipc.rejection_reason = ''
+    ipc.updated_by = user
+    ipc.save()
+    _publish_ipc_submitted(ipc)
+    return ipc
+
+
+def approve_ipc(ipc, user):
+    from datetime import timedelta
+    ipc.status = IPCStatus.APPROVED
+    ipc.approval_date = date.today()
+    if not ipc.planned_payment_date:
+        ipc.planned_payment_date = date.today() + timedelta(days=30)
+    ipc.updated_by = user
+    ipc.save()
+    return ipc
+
+
+def pay_ipc(ipc, user, payment_date):
+    ipc.status = IPCStatus.PAID
+    ipc.actual_payment_date = payment_date
+    ipc.updated_by = user
+    ipc.save()
+    _upsert_ipc_cash_transaction(ipc, user, payment_date)
+    return ipc
+
+
+def reject_ipc(ipc, user, reason):
+    ipc.status = IPCStatus.DRAFT
+    ipc.rejection_reason = reason
+    ipc.updated_by = user
+    ipc.save()
+    return ipc
+
+
+def update_ipc_item(ipc, item, qty_current, user):
+    qty_current = Decimal(str(qty_current))
+    item.qty_current = qty_current
+    item.qty_cumulative = Decimal(str(item.qty_previous or 0)) + qty_current
+    unit_price = Decimal(str(item.unit_price or 0))
+    item.amount_current = unit_price * qty_current
+    item.amount_cumulative = unit_price * item.qty_cumulative
+    item.updated_by = user
+    item.save()
+    gross = IPCItem.objects.filter(ipc=ipc, is_deleted=False).aggregate(
+        total=Sum('amount_current')
+    )['total'] or 0
+    ipc.gross_amount = gross
+    ipc.save(update_fields=['gross_amount', 'updated_at'])
+    apply_deductions(ipc.id)
+    ipc.refresh_from_db()
+    return ipc
+
+
+def add_manual_deduction(ipc, deduction_type, amount, description, user):
+    if ipc.status != IPCStatus.DRAFT:
+        raise ValueError('Deductions can only be edited on draft IPCs.')
+    if deduction_type not in MANUAL_DEDUCTION_TYPES:
+        raise ValueError('Only material_price_diff and other deductions can be added manually.')
+    IPCDeduction.objects.create(
+        ipc=ipc,
+        deduction_type=deduction_type,
+        amount=amount,
+        description=description,
+        created_by=user,
+        updated_by=user,
+    )
+    apply_deductions(ipc.id)
+    ipc.refresh_from_db()
+    return ipc
+
+
+def update_manual_deduction(ipc, deduction, amount, description, user):
+    if ipc.status != IPCStatus.DRAFT:
+        raise ValueError('Deductions can only be edited on draft IPCs.')
+    if amount is not None:
+        deduction.amount = amount
+    if description is not None:
+        deduction.description = description
+    deduction.updated_by = user
+    deduction.save()
+    apply_deductions(ipc.id)
+    ipc.refresh_from_db()
+    return ipc
+
+
+def delete_manual_deduction(ipc, deduction, user):
+    if ipc.status != IPCStatus.DRAFT:
+        raise ValueError('Deductions can only be edited on draft IPCs.')
+    deduction.is_deleted = True
+    deduction.deleted_at = timezone.now()
+    deduction.updated_by = user
+    deduction.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+    apply_deductions(ipc.id)
+    ipc.refresh_from_db()
+    return ipc

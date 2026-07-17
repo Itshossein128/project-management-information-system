@@ -67,7 +67,7 @@ def test_manual_deduction_api(finance_client, project, ipc):
 
 def test_submit_publishes_event(finance_client, project, ipc):
     url = f'{BASE.format(project_id=project.id)}/ipcs/{ipc.id}/submit/'
-    with patch('contracts.views._publish_ipc_submitted') as mock_publish:
+    with patch('contracts.services.ipc_service._publish_ipc_submitted') as mock_publish:
         resp = finance_client.post(url)
     assert resp.status_code == 200
     mock_publish.assert_called_once()
