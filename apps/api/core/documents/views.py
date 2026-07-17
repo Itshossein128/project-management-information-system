@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
 from common.jalali import parse_jalali_or_gregorian
+from common.viewsets import ProjectScopedViewSet
 from common.validators import validate_document_upload
 from documents.models import Correspondence, CorrStatus, DocumentRevision, MeetingMinutes, ProjectDocument
 from documents.serializers import (
@@ -24,28 +25,9 @@ from documents.services.upload_service import upload_file_to_s3
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
-class DocScopedViewSet(viewsets.ModelViewSet):
+class DocScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_documents'
     edit_permission = 'upload_documents'
-
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProjectDocumentViewSet(DocScopedViewSet):
@@ -171,12 +153,9 @@ class CorrespondenceViewSet(DocScopedViewSet):
         corr_number = self.request.data.get('corr_number') or generate_corr_number(
             self.kwargs['project_pk'], serializer.validated_data['corr_type']
         )
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            corr_number=corr_number,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer)
+        serializer.instance.corr_number = corr_number
+        serializer.instance.save(update_fields=['corr_number'])
 
 
 class CorrespondenceRespondView(APIView):
@@ -208,12 +187,4 @@ class MeetingMinutesViewSet(DocScopedViewSet):
     def list(self, request, *args, **kwargs):
         return Response({'results': MeetingMinutesSerializer(self.get_queryset(), many=True).data})
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
 
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)

@@ -48,13 +48,6 @@ class DisciplineSubReportViewSet(ProjectScopedViewSet):
             qs = qs.filter(discipline=discipline)
         return qs.order_by('-report_date')
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
-
     @action(detail=True, methods=['post'])
     def submit(self, request, project_pk=None, pk=None):
         obj = self.get_object()

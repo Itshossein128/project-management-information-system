@@ -30,6 +30,7 @@ from contracts.serializers import (
 )
 from contracts.services.ipc_service import apply_deductions, auto_populate_ipc, next_change_number, next_ipc_number
 from permissions.project import HasProjectPermission, IsProjectMember
+from common.viewsets import ProjectScopedViewSet
 
 logger = logging.getLogger(__name__)
 
@@ -70,45 +71,14 @@ def _invalidate(project_id):
         pass
 
 
-class ContractScopedViewSet(viewsets.ModelViewSet):
-    lookup_url_kwarg = 'pk'
+class ContractScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_contracts'
     edit_permission = 'edit_contracts'
 
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
-
     def get_queryset(self):
+        # We override to maintain the specific Contract model querying behavior,
+        # though ProjectScopedViewSet automatically applies project_id filter.
         return Contract.objects.filter(project_id=self.get_project_id(), is_deleted=False)
-
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
-
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ContractViewSet(ContractScopedViewSet):

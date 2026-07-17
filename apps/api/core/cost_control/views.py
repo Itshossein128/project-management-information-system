@@ -32,6 +32,7 @@ from cost_control.services.cost_pool_service import (
 from cost_control.services.cost_summary_service import cost_summary
 from cost_control.services.variance_service import get_budget_vs_actual
 from permissions.project import HasProjectPermission, IsProjectMember
+from common.viewsets import ProjectScopedViewSet
 from resources.models import Supplier
 
 
@@ -44,48 +45,28 @@ def _invalidate_cost_caches(project_id):
         pass
 
 
-class CostScopedViewSet(viewsets.ModelViewSet):
-    lookup_url_kwarg = 'pk'
+class CostScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def get_project_id(self):
-        return self.kwargs['project_pk']
-
-    def get_queryset(self):
-        return self.queryset.filter(project_id=self.get_project_id())
-
     def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer)
         _invalidate_cost_caches(self.get_project_id())
 
     def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+        super().perform_update(serializer)
         _invalidate_cost_caches(self.get_project_id())
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        if not hasattr(instance, 'is_deleted'):
+            instance.delete()
+            _invalidate_cost_caches(self.get_project_id())
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        response = super().destroy(request, *args, **kwargs)
         _invalidate_cost_caches(self.get_project_id())
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return response
 
 
 class BudgetViewSet(CostScopedViewSet):

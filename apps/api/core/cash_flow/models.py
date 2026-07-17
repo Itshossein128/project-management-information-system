@@ -94,5 +94,13 @@ class CashFlowForecast(AuditSoftDeleteModel):
 
     def save(self, *args, **kwargs):
         if self.month:
-            self.month = self.month.replace(day=1)
+            if isinstance(self.month, str):
+                from common.jalali import parse_jalali_or_gregorian
+                parsed = parse_jalali_or_gregorian(self.month)
+                if parsed:
+                    self.month = parsed
+            try:
+                self.month = self.month.replace(day=1)
+            except TypeError:
+                pass
         super().save(*args, **kwargs)
