@@ -1,4 +1,6 @@
 import { ThemeSync } from "@/components/ThemeSync";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import { useTranslation } from "react-i18next";
 import {
   isRouteErrorResponse,
@@ -44,10 +46,12 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeSync />
+      <TooltipProvider>
       <ToastProvider>
         <PwaManager />
         <Outlet />
       </ToastProvider>
+      </TooltipProvider>
     </AuthProvider>
   );
 }
