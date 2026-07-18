@@ -21,3 +21,6 @@
 ## 2026-07-17 - Resolve N+1 query in Subcontractor API
 **Learning:** Using `.filter()`, `.count()`, or `.exists()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer or looped service function completely bypasses Django's `prefetch_related` cache, leading to severe N+1 query performance degradation.
 **Action:** Always prefetch related collections in the viewset (`.prefetch_related('scores', 'warnings')`), and strictly iterate over `.all()` in Python (using list comprehensions, `max()`, `sum()`, or `any()`) when serializing or computing logic for lists of objects.
+## 2024-07-18 - Resolve N+1 query in Subcontractor API
+**Learning:** Using `.filter()` or `.order_by()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer completely bypasses Django's `prefetch_related` cache, leading to N+1 query performance degradation. Attempting to solve this *only* in the serializer by doing Python-level sorting/filtering can be dangerous for large datasets (OOM or slow responses).
+**Action:** Use a `Prefetch` object with a custom `queryset` in the View to do the filtering/sorting at the database level during the initial prefetch. Then, in the serializer, strictly iterate over `.all()` in Python to utilize the prefetched cache.

@@ -42,10 +42,15 @@ class SubScopedViewSet(viewsets.ModelViewSet):
         return self.edit_permission
 
     def get_queryset(self):
+        from django.db.models import Prefetch
+        from subcontractors.models import SubcontractorPerformanceScore, SubcontractorWarning
         return Subcontractor.objects.filter(
             project_id=self.kwargs['project_pk'],
             is_deleted=False
-        ).prefetch_related('scores', 'warnings')
+        ).prefetch_related(
+            Prefetch('scores', queryset=SubcontractorPerformanceScore.objects.filter(is_deleted=False).order_by('-score_date')),
+            Prefetch('warnings', queryset=SubcontractorWarning.objects.filter(is_deleted=False).order_by('-warning_date')),
+        )
 
     def perform_create(self, serializer):
         serializer.save(

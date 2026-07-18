@@ -122,16 +122,16 @@ class SubcontractorDetailSerializer(SubcontractorSerializer):
         return financial_summary(obj)
 
     def get_performance_history(self, obj):
-        return PerformanceScoreSerializer(
-            obj.scores.filter(is_deleted=False).order_by('-score_date')[:10],
-            many=True,
-        ).data
+        # ⚡ Bolt: Iterate over prefetched related collection in Python to avoid N+1 queries.
+        # Note: The viewset already filters out is_deleted=False and sorts by -score_date via Prefetch.
+        scores = [s for s in obj.scores.all() if not s.is_deleted]
+        return PerformanceScoreSerializer(scores[:10], many=True).data
 
     def get_warnings(self, obj):
-        return WarningSerializer(
-            obj.warnings.filter(is_deleted=False).order_by('-warning_date'),
-            many=True,
-        ).data
+        # ⚡ Bolt: Iterate over prefetched related collection in Python to avoid N+1 queries.
+        # Note: The viewset already filters out is_deleted=False and sorts by -warning_date via Prefetch.
+        warnings = [w for w in obj.warnings.all() if not w.is_deleted]
+        return WarningSerializer(warnings, many=True).data
 
     def get_recent_activities(self, obj):
         from field_reports.models import DailyReportActivity
