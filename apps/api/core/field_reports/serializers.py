@@ -340,7 +340,8 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         return _user_name(obj.approved_by)
 
     def _active(self, manager):
-        return manager.filter(is_deleted=False)
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
+        return [item for item in manager.all() if not item.is_deleted]
 
     def get_activities(self, obj):
         return DailyReportActivitySerializer(self._active(obj.activities), many=True).data
