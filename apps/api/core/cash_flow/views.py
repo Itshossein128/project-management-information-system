@@ -25,6 +25,7 @@ from common.viewsets import ProjectScopedViewSet
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
+# Helper function to invalidate cache entries related to cash flow calculations when a transaction or forecast changes.
 def _invalidate_cashflow_caches(project_id):
     try:
         from common.cache_utils import invalidate_project_caches

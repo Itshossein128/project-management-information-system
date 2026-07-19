@@ -136,6 +136,7 @@ def get_receivables_payables(project_id):
     }
 
 
+# Fallback stub for receivables/payables calculation when the contracts/IPC module is not yet available or imported.
 def _receivables_stub():
     return {
         'receivables': None,
