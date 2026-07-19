@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { Modal } from "@/components/overlay/modal";
 import { Button, Input, Label, PasswordInput } from "@/components/form";
 import type { CreateHrUserPayload } from "@/app/hooks/queries";
@@ -142,7 +143,10 @@ export function CreateHrUserModal({
             id="button-submitCreateHrUser"
             type="submit"
             disabled={!canSubmit || submitting}
+            aria-busy={submitting}
+            className="inline-flex items-center gap-2"
           >
+            {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
             {submitting ? t("common.loading") : t("hrUsers.createUser")}
           </Button>
         </div>
