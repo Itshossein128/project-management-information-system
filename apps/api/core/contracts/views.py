@@ -208,9 +208,10 @@ class ChangeOrderApproveView(APIView):
         try:
             co = approve_change_order(co, request.user)
             return Response(ChangeOrderSerializer(co).data)
-        except ValueError as e:
+        except ValueError:
+            logger.exception('Failed to reject change order')
             return Response(
-                {'detail': str(e)},
+                {'detail': 'Failed to reject change order.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -341,8 +342,9 @@ class IPCSubmitView(APIView):
         try:
             ipc = submit_ipc(ipc, request.user)
             return Response(IPCDetailSerializer(ipc).data)
-        except ValueError as e:
-            return Response({'detail': str(e)}, status=400)
+        except ValueError:
+            logger.exception('Failed to submit IPC')
+            return Response({'detail': 'Failed to submit IPC.'}, status=400)
 
 
 class IPCDeductionListView(APIView):
@@ -365,8 +367,9 @@ class IPCDeductionListView(APIView):
                 request.user
             )
             return Response(IPCDetailSerializer(ipc).data, status=201)
-        except ValueError as e:
-            return Response({'detail': str(e)}, status=400)
+        except ValueError:
+            logger.exception('Failed to add deduction to IPC')
+            return Response({'detail': 'Failed to add deduction.'}, status=400)
 
 
 class IPCDeductionDetailView(APIView):
@@ -387,8 +390,9 @@ class IPCDeductionDetailView(APIView):
                 request.user
             )
             return Response(IPCDetailSerializer(ipc).data)
-        except ValueError as e:
-            return Response({'detail': str(e)}, status=400)
+        except ValueError:
+            logger.exception('Failed to update deduction for IPC')
+            return Response({'detail': 'Failed to update deduction.'}, status=400)
 
     def delete(self, request, project_pk=None, pk=None, did=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
@@ -398,8 +402,9 @@ class IPCDeductionDetailView(APIView):
         try:
             ipc = delete_manual_deduction(ipc, deduction, request.user)
             return Response(IPCDetailSerializer(ipc).data)
-        except ValueError as e:
-            return Response({'detail': str(e)}, status=400)
+        except ValueError:
+            logger.exception('Failed to delete deduction for IPC')
+            return Response({'detail': 'Failed to delete deduction.'}, status=400)
 
 
 class IPCApproveView(APIView):

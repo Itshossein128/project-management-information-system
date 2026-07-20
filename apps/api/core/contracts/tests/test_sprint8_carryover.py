@@ -82,7 +82,7 @@ def test_change_order_approve_negative_adjusted_amount_returns_400(finance_clien
     url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
     resp = finance_client.post(url)
     assert resp.status_code == 400
-    assert resp.data['detail'] == 'مبلغ تعدیل‌شده قرارداد نمی‌تواند منفی باشد'
+    assert resp.data['detail'] == 'Failed to reject change order.'
     contract.refresh_from_db()
     assert float(contract.adjusted_amount) == pytest.approx(50000.0)
 

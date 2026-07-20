@@ -127,9 +127,10 @@ class ItemViewSet(viewsets.ModelViewSet):
                 'imported_count': imported_count,
                 'errors': errors if errors else None
             }, status=status.HTTP_201_CREATED)
-        except ValueError as e:
+        except ValueError:
+            logger.exception('Validation error during items import')
             return Response(
-                {'error': str(e)},
+                {'error': 'Invalid data in import file.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:

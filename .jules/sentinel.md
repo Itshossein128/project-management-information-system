@@ -16,3 +16,12 @@
 **Vulnerability:** Found `ValueError` exceptions being cast to string and returned directly in 400 Bad Request responses within `apps/api/core/storage/views.py`.
 **Learning:** Returning `str(exc)` can leak sensitive internal information, stack traces, or validation details that an attacker could use to probe the system. This violates the principle of failing securely.
 **Prevention:** Always catch exceptions, log the full details server-side using `logger.exception(...)` so debugging information is preserved internally, and return generic, safe messages like `'Invalid request.'` to the client. Keep any specific safe messages (like `'Not found.'` mapped to 404) explicitly checked, rather than relying on dynamic error strings.
+## 2026-07-20 - Explicit Path Traversal Mitigation in Upload Service
+**Vulnerability:** The document upload service was using `os.path.basename` to silently extract the base name of uploaded files instead of explicitly rejecting malicious filenames (e.g., containing `..`, `/`, or `\`). This could be bypassed in some edge cases or environments and generally violates the "fail securely" principle.
+**Learning:** Relying purely on string sanitization like `os.path.basename` without explicitly rejecting invalid input is risky for preventing Path Traversal.
+**Prevention:** Explicitly reject malicious filenames with characters like `..`, `/`, or `\` by raising a ValidationError before processing, rather than relying on silent sanitization.
+## $(date +'%Y-%m-%d') - Exception Information Leakage
+
+**Vulnerability:** Several DRF View API endpoints were catching `ValueError` explicitly and returning `str(e)` in the response body. This leaks exception messages, potentially exposing internal stack traces, variable values, or path information.
+**Learning:** Returning `str(e)` from exception catches exposes internals and violates fail securely principles.
+**Prevention:** Catch exceptions, log the full details using `logger.exception()`, and return a generic, user-friendly error message or explicit validation message.
