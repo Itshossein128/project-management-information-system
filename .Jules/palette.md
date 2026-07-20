@@ -26,3 +26,7 @@
 ## 2025-02-21 - [Added Loading States with aria-busy for Async Form Actions]
 **Learning:** [Users need immediate visual feedback when submitting forms that trigger async actions, otherwise they may assume the action failed or click the button multiple times. Adding a loading spinner next to the submit text provides clear confirmation. Similarly, using the `aria-busy` attribute correctly announces this temporary transition state to screen readers.]
 **Action:** [Always include a visual loading indicator (like `lucide-react`'s `Loader2` with an `animate-spin` class) inside submit buttons when they are in a busy state. Also, always add `aria-busy={busy}` for screen reader compatibility, and utilize flexbox layouts (`inline-flex items-center gap-2`) to keep text and spinner properly aligned.]
+## 2024-07-19 - Password Input UX Improvement
+Improved the `PasswordInput` component UX by:
+1. Adding right padding (`pr-10`) to the input field so that long passwords don't overflow and hide beneath the visibility toggle icon.
+2. Adding `onPointerDown={(e) => e.preventDefault()}` to the toggle button to prevent the input field from losing focus when the user toggles password visibility. This allows the user to seamlessly continue typing after clicking the toggle.

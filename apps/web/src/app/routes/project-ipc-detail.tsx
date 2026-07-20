@@ -7,6 +7,8 @@ import { IPCDeductionsTable } from "@/components/contracts/IPCDeductionsTable";
 import { IPCLineItemsTable } from "@/components/contracts/IPCLineItemsTable";
 import { IPCWorkflowBar } from "@/components/contracts/IPCWorkflowBar";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function IPCDetailContent() {
@@ -18,7 +20,7 @@ function IPCDetailContent() {
   const canEditIpc = has("edit_ipcs");
   const canApprove = has("approve_ipcs");
 
-  const { data: ipc, isLoading } = useQuery({
+  const { data: ipc, isLoading, isError, refetch } = useQuery({
     queryKey: ["ipc", projectId, ipcId],
     queryFn: () => fetchIPC(projectId, ipcId),
     enabled: canView && Boolean(ipcId),
@@ -27,15 +29,17 @@ function IPCDetailContent() {
   const refresh = () => void qc.invalidateQueries({ queryKey: ["ipc", projectId, ipcId] });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
   if (!canView) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به صورت‌وضعیت‌ها ندارید.
-      </p>
+      <EmptyState
+        title="دسترسی ندارید"
+        description="دسترسی به صورت‌وضعیت‌ها ندارید."
+      />
     );
   }
-  if (!ipc) return <p>صدور موقت یافت نشد</p>;
+  if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
+  if (!ipc) return <EmptyState title="صدور موقت یافت نشد" />;
 
   const canEditLines = canEditIpc && ipc.status === "draft";
 

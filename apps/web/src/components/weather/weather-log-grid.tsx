@@ -14,7 +14,9 @@ import {
 } from "@/app/lib/api/weather";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
+import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Modal } from "@/components/overlay/modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
@@ -63,7 +65,7 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
     ? { page: 1, per_page: 100, date_from: calendarRange.from, date_to: calendarRange.to, ordering: "-log_date" as const }
     : { page, per_page: 50, date_from: dateRange.from, date_to: dateRange.to, ordering };
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
     queryKey: ["weather-logs", projectId, listParams],
     queryFn: () => fetchWeatherLogs(projectId, listParams),
   });
@@ -206,12 +208,20 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
 
       {isLoading ? (
         <LoadingSkeleton rows={8} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : viewMode === "table" ? (
         logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center text-muted-foreground">
-            <CloudOff className="mb-3 size-10 opacity-50" />
-            <p>گزارش جویی برای این بازه ثبت نشده است</p>
-          </div>
+          <EmptyState
+            icon={<CloudOff />}
+            title="گزارش جویی برای این بازه ثبت نشده است"
+            action={
+              <Button variant="primary" size="sm" onClick={() => openCreate()}>
+                <Plus className="size-4" />
+                افزودن
+              </Button>
+            }
+          />
         ) : (
           <>
             <div className="overflow-x-auto rounded-lg border border-border">

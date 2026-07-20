@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { X } from "lucide-react";
 import { cn } from "src/app/lib/utils";
 
 type ToastVariant = "success" | "error" | "warning";
@@ -26,8 +27,12 @@ const variantClass: Record<ToastVariant, string> = {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  const dismiss = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const push = useCallback((message: string, variant: ToastVariant) => {
-    const id = Date.now();
+    const id = Date.now() + Math.floor(Math.random() * 1000);
     setToasts((prev) => [...prev, { id, message, variant }]);
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -46,17 +51,30 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 start-4 z-[100] flex max-w-sm flex-col gap-2">
+      <div
+        className="pointer-events-none fixed bottom-4 start-4 z-[100] flex max-w-sm flex-col gap-2"
+        aria-live="polite"
+        aria-relevant="additions text"
+      >
         {toasts.map((t) => (
           <div
             key={t.id}
             className={cn(
-              "pointer-events-auto rounded-lg border px-4 py-3 text-sm shadow-lg",
+              "pointer-events-auto flex items-start gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg",
               variantClass[t.variant],
             )}
-            role="status"
+            role={t.variant === "error" ? "alert" : "status"}
+            aria-live={t.variant === "error" ? "assertive" : "polite"}
           >
-            {t.message}
+            <p className="flex-1">{t.message}</p>
+            <button
+              type="button"
+              className="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="بستن"
+              onClick={() => dismiss(t.id)}
+            >
+              <X className="size-4" aria-hidden />
+            </button>
           </div>
         ))}
       </div>

@@ -153,7 +153,7 @@ export function DailyReportForm({
   const subcontractorOptions = useMemo(
     () =>
       (Array.isArray(subcontractorsQuery.data) ? subcontractorsQuery.data : []).map(
-        (c) => ({
+        (c: any) => ({
           value: String(c.id ?? c.contract_id ?? ""),
           label: String(c.counterparty ?? c.name ?? c.contract_number ?? ""),
         }),

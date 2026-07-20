@@ -9,6 +9,9 @@ import {
   type CostCategory,
 } from "@/app/lib/api/costs";
 import { AllocationWizard } from "@/components/costs/AllocationWizard";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -33,7 +36,7 @@ export function CostPoolTab({
   const [category, setCategory] = useState<CostCategory>("site_overhead");
   const [totalAmount, setTotalAmount] = useState("");
 
-  const { data: pools = [], isLoading } = useQuery({
+  const { data: pools = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["cost-pools", projectId],
     queryFn: () => fetchCostPools(projectId),
   });
@@ -56,23 +59,35 @@ export function CostPoolTab({
   });
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>;
+    return <LoadingSkeleton rows={6} />;
+  }
+  if (isError) {
+    return <QueryErrorState onRetry={() => void refetch()} />;
   }
 
   return (
-    <div className="space-y-4">
-      {canEdit ? (
+    <div className="space-y-4" data-testid="cost-pool-tab">
+      {canEdit && (pools.length > 0 || showCreate) ? (
         <div className="flex flex-wrap items-end gap-3">
           {!showCreate ? (
-            <Button variant="secondary" size="sm" onClick={() => setShowCreate(true)}>
+            <Button
+              variant="secondary"
+              size="sm"
+              data-testid="cost-pool-new-btn"
+              onClick={() => setShowCreate(true)}
+            >
               استخر جدید
             </Button>
           ) : (
-            <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border p-3">
+            <div
+              className="flex flex-wrap items-end gap-2 rounded-lg border border-border p-3"
+              data-testid="cost-pool-create-form"
+            >
               <label className="flex flex-col gap-1 text-sm">
                 <span>نام استخر</span>
                 <input
                   className="rounded-md border px-2 py-1"
+                  data-testid="cost-pool-name-input"
                   value={poolName}
                   onChange={(e) => setPoolName(e.target.value)}
                 />
@@ -81,6 +96,7 @@ export function CostPoolTab({
                 <span>دسته</span>
                 <select
                   className="rounded-md border px-2 py-1"
+                  data-testid="cost-pool-category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as CostCategory)}
                 >
@@ -96,6 +112,7 @@ export function CostPoolTab({
                 <input
                   type="number"
                   className="rounded-md border px-2 py-1"
+                  data-testid="cost-pool-amount-input"
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(e.target.value)}
                 />
@@ -103,6 +120,7 @@ export function CostPoolTab({
               <Button
                 variant="primary"
                 size="sm"
+                data-testid="cost-pool-create-btn"
                 loading={createMutation.isPending}
                 disabled={!poolName}
                 onClick={() => createMutation.mutate()}
@@ -117,8 +135,28 @@ export function CostPoolTab({
         </div>
       ) : null}
 
+      {pools.length === 0 ? (
+        showCreate ? null : (
+          <EmptyState
+            title="استخری ثبت نشده"
+            description="استخر هزینه برای تخصیص هزینه‌های سربار ایجاد کنید."
+            action={
+              canEdit ? (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  data-testid="cost-pool-new-btn"
+                  onClick={() => setShowCreate(true)}
+                >
+                  استخر جدید
+                </Button>
+              ) : null
+            }
+          />
+        )
+      ) : (
       <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" data-testid="cost-pool-table">
           <thead className="bg-muted/50">
             <tr>
               {["نام", "دسته", "کل", "تخصیص‌یافته", "باقیمانده", "وضعیت", ""].map((h) => (
@@ -129,15 +167,12 @@ export function CostPoolTab({
             </tr>
           </thead>
           <tbody>
-            {pools.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
-                  استخری ثبت نشده
-                </td>
-              </tr>
-            ) : (
-              pools.map((p) => (
-                <tr key={p.id} className="border-t border-border">
+              {pools.map((p) => (
+                <tr
+                  key={p.id}
+                  className="border-t border-border"
+                  data-testid={`cost-pool-row-${p.id}`}
+                >
                   <td className="px-3 py-2 font-medium">{p.pool_name || "—"}</td>
                   <td className="px-3 py-2">{costCategoryLabel(p.cost_category)}</td>
                   <td className="px-3 py-2">
@@ -148,17 +183,22 @@ export function CostPoolTab({
                   <td className="px-3 py-2">{STATUS_LABELS[p.status] ?? p.status}</td>
                   <td className="px-3 py-2">
                     {canEdit && p.remaining > 0 ? (
-                      <Button variant="secondary" size="sm" onClick={() => setWizardPoolId(p.id)}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`cost-pool-allocate-btn-${p.id}`}
+                        onClick={() => setWizardPoolId(p.id)}
+                      >
                         تخصیص
                       </Button>
                     ) : null}
                   </td>
                 </tr>
-              ))
-            )}
+              ))}
           </tbody>
         </table>
       </div>
+      )}
 
       {wizardPoolId ? (
         <AllocationWizard

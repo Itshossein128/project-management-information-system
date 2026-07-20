@@ -99,6 +99,69 @@ export async function moveWbsViaApi(
   }
 }
 
+/** Upsert a budget row via API. */
+export async function createBudgetViaApi(
+  page: Page,
+  projectBasePath: string,
+  opts: {
+    wbsId?: string;
+    activityId?: string;
+    costCategory?: string;
+    budgetAmount: number;
+  },
+): Promise<void> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/budgets/bulk/`, {
+    headers: await authHeaders(page),
+    data: [
+      {
+        wbs: opts.wbsId ?? null,
+        activity: opts.activityId ?? null,
+        cost_category: opts.costCategory ?? "labor",
+        budget_amount: opts.budgetAmount,
+      },
+    ],
+  });
+  if (!res.ok()) {
+    throw new Error(`createBudgetViaApi failed: ${res.status()} ${await res.text()}`);
+  }
+}
+
+/** Create an actual cost via API. Returns cost id. */
+export async function createActualCostViaApi(
+  page: Page,
+  projectBasePath: string,
+  opts: {
+    costDate?: string;
+    costCategory?: string;
+    amount: number;
+    wbsId?: string;
+    activityId?: string;
+    description?: string;
+  },
+): Promise<string> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/costs/`, {
+    headers: await authHeaders(page),
+    data: {
+      cost_date: opts.costDate ?? "2026-01-15",
+      cost_category: opts.costCategory ?? "labor",
+      amount: opts.amount,
+      wbs: opts.wbsId ?? null,
+      activity: opts.activityId ?? null,
+      description: opts.description ?? "E2E actual cost",
+    },
+  });
+  if (!res.ok()) {
+    throw new Error(`createActualCostViaApi failed: ${res.status()} ${await res.text()}`);
+  }
+  const body = (await res.json()) as { id?: string };
+  if (!body.id) throw new Error(`createActualCostViaApi missing id: ${JSON.stringify(body)}`);
+  return body.id;
+}
+
 /** Create an activity via API. Returns activity id. */
 export async function createActivityViaApi(
   page: Page,

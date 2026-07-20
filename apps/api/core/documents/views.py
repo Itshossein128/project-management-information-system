@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
+from common.viewsets import ProjectScopedViewSet
 from common.jalali import parse_jalali_or_gregorian
 from documents.models import Correspondence, CorrStatus, DocumentRevision, MeetingMinutes, ProjectDocument
 from documents.serializers import (
@@ -23,28 +24,9 @@ from documents.services.document_service import create_project_document, create_
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
-class DocScopedViewSet(viewsets.ModelViewSet):
+class DocScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_documents'
     edit_permission = 'upload_documents'
-
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProjectDocumentViewSet(DocScopedViewSet):

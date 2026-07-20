@@ -218,8 +218,11 @@ export function fetchCostSummary(projectId: string, asOf?: string) {
   return apiJson<CostSummary>(`${base(projectId)}/costs/summary/${qs}`);
 }
 
-export function fetchCostPools(projectId: string) {
-  return apiJson<CostPool[]>(`${base(projectId)}/cost-pools/`);
+export async function fetchCostPools(projectId: string) {
+  const data = await apiJson<CostPool[] | { results: CostPool[] }>(
+    `${base(projectId)}/cost-pools/`,
+  );
+  return Array.isArray(data) ? data : (data.results ?? []);
 }
 
 export function createCostPool(
@@ -251,6 +254,31 @@ export function allocateCostPool(
   return apiJson<CostPool>(`${base(projectId)}/cost-pools/${poolId}/allocate/`, {
     method: "POST",
     body: JSON.stringify(items),
+  });
+}
+
+export type AutoAllocateMethod = "by_budget_weight" | "by_quantity" | "by_hours";
+
+export const AUTO_ALLOCATE_METHODS: { value: AutoAllocateMethod; label: string }[] = [
+  { value: "by_budget_weight", label: "بر اساس وزن بودجه" },
+  { value: "by_quantity", label: "بر اساس مقدار" },
+  { value: "by_hours", label: "بر اساس ساعت" },
+];
+
+export function autoAllocateCostPool(
+  projectId: string,
+  poolId: string,
+  body: { method?: AutoAllocateMethod; activity_ids?: string[] } = {},
+) {
+  return apiJson<{
+    pool: CostPool;
+    allocations: { activity_id: string; amount: number; allocation_method?: string }[];
+  }>(`${base(projectId)}/cost-pools/${poolId}/auto-allocate/`, {
+    method: "POST",
+    body: JSON.stringify({
+      method: body.method ?? "by_budget_weight",
+      ...(body.activity_ids?.length ? { activity_ids: body.activity_ids } : {}),
+    }),
   });
 }
 

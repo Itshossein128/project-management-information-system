@@ -9,7 +9,9 @@ import {
   type CreateProjectPayload,
 } from "@/app/lib/api/projects";
 import { PATHS } from "@/app/routeVars";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Input, Label } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -23,7 +25,7 @@ function ProjectSettingsContent() {
   const { has } = usePermission(id);
   const canEdit = has("edit_project");
 
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isLoading, isError, refetch } = useQuery({
     queryKey: ["project", id],
     queryFn: () => fetchProject(id),
     enabled: Boolean(id),
@@ -42,8 +44,14 @@ function ProjectSettingsContent() {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  if (isLoading || !project) {
+  if (isLoading) {
     return <LoadingSkeleton rows={6} />;
+  }
+  if (isError) {
+    return <QueryErrorState onRetry={() => void refetch()} />;
+  }
+  if (!project) {
+    return <EmptyState title="پروژه یافت نشد" />;
   }
 
   const values = {

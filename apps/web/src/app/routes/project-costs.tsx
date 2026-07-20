@@ -8,7 +8,9 @@ import { ActualCostsTab } from "@/components/costs/ActualCostsTab";
 import { BudgetGrid } from "@/components/costs/BudgetGrid";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
 import { VarianceTab } from "@/components/costs/VarianceTab";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Button } from "@/components/ui/sprint-button";
 
@@ -28,21 +30,29 @@ function CostsContent() {
   const canEdit = has("edit_costs");
   const [tab, setTab] = useState<Tab>("budget");
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const {
+    data: summary,
+    isLoading: summaryLoading,
+    isError: summaryError,
+    refetch: refetchSummary,
+  } = useQuery({
     queryKey: ["cost-summary", projectId],
     queryFn: () => fetchCostSummary(projectId),
     enabled: canView && Boolean(projectId),
   });
 
   if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
-
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده هزینه‌ها را ندارد.
-      </p>
+      <EmptyState
+        title="دسترسی ندارید"
+        description="نقش شما مجوز مشاهده هزینه‌ها را ندارد."
+      />
     );
+  }
+  if (summaryError) {
+    return <QueryErrorState onRetry={() => void refetchSummary()} />;
   }
 
   const consumption = summary?.budget_consumption_pct;
@@ -51,7 +61,10 @@ function CostsContent() {
     <div className="space-y-6">
       <PageHeader title="کنترل هزینه" subtitle={project.project_name} />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-5"
+        data-testid="costs-kpi-grid"
+      >
         <KPICard
           title="بودجه کل (BAC)"
           value={summary ? formatFaAmount(summary.total_budget) : "—"}
@@ -59,6 +72,11 @@ function CostsContent() {
         <KPICard
           title="هزینه واقعی"
           value={summary ? formatFaAmount(summary.total_actual) : "—"}
+        />
+        <KPICard
+          title="تعهدات"
+          value={summary ? formatFaAmount(summary.total_committed) : "—"}
+          subtitle="قراردادهای فعال"
         />
         <KPICard
           title="درصد مصرف بودجه"
@@ -82,12 +100,13 @@ function CostsContent() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-border pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-border pb-2" data-testid="costs-tabs">
         {TABS.map((t) => (
           <Button
             key={t.id}
             size="sm"
             variant={tab === t.id ? "primary" : "secondary"}
+            data-testid={`costs-tab-${t.id}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}

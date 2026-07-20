@@ -4,7 +4,6 @@ import { Fragment, useState } from "react";
 import {
   CATEGORY_META,
   createBarrier,
-  deleteBarrier,
   fetchBarriers,
   STATUS_META,
   updateBarrier,
@@ -12,7 +11,10 @@ import {
 } from "@/app/lib/api/barriers";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
+import { Select } from "@/components/form/Select";
+import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
@@ -44,7 +46,7 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
   });
   const [resolveForm, setResolveForm] = useState({ resolved_date: "", corrective_action: "" });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["barriers", projectId, page, dateRange, status],
     queryFn: () =>
       fetchBarriers(projectId, {
@@ -97,18 +99,20 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
             onChange={setDateRange}
           />
         </div>
-        <select
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option value="">همه وضعیت‌ها</option>
-          {Object.entries(STATUS_META).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v.label}
-            </option>
-          ))}
-        </select>
+        <Select
+          name="barrier_status"
+          label="وضعیت"
+          fieldClassName="min-w-[160px]"
+          value={status || "all"}
+          onChange={(e) => setStatus(e.target.value === "all" ? "" : e.target.value)}
+          options={[
+            { value: "all", label: "همه وضعیت‌ها" },
+            ...Object.entries(STATUS_META).map(([k, v]) => ({
+              value: k,
+              label: v.label,
+            })),
+          ]}
+        />
         <Button
           variant="primary"
           size="sm"
@@ -132,10 +136,34 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
 
       {isLoading ? (
         <LoadingSkeleton rows={8} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : rows.length === 0 ? (
-        <p className="rounded-lg border border-dashed py-12 text-center text-muted-foreground">
-          موانعی ثبت نشده است
-        </p>
+        <EmptyState
+          title="موانعی ثبت نشده است"
+          description="موانع و مشکلات پروژه را ثبت و پیگیری کنید."
+          action={
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                setEdit(null);
+                setForm({
+                  log_date: "",
+                  description: "",
+                  category: "other",
+                  impact_on_schedule: false,
+                  impact_on_cost: false,
+                  status: "open",
+                });
+                setDrawerOpen(true);
+              }}
+            >
+              <Plus className="size-4" />
+              افزودن
+            </Button>
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full min-w-[900px] text-sm">

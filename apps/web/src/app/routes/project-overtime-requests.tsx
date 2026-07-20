@@ -14,6 +14,8 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { Drawer } from "@/components/ui/drawer";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
@@ -35,7 +37,7 @@ function Content() {
     reason: "درخواست اضافه‌کاری پروژه",
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["overtime", projectId, tab],
     queryFn: () => fetchOvertimeRequests(projectId, tab === "mine"),
   });
@@ -61,6 +63,7 @@ function Content() {
   }[];
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
+  if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
 
   return (
     <div className='space-y-4'>
@@ -83,6 +86,17 @@ function Content() {
           درخواست جدید
         </Button>
       </div>
+      {rows.length === 0 ? (
+        <EmptyState
+          title="درخواستی ثبت نشده"
+          description="اولین درخواست اضافه‌کاری را ثبت کنید."
+          action={
+            <Button size="sm" onClick={() => setOpen(true)}>
+              درخواست جدید
+            </Button>
+          }
+        />
+      ) : (
       <table className='w-full text-sm border rounded-lg'>
         <thead className='bg-muted/50'>
           <tr>
@@ -184,6 +198,7 @@ function Content() {
           ))}
         </tbody>
       </table>
+      )}
       <Drawer
         isOpen={open}
         onClose={() => setOpen(false)}

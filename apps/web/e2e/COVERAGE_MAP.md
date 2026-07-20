@@ -1,14 +1,18 @@
 | Module | Flow | Tested Branches | Total Branches | Coverage Score |
 |---|---|---|---|---|
 | AUTH | Standard login and session management | 2 | 8 | 25% |
-| AUTH | Role-based redirect after login | 1 | 8 | 12% |
+| AUTH | Role-based redirect after login | 8 | 8 | 100% |
 | PROJECT | List & Create | 4 | 10 | 40% |
 | WBS | Tree Operations | 3 | 10 | 30% |
 | ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
 | DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
 | OFFLINE | Sync & Conflict | 2 | 15 | 13% |
-| FINANCE | Budget & Cost | 0 | 15 | 0% |
+| FINANCE | Budget & Cost | 6 | 15 | 40% |
+
+## Sprint 7 coverage notes
+
+- `e2e/tests/sprint7-costs.spec.ts` — costs KPIs (incl. committed), budget grid upsert, actual cost create, variance tab, cost pool create + manual allocate
 
 ## Sprint 3 coverage notes
 

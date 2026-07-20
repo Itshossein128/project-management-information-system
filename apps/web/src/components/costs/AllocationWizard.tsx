@@ -1,7 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchActivities } from "@/app/lib/api/activities";
-import { allocateCostPool, formatFaAmount, type CostPool } from "@/app/lib/api/costs";
+import {
+  allocateCostPool,
+  AUTO_ALLOCATE_METHODS,
+  autoAllocateCostPool,
+  formatFaAmount,
+  type AutoAllocateMethod,
+  type CostPool,
+} from "@/app/lib/api/costs";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -26,6 +33,7 @@ export function AllocationWizard({
 }) {
   const toast = useToast();
   const [lines, setLines] = useState<AllocationLine[]>([{ activity_id: "", amount: "" }]);
+  const [autoMethod, setAutoMethod] = useState<AutoAllocateMethod>("by_budget_weight");
 
   const { data: activitiesData } = useQuery({
     queryKey: ["activities", projectId, "allocation"],
@@ -56,9 +64,24 @@ export function AllocationWizard({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const autoAllocate = useMutation({
+    mutationFn: () => autoAllocateCostPool(projectId, poolId, { method: autoMethod }),
+    onSuccess: (res) => {
+      if (!res.allocations.length) {
+        toast.error("تخصیص خودکاری انجام نشد — داده وزنی یافت نشد");
+        return;
+      }
+      toast.success(`${res.allocations.length} تخصیص خودکار انجام شد`);
+      onDone();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const updateLine = (idx: number, patch: Partial<AllocationLine>) => {
     setLines((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
   };
+
+  const busy = save.isPending || autoAllocate.isPending;
 
   return (
     <Drawer
@@ -72,8 +95,9 @@ export function AllocationWizard({
           </p>
           <Button
             variant="primary"
+            data-testid="cost-pool-allocate-confirm"
             disabled={
-              save.isPending ||
+              busy ||
               lines.every((l) => !l.activity_id || !l.amount) ||
               totalAllocated > remaining
             }
@@ -85,7 +109,37 @@ export function AllocationWizard({
         </div>
       }
     >
-      <div className="space-y-3">
+      <div className="space-y-4" data-testid="cost-pool-allocation-wizard">
+        <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-3">
+          <p className="text-sm font-medium">تخصیص خودکار</p>
+          <label className="flex flex-col gap-1 text-sm">
+            <span>روش</span>
+            <select
+              className="rounded-md border border-input bg-background px-3 py-2"
+              value={autoMethod}
+              data-testid="cost-pool-auto-method"
+              onChange={(e) => setAutoMethod(e.target.value as AutoAllocateMethod)}
+            >
+              {AUTO_ALLOCATE_METHODS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button
+            variant="secondary"
+            size="sm"
+            data-testid="cost-pool-auto-allocate"
+            disabled={busy || remaining <= 0}
+            loading={autoAllocate.isPending}
+            onClick={() => autoAllocate.mutate()}
+          >
+            تخصیص خودکار
+          </Button>
+        </div>
+
+        <p className="text-sm font-medium">تخصیص دستی</p>
         {lines.map((line, idx) => (
           <div key={idx} className="flex flex-col gap-2 rounded-lg border border-border p-3">
             <label className="flex flex-col gap-1 text-sm">
@@ -93,6 +147,7 @@ export function AllocationWizard({
               <select
                 className="rounded-md border border-input bg-background px-3 py-2"
                 value={line.activity_id}
+                data-testid={idx === 0 ? "cost-pool-allocate-activity" : undefined}
                 onChange={(e) => updateLine(idx, { activity_id: e.target.value })}
               >
                 <option value="">انتخاب…</option>
@@ -109,6 +164,7 @@ export function AllocationWizard({
                 type="number"
                 className="rounded-md border px-3 py-2"
                 value={line.amount}
+                data-testid={idx === 0 ? "cost-pool-allocate-amount" : undefined}
                 onChange={(e) => updateLine(idx, { amount: e.target.value })}
               />
             </label>

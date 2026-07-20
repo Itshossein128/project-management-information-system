@@ -13,6 +13,9 @@ import {
   type CostCategory,
 } from "@/app/lib/api/costs";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -96,6 +99,7 @@ function AddCostDrawer({
       footer={
         <Button
           variant="primary"
+          data-testid="actual-cost-save-btn"
           disabled={!costDate || !amount || save.isPending}
           loading={save.isPending}
           onClick={() => save.mutate()}
@@ -104,12 +108,13 @@ function AddCostDrawer({
         </Button>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" data-testid="actual-cost-drawer">
         <JalaliDatePicker name="cost_date" label="تاریخ هزینه" value={costDate} onChange={setCostDate} />
         <label className="flex flex-col gap-1 text-sm">
           <span>دسته هزینه</span>
           <select
             className="rounded-md border border-input bg-background px-3 py-2"
+            data-testid="actual-cost-category"
             value={category}
             onChange={(e) => setCategory(e.target.value as CostCategory)}
           >
@@ -125,6 +130,7 @@ function AddCostDrawer({
           <input
             type="number"
             className="rounded-md border border-input px-3 py-2"
+            data-testid="actual-cost-amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
@@ -133,6 +139,7 @@ function AddCostDrawer({
           <span>WBS</span>
           <select
             className="rounded-md border border-input bg-background px-3 py-2"
+            data-testid="actual-cost-wbs"
             value={wbsId}
             onChange={(e) => setWbsId(e.target.value)}
           >
@@ -201,7 +208,7 @@ export function ActualCostsTab({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const qc = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["actual-costs", projectId, category, dateFrom, dateTo],
     queryFn: () =>
       fetchActualCosts(projectId, {
@@ -220,7 +227,7 @@ export function ActualCostsTab({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="actual-costs-tab">
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
           <span>دسته</span>
@@ -243,7 +250,12 @@ export function ActualCostsTab({
           جمع: <span className="font-semibold text-foreground">{totalDisplay}</span>
         </p>
         {canEdit ? (
-          <Button variant="secondary" size="sm" onClick={() => setDrawerOpen(true)}>
+          <Button
+            variant="secondary"
+            size="sm"
+            data-testid="actual-cost-add-btn"
+            onClick={() => setDrawerOpen(true)}
+          >
             <Plus className="size-4" />
             افزودن هزینه
           </Button>
@@ -251,7 +263,27 @@ export function ActualCostsTab({
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          title="هزینه‌ای یافت نشد"
+          description="هزینه جدیدی ثبت کنید یا فیلترها را تغییر دهید."
+          action={
+            canEdit ? (
+              <Button
+                variant="primary"
+                size="sm"
+                data-testid="actual-cost-add-btn"
+                onClick={() => setDrawerOpen(true)}
+              >
+                <Plus className="size-4" />
+                افزودن هزینه
+              </Button>
+            ) : null
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -267,30 +299,24 @@ export function ActualCostsTab({
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
-                    هزینه‌ای یافت نشد
+              {rows.map((r) => (
+                <tr key={r.id} className="border-t border-border">
+                  <td className="px-3 py-2 whitespace-nowrap">{r.cost_date}</td>
+                  <td className="px-3 py-2">{costCategoryLabel(r.cost_category)}</td>
+                  <td className="px-3 py-2 font-medium">
+                    {r.amount_display || formatFaAmount(r.amount)}
+                  </td>
+                  <td className="px-3 py-2">{r.wbs_code ?? "—"}</td>
+                  <td className="px-3 py-2">{r.activity_code ?? "—"}</td>
+                  <td className="px-3 py-2">{r.supplier_name ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    <SourceBadge isAuto={r.is_auto_created} />
+                  </td>
+                  <td className="px-3 py-2 max-w-[200px] truncate" title={r.description}>
+                    {r.description || "—"}
                   </td>
                 </tr>
-              ) : (
-                rows.map((r) => (
-                  <tr key={r.id} className="border-t border-border">
-                    <td className="px-3 py-2 whitespace-nowrap">{r.cost_date}</td>
-                    <td className="px-3 py-2">{costCategoryLabel(r.cost_category)}</td>
-                    <td className="px-3 py-2 font-medium">{r.amount_display || formatFaAmount(r.amount)}</td>
-                    <td className="px-3 py-2">{r.wbs_code ?? "—"}</td>
-                    <td className="px-3 py-2">{r.activity_code ?? "—"}</td>
-                    <td className="px-3 py-2">{r.supplier_name ?? "—"}</td>
-                    <td className="px-3 py-2">
-                      <SourceBadge isAuto={r.is_auto_created} />
-                    </td>
-                    <td className="px-3 py-2 max-w-[200px] truncate" title={r.description}>
-                      {r.description || "—"}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>

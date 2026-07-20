@@ -10,7 +10,10 @@ import { InflationDetailTable } from "@/components/economic/InflationDetailTable
 import { MonteCarloPanel } from "@/components/economic/MonteCarloPanel";
 import { ProfitLayersPanel } from "@/components/economic/ProfitLayersPanel";
 import { SensitivityTornadoChart } from "@/components/economic/SensitivityTornadoChart";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useQuery } from "@tanstack/react-query";
 
@@ -34,31 +37,50 @@ function EconomicContent() {
   const [tab, setTab] = useState<Tab>("overview");
   const [asOf, setAsOf] = useState("");
 
-  const { data: snapshot, isLoading: loadingSnap } = useQuery({
+  const {
+    data: snapshot,
+    isLoading: loadingSnap,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["economic-snapshot", projectId, asOf],
     queryFn: () => fetchEconomicSnapshot(projectId, asOf || undefined),
     enabled: canView,
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
-  if (!canView) return <p className="p-8 text-center text-muted-foreground">دسترسی ندارید.</p>;
-  if (!snapshot) return null;
+  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!canView) {
+    return (
+      <EmptyState
+        title="دسترسی ندارید"
+        description="برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است."
+      />
+    );
+  }
+  if (isError) {
+    return <QueryErrorState onRetry={() => void refetch()} />;
+  }
+  if (!snapshot) {
+    return (
+      <EmptyState
+        title="داده‌ای برای تحلیل موجود نیست"
+        description="پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="economic-page">
       <PageHeader title="تحلیل اقتصادی" subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">
-          تاریخ مبنا (اختیاری)
-          <input
-            type="date"
-            className="mt-1 block rounded-md border px-2 py-1.5 text-sm"
-            value={asOf}
-            onChange={(e) => setAsOf(e.target.value)}
-          />
-        </label>
+        <JalaliDatePicker
+          name="economic_as_of"
+          label="تاریخ مبنا (اختیاری)"
+          value={asOf}
+          onChange={setAsOf}
+        />
       </div>
 
       <div className="flex flex-wrap gap-2">
