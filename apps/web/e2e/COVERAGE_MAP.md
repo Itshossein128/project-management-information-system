@@ -1,7 +1,7 @@
 | Module | Flow | Tested Branches | Total Branches | Coverage Score |
 |---|---|---|---|---|
 | AUTH | Standard login and session management | 2 | 8 | 25% |
-| AUTH | Role-based redirect after login | 1 | 8 | 12% |
+| AUTH | Role-based redirect after login | 8 | 8 | 100% |
 | PROJECT | List & Create | 4 | 10 | 40% |
 | WBS | Tree Operations | 3 | 10 | 30% |
 | ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
