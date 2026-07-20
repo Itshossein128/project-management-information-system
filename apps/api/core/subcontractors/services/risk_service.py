@@ -62,11 +62,13 @@ def financial_summary(sub: Subcontractor) -> dict:
 def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
     reasons = []
 
+    # ⚡ Bolt: Use .all() which relies on prefetch_related cache if available
     valid_scores = [s for s in sub.scores.all() if not s.is_deleted]
     latest = max(valid_scores, key=lambda x: x.score_date) if valid_scores else None
     if latest and latest.overall_score is not None and float(latest.overall_score) < 6:
         reasons.append('آخرین نمره عملکرد کمتر از 6 است')
 
+    # ⚡ Bolt: Iterate over .all() which relies on prefetch_related cache to avoid N+1 warnings queries
     has_critical_warning = any(
         w.warning_type in [WarningType.WRITTEN, WarningType.FINAL, WarningType.CONTRACT_SUSPENSION]
         for w in sub.warnings.all()
@@ -81,20 +83,23 @@ def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
     if sub.contract_id:
         from schedule.models import ActivityProgress
 
-        items = sub.contract.items.filter(is_deleted=False, activity_id__isnull=False)
-        for item in items:
-            prog = (
-                ActivityProgress.objects.filter(activity_id=item.activity_id)
-                .order_by('-report_date')
-                .first()
+        # ⚡ Bolt: Fetch all latest progress entries in a single query to avoid N+1 per contract item
+        activity_ids = sub.contract.items.filter(
+            is_deleted=False, activity_id__isnull=False
+        ).values_list('activity_id', flat=True)
+
+        if activity_ids:
+            latest_progresses = (
+                ActivityProgress.objects.filter(activity_id__in=activity_ids)
+                .order_by('activity_id', '-report_date')
+                .distinct('activity_id')
             )
-            if not prog:
-                continue
-            planned = float(prog.planned_progress or 0)
-            actual = float(prog.actual_progress or 0)
-            if planned - actual > 0.15:
-                reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
-                break
+            for prog in latest_progresses:
+                planned = float(prog.planned_progress or 0)
+                actual = float(prog.actual_progress or 0)
+                if planned - actual > 0.15:
+                    reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
+                    break
 
     return bool(reasons), reasons
 

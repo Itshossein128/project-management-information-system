@@ -21,3 +21,6 @@
 ## 2026-07-17 - Resolve N+1 query in Subcontractor API
 **Learning:** Using `.filter()`, `.count()`, or `.exists()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer or looped service function completely bypasses Django's `prefetch_related` cache, leading to severe N+1 query performance degradation.
 **Action:** Always prefetch related collections in the viewset (`.prefetch_related('scores', 'warnings')`), and strictly iterate over `.all()` in Python (using list comprehensions, `max()`, `sum()`, or `any()`) when serializing or computing logic for lists of objects.
+## 2026-07-20 - [Avoid N+1 queries in Django loops]
+**Learning:** Found N+1 queries being caused in `compute_risk_flag` when iterating over contract items to check their associated `ActivityProgress`. It issued a new `.filter()` query for every item to find the latest progress.
+**Action:** Replaced loop querying with a single aggregated query fetching the latest progress for all relevant activity IDs using `__in` and `.distinct('activity_id')`.
