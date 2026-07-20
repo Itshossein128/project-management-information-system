@@ -85,6 +85,8 @@ The global `inventory.Item` API at `/api/items/` is **deprecated**. New work mus
 
 Known gaps (non-blocking): labor model is Shiraz job-title grid (not blueprint type/discipline); photo upload needs MinIO; multi-discipline = entity tabs (not civil/electrical sub-reports).
 
+See module docs: `apps/api/core/field_reports/ENDPOINTS.md`.
+
 ## Sprint 5 completion checklist (Offline Sync)
 
 | Task | Status |
@@ -102,6 +104,8 @@ Known gaps (non-blocking): labor model is Shiraz job-title grid (not blueprint t
 | **C-08** Weighted progress + S-curve endpoint | Done — `schedule/progress_views.py` |
 | **K-01** EVM KPIs (partial) | Done — SPI, CPI, EAC, VAC via `/progress/kpis/` |
 | **UI-05** Progress dashboard | Done — `/projects/{id}/progress` |
+
+See module docs: `apps/api/core/schedule/ENDPOINTS.md` (progress, activities, imports, Gantt).
 
 ## API paths
 
@@ -121,6 +125,8 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 | **C-10** Actual cost ledger + cost pool allocation | Done — labor auto-cost, auto-allocate API, manual allocate |
 | **UI-06** Cost control screens | Done — `/projects/{id}/costs` (budget, actual, variance, pools) |
 | **Tests** | Done — `cost_control/tests/` in CI |
+
+See module docs: `apps/api/core/cost_control/ENDPOINTS.md`.
 
 ## Sprint 8 completion checklist (Contracts & IPC)
 

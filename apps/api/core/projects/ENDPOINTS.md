@@ -99,12 +99,12 @@ This module handles the core project management functionality within IPCAS, incl
 The `projects` module acts as the root for many other domain-specific endpoints, all nested under a `/<project_pk>/` prefix. These include:
 *   `/inventory/`
 *   `/wbs/`
-*   `/schedule/`
-*   `/field_reports/`
+*   `/schedule/` (activities, progress, Gantt — see `schedule/ENDPOINTS.md`)
+*   `/daily-reports/`, weather, equipment, labor analytics (see `field_reports/ENDPOINTS.md`)
 *   `/risk/`
 *   `/hr/`
 *   `/sub_reports/`
-*   `/cost_control/`
+*   `/budgets/`, `/costs/`, `/cost-pools/` (see `cost_control/ENDPOINTS.md`)
 *   `/resources/`
 *   `/cash_flow/`
 *   `/contracts/`
