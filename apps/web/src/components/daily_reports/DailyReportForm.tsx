@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import { CloudOff, Save } from "lucide-react";
+import { CloudOff, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useDailyReportForm } from "@/app/hooks/useDailyReportForm";
 import { usePermission } from "@/app/contexts/project-context";
@@ -293,9 +293,14 @@ export function DailyReportForm({
             onClick={() => saveHeader.mutate()}
             disabled={saveHeader.isPending || !header.report_date}
             data-testid="daily-report-save-header"
-            className="inline-flex items-center gap-1 rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            aria-busy={saveHeader.isPending}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
-            <Save className="size-4" />
+            {saveHeader.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Save className="size-4" />
+            )}
             {reportId ? "ذخیره هدر" : "ایجاد گزارش"}
           </button>
         </div>
