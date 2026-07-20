@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from common.viewsets import ProjectScopedViewSet
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
+from sub_reports import services
 from sub_reports.models import DisciplineSubReport, SubReportStatus
 from sub_reports.serializers import DisciplineSubReportSerializer
 
@@ -58,37 +59,18 @@ class DisciplineSubReportViewSet(ProjectScopedViewSet):
     @action(detail=True, methods=['post'])
     def submit(self, request, project_pk=None, pk=None):
         obj = self.get_object()
-        if obj.status != SubReportStatus.DRAFT:
-            raise ValidationError('فقط گزارش‌های پیش‌نویس قابل ارسال هستند')
-        obj.status = SubReportStatus.SUBMITTED
-        obj.submitted_by = request.user
-        obj.submitted_at = timezone.now()
-        obj.updated_by = request.user
-        obj.save(update_fields=['status', 'submitted_by', 'submitted_at', 'updated_by', 'updated_at'])
+        obj = services.submit_sub_report(obj, request.user)
         return Response(self.get_serializer(obj).data)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, project_pk=None, pk=None):
         obj = self.get_object()
-        if obj.status != SubReportStatus.SUBMITTED:
-            raise ValidationError('فقط گزارش‌های ارسال شده قابل تأیید هستند')
-        obj.status = SubReportStatus.APPROVED
-        obj.approved_by = request.user
-        obj.approved_at = timezone.now()
-        obj.updated_by = request.user
-        obj.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_by', 'updated_at'])
+        obj = services.approve_sub_report(obj, request.user)
         return Response(self.get_serializer(obj).data)
 
     @action(detail=True, methods=['post'])
     def reject(self, request, project_pk=None, pk=None):
         obj = self.get_object()
-        if obj.status != SubReportStatus.SUBMITTED:
-            raise ValidationError('فقط گزارش‌های ارسال شده قابل رد هستند')
-        reason = (request.data.get('rejection_reason') or '').strip()
-        if len(reason) < 10:
-            raise ValidationError({'rejection_reason': 'دلیل رد باید حداقل ۱۰ کاراکتر باشد'})
-        obj.status = SubReportStatus.REJECTED
-        obj.rejection_reason = reason
-        obj.updated_by = request.user
-        obj.save(update_fields=['status', 'rejection_reason', 'updated_by', 'updated_at'])
+        rejection_reason = request.data.get('rejection_reason')
+        obj = services.reject_sub_report(obj, request.user, rejection_reason)
         return Response(self.get_serializer(obj).data)
