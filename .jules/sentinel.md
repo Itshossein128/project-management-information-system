@@ -16,3 +16,8 @@
 **Vulnerability:** Found `ValueError` exceptions being cast to string and returned directly in 400 Bad Request responses within `apps/api/core/storage/views.py`.
 **Learning:** Returning `str(exc)` can leak sensitive internal information, stack traces, or validation details that an attacker could use to probe the system. This violates the principle of failing securely.
 **Prevention:** Always catch exceptions, log the full details server-side using `logger.exception(...)` so debugging information is preserved internally, and return generic, safe messages like `'Invalid request.'` to the client. Keep any specific safe messages (like `'Not found.'` mapped to 404) explicitly checked, rather than relying on dynamic error strings.
+
+## 2024-07-18 - Missing Django Security Headers
+**Vulnerability:** The Django configuration (`apps/api/core/config/settings.py`) lacked standard production security headers and secure cookie configurations, which left the application vulnerable to basic web attacks like Clickjacking and MIME sniffing.
+**Learning:** Even when building a REST API, Django's built-in `SecurityMiddleware` and cookie settings (like `X_FRAME_OPTIONS`, `SECURE_CONTENT_TYPE_NOSNIFF`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`) must be explicitly enabled for defense-in-depth, especially when session authentication is active.
+**Prevention:** Always ensure standard security headers and secure cookie flags are defined and mapped correctly to the `DEBUG` state in Django configuration files to protect production environments automatically.

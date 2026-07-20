@@ -279,3 +279,9 @@ CACHES = {
 RATELIMIT_USE_CACHE = 'default'
 RATELIMIT_ENABLE = True
 RATELIMIT_VIEW = 'authentication.ratelimit_handlers.ratelimit_view'
+
+# Security Settings
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+X_FRAME_OPTIONS = 'DENY'
