@@ -11,8 +11,12 @@ def upload_file_to_s3(file_obj, project_id, prefix='documents') -> tuple[str, st
     """Upload file and return (url, filename, size_kb)."""
     import boto3
     import os
+    from rest_framework.exceptions import ValidationError
 
     original_name = file_obj.name or ''
+
+    if '..' in original_name or '/' in original_name or '\\' in original_name:
+        raise ValidationError('Invalid filename: Path traversal attempts are not allowed.')
 
     # Standardize path separators and just use the basename to discard path components.
     safe_name = os.path.basename(original_name.replace('\\', '/'))

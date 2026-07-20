@@ -16,3 +16,8 @@
 **Vulnerability:** Found `ValueError` exceptions being cast to string and returned directly in 400 Bad Request responses within `apps/api/core/storage/views.py`.
 **Learning:** Returning `str(exc)` can leak sensitive internal information, stack traces, or validation details that an attacker could use to probe the system. This violates the principle of failing securely.
 **Prevention:** Always catch exceptions, log the full details server-side using `logger.exception(...)` so debugging information is preserved internally, and return generic, safe messages like `'Invalid request.'` to the client. Keep any specific safe messages (like `'Not found.'` mapped to 404) explicitly checked, rather than relying on dynamic error strings.
+
+## 2024-07-19 - Explicitly Reject Path Traversal Attempts
+**Vulnerability:** Document upload logic in `apps/api/core/documents/services/upload_service.py` relied solely on silent sanitization (`os.path.basename`) when processing client-provided filenames.
+**Learning:** While `os.path.basename` sanitizes the filename, explicitly failing and rejecting payloads containing path traversal characters (`..`, `/`, `\`) provides stronger defense-in-depth and is a preferred security posture over silently modifying malicious input. Note that this supersedes previous learnings about just using `os.path.basename` due to the explicit requirement to explicitly reject such inputs.
+**Prevention:** Always add explicit checks to reject malicious filenames (e.g. by raising `ValidationError`) early in the pipeline before performing any file operations or relying on silent sanitization functions.
