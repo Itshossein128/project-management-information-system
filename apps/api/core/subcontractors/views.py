@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 
 from common.cache_helpers import cache_key, get_cached_or_compute, params_fingerprint
 from common.cache_utils import invalidate_project_caches
+from common.viewsets import ProjectScopedViewSet
 from permissions.project import HasProjectPermission, IsProjectMember
 from subcontractors.models import Subcontractor, SubcontractorPerformanceScore, SubcontractorWarning
 from subcontractors.serializers import (
@@ -26,52 +27,26 @@ def _invalidate_subcontractor_caches(project_id):
     invalidate_project_caches(project_id)
 
 
-class SubScopedViewSet(viewsets.ModelViewSet):
+class SubScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_contracts'
     edit_permission = 'edit_contracts'
-
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
-
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
 
     def get_queryset(self):
         from django.db.models import Prefetch
         from subcontractors.models import SubcontractorPerformanceScore, SubcontractorWarning
         return Subcontractor.objects.filter(
-            project_id=self.kwargs['project_pk'],
+            project_id=self.get_project_id(),
             is_deleted=False
         ).prefetch_related(
             Prefetch('scores', queryset=SubcontractorPerformanceScore.objects.filter(is_deleted=False).order_by('-score_date')),
             Prefetch('warnings', queryset=SubcontractorWarning.objects.filter(is_deleted=False).order_by('-warning_date')),
         )
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+    def post_save(self, instance):
         _invalidate_subcontractor_caches(self.kwargs['project_pk'])
 
-    def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+    def post_delete(self, instance):
         _invalidate_subcontractor_caches(self.kwargs['project_pk'])
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        _invalidate_subcontractor_caches(self.kwargs['project_pk'])
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubcontractorViewSet(SubScopedViewSet):
