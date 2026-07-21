@@ -24,3 +24,7 @@
 ## 2024-07-18 - Resolve N+1 query in Subcontractor API
 **Learning:** Using `.filter()` or `.order_by()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer completely bypasses Django's `prefetch_related` cache, leading to N+1 query performance degradation. Attempting to solve this *only* in the serializer by doing Python-level sorting/filtering can be dangerous for large datasets (OOM or slow responses).
 **Action:** Use a `Prefetch` object with a custom `queryset` in the View to do the filtering/sorting at the database level during the initial prefetch. Then, in the serializer, strictly iterate over `.all()` in Python to utilize the prefetched cache.
+
+## 2024-05-24 - Prevent N+1 queries in temporal aggregations
+**Learning:** Functions that aggregate data over intervals (like daily S-curve points) can easily cause N+1 query problems if they call individual database-querying helpers inside the loop. In `get_s_curve_data`, calling `get_planned_progress_on_date` and `get_project_progress_on_date` per day resulted in 2N queries.
+**Action:** When calculating data over a chronological interval, fetch all required underlying records upfront in a single query ordered by date, then iterate over the interval points while advancing a pointer through the prefetched records to update state in memory.
