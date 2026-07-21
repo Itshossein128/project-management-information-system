@@ -30,3 +30,6 @@
 Improved the `PasswordInput` component UX by:
 1. Adding right padding (`pr-10`) to the input field so that long passwords don't overflow and hide beneath the visibility toggle icon.
 2. Adding `onPointerDown={(e) => e.preventDefault()}` to the toggle button to prevent the input field from losing focus when the user toggles password visibility. This allows the user to seamlessly continue typing after clicking the toggle.
+## 2026-07-21 - Added aria-busy and aria-hidden to loading buttons
+**Learning:** For components that manage a loading state with an internal spinner, applying `aria-busy` to the root element accurately conveys the component's state to screen readers. In tandem, setting `aria-hidden="true"` on the internal spinner prevents redundant or confusing announcements.
+**Action:** Always add `aria-busy` on the container and `aria-hidden` on the visual loading indicators (like `Loader2`) inside interactive elements that have a loading state.
