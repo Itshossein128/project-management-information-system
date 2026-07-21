@@ -6,6 +6,7 @@ import logging
 from datetime import date
 from decimal import Decimal
 
+from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -99,6 +100,46 @@ def _upsert_ipc_cash_transaction(ipc, user, payment_date=None):
     _invalidate(ipc.project_id)
 
 
+
+
+@transaction.atomic
+def create_ipc(project_id, contract, validated_data, user):
+    ipc = IPC.objects.create(
+        project_id=project_id,
+        contract=contract,
+        ipc_number=next_ipc_number(contract.id),
+        period_start=validated_data.get('period_start'),
+        period_end=validated_data.get('period_end'),
+        prepared_date=validated_data.get('prepared_date') or date.today(),
+        notes=validated_data.get('notes', ''),
+        created_by=user,
+        updated_by=user,
+    )
+    try:
+        from contracts.tasks import populate_ipc_async
+        populate_ipc_async.delay(str(ipc.id))
+    except Exception:
+        auto_populate_ipc(ipc.id)
+        apply_deductions(ipc.id)
+    ipc.refresh_from_db()
+    return ipc
+
+
+
+@transaction.atomic
+def update_ipc(ipc, validated_data, user):
+    from rest_framework.exceptions import ValidationError
+    if ipc.status != IPCStatus.DRAFT:
+        raise ValidationError({'detail': 'Only draft IPCs can be edited.'})
+    for field in ('period_start', 'period_end', 'prepared_date', 'notes'):
+        if field in validated_data:
+            setattr(ipc, field, validated_data[field])
+    ipc.updated_by = user
+    ipc.save()
+    return ipc
+
+
+@transaction.atomic
 def auto_populate_ipc(ipc_id):
     """
     Automatically populates the items of an Interim Payment Certificate (IPC) based on
@@ -169,6 +210,7 @@ def auto_populate_ipc(ipc_id):
     ipc.save(update_fields=['gross_amount', 'updated_at'])
 
 
+@transaction.atomic
 def apply_deductions(ipc_id):
     """
     Recalculates and applies standard automatic deductions (such as retention, tax, and
@@ -264,6 +306,7 @@ def next_change_number(contract_id) -> int:
     return (last.change_number + 1) if last else 1
 
 
+@transaction.atomic
 def submit_ipc(ipc, user):
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Only draft IPCs can be submitted.')
@@ -276,6 +319,7 @@ def submit_ipc(ipc, user):
     return ipc
 
 
+@transaction.atomic
 def approve_ipc(ipc, user):
     from datetime import timedelta
     ipc.status = IPCStatus.APPROVED
@@ -287,6 +331,7 @@ def approve_ipc(ipc, user):
     return ipc
 
 
+@transaction.atomic
 def pay_ipc(ipc, user, payment_date):
     ipc.status = IPCStatus.PAID
     ipc.actual_payment_date = payment_date
@@ -296,6 +341,7 @@ def pay_ipc(ipc, user, payment_date):
     return ipc
 
 
+@transaction.atomic
 def reject_ipc(ipc, user, reason):
     ipc.status = IPCStatus.DRAFT
     ipc.rejection_reason = reason
@@ -304,6 +350,7 @@ def reject_ipc(ipc, user, reason):
     return ipc
 
 
+@transaction.atomic
 def update_ipc_item(ipc, item, qty_current, user):
     qty_current = Decimal(str(qty_current))
     item.qty_current = qty_current
@@ -323,6 +370,7 @@ def update_ipc_item(ipc, item, qty_current, user):
     return ipc
 
 
+@transaction.atomic
 def add_manual_deduction(ipc, deduction_type, amount, description, user):
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
@@ -341,6 +389,7 @@ def add_manual_deduction(ipc, deduction_type, amount, description, user):
     return ipc
 
 
+@transaction.atomic
 def update_manual_deduction(ipc, deduction, amount, description, user):
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
@@ -355,6 +404,7 @@ def update_manual_deduction(ipc, deduction, amount, description, user):
     return ipc
 
 
+@transaction.atomic
 def delete_manual_deduction(ipc, deduction, user):
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')

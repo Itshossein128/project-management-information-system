@@ -28,8 +28,10 @@ from contracts.serializers import (
     IPCItemSerializer,
     IPCListSerializer,
 )
-from contracts.services.contract_service import bulk_upsert_contract_items, approve_change_order, reject_change_order
+from contracts.services.contract_service import bulk_upsert_contract_items, approve_change_order, reject_change_order, create_change_order
 from contracts.services.ipc_service import (
+    create_ipc,
+    update_ipc,
     apply_deductions,
     auto_populate_ipc,
     next_change_number,
@@ -136,14 +138,11 @@ class ChangeOrderView(APIView):
     @extend_schema(summary='Create change order', tags=['Contracts'])
     def post(self, request, project_pk=None, pk=None):
         contract = get_object_or_404(Contract, pk=pk, project_id=project_pk, is_deleted=False)
-        co = ChangeOrder.objects.create(
-            contract=contract,
-            change_number=next_change_number(contract.id),
-            description=request.data.get('description', ''),
-            amount_change=request.data.get('amount_change', 0),
-            status=ChangeOrderStatus.DRAFT,
-            created_by=request.user,
-            updated_by=request.user,
+        co = create_change_order(
+            contract,
+            request.data.get('description', ''),
+            request.data.get('amount_change', 0),
+            request.user,
         )
         return Response(ChangeOrderSerializer(co).data, status=201)
 
@@ -238,38 +237,15 @@ class IPCViewSet(viewsets.ViewSet):
         contract = get_object_or_404(
             Contract, pk=ser.validated_data['contract_id'], project_id=project_pk, is_deleted=False
         )
-        ipc = IPC.objects.create(
-            project_id=project_pk,
-            contract=contract,
-            ipc_number=next_ipc_number(contract.id),
-            period_start=ser.validated_data.get('period_start'),
-            period_end=ser.validated_data.get('period_end'),
-            prepared_date=ser.validated_data.get('prepared_date') or date.today(),
-            notes=ser.validated_data.get('notes', ''),
-            created_by=request.user,
-            updated_by=request.user,
-        )
-        try:
-            from contracts.tasks import populate_ipc_async
-            populate_ipc_async.delay(str(ipc.id))
-        except Exception:
-            auto_populate_ipc(ipc.id)
-            apply_deductions(ipc.id)
-        ipc.refresh_from_db()
+        ipc = create_ipc(project_pk, contract, ser.validated_data, request.user)
         return Response(IPCDetailSerializer(ipc).data, status=201)
 
     def partial_update(self, request, project_pk=None, pk=None):
         self.action = 'partial_update'
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        if ipc.status != IPCStatus.DRAFT:
-            return Response({'detail': 'Only draft IPCs can be edited.'}, status=400)
         ser = IPCDetailSerializer(ipc, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        for field in ('period_start', 'period_end', 'prepared_date', 'notes'):
-            if field in ser.validated_data:
-                setattr(ipc, field, ser.validated_data[field])
-        ipc.updated_by = request.user
-        ipc.save()
+        ipc = update_ipc(ipc, ser.validated_data, request.user)
         return Response(IPCDetailSerializer(ipc).data)
 
 
