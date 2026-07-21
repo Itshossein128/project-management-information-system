@@ -30,3 +30,5 @@
 Improved the `PasswordInput` component UX by:
 1. Adding right padding (`pr-10`) to the input field so that long passwords don't overflow and hide beneath the visibility toggle icon.
 2. Adding `onPointerDown={(e) => e.preventDefault()}` to the toggle button to prevent the input field from losing focus when the user toggles password visibility. This allows the user to seamlessly continue typing after clicking the toggle.
+## 2026-07-21 - Overriding Shadcn Alert Opinionated Styles
+When using Shadcn UI's `Alert` component, it enforces opinionated styles like `[&>svg]:size-4` for icons and specific text colors via `AlertDescription`. To override the icon size, wrap the SVG in a `<div>`. To override text colors (e.g., for custom banners), avoid using `AlertDescription` and apply text color overrides directly.

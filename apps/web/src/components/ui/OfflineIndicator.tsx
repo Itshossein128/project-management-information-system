@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { AlertTriangle, CloudOff, RefreshCw } from "lucide-react";
 import { cn } from "@/app/lib/utils";
+import { Alert } from "@/components/ui/alert";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import {
   countUnresolvedConflicts,
@@ -56,78 +57,87 @@ export function OfflineIndicator() {
 
   if (conflicts > 0) {
     return (
-      <div
+      <Alert
         data-testid="offline-indicator"
-        className="flex w-full items-center justify-between gap-3 bg-red-600 px-4 py-2 text-sm text-white"
+        variant="destructive"
+        className="rounded-none border-0 bg-red-600 p-0 text-white [&_*]:text-white"
       >
-        <span className="flex items-center gap-2">
-          <AlertTriangle className="size-4" aria-hidden />
-          {`${conflicts} تعارض داده نیاز به بررسی دارد`}
-        </span>
-        {conflictsHref ? (
-          <Link
-            to={conflictsHref}
-            className="rounded bg-white/20 px-3 py-1 font-medium hover:bg-white/30"
-          >
-            مشاهده تعارض‌ها
-          </Link>
-        ) : null}
-      </div>
+        <div className="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm">
+          <span className="flex items-center gap-2">
+            <AlertTriangle className="size-4" aria-hidden />
+            {`${conflicts} تعارض داده نیاز به بررسی دارد`}
+          </span>
+          {conflictsHref ? (
+            <Link
+              to={conflictsHref}
+              className="rounded bg-white/20 px-3 py-1 font-medium hover:bg-white/30"
+            >
+              مشاهده تعارض‌ها
+            </Link>
+          ) : null}
+        </div>
+      </Alert>
     );
   }
 
   if (isOnline && stats.syncing > 0) {
     return (
-      <div
+      <Alert
         data-testid="offline-indicator"
-        className="flex w-full items-center gap-2 bg-blue-600 px-4 py-2 text-sm text-white"
+        className="rounded-none border-0 bg-blue-600 p-0 text-white"
       >
-        <RefreshCw className="size-4 animate-spin" aria-hidden />
-        {`در حال همگام‌سازی... (${stats.syncing} مورد)`}
-      </div>
+        <div className="flex w-full items-center gap-2 px-4 py-2 text-sm">
+          <RefreshCw className="size-4 animate-spin" aria-hidden />
+          {`در حال همگام‌سازی... (${stats.syncing} مورد)`}
+        </div>
+      </Alert>
     );
   }
 
   if (!isOnline) {
     return (
-      <div
+      <Alert
         data-testid="offline-indicator"
-        className="flex w-full items-center justify-between gap-3 bg-amber-500 px-4 py-2 text-sm text-amber-950"
+        className="rounded-none border-0 bg-amber-500 p-0 text-amber-950"
       >
-        <span className="flex items-center gap-2">
-          <CloudOff className="size-4" aria-hidden />
-          آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند
-        </span>
-        {stats.pending > 0 ? (
-          <span className="rounded-full bg-amber-950/15 px-3 py-0.5 font-medium">
-            {`در صف: ${stats.pending} مورد`}
+        <div className="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm">
+          <span className="flex items-center gap-2">
+            <CloudOff className="size-4" aria-hidden />
+            آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند
           </span>
-        ) : null}
-      </div>
+          {stats.pending > 0 ? (
+            <span className="rounded-full bg-amber-950/15 px-3 py-0.5 font-medium">
+              {`در صف: ${stats.pending} مورد`}
+            </span>
+          ) : null}
+        </div>
+      </Alert>
     );
   }
 
   if (stats.pending > 0 || stats.failed > 0) {
     return (
-      <div
+      <Alert
         data-testid="offline-indicator"
         className={cn(
-          "flex w-full items-center justify-between gap-3 bg-amber-100 px-4 py-2 text-sm text-amber-900",
-          "dark:bg-amber-950 dark:text-amber-100",
+          "rounded-none border-0 p-0",
+          "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100",
         )}
       >
-        <span className="flex items-center gap-2">
-          <CloudOff className="size-4" aria-hidden />
-          {stats.failed > 0
-            ? `${stats.failed} مورد ناموفق — ${stats.pending} در صف`
-            : `${stats.pending} مورد در انتظار همگام‌سازی`}
-        </span>
-        {conflictsHref && stats.failed > 0 ? (
-          <Link to={conflictsHref} className="font-medium underline">
-            مدیریت صف
-          </Link>
-        ) : null}
-      </div>
+        <div className="flex w-full items-center justify-between gap-3 px-4 py-2 text-sm">
+          <span className="flex items-center gap-2">
+            <CloudOff className="size-4" aria-hidden />
+            {stats.failed > 0
+              ? `${stats.failed} مورد ناموفق — ${stats.pending} در صف`
+              : `${stats.pending} مورد در انتظار همگام‌سازی`}
+          </span>
+          {conflictsHref && stats.failed > 0 ? (
+            <Link to={conflictsHref} className="font-medium underline">
+              مدیریت صف
+            </Link>
+          ) : null}
+        </div>
+      </Alert>
     );
   }
 
