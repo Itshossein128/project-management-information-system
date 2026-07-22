@@ -60,7 +60,7 @@ export function AppShellHeader({ className }: AppShellHeaderProps) {
           </h1>
         </div>
 
-        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2.5 sm:gap-3">
           <NotificationBell />
           <AppPreferencesBar />
           <span
