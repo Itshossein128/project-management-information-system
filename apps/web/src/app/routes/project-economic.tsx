@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 
 type Tab = "overview" | "inflation" | "financing" | "forecast" | "simulation" | "sensitivity" | "history";
@@ -83,27 +84,43 @@ function EconomicContent() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "overview" && <ProfitLayersPanel snapshot={snapshot} />}
-      {tab === "inflation" && (
-        <InflationDetailTable projectId={projectId} canEdit={canEdit} asOf={asOf || undefined} />
-      )}
-      {tab === "financing" && <FinancingCostPanel projectId={projectId} />}
-      {tab === "forecast" && <EvmForecastPanel projectId={projectId} asOf={asOf || undefined} />}
-      {tab === "simulation" && <MonteCarloPanel projectId={projectId} />}
-      {tab === "sensitivity" && <SensitivityTornadoChart projectId={projectId} />}
-      {tab === "history" && <EconomicHistoryChart projectId={projectId} />}
+        <ShadcnTabsContent value="overview" className="mt-0">
+          <ProfitLayersPanel snapshot={snapshot} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="inflation" className="mt-0">
+          <InflationDetailTable projectId={projectId} canEdit={canEdit} asOf={asOf || undefined} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="financing" className="mt-0">
+          <FinancingCostPanel projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="forecast" className="mt-0">
+          <EvmForecastPanel projectId={projectId} asOf={asOf || undefined} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="simulation" className="mt-0">
+          <MonteCarloPanel projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="sensitivity" className="mt-0">
+          <SensitivityTornadoChart projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="history" className="mt-0">
+          <EconomicHistoryChart projectId={projectId} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }

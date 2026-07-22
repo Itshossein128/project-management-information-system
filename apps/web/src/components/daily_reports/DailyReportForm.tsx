@@ -21,6 +21,7 @@ import { warmProjectCache } from "@/app/lib/offlineCache";
 import { isNetworkError } from "@/app/lib/offlineWrite";
 import { isoToJalali, jalaliToIso } from "@/app/lib/jalali-utils";
 import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivityTab } from "./ActivityTab";
 import { ApprovalStatusBar } from "./ApprovalStatusBar";
 import { ConcreteTab } from "./ConcreteTab";
@@ -305,39 +306,36 @@ export function DailyReportForm({
         </p>
       )}
 
-      <div className="rounded-xl border border-border bg-card">
-        <div className="flex flex-wrap gap-1 border-b border-border p-2">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              onClick={() => setActiveTab(t.key)}
-              data-testid={`report-tab-${t.key}`}
-              className={
-                activeTab === t.key
-                  ? "rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
-                  : "rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/40"
-              }
-            >
-              {t.label}
-              {counts[t.key] > 0 ? (
-                <span className="ms-1 rounded-full bg-black/10 px-1.5 text-xs dark:bg-white/10">
-                  {counts[t.key]}
-                </span>
-              ) : null}
-            </button>
-          ))}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir="rtl">
+        <div className="rounded-xl border border-border bg-card">
+          <TabsList className="flex h-auto flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-2">
+            {TABS.map((t) => (
+              <TabsTrigger
+                key={t.key}
+                value={t.key}
+                data-testid={`report-tab-${t.key}`}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                {t.label}
+                {counts[t.key] > 0 ? (
+                  <span className="ms-1 rounded-full bg-black/10 px-1.5 text-xs dark:bg-white/10">
+                    {counts[t.key]}
+                  </span>
+                ) : null}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="p-4">
+            <ShadcnTabsContent value="activities" className="mt-0"><ActivityTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="labor" className="mt-0"><LaborTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="equipment" className="mt-0"><EquipmentTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="materials" className="mt-0"><MaterialsTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="concrete" className="mt-0"><ConcreteTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="labor_camp" className="mt-0"><LaborCampTab {...tabProps} /></ShadcnTabsContent>
+            <ShadcnTabsContent value="incidents" className="mt-0"><IncidentsTab {...tabProps} /></ShadcnTabsContent>
+          </div>
         </div>
-        <div className="p-4">
-          {activeTab === "activities" ? <ActivityTab {...tabProps} /> : null}
-          {activeTab === "labor" ? <LaborTab {...tabProps} /> : null}
-          {activeTab === "equipment" ? <EquipmentTab {...tabProps} /> : null}
-          {activeTab === "materials" ? <MaterialsTab {...tabProps} /> : null}
-          {activeTab === "concrete" ? <ConcreteTab {...tabProps} /> : null}
-          {activeTab === "labor_camp" ? <LaborCampTab {...tabProps} /> : null}
-          {activeTab === "incidents" ? <IncidentsTab {...tabProps} /> : null}
-        </div>
-      </div>
+      </Tabs>
     </div>
   );
 }

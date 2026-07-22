@@ -19,6 +19,7 @@ import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/pag
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "balance" | "requests" | "transactions";
 
@@ -426,23 +427,28 @@ function MaterialBalanceContent() {
   return (
     <div className="space-y-6">
       <PageHeader title="بالانس مصالح" subtitle={project.project_name} />
-      <div className="flex flex-wrap gap-2 border-b border-border pb-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            size="sm"
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
-      {tab === "balance" ? <BalanceTab projectId={projectId} /> : null}
-      {tab === "requests" ? <RequestsTab projectId={projectId} canEdit={canEdit} /> : null}
-      {tab === "transactions" ? (
-        <TransactionsTab projectId={projectId} canEdit={canEdit} />
-      ) : null}
+
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <ShadcnTabsContent value="balance" className="mt-0">
+          <BalanceTab projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="requests" className="mt-0">
+          <RequestsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="transactions" className="mt-0">
+          <TransactionsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }

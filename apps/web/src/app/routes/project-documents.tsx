@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "archive" | "correspondence" | "meetings";
 
@@ -95,22 +96,16 @@ function DocumentsContent() {
     <div className="space-y-6">
       <PageHeader title="مدارک و مکاتبات" subtitle={project.project_name} />
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="بخش‌های مدارک">
-        {tabs.map(([id, label]) => (
-          <Button
-            key={id}
-            role="tab"
-            aria-selected={tab === id}
-            variant={tab === id ? "primary" : "secondary"}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4">
+          {tabs.map(([id, label]) => (
+            <TabsTrigger key={id} value={id}>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "archive" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="archive" className="space-y-4 mt-0">
           <Field name="doc_search" label="جستجو" htmlFor="doc-search">
             {() => (
               <Input
@@ -164,11 +159,9 @@ function DocumentsContent() {
               ))}
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "correspondence" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="correspondence" className="space-y-4 mt-0">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">باز</p>
@@ -225,11 +218,9 @@ function DocumentsContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "meetings" ? (
-        <div role="tabpanel">
+        <ShadcnTabsContent value="meetings" className="mt-0">
           {mloading ? (
             <LoadingSkeleton rows={6} />
           ) : mError ? (
@@ -267,8 +258,8 @@ function DocumentsContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }

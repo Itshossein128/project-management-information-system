@@ -7,6 +7,7 @@ import { GapAnalysisTab } from "@/components/cashflow/GapAnalysisTab";
 import { TransactionsTab } from "@/components/cashflow/TransactionsTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "transactions" | "forecast" | "gap";
 
@@ -38,23 +39,27 @@ function CashFlowContent() {
     <div className="space-y-6">
       <PageHeader title="جریان نقدی" subtitle={project.project_name} />
 
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "transactions" && (
-        <TransactionsTab projectId={projectId} canEdit={canEdit} />
-      )}
-      {tab === "forecast" && <ForecastTab projectId={projectId} />}
-      {tab === "gap" && <GapAnalysisTab projectId={projectId} />}
+        <ShadcnTabsContent value="transactions" className="mt-0">
+          <TransactionsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="forecast" className="mt-0">
+          <ForecastTab projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="gap" className="mt-0">
+          <GapAnalysisTab projectId={projectId} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }
