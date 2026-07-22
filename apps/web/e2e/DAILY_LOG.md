@@ -9,3 +9,8 @@ Date: 2025-07-10
 Selected flow: Authentication (Module 18)
 Coverage score: 2/4 branches tested
 Reason: Picked earliest flow with 0 coverage (auth is foundational)
+
+Date: 2026-07-22
+Selected flow: Finance (Budget & Cost)
+Coverage score: 2/15 branches tested
+Reason: Flow marked 0% in coverage map, picking to increase coverage for Sprint 7 Budget & Cost Control module.
