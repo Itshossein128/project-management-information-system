@@ -201,9 +201,44 @@ def get_s_curve_data(
             logger.debug('S-curve cache read failed', exc_info=True)
 
     result = []
+
+    # ⚡ Bolt: Fetch all activities and relevant progress in a single sweep to avoid N+1 queries
+    activities = Activity.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        weight__isnull=False,
+    )
+    activities_list = list(activities)
+    total_weight = sum(float(a.weight) for a in activities_list)
+    activity_ids = [a.id for a in activities_list]
+
+    all_progress = list(
+        ActivityProgress.objects.filter(
+            activity_id__in=activity_ids,
+            report_date__lte=date_to,
+        ).order_by('report_date', 'activity_id')
+    )
+
+    latest_planned: dict = {}
+    latest_actual: dict = {}
+    progress_idx = 0
+
     for point_date in _aggregate_interval_points(project_id, date_from, date_to, interval):
-        planned = get_planned_progress_on_date(project_id, point_date)
-        actual = get_project_progress_on_date(project_id, point_date)
+        while progress_idx < len(all_progress) and all_progress[progress_idx].report_date <= point_date:
+            row = all_progress[progress_idx]
+            if row.planned_progress is not None:
+                latest_planned[row.activity_id] = float(row.planned_progress)
+            if row.actual_progress is not None:
+                latest_actual[row.activity_id] = float(row.actual_progress)
+            progress_idx += 1
+
+        if total_weight == 0:
+            planned = 0.0
+            actual = 0.0
+        else:
+            planned = sum(float(a.weight) * latest_planned.get(a.id, 0.0) for a in activities_list) / total_weight
+            actual = sum(float(a.weight) * latest_actual.get(a.id, 0.0) for a in activities_list) / total_weight
+
         result.append({
             'date': point_date.strftime('%Y-%m-%d'),
             'planned_progress': round(planned * 100, 2),

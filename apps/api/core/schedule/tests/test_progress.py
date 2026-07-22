@@ -5,7 +5,6 @@ from django.utils import timezone
 
 from field_reports.models import ActivityRowShift, DailyReport, DailyReportActivity, ReportStatus
 from field_reports.tasks import recalculate_activity_progress
-from projects.models import Activity
 from schedule.models import ActivityProgress, BaselineActivity, BaselineSchedule
 from schedule.services.evm_service import compute_evm
 from schedule.services.progress_service import (
@@ -65,18 +64,22 @@ class TestProgressService:
         date_from = timezone.datetime(2024, 10, 1).date()
         date_to = timezone.datetime(2024, 10, 3).date()
         calls = {'n': 0}
-        original = get_project_progress_on_date
+
+        # We patch _aggregate_interval_points to count how many times the core loop is run
+        from schedule.services.progress_service import _aggregate_interval_points
+        original = _aggregate_interval_points
 
         def counted(*args, **kwargs):
             calls['n'] += 1
             return original(*args, **kwargs)
 
         monkeypatch.setattr(
-            'schedule.services.progress_service.get_project_progress_on_date',
+            'schedule.services.progress_service._aggregate_interval_points',
             counted,
         )
         get_s_curve_data(project.id, date_from, date_to, 'daily', force_refresh=True)
         first_calls = calls['n']
+        assert first_calls > 0
         get_s_curve_data(project.id, date_from, date_to, 'daily', force_refresh=False)
         assert calls['n'] == first_calls
         get_s_curve_data(project.id, date_from, date_to, 'daily', force_refresh=True)
