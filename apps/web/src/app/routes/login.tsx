@@ -69,12 +69,13 @@ export default function Login() {
   }
 
   return (
-    <div className='relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4'>
-      <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10'>
-        <div className='animate-aurora absolute -end-32 -top-32 h-96 w-96 rounded-full bg-brand-500/25 blur-3xl' />
-        <div className='animate-aurora absolute -bottom-32 -start-32 h-[26rem] w-[26rem] rounded-full bg-gold-500/20 blur-3xl [animation-delay:-6s]' />
-        <div className='animate-float absolute start-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-brand-400/10 blur-3xl' />
-        <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/70' />
+    <div className='relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-background p-4'>
+      <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10 overflow-hidden'>
+        <div className='animate-aurora absolute -top-24 end-[8%] h-[26rem] w-[26rem] rounded-full bg-brand-500/50 blur-3xl' />
+        <div className='animate-aurora absolute -bottom-24 start-[6%] h-[28rem] w-[28rem] rounded-full bg-gold-500/40 blur-3xl [animation-delay:-6s]' />
+        <div className='animate-float absolute start-1/2 top-1/3 h-80 w-80 -translate-x-1/2 rounded-full bg-brand-400/35 blur-3xl' />
+        <div className='animate-aurora absolute bottom-[12%] end-[18%] h-72 w-72 rounded-full bg-brand-300/35 blur-3xl [animation-delay:-11s]' />
+        <div className='absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/55' />
       </div>
       <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
         <AppPreferencesBar />
