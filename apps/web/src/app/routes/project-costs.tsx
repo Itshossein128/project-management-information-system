@@ -13,6 +13,7 @@ import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/pag
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "budget" | "actual" | "variance" | "pools";
 
@@ -100,24 +101,28 @@ function CostsContent() {
         />
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-border pb-2" data-testid="costs-tabs">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            size="sm"
-            variant={tab === t.id ? "primary" : "secondary"}
-            data-testid={`costs-tab-${t.id}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4" data-testid="costs-tabs">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id} data-testid={`costs-tab-${t.id}`}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "budget" ? <BudgetGrid projectId={projectId} canEdit={canEdit} /> : null}
-      {tab === "actual" ? <ActualCostsTab projectId={projectId} canEdit={canEdit} /> : null}
-      {tab === "variance" ? <VarianceTab projectId={projectId} /> : null}
-      {tab === "pools" ? <CostPoolTab projectId={projectId} canEdit={canEdit} /> : null}
+        <ShadcnTabsContent value="budget" className="mt-0">
+          <BudgetGrid projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="actual" className="mt-0">
+          <ActualCostsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="variance" className="mt-0">
+          <VarianceTab projectId={projectId} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="pools" className="mt-0">
+          <CostPoolTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -29,6 +29,7 @@ import { WarningTimeline } from "@/components/subcontractors/WarningTimeline";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as XLSX from "xlsx";
 
 type Tab = "performance" | "financial" | "warnings" | "activities";
@@ -264,23 +265,16 @@ function SubcontractorDetailContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="بخش‌های پیمانکار">
-        {tabs.map(([key, label]) => (
-          <Button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            variant={tab === key ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+        <TabsList className="mb-4">
+          {tabs.map(([key, label]) => (
+            <TabsTrigger key={key} value={key}>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "performance" ? (
-        <div className="space-y-6" role="tabpanel">
+        <ShadcnTabsContent value="performance" className="space-y-6 mt-0">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className={`text-4xl font-bold ${scoreColor(latest?.overall_score)}`}>
@@ -341,11 +335,9 @@ function SubcontractorDetailContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "financial" ? (
-        <div className="space-y-6" role="tabpanel">
+        <ShadcnTabsContent value="financial" className="space-y-6 mt-0">
           {!sub.contract ? (
             <EmptyState
               title="قراردادی متصل نیست"
@@ -415,11 +407,9 @@ function SubcontractorDetailContent() {
               )}
             </>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "warnings" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="warnings" className="space-y-4 mt-0">
           <div className="flex justify-end">
             {canEdit ? (
               <Button variant="primary" onClick={() => setWarningDrawer(true)}>
@@ -445,11 +435,9 @@ function SubcontractorDetailContent() {
               onResolve={(w) => setResolveModal(w)}
             />
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "activities" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="activities" className="space-y-4 mt-0">
           <div className="flex flex-wrap items-end gap-3">
             <JalaliDatePicker
               name="activity_from"
@@ -507,8 +495,8 @@ function SubcontractorDetailContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
+      </Tabs>
 
       <Drawer
         isOpen={scoreDrawer}
