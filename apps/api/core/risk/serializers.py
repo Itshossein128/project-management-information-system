@@ -5,6 +5,14 @@ from risk.models import BarrierCategory, BarrierStatus, EventType, RiskEvent
 
 
 class BarrierSerializer(serializers.ModelSerializer):
+    """
+    Standardizes data flow between the API and DB for barrier risk events.
+
+    Maps dates between Jalali for the frontend and Gregorian for the DB, and
+    provides logic to ensure a resolved_date is supplied when a barrier
+    is marked as resolved.
+    """
+
     log_date = JalaliDateField(source='event_date')
     resolved_date = JalaliDateField(required=False, allow_null=True)
     category_label = serializers.CharField(source='get_category_display', read_only=True)
@@ -48,6 +56,13 @@ class BarrierSerializer(serializers.ModelSerializer):
 
 
 class BarrierCreateSerializer(BarrierSerializer):
+    """
+    A specialized serializer for creating new barriers.
+
+    Overrides the create method to strictly enforce the `EventType.BARRIER`
+    event type regardless of user input.
+    """
+
     log_date = JalaliDateField(source='event_date')
 
     def create(self, validated_data):

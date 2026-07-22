@@ -17,6 +17,13 @@ from risk.serializers import BarrierCreateSerializer, BarrierSerializer
     destroy=extend_schema(summary='Soft-delete barrier log', tags=['Barriers']),
 )
 class BarrierLogViewSet(ProjectScopedViewSet):
+    """
+    Provides project-scoped CRUD operations for barrier logs.
+
+    Inherits from ProjectScopedViewSet to automatically filter operations to the
+    currently active project context.
+    """
+
     queryset = RiskEvent.objects.select_related('responsible_user').all()
     serializer_class = BarrierSerializer
     pagination_class = DefaultPageNumberPagination
@@ -30,6 +37,12 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         return BarrierSerializer
 
     def get_queryset(self):
+        """
+        Retrieves the base project-scoped queryset and applies filters.
+
+        Filters restrict results to only BARRIER event types, and allows further
+        filtering via query parameters for status, category, impact, and date ranges.
+        """
         qs = super().get_queryset().filter(event_type=EventType.BARRIER)
         params = self.request.query_params
         if params.get('status'):
@@ -49,6 +62,10 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         return qs.order_by('-event_date', '-created_at')
 
     def perform_create(self, serializer):
+        """
+        Injects project and user context upon creation, and strictly enforces
+        the BARRIER event type.
+        """
         serializer.save(
             project_id=self.get_project_id(),
             event_type=EventType.BARRIER,
@@ -57,6 +74,10 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         )
 
     def partial_update(self, request, *args, **kwargs):
+        """
+        Handles partial updates to a barrier log, validating that a resolved_date
+        is provided if the status is being changed to resolved.
+        """
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

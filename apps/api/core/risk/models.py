@@ -36,6 +36,14 @@ class BarrierStatus(models.TextChoices):
 
 
 class RiskEvent(AuditSoftDeleteModel):
+    """
+    Represents an event logged against a project, which can be of various types
+    such as delay, barrier, risk, claim, or change order.
+
+    Tracks details including the event's impact on schedule and cost, its
+    probability, severity, and current status (e.g., open, in progress, resolved).
+    """
+
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='risk_events')
     activity = models.ForeignKey(
         'projects.Activity',
