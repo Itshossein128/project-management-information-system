@@ -37,12 +37,15 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
+    <div className="overflow-x-auto rounded-xl border border-border/80 bg-card shadow-[var(--shadow-card)]">
       <table className="w-full min-w-[640px] text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted/50">
+          <tr className="border-b border-border/80 bg-muted/40">
             {columns.map((col) => (
-              <th key={col.key} className="px-4 py-3 text-start font-medium">
+              <th
+                key={col.key}
+                className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
                 {col.label}
               </th>
             ))}
@@ -53,8 +56,9 @@ export function DataTable<T>({
             <tr
               key={rowKey(row)}
               className={cn(
-                "border-b border-border last:border-0",
-                onRowClick && "cursor-pointer hover:bg-muted/40",
+                "border-b border-border/60 transition-colors duration-150 last:border-0",
+                onRowClick &&
+                  "cursor-pointer hover:bg-brand-50/60 dark:hover:bg-brand-950/30",
               )}
               onClick={() => onRowClick?.(row)}
             >

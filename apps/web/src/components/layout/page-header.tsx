@@ -55,7 +55,7 @@ export function LoadingSkeleton({ rows = 5, className }: { rows?: number; classN
   return (
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-10 animate-pulse rounded-md bg-muted" />
+        <div key={i} className="skeleton-shimmer h-10 rounded-lg" />
       ))}
     </div>
   );

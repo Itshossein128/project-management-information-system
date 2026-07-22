@@ -120,6 +120,79 @@
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-glow-sm: var(--shadow-glow-sm);
+
+  /* Custom keyframes exposed as Tailwind animate-* utilities */
+  --animate-fade-in: fade-in var(--duration-slow) var(--ease-standard) both;
+  --animate-fade-in-up: fade-in-up var(--duration-slow) var(--ease-emphasized) both;
+  --animate-scale-in: scale-in var(--duration-normal) var(--ease-spring) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+}
+
+/* -------------------------------------------------
+   KEYFRAMES (global so animate-* utilities + custom
+   classes always resolve)
+-------------------------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: -180% 0;
+  }
+  to {
+    background-position: 180% 0;
+  }
+}
+@keyframes aurora {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(6%, -4%, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-5%, 5%, 0) scale(0.95);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 /* -------------------------------------------------
@@ -325,7 +398,7 @@
 -------------------------------------------------- */
 @layer components {
   .app-chrome {
-    @apply border-border/80 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75;
+    @apply border-border/70 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/65;
     box-shadow: var(--shadow-xs);
   }
 
@@ -360,18 +433,51 @@
   .card-interactive {
     @apply transition-[transform,box-shadow,border-color];
     transition-duration: var(--duration-normal);
-    transition-timing-function: var(--ease-standard);
+    transition-timing-function: var(--ease-emphasized);
   }
 
   .card-interactive:hover {
-    @apply border-brand-200/80;
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    @apply border-brand-300/70;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
   }
 
   .card-interactive:active {
-    transform: translateY(0);
-    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Brand gradient text for headings / marks */
+  .text-gradient-brand {
+    background-image: linear-gradient(
+      100deg,
+      var(--palette-brand-500),
+      var(--palette-brand-700) 55%,
+      var(--palette-accent-500)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Shimmering skeleton surface */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--muted);
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklch, var(--foreground) 8%, transparent),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
   }
 
   .surface-panel {
@@ -438,6 +544,48 @@
 
   .scrollbar-none::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Entrance animation for route content (re-keyed per navigation) */
+  .page-enter {
+    animation: fade-in-up var(--duration-slow) var(--ease-emphasized) both;
+  }
+
+  /* Ambient app background: soft brand/accent aurora wash */
+  .app-aurora {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--background);
+  }
+  .app-aurora::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        42rem 30rem at 12% -8%,
+        color-mix(in oklch, var(--palette-brand-500) 16%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        40rem 28rem at 108% 6%,
+        color-mix(in oklch, var(--palette-accent-500) 13%, transparent),
+        transparent 70%
+      );
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
