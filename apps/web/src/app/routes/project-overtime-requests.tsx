@@ -178,20 +178,36 @@ function Content() {
                   </>
                 ) : null}
                 {canApprove && r.status === "supervisor_approved" ? (
-                  <Button
-                    size='sm'
-                    variant='ghost'
-                    onClick={() =>
-                      managerApproveOvertime(projectId, r.id, true)
-                        .then(() => {
-                          toast.success("تأیید مدیر");
-                          void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
-                        })
-                        .catch((e: Error) => toast.error(e.message))
-                    }
-                  >
-                    تأیید مدیر
-                  </Button>
+                  <>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        managerApproveOvertime(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید مدیر");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید مدیر
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        managerApproveOvertime(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
                 ) : null}
               </td>
             </tr>

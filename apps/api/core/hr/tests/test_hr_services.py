@@ -59,6 +59,15 @@ class TestHRServices:
         assert req.supervisor_approved is True
         assert req.supervisor_notes == 'notes'
 
+    def test_supervisor_approve_overtime_rejects_wrong_status(self, setup_data):
+        req = OvertimeRequest.objects.create(
+            project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
+            department='D1', overtime_date='2024-01-01', requested_hours='2',
+            reason='reason', status=OvertimeStatus.DRAFT
+        )
+        with pytest.raises(ValidationError):
+            services.supervisor_approve_overtime(req, setup_data['supervisor'], True)
+
     def test_manager_approve_overtime(self, setup_data):
         req = OvertimeRequest.objects.create(
             project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
@@ -70,6 +79,15 @@ class TestHRServices:
         assert req.status == OvertimeStatus.MANAGER_APPROVED
         assert req.manager_approved is True
         assert str(req.approved_hours) == '1.50'
+
+    def test_manager_approve_overtime_rejects_wrong_status(self, setup_data):
+        req = OvertimeRequest.objects.create(
+            project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
+            department='D1', overtime_date='2024-01-01', requested_hours='2',
+            reason='reason', status=OvertimeStatus.SUBMITTED
+        )
+        with pytest.raises(ValidationError):
+            services.manager_approve_overtime(req, setup_data['manager'], True)
 
     def test_check_leave_draft_status_success(self, setup_data):
         req = LeaveRequest(
@@ -110,6 +128,15 @@ class TestHRServices:
         assert req.status == LeaveStatus.SUPERVISOR_APPROVED
         assert req.supervisor_approved is True
 
+    def test_supervisor_approve_leave_rejects_wrong_status(self, setup_data):
+        req = LeaveRequest.objects.create(
+            project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
+            department='D1', request_type=LeaveType.DAILY, leave_date='2024-01-01',
+            status=LeaveStatus.DRAFT
+        )
+        with pytest.raises(ValidationError):
+            services.supervisor_approve_leave(req, setup_data['supervisor'], True)
+
     def test_manager_approve_leave(self, setup_data):
         req = LeaveRequest.objects.create(
             project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
@@ -120,6 +147,15 @@ class TestHRServices:
         req.refresh_from_db()
         assert req.status == LeaveStatus.MANAGER_APPROVED
         assert req.manager_approved is True
+
+    def test_manager_approve_leave_rejects_wrong_status(self, setup_data):
+        req = LeaveRequest.objects.create(
+            project=setup_data['project'], requester=setup_data['requester'], created_by=setup_data['requester'],
+            department='D1', request_type=LeaveType.DAILY, leave_date='2024-01-01',
+            status=LeaveStatus.SUBMITTED
+        )
+        with pytest.raises(ValidationError):
+            services.manager_approve_leave(req, setup_data['manager'], True)
 
     def test_security_approve_leave(self, setup_data):
         req = LeaveRequest.objects.create(

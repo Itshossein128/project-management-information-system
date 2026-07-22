@@ -73,8 +73,53 @@ class TestBalanceService:
         assert balance['current_balance'] == 65
         assert balance['is_low_stock'] is False
 
-        series = running_balance(material.id)
+        series = running_balance(material.id, project_id=project.id)
         assert series[-1]['running_balance'] == 65
+        assert balance['total_adjusted'] == 5
+
+    def test_running_balance_requires_project_material(self, material, user, project, auth_client):
+        InventoryTransaction.objects.create(
+            project=project,
+            material=material,
+            tx_date='2024-08-01',
+            tx_type=TransactionType.IN,
+            quantity=100,
+            created_by=user,
+            updated_by=user,
+        )
+        ok = auth_client.get(
+            f'/api/v1/projects/{project.id}/inventory-transactions/balance/?material_id={material.id}'
+        )
+        assert ok.status_code == status.HTTP_200_OK
+        assert ok.data[-1]['running_balance'] == 100
+
+        foreign = Material.objects.create(
+            project=project,
+            material_code='OTHER-MAT',
+            material_name='Other mat',
+        )
+        # material belonging to another project id under this project's path
+        from projects.models import Project
+
+        other_project = Project.objects.create(project_code='P-OTHER', project_name='Other')
+        foreign.project = other_project
+        foreign.save(update_fields=['project'])
+        missing = auth_client.get(
+            f'/api/v1/projects/{project.id}/inventory-transactions/balance/?material_id={foreign.id}'
+        )
+        assert missing.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_balance_detail_404_for_foreign_material(self, material, auth_client, project):
+        from projects.models import Project
+
+        other = Project.objects.create(project_code='P-X', project_name='X')
+        foreign = Material.objects.create(
+            project=other,
+            material_code='X-01',
+            material_name='Foreign',
+        )
+        resp = auth_client.get(f'/api/v1/projects/{project.id}/material-balance/{foreign.id}/')
+        assert resp.status_code == status.HTTP_404_NOT_FOUND
 
     def test_low_stock_flag(self, material, user, project):
         InventoryTransaction.objects.create(

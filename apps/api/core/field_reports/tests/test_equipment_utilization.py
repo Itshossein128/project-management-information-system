@@ -100,3 +100,56 @@ class TestEquipmentUtilization:
         listing = auth_client.get(base)
         assert listing.status_code == status.HTTP_200_OK
         assert len(listing.data['results']) >= 1
+
+    def test_dedupes_daily_report_when_standalone_log_exists(
+        self, project, user, registry_equipment
+    ):
+        from datetime import time
+
+        from field_reports.models import (
+            DailyReport,
+            DailyReportEquipment,
+            ReportStatus,
+            ReportShift,
+        )
+
+        EquipmentLog.objects.create(
+            project=project,
+            equipment=registry_equipment,
+            log_date='2024-08-10',
+            equipment_name='بیل مکانیکی',
+            equipment_ref='EX-01',
+            shift=ReportShift.DAY,
+            status=EquipmentStatus.ACTIVE,
+            ownership_type=OwnershipType.OWNED,
+            productive_hours=6,
+            idle_hours=2,
+            created_by=user,
+            updated_by=user,
+        )
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-08-10',
+            status=ReportStatus.APPROVED,
+            created_by=user,
+            updated_by=user,
+        )
+        DailyReportEquipment.objects.create(
+            report=report,
+            equipment=registry_equipment,
+            equipment_name='بیل مکانیکی',
+            equipment_ref='EX-01',
+            shift=ReportShift.DAY,
+            status=EquipmentStatus.ACTIVE,
+            ownership_type=OwnershipType.OWNED,
+            productive_hours=8,
+            idle_hours=0,
+            work_start=time(8, 0),
+            work_end=time(16, 0),
+        )
+
+        rows = equipment_utilization_list(project.id)
+        assert len(rows) == 1
+        assert rows[0]['productive_hours'] == 6
+        assert rows[0]['idle_hours'] == 2
+        assert rows[0]['log_count'] == 1

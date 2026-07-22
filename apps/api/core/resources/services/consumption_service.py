@@ -9,11 +9,9 @@ from resources.models import InventoryTransaction, Material, TransactionType
 
 
 def _issued_qty(qs):
+    """Materials issued to the field (excludes waste — tracked separately)."""
     return float(
-        qs.filter(tx_type__in=[TransactionType.OUT, TransactionType.WASTE]).aggregate(
-            total=Sum('quantity')
-        )['total']
-        or 0
+        qs.filter(tx_type=TransactionType.OUT).aggregate(total=Sum('quantity'))['total'] or 0
     )
 
 
@@ -91,7 +89,7 @@ def activity_consumption_list(
             project_id=project_id,
             activity=activity,
             is_deleted=False,
-            tx_type__in=[TransactionType.OUT, TransactionType.WASTE],
+            tx_type=TransactionType.OUT,
         )
         if date_from:
             txs = txs.filter(tx_date__gte=date_from)

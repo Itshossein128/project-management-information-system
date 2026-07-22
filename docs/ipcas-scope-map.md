@@ -240,14 +240,14 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 
 | Task | Status |
 |------|--------|
-| **C-13** Inventory ledger + running balance + consumption analytics | Done — `resources/` balance + `material-balance/consumption/` |
+| **C-13** Inventory ledger + running balance + consumption analytics | Done — `resources/` balance + `material-balance/consumption/`; ADJUST included in balance; running balance project-scoped |
 | **C-13** Tests | Done — `resources/tests/test_balance.py` |
-| **C-14** Equipment registry + utilization API | Done — `equipment/`, `equipment-utilization/` |
+| **C-14** Equipment registry + utilization API | Done — `equipment/`, `equipment-utilization/`; log vs daily-report dedupe |
 | **C-14** Tests | Done — `field_reports/tests/test_equipment_utilization.py` |
-| **Labor productivity API** | Done — `labor-productivity/` |
-| **UI-04** Daily report labor/equipment tab polish | Done — idle hours, registry combobox, work_hours columns |
+| **Labor productivity API** | Done — `labor-productivity/` with per-activity hour allocation by qty share |
+| **UI-04** Daily report labor/equipment tab polish | Done — idle hours, registry combobox with equipment FK, work_hours columns |
 | **Equipment + labor dashboards** | Done — `equipment-utilization`, `labor-productivity` routes |
-| **HR approval UI** | Done — leave/overtime approve actions in web UI |
+| **HR approval UI** | Done — leave/overtime approve+reject; backend status gates + `approve_reports` |
 | **Nav grouping** | Done — Resources section in project sidebar |
 
 ### Sprint 10 API paths

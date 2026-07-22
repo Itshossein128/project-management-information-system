@@ -1,6 +1,7 @@
 """Material balance and inventory API."""
 
 from django.db.models import Max
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
+from common.jalali import parse_jalali_or_gregorian
 from common.viewsets import ProjectScopedViewSet
 from permissions.project import HasProjectPermission, IsProjectMember
 from resources.models import InventoryTransaction, Material, MaterialRequest
@@ -94,7 +96,7 @@ class MaterialBalanceDetailView(APIView):
 
     @extend_schema(summary='Material balance detail', tags=['Materials'])
     def get(self, request, project_pk=None, mid=None):
-        material = Material.objects.get(pk=mid, project_id=project_pk)
+        material = get_object_or_404(Material, pk=mid, project_id=project_pk)
         balance = compute_material_balance(material)
         requests = MaterialRequestSerializer(
             MaterialRequest.objects.filter(material=material, is_deleted=False),
@@ -113,12 +115,14 @@ class MaterialConsumptionView(APIView):
 
     @extend_schema(summary='Material consumption vs planned', tags=['Materials'])
     def get(self, request, project_pk=None):
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
         data = material_consumption_report(
             project_pk,
             material_id=request.query_params.get('material_id'),
             activity_id=request.query_params.get('activity_id'),
-            date_from=request.query_params.get('date_from'),
-            date_to=request.query_params.get('date_to'),
+            date_from=parse_jalali_or_gregorian(date_from) if date_from else None,
+            date_to=parse_jalali_or_gregorian(date_to) if date_to else None,
         )
         return Response(data)
 
@@ -132,4 +136,5 @@ class InventoryRunningBalanceView(APIView):
         material_id = request.query_params.get('material_id')
         if not material_id:
             return Response({'detail': 'material_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(running_balance(material_id))
+        get_object_or_404(Material, pk=material_id, project_id=project_pk)
+        return Response(running_balance(material_id, project_id=project_pk))

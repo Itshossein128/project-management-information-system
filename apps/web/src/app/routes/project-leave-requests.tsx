@@ -140,52 +140,100 @@ function Content() {
                   </Button>
                 ) : null}
                 {canApprove && r.status === "submitted" ? (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      supervisorApproveLeave(projectId, r.id, true)
-                        .then(() => {
-                          toast.success("تأیید سرپرست");
-                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
-                        })
-                        .catch((e: Error) => toast.error(e.message))
-                    }
-                  >
-                    تأیید سرپرست
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        supervisorApproveLeave(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید سرپرست");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید سرپرست
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        supervisorApproveLeave(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
                 ) : null}
                 {canApprove && r.status === "supervisor_approved" ? (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      managerApproveLeave(projectId, r.id, true)
-                        .then(() => {
-                          toast.success("تأیید مدیر");
-                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
-                        })
-                        .catch((e: Error) => toast.error(e.message))
-                    }
-                  >
-                    تأیید مدیر
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        managerApproveLeave(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید مدیر");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید مدیر
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        managerApproveLeave(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
                 ) : null}
                 {canApprove && r.status === "manager_approved" && r.request_type === "mission" ? (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() =>
-                      securityApproveLeave(projectId, r.id, true)
-                        .then(() => {
-                          toast.success("تأیید حراست");
-                          void qc.invalidateQueries({ queryKey: ["leave", projectId] });
-                        })
-                        .catch((e: Error) => toast.error(e.message))
-                    }
-                  >
-                    تأیید حراست
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        securityApproveLeave(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید حراست");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید حراست
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        securityApproveLeave(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["leave", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
                 ) : null}
               </td>
             </tr>
