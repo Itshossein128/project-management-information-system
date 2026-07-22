@@ -41,3 +41,20 @@ class TestInflationMappingsAPI:
         delete = finance_client.delete(f'{url}{mapping_id}/')
         assert delete.status_code == status.HTTP_204_NO_CONTENT
         assert not CostCategoryInflationMapping.objects.filter(id=mapping_id).exists()
+
+    def test_patch_project_mapping(self, finance_client, project):
+        url = BASE.format(project_id=project.id)
+        create = finance_client.post(
+            url,
+            {'cost_category': 'labor', 'index_name': 'نیروی کار', 'weight': '1.0'},
+            format='json',
+        )
+        assert create.status_code == status.HTTP_201_CREATED
+        mapping_id = create.data['id']
+        patch = finance_client.patch(
+            f'{url}{mapping_id}/',
+            {'weight': '0.5'},
+            format='json',
+        )
+        assert patch.status_code == status.HTTP_200_OK
+        assert float(patch.data['weight']) == pytest.approx(0.5)

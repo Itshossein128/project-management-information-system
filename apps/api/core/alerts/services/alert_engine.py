@@ -108,6 +108,7 @@ def _evaluate_rule(rule: AlertRule, project_id):
         'subcontractor_score_low': _check_subcontractor_score_low,
         'correspondence_response_due': _check_correspondence_due,
         'baseline_not_set': _check_baseline_not_set,
+        'sync_conflict_unresolved': _check_sync_conflict_unresolved,
     }
     checker = checkers.get(_normalize_alert_type(rule.alert_type))
     if checker:
@@ -306,16 +307,16 @@ def _check_subcontractor_score_low(rule, project_id):
 
 
 def _check_correspondence_due(rule, project_id):
-    from documents.models import Correspondence
+    from documents.models import Correspondence, CorrStatus
 
     days = int(float(rule.threshold or 3))
     cutoff = date.today() + timedelta(days=days)
     items = Correspondence.objects.filter(
         project_id=project_id,
         is_deleted=False,
+        status=CorrStatus.OPEN,
         response_due_date__isnull=False,
         response_due_date__lte=cutoff,
-        response_due_date__gte=date.today(),
     )
     for item in items:
         fire_alert(
@@ -335,6 +336,20 @@ def _check_baseline_not_set(rule, project_id):
             f'baseline:{project_id}',
             'برای این پروژه خط مبنای جاری تعریف نشده است',
             project_id,
+        )
+
+
+def _check_sync_conflict_unresolved(rule, project_id):
+    from field_reports.models import SyncConflictLog
+
+    for entry in SyncConflictLog.objects.filter(project_id=project_id, resolved_at__isnull=True):
+        ref = entry.local_id or str(entry.daily_report_id or entry.id)
+        fire_alert(
+            rule.id,
+            f'sync_conflict:{ref}',
+            f'تعارض همگام‌سازی حل‌نشده: {entry.conflict_reason}',
+            project_id,
+            extra_context={'link': f'/projects/{project_id}/sync-conflicts'},
         )
 
 

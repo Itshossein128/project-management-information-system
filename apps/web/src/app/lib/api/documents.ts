@@ -1,5 +1,5 @@
 import { PATHS } from "@/app/routeVars";
-import { apiJson } from "@/app/lib/api-client";
+import { apiFormData, apiJson } from "@/app/lib/api-client";
 
 const base = (projectId: string) => `/${PATHS.API_PROJECTS}/${projectId}`;
 
@@ -43,11 +43,42 @@ export function fetchDocuments(projectId: string, params: Record<string, string>
   return apiJson<{ results: DocumentRow[] }>(`${base(projectId)}/documents/${qs ? `?${qs}` : ""}`);
 }
 
+export function uploadDocument(projectId: string, formData: FormData) {
+  return apiFormData<DocumentRow>(`${base(projectId)}/documents/`, formData);
+}
+
 export function fetchCorrespondence(projectId: string, params: Record<string, string> = {}) {
   const qs = new URLSearchParams(params).toString();
   return apiJson<{ results: CorrespondenceRow[] }>(
     `${base(projectId)}/correspondence/${qs ? `?${qs}` : ""}`,
   );
+}
+
+export function createCorrespondence(
+  projectId: string,
+  body: Partial<CorrespondenceRow> & {
+    corr_type: string;
+    subject: string;
+    from_party: string;
+    to_party: string;
+    corr_date: string;
+  },
+) {
+  return apiJson<CorrespondenceRow>(`${base(projectId)}/correspondence/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function respondCorrespondence(
+  projectId: string,
+  id: string,
+  body: { response_date?: string } = {},
+) {
+  return apiJson<CorrespondenceRow>(`${base(projectId)}/correspondence/${id}/respond/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
 
 export function fetchMeetings(projectId: string) {
@@ -72,5 +103,16 @@ export const MEETING_TYPE_LABELS: Record<string, string> = {
   employer_meeting: "جلسه کارفرما",
   subcontractor: "جلسه پیمانکار",
   safety: "جلسه ایمنی",
+  other: "سایر",
+};
+
+export const DOC_TYPE_LABELS: Record<string, string> = {
+  drawing: "نقشه",
+  specification: "مشخصات",
+  contract: "قرارداد",
+  report: "گزارش",
+  correspondence: "مکاتبه",
+  minutes: "صورتجلسه",
+  photo: "عکس",
   other: "سایر",
 };

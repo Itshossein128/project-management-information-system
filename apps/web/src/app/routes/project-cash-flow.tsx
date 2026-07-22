@@ -53,7 +53,7 @@ function CashFlowContent() {
         </ShadcnTabsContent>
 
         <ShadcnTabsContent value="forecast" className="mt-0">
-          <ForecastTab projectId={projectId} />
+          <ForecastTab projectId={projectId} canEdit={canEdit} />
         </ShadcnTabsContent>
 
         <ShadcnTabsContent value="gap" className="mt-0">

@@ -23,6 +23,9 @@ PERMISSIONS: dict[str, str] = {
     'approve_ipcs': 'Approve IPCs',
     'view_cashflow': 'View cash flow',
     'edit_cashflow': 'Edit cash flow',
+    'view_procurement': 'View procurement',
+    'edit_procurement': 'Edit procurement',
+    'approve_procurement': 'Approve procurement',
     'view_documents': 'View documents',
     'upload_documents': 'Upload documents',
     'view_correspondence': 'View correspondence',
@@ -52,6 +55,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_activities',
         'view_reports',
         'edit_reports',
+        'view_procurement',
     ],
     'field_supervisor': [
         'view_project',
@@ -75,6 +79,8 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_cashflow',
         'edit_cashflow',
         'view_dashboard',
+        'view_procurement',
+        'approve_procurement',
     ],
     'procurement_officer': [
         'view_project',
@@ -83,6 +89,8 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'edit_suppliers',
         'view_documents',
         'upload_documents',
+        'view_procurement',
+        'edit_procurement',
     ],
     'document_controller': [
         'view_project',

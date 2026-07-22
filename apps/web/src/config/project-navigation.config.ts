@@ -33,7 +33,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "clipboard" as IconName,
       path: `${base}/${PATHS.PROJECT_DAILY_REPORTS}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!daily-reports|sync-conflicts|weather|barriers|alerts)`,
+      activePathExclude: `${base}/(?!daily-reports|sync-conflicts|weather|barriers|risk-register|alerts)`,
       children: [
         { label: "گزارش روزانه", path: `${base}/${PATHS.PROJECT_DAILY_REPORTS}` },
         {
@@ -42,6 +42,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
         },
         { label: "وضعیت جوی", path: `${base}/${PATHS.PROJECT_WEATHER}` },
         { label: "موانع", path: `${base}/${PATHS.PROJECT_BARRIERS}` },
+        { label: "ریسک و تأخیر", path: `${base}/${PATHS.PROJECT_RISK_REGISTER}` },
         { label: "هشدارها", path: `${base}/${PATHS.PROJECT_ALERTS}` },
       ],
     },
@@ -51,7 +52,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "business" as IconName,
       path: `${base}/${PATHS.PROJECT_CONTRACTS}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!contracts|subcontractors|documents|cash-flow|costs|material-balance|economic)`,
+      activePathExclude: `${base}/(?!contracts|subcontractors|documents|cash-flow|costs|material-balance|procurement|economic)`,
       children: [
         { label: "قراردادها", path: `${base}/${PATHS.PROJECT_CONTRACTS}` },
         {
@@ -65,6 +66,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "بالانس مصالح",
           path: `${base}/${PATHS.PROJECT_MATERIAL_BALANCE}`,
         },
+        { label: "تأمین و خرید", path: `${base}/${PATHS.PROJECT_PROCUREMENT}` },
         { label: "تحلیل اقتصادی", path: `${base}/${PATHS.PROJECT_ECONOMIC}` },
       ],
     },

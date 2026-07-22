@@ -34,7 +34,7 @@ function EconomicContent() {
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
-  const canEdit = has("edit_costs");
+  const canEdit = has("edit_cashflow");
   const [tab, setTab] = useState<Tab>("overview");
   const [asOf, setAsOf] = useState("");
 
@@ -129,7 +129,7 @@ export default function ProjectEconomicPage() {
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>
-      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+      <main className="page-main page-shell mx-auto  px-4 py-8">
         <Breadcrumb
           items={[
             { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },

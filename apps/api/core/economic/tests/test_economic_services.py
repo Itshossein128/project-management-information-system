@@ -42,6 +42,64 @@ class TestInflationService:
     def test_get_index_value_defaults_when_missing(self, db):
         assert get_index_value('unknown', date.today()) == pytest.approx(100.0)
 
+    def test_get_index_value_resolves_persian_mapping_names(self, db):
+        InflationIndex.objects.create(
+            index_name='نیروی کار',
+            index_date=date(2024, 1, 1),
+            index_value=Decimal('100'),
+        )
+        InflationIndex.objects.create(
+            index_name='نیروی کار',
+            index_date=date(2024, 6, 1),
+            index_value=Decimal('120'),
+        )
+        assert get_index_value('نیروی کار', date(2024, 6, 1)) == pytest.approx(120.0)
+
+    def test_get_index_value_falls_back_to_alias(self, db):
+        InflationIndex.objects.create(
+            index_name='Construction Materials',
+            index_date=date(2024, 1, 1),
+            index_value=Decimal('100'),
+        )
+        InflationIndex.objects.create(
+            index_name='Construction Materials',
+            index_date=date(2024, 6, 1),
+            index_value=Decimal('130'),
+        )
+        assert get_index_value('فولاد', date(2024, 6, 1)) == pytest.approx(130.0)
+
+    def test_labor_cost_uses_persian_labor_index(self, project, user, activity):
+        from economic.models import CostCategoryInflationMapping
+
+        CostCategoryInflationMapping.objects.filter(cost_category=CostCategory.LABOR).delete()
+        CostCategoryInflationMapping.objects.create(
+            project=None,
+            cost_category=CostCategory.LABOR,
+            index_name='نیروی کار',
+            weight=Decimal('1'),
+        )
+        InflationIndex.objects.create(
+            index_name='نیروی کار',
+            index_date=date(2024, 1, 1),
+            index_value=Decimal('100'),
+        )
+        InflationIndex.objects.create(
+            index_name='نیروی کار',
+            index_date=date(2024, 6, 1),
+            index_value=Decimal('115'),
+        )
+        ActualCost.objects.create(
+            project=project,
+            activity=activity,
+            cost_category=CostCategory.LABOR,
+            amount=Decimal('1000'),
+            cost_date=date(2024, 1, 1),
+            created_by=user,
+            updated_by=user,
+        )
+        total = compute_total_inflation_adjusted_cost(project.id, date(2024, 6, 1))
+        assert total == pytest.approx(1150.0)
+
     def test_adjust_cost_for_inflation(self, project, inflation_indices):
         amount = adjust_cost_for_inflation(
             Decimal('1000'),

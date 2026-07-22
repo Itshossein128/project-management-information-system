@@ -7,6 +7,7 @@ import {
   acknowledgeAlert,
   ALERT_TYPE_LABELS,
   createAlertRule,
+  deleteAlertRule,
   fetchAlertRules,
   fetchAlerts,
   updateAlertRule,
@@ -103,6 +104,15 @@ function AlertCenterContent() {
     onSuccess: () => {
       toast.success("قانون ایجاد شد");
       setRuleDrawer(false);
+      void qc.invalidateQueries({ queryKey: ["alert-rules", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: (id: string) => deleteAlertRule(projectId, id),
+    onSuccess: () => {
+      toast.success("قانون حذف شد");
       void qc.invalidateQueries({ queryKey: ["alert-rules", projectId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -224,7 +234,20 @@ function AlertCenterContent() {
                           }}
                         />
                       </td>
-                      <td className="px-3 py-2">{r.is_system ? "—" : "قابل حذف"}</td>
+                      <td className="px-3 py-2">
+                        {!r.is_system ? (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            loading={deleteRule.isPending}
+                            onClick={() => deleteRule.mutate(r.id)}
+                          >
+                            حذف
+                          </Button>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

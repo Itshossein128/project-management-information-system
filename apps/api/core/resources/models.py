@@ -109,6 +109,7 @@ class InventoryTransaction(AuditSoftDeleteModel):
 
 class MaterialRequestStatus(models.TextChoices):
     PENDING = 'pending', 'Pending'
+    APPROVED = 'approved', 'Approved'
     ORDERED = 'ordered', 'Ordered'
     DELIVERED = 'delivered', 'Delivered'
     CANCELLED = 'cancelled', 'Cancelled'
@@ -117,6 +118,13 @@ class MaterialRequestStatus(models.TextChoices):
 class MaterialRequest(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='material_requests')
     material = models.ForeignKey(Material, on_delete=models.PROTECT, related_name='requests')
+    activity = models.ForeignKey(
+        'projects.Activity',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='material_requests',
+    )
     request_number = models.PositiveIntegerField()
     requested_qty = models.DecimalField(max_digits=18, decimal_places=4)
     unit = models.CharField(max_length=40)
@@ -127,6 +135,14 @@ class MaterialRequest(AuditSoftDeleteModel):
         choices=MaterialRequestStatus.choices,
         default=MaterialRequestStatus.PENDING,
     )
+    approved_by = models.ForeignKey(
+        'authentication.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_material_requests',
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(blank=True, default='')
 
     class Meta:
@@ -136,4 +152,27 @@ class MaterialRequest(AuditSoftDeleteModel):
                 fields=['project', 'material', 'request_number'],
                 name='uniq_material_request_number',
             ),
+        ]
+
+
+class PurchaseOrder(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='purchase_orders')
+    material_request = models.OneToOneField(
+        MaterialRequest,
+        on_delete=models.CASCADE,
+        related_name='purchase_order',
+    )
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name='purchase_orders')
+    po_number = models.PositiveIntegerField()
+    order_date = models.DateField()
+    expected_delivery_date = models.DateField(null=True, blank=True)
+    actual_delivery_date = models.DateField(null=True, blank=True)
+    ordered_qty = models.DecimalField(max_digits=18, decimal_places=4)
+    unit_price = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'purchase_orders'
+        constraints = [
+            models.UniqueConstraint(fields=['project', 'po_number'], name='uniq_po_project_number'),
         ]

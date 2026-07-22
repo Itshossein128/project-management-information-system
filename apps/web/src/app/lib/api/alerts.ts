@@ -37,6 +37,7 @@ export const ALERT_TYPE_LABELS: Record<string, string> = {
   subcontractor_at_risk: "ریسک پیمانکار",
   correspondence_response_due: "سررسید مکاتبه",
   baseline_not_set: "خط مبنا تعریف نشده",
+  sync_conflict_unresolved: "تعارض همگام‌سازی",
 };
 
 export function fetchAlertRules(projectId: string) {

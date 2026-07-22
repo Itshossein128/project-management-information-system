@@ -1,7 +1,7 @@
 from datetime import date
 from django.db import transaction
 from django.utils import timezone
-from common.jalali import parse_jalali_or_gregorian
+from common.jalali import parse_date_optional
 from common.validators import validate_document_upload
 from documents.models import DocumentRevision, ProjectDocument
 from documents.services.upload_service import upload_file_to_s3
@@ -21,7 +21,7 @@ def create_project_document(project_id, user, data, file_obj=None) -> ProjectDoc
         doc_code=data.get('doc_code', ''),
         discipline=data.get('discipline', ''),
         revision=data.get('revision', ''),
-        revision_date=parse_jalali_or_gregorian(data['revision_date']) if data.get('revision_date') else None,
+        revision_date=parse_date_optional(data.get('revision_date')),
         access_level=data.get('access_level', 'project'),
         tags=data.get('tags', ''),
         file_url=url,
@@ -48,7 +48,7 @@ def create_document_revision(doc: ProjectDocument, user, data, file_obj) -> Docu
     url, name, size_kb = upload_file_to_s3(file_obj, doc.project_id)
 
     rev_label = data.get('revision_label', doc.revision or 'Rev')
-    rev_date = parse_jalali_or_gregorian(data.get('revision_date')) or date.today()
+    rev_date = parse_date_optional(data.get('revision_date')) or date.today()
 
     revision = DocumentRevision.objects.create(
         document=doc,

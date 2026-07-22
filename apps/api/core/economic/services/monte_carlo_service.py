@@ -10,6 +10,7 @@ from django.db.models import Sum
 from contracts.models import Contract, ContractType
 from cost_control.models import ActualCost
 from economic.models import SimulationResult
+from economic.services.financing_service import annual_financing_rate
 from economic.services.snapshot_service import generate_snapshot
 from schedule.services.evm_service import compute_evm
 
@@ -28,6 +29,7 @@ DEFAULT_PARAMS = {
 def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
     params = {**DEFAULT_PARAMS, **(scenario_params or {})}
     generate_snapshot(project_id)
+    rate = annual_financing_rate()
 
     base_cost = float(
         ActualCost.objects.filter(project_id=project_id, is_deleted=False).aggregate(t=Sum('amount'))['t'] or 0
@@ -51,7 +53,7 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
     ).clip(0.3, 2.0)
 
     adjusted_cost = eac * overrun * (1 + inflation) / productivity
-    financing = revenue * 0.28 * delay / 365
+    financing = revenue * rate * delay / 365
     profit = revenue - adjusted_cost - financing
 
     payment_ratio = np.clip(1.0 - delay / 365.0, 0.05, 1.0)
@@ -67,13 +69,13 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
     base_profit = (
         revenue
         - eac * params['cost_overrun_mean'] * (1 + params['inflation_rate_mean']) / params['productivity_factor_mean']
-        - revenue * 0.28 * params['payment_delay_mean'] / 365
+        - revenue * rate * params['payment_delay_mean'] / 365
     )
 
     def quick_profit(p):
         prod = max(float(p['productivity_factor_mean']), 0.3)
         c = eac * p['cost_overrun_mean'] * (1 + p['inflation_rate_mean']) / prod
-        f = revenue * 0.28 * p['payment_delay_mean'] / 365
+        f = revenue * rate * p['payment_delay_mean'] / 365
         return revenue - c - f
 
     for var_name, mean_key, std_key in [

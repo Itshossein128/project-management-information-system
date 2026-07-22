@@ -73,6 +73,20 @@ class RiskEvent(AuditSoftDeleteModel):
         blank=True,
         related_name='barrier_assignments',
     )
+    related_daily_report = models.ForeignKey(
+        'field_reports.DailyReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='linked_risk_events',
+    )
+    related_correspondence = models.ForeignKey(
+        'documents.Correspondence',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='linked_risk_events',
+    )
 
     class Meta:
         db_table = 'risk_events'

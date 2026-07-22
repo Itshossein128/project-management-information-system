@@ -33,11 +33,11 @@ All project endpoints require `view_dashboard` + `IsProjectMember`. Inflation in
 *   **Method:** `GET`
 *   **Description:** All snapshots for the project ordered by `snapshot_date`.
 
-### 3. Financing Cost
+### 3. Financing Cost / Payment Delay
 
-*   **URL:** `/economic/financing-cost/`
+*   **URL:** `/economic/financing-cost/` or `/economic/payment-delay/` (alias)
 *   **Method:** `GET`
-*   **Description:** Payment-delay analysis and total financing cost (from approved/paid IPC timing vs planned dates).
+*   **Description:** Payment-delay analysis and total financing cost (from approved/paid IPC timing vs planned dates). Includes `annual_financing_rate` (from `ECONOMIC_ANNUAL_FINANCING_RATE`, default 0.28).
 
 ### 4. Inflation Indices (read)
 
@@ -115,6 +115,7 @@ Set `CELERY_TASK_ALWAYS_EAGER=true` in `.env` so Monte Carlo runs inline. Snapsh
 *   **Method:** `POST` — create project mapping (`edit_cashflow`); body: `cost_category`, `index_name`, `weight`.
 
 *   **URL:** `/economic/inflation-mappings/{mapping_id}/`
+*   **Method:** `PATCH` — update project-owned mapping (`edit_cashflow`); body may include `cost_category`, `index_name`, `weight`.
 *   **Method:** `DELETE` — remove project-owned mapping only (`edit_cashflow`).
 
 ### 11. Sensitivity tornado (latest simulation)

@@ -16,9 +16,11 @@ import { useToast } from "@/components/ui/toast";
 function ForecastRowEditor({
   projectId,
   row,
+  canEdit,
 }: {
   projectId: string;
   row: ForecastRow;
+  canEdit: boolean;
 }) {
   const toast = useToast();
   const qc = useQueryClient();
@@ -51,22 +53,30 @@ function ForecastRowEditor({
     <tr className="border-t">
       <td className="px-3 py-2 font-medium">{monthLabel(row.month)}</td>
       <td className="px-3 py-2">
-        <input
-          type="number"
-          className="w-28 rounded border px-2 py-1 text-sm"
-          value={inflow}
-          onChange={(e) => setInflow(e.target.value)}
-          onBlur={() => save.mutate()}
-        />
+        {canEdit ? (
+          <input
+            type="number"
+            className="w-28 rounded border px-2 py-1 text-sm"
+            value={inflow}
+            onChange={(e) => setInflow(e.target.value)}
+            onBlur={() => save.mutate()}
+          />
+        ) : (
+          formatFaAmount(row.expected_inflow)
+        )}
       </td>
       <td className="px-3 py-2">
-        <input
-          type="number"
-          className="w-28 rounded border px-2 py-1 text-sm"
-          value={outflow}
-          onChange={(e) => setOutflow(e.target.value)}
-          onBlur={() => save.mutate()}
-        />
+        {canEdit ? (
+          <input
+            type="number"
+            className="w-28 rounded border px-2 py-1 text-sm"
+            value={outflow}
+            onChange={(e) => setOutflow(e.target.value)}
+            onBlur={() => save.mutate()}
+          />
+        ) : (
+          formatFaAmount(row.expected_outflow)
+        )}
       </td>
       <td className="px-3 py-2">{formatFaAmount(forecastNet)}</td>
       <td className="px-3 py-2">
@@ -84,23 +94,35 @@ function ForecastRowEditor({
         {deviation != null ? formatFaAmount(deviation) : "—"}
       </td>
       <td className="px-3 py-2">
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={confidence}
-          onChange={(e) => setConfidence(Number(e.target.value))}
-          onMouseUp={() => save.mutate()}
-          onTouchEnd={() => save.mutate()}
-          className="w-24"
-        />
-        <span className="ms-2 text-xs">{confidence}٪</span>
+        {canEdit ? (
+          <>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={confidence}
+              onChange={(e) => setConfidence(Number(e.target.value))}
+              onMouseUp={() => save.mutate()}
+              onTouchEnd={() => save.mutate()}
+              className="w-24"
+            />
+            <span className="ms-2 text-xs">{confidence}٪</span>
+          </>
+        ) : (
+          <span>{row.confidence_pct ?? 80}٪</span>
+        )}
       </td>
     </tr>
   );
 }
 
-export function ForecastTab({ projectId }: { projectId: string }) {
+export function ForecastTab({
+  projectId,
+  canEdit,
+}: {
+  projectId: string;
+  canEdit: boolean;
+}) {
   const todayIso = new Date().toISOString().slice(0, 10);
 
   const {
@@ -166,7 +188,12 @@ export function ForecastTab({ projectId }: { projectId: string }) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <ForecastRowEditor key={row.month} projectId={projectId} row={row} />
+                <ForecastRowEditor
+                  key={row.month}
+                  projectId={projectId}
+                  row={row}
+                  canEdit={canEdit}
+                />
               ))}
             </tbody>
           </table>

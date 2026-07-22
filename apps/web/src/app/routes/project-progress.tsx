@@ -332,7 +332,7 @@ export default function ProjectProgressPage() {
   const { projectId = "" } = useParams();
 
   return (
-    <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+    <main className="page-main page-shell mx-auto  px-4 py-8">
       <ProjectProvider projectId={projectId}>
         <Breadcrumb
           items={[

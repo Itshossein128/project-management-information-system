@@ -27,18 +27,24 @@ def render_gantt_pdf(project_id, gantt_data: dict) -> bytes:
         Spacer(1, 12),
     ]
 
-    rows = [[_fa(h) for h in ['کد WBS', 'فعالیت', 'شروع', 'پایان', 'پیشرفت', 'وضعیت']]]
+    rows = [[_fa(h) for h in ['کد WBS', 'فعالیت', 'شروع', 'پایان', 'شروع مبنا', 'پایان مبنا', 'پیشرفت', 'وضعیت']]]
     for task in gantt_data.get('tasks', []):
         start_val = parse_date(task['start']) if isinstance(task.get('start'), str) else task.get('start')
         end_val = parse_date(task['end']) if isinstance(task.get('end'), str) else task.get('end')
+        bl_start = parse_date(task['baseline_start']) if isinstance(task.get('baseline_start'), str) else task.get('baseline_start')
+        bl_end = parse_date(task['baseline_end']) if isinstance(task.get('baseline_end'), str) else task.get('baseline_end')
 
         start_j = gregorian_to_jalali(start_val) if start_val else '—'
         end_j = gregorian_to_jalali(end_val) if end_val else '—'
+        bl_start_j = gregorian_to_jalali(bl_start) if bl_start else '—'
+        bl_end_j = gregorian_to_jalali(bl_end) if bl_end else '—'
         rows.append([
             _fa(task.get('wbs_code', '')),
             _fa(task.get('name', '')),
             _fa(start_j or '—'),
             _fa(end_j or '—'),
+            _fa(bl_start_j or '—'),
+            _fa(bl_end_j or '—'),
             _fa(f"{task.get('progress', 0)}%"),
             _fa(task.get('status', '')),
         ])

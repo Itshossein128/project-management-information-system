@@ -93,3 +93,41 @@ class TestFinancingCostAPI:
         assert resp.status_code == status.HTTP_200_OK
         assert resp.data['total_financing_cost'] > 0
         assert len(resp.data['details']) == 1
+        assert 'annual_financing_rate' in resp.data
+
+    def test_payment_delay_alias(self, auth_client, project):
+        url = f'{BASE.format(project_id=project.id)}economic/payment-delay/'
+        resp = auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+        assert 'total_financing_cost' in resp.data
+
+
+@pytest.mark.django_db
+class TestSnapshotRefreshAPI:
+    def test_refresh_regenerates_snapshot(self, auth_client, project, activity, user, inflation_indices):
+        EconomicSnapshot.objects.create(
+            project=project,
+            snapshot_date=date(2024, 6, 1),
+            actual_cost=Decimal('1'),
+            inflation_adj_cost=Decimal('1'),
+            financing_cost=Decimal('0'),
+            revenue_to_date=Decimal('0'),
+            accounting_profit=Decimal('-1'),
+            real_profit=Decimal('-1'),
+            economic_profit=Decimal('-1'),
+            working_capital=Decimal('0'),
+            avg_payment_delay_days=0,
+        )
+        ActualCost.objects.create(
+            project=project,
+            activity=activity,
+            cost_category=CostCategory.OTHER,
+            amount=Decimal('1000'),
+            cost_date=date(2024, 1, 1),
+            created_by=user,
+            updated_by=user,
+        )
+        url = f'{BASE.format(project_id=project.id)}economic/snapshot/?as_of=2024-06-01&refresh=1'
+        resp = auth_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK
+        assert float(resp.data['actual_cost']) == pytest.approx(1000.0)

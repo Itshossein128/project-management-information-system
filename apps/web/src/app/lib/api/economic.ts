@@ -121,6 +121,7 @@ export function fetchFinancingCost(projectId: string) {
   return apiJson<{
     total_financing_cost: number;
     avg_payment_delay_days: number;
+    annual_financing_rate?: number;
     details: Array<{
       ipc_number: number;
       net_amount: number;
@@ -143,6 +144,31 @@ export function createInflationMapping(projectId: string, body: Record<string, u
 
 export function deleteInflationMapping(projectId: string, id: string) {
   return apiJson<void>(`${base(projectId)}/economic/inflation-mappings/${id}/`, { method: "DELETE" });
+}
+
+export function updateInflationMapping(
+  projectId: string,
+  id: string,
+  body: Partial<{ cost_category: string; index_name: string; weight: number }>,
+) {
+  return apiJson<InflationMapping>(`${base(projectId)}/economic/inflation-mappings/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function fetchPaymentDelay(projectId: string) {
+  return apiJson<{
+    total_financing_cost: number;
+    avg_payment_delay_days: number;
+    annual_financing_rate: number;
+    details: Array<{
+      ipc_number: number;
+      net_amount: number;
+      delay_days: number;
+      financing_cost: number;
+    }>;
+  }>(`${base(projectId)}/economic/payment-delay/`);
 }
 
 export function fetchSensitivity(projectId: string) {

@@ -221,6 +221,9 @@ AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'ipcas-files
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'false').lower() in ('1', 'true', 'yes')
 
+# Economic engine
+ECONOMIC_ANNUAL_FINANCING_RATE = float(os.environ.get('ECONOMIC_ANNUAL_FINANCING_RATE', '0.28'))
+
 # RabbitMQ
 RABBITMQ_URL = os.environ.get('RABBITMQ_URL', 'amqp://ipcas:ipcas@localhost:5672/')
 

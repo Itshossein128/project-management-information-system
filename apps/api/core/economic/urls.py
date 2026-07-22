@@ -21,6 +21,7 @@ project_urlpatterns = [
     path('economic/snapshot/', EconomicSnapshotView.as_view(), name='economic-snapshot'),
     path('economic/history/', EconomicHistoryView.as_view(), name='economic-history'),
     path('economic/financing-cost/', FinancingCostView.as_view(), name='economic-financing'),
+    path('economic/payment-delay/', FinancingCostView.as_view(), name='economic-payment-delay'),
     path('economic/inflation-indices/', InflationIndicesView.as_view(), name='economic-inflation-indices'),
     path('economic/forecast/', EconomicForecastView.as_view(), name='economic-forecast'),
     path('economic/working-capital/', WorkingCapitalView.as_view(), name='economic-working-capital'),

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
 import { isoRangeToJalali, formatDisplayDate } from "@/app/lib/jalali-utils";
 import {
   categoryLabel,
@@ -8,6 +8,7 @@ import {
   deleteCashTransaction,
   fetchCashFlowList,
   formatFaAmount,
+  updateCashTransaction,
   INFLOW_CATEGORIES,
   OUTFLOW_CATEGORIES,
   type CashTransactionRow,
@@ -186,6 +187,95 @@ function AddTransactionDrawer({
   );
 }
 
+function EditTransactionDrawer({
+  projectId,
+  row,
+  open,
+  onClose,
+}: {
+  projectId: string;
+  row: CashTransactionRow | null;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const toast = useToast();
+  const qc = useQueryClient();
+  const [description, setDescription] = useState("");
+  const [counterparty, setCounterparty] = useState("");
+  const [amount, setAmount] = useState("");
+
+  useEffect(() => {
+    if (row) {
+      setDescription(row.description ?? "");
+      setCounterparty(row.counterparty ?? "");
+      setAmount(row.amount ?? "");
+    }
+  }, [row]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      updateCashTransaction(projectId, row!.id, {
+        description,
+        counterparty,
+        amount: Number(amount),
+      }),
+    onSuccess: () => {
+      toast.success("تراکنش به‌روزرسانی شد");
+      qc.invalidateQueries({ queryKey: ["cash-flow", projectId] });
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  if (!row || row.source === "ipc") return null;
+
+  return (
+    <Drawer
+      isOpen={open}
+      onClose={onClose}
+      title="ویرایش تراکنش"
+      footer={
+        <Button
+          variant="primary"
+          disabled={!amount || save.isPending}
+          loading={save.isPending}
+          onClick={() => save.mutate()}
+        >
+          ذخیره
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1 text-sm">
+          <span>مبلغ (ریال)</span>
+          <input
+            type="number"
+            className="rounded-md border border-input bg-background px-3 py-2"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span>طرف مقابل</span>
+          <input
+            className="rounded-md border border-input bg-background px-3 py-2"
+            value={counterparty}
+            onChange={(e) => setCounterparty(e.target.value)}
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          <span>توضیحات</span>
+          <textarea
+            className="rounded-md border border-input bg-background px-3 py-2"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </label>
+      </div>
+    </Drawer>
+  );
+}
+
 export function TransactionsTab({
   projectId,
   canEdit,
@@ -202,6 +292,7 @@ export function TransactionsTab({
   const [isForecast, setIsForecast] = useState("");
   const [counterparty, setCounterparty] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editRow, setEditRow] = useState<CashTransactionRow | null>(null);
   const [sortKey, setSortKey] = useState<keyof CashTransactionRow>("tx_date");
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -387,14 +478,26 @@ export function TransactionsTab({
                   <td className="px-3 py-2">{formatFaAmount(withBalance.get(row.id))}</td>
                   {canEdit && (
                     <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        className="text-red-600"
-                        onClick={() => remove.mutate(row.id)}
-                        aria-label="حذف"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                      <div className="flex gap-2">
+                        {row.source !== "ipc" ? (
+                          <button
+                            type="button"
+                            className="text-blue-600"
+                            onClick={() => setEditRow(row)}
+                            aria-label="ویرایش"
+                          >
+                            <Pencil className="size-4" />
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          className="text-red-600"
+                          onClick={() => remove.mutate(row.id)}
+                          aria-label="حذف"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -408,6 +511,12 @@ export function TransactionsTab({
         projectId={projectId}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+      />
+      <EditTransactionDrawer
+        projectId={projectId}
+        row={editRow}
+        open={Boolean(editRow)}
+        onClose={() => setEditRow(null)}
       />
     </div>
   );
