@@ -113,12 +113,7 @@ class CorrespondenceViewSet(DocScopedViewSet):
         corr_number = self.request.data.get('corr_number') or generate_corr_number(
             self.kwargs['project_pk'], serializer.validated_data['corr_type']
         )
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            corr_number=corr_number,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer, corr_number=corr_number)
 
 
 class CorrespondenceRespondView(APIView):
@@ -150,12 +145,6 @@ class MeetingMinutesViewSet(DocScopedViewSet):
     def list(self, request, *args, **kwargs):
         return Response({'results': MeetingMinutesSerializer(self.get_queryset(), many=True).data})
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)

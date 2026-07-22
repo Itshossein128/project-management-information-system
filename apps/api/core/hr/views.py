@@ -29,12 +29,7 @@ class BaseHRRequestViewSet(ProjectScopedViewSet):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            requester=self.request.user,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer, requester=self.request.user)
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()

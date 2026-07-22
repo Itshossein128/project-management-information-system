@@ -37,11 +37,12 @@ class ProjectScopedViewSet(viewsets.ModelViewSet):
     def post_delete(self, instance):
         pass
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer, **kwargs):
         serializer.save(
             project_id=self.get_project_id(),
             created_by=self.request.user,
             updated_by=self.request.user,
+            **kwargs
         )
         self.post_save(serializer.instance)
 
