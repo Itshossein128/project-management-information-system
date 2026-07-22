@@ -44,10 +44,11 @@ export function SprintButton({
       variant={variantMap[variant]}
       size={size}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={cn(className)}
       {...props}
     >
-      {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+      {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
       {children}
     </ShadcnButton>
   );
