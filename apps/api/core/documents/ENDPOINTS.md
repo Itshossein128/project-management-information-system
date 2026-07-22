@@ -73,3 +73,12 @@ Endpoints related to managing meeting minutes for a project.
 *   **`DELETE /meetings/<uuid:pk>/`**
     *   **Purpose:** Deletes a specific meeting minutes record.
     *   **Behavior:** Soft deletes the meeting minutes entry.
+
+## Upload security
+
+Document and revision uploads pass through two layers of validation:
+
+1. **`common.validators.validate_document_upload`** — enforces extension whitelist, 50 MB max size, and MIME sniffing (via `python-magic` when available).
+2. **`documents.services.upload_service.upload_file_to_s3`** — rejects filenames containing `..`, `/`, or `\`; stores objects under `{prefix}/{project_id}/{uuid}.{ext}` using only the basename.
+
+Clients must send the file as multipart form data with a plain filename (no directory components). Path traversal in the original filename returns `400` with `Invalid filename: Path traversal attempts are not allowed.`
