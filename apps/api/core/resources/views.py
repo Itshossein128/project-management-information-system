@@ -28,8 +28,6 @@ class MaterialViewSet(ProjectScopedViewSet):
     view_permission = 'view_reports'
     edit_permission = 'edit_reports'
 
-    def perform_create(self, serializer):
-        serializer.save(project_id=self.get_project_id())
 
 
 class MaterialRequestViewSet(ProjectScopedViewSet):
@@ -46,10 +44,7 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
             )['m']
             or 0
         )
-        serializer.save(
-            project_id=self.get_project_id(),
-            request_number=max_num + 1,
-        )
+        super().perform_create(serializer, request_number=max_num + 1)
 
 
 class InventoryTransactionViewSet(ProjectScopedViewSet):
@@ -60,8 +55,6 @@ class InventoryTransactionViewSet(ProjectScopedViewSet):
 
     AUTO_MSG = 'این تراکنش از گزارش روزانه ایجاد شده و قابل ویرایش مستقیم نیست'
 
-    def perform_create(self, serializer):
-        serializer.save(project_id=self.get_project_id())
 
     def update(self, request, *args, **kwargs):
         if self.get_object().daily_report_id:

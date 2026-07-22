@@ -49,12 +49,7 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         return qs.order_by('-event_date', '-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            event_type=EventType.BARRIER,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer, event_type=EventType.BARRIER)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()

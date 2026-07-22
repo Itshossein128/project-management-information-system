@@ -50,12 +50,6 @@ class EquipmentViewSet(ProjectScopedViewSet):
             qs = qs.filter(is_active=True)
         return qs.order_by('equipment_name')
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
 
 
 class EquipmentUtilizationView(APIView):
