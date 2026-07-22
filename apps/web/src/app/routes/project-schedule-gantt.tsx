@@ -8,6 +8,7 @@ import { fetchActivity } from "@/app/lib/api/activities";
 import { downloadGanttPdf, fetchGantt } from "@/app/lib/api/gantt";
 import { ActivityDrawer } from "@/components/activities/activity-drawer";
 import { LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -77,8 +78,11 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
-  if (!canView) return <p className="p-8 text-center text-muted-foreground">دسترسی ندارید.</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
+  if (!canView)
+    return (
+      <AccessDenied description="برای مشاهده گانت به مجوز مشاهده فعالیت‌ها نیاز است." />
+    );
 
   return (
     <div className="space-y-4">

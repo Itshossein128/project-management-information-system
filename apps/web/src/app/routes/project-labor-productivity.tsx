@@ -6,6 +6,7 @@ import { fetchLaborProductivity } from "@/app/lib/api/labor-productivity";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 type GroupBy = "activity" | "discipline" | "job_title";
@@ -31,9 +32,7 @@ function Content() {
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید.
-      </p>
+      <AccessDenied description="برای مشاهده این بخش به مجوز مربوطه نیاز است." />
     );
   }
 

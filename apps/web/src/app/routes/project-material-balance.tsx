@@ -15,6 +15,7 @@ import { fetchSuppliers } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -419,13 +420,11 @@ function MaterialBalanceContent() {
   const [tab, setTab] = useState<Tab>("balance");
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده گزارش‌ها را ندارد.
-      </p>
+      <AccessDenied description="نقش شما مجوز مشاهده گزارش‌ها را ندارد." />
     );
   }
 

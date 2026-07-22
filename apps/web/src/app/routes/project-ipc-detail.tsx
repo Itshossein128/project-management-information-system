@@ -7,6 +7,7 @@ import { IPCDeductionsTable } from "@/components/contracts/IPCDeductionsTable";
 import { IPCLineItemsTable } from "@/components/contracts/IPCLineItemsTable";
 import { IPCWorkflowBar } from "@/components/contracts/IPCWorkflowBar";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function IPCDetailContent() {
@@ -27,15 +28,13 @@ function IPCDetailContent() {
   const refresh = () => void qc.invalidateQueries({ queryKey: ["ipc", projectId, ipcId] });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
   if (!canView) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به صورت‌وضعیت‌ها ندارید.
-      </p>
+      <AccessDenied description="برای مشاهده صورت‌وضعیت‌ها به مجوز مربوطه نیاز است." />
     );
   }
-  if (!ipc) return <p>صدور موقت یافت نشد</p>;
+  if (!ipc) return <NotFoundState title="صدور موقت یافت نشد" />;
 
   const canEditLines = canEditIpc && ipc.status === "draft";
 

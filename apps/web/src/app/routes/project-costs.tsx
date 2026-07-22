@@ -9,6 +9,7 @@ import { BudgetGrid } from "@/components/costs/BudgetGrid";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
 import { VarianceTab } from "@/components/costs/VarianceTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Button } from "@/components/ui/sprint-button";
 
@@ -35,13 +36,11 @@ function CostsContent() {
   });
 
   if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده هزینه‌ها را ندارد.
-      </p>
+      <AccessDenied description="نقش شما مجوز مشاهده هزینه‌ها را ندارد." />
     );
   }
 

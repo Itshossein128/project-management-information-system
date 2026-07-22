@@ -11,6 +11,7 @@ import {
   type ContractFormValues,
 } from "@/components/contracts/ContractForm";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -33,12 +34,10 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
   });
 
   if (isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
   if (!canEdit) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به ویرایش قراردادها ندارید.
-      </p>
+      <AccessDenied description="برای ویرایش قراردادها به مجوز مربوطه نیاز است." />
     );
   }
 

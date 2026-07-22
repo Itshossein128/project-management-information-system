@@ -11,6 +11,7 @@ import { MonteCarloPanel } from "@/components/economic/MonteCarloPanel";
 import { ProfitLayersPanel } from "@/components/economic/ProfitLayersPanel";
 import { SensitivityTornadoChart } from "@/components/economic/SensitivityTornadoChart";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useQuery } from "@tanstack/react-query";
 
@@ -41,8 +42,8 @@ function EconomicContent() {
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
-  if (!canView) return <p className="p-8 text-center text-muted-foreground">دسترسی ندارید.</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
+  if (!canView) return <AccessDenied description="برای مشاهده تحلیل اقتصادی به مجوز مربوطه نیاز است." />;
   if (!snapshot) return null;
 
   return (
