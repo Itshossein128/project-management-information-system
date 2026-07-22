@@ -40,10 +40,14 @@ def s_curve_cache_key(project_id, date_from: date, date_to: date, interval: str)
 
 
 def invalidate_s_curve_cache(project_id) -> None:
-    """Invalidate S-curve Redis keys and Django-cached EVM KPI payloads for a project."""
+    """Invalidate S-curve Redis keys and Django-cached EVM / unified KPI payloads for a project."""
     try:
         client = _redis_client()
-        for pattern in (f's_curve:{project_id}:*', f'*kpis:{project_id}:*'):
+        for pattern in (
+            f's_curve:{project_id}:*',
+            f'*kpis:{project_id}:*',
+            f'project_kpis:{project_id}:*',
+        ):
             for key in client.scan_iter(match=pattern):
                 client.delete(key)
     except Exception:  # noqa: BLE001 - cache is best-effort

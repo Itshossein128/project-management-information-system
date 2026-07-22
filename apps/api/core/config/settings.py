@@ -213,6 +213,10 @@ EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.conso
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ipcas.io')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
+# Alert notification channels (K-04): in_app, email, sms
+ALERT_NOTIFY_CHANNELS = os.environ.get('ALERT_NOTIFY_CHANNELS', 'in_app,email')
+SMS_PROVIDER = os.environ.get('SMS_PROVIDER', 'console')
+
 # S3 / MinIO
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', 'http://localhost:9000')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'ipcas')

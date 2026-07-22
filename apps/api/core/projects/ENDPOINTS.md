@@ -21,6 +21,17 @@ This module handles the core project management functionality within IPCAS, incl
     *   `PATCH`: Partially updates project details.
 *   **Permissions:** Requires access to the specific project.
 
+### 1b. Unified KPIs / Health (Sprint 13)
+
+*   **URL:** `/<project_pk>/kpis/`
+*   **Method:** `GET`
+*   **Description:** Aggregated physical, cost, cash, schedule, and alert KPIs (cached 5 min). Query: `as_of`, `force_refresh=1`.
+*   **Permission:** `view_dashboard`
+
+*   **URL:** `/<project_pk>/health/`
+*   **Method:** `GET`
+*   **Description:** Alias of `/kpis/` (dashboard KPI summary).
+
 ### 2. Project Templates
 *   **URL:** `/templates/`
 *   **Method:** `GET`

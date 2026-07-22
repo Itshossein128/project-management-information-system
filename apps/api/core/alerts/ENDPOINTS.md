@@ -63,8 +63,13 @@ All routes are nested under a project: `/api/v1/projects/{project_pk}/`.
 | `subcontractor_score_low` | Score floor (default 6) | Latest overall score below threshold |
 | `correspondence_response_due` | Days ahead (default 3) | Correspondence with upcoming due date |
 | `sync_conflict_unresolved` | — | Reserved for offline sync conflicts |
+| `critical_path_delay` | Lag % (default 5) | Critical baseline activities behind plan |
+| `ipc_approval_delayed` | Days pending (default 7) | IPC in submitted/under_review too long |
+| `procurement_overdue` | Grace days (default 0) | PO past expected delivery or MR past required_by |
 
-When a rule fires, in-app `Notification` records are created for `recipient_ids` or members matching `notify_roles`. `AlertLog` records the event; `cooldown_hours` prevents duplicate fires for the same `trigger_reference`.
+When a rule fires, notifications are delivered via `notifications.services.delivery` across channels configured in `ALERT_NOTIFY_CHANNELS` (default `in_app,email`; optional `sms` uses console SMS backend). `AlertLog` records the event; `cooldown_hours` prevents duplicate fires for the same `trigger_reference`.
+
+Web Push is deferred post-UAT; the in-app notification bell covers push-like UX.
 
 ## Background tasks
 

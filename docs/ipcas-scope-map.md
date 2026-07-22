@@ -197,7 +197,7 @@ All paths are under `/api/v1/projects/{projectId}/` unless noted.
 | Task | Status |
 |------|--------|
 | **C-16** Subcontractor registry + scorecard + risk flag engine | Done — `subcontractors/` CRUD, scores, warnings, risk-summary |
-| **K-03** Configurable alert rule engine | Done — `alerts/services/alert_engine.py` (13 alert types incl. `sync_conflict_unresolved`) |
+| **K-03** Configurable alert rule engine | Done — `alerts/services/alert_engine.py` (16 alert types incl. Sprint 13 critical path / IPC approval / procurement) |
 | **K-05** Alert acknowledgement + log API | Done — alert log list, acknowledge, active counts; rule delete in UI |
 | **E-06** Economic P&L snapshot generator | Done — `economic/services/snapshot_service.py` + nightly Celery task |
 | **E-07** Monte Carlo simulation | Done — async `POST .../economic/simulate/` |
@@ -348,3 +348,37 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - `GET /api/v1/projects/{id}/economic/snapshot/?refresh=1` — force regenerate snapshot
 
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)
+
+## Sprint 13 completion checklist (Alerts, Executive Dashboard & Polish)
+
+| Task | Status |
+|------|--------|
+| **K-02** Unified KPI endpoint (`/kpis`) with caching | Done — `GET .../kpis/` + `/health/` alias; Redis TTL 5 min; `projects/kpi_service.py` |
+| **K-03** Alert rule engine | Done — carried from Sprint 9; 16 alert types |
+| **K-04** Notification delivery (email, SMS, in-app) | Done — `notifications/services/delivery.py`; channels via `ALERT_NOTIFY_CHANNELS` (default `in_app,email`); SMS console stub |
+| **K-05** Alert acknowledgement + log API | Done — carried from Sprint 9 |
+| **UI-09** Gantt chart (read-only) | Done — carried from Sprint 9 |
+| **UI-10** Executive dashboard with 10-KPI panel | Done — `/projects/{id}/overview` + `ExecutiveKpiPanel` |
+| **UI-12** Alert center + rule configuration | Done — carried from Sprint 9; new type labels |
+| **15+ alert types** | Done — added `critical_path_delay`, `ipc_approval_delayed`, `procurement_overdue` |
+| **Hardening** | Done — `alert_log` indexes; `apps/api/scripts/load_smoke_kpis.py` |
+| **Tests / E2E** | Done — KPI + delivery + sprint13 alert tests; `e2e/tests/sprint13.spec.ts` |
+| **UAT** | Done — [sprint13-uat-checklist.md](./sprint13-uat-checklist.md) |
+
+### Sprint 13 API paths
+
+- `GET /api/v1/projects/{id}/kpis/` — unified KPIs (`?as_of=`, `?force_refresh=1`); permission `view_dashboard`
+- `GET /api/v1/projects/{id}/health/` — alias of `/kpis/`
+- Alert types (system seeds): prior 13 + `critical_path_delay`, `ipc_approval_delayed`, `procurement_overdue`
+
+### Sprint 13 frontend routes
+
+- `/projects/{id}/overview` — executive 10-KPI panel (permission-gated sections) + module launcher
+- `/projects/{id}/alerts` — alert center (unchanged route; expanded type catalog)
+
+### Sprint 13 operational notes
+
+- **Channels:** `ALERT_NOTIFY_CHANNELS=in_app,email` (add `sms` to enable console SMS backend). `SMS_PROVIDER=console` by default.
+- **Cache:** Unified KPIs use `project_kpis:{id}:{as_of}` (5 min). Progress EVM cache invalidation also clears `project_kpis:*`.
+- **Load smoke:** `ACCESS_TOKEN=… PROJECT_ID=… python apps/api/scripts/load_smoke_kpis.py`
+

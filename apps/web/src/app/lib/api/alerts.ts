@@ -35,9 +35,13 @@ export const ALERT_TYPE_LABELS: Record<string, string> = {
   missing_daily_report: "گزارش روزانه ارسال نشده",
   daily_report_not_approved: "گزارش تأیید نشده",
   subcontractor_at_risk: "ریسک پیمانکار",
+  subcontractor_score_low: "نمره پایین پیمانکار",
   correspondence_response_due: "سررسید مکاتبه",
   baseline_not_set: "خط مبنا تعریف نشده",
   sync_conflict_unresolved: "تعارض همگام‌سازی",
+  critical_path_delay: "تأخیر مسیر بحرانی",
+  ipc_approval_delayed: "تأخیر تأیید IPC",
+  procurement_overdue: "تأخیر تأمین و خرید",
 };
 
 export function fetchAlertRules(projectId: string) {

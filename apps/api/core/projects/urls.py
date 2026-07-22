@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from projects.views import ProjectViewSet
+from projects.kpi_views import ProjectHealthView, ProjectKpisView
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
 from project_templates.views import SaveProjectAsTemplateView
 from business_meta.views import (
@@ -88,6 +89,10 @@ urlpatterns = [
 
     # Save Project as Template
     path('<uuid:project_pk>/save-as-template/', SaveProjectAsTemplateView.as_view(), name='project-save-as-template'),
+
+    # Unified KPIs / health (Sprint 13 / K-02)
+    path('<uuid:project_pk>/kpis/', ProjectKpisView.as_view(), name='project-kpis'),
+    path('<uuid:project_pk>/health/', ProjectHealthView.as_view(), name='project-health'),
 
     # --- Nested Apps ---
     # These apps have endpoints nested under a specific project context

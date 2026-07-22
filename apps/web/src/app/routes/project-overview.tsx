@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Settings } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { ProjectProvider, useProject } from "@/app/contexts/project-context";
+import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import { fetchMembers } from "@/app/lib/api/members";
+import { fetchProjectKpis } from "@/app/lib/api/kpis";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { warmProjectCache } from "@/app/lib/offlineCache";
@@ -23,16 +24,35 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ExecutiveKpiPanel } from "@/components/dashboard/ExecutiveKpiPanel";
 
 function OverviewContent() {
   const { t } = useTranslation();
   const { projectId, project, isLoading } = useProject();
+  const { has } = usePermission(projectId);
   const isOnline = useOnlineStatus();
   const toast = useToast();
   const warmedRef = useRef(false);
+  const canViewDashboard = has("view_dashboard");
+  const canViewCost = has("view_costs") || canViewDashboard;
+  const canViewCash = has("view_cashflow") || canViewDashboard;
+  const canViewAlerts = has("view_project") || canViewDashboard;
+
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
+  });
+
+  const {
+    data: kpis,
+    isLoading: kpisLoading,
+    isError: kpisError,
+    refetch: refetchKpis,
+  } = useQuery({
+    queryKey: ["project-kpis", projectId],
+    queryFn: () => fetchProjectKpis(projectId),
+    enabled: Boolean(projectId) && canViewDashboard,
   });
 
   useEffect(() => {
@@ -113,6 +133,23 @@ function OverviewContent() {
           </>
         }
       />
+
+      {canViewDashboard ? (
+        kpisLoading ? (
+          <LoadingSkeleton rows={3} />
+        ) : kpisError ? (
+          <QueryErrorState onRetry={() => void refetchKpis()} />
+        ) : kpis ? (
+          <ExecutiveKpiPanel
+            projectId={projectId}
+            kpis={kpis}
+            canViewSchedule={canViewDashboard}
+            canViewCost={canViewCost}
+            canViewCash={canViewCash}
+            canViewAlerts={canViewAlerts}
+          />
+        ) : null
+      ) : null}
 
       <div className='mb-8 grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2'>
         <div>

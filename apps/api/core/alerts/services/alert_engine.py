@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 
 from alerts.models import AlertLog, AlertRule
-from notifications.models import Notification, NotificationType
+from notifications.services.delivery import deliver_alert_notifications
 
 
 def _normalize_alert_type(value: str) -> str:
@@ -50,20 +50,16 @@ def fire_alert(rule_id, trigger_reference: str, message: str, project_id, extra_
         return None
 
     recipients = _resolve_recipients(rule, project_id)
-    sent = 0
     link = (extra_context or {}).get('link', f'/projects/{project_id}/alerts')
     title = rule.name or rule.get_alert_type_display()
 
-    for user_id in recipients:
-        Notification.objects.create(
-            user_id=user_id,
-            project_id=project_id,
-            notification_type=NotificationType.GENERIC,
-            title=title,
-            message=message,
-            link=link,
-        )
-        sent += 1
+    sent = deliver_alert_notifications(
+        user_ids=recipients,
+        project_id=project_id,
+        title=title,
+        message=message,
+        link=link,
+    )
 
     return AlertLog.objects.create(
         rule=rule,
@@ -109,6 +105,9 @@ def _evaluate_rule(rule: AlertRule, project_id):
         'correspondence_response_due': _check_correspondence_due,
         'baseline_not_set': _check_baseline_not_set,
         'sync_conflict_unresolved': _check_sync_conflict_unresolved,
+        'critical_path_delay': _check_critical_path_delay,
+        'ipc_approval_delayed': _check_ipc_approval_delayed,
+        'procurement_overdue': _check_procurement_overdue,
     }
     checker = checkers.get(_normalize_alert_type(rule.alert_type))
     if checker:
@@ -204,7 +203,7 @@ def _check_low_stock(rule, project_id):
     from resources.models import Material
     from resources.services.balance_service import compute_material_balance
 
-    for material in Material.objects.filter(project_id=project_id, is_deleted=False):
+    for material in Material.objects.filter(project_id=project_id):
         row = compute_material_balance(material)
         if row.get('is_low_stock'):
             fire_alert(
@@ -350,6 +349,130 @@ def _check_sync_conflict_unresolved(rule, project_id):
             f'تعارض همگام‌سازی حل‌نشده: {entry.conflict_reason}',
             project_id,
             extra_context={'link': f'/projects/{project_id}/sync-conflicts'},
+        )
+
+
+def _check_critical_path_delay(rule, project_id):
+    """Critical baseline activities behind plan by lag ≥ threshold %."""
+    from schedule.models import ActivityProgress, BaselineActivity, BaselineSchedule
+
+    threshold_pct = float(rule.threshold or 5) / 100
+    current = BaselineSchedule.objects.filter(project_id=project_id, is_current=True).first()
+    if not current:
+        return
+
+    critical = BaselineActivity.objects.filter(
+        baseline=current,
+        is_critical=True,
+    ).select_related('activity')
+
+    activity_ids = [ba.activity_id for ba in critical]
+    if not activity_ids:
+        return
+
+    progresses = (
+        ActivityProgress.objects.filter(activity_id__in=activity_ids)
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: p for p in progresses}
+
+    for ba in critical:
+        act = ba.activity
+        if act is None or getattr(act, 'is_deleted', False):
+            continue
+        prog = progress_map.get(act.id)
+        if not prog:
+            continue
+        planned = float(prog.planned_progress or 0)
+        actual = float(prog.actual_progress or 0)
+        if planned - actual > threshold_pct:
+            fire_alert(
+                rule.id,
+                f'critical_path:{act.id}',
+                f'فعالیت بحرانی {act.activity_name} بیش از {threshold_pct * 100:.0f}٪ از برنامه عقب است',
+                project_id,
+                extra_context={'link': f'/projects/{project_id}/schedule/gantt'},
+            )
+
+
+def _check_ipc_approval_delayed(rule, project_id):
+    """IPC stuck in submitted/under_review beyond threshold days."""
+    from contracts.models import IPC, IPCStatus
+
+    days = int(float(rule.threshold or 7))
+    cutoff = date.today() - timedelta(days=days)
+    pending = IPC.objects.filter(
+        project_id=project_id,
+        status__in=[IPCStatus.SUBMITTED, IPCStatus.UNDER_REVIEW],
+        is_deleted=False,
+    ).select_related('contract')
+
+    for ipc in pending:
+        anchor = ipc.submitted_date or ipc.prepared_date
+        if not anchor or anchor > cutoff:
+            continue
+        delay = (date.today() - anchor).days
+        fire_alert(
+            rule.id,
+            f'ipc_approval:{ipc.id}',
+            f'صدور موقت شماره {ipc.ipc_number} قرارداد {ipc.contract.counterparty} '
+            f'{delay} روز در انتظار تأیید است',
+            project_id,
+            extra_context={'link': f'/projects/{project_id}/contracts/{ipc.contract_id}'},
+        )
+
+
+def _check_procurement_overdue(rule, project_id):
+    """POs past expected delivery without actual delivery, or MRs past required_by."""
+    from resources.models import MaterialRequest, MaterialRequestStatus, PurchaseOrder
+
+    today = date.today()
+    grace = int(float(rule.threshold or 0))
+    cutoff = today - timedelta(days=grace)
+
+    overdue_pos = PurchaseOrder.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        actual_delivery_date__isnull=True,
+        expected_delivery_date__isnull=False,
+        expected_delivery_date__lte=cutoff,
+    ).select_related('material_request', 'material_request__material')
+
+    for po in overdue_pos:
+        mr = po.material_request
+        if mr and mr.status == MaterialRequestStatus.DELIVERED:
+            continue
+        name = mr.material.material_name if mr and mr.material_id else f'PO-{po.po_number}'
+        fire_alert(
+            rule.id,
+            f'po_overdue:{po.id}',
+            f'سفارش خرید {po.po_number} ({name}) از موعد تحویل گذشته است',
+            project_id,
+            extra_context={'link': f'/projects/{project_id}/procurement'},
+        )
+
+    overdue_mrs = MaterialRequest.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        required_by_date__isnull=False,
+        required_by_date__lte=cutoff,
+    ).exclude(
+        status__in=[MaterialRequestStatus.DELIVERED, MaterialRequestStatus.CANCELLED],
+    ).select_related('material')
+
+    for mr in overdue_mrs:
+        # Skip if already covered by PO alert for same request
+        if hasattr(mr, 'purchase_order') and mr.purchase_order and not mr.purchase_order.is_deleted:
+            po = mr.purchase_order
+            if po.expected_delivery_date and po.actual_delivery_date is None:
+                continue
+        fire_alert(
+            rule.id,
+            f'mr_overdue:{mr.id}',
+            f'درخواست مصالح {mr.request_number} ({mr.material.material_name}) از موعد نیاز گذشته است',
+            project_id,
+            extra_context={'link': f'/projects/{project_id}/procurement'},
         )
 
 
