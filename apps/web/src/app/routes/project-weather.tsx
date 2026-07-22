@@ -6,13 +6,14 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { NotFoundState } from "@/components/layout/empty-state";
 import { WeatherLogGrid } from "@/components/weather/weather-log-grid";
 
 function WeatherPageContent() {
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   return (
     <>

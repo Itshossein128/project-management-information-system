@@ -264,13 +264,13 @@ export function DataTable<TData>({
               <tr
                 key={headerGroup.id}
                 id={`row-headerGroup-${headerGroup.id}`}
-                className="border-border border-b bg-muted/50"
+                className="border-border/80 border-b bg-muted/40"
               >
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     id={`text-columnHeader-${name}-${header.id}`}
-                    className="px-3 py-2 text-start font-medium text-muted-foreground sm:px-4 sm:py-3"
+                    className="px-3 py-2 text-start text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-4 sm:py-3"
                   >
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (
                       <button
@@ -323,7 +323,7 @@ export function DataTable<TData>({
                 <tr
                   key={row.id}
                   id={`row-data-${name}-${index}`}
-                  className="border-border border-b last:border-b-0 hover:bg-muted/30"
+                  className="border-border/60 border-b transition-colors duration-150 last:border-b-0 hover:bg-brand-50/60 dark:hover:bg-brand-950/30"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td

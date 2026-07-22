@@ -13,6 +13,7 @@ import {
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
 import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer";
@@ -115,13 +116,11 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده داشبورد را ندارد.
-      </p>
+      <AccessDenied description="نقش شما مجوز مشاهده داشبورد را ندارد." />
     );
   }
 

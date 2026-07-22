@@ -18,6 +18,7 @@ import { ContractBoQGrid } from "@/components/contracts/ContractBoQGrid";
 import { ContractSummaryCards } from "@/components/contracts/ContractSummaryCards";
 import { IPCWizard } from "@/components/contracts/IPCWizard";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -54,15 +55,13 @@ function ContractDetailContent() {
   });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
   if (!canView) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به قراردادها ندارید.
-      </p>
+      <AccessDenied description="برای مشاهده قراردادها به مجوز مربوطه نیاز است." />
     );
   }
-  if (!contract) return <p>قرارداد یافت نشد</p>;
+  if (!contract) return <NotFoundState title="قرارداد یافت نشد" />;
 
   const startEdit = () => {
     setValues(contractDetailToForm(contract));

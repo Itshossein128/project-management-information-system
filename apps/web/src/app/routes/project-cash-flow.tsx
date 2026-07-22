@@ -6,6 +6,7 @@ import { ForecastTab } from "@/components/cashflow/ForecastTab";
 import { GapAnalysisTab } from "@/components/cashflow/GapAnalysisTab";
 import { TransactionsTab } from "@/components/cashflow/TransactionsTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 type Tab = "transactions" | "forecast" | "gap";
@@ -24,13 +25,11 @@ function CashFlowContent() {
   const [tab, setTab] = useState<Tab>("transactions");
 
   if (isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده جریان نقدی را ندارد.
-      </p>
+      <AccessDenied description="نقش شما مجوز مشاهده جریان نقدی را ندارد." />
     );
   }
 

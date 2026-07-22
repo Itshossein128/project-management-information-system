@@ -7,11 +7,12 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { NotFoundState } from "@/components/layout/empty-state";
 
 function BarriersContent() {
   const { projectId, project, isLoading } = useProject();
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
   return (
     <>
       <PageHeader title='موانع و مشکلات' subtitle='ثبت و پیگیری موانع پروژه' />
