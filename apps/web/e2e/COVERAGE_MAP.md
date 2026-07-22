@@ -8,7 +8,7 @@
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
 | DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
 | OFFLINE | Sync & Conflict | 2 | 15 | 13% |
-| FINANCE | Budget & Cost | 0 | 15 | 0% |
+| FINANCE | Budget & Cost | 15 | 15 | 100% |
 
 ## Sprint 3 coverage notes
 
