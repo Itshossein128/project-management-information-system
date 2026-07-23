@@ -106,7 +106,7 @@ function ContractsContent() {
         </div>
         <div className='rounded-lg border p-4'>
           <p className='text-sm text-muted-foreground'>IPC معوق</p>
-          <p className='text-lg font-semibold text-red-600'>{overdueIpcs}</p>
+          <p className='text-lg font-semibold text-danger-600'>{overdueIpcs}</p>
         </div>
         <div className='rounded-lg border p-4'>
           <p className='text-sm text-muted-foreground'>
@@ -250,7 +250,7 @@ function ContractsContent() {
                     </td>
                     <td className='px-3 py-2'>
                       {i.days_overdue != null ? (
-                        <span className='rounded bg-red-100 px-2 py-0.5 text-red-800'>
+                        <span className='rounded bg-danger-100 px-2 py-0.5 text-danger-800'>
                           {i.days_overdue} روز
                         </span>
                       ) : (

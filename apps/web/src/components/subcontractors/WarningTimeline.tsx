@@ -35,7 +35,7 @@ export function WarningTimeline({ warnings, canEdit, onResolve }: Props) {
                 رفع شد در {w.resolved_date}
               </span>
             ) : (
-              <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">رفع نشده</span>
+              <span className="rounded bg-danger-100 px-2 py-0.5 text-xs text-danger-800">رفع نشده</span>
             )}
           </div>
           <p className={`mt-2 text-sm ${w.resolved ? "line-through" : ""}`}>{w.reason}</p>

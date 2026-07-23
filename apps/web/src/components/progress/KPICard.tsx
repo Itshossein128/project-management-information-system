@@ -25,7 +25,7 @@ export function KPICard({
         <p
           className={cn(
             "mt-2 text-sm font-medium",
-            trend.positive ? "text-emerald-600" : "text-red-600",
+            trend.positive ? "text-success-600" : "text-danger-600",
           )}
         >
           {trend.label}

@@ -333,7 +333,7 @@ export function WeatherLogGrid({ projectId }: WeatherLogGridProps) {
                         </span>
                       ) : null}
                       <span
-                        className={`mt-0.5 size-1.5 rounded-full ${log.site_status === "active" ? "bg-emerald-500" : "bg-gray-400"}`}
+                        className={`mt-0.5 size-1.5 rounded-full ${log.site_status === "active" ? "bg-success-500" : "bg-neutral-400"}`}
                         title={log.site_status_label}
                       />
                     </>

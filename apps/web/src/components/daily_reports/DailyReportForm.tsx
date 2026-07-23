@@ -267,7 +267,7 @@ export function DailyReportForm({
       />
 
       {!isOnline ? (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+        <div className="flex items-center gap-2 rounded-lg border border-warning-300 bg-warning-50 px-4 py-2 text-sm text-warning-900 dark:bg-warning-950/30 dark:text-warning-200">
           <CloudOff className="size-4" />
           حالت آفلاین — تغییرات به صورت محلی ذخیره و پس از اتصال همگام‌سازی می‌شوند.
         </div>

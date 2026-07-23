@@ -13,10 +13,10 @@ import {
 } from "@/app/hooks/useNotifications";
 
 const TYPE_ACCENT: Record<NotificationType, string> = {
-  report_submitted: "bg-amber-500",
-  report_approved: "bg-emerald-500",
-  report_rejected: "bg-red-500",
-  generic: "bg-sky-500",
+  report_submitted: "bg-warning-500",
+  report_approved: "bg-success-500",
+  report_rejected: "bg-danger-500",
+  generic: "bg-info-500",
 };
 
 const FOCUSABLE =

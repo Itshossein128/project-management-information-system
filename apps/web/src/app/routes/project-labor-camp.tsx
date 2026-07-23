@@ -106,10 +106,10 @@ function Content() {
                       className={cn(
                         "px-3 py-2 font-medium",
                         r.empty_capacity < 0
-                          ? "text-red-600"
+                          ? "text-danger-600"
                           : r.empty_capacity === 0
-                            ? "text-amber-600"
-                            : "text-emerald-600",
+                            ? "text-warning-600"
+                            : "text-success-600",
                       )}
                     >
                       {r.empty_capacity}

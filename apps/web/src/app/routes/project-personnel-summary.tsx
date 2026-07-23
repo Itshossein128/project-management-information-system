@@ -30,9 +30,9 @@ function monthStartIso() {
 function heatColor(value: number, max: number): string {
   if (value <= 0 || max <= 0) return "";
   const ratio = value / max;
-  if (ratio > 0.75) return "bg-emerald-200 dark:bg-emerald-900/50";
-  if (ratio > 0.5) return "bg-emerald-100 dark:bg-emerald-950/40";
-  if (ratio > 0.25) return "bg-emerald-50 dark:bg-emerald-950/20";
+  if (ratio > 0.75) return "bg-success-200 dark:bg-success-900/50";
+  if (ratio > 0.5) return "bg-success-100 dark:bg-success-950/40";
+  if (ratio > 0.25) return "bg-success-50 dark:bg-success-950/20";
   return "bg-muted/30";
 }
 

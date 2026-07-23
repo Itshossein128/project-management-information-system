@@ -24,13 +24,13 @@ export function WeatherIcon({ condition, className }: { condition: WeatherCondit
 }
 
 export const WEATHER_CALENDAR_COLORS: Record<WeatherCondition, string> = {
-  sunny: "bg-amber-200 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200",
-  cloudy: "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200",
-  partly_cloudy: "bg-sky-200 text-sky-900 dark:bg-sky-900/50 dark:text-sky-200",
-  rainy: "bg-blue-300 text-blue-900 dark:bg-blue-900/50 dark:text-blue-200",
-  stormy: "bg-violet-300 text-violet-900 dark:bg-violet-900/50 dark:text-violet-200",
-  snowy: "bg-cyan-200 text-cyan-900 dark:bg-cyan-900/50 dark:text-cyan-200",
-  foggy: "bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+  sunny: "bg-warning-200 text-warning-900 dark:bg-warning-900/50 dark:text-warning-200",
+  cloudy: "bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200",
+  partly_cloudy: "bg-info-200 text-info-900 dark:bg-info-900/50 dark:text-info-200",
+  rainy: "bg-info-300 text-info-900 dark:bg-info-900/50 dark:text-info-200",
+  stormy: "bg-brand-300 text-brand-900 dark:bg-brand-900/50 dark:text-brand-200",
+  snowy: "bg-info-100 text-info-900 dark:bg-info-900/50 dark:text-info-200",
+  foggy: "bg-neutral-300 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200",
 };
 
 function SunIcon({ className }: IconProps) {

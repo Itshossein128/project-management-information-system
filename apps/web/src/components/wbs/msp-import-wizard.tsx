@@ -159,7 +159,7 @@ export function MspImportWizard({
 
       {step === 1 && (
         <div className="space-y-4">
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+          <div className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200">
             Microsoft Project: File → Save As → XML (.xml). Primavera P6: Export → XER (.xer).
             فایل‌های باینری .mpp پشتیبانی نمی‌شوند.
           </div>
@@ -209,7 +209,7 @@ export function MspImportWizard({
       {step === 2 && preview && (
         <div className="space-y-4">
           {preview.warnings.length > 0 && (
-            <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+            <div className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200">
               <p className="font-medium">هشدارها</p>
               <ul className="mt-1 list-inside list-disc">
                 {preview.warnings.map((w) => (

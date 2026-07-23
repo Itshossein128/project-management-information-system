@@ -58,7 +58,7 @@ export function OfflineIndicator() {
     return (
       <div
         data-testid="offline-indicator"
-        className="flex w-full items-center justify-between gap-3 bg-red-600 px-4 py-2 text-sm text-white"
+        className="flex w-full items-center justify-between gap-3 bg-danger-600 px-4 py-2 text-sm text-white"
       >
         <span className="flex items-center gap-2">
           <AlertTriangle className="size-4" aria-hidden />
@@ -80,7 +80,7 @@ export function OfflineIndicator() {
     return (
       <div
         data-testid="offline-indicator"
-        className="flex w-full items-center gap-2 bg-blue-600 px-4 py-2 text-sm text-white"
+        className="flex w-full items-center gap-2 bg-info-600 px-4 py-2 text-sm text-white"
       >
         <RefreshCw className="size-4 animate-spin" aria-hidden />
         {`در حال همگام‌سازی... (${stats.syncing} مورد)`}
@@ -92,14 +92,14 @@ export function OfflineIndicator() {
     return (
       <div
         data-testid="offline-indicator"
-        className="flex w-full items-center justify-between gap-3 bg-amber-500 px-4 py-2 text-sm text-amber-950"
+        className="flex w-full items-center justify-between gap-3 bg-warning-500 px-4 py-2 text-sm text-warning-950"
       >
         <span className="flex items-center gap-2">
           <CloudOff className="size-4" aria-hidden />
           آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند
         </span>
         {stats.pending > 0 ? (
-          <span className="rounded-full bg-amber-950/15 px-3 py-0.5 font-medium">
+          <span className="rounded-full bg-warning-950/15 px-3 py-0.5 font-medium">
             {`در صف: ${stats.pending} مورد`}
           </span>
         ) : null}
@@ -112,8 +112,8 @@ export function OfflineIndicator() {
       <div
         data-testid="offline-indicator"
         className={cn(
-          "flex w-full items-center justify-between gap-3 bg-amber-100 px-4 py-2 text-sm text-amber-900",
-          "dark:bg-amber-950 dark:text-amber-100",
+          "flex w-full items-center justify-between gap-3 bg-warning-100 px-4 py-2 text-sm text-warning-900",
+          "dark:bg-warning-950 dark:text-warning-100",
         )}
       >
         <span className="flex items-center gap-2">

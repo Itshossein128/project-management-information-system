@@ -143,10 +143,10 @@ export function ActivityDrawer({
 
   const weightBarColor = weightSummary
     ? weightSummary.is_balanced
-      ? "bg-emerald-500"
+      ? "bg-success-500"
       : weightSummary.total_weight < 0.99 || weightSummary.total_weight > 1.01
-        ? "bg-red-500"
-        : "bg-amber-500"
+        ? "bg-danger-500"
+        : "bg-warning-500"
     : "bg-muted";
 
   async function handleSave() {
@@ -326,7 +326,7 @@ export function ActivityDrawer({
               />
             </div>
             {weightSummary.warning ? (
-              <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{weightSummary.warning}</p>
+              <p className="mt-2 text-xs text-warning-700 dark:text-warning-400">{weightSummary.warning}</p>
             ) : null}
           </div>
         ) : null}
