@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderOpen, Mail, Users } from "lucide-react";
 import { useState } from "react";
@@ -38,6 +39,8 @@ import { useToast } from "@/components/ui/toast";
 type Tab = "archive" | "correspondence" | "meetings";
 
 function DocumentsContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canViewDocs = has("view_documents");
@@ -140,12 +143,12 @@ function DocumentsContent() {
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
   if (!canViewCurrent) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده مدارک و مکاتبات به مجوز مربوطه نیاز است."
       />
     );
@@ -170,9 +173,9 @@ function DocumentsContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="مدارک و مکاتبات" subtitle={project.project_name} />
+      <PageHeader title={t("pages.documents.title")} subtitle={project.project_name} />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <TabsList>
             {tabs.map(([id, label]) => (
@@ -489,6 +492,7 @@ function DocumentsContent() {
 }
 
 export default function ProjectDocumentsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

@@ -1,5 +1,6 @@
 import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 import { cn } from "src/app/lib/utils";
 
 const badgeVariants = cva(
@@ -40,9 +41,25 @@ export const projectStatusBadge: Record<string, BadgeProps["variant"]> = {
   handed_over: "neutral",
 };
 
+/** i18n keys for project status codes — use with `t(projectStatusI18nKey[status])`. */
+export const projectStatusI18nKey: Record<string, string> = {
+  active: "status.active",
+  suspended: "status.suspended",
+  completed: "status.completed",
+  handed_over: "status.handed_over",
+};
+
+/** @deprecated Prefer `projectStatusI18nKey` + `t()` for bilingual UI. */
 export const projectStatusLabels: Record<string, string> = {
   active: "فعال",
   suspended: "معلق",
   completed: "تکمیل‌شده",
   handed_over: "تحویل‌شده",
 };
+
+/** Localized project status label hook helper. */
+export function useProjectStatusLabel(status: string): string {
+  const { t } = useTranslation();
+  const key = projectStatusI18nKey[status];
+  return key ? t(key) : status;
+}

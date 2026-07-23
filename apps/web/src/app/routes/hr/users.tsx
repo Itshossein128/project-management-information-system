@@ -33,6 +33,8 @@ export interface HrUserRow {
 }
 
 export function meta() {
+  const { t } = useTranslation();
+
   return [
     { title: "Users | Building Management" },
     { name: "description", content: "Directory of application users" },

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -31,6 +32,8 @@ import { useToast } from "@/components/ui/toast";
 type Tab = "info" | "boq" | "changes";
 
 function ContractDetailContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { contractId = "" } = useParams();
   const qc = useQueryClient();
@@ -69,11 +72,11 @@ function ContractDetailContent() {
   });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title='پروژه یافت نشد' />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
       <EmptyState
-        title='دسترسی ندارید'
+        title={t("common.accessDenied")}
         description='دسترسی به قراردادها ندارید.'
       />
     );
@@ -203,6 +206,7 @@ function ContractDetailContent() {
 }
 
 export default function ProjectContractDetailPage() {
+  const { t, i18n } = useTranslation();
   const { projectId, contractId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

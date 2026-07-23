@@ -104,6 +104,7 @@ export default function BusinessJobPositionsPage() {
   };
 
   const startEdit = (jp: BusinessJobPosition) => {
+
     setEditingId(jp.id);
     setSlug(jp.slug);
     setLabel(jp.label);

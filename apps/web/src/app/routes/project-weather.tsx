@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
@@ -10,10 +11,12 @@ import {
 import { WeatherLogGrid } from "@/components/weather/weather-log-grid";
 
 function WeatherPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
 
   return (
     <>
@@ -28,8 +31,8 @@ function WeatherPageContent() {
         ]}
       />
       <PageHeader
-        title='وضعیت جوی'
-        subtitle='گزارش روزانه وضعیت آب‌وهوا و کارگاه'
+        title={t("pages.weather.title")}
+        subtitle={t("pages.weather.subtitle")}
       />
       <WeatherLogGrid projectId={projectId} />
     </>
@@ -37,6 +40,7 @@ function WeatherPageContent() {
 }
 
 export default function ProjectWeatherPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

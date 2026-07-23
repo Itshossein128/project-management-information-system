@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import gettext as _
 
 from projects.models import Project, ProjectStatus
 
@@ -80,7 +81,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
     def validate_project_code(self, value):
         value = value.strip()
         if not value:
-            raise serializers.ValidationError('Project code is required.')
+            raise serializers.ValidationError(_('Project code is required.'))
         return value
 
     def validate(self, attrs):

@@ -1,4 +1,5 @@
 import { ThemeSync } from "@/components/ThemeSync";
+import I18nSync from "@/components/i18Sync";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { useTranslation } from "react-i18next";
@@ -46,6 +47,7 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeSync />
+      <I18nSync />
       <TooltipProvider>
       <ToastProvider>
         <PwaManager />

@@ -51,7 +51,7 @@ function ProjectSettingsContent() {
     return <QueryErrorState onRetry={() => void refetch()} />;
   }
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
 
   const values = {
@@ -70,6 +70,7 @@ function ProjectSettingsContent() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!canEdit) return;
     saveMutation.mutate({

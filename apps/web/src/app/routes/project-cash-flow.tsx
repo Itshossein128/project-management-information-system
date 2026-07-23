@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -18,6 +19,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function CashFlowContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_cashflow");
@@ -37,9 +40,9 @@ function CashFlowContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="جریان نقدی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.cashFlow.title")} subtitle={project.project_name} />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -65,6 +68,7 @@ function CashFlowContent() {
 }
 
 export default function ProjectCashFlowPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
 
   return (

@@ -174,7 +174,9 @@ export const SidebarItem = ({
                       )
                     }
                   >
-                    {child.label}
+                    {child.labelI18nKey
+                      ? t(child.labelI18nKey, { defaultValue: child.label })
+                      : child.label}
                   </NavLink>
                 </li>
               ))}

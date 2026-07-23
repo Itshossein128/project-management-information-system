@@ -3,14 +3,16 @@ from __future__ import annotations
 
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext as _
 from django_ratelimit.decorators import ratelimit
-
-RATELIMIT_MESSAGE = 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً چند دقیقه دیگر تلاش کنید.'
 
 
 def ratelimit_view(request, exception=None):
-    """RATELIMIT_VIEW handler — return 429 with Persian message."""
-    return JsonResponse({'detail': RATELIMIT_MESSAGE}, status=429)
+    """RATELIMIT_VIEW handler — return 429 with localized message."""
+    return JsonResponse(
+        {'detail': _('Too many requests. Please try again later.')},
+        status=429,
+    )
 
 
 def handle_ratelimit_403(request, exception=None):

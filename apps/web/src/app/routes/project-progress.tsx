@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -31,6 +32,8 @@ function todayIso() {
 }
 
 function ProgressPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
@@ -122,7 +125,7 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (snapshotError) {
     return <QueryErrorState onRetry={() => void refetchSnapshot()} />;
   }
@@ -130,7 +133,7 @@ function ProgressPageContent() {
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="نقش شما مجوز مشاهده داشبورد را ندارد."
       />
     );
@@ -139,7 +142,7 @@ function ProgressPageContent() {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <PageHeader title="گزارش پیشرفت پروژه" subtitle={project.project_name} />
+        <PageHeader title={t("pages.progress.title")} subtitle={project.project_name} />
         {canEdit ? (
           <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)}>
             ثبت پیشرفت دستی
@@ -329,6 +332,7 @@ function ProgressPageContent() {
 }
 
 export default function ProjectProgressPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

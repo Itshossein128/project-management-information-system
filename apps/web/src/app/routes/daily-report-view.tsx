@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
@@ -32,6 +33,7 @@ import { LaborTab } from "@/components/daily_reports/LaborTab";
 import { MaterialsTab } from "@/components/daily_reports/MaterialsTab";
 
 export default function DailyReportViewPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "", reportId = "" } = useParams();
   const toast = useToast();
   const queryClient = useQueryClient();

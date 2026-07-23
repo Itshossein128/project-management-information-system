@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -22,6 +23,8 @@ function daysBetween(start: string | null, end: string | null): number | null {
 }
 
 function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
+  const { t } = useTranslation();
+
   const rows = tasks.filter((t) => t.baseline_start || t.baseline_end);
   if (rows.length === 0) return null;
 
@@ -66,6 +69,8 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
 }
 
 function GanttContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_activities");
@@ -148,11 +153,11 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده گانت به مجوز فعالیت‌ها نیاز است."
       />
     );
@@ -173,7 +178,7 @@ function GanttContent() {
           { label: "گانت" },
         ]}
       />
-      <PageHeader title="گانت" subtitle={project.project_name} />
+      <PageHeader title={t("pages.gantt.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
         <Select
@@ -295,6 +300,7 @@ function GanttContent() {
 }
 
 export default function ProjectScheduleGanttPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

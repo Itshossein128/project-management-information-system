@@ -15,6 +15,17 @@ export const languageNames: Record<SupportedLanguage, string> = {
 
 export const isRTL = (lang: string = i18n.language): boolean => lang === "fa";
 
+function resolveInitialLanguage(): SupportedLanguage {
+  if (typeof window === "undefined") return "fa";
+  const stored =
+    window.localStorage.getItem("app-language") ??
+    window.localStorage.getItem("i18nextLng");
+  if (stored === "fa" || stored === "en") return stored;
+  return "fa";
+}
+
+const initialLng = resolveInitialLanguage();
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -24,14 +35,16 @@ i18n
       fa: { translation: fa },
     },
     fallbackLng: "fa",
-    lng: "fa",
+    lng: initialLng,
+    supportedLngs: [...supportedLanguages],
     interpolation: {
       escapeValue: false,
     },
     detection: {
+      // Prefer the app language store key; keep i18nextLng as secondary.
       order: ["localStorage", "navigator"],
       caches: ["localStorage"],
-      lookupLocalStorage: "i18nextLng",
+      lookupLocalStorage: "app-language",
     },
   });
 

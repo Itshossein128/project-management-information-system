@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 
 export default function SyncConflictsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -82,8 +84,8 @@ export default function SyncConflictsPage() {
       />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <PageHeader
-          title="تعارض‌های همگام‌سازی"
-          subtitle="مواردی که هنگام همگام‌سازی با نسخه سرور تعارض داشتند"
+          title={t("pages.syncConflicts.title")}
+          subtitle={t("pages.syncConflicts.subtitle")}
         />
         {visibleConflicts.length > 0 ? (
           <Badge
@@ -100,7 +102,7 @@ export default function SyncConflictsPage() {
         <div data-testid="conflict-empty-state">
           <EmptyState
             icon={<CheckCircle2 className="text-success-500" />}
-            title="هیچ تعارضی وجود ندارد"
+            title={t("pages.syncConflicts.emptyTitle")}
             description="تمام داده‌های آفلاین با موفقیت همگام‌سازی شده‌اند"
           />
         </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -25,6 +26,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function CostsContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_costs");
@@ -43,11 +46,11 @@ function CostsContent() {
   });
 
   if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="نقش شما مجوز مشاهده هزینه‌ها را ندارد."
       />
     );
@@ -60,7 +63,7 @@ function CostsContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="کنترل هزینه" subtitle={project.project_name} />
+      <PageHeader title={t("pages.costs.title")} subtitle={project.project_name} />
 
       <div
         className="grid gap-4 md:grid-cols-2 xl:grid-cols-5"
@@ -101,7 +104,7 @@ function CostsContent() {
         />
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4" data-testid="costs-tabs">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id} data-testid={`costs-tab-${t.id}`}>
@@ -128,6 +131,7 @@ function CostsContent() {
 }
 
 export default function ProjectCostsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

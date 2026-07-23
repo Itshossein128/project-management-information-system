@@ -64,3 +64,27 @@ msgstr "رمز عبور با موفقیت تغییر کرد."
 
 msgid "Phone number must be 9-15 digits, optionally starting with +."
 msgstr "شماره تلفن باید ۹ تا ۱۵ رقم باشد و می‌تواند با + شروع شود."
+
+msgid "Validation error."
+msgstr "خطای اعتبارسنجی."
+
+msgid "Conflict."
+msgstr "تعارض."
+
+msgid "Project code is required."
+msgstr "کد پروژه الزامی است."
+
+msgid "You are not an active member of this project."
+msgstr "شما عضو فعال این پروژه نیستید."
+
+msgid "Too many requests. Please try again later."
+msgstr "تعداد درخواست‌ها بیش از حد مجاز است. لطفاً بعداً دوباره تلاش کنید."
+
+msgid "File size must not exceed 50 MB."
+msgstr "حجم فایل نباید از ۵۰ مگابایت تجاوز کند."
+
+msgid "File type is not allowed."
+msgstr "نوع فایل مجاز نیست."
+
+msgid "This field is required."
+msgstr "این فیلد الزامی است."

@@ -57,6 +57,7 @@ export default function SettingsRolesPage() {
   };
 
   const togglePermission = (codename: string) => {
+
     if (selectedRole?.is_system) return;
     setDraftPermissions((prev) => {
       const next = new Set(prev);

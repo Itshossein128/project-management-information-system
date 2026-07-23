@@ -9,12 +9,16 @@ from rest_framework.exceptions import (
     ValidationError,
 )
 from rest_framework.views import exception_handler
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
+
+from common.i18n import localize_api_payload
 
 
 class ConflictError(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_code = 'conflict'
-    default_detail = 'Conflict.'
+    default_detail = _lazy('Conflict.')
 
 
 def _extract_message(data) -> str:
@@ -32,7 +36,7 @@ def _extract_message(data) -> str:
                 messages.append(f'{key}: {"; ".join(str(v) for v in value)}')
             else:
                 messages.append(f'{key}: {value}')
-        return '; '.join(messages) if messages else 'Validation error.'
+        return '; '.join(messages) if messages else str(_('Validation error.'))
     if isinstance(data, list):
         return '; '.join(str(item) for item in data)
     return str(data)
@@ -64,6 +68,7 @@ def custom_exception_handler(exc, context):
         return response
 
     if isinstance(response.data, dict) and 'error' in response.data:
+        response.data = localize_api_payload(response.data)
         return response
 
     message = _extract_message(response.data)
@@ -76,11 +81,11 @@ def custom_exception_handler(exc, context):
         if wait is not None:
             response['Retry-After'] = str(int(wait))
 
-    response.data = {
+    response.data = localize_api_payload({
         'error': {
             'code': code,
             'message': message,
             'details': details,
         }
-    }
+    })
     return response

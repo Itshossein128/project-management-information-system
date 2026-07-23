@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -24,6 +25,8 @@ import { Drawer } from "@/components/ui/drawer";
 import { useToast } from "@/components/ui/toast";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const { has } = usePermission(projectId);
   const canEdit = has("edit_reports");
@@ -249,6 +252,7 @@ function Content() {
 }
 
 export default function ProjectEquipmentUtilizationPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
@@ -259,7 +263,7 @@ export default function ProjectEquipmentUtilizationPage() {
             { label: "بهره‌وری ماشین‌آلات" },
           ]}
         />
-        <PageHeader title='بهره‌وری ماشین‌آلات' />
+        <PageHeader title={t("pages.equipmentUtilization.title")} />
         <p className='text-sm text-muted-foreground'>
           <Link
             className='text-primary hover:underline'

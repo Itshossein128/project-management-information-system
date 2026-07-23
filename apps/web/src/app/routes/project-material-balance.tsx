@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -30,6 +31,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function BalanceTab({ projectId }: { projectId: string }) {
+  const { t, i18n } = useTranslation();
+
   const [discipline, setDiscipline] = useState("");
   const [lowStock, setLowStock] = useState(false);
 
@@ -134,6 +137,8 @@ function BalanceTab({ projectId }: { projectId: string }) {
 }
 
 function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
@@ -210,7 +215,7 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
       ) : isError ? (
         <QueryErrorState onRetry={() => void refetch()} />
       ) : requests.length === 0 ? (
-        <EmptyState title="درخواستی ثبت نشده" description="درخواست مصالح اینجا نمایش داده می‌شود." />
+        <EmptyState title={t("pages.procurement.empty")} description="درخواست مصالح اینجا نمایش داده می‌شود." />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -244,6 +249,8 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
 }
 
 function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
@@ -406,6 +413,8 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
 }
 
 function MaterialBalanceContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -413,12 +422,12 @@ function MaterialBalanceContent() {
   const [tab, setTab] = useState<Tab>("balance");
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="نقش شما مجوز مشاهده گزارش‌ها را ندارد."
       />
     );
@@ -426,9 +435,9 @@ function MaterialBalanceContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="بالانس مصالح" subtitle={project.project_name} />
+      <PageHeader title={t("pages.materialBalance.title")} subtitle={project.project_name} />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -454,6 +463,7 @@ function MaterialBalanceContent() {
 }
 
 export default function ProjectMaterialBalancePage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

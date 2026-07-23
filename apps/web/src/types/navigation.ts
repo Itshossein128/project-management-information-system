@@ -18,6 +18,8 @@ export type AppRoute = {
 
 export interface NavigationChildItem {
   label: string;
+  /** When set, sidebar uses `t(labelI18nKey)` for the visible child label. */
+  labelI18nKey?: string;
   /** Route segment(s), e.g. `businesses/3/tables`. If it contains `:param`, it is not a direct link. */
   path: string;
 }

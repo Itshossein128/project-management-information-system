@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
@@ -19,6 +20,8 @@ import { useToast } from "@/components/ui/toast";
 type Tab = "indirect" | "direct";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const toast = useToast();
   const qc = useQueryClient();
@@ -153,12 +156,13 @@ function Content() {
 }
 
 export default function ProjectManpowerPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "نیروی انسانی" }]} />
-        <PageHeader title='نیروی انسانی روزانه' />
+        <PageHeader title={t("pages.manpower.title")} />
         <Content />
       </ProjectProvider>
     </main>

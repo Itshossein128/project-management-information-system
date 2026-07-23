@@ -133,6 +133,7 @@ export default function ProjectCreateWizardPage() {
   };
 
   const addSearchedMember = (user: UserLookupResult) => {
+
     if (!selectedRoleId) return;
     setMembers((prev) => [...prev, { user, roleId: selectedRoleId }]);
     setSearch("");
@@ -146,6 +147,7 @@ export default function ProjectCreateWizardPage() {
   };
 
   const selectTemplate = (template: ProjectTemplateListItem | null) => {
+
     setSelectedTemplateId(template?.template_id ?? null);
     if (template) {
       setForm((f) => ({

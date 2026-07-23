@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -15,6 +16,8 @@ import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
 function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { contractId } = useParams();
   const navigate = useNavigate();
@@ -45,7 +48,7 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={mode === "create" ? "قرارداد جدید" : "ویرایش قرارداد"}
+        title={mode === "create" ? t("pages.contractNew.title") : t("pages.contractEdit.title")}
         subtitle={project.project_name}
       />
       <ContractForm
@@ -65,6 +68,7 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
 }
 
 export default function ProjectContractFormPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

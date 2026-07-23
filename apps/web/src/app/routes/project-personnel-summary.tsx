@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Download } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -23,6 +24,8 @@ function todayIso() {
 }
 
 function monthStartIso() {
+  const { t } = useTranslation();
+
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
 }
@@ -37,6 +40,8 @@ function heatColor(value: number, max: number): string {
 }
 
 function PersonnelSummaryContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -75,6 +80,7 @@ function PersonnelSummaryContent() {
   }, [data]);
 
   const exportXlsx = () => {
+
     if (!data) return;
     const headers = ["عنوان شغلی", ...data.dates, "میانگین"];
     const rows = data.job_titles.map((title) => {
@@ -113,7 +119,7 @@ function PersonnelSummaryContent() {
   return (
     <div className='space-y-6'>
       <div className='flex flex-wrap items-end justify-between gap-3'>
-        <PageHeader title='گزارش نفرات' subtitle={project.project_name} />
+        <PageHeader title={t("pages.personnelSummary.title")} subtitle={project.project_name} />
         <Button
           variant='secondary'
           size='sm'
@@ -238,6 +244,7 @@ function PersonnelSummaryContent() {
 }
 
 export default function ProjectPersonnelSummaryPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

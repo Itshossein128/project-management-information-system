@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
 import { useState } from "react";
@@ -27,6 +28,8 @@ import { Button } from "@/components/ui/sprint-button";
 type Tab = "contracts" | "ipcs";
 
 function ContractsContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_contracts");
@@ -58,12 +61,12 @@ function ContractsContent() {
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
   if (!project) {
-    return <EmptyState title='پروژه یافت نشد' />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
   if (!canView) {
     return (
       <EmptyState
-        title='دسترسی ندارید'
+        title={t("common.accessDenied")}
         description='برای مشاهده قراردادها به مجوز مربوطه نیاز است.'
       />
     );
@@ -84,7 +87,7 @@ function ContractsContent() {
   return (
     <div className='space-y-6'>
       <PageHeader
-        title='قراردادها'
+        title={t("pages.contracts.title")}
         subtitle={project.project_name}
         actions={
           canEdit ? (
@@ -200,7 +203,7 @@ function ContractsContent() {
       {tab === "ipcs" ? (
         !canViewIpcs ? (
           <EmptyState
-            title='دسترسی ندارید'
+            title={t("common.accessDenied")}
             description='برای مشاهده صورت‌وضعیت‌ها به مجوز مربوطه نیاز است.'
           />
         ) : iloading ? (
@@ -269,6 +272,7 @@ function ContractsContent() {
 }
 
 export default function ProjectContractsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

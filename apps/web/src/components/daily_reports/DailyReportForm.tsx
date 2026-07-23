@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -78,6 +79,7 @@ export function DailyReportForm({
   projectId: string;
   reportId?: string;
 }) {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -306,7 +308,7 @@ export function DailyReportForm({
         </p>
       )}
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir="rtl">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir={i18n.dir()}>
         <div className="rounded-xl border border-border bg-card">
           <TabsList className="flex h-auto flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-2">
             {TABS.map((t) => (

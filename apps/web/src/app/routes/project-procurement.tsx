@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -36,6 +37,7 @@ function WorkflowActions({
   const toast = useToast();
   const qc = useQueryClient();
   const invalidate = () => {
+
     void qc.invalidateQueries({ queryKey: ["procurement", projectId] });
     void qc.invalidateQueries({ queryKey: ["material-requests", projectId] });
     void qc.invalidateQueries({ queryKey: ["material-balance", projectId] });
@@ -100,6 +102,7 @@ function PlaceOrderDrawer({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
   const [supplierId, setSupplierId] = useState("");
@@ -125,7 +128,7 @@ function PlaceOrderDrawer({
     <Drawer
       isOpen={open}
       onClose={onClose}
-      title="ثبت سفارش خرید"
+      title={t("pages.procurement.newOrder")}
       footer={
         <Button
           variant="primary"
@@ -157,6 +160,8 @@ function PlaceOrderDrawer({
 }
 
 function ProcurementContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const toast = useToast();
@@ -210,14 +215,14 @@ function ProcurementContent() {
   if (!canView) {
     return (
       <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به تأمین و خرید ندارید.
+        {t("common.accessDenied")}
       </p>
     );
   }
 
   return (
     <div className="space-y-6" data-testid="procurement-page">
-      <PageHeader title="تأمین و خرید" subtitle={project.project_name} />
+      <PageHeader title={t("pages.procurement.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
@@ -247,7 +252,7 @@ function ProcurementContent() {
       ) : isError ? (
         <QueryErrorState onRetry={() => void refetch()} />
       ) : requests.length === 0 ? (
-        <EmptyState title="درخواستی ثبت نشده" description="درخواست خرید مصالح اینجا نمایش داده می‌شود." />
+        <EmptyState title={t("pages.procurement.empty")} description={t("pages.procurement.emptyDescription")} />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm" data-testid="procurement-table">
@@ -297,7 +302,7 @@ function ProcurementContent() {
       <Drawer
         isOpen={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="درخواست خرید"
+        title={t("pages.procurement.request")}
         footer={
           <Button
             variant="primary"
@@ -348,6 +353,7 @@ function ProcurementContent() {
 }
 
 export default function ProjectProcurementPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

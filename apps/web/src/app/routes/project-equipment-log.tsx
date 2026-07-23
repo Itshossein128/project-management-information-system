@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -20,6 +21,8 @@ import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const toast = useToast();
   const qc = useQueryClient();
@@ -216,12 +219,13 @@ function Content() {
 }
 
 export default function ProjectEquipmentLogPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "ماشین‌آلات" }]} />
-        <PageHeader title='ماشین‌آلات و تجهیزات' />
+        <PageHeader title={t("pages.equipmentLog.title")} />
         <Content />
       </ProjectProvider>
     </main>

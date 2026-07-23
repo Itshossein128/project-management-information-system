@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -31,6 +32,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function EconomicContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
@@ -50,11 +53,11 @@ function EconomicContent() {
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است."
       />
     );
@@ -73,7 +76,7 @@ function EconomicContent() {
 
   return (
     <div className="space-y-6" data-testid="economic-page">
-      <PageHeader title="تحلیل اقتصادی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.economic.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
         <JalaliDatePicker
@@ -84,7 +87,7 @@ function EconomicContent() {
         />
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -126,6 +129,7 @@ function EconomicContent() {
 }
 
 export default function ProjectEconomicPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

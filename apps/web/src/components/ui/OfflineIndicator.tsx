@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import { AlertTriangle, CloudOff, RefreshCw } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
@@ -20,6 +21,7 @@ const EMPTY_STATS: QueueStats = { pending: 0, syncing: 0, failed: 0, total: 0 };
  * Hidden when online with an empty sync queue (no permanent chrome noise).
  */
 export function OfflineIndicator() {
+  const { t } = useTranslation();
   const isOnline = useOnlineStatus();
   const location = useLocation();
   const [stats, setStats] = useState<QueueStats>(EMPTY_STATS);
@@ -62,14 +64,14 @@ export function OfflineIndicator() {
       >
         <span className="flex items-center gap-2">
           <AlertTriangle className="size-4" aria-hidden />
-          {`${conflicts} تعارض داده نیاز به بررسی دارد`}
+          {t("offline.conflictsBanner", { count: conflicts })}
         </span>
         {conflictsHref ? (
           <Link
             to={conflictsHref}
             className="rounded bg-white/20 px-3 py-1 font-medium hover:bg-white/30"
           >
-            مشاهده تعارض‌ها
+            {t("offline.viewConflicts")}
           </Link>
         ) : null}
       </div>
@@ -83,7 +85,7 @@ export function OfflineIndicator() {
         className="flex w-full items-center gap-2 bg-info-600 px-4 py-2 text-sm text-white"
       >
         <RefreshCw className="size-4 animate-spin" aria-hidden />
-        {`در حال همگام‌سازی... (${stats.syncing} مورد)`}
+        {t("offline.syncingCount", { count: stats.syncing })}
       </div>
     );
   }
@@ -96,11 +98,11 @@ export function OfflineIndicator() {
       >
         <span className="flex items-center gap-2">
           <CloudOff className="size-4" aria-hidden />
-          آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند
+          {t("offline.offlineLocal")}
         </span>
         {stats.pending > 0 ? (
           <span className="rounded-full bg-warning-950/15 px-3 py-0.5 font-medium">
-            {`در صف: ${stats.pending} مورد`}
+            {t("offline.queuedCount", { count: stats.pending })}
           </span>
         ) : null}
       </div>
@@ -119,12 +121,15 @@ export function OfflineIndicator() {
         <span className="flex items-center gap-2">
           <CloudOff className="size-4" aria-hidden />
           {stats.failed > 0
-            ? `${stats.failed} مورد ناموفق — ${stats.pending} در صف`
-            : `${stats.pending} مورد در انتظار همگام‌سازی`}
+            ? t("offline.failedQueued", {
+                failed: stats.failed,
+                pending: stats.pending,
+              })
+            : t("offline.pendingSync", { count: stats.pending })}
         </span>
         {conflictsHref && stats.failed > 0 ? (
           <Link to={conflictsHref} className="font-medium underline">
-            مدیریت صف
+            {t("offline.manageQueue")}
           </Link>
         ) : null}
       </div>

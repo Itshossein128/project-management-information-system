@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
@@ -30,6 +31,8 @@ function todayIso() {
 }
 
 function ActivityLogContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -88,7 +91,7 @@ function ActivityLogContent() {
 
   return (
     <div className='space-y-6'>
-      <PageHeader title='بانک فعالیت‌ها' subtitle={project.project_name} />
+      <PageHeader title={t("pages.activityLog.title")} subtitle={project.project_name} />
 
       <div className='flex flex-wrap items-end gap-3'>
         <div className='min-w-[260px] flex-1'>
@@ -271,6 +274,7 @@ function ActivityLogContent() {
 }
 
 export default function ProjectActivityLogPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useState } from "react";
@@ -35,6 +36,8 @@ function groupByType(entries: AlertLogEntry[]) {
 }
 
 function AlertCenterContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const qc = useQueryClient();
   const toast = useToast();
@@ -120,7 +123,7 @@ function AlertCenterContent() {
 
   if (isLoading || loadingAlerts) return <LoadingSkeleton rows={10} />;
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
   if (alertsError) {
     return <QueryErrorState onRetry={() => void refetchAlerts()} />;
@@ -130,7 +133,7 @@ function AlertCenterContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="هشدارها" subtitle={project.project_name} />
+      <PageHeader title={t("pages.alerts.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap gap-2">
         <Button variant={tab === "active" ? "primary" : "secondary"} size="sm" onClick={() => setTab("active")}>
@@ -345,6 +348,7 @@ function AlertCenterContent() {
 }
 
 export default function ProjectAlertsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

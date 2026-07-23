@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { useState } from "react";
@@ -25,6 +26,8 @@ import { useToast } from "@/components/ui/toast";
 const NO_CONTRACT = "__none__";
 
 function SubcontractorsContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -83,12 +86,12 @@ function SubcontractorsContent() {
 
   if (isLoading || (canView && loading)) return <LoadingSkeleton rows={8} />;
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده پیمانکاران فرعی به مجوز قراردادها نیاز است."
       />
     );
@@ -105,7 +108,7 @@ function SubcontractorsContent() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="پیمانکاران فرعی"
+        title={t("pages.subcontractors.title")}
         subtitle={project.project_name}
         actions={
           canEdit ? (
@@ -159,7 +162,7 @@ function SubcontractorsContent() {
       {rows.length === 0 ? (
         <EmptyState
           icon={<Users />}
-          title="پیمانکاری ثبت نشده"
+          title={t("pages.subcontractors.empty")}
           description="اولین پیمانکار فرعی را اضافه کنید یا فیلترها را تغییر دهید."
           action={
             canEdit ? (
@@ -228,7 +231,7 @@ function SubcontractorsContent() {
       <Drawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title="افزودن پیمانکار فرعی"
+        title={t("pages.subcontractors.add")}
         footer={
           <Button
             variant="primary"
@@ -318,6 +321,7 @@ function SubcontractorsContent() {
 }
 
 export default function ProjectSubcontractorsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

@@ -8,7 +8,7 @@ import { PATHS } from "@/app/routeVars";
 import {
   Badge,
   projectStatusBadge,
-  projectStatusLabels,
+  projectStatusI18nKey,
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { DataTable } from "@/components/ui/data-table";
@@ -41,7 +41,7 @@ export default function ProjectListPage() {
       render: (row: ProjectListItem) => (
         <Badge
           variant={projectStatusBadge[row.status] ?? "neutral"}
-          label={projectStatusLabels[row.status] ?? row.status}
+          label={t(projectStatusI18nKey[row.status] ?? row.status)}
         />
       ),
     },

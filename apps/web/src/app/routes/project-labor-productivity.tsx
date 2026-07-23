@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -19,6 +20,8 @@ import { Button } from "@/components/ui/sprint-button";
 type GroupBy = "activity" | "discipline" | "job_title";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -187,6 +190,7 @@ function Content() {
 }
 
 export default function ProjectLaborProductivityPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
@@ -197,7 +201,7 @@ export default function ProjectLaborProductivityPage() {
             { label: "بهره‌وری نیروی انسانی" },
           ]}
         />
-        <PageHeader title='بهره‌وری نیروی انسانی' />
+        <PageHeader title={t("pages.laborProductivity.title")} />
         <p className='text-sm text-muted-foreground'>
           <Link
             className='text-primary hover:underline'

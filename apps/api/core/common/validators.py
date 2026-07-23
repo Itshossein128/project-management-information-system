@@ -5,9 +5,10 @@ import os
 from typing import Iterable
 
 from rest_framework.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
-MSG_FILE_TOO_LARGE = 'حجم فایل نباید از 50 مگابایت تجاوز کند'
-MSG_INVALID_TYPE = 'نوع فایل مجاز نیست'
+MSG_FILE_TOO_LARGE = _('File size must not exceed 50 MB.')
+MSG_INVALID_TYPE = _('File type is not allowed.')
 
 DOCUMENT_EXTENSIONS = frozenset(
     {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png', '.zip'}

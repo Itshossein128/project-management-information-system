@@ -177,7 +177,7 @@ export default function DailyReportsListPage() {
         ]}
       />
       <PageHeader
-        title='گزارش‌های روزانه'
+        title={t("pages.dailyReports.title")}
         actions={
           canEdit ? (
             <Link

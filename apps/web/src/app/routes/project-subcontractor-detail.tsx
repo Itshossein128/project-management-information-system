@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -41,6 +42,8 @@ function trendIcon(trend: string) {
 }
 
 function SubcontractorDetailContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { subId = "" } = useParams();
   const qc = useQueryClient();
@@ -179,7 +182,7 @@ function SubcontractorDetailContent() {
     return (
       <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
         <EmptyState
-          title="دسترسی ندارید"
+          title={t("common.accessDenied")}
           description="برای مشاهده جزئیات پیمانکار به مجوز قراردادها نیاز است."
         />
       </main>
@@ -265,7 +268,7 @@ function SubcontractorDetailContent() {
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {tabs.map(([key, label]) => (
             <TabsTrigger key={key} value={key}>
@@ -659,6 +662,7 @@ function SubcontractorDetailContent() {
 }
 
 export default function ProjectSubcontractorDetailPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

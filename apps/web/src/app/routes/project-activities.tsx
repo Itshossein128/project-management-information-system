@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
@@ -9,6 +10,8 @@ import {
 } from "@/components/layout/page-header";
 
 function ActivitiesPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
@@ -27,8 +30,8 @@ function ActivitiesPageContent() {
         ]}
       />
       <PageHeader
-        title='فعالیت‌ها'
-        subtitle='مدیریت فعالیت‌های زمان‌بندی پروژه'
+        title={t("pages.activities.title")}
+        subtitle={t("pages.activities.subtitle")}
       />
       <ActivitiesGrid projectId={projectId} />
     </>
@@ -36,6 +39,7 @@ function ActivitiesPageContent() {
 }
 
 export default function ProjectActivitiesPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

@@ -23,7 +23,45 @@
     "delete": "Delete",
     "close": "Close",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "save": "Save",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "create": "Create",
+    "add": "Add",
+    "update": "Update",
+    "confirm": "Confirm",
+    "approve": "Approve",
+    "reject": "Reject",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "dateRange": "Date range",
+    "notes": "Notes",
+    "owner": "Owner",
+    "unit": "Unit",
+    "today": "Today",
+    "offline": "Offline",
+    "readOnly": "Read-only view",
+    "projectNotFound": "Project not found",
+    "accessDenied": "You do not have access",
+    "noResults": "No results",
+    "empty": "Nothing here yet",
+    "exportPdf": "Export PDF",
+    "refresh": "Refresh",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "suspended": "Suspended",
+    "brandName": "Building",
+    "brandShort": "BM"
   },
   "form": {
     "sticky": {
@@ -73,7 +111,27 @@
     "deptSecurity": "Security",
     "deptMachinery": "Machinery",
     "deptWarehouse": "Warehouse",
-    "deptElectrical": "Electrical"
+    "deptElectrical": "Electrical",
+    "projectResources": "Resources",
+    "projectGantt": "Gantt",
+    "projectActivityLog": "Activity bank",
+    "projectSubcontractors": "Subcontractors",
+    "projectCashFlow": "Cash flow",
+    "projectCosts": "Cost control",
+    "projectMaterialBalance": "Material balance",
+    "projectProcurement": "Procurement",
+    "projectEconomic": "Economic analysis",
+    "projectContracts": "Contracts",
+    "projectEquipmentUtilization": "Equipment utilization",
+    "projectEquipmentLog": "Equipment log",
+    "projectLaborProductivity": "Labor productivity",
+    "projectPersonnelSummary": "Personnel summary",
+    "projectManpower": "Manpower",
+    "projectLaborCamp": "Labor camp",
+    "projectLeave": "Leave",
+    "projectOvertime": "Overtime",
+    "projectSettings": "Project settings",
+    "projectRiskRegister": "Risk & delay"
   },
   "businessDepartment": {
     "comingSoon": "This section will be added soon.",
@@ -495,5 +553,167 @@
   },
   "notifications": {
     "title": "Notifications"
+  },
+  "pages": {
+    "wbs": {
+      "title": "Work breakdown structure",
+      "empty": "No WBS nodes yet"
+    },
+    "activities": {
+      "title": "Activities",
+      "subtitle": "Manage project schedule activities"
+    },
+    "gantt": {
+      "title": "Gantt"
+    },
+    "progress": {
+      "title": "Project progress"
+    },
+    "activityLog": {
+      "title": "Activity bank"
+    },
+    "dailyReports": {
+      "title": "Daily reports"
+    },
+    "syncConflicts": {
+      "title": "Sync conflicts",
+      "subtitle": "Items that conflicted with the server during sync",
+      "emptyTitle": "No conflicts",
+      "emptyDescription": "All synced items are consistent with the server."
+    },
+    "weather": {
+      "title": "Weather",
+      "subtitle": "Daily weather and site status"
+    },
+    "barriers": {
+      "title": "Barriers & issues",
+      "subtitle": "Track project barriers"
+    },
+    "riskRegister": {
+      "title": "Risk & delay register",
+      "subtitle": "Probability × impact matrix and event list",
+      "empty": "No events recorded",
+      "emptyDescription": "Record the first risk or delay.",
+      "newEvent": "New event"
+    },
+    "alerts": {
+      "title": "Alerts"
+    },
+    "contracts": {
+      "title": "Contracts"
+    },
+    "contractNew": {
+      "title": "New contract"
+    },
+    "contractEdit": {
+      "title": "Edit contract"
+    },
+    "subcontractors": {
+      "title": "Subcontractors",
+      "empty": "No subcontractors yet",
+      "add": "Add subcontractor"
+    },
+    "documents": {
+      "title": "Documents & correspondence"
+    },
+    "cashFlow": {
+      "title": "Cash flow"
+    },
+    "costs": {
+      "title": "Cost control"
+    },
+    "materialBalance": {
+      "title": "Material balance"
+    },
+    "procurement": {
+      "title": "Procurement",
+      "empty": "No requests yet",
+      "emptyDescription": "Material purchase requests appear here.",
+      "newOrder": "Create purchase order",
+      "request": "Purchase request"
+    },
+    "economic": {
+      "title": "Economic analysis"
+    },
+    "equipmentUtilization": {
+      "title": "Equipment utilization"
+    },
+    "equipmentLog": {
+      "title": "Equipment & machinery"
+    },
+    "laborProductivity": {
+      "title": "Labor productivity"
+    },
+    "personnelSummary": {
+      "title": "Personnel summary"
+    },
+    "manpower": {
+      "title": "Daily manpower"
+    },
+    "laborCamp": {
+      "title": "Labor camp report"
+    },
+    "leaveRequests": {
+      "title": "Leave & mission requests"
+    },
+    "overtimeRequests": {
+      "title": "Overtime requests"
+    },
+    "subReports": {
+      "title": "Building / electrical / mechanical daily reports"
+    },
+    "ipcDetail": {
+      "title": "Interim payment certificate #{{number}}"
+    },
+    "projectSettings": {
+      "title": "Project settings"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "suspended": "Suspended",
+    "completed": "Completed",
+    "handed_over": "Handed over",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "in_progress": "In progress",
+    "not_started": "Not started",
+    "overdue": "Overdue",
+    "open": "Open",
+    "closed": "Closed",
+    "resolved": "Resolved",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "offline": {
+    "offline": "You are offline",
+    "syncing": "Syncing…",
+    "pendingChanges": "{{count}} pending changes",
+    "conflict": "Sync conflicts need attention",
+    "backOnline": "Back online",
+    "conflictsBanner": "{{count}} data conflicts need review",
+    "viewConflicts": "View conflicts",
+    "syncingCount": "Syncing… ({{count}} items)",
+    "offlineLocal": "Offline — data is saved locally",
+    "queuedCount": "Queued: {{count}}",
+    "failedQueued": "{{failed}} failed — {{pending}} queued",
+    "pendingSync": "{{count}} items waiting to sync",
+    "manageQueue": "Manage queue"
+  },
+  "toast": {
+    "saved": "Saved successfully",
+    "deleted": "Deleted successfully",
+    "created": "Created successfully",
+    "updated": "Updated successfully",
+    "failed": "Operation failed",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "dialog": {
+    "close": "Close"
   }
 }

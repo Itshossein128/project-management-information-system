@@ -23,7 +23,45 @@
     "delete": "حذف",
     "close": "بستن",
     "showPassword": "نمایش رمز عبور",
-    "hidePassword": "مخفی کردن رمز عبور"
+    "hidePassword": "مخفی کردن رمز عبور",
+    "save": "ذخیره",
+    "edit": "ویرایش",
+    "view": "مشاهده",
+    "search": "جستجو",
+    "create": "ایجاد",
+    "add": "افزودن",
+    "update": "به‌روزرسانی",
+    "confirm": "تأیید",
+    "approve": "تأیید",
+    "reject": "رد",
+    "actions": "عملیات",
+    "status": "وضعیت",
+    "date": "تاریخ",
+    "fromDate": "از تاریخ",
+    "toDate": "تا تاریخ",
+    "dateRange": "بازه تاریخ",
+    "notes": "یادداشت",
+    "owner": "مسئول",
+    "unit": "واحد",
+    "today": "امروز",
+    "offline": "آفلاین",
+    "readOnly": "نمایش فقط خواندنی",
+    "projectNotFound": "پروژه یافت نشد",
+    "accessDenied": "دسترسی ندارید",
+    "noResults": "نتیجه‌ای یافت نشد",
+    "empty": "موردی وجود ندارد",
+    "exportPdf": "خروجی PDF",
+    "refresh": "بازخوانی",
+    "yes": "بله",
+    "no": "خیر",
+    "all": "همه",
+    "active": "فعال",
+    "inactive": "غیرفعال",
+    "pending": "در انتظار",
+    "completed": "تکمیل‌شده",
+    "suspended": "معلق",
+    "brandName": "Building",
+    "brandShort": "BM"
   },
   "form": {
     "sticky": {
@@ -73,7 +111,27 @@
     "deptSecurity": "حراست",
     "deptMachinery": "ماشین آلات",
     "deptWarehouse": "انباردار",
-    "deptElectrical": "برق"
+    "deptElectrical": "برق",
+    "projectResources": "منابع",
+    "projectGantt": "گانت",
+    "projectActivityLog": "بانک فعالیت‌ها",
+    "projectSubcontractors": "پیمانکاران فرعی",
+    "projectCashFlow": "جریان نقدی",
+    "projectCosts": "کنترل هزینه",
+    "projectMaterialBalance": "بالانس مصالح",
+    "projectProcurement": "تأمین و خرید",
+    "projectEconomic": "تحلیل اقتصادی",
+    "projectContracts": "قراردادها",
+    "projectEquipmentUtilization": "بهره‌وری ماشین‌آلات",
+    "projectEquipmentLog": "کارکرد ماشین‌آلات",
+    "projectLaborProductivity": "بهره‌وری نیروی انسانی",
+    "projectPersonnelSummary": "گزارش نفرات",
+    "projectManpower": "نیروی انسانی",
+    "projectLaborCamp": "کمپ کارگری",
+    "projectLeave": "مرخصی",
+    "projectOvertime": "اضافه‌کار",
+    "projectSettings": "تنظیمات پروژه",
+    "projectRiskRegister": "ریسک و تأخیر"
   },
   "businessDepartment": {
     "comingSoon": "این بخش به‌زودی اضافه خواهد شد.",
@@ -495,5 +553,167 @@
   },
   "notifications": {
     "title": "اعلان‌ها"
+  },
+  "pages": {
+    "wbs": {
+      "title": "ساختار شکست کار",
+      "empty": "هنوز گره WBS ایجاد نشده است"
+    },
+    "activities": {
+      "title": "فعالیت‌ها",
+      "subtitle": "مدیریت فعالیت‌های زمان‌بندی پروژه"
+    },
+    "gantt": {
+      "title": "گانت"
+    },
+    "progress": {
+      "title": "گزارش پیشرفت پروژه"
+    },
+    "activityLog": {
+      "title": "بانک فعالیت‌ها"
+    },
+    "dailyReports": {
+      "title": "گزارش‌های روزانه"
+    },
+    "syncConflicts": {
+      "title": "تعارض‌های همگام‌سازی",
+      "subtitle": "مواردی که هنگام همگام‌سازی با نسخه سرور تعارض داشتند",
+      "emptyTitle": "هیچ تعارضی وجود ندارد",
+      "emptyDescription": "همه موارد همگام‌سازی‌شده با سرور سازگارند."
+    },
+    "weather": {
+      "title": "وضعیت جوی",
+      "subtitle": "گزارش روزانه وضعیت آب‌وهوا و کارگاه"
+    },
+    "barriers": {
+      "title": "موانع و مشکلات",
+      "subtitle": "ثبت و پیگیری موانع پروژه"
+    },
+    "riskRegister": {
+      "title": "ثبت ریسک و تأخیر",
+      "subtitle": "ماتریس احتمال × شدت و فهرست رویدادها",
+      "empty": "رویدادی ثبت نشده",
+      "emptyDescription": "اولین ریسک یا تأخیر را ثبت کنید.",
+      "newEvent": "رویداد جدید"
+    },
+    "alerts": {
+      "title": "هشدارها"
+    },
+    "contracts": {
+      "title": "قراردادها"
+    },
+    "contractNew": {
+      "title": "قرارداد جدید"
+    },
+    "contractEdit": {
+      "title": "ویرایش قرارداد"
+    },
+    "subcontractors": {
+      "title": "پیمانکاران فرعی",
+      "empty": "پیمانکاری ثبت نشده",
+      "add": "افزودن پیمانکار فرعی"
+    },
+    "documents": {
+      "title": "مدارک و مکاتبات"
+    },
+    "cashFlow": {
+      "title": "جریان نقدی"
+    },
+    "costs": {
+      "title": "کنترل هزینه"
+    },
+    "materialBalance": {
+      "title": "بالانس مصالح"
+    },
+    "procurement": {
+      "title": "تأمین و خرید",
+      "empty": "درخواستی ثبت نشده",
+      "emptyDescription": "درخواست خرید مصالح اینجا نمایش داده می‌شود.",
+      "newOrder": "ثبت سفارش خرید",
+      "request": "درخواست خرید"
+    },
+    "economic": {
+      "title": "تحلیل اقتصادی"
+    },
+    "equipmentUtilization": {
+      "title": "بهره‌وری ماشین‌آلات"
+    },
+    "equipmentLog": {
+      "title": "ماشین‌آلات و تجهیزات"
+    },
+    "laborProductivity": {
+      "title": "بهره‌وری نیروی انسانی"
+    },
+    "personnelSummary": {
+      "title": "گزارش نفرات"
+    },
+    "manpower": {
+      "title": "نیروی انسانی روزانه"
+    },
+    "laborCamp": {
+      "title": "گزارش نفرات کمپ"
+    },
+    "leaveRequests": {
+      "title": "درخواست‌های مرخصی و مأموریت"
+    },
+    "overtimeRequests": {
+      "title": "درخواست‌های اضافه‌کاری"
+    },
+    "subReports": {
+      "title": "گزارش روزانه ابنیه / برق / مکانیک"
+    },
+    "ipcDetail": {
+      "title": "صدور موقت #{{number}}"
+    },
+    "projectSettings": {
+      "title": "تنظیمات پروژه"
+    }
+  },
+  "status": {
+    "active": "فعال",
+    "suspended": "معلق",
+    "completed": "تکمیل‌شده",
+    "handed_over": "تحویل‌شده",
+    "draft": "پیش‌نویس",
+    "submitted": "ارسال‌شده",
+    "approved": "تأییدشده",
+    "rejected": "ردشده",
+    "in_progress": "در حال انجام",
+    "not_started": "شروع‌نشده",
+    "overdue": "معوق",
+    "open": "باز",
+    "closed": "بسته",
+    "resolved": "رفع‌شده",
+    "critical": "بحرانی",
+    "high": "بالا",
+    "medium": "متوسط",
+    "low": "پایین"
+  },
+  "offline": {
+    "offline": "شما آفلاین هستید",
+    "syncing": "در حال همگام‌سازی…",
+    "pendingChanges": "{{count}} تغییر در انتظار",
+    "conflict": "تعارض‌های همگام‌سازی نیاز به توجه دارند",
+    "backOnline": "اتصال برقرار شد",
+    "conflictsBanner": "{{count}} تعارض داده نیاز به بررسی دارد",
+    "viewConflicts": "مشاهده تعارض‌ها",
+    "syncingCount": "در حال همگام‌سازی… ({{count}} مورد)",
+    "offlineLocal": "آفلاین — داده‌ها به‌صورت محلی ذخیره می‌شوند",
+    "queuedCount": "در صف: {{count}} مورد",
+    "failedQueued": "{{failed}} مورد ناموفق — {{pending}} در صف",
+    "pendingSync": "{{count}} مورد در انتظار همگام‌سازی",
+    "manageQueue": "مدیریت صف"
+  },
+  "toast": {
+    "saved": "با موفقیت ذخیره شد",
+    "deleted": "با موفقیت حذف شد",
+    "created": "با موفقیت ایجاد شد",
+    "updated": "با موفقیت به‌روزرسانی شد",
+    "failed": "عملیات ناموفق بود",
+    "approved": "تأیید شد",
+    "rejected": "رد شد"
+  },
+  "dialog": {
+    "close": "بستن"
   }
 }
