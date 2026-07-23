@@ -19,6 +19,11 @@ from sub_reports.services import submit_sub_report, approve_sub_report, reject_s
     destroy=extend_schema(summary='Delete discipline sub-report', tags=['Sub-reports']),
 )
 class DisciplineSubReportViewSet(ProjectScopedViewSet):
+    """
+    ViewSet for managing Discipline Sub-Reports.
+    Provides standard CRUD operations along with custom actions for submitting,
+    approving, and rejecting reports based on user permissions.
+    """
     queryset = DisciplineSubReport.objects.prefetch_related('activities').all()
     serializer_class = DisciplineSubReportSerializer
     pagination_class = DefaultPageNumberPagination
@@ -43,18 +48,30 @@ class DisciplineSubReportViewSet(ProjectScopedViewSet):
 
     @action(detail=True, methods=['post'])
     def submit(self, request, project_pk=None, pk=None):
+        """
+        Custom action to submit a draft sub-report.
+        Requires 'edit_reports' permission.
+        """
         obj = self.get_object()
         obj = submit_sub_report(obj, request.user)
         return Response(self.get_serializer(obj).data)
 
     @action(detail=True, methods=['post'])
     def approve(self, request, project_pk=None, pk=None):
+        """
+        Custom action to approve a submitted sub-report.
+        Requires 'approve_reports' permission.
+        """
         obj = self.get_object()
         obj = approve_sub_report(obj, request.user)
         return Response(self.get_serializer(obj).data)
 
     @action(detail=True, methods=['post'])
     def reject(self, request, project_pk=None, pk=None):
+        """
+        Custom action to reject a submitted sub-report, requiring a reason.
+        Requires 'approve_reports' permission.
+        """
         obj = self.get_object()
         obj = reject_sub_report(obj, request.user, request.data.get('rejection_reason'))
         return Response(self.get_serializer(obj).data)
