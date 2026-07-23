@@ -96,7 +96,7 @@ export function NotificationPanel({
             type="button"
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-sm text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             <CheckCheck className="size-3.5" aria-hidden />
             خواندن همه
@@ -130,7 +130,7 @@ export function NotificationPanel({
                   type="button"
                   onClick={() => handleClick(n)}
                   className={cn(
-                    "flex min-w-0 flex-1 gap-3 px-4 py-3 text-right hover:bg-muted/50",
+                    "flex min-w-0 flex-1 gap-3 px-4 py-3 text-right hover:bg-muted/50 focus-visible:outline-none focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     !n.is_read && "bg-primary/5",
                   )}
                 >
