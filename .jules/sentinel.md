@@ -21,3 +21,7 @@
 **Vulnerability:** Document upload logic in `apps/api/core/documents/services/upload_service.py` relied solely on silent sanitization (`os.path.basename`) when processing client-provided filenames.
 **Learning:** While `os.path.basename` sanitizes the filename, explicitly failing and rejecting payloads containing path traversal characters (`..`, `/`, `\`) provides stronger defense-in-depth and is a preferred security posture over silently modifying malicious input. Note that this supersedes previous learnings about just using `os.path.basename` due to the explicit requirement to explicitly reject such inputs.
 **Prevention:** Always add explicit checks to reject malicious filenames (e.g. by raising `ValidationError`) early in the pipeline before performing any file operations or relying on silent sanitization functions.
+## 2024-07-23 - Prevent Exception Information Leakage in APIs
+**Vulnerability:** Found an API endpoint (`apps/api/core/inventory/views.py`) returning a raw exception string (`str(e)`) inside a generic 400 response.
+**Learning:** Returning `str(e)` directly to clients leaks internal implementation details, such as file paths or module internals, exposing the application to reconnaissance attacks.
+**Prevention:** Instead of stringifying generic exceptions in JSON responses, explicitly catch the expected errors, log them using `logger.exception()` to preserve debugging information server-side, and return a safe, generic error message (like "Invalid request.") to the client.
