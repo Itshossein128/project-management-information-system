@@ -1,7 +1,7 @@
 import { ThemeSync } from "@/components/ThemeSync";
 import I18nSync from "@/components/i18Sync";
 import { TooltipProvider } from "@/components/ui/tooltip";
-
+import React from "react";
 import { useTranslation } from "react-i18next";
 import {
   isRouteErrorResponse,
@@ -23,10 +23,17 @@ const themeInitScript = `(function(){try{var t=localStorage.getItem("app-theme")
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
-  const dir = isRTL(i18n.language) ? "rtl" : "ltr";
+
+  // Keep SSR + first paint on the boot language (fa) to avoid hydration mismatch.
+  // After mount, follow i18n.language for lang/dir.
+  React.useEffect(() => {
+    const dir = isRTL(i18n.language) ? "rtl" : "ltr";
+    document.documentElement.setAttribute("lang", i18n.language);
+    document.documentElement.setAttribute("dir", dir);
+  }, [i18n.language]);
 
   return (
-    <html lang={i18n.language} dir={dir} suppressHydrationWarning>
+    <html lang="fa" dir="rtl" suppressHydrationWarning>
       <head>
         <meta charSet='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1' />
