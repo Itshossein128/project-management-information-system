@@ -14,3 +14,8 @@ Date: 2026-07-20
 Selected flow: Role-based redirect after login
 Coverage score: 8/8 branches tested
 Reason: Flow had the lowest coverage (12%), now increased to 100%.
+
+Date: 2026-07-23
+Selected flow: Physical Progress Control
+Coverage score: 1/10 branches tested
+Reason: Flow had the lowest coverage of 10% (1/10 branches tested).

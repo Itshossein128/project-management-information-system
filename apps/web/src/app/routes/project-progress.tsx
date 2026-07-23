@@ -141,7 +141,7 @@ function ProgressPageContent() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <PageHeader title="گزارش پیشرفت پروژه" subtitle={project.project_name} />
         {canEdit ? (
-          <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)}>
+          <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)} data-testid="progress-manual-btn">
             ثبت پیشرفت دستی
           </Button>
         ) : null}
@@ -298,6 +298,7 @@ function ProgressPageContent() {
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
+              data-testid="progress-behind-checkbox"
               checked={behindOnly}
               onChange={(e) => setBehindOnly(e.target.checked)}
             />

@@ -35,6 +35,12 @@
 - `report-reject-reason` / `report-reject-confirm-btn`
 - `photo-cell` / `photo-upload-input` / `photo-preview-link`
 
+## Physical Progress & S-Curve (Sprint 6)
+- `progress-kpi-grid` — KPI grid section
+- `progress-s-curve` — S-Curve chart section
+- `progress-manual-btn` — Button to enter progress manually
+- `progress-behind-checkbox` — Checkbox to filter behind-schedule activities
+
 ## Budget & Cost (Sprint 7)
 - `costs-kpi-grid` / `costs-tabs` / `costs-tab-{budget|actual|variance|pools}`
 - `budget-grid` / `budget-matrix` / `budget-cell-{code}-{category}` / `budget-input-{code}-{category}` / `budget-save-btn`

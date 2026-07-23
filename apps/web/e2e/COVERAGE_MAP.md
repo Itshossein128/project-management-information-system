@@ -8,7 +8,12 @@
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
 | DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
 | OFFLINE | Sync & Conflict | 2 | 15 | 13% |
+| PROGRESS | Physical Progress & S-Curve | 4 | 10 | 40% |
 | FINANCE | Budget & Cost | 5 | 15 | 33% |
+
+## Sprint 6 coverage notes
+
+- `e2e/tests/sprint6-progress.spec.ts` — RTL layout, KPI grid loading, S-curve section, behind-schedule checkbox API trigger, visitor permission for manual progress button
 
 ## Sprint 7 coverage notes
 
