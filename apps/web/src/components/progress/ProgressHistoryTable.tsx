@@ -42,7 +42,7 @@ export function ProgressHistoryTable({
               <td
                 className={cn(
                   "px-3 py-2 font-medium",
-                  row.variance_pct < 0 ? "text-red-600" : row.variance_pct > 0 ? "text-emerald-600" : "",
+                  row.variance_pct < 0 ? "text-danger-600" : row.variance_pct > 0 ? "text-success-600" : "",
                 )}
               >
                 {row.variance_pct > 0 ? "+" : ""}

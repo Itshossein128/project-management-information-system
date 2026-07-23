@@ -64,18 +64,18 @@ const SYNC_META: Record<
   RowSyncStatus,
   { Icon: typeof CheckCircle2; className: string; title: string }
 > = {
-  synced: { Icon: CheckCircle2, className: "text-emerald-500", title: "همگام" },
+  synced: { Icon: CheckCircle2, className: "text-success-500", title: "همگام" },
   pending: {
     Icon: Clock,
-    className: "text-amber-500",
+    className: "text-warning-500",
     title: "در صف همگام‌سازی",
   },
   failed: {
     Icon: RefreshCw,
-    className: "text-red-500",
+    className: "text-danger-500",
     title: "ناموفق — تلاش مجدد",
   },
-  conflict: { Icon: AlertTriangle, className: "text-red-600", title: "تعارض" },
+  conflict: { Icon: AlertTriangle, className: "text-danger-600", title: "تعارض" },
 };
 
 function SyncCell({
@@ -269,7 +269,7 @@ export function EditableGrid({
                         className={cn(
                           "rounded p-1 hover:bg-muted disabled:opacity-30",
                           row._dirty
-                            ? "text-emerald-600"
+                            ? "text-success-600"
                             : "text-muted-foreground",
                         )}
                       >
@@ -281,7 +281,7 @@ export function EditableGrid({
                         aria-label="حذف"
                         disabled={savingKey === row._key}
                         onClick={() => deleteRow(row)}
-                        className="rounded p-1 text-red-600 hover:bg-muted disabled:opacity-30"
+                        className="rounded p-1 text-danger-600 hover:bg-muted disabled:opacity-30"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -482,8 +482,8 @@ function PhotoCell({
       ) : fileId ? (
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded border border-emerald-400 px-2 py-1 text-xs text-emerald-700",
-            isPending && "border-amber-400 text-amber-700",
+            "inline-flex items-center gap-1 rounded border border-success-400 px-2 py-1 text-xs text-success-700",
+            isPending && "border-warning-400 text-warning-700",
           )}
           title={isPending ? "در صف آفلاین" : "عکس ذخیره شده"}
         >
@@ -497,7 +497,7 @@ function PhotoCell({
           className={cn(
             "inline-flex cursor-pointer items-center gap-1 rounded border border-dashed border-border px-2 py-1 text-xs",
             disabled && "pointer-events-none opacity-50",
-            fileId && "border-emerald-400 text-emerald-700",
+            fileId && "border-success-400 text-success-700",
           )}
         >
           <Camera className="size-3.5" />

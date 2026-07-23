@@ -89,7 +89,7 @@ function ForecastRowEditor({
         {actualNet != null ? formatFaAmount(actualNet) : "—"}
       </td>
       <td
-        className={`px-3 py-2 ${deviation != null && deviation >= 0 ? "text-emerald-600" : "text-red-600"}`}
+        className={`px-3 py-2 ${deviation != null && deviation >= 0 ? "text-success-600" : "text-danger-600"}`}
       >
         {deviation != null ? formatFaAmount(deviation) : "—"}
       </td>

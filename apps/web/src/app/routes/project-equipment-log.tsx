@@ -129,7 +129,7 @@ function Content() {
                 </td>
                 <td className='px-3 py-2'>{r.ownership_type}</td>
                 <td
-                  className={`px-3 py-2 ${r.warning ? "text-amber-600" : ""}`}
+                  className={`px-3 py-2 ${r.warning ? "text-warning-600" : ""}`}
                 >
                   {r.productive_hours ?? "—"}
                 </td>

@@ -180,7 +180,7 @@ export function WBSNodeRow({
 
         {weightWarning && (
           <span
-            className="text-xs text-amber-600"
+            className="text-xs text-warning-600"
             title={t("wbs.weightWarning")}
           >
             ⚠

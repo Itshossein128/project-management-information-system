@@ -260,7 +260,7 @@ function DocumentsContent() {
             </div>
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">سررسید گذشته</p>
-              <p className="text-xl font-semibold text-red-600">{overdueCount}</p>
+              <p className="text-xl font-semibold text-danger-600">{overdueCount}</p>
             </div>
             <label className="flex items-center gap-2 rounded-lg border p-4 text-sm">
               <input

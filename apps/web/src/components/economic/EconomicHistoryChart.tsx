@@ -11,8 +11,15 @@ import {
 } from "recharts";
 import { fetchEconomicHistory, formatFaAmount } from "@/app/lib/api/economic";
 import { LoadingSkeleton } from "@/components/layout/page-header";
+import { chartColor } from "@/design/tokens";
 
 export function EconomicHistoryChart({ projectId }: { projectId: string }) {
+  const colors = {
+    accounting: chartColor("info"),
+    real: chartColor("success"),
+    economic: chartColor("accent"),
+    workingCapital: chartColor("danger"),
+  };
   const { data, isLoading } = useQuery({
     queryKey: ["economic-history", projectId],
     queryFn: () => fetchEconomicHistory(projectId),
@@ -47,10 +54,10 @@ export function EconomicHistoryChart({ projectId }: { projectId: string }) {
             <YAxis tickFormatter={(v) => formatFaAmount(v)} />
             <Tooltip formatter={(v) => formatFaAmount(Number(v ?? 0))} />
             <Legend />
-            <Line type="monotone" dataKey="accounting" stroke="#3b82f6" name="حسابداری" />
-            <Line type="monotone" dataKey="real" stroke="#059669" name="واقعی" />
-            <Line type="monotone" dataKey="economic" stroke="#7c3aed" name="اقتصادی" />
-            <Line type="monotone" dataKey="working_capital" stroke="#dc2626" name="سرمایه در گردش" />
+            <Line type="monotone" dataKey="accounting" stroke={colors.accounting} name="حسابداری" />
+            <Line type="monotone" dataKey="real" stroke={colors.real} name="واقعی" />
+            <Line type="monotone" dataKey="economic" stroke={colors.economic} name="اقتصادی" />
+            <Line type="monotone" dataKey="working_capital" stroke={colors.workingCapital} name="سرمایه در گردش" />
           </LineChart>
         </ResponsiveContainer>
       </div>

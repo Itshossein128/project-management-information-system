@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { formatBillions, type MonthlyCashFlowRow } from "@/app/lib/api/cashflow";
+import { chartColor } from "@/design/tokens";
 
 const JALALI_MONTHS = [
   "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -44,6 +45,15 @@ export function CashFlowChart({
   );
 
   const todayLabel = monthLabel(todayIso);
+  const colors = useMemo(
+    () => ({
+      today: chartColor("danger"),
+      inflow: chartColor("success"),
+      outflow: chartColor("danger"),
+      balance: chartColor("info"),
+    }),
+    [],
+  );
 
   return (
     <div className="h-80 w-full">
@@ -64,14 +74,14 @@ export function CashFlowChart({
               value === "inflow" ? "دریافت" : value === "outflow" ? "پرداخت" : "مانده تجمعی"
             }
           />
-          <ReferenceLine x={todayLabel} stroke="#ef4444" strokeDasharray="4 4" label="امروز" />
-          <Bar yAxisId="left" dataKey="inflow" fill="#22c55e" name="inflow" />
-          <Bar yAxisId="left" dataKey="outflow" fill="#ef4444" name="outflow" />
+          <ReferenceLine x={todayLabel} stroke={colors.today} strokeDasharray="4 4" label="امروز" />
+          <Bar yAxisId="left" dataKey="inflow" fill={colors.inflow} name="inflow" />
+          <Bar yAxisId="left" dataKey="outflow" fill={colors.outflow} name="outflow" />
           <Line
             yAxisId="right"
             type="monotone"
             dataKey="cumulative_balance"
-            stroke="#3b82f6"
+            stroke={colors.balance}
             strokeWidth={2}
             dot={false}
             name="cumulative_balance"

@@ -97,7 +97,7 @@ function BalanceTab({ projectId }: { projectId: string }) {
                   return (
                   <tr
                     key={r.material_id}
-                    className={`border-t border-border ${r.is_low_stock ? "bg-red-50 dark:bg-red-950/20" : ""}`}
+                    className={`border-t border-border ${r.is_low_stock ? "bg-danger-50 dark:bg-danger-950/20" : ""}`}
                   >
                     <td className="px-3 py-2 font-mono text-xs">{r.material_code}</td>
                     <td className="px-3 py-2">{r.material_name}</td>
@@ -114,12 +114,12 @@ function BalanceTab({ projectId }: { projectId: string }) {
                       {r.is_low_stock ? (
                         <Link
                           to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_ALERTS}?type=low_stock`}
-                          className="text-xs text-red-600 hover:underline"
+                          className="text-xs text-danger-600 hover:underline"
                         >
                           کمبود
                         </Link>
                       ) : (
-                        <span className="text-xs text-emerald-600">عادی</span>
+                        <span className="text-xs text-success-600">عادی</span>
                       )}
                     </td>
                   </tr>
@@ -390,9 +390,9 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
                     <td className="px-3 py-2">{r.document_ref || "—"}</td>
                     <td className="px-3 py-2">
                       {r.daily_report ? (
-                        <span className="text-xs text-blue-600">گزارش روزانه</span>
+                        <span className="text-xs text-info-600">گزارش روزانه</span>
                       ) : (
-                        <span className="text-xs text-emerald-600">دستی</span>
+                        <span className="text-xs text-success-600">دستی</span>
                       )}
                     </td>
                   </tr>

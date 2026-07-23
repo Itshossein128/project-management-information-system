@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { formatBillions, type GapRow } from "@/app/lib/api/cashflow";
 import { monthLabel } from "@/components/cashflow/CashFlowChart";
+import { chartColor } from "@/design/tokens";
 
 export function WaterfallChart({ data }: { data: GapRow[] }) {
   const chartData = useMemo(
@@ -21,6 +22,14 @@ export function WaterfallChart({ data }: { data: GapRow[] }) {
         label: monthLabel(row.month),
       })),
     [data],
+  );
+  const colors = useMemo(
+    () => ({
+      positive: chartColor("success"),
+      negative: chartColor("danger"),
+      balance: chartColor("info"),
+    }),
+    [],
   );
 
   return (
@@ -33,13 +42,16 @@ export function WaterfallChart({ data }: { data: GapRow[] }) {
           <Tooltip formatter={(v) => formatBillions(Number(v ?? 0))} />
           <Bar dataKey="net" name="خالص">
             {chartData.map((entry) => (
-              <Cell key={entry.month} fill={entry.net >= 0 ? "#22c55e" : "#ef4444"} />
+              <Cell
+                key={entry.month}
+                fill={entry.net >= 0 ? colors.positive : colors.negative}
+              />
             ))}
           </Bar>
           <Line
             type="monotone"
             dataKey="cumulative_balance"
-            stroke="#3b82f6"
+            stroke={colors.balance}
             strokeWidth={2}
             dot={false}
             name="مانده تجمعی"

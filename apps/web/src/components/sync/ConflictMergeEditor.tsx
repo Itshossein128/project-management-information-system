@@ -111,7 +111,7 @@ export function ConflictMergeEditor({
           <div key={key} className="grid grid-cols-3 gap-2 text-sm">
             <div
               data-testid={`conflict-merge-field-server-${key}`}
-              className={`rounded-md border px-2 py-1.5 ${differs ? "border-amber-400 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"}`}
+              className={`rounded-md border px-2 py-1.5 ${differs ? "border-warning-400 bg-warning-50 dark:bg-warning-950/30" : "border-border bg-card"}`}
             >
               {formatValue(serverVal)}
             </div>
@@ -124,7 +124,7 @@ export function ConflictMergeEditor({
             />
             <div
               data-testid={`conflict-merge-field-local-${key}`}
-              className={`rounded-md border px-2 py-1.5 ${differs ? "border-amber-400 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"}`}
+              className={`rounded-md border px-2 py-1.5 ${differs ? "border-warning-400 bg-warning-50 dark:bg-warning-950/30" : "border-border bg-card"}`}
             >
               {formatValue(localVal)}
             </div>

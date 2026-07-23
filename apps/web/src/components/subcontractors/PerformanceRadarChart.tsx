@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import type { PerformanceScore } from "@/app/lib/api/subcontractors";
+import { chartColor } from "@/design/tokens";
 
 const AXES = [
   { key: "progress_score", label: "پیشرفت" },
@@ -39,14 +40,16 @@ interface Props {
 
 export function PerformanceRadarChart({ latest, history }: Props) {
   const data = buildChartData(latest, history);
+  const latestColor = chartColor("brand");
+  const averageColor = chartColor("neutral");
   return (
     <ResponsiveContainer width="100%" height={320}>
       <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%">
         <PolarGrid />
         <PolarAngleAxis dataKey="subject" />
         <PolarRadiusAxis angle={90} domain={[0, 10]} />
-        <Radar name="آخرین ارزیابی" dataKey="latest" stroke="#2563eb" fill="#2563eb" fillOpacity={0.4} />
-        <Radar name="میانگین" dataKey="average" stroke="#9ca3af" fill="transparent" strokeWidth={2} />
+        <Radar name="آخرین ارزیابی" dataKey="latest" stroke={latestColor} fill={latestColor} fillOpacity={0.4} />
+        <Radar name="میانگین" dataKey="average" stroke={averageColor} fill="transparent" strokeWidth={2} />
         <Legend />
       </RadarChart>
     </ResponsiveContainer>

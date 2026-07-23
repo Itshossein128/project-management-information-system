@@ -69,13 +69,13 @@ export const CATEGORY_META: Record<
   BarrierCategory,
   { label: string; className: string }
 > = {
-  equipment_failure: { label: "خرابی تجهیزات", className: "bg-red-100 text-red-800" },
-  payment_delay: { label: "تأخیر پرداخت", className: "bg-amber-100 text-amber-800" },
+  equipment_failure: { label: "خرابی تجهیزات", className: "bg-danger-100 text-danger-800" },
+  payment_delay: { label: "تأخیر پرداخت", className: "bg-warning-100 text-warning-800" },
   design_change: { label: "تغییر طراحی", className: "bg-purple-100 text-purple-800" },
-  weather: { label: "شرایط جوی", className: "bg-blue-100 text-blue-800" },
-  subcontractor: { label: "پیمانکار", className: "bg-orange-100 text-orange-800" },
-  safety: { label: "ایمنی", className: "bg-red-200 text-red-900" },
-  other: { label: "سایر", className: "bg-gray-100 text-gray-800" },
+  weather: { label: "شرایط جوی", className: "bg-info-100 text-info-800" },
+  subcontractor: { label: "پیمانکار", className: "bg-safety-100 text-safety-800" },
+  safety: { label: "ایمنی", className: "bg-danger-200 text-danger-900" },
+  other: { label: "سایر", className: "bg-neutral-100 text-neutral-800" },
 };
 
 export const STATUS_META: Record<BarrierStatus, { label: string; variant: "danger" | "warning" | "success" }> = {

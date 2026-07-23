@@ -179,7 +179,7 @@ export function BudgetGrid({
   return (
     <div className="space-y-4" data-testid="budget-grid">
       {budgetData?.warning ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <p className="rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:bg-warning-950/40 dark:text-warning-100">
           {budgetData.warning}
         </p>
       ) : null}

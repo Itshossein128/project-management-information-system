@@ -99,7 +99,7 @@ export default function SyncConflictsPage() {
       ) : visibleConflicts.length === 0 ? (
         <div data-testid="conflict-empty-state">
           <EmptyState
-            icon={<CheckCircle2 className="text-emerald-500" />}
+            icon={<CheckCircle2 className="text-success-500" />}
             title="هیچ تعارضی وجود ندارد"
             description="تمام داده‌های آفلاین با موفقیت همگام‌سازی شده‌اند"
           />

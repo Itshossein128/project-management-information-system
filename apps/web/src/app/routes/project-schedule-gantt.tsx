@@ -52,7 +52,7 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
                 <td className="px-3 py-2">{t.baseline_start ? formatDisplayDate(t.baseline_start) : "—"}</td>
                 <td className="px-3 py-2">{t.baseline_end ? formatDisplayDate(t.baseline_end) : "—"}</td>
                 <td
-                  className={`px-3 py-2 ${variance != null && variance > 0 ? "text-red-600" : variance != null && variance < 0 ? "text-emerald-600" : ""}`}
+                  className={`px-3 py-2 ${variance != null && variance > 0 ? "text-danger-600" : variance != null && variance < 0 ? "text-success-600" : ""}`}
                 >
                   {variance != null ? `${variance > 0 ? "+" : ""}${variance}` : "—"}
                 </td>
@@ -263,9 +263,9 @@ function GanttContent() {
       ) : null}
 
       <style>{`
-        .bar-critical .bar { fill: #dc2626 !important; }
-        .bar-done .bar { fill: #059669 !important; }
-        .bar-normal .bar { fill: #2563eb !important; }
+        .bar-critical .bar { fill: var(--palette-danger-600) !important; }
+        .bar-done .bar { fill: var(--palette-success-600) !important; }
+        .bar-normal .bar { fill: var(--palette-info-600) !important; }
         .gantt-container .grid-row { direction: rtl; }
       `}</style>
 

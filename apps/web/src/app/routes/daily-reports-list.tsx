@@ -193,7 +193,7 @@ export default function DailyReportsListPage() {
       />
 
       {pendingCount > 0 ? (
-        <div className='mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200'>
+        <div className='mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warning-300 bg-warning-50 px-4 py-3 text-sm text-warning-900 dark:bg-warning-950/30 dark:text-warning-200'>
           <span className='flex items-center gap-2'>
             <CloudOff className='size-4' />
             {`${pendingCount} تغییر همگام‌سازی نشده در این دستگاه وجود دارد`}
@@ -203,7 +203,7 @@ export default function DailyReportsListPage() {
             data-testid='daily-reports-sync-now'
             disabled={!isOnline || syncing}
             onClick={syncNow}
-            className='inline-flex items-center gap-1 rounded-md bg-amber-600 px-3 py-1.5 text-white hover:bg-amber-700 disabled:opacity-50'
+            className='inline-flex items-center gap-1 rounded-md bg-warning-600 px-3 py-1.5 text-white hover:bg-warning-700 disabled:opacity-50'
           >
             <RefreshCw className={syncing ? "size-4 animate-spin" : "size-4"} />
             همگام‌سازی اکنون
@@ -226,7 +226,7 @@ export default function DailyReportsListPage() {
                   <Badge variant='warning' label='آفلاین' />
                   {formatDisplayDate(r.report_date)}
                 </span>
-                <span className='flex items-center gap-1 text-amber-600'>
+                <span className='flex items-center gap-1 text-warning-600'>
                   <CloudOff className='size-4' />
                   در انتظار همگام‌سازی
                 </span>
@@ -245,12 +245,12 @@ export default function DailyReportsListPage() {
         <StatCard
           label='تأیید شده'
           value={stats.approved}
-          tone='text-emerald-600'
+          tone='text-success-600'
         />
         <StatCard
           label='در انتظار'
           value={stats.pending}
-          tone='text-amber-600'
+          tone='text-warning-600'
         />
         <StatCard
           label='پیش‌نویس'
@@ -386,7 +386,7 @@ export default function DailyReportsListPage() {
                             title='ویرایش'
                             aria-label='ویرایش'
                             data-testid={`daily-report-edit-${r.report_id}`}
-                            className='rounded p-1 text-blue-600 hover:bg-muted'
+                            className='rounded p-1 text-info-600 hover:bg-muted'
                           >
                             <Pencil className='size-4' />
                           </Link>
@@ -408,7 +408,7 @@ export default function DailyReportsListPage() {
                               if (confirm("این گزارش حذف شود؟"))
                                 removeMutation.mutate(r.report_id);
                             }}
-                            className='rounded p-1 text-red-600 hover:bg-muted'
+                            className='rounded p-1 text-danger-600 hover:bg-muted'
                           >
                             <Trash2 className='size-4' />
                           </button>
