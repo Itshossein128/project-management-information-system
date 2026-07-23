@@ -120,13 +120,6 @@ class RiskEventViewSet(ProjectScopedViewSet):
             qs = qs.filter(event_date__lte=date_to)
         return qs.order_by('-event_date', '-created_at')
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
-
 
 class RiskMatrixView(APIView):
     permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
