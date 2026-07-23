@@ -34,7 +34,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
       >
         <div
           id="text-sidebarBrandMark"
-          className="flex size-11 items-center justify-center rounded-xl bg-sidebar-primary font-semibold text-sidebar-primary-foreground shadow-sm ring-1 ring-sidebar-ring/30"
+          className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-safety-700 font-semibold text-white shadow-sm ring-1 ring-sidebar-ring/30"
           aria-hidden
         >
           BM
