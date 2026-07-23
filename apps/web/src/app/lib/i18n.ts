@@ -15,16 +15,20 @@ export const languageNames: Record<SupportedLanguage, string> = {
 
 export const isRTL = (lang: string = i18n.language): boolean => lang === "fa";
 
-function resolveInitialLanguage(): SupportedLanguage {
-  if (typeof window === "undefined") return "fa";
+function resolveStoredLanguage(): SupportedLanguage | null {
+  if (typeof window === "undefined") return null;
   const stored =
     window.localStorage.getItem("app-language") ??
     window.localStorage.getItem("i18nextLng");
   if (stored === "fa" || stored === "en") return stored;
-  return "fa";
+  return null;
 }
 
-const initialLng = resolveInitialLanguage();
+/**
+ * Always boot with the same default on server + first client paint to avoid
+ * hydration mismatches. I18nSync / language store then apply the stored lang.
+ */
+const BOOT_LNG: SupportedLanguage = "fa";
 
 i18n
   .use(LanguageDetector)
@@ -35,17 +39,28 @@ i18n
       fa: { translation: fa },
     },
     fallbackLng: "fa",
-    lng: initialLng,
+    lng: BOOT_LNG,
     supportedLngs: [...supportedLanguages],
     interpolation: {
       escapeValue: false,
     },
     detection: {
       // Prefer the app language store key; keep i18nextLng as secondary.
-      order: ["localStorage", "navigator"],
+      // Disabled on first paint — sync happens via I18nSync after mount.
+      order: [],
       caches: ["localStorage"],
       lookupLocalStorage: "app-language",
     },
   });
+
+if (typeof window !== "undefined") {
+  const stored = resolveStoredLanguage();
+  if (stored && stored !== BOOT_LNG) {
+    // Defer until after hydration so <html lang/dir> match SSR markup.
+    queueMicrotask(() => {
+      void i18n.changeLanguage(stored);
+    });
+  }
+}
 
 export default i18n;
