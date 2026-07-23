@@ -22,6 +22,11 @@ class SubReportStatus(models.TextChoices):
 
 
 class DisciplineSubReport(AuditSoftDeleteModel):
+    """
+    Represents a discipline-specific sub-report within a project, which can optionally
+    be linked to a daily report. It tracks the status of the report (draft, submitted,
+    approved, rejected) along with relevant environmental and auditing details.
+    """
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='discipline_sub_reports')
     report_date = models.DateField()
     discipline = models.CharField(max_length=20, choices=Discipline.choices, default=Discipline.CIVIL)
@@ -66,6 +71,11 @@ class DisciplineSubReport(AuditSoftDeleteModel):
 
 
 class DisciplineSubReportActivity(UUIDModel):
+    """
+    Represents an individual work activity tracked within a specific discipline sub-report.
+    It captures details about the workforce (crew, foreman, workers), location (zone, block, floor),
+    and execution details (quantity, percentage) mapped to a project schedule activity.
+    """
     sub_report = models.ForeignKey(DisciplineSubReport, on_delete=models.CASCADE, related_name='activities')
     row_number = models.PositiveIntegerField()
     shift = models.CharField(max_length=20)

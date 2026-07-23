@@ -3,6 +3,11 @@ from rest_framework.exceptions import ValidationError
 from sub_reports.models import SubReportStatus
 
 def submit_sub_report(sub_report, user):
+    """
+    Submits a discipline sub-report if it's currently in a draft state.
+    Updates the status to 'SUBMITTED', sets the submitting user,
+    and updates the timestamps and updated_by fields.
+    """
     if sub_report.status != SubReportStatus.DRAFT:
         raise ValidationError('فقط گزارش‌های پیش‌نویس قابل ارسال هستند')
 
@@ -14,6 +19,11 @@ def submit_sub_report(sub_report, user):
     return sub_report
 
 def approve_sub_report(sub_report, user):
+    """
+    Approves a previously submitted discipline sub-report.
+    Updates the status to 'APPROVED', sets the approving user,
+    and updates the timestamps and updated_by fields.
+    """
     if sub_report.status != SubReportStatus.SUBMITTED:
         raise ValidationError('فقط گزارش‌های ارسال شده قابل تأیید هستند')
 
@@ -25,6 +35,12 @@ def approve_sub_report(sub_report, user):
     return sub_report
 
 def reject_sub_report(sub_report, user, rejection_reason):
+    """
+    Rejects a previously submitted discipline sub-report.
+    Updates the status to 'REJECTED', records the rejection reason,
+    and updates the updated_by and timestamp fields.
+    Validates that the rejection reason is at least 10 characters long.
+    """
     if sub_report.status != SubReportStatus.SUBMITTED:
         raise ValidationError('فقط گزارش‌های ارسال شده قابل رد هستند')
 
