@@ -7,3 +7,4 @@ class AlertsConfig(AppConfig):
 
     def ready(self):
         import alerts.signals  # noqa: F401
+        import alerts.services.checkers  # noqa: F401, register checkers

@@ -3,7 +3,7 @@
 import pytest
 
 from alerts.models import AlertLog, AlertRule
-from alerts.services.alert_engine import _check_sync_conflict_unresolved
+from alerts.services.checkers import _check_sync_conflict_unresolved
 from field_reports.models import SyncConflictLog
 
 
