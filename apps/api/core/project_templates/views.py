@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
@@ -43,6 +44,9 @@ class ProjectTemplateViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             # ⚡ Bolt: Add prefetch_related to avoid N+1 queries when loading nested WBS trees and roles
             qs = qs.prefetch_related('wbs_nodes__activities', 'template_roles__role')
+        elif self.action == 'list':
+            # ⚡ Bolt: Annotate wbs_nodes count to avoid N+1 query problem during list
+            qs = qs.annotate(annotated_wbs_node_count=Count('wbs_nodes'))
 
         return qs
 

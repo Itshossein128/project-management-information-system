@@ -24,3 +24,6 @@
 ## 2024-07-18 - Resolve N+1 query in Subcontractor API
 **Learning:** Using `.filter()` or `.order_by()` on related objects (e.g., `obj.warnings.filter(...)`) within a serializer completely bypasses Django's `prefetch_related` cache, leading to N+1 query performance degradation. Attempting to solve this *only* in the serializer by doing Python-level sorting/filtering can be dangerous for large datasets (OOM or slow responses).
 **Action:** Use a `Prefetch` object with a custom `queryset` in the View to do the filtering/sorting at the database level during the initial prefetch. Then, in the serializer, strictly iterate over `.all()` in Python to utilize the prefetched cache.
+## 2026-07-23 - Safe Annotation Extraction in DRF Serializers
+**Learning:** When annotating a queryset in a ViewSet to fix an N+1 issue (e.g., using `Count`), the matching `SerializerMethodField` must read the annotated value safely. If the serializer expects an annotated field but is reused in a context where the annotation is missing, it will crash.
+**Action:** Always use `getattr(obj, 'annotated_field_name', None)` to check for the annotation's presence, and provide a fallback like `return obj.related_set.count()`.
