@@ -71,8 +71,8 @@ export default function Login() {
   return (
     <div className='relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4'>
       <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10'>
-        <div className='absolute -end-24 -top-24 h-72 w-72 rounded-full bg-brand-500/15 blur-3xl' />
-        <div className='absolute -bottom-24 -start-24 h-80 w-80 rounded-full bg-safety-500/15 blur-3xl' />
+        <div className='absolute -end-24 -top-24 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl' />
+        <div className='absolute -bottom-24 -start-24 h-80 w-80 rounded-full bg-safety-500/25 blur-3xl' />
         <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60' />
       </div>
       <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
@@ -82,7 +82,7 @@ export default function Login() {
         <CardHeader className='justify-items-center text-center'>
           <div
             aria-hidden='true'
-            className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-lg font-bold tracking-tight text-white shadow-md'
+            className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-safety-600 text-lg font-bold tracking-tight text-white shadow-md'
           >
             BM
           </div>
