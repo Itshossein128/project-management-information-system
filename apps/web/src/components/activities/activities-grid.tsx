@@ -29,6 +29,7 @@ import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Modal } from "@/components/overlay/modal";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/sprint-button";
 import { Checkbox, Field, Input, Select } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
@@ -361,15 +362,30 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                         <div className="flex gap-1">
                           {canEdit ? (
                             <>
-                              <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label="ویرایش">
-                                <Pencil className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label="ارتباط">
-                                <GitBranchPlus className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
-                                <Trash2 className="size-4" />
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label="ویرایش">
+                                    <Pencil className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>ویرایش</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label="ارتباط">
+                                    <GitBranchPlus className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>ارتباط</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>حذف</TooltipContent>
+                              </Tooltip>
                             </>
                           ) : null}
                         </div>
