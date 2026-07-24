@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class UploadUrlView(APIView):
+    """
+    Handles the generation of presigned URLs for uploading files to S3.
+    """
     permission_classes = [IsAuthenticated, IsProjectMember]
 
     @extend_schema(summary='Get presigned upload URL', tags=['Storage'])
@@ -38,6 +41,9 @@ class UploadUrlView(APIView):
 
 
 class ConfirmUploadView(APIView):
+    """
+    Confirms the successful upload of a file to S3 and updates its size and status.
+    """
     require_uploader = True
     permission_classes = [IsAuthenticated, CanAccessStoredFile]
 
@@ -55,6 +61,9 @@ class ConfirmUploadView(APIView):
 
 
 class DownloadUrlView(APIView):
+    """
+    Generates a presigned URL for downloading a previously uploaded file from S3.
+    """
     permission_classes = [IsAuthenticated, CanAccessStoredFile]
 
     @extend_schema(summary='Get presigned download URL', tags=['Storage'])

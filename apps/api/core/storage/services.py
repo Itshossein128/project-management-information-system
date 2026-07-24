@@ -31,6 +31,10 @@ class _NamedUpload:
 
 
 def generate_upload_url(project_pk, user, raw_filename, content_type='application/octet-stream'):
+    """
+    Validates a file upload request, creates a StoredFile record in the database,
+    and returns an S3 presigned URL for a secure direct upload.
+    """
     if not raw_filename or '..' in raw_filename or '/' in raw_filename or '\\' in raw_filename:
         raise ValueError('Invalid filename.')
 
@@ -63,6 +67,10 @@ def generate_upload_url(project_pk, user, raw_filename, content_type='applicatio
 
 
 def confirm_upload(file_id, user, size_bytes=None):
+    """
+    Marks a StoredFile as successfully uploaded and records its size in the database.
+    Verifies that the uploaded file size does not exceed the maximum allowed size.
+    """
     try:
         stored = StoredFile.objects.get(pk=file_id, uploaded_by=user)
     except StoredFile.DoesNotExist:
@@ -78,6 +86,10 @@ def confirm_upload(file_id, user, size_bytes=None):
 
 
 def generate_download_url(file_id):
+    """
+    Generates a presigned URL that allows securely downloading an S3 object
+    for a limited amount of time.
+    """
     try:
         stored = StoredFile.objects.get(pk=file_id)
     except StoredFile.DoesNotExist:
