@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -14,7 +15,7 @@ import {
 import { fetchSuppliers } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
@@ -30,6 +31,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function BalanceTab({ projectId }: { projectId: string }) {
+  const { t, i18n } = useTranslation();
+
   const [discipline, setDiscipline] = useState("");
   const [lowStock, setLowStock] = useState(false);
 
@@ -97,7 +100,7 @@ function BalanceTab({ projectId }: { projectId: string }) {
                   return (
                   <tr
                     key={r.material_id}
-                    className={`border-t border-border ${r.is_low_stock ? "bg-red-50 dark:bg-red-950/20" : ""}`}
+                    className={`border-t border-border ${r.is_low_stock ? "bg-danger-50 dark:bg-danger-950/20" : ""}`}
                   >
                     <td className="px-3 py-2 font-mono text-xs">{r.material_code}</td>
                     <td className="px-3 py-2">{r.material_name}</td>
@@ -114,12 +117,12 @@ function BalanceTab({ projectId }: { projectId: string }) {
                       {r.is_low_stock ? (
                         <Link
                           to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_ALERTS}?type=low_stock`}
-                          className="text-xs text-red-600 hover:underline"
+                          className="text-xs text-danger-600 hover:underline"
                         >
                           کمبود
                         </Link>
                       ) : (
-                        <span className="text-xs text-emerald-600">عادی</span>
+                        <span className="text-xs text-success-600">عادی</span>
                       )}
                     </td>
                   </tr>
@@ -134,6 +137,8 @@ function BalanceTab({ projectId }: { projectId: string }) {
 }
 
 function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
@@ -210,7 +215,7 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
       ) : isError ? (
         <QueryErrorState onRetry={() => void refetch()} />
       ) : requests.length === 0 ? (
-        <EmptyState title="درخواستی ثبت نشده" description="درخواست مصالح اینجا نمایش داده می‌شود." />
+        <EmptyState title={t("pages.procurement.empty")} description="درخواست مصالح اینجا نمایش داده می‌شود." />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -244,6 +249,8 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
 }
 
 function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
@@ -390,9 +397,9 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
                     <td className="px-3 py-2">{r.document_ref || "—"}</td>
                     <td className="px-3 py-2">
                       {r.daily_report ? (
-                        <span className="text-xs text-blue-600">گزارش روزانه</span>
+                        <span className="text-xs text-info-600">گزارش روزانه</span>
                       ) : (
-                        <span className="text-xs text-emerald-600">دستی</span>
+                        <span className="text-xs text-success-600">دستی</span>
                       )}
                     </td>
                   </tr>
@@ -406,6 +413,8 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
 }
 
 function MaterialBalanceContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -413,22 +422,24 @@ function MaterialBalanceContent() {
   const [tab, setTab] = useState<Tab>("balance");
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <EmptyState
-        title="دسترسی ندارید"
-        description="نقش شما مجوز مشاهده گزارش‌ها را ندارد."
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.reports.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
       />
     );
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="بالانس مصالح" subtitle={project.project_name} />
+      <PageHeader title={t("pages.materialBalance.title")} subtitle={project.project_name} />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -454,6 +465,7 @@ function MaterialBalanceContent() {
 }
 
 export default function ProjectMaterialBalancePage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -6,6 +7,7 @@ import { ForecastTab } from "@/components/cashflow/ForecastTab";
 import { GapAnalysisTab } from "@/components/cashflow/GapAnalysisTab";
 import { TransactionsTab } from "@/components/cashflow/TransactionsTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -18,6 +20,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function CashFlowContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_cashflow");
@@ -25,21 +29,19 @@ function CashFlowContent() {
   const [tab, setTab] = useState<Tab>("transactions");
 
   if (isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
 
   if (!canView) {
     return (
-      <p className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده جریان نقدی را ندارد.
-      </p>
+      <AccessDenied description="نقش شما مجوز مشاهده جریان نقدی را ندارد." />
     );
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="جریان نقدی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.cashFlow.title")} subtitle={project.project_name} />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -65,6 +67,7 @@ function CashFlowContent() {
 }
 
 export default function ProjectCashFlowPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
 
   return (

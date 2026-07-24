@@ -43,14 +43,14 @@ def test_rejects_oversized_file():
     upload = _FakeUpload('data.xml', size=51 * 1024 * 1024)
     with pytest.raises(ValidationError) as exc:
         validate_msp_upload(upload)
-    assert MSG_FILE_TOO_LARGE in str(exc.value.detail)
+    assert str(MSG_FILE_TOO_LARGE) in str(exc.value.detail)
 
 
 def test_rejects_invalid_extension():
     upload = _FakeUpload('data.txt')
     with pytest.raises(ValidationError) as exc:
         validate_msp_upload(upload)
-    assert MSG_INVALID_TYPE in str(exc.value.detail)
+    assert str(MSG_INVALID_TYPE) in str(exc.value.detail)
 
 
 def test_accepts_xml_extension():
@@ -83,7 +83,7 @@ def test_rejects_document_upload_with_mismatched_mime():
     upload = _FakeUpload('report.pdf', content=b'Not a PDF', content_type='text/plain')
     with pytest.raises(ValidationError) as exc:
         validate_document_upload(upload)
-    assert MSG_INVALID_TYPE in str(exc.value.detail)
+    assert str(MSG_INVALID_TYPE) in str(exc.value.detail)
 
 
 def test_validate_upload_with_no_expected_mimes():

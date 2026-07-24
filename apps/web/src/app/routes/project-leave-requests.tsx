@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -24,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const { has } = usePermission(projectId);
   const canApprove = has("approve_reports");
@@ -88,7 +91,7 @@ function Content() {
       </div>
       {rows.length === 0 ? (
         <EmptyState
-          title="درخواستی ثبت نشده"
+          title={t("pages.procurement.empty")}
           description="اولین درخواست مرخصی را ثبت کنید."
           action={
             <Button size="sm" onClick={() => setOpen(true)}>
@@ -295,12 +298,13 @@ function Content() {
 }
 
 export default function ProjectLeaveRequestsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "مرخصی و مأموریت" }]} />
-        <PageHeader title='درخواست‌های مرخصی و مأموریت' />
+        <PageHeader title={t("pages.leaveRequests.title")} />
         <Content />
       </ProjectProvider>
     </main>

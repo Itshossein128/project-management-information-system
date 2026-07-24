@@ -1,18 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
 import { ActivitiesGrid } from "@/components/activities/activities-grid";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { NotFoundState } from "@/components/layout/empty-state";
 
 function ActivitiesPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   return (
     <>
@@ -27,8 +27,8 @@ function ActivitiesPageContent() {
         ]}
       />
       <PageHeader
-        title='فعالیت‌ها'
-        subtitle='مدیریت فعالیت‌های زمان‌بندی پروژه'
+        title={t("pages.activities.title")}
+        subtitle={t("pages.activities.subtitle")}
       />
       <ActivitiesGrid projectId={projectId} />
     </>
@@ -36,6 +36,7 @@ function ActivitiesPageContent() {
 }
 
 export default function ProjectActivitiesPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

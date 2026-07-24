@@ -1,22 +1,36 @@
 import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 import { cn } from "src/app/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset transition-colors",
   {
     variants: {
       variant: {
-        success: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
-        warning: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-        danger: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
-        info: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+        success: "bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300",
+        warning: "bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300",
+        danger: "bg-danger-100 text-danger-800 dark:bg-danger-900/40 dark:text-danger-300",
+        info: "bg-info-100 text-info-800 dark:bg-info-900/40 dark:text-info-300",
         neutral: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: { variant: "neutral" },
   },
 );
+
+const dotVariants = cva("size-1.5 rounded-full", {
+  variants: {
+    variant: {
+      success: "bg-success-500",
+      warning: "bg-warning-500",
+      danger: "bg-danger-500",
+      info: "bg-info-500",
+      neutral: "bg-muted-foreground/60",
+    },
+  },
+  defaultVariants: { variant: "neutral" },
+});
 
 export interface BadgeProps
   extends VariantProps<typeof badgeVariants>,
@@ -28,6 +42,7 @@ export interface BadgeProps
 export function Badge({ variant, label, className, ...props }: BadgeProps) {
   return (
     <span className={cn(badgeVariants({ variant }), className)} {...props}>
+      <span aria-hidden className={dotVariants({ variant })} />
       {label}
     </span>
   );
@@ -40,9 +55,25 @@ export const projectStatusBadge: Record<string, BadgeProps["variant"]> = {
   handed_over: "neutral",
 };
 
+/** i18n keys for project status codes — use with `t(projectStatusI18nKey[status])`. */
+export const projectStatusI18nKey: Record<string, string> = {
+  active: "status.active",
+  suspended: "status.suspended",
+  completed: "status.completed",
+  handed_over: "status.handed_over",
+};
+
+/** @deprecated Prefer `projectStatusI18nKey` + `t()` for bilingual UI. */
 export const projectStatusLabels: Record<string, string> = {
   active: "فعال",
   suspended: "معلق",
   completed: "تکمیل‌شده",
   handed_over: "تحویل‌شده",
 };
+
+/** Localized project status label hook helper. */
+export function useProjectStatusLabel(status: string): string {
+  const { t } = useTranslation();
+  const key = projectStatusI18nKey[status];
+  return key ? t(key) : status;
+}

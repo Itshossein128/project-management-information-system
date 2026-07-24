@@ -159,7 +159,7 @@ export function AddRelationModal({
         </div>
 
         {inlineError ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          <p className="rounded-md bg-danger-50 px-3 py-2 text-sm text-danger-700 dark:bg-danger-950/40 dark:text-danger-300">
             {inlineError}
           </p>
         ) : null}

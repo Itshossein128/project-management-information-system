@@ -19,10 +19,10 @@ import { LoadingSkeleton } from "@/components/layout/page-header";
 import { cn } from "@/app/lib/utils";
 
 const STATUS_COLORS: Record<ActivityStatus, string> = {
-  not_started: "border-slate-300 bg-slate-50 dark:border-slate-600 dark:bg-slate-900",
-  in_progress: "border-blue-400 bg-blue-50 dark:border-blue-600 dark:bg-blue-950/40",
-  suspended: "border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40",
-  completed: "border-emerald-400 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/40",
+  not_started: "border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900",
+  in_progress: "border-info-400 bg-info-50 dark:border-info-600 dark:bg-info-950/40",
+  suspended: "border-warning-400 bg-warning-50 dark:border-warning-600 dark:bg-warning-950/40",
+  completed: "border-success-400 bg-success-50 dark:border-success-600 dark:bg-success-950/40",
 };
 
 type ActivityNodeData = {
@@ -40,7 +40,7 @@ function ActivityNodeCard({ data }: NodeProps<Node<ActivityNodeData>>) {
       className={cn(
         "min-w-[160px] max-w-[200px] rounded-lg border-2 px-3 py-2 text-xs shadow-sm",
         STATUS_COLORS[data.status],
-        data.is_critical && "border-red-600 ring-2 ring-red-400/50",
+        data.is_critical && "border-danger-600 ring-2 ring-danger-400/50",
       )}
     >
       <div className="font-mono font-semibold">{data.code}</div>

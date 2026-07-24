@@ -136,11 +136,11 @@ export function ConflictCard({
   return (
     <div
       data-testid={`conflict-card-${index}`}
-      className={`space-y-4 rounded-xl border border-red-300 bg-card p-4 transition-opacity duration-300 ${fading ? "opacity-0" : "opacity-100"}`}
+      className={`space-y-4 rounded-xl border border-danger-300 bg-card p-4 transition-opacity duration-300 ${fading ? "opacity-0" : "opacity-100"}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <AlertTriangle className="size-5 text-red-700 dark:text-red-300" />
+          <AlertTriangle className="size-5 text-danger-700 dark:text-danger-300" />
           <Badge variant="neutral" label={entityLabel} />
           <span className="text-sm text-muted-foreground">
             {new Date(conflict.created_at).toLocaleString("fa-IR")}
@@ -151,7 +151,7 @@ export function ConflictCard({
         </div>
       </div>
 
-      <p className="text-sm text-red-800 dark:text-red-200">{conflictReason}</p>
+      <p className="text-sm text-danger-800 dark:text-danger-200">{conflictReason}</p>
 
       {!showMerge ? (
         <>

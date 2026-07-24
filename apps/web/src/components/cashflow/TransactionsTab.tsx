@@ -29,8 +29,8 @@ function TxTypeBadge({ type }: { type: TxType }) {
     <span
       className={
         type === "in"
-          ? "inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800"
-          : "inline-flex rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-800"
+          ? "inline-flex rounded-full bg-success-100 px-2 py-0.5 text-xs text-success-800"
+          : "inline-flex rounded-full bg-danger-100 px-2 py-0.5 text-xs text-danger-800"
       }
     >
       {type === "in" ? "دریافت" : "پرداخت"}
@@ -467,7 +467,7 @@ export function TransactionsTab({
                   </td>
                   <td className="px-3 py-2">{categoryLabel(row.category, row.tx_type)}</td>
                   <td
-                    className={`px-3 py-2 font-medium ${row.tx_type === "in" ? "text-emerald-600" : "text-red-600"}`}
+                    className={`px-3 py-2 font-medium ${row.tx_type === "in" ? "text-success-600" : "text-danger-600"}`}
                   >
                     {row.amount_display}
                   </td>
@@ -482,7 +482,7 @@ export function TransactionsTab({
                         {row.source !== "ipc" ? (
                           <button
                             type="button"
-                            className="text-blue-600"
+                            className="text-info-600"
                             onClick={() => setEditRow(row)}
                             aria-label="ویرایش"
                           >
@@ -491,7 +491,7 @@ export function TransactionsTab({
                         ) : null}
                         <button
                           type="button"
-                          className="text-red-600"
+                          className="text-danger-600"
                           onClick={() => remove.mutate(row.id)}
                           aria-label="حذف"
                         >

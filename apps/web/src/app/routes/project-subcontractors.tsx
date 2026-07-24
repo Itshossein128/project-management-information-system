@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { useState } from "react";
@@ -25,6 +26,8 @@ import { useToast } from "@/components/ui/toast";
 const NO_CONTRACT = "__none__";
 
 function SubcontractorsContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -83,12 +86,12 @@ function SubcontractorsContent() {
 
   if (isLoading || (canView && loading)) return <LoadingSkeleton rows={8} />;
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
   if (!canView) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده پیمانکاران فرعی به مجوز قراردادها نیاز است."
       />
     );
@@ -105,7 +108,7 @@ function SubcontractorsContent() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="پیمانکاران فرعی"
+        title={t("pages.subcontractors.title")}
         subtitle={project.project_name}
         actions={
           canEdit ? (
@@ -117,7 +120,7 @@ function SubcontractorsContent() {
       />
 
       {atRisk > 0 ? (
-        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900">
+        <div className="rounded-lg border border-warning-300 bg-warning-50 p-4 text-warning-900">
           ⚠ {atRisk} پیمانکار در وضعیت ریسک قرار دارند{" "}
           <button type="button" className="underline" onClick={() => setRiskOnly(true)}>
             مشاهده جزئیات
@@ -127,9 +130,9 @@ function SubcontractorsContent() {
 
       <div className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">کل پیمانکاران</p><p className="text-xl font-semibold">{rows.length}</p></div>
-        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">فعال</p><p className="text-xl font-semibold text-emerald-600">{active}</p></div>
-        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">در خطر</p><p className="text-xl font-semibold text-red-600">{atRisk}</p></div>
-        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">تعلیق‌شده</p><p className="text-xl font-semibold text-amber-600">{suspended}</p></div>
+        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">فعال</p><p className="text-xl font-semibold text-success-600">{active}</p></div>
+        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">در خطر</p><p className="text-xl font-semibold text-danger-600">{atRisk}</p></div>
+        <div className="rounded-lg border p-4"><p className="text-sm text-muted-foreground">تعلیق‌شده</p><p className="text-xl font-semibold text-warning-600">{suspended}</p></div>
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -159,7 +162,7 @@ function SubcontractorsContent() {
       {rows.length === 0 ? (
         <EmptyState
           icon={<Users />}
-          title="پیمانکاری ثبت نشده"
+          title={t("pages.subcontractors.empty")}
           description="اولین پیمانکار فرعی را اضافه کنید یا فیلترها را تغییر دهید."
           action={
             canEdit ? (
@@ -202,7 +205,7 @@ function SubcontractorsContent() {
                     </td>
                     <td className="px-3 py-2">{formatFaAmount(r.financial_summary.outstanding)}</td>
                     <td className="px-3 py-2">
-                      <span className={`rounded px-2 py-0.5 text-xs ${hasSeriousWarning ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-700"}`}>
+                      <span className={`rounded px-2 py-0.5 text-xs ${hasSeriousWarning ? "bg-danger-100 text-danger-800" : "bg-neutral-100 text-neutral-700"}`}>
                         {r.warning_count}
                       </span>
                     </td>
@@ -228,7 +231,7 @@ function SubcontractorsContent() {
       <Drawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title="افزودن پیمانکار فرعی"
+        title={t("pages.subcontractors.add")}
         footer={
           <Button
             variant="primary"
@@ -318,6 +321,7 @@ function SubcontractorsContent() {
 }
 
 export default function ProjectSubcontractorsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

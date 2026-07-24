@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -41,6 +42,8 @@ function trendIcon(trend: string) {
 }
 
 function SubcontractorDetailContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { subId = "" } = useParams();
   const qc = useQueryClient();
@@ -179,7 +182,7 @@ function SubcontractorDetailContent() {
     return (
       <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
         <EmptyState
-          title="دسترسی ندارید"
+          title={t("common.accessDenied")}
           description="برای مشاهده جزئیات پیمانکار به مجوز قراردادها نیاز است."
         />
       </main>
@@ -265,7 +268,7 @@ function SubcontractorDetailContent() {
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {tabs.map(([key, label]) => (
             <TabsTrigger key={key} value={key}>
@@ -366,7 +369,7 @@ function SubcontractorDetailContent() {
                 </p>
                 <div className="h-3 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full bg-amber-500"
+                    className="h-full bg-warning-500"
                     style={{
                       width: `${fin.advance_paid > 0 ? (fin.advance_recovered / fin.advance_paid) * 100 : 0}%`,
                     }}
@@ -396,7 +399,7 @@ function SubcontractorDetailContent() {
                           <td className="px-3 py-2">
                             {IPC_STATUS_LABELS[ipc.status] ?? ipc.status}
                           </td>
-                          <td className={`px-3 py-2 ${ipc.days_overdue ? "text-red-600" : ""}`}>
+                          <td className={`px-3 py-2 ${ipc.days_overdue ? "text-danger-600" : ""}`}>
                             {ipc.days_overdue ? `${ipc.days_overdue} روز` : "—"}
                           </td>
                         </tr>
@@ -549,9 +552,9 @@ function SubcontractorDetailContent() {
             onChange={(v) => setScoreForm({ ...scoreForm, cooperation_score: v })}
           />
           {liveOverall != null ? (
-            <div className="rounded-lg bg-amber-50 p-4 text-center">
-              <p className="text-sm text-amber-800">نمره کل محاسبه شده</p>
-              <p className="text-2xl font-bold text-amber-900">{liveOverall.toFixed(1)}</p>
+            <div className="rounded-lg bg-warning-50 p-4 text-center">
+              <p className="text-sm text-warning-800">نمره کل محاسبه شده</p>
+              <p className="text-2xl font-bold text-warning-900">{liveOverall.toFixed(1)}</p>
             </div>
           ) : null}
           <TextArea
@@ -659,6 +662,7 @@ function SubcontractorDetailContent() {
 }
 
 export default function ProjectSubcontractorDetailPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

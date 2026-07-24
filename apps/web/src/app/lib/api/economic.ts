@@ -197,5 +197,5 @@ export function formatFaAmount(v: number) {
 }
 
 export function profitColor(v: number) {
-  return v >= 0 ? "text-emerald-600" : "text-red-600";
+  return v >= 0 ? "text-success-600" : "text-danger-600";
 }

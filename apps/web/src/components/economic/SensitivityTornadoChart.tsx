@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { fetchSensitivity, formatFaAmount } from "@/app/lib/api/economic";
 import { LoadingSkeleton } from "@/components/layout/page-header";
+import { chartColor } from "@/design/tokens";
 
 export function SensitivityTornadoChart({ projectId }: { projectId: string }) {
+  const impactColor = chartColor("warning");
   const { data, isLoading } = useQuery({
     queryKey: ["economic-sensitivity", projectId],
     queryFn: () => fetchSensitivity(projectId),
@@ -36,7 +38,7 @@ export function SensitivityTornadoChart({ projectId }: { projectId: string }) {
             <XAxis type="number" tickFormatter={(v) => formatFaAmount(v)} />
             <YAxis type="category" dataKey="name" width={100} />
             <Tooltip formatter={(v) => formatFaAmount(Number(v ?? 0))} />
-            <Bar dataKey="impact" fill="#f59e0b" name="تأثیر" />
+            <Bar dataKey="impact" fill={impactColor} name="تأثیر" />
           </BarChart>
         </ResponsiveContainer>
       </div>

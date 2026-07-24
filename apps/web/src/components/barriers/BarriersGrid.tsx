@@ -194,8 +194,8 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
                         )}
                       </td>
                       <td className="px-3 py-2 max-w-xs truncate">{row.description}</td>
-                      <td className="px-3 py-2">{row.impact_on_schedule ? <Check className="size-4 text-emerald-600" /> : "—"}</td>
-                      <td className="px-3 py-2">{row.impact_on_cost ? <Check className="size-4 text-emerald-600" /> : "—"}</td>
+                      <td className="px-3 py-2">{row.impact_on_schedule ? <Check className="size-4 text-success-600" /> : "—"}</td>
+                      <td className="px-3 py-2">{row.impact_on_cost ? <Check className="size-4 text-success-600" /> : "—"}</td>
                       <td className="px-3 py-2">
                         <Badge variant={st.variant} label={st.label} />
                       </td>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
@@ -13,11 +14,8 @@ import {
 } from "@/app/lib/api/reports";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function monthStartIso() {
@@ -30,6 +28,8 @@ function todayIso() {
 }
 
 function ActivityLogContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -73,13 +73,16 @@ function ActivityLogContent() {
   });
 
   if (projectLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <p className='rounded-lg border border-border bg-card p-8 text-center text-muted-foreground'>
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده گزارش‌ها را ندارد.
-      </p>
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.activityLog.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
+      />
     );
   }
 
@@ -88,7 +91,7 @@ function ActivityLogContent() {
 
   return (
     <div className='space-y-6'>
-      <PageHeader title='بانک فعالیت‌ها' subtitle={project.project_name} />
+      <PageHeader title={t("pages.activityLog.title")} subtitle={project.project_name} />
 
       <div className='flex flex-wrap items-end gap-3'>
         <div className='min-w-[260px] flex-1'>
@@ -271,6 +274,7 @@ function ActivityLogContent() {
 }
 
 export default function ProjectActivityLogPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

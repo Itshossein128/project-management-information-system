@@ -35,12 +35,12 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
       ) : isError ? (
         <QueryErrorState onRetry={() => void refetch()} />
       ) : gaps.length === 0 ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-8 text-center text-emerald-800">
+        <div className="rounded-lg border border-success-200 bg-success-50 p-8 text-center text-success-800">
           در بازه پیش‌بینی شده کمبود نقدینگی وجود ندارد
         </div>
       ) : (
         <>
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-900">
+          <div className="rounded-lg border border-warning-200 bg-warning-50 p-4 text-warning-900">
             ⚠ {gaps.length} ماه با کمبود نقدینگی پیش‌بینی شده شناسایی شد
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -49,8 +49,8 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
                 key={g.month}
                 className={`rounded-lg border p-4 ${
                   g.is_cumulative_negative
-                    ? "border-red-300 bg-red-50"
-                    : "border-amber-300 bg-amber-50"
+                    ? "border-danger-300 bg-danger-50"
+                    : "border-warning-300 bg-warning-50"
                 }`}
               >
                 <h4 className="font-medium">{monthLabel(g.month)}</h4>
@@ -63,7 +63,7 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
                     <dt>پرداخت پیش‌بینی</dt>
                     <dd>{formatFaAmount(g.expected_outflow)}</dd>
                   </div>
-                  <div className="flex justify-between font-medium text-red-700">
+                  <div className="flex justify-between font-medium text-danger-700">
                     <dt>کمبود</dt>
                     <dd>{formatFaAmount(g.gap_amount)}</dd>
                   </div>
@@ -91,7 +91,7 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
                 <dt>کل IPC تأییدشده پرداخت‌نشده</dt>
                 <dd>{formatFaAmount(receivables.receivables.total_approved_unpaid)}</dd>
               </div>
-              <div className="flex justify-between text-red-600">
+              <div className="flex justify-between text-danger-600">
                 <dt>معوق</dt>
                 <dd>{formatFaAmount(receivables.receivables.overdue)}</dd>
               </div>
@@ -110,7 +110,7 @@ export function GapAnalysisTab({ projectId }: { projectId: string }) {
                 <dt>کل IPC پیمانکاران پرداخت‌نشده</dt>
                 <dd>{formatFaAmount(receivables.payables.total_approved_unpaid)}</dd>
               </div>
-              <div className="flex justify-between text-red-600">
+              <div className="flex justify-between text-danger-600">
                 <dt>معوق</dt>
                 <dd>{formatFaAmount(receivables.payables.overdue)}</dd>
               </div>

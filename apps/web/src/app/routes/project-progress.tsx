@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -12,8 +13,8 @@ import {
 } from "@/app/lib/api/progress";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
-import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
@@ -31,6 +32,8 @@ function todayIso() {
 }
 
 function ProgressPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
@@ -122,16 +125,18 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (snapshotError) {
     return <QueryErrorState onRetry={() => void refetchSnapshot()} />;
   }
 
   if (!canView) {
     return (
-      <EmptyState
-        title="دسترسی ندارید"
-        description="نقش شما مجوز مشاهده داشبورد را ندارد."
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.progress.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده داشبورد را ندارد.",
+        })}
       />
     );
   }
@@ -139,7 +144,7 @@ function ProgressPageContent() {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <PageHeader title="گزارش پیشرفت پروژه" subtitle={project.project_name} />
+        <PageHeader title={t("pages.progress.title")} subtitle={project.project_name} />
         {canEdit ? (
           <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)} data-testid="progress-manual-btn">
             ثبت پیشرفت دستی
@@ -281,7 +286,7 @@ function ProgressPageContent() {
           </div>
         </div>
         {sCurve?.warning ? (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:bg-warning-950/40 dark:text-warning-100">
             {sCurve.warning}
           </p>
         ) : null}
@@ -330,6 +335,7 @@ function ProgressPageContent() {
 }
 
 export default function ProjectProgressPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

@@ -14,7 +14,7 @@ export function RiskBadge({ reasons }: Props) {
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          className="cursor-help inline-flex items-center gap-1 rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800"
+          className="cursor-help inline-flex items-center gap-1 rounded bg-danger-100 px-2 py-0.5 text-xs font-medium text-danger-800"
         >
           <AlertTriangle className="size-3" aria-hidden />
           در خطر

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -78,6 +79,7 @@ export function DailyReportForm({
   projectId: string;
   reportId?: string;
 }) {
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -267,7 +269,7 @@ export function DailyReportForm({
       />
 
       {!isOnline ? (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+        <div className="flex items-center gap-2 rounded-lg border border-warning-300 bg-warning-50 px-4 py-2 text-sm text-warning-900 dark:bg-warning-950/30 dark:text-warning-200">
           <CloudOff className="size-4" />
           حالت آفلاین — تغییرات به صورت محلی ذخیره و پس از اتصال همگام‌سازی می‌شوند.
         </div>
@@ -306,7 +308,7 @@ export function DailyReportForm({
         </p>
       )}
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir="rtl">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir={i18n.dir()}>
         <div className="rounded-xl border border-border bg-card">
           <TabsList className="flex h-auto flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-2">
             {TABS.map((t) => (

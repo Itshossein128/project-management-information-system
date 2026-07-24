@@ -113,7 +113,7 @@ export function MonteCarloPanel({ projectId }: { projectId: string }) {
           <div className="rounded border p-3 text-center">
             <p className="text-xs text-muted-foreground">احتمال زیان</p>
             <p
-              className={`text-lg font-semibold ${probLoss > 0.3 ? "text-red-600" : probLoss > 0.1 ? "text-amber-600" : "text-emerald-600"}`}
+              className={`text-lg font-semibold ${probLoss > 0.3 ? "text-danger-600" : probLoss > 0.1 ? "text-warning-600" : "text-success-600"}`}
             >
               {(probLoss * 100).toFixed(1)}٪
             </p>

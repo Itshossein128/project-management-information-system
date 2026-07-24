@@ -9,8 +9,13 @@ import {
   YAxis,
 } from "recharts";
 import { formatFaAmount, profitColor, type EconomicSnapshot } from "@/app/lib/api/economic";
+import { chartColor } from "@/design/tokens";
 
 export function ProfitLayersPanel({ snapshot }: { snapshot: EconomicSnapshot }) {
+  const colors = {
+    positive: chartColor("success"),
+    negative: chartColor("danger"),
+  };
   const profitBars = [
     { name: "حسابداری", value: snapshot.accounting_profit },
     { name: "واقعی", value: snapshot.real_profit },
@@ -50,7 +55,7 @@ export function ProfitLayersPanel({ snapshot }: { snapshot: EconomicSnapshot }) 
             <p className="text-sm text-muted-foreground">{card.title}</p>
             <p className={`text-2xl font-bold ${profitColor(card.value)}`}>{formatFaAmount(card.value)}</p>
             <p className="mt-1 text-xs text-muted-foreground">{card.formula}</p>
-            <p className="text-xs text-amber-700">{card.sub}</p>
+            <p className="text-xs text-warning-700">{card.sub}</p>
           </div>
         ))}
       </div>
@@ -64,7 +69,10 @@ export function ProfitLayersPanel({ snapshot }: { snapshot: EconomicSnapshot }) 
             <Tooltip formatter={(v) => formatFaAmount(Number(v ?? 0))} />
             <Bar dataKey="value">
               {profitBars.map((entry) => (
-                <Cell key={entry.name} fill={entry.value >= 0 ? "#059669" : "#dc2626"} />
+                <Cell
+                  key={entry.name}
+                  fill={entry.value >= 0 ? colors.positive : colors.negative}
+                />
               ))}
             </Bar>
           </BarChart>

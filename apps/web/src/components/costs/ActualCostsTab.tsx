@@ -25,8 +25,8 @@ function SourceBadge({ isAuto }: { isAuto: boolean }) {
     <span
       className={
         isAuto
-          ? "inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-950 dark:text-blue-200"
-          : "inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
+          ? "inline-flex rounded-full bg-info-100 px-2 py-0.5 text-xs text-info-800 dark:bg-info-950 dark:text-info-200"
+          : "inline-flex rounded-full bg-success-100 px-2 py-0.5 text-xs text-success-800 dark:bg-success-950 dark:text-success-200"
       }
     >
       {isAuto ? "خودکار" : "دستی"}

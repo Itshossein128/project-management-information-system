@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button, Input, Label } from "@/components/form";
 import { GridPagination } from "@/components/grid";
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +39,7 @@ interface RowResponse {
 }
 
 export default function BusinessTablePage() {
+  const { t, i18n } = useTranslation();
   const { businessId, tableSlug } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hasRole } = useAuth();

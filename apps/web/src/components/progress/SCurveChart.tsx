@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import type { SCurvePoint } from "@/app/lib/api/progress";
+import { chartColor } from "@/design/tokens";
 
 export function SCurveChart({
   data,
@@ -30,6 +31,14 @@ export function SCurveChart({
   );
 
   const todayLabel = isoToJalali(todayIso) || todayIso;
+  const colors = useMemo(
+    () => ({
+      today: chartColor("danger"),
+      planned: chartColor("info"),
+      actual: chartColor("success"),
+    }),
+    [],
+  );
 
   return (
     <div className="h-80 w-full">
@@ -50,11 +59,11 @@ export function SCurveChart({
               value === "planned_progress" ? "برنامه‌ریزی شده" : "واقعی"
             }
           />
-          <ReferenceLine x={todayLabel} stroke="#ef4444" strokeDasharray="4 4" label="امروز" />
+          <ReferenceLine x={todayLabel} stroke={colors.today} strokeDasharray="4 4" label="امروز" />
           <Line
             type="monotone"
             dataKey="planned_progress"
-            stroke="#3b82f6"
+            stroke={colors.planned}
             strokeWidth={2}
             dot={false}
             name="planned_progress"
@@ -62,7 +71,7 @@ export function SCurveChart({
           <Line
             type="monotone"
             dataKey="actual_progress"
-            stroke="#22c55e"
+            stroke={colors.actual}
             strokeWidth={2}
             dot={false}
             name="actual_progress"

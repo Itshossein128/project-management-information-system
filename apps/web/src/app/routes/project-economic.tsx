@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -11,7 +12,7 @@ import { MonteCarloPanel } from "@/components/economic/MonteCarloPanel";
 import { ProfitLayersPanel } from "@/components/economic/ProfitLayersPanel";
 import { SensitivityTornadoChart } from "@/components/economic/SensitivityTornadoChart";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
@@ -31,6 +32,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function EconomicContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
@@ -50,12 +53,14 @@ function EconomicContent() {
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
-        title="دسترسی ندارید"
-        description="برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است."
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.economic.accessDeniedDescription", {
+          defaultValue: "برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است.",
+        })}
       />
     );
   }
@@ -65,15 +70,20 @@ function EconomicContent() {
   if (!snapshot) {
     return (
       <EmptyState
-        title="داده‌ای برای تحلیل موجود نیست"
-        description="پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود."
+        title={t("pages.economic.noDataTitle", {
+          defaultValue: "داده‌ای برای تحلیل موجود نیست",
+        })}
+        description={t("pages.economic.noDataDescription", {
+          defaultValue:
+            "پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود.",
+        })}
       />
     );
   }
 
   return (
     <div className="space-y-6" data-testid="economic-page">
-      <PageHeader title="تحلیل اقتصادی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.economic.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
         <JalaliDatePicker
@@ -84,7 +94,7 @@ function EconomicContent() {
         />
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir="rtl">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
         <TabsList className="mb-4">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id}>
@@ -126,6 +136,7 @@ function EconomicContent() {
 }
 
 export default function ProjectEconomicPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

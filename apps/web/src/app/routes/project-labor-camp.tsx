@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -20,6 +21,8 @@ import { PATHS } from "@/app/routeVars";
 import { cn } from "@/app/lib/utils";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const toast = useToast();
   const qc = useQueryClient();
@@ -106,10 +109,10 @@ function Content() {
                       className={cn(
                         "px-3 py-2 font-medium",
                         r.empty_capacity < 0
-                          ? "text-red-600"
+                          ? "text-danger-600"
                           : r.empty_capacity === 0
-                            ? "text-amber-600"
-                            : "text-emerald-600",
+                            ? "text-warning-600"
+                            : "text-success-600",
                       )}
                     >
                       {r.empty_capacity}
@@ -224,12 +227,13 @@ function Content() {
 }
 
 export default function ProjectLaborCampPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "گزارش کمپ" }]} />
-        <PageHeader title='گزارش نفرات کمپ' />
+        <PageHeader title={t("pages.laborCamp.title")} />
         <Content />
       </ProjectProvider>
     </main>

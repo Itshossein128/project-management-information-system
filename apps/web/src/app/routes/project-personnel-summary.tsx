@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Download } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -11,11 +12,8 @@ import { downloadExcel } from "@/app/lib/excel/excel-write";
 import { fetchPersonnelSummary } from "@/app/lib/api/reports";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function todayIso() {
@@ -23,6 +21,8 @@ function todayIso() {
 }
 
 function monthStartIso() {
+  const { t } = useTranslation();
+
   const d = new Date();
   return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
 }
@@ -30,13 +30,15 @@ function monthStartIso() {
 function heatColor(value: number, max: number): string {
   if (value <= 0 || max <= 0) return "";
   const ratio = value / max;
-  if (ratio > 0.75) return "bg-emerald-200 dark:bg-emerald-900/50";
-  if (ratio > 0.5) return "bg-emerald-100 dark:bg-emerald-950/40";
-  if (ratio > 0.25) return "bg-emerald-50 dark:bg-emerald-950/20";
+  if (ratio > 0.75) return "bg-success-200 dark:bg-success-900/50";
+  if (ratio > 0.5) return "bg-success-100 dark:bg-success-950/40";
+  if (ratio > 0.25) return "bg-success-50 dark:bg-success-950/20";
   return "bg-muted/30";
 }
 
 function PersonnelSummaryContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -75,6 +77,7 @@ function PersonnelSummaryContent() {
   }, [data]);
 
   const exportXlsx = () => {
+
     if (!data) return;
     const headers = ["عنوان شغلی", ...data.dates, "میانگین"];
     const rows = data.job_titles.map((title) => {
@@ -100,20 +103,23 @@ function PersonnelSummaryContent() {
   };
 
   if (projectLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <p className='rounded-lg border border-border bg-card p-8 text-center text-muted-foreground'>
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده گزارش‌ها را ندارد.
-      </p>
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.reports.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
+      />
     );
   }
 
   return (
     <div className='space-y-6'>
       <div className='flex flex-wrap items-end justify-between gap-3'>
-        <PageHeader title='گزارش نفرات' subtitle={project.project_name} />
+        <PageHeader title={t("pages.personnelSummary.title")} subtitle={project.project_name} />
         <Button
           variant='secondary'
           size='sm'
@@ -238,6 +244,7 @@ function PersonnelSummaryContent() {
 }
 
 export default function ProjectPersonnelSummaryPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

@@ -34,10 +34,10 @@ function rowLabel(row: VarianceRow, groupBy: GroupBy): string {
 }
 
 function varianceColor(row: VarianceRow): string {
-  if (row.budget === 0 && row.actual > 0) return "bg-red-50 dark:bg-red-950/30";
+  if (row.budget === 0 && row.actual > 0) return "bg-danger-50 dark:bg-danger-950/30";
   if (row.consumption_pct == null) return "";
-  if (row.consumption_pct > 100) return "bg-red-50 dark:bg-red-950/30";
-  if (row.consumption_pct > 85) return "bg-amber-50 dark:bg-amber-950/30";
+  if (row.consumption_pct > 100) return "bg-danger-50 dark:bg-danger-950/30";
+  if (row.consumption_pct > 85) return "bg-warning-50 dark:bg-warning-950/30";
   return "";
 }
 
@@ -110,8 +110,8 @@ export function VarianceTab({ projectId }: { projectId: string }) {
                   ]}
                 />
                 <Legend formatter={(v) => (v === "budget" ? "بودجه" : "واقعی")} />
-                <Bar dataKey="budget" fill="hsl(var(--chart-1, 220 70% 50%))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="actual" fill="hsl(var(--chart-2, 160 60% 45%))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="budget" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="actual" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -135,7 +135,7 @@ export function VarianceTab({ projectId }: { projectId: string }) {
                     <td className="px-3 py-2">{formatFaAmount(r.actual)}</td>
                     <td
                       className={`px-3 py-2 font-medium ${
-                        r.variance < 0 ? "text-red-600" : "text-emerald-600"
+                        r.variance < 0 ? "text-danger-600" : "text-success-600"
                       }`}
                     >
                       {formatFaAmount(r.variance)}

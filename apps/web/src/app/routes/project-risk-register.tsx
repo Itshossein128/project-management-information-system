@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
@@ -32,6 +33,8 @@ import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 const SEVERITIES: RiskSeverity[] = ["low", "medium", "high", "critical"];
 
 function RiskRegisterContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canEdit = has("edit_reports");
@@ -101,7 +104,7 @@ function RiskRegisterContent() {
   }, [matrix]);
 
   if (isLoading || mLoading || eLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
   if (mError || eError) {
     return (
       <QueryErrorState
@@ -118,8 +121,8 @@ function RiskRegisterContent() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="ثبت ریسک و تأخیر"
-        subtitle="ماتریس احتمال × شدت و فهرست رویدادها"
+        title={t("pages.riskRegister.title")}
+        subtitle={t("pages.riskRegister.subtitle")}
       />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -197,7 +200,7 @@ function RiskRegisterContent() {
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState title="رویدادی ثبت نشده" description="اولین ریسک یا تأخیر را ثبت کنید." />
+        <EmptyState title={t("pages.riskRegister.empty")} description={t("pages.riskRegister.emptyDescription")} />
       ) : (
         <table className="w-full text-sm border rounded-lg">
           <thead className="bg-muted/50">
@@ -241,7 +244,7 @@ function RiskRegisterContent() {
       <Drawer
         isOpen={open}
         onClose={() => setOpen(false)}
-        title="رویداد جدید"
+        title={t("pages.riskRegister.newEvent")}
         footer={
           <Button onClick={() => save.mutate()} loading={save.isPending}>
             ذخیره
@@ -306,6 +309,7 @@ function RiskRegisterContent() {
 }
 
 export default function ProjectRiskRegisterPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className="page-main page-shell mx-auto px-4 py-8">

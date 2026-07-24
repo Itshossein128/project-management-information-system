@@ -1,4 +1,5 @@
 from rest_framework.permissions import BasePermission
+from django.utils.translation import gettext_lazy as _
 
 from master_data.models import ProjectMember
 
@@ -37,7 +38,7 @@ def _get_active_member(user, project_id):
 
 
 class IsProjectMember(BasePermission):
-    message = 'You are not an active member of this project.'
+    message = _('You are not an active member of this project.')
 
     def has_permission(self, request, view):
         project_id = _get_project_id(request, view)

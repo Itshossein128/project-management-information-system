@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -11,10 +12,13 @@ import {
   type ContractFormValues,
 } from "@/components/contracts/ContractForm";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
 function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { contractId } = useParams();
   const navigate = useNavigate();
@@ -33,19 +37,17 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
   });
 
   if (isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
   if (!canEdit) {
     return (
-      <p className="rounded-lg border p-8 text-center text-muted-foreground">
-        دسترسی به ویرایش قراردادها ندارید.
-      </p>
+      <AccessDenied description="برای ویرایش قراردادها به مجوز مربوطه نیاز است." />
     );
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={mode === "create" ? "قرارداد جدید" : "ویرایش قرارداد"}
+        title={mode === "create" ? t("pages.contractNew.title") : t("pages.contractEdit.title")}
         subtitle={project.project_name}
       />
       <ContractForm
@@ -65,6 +67,7 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
 }
 
 export default function ProjectContractFormPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>

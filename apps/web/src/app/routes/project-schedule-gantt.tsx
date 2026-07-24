@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -9,7 +10,7 @@ import { downloadGanttPdf, fetchGantt, type GanttTask } from "@/app/lib/api/gant
 import { PATHS } from "@/app/routeVars";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { Checkbox, Select } from "@/components/form";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
@@ -22,6 +23,8 @@ function daysBetween(start: string | null, end: string | null): number | null {
 }
 
 function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
+  const { t } = useTranslation();
+
   const rows = tasks.filter((t) => t.baseline_start || t.baseline_end);
   if (rows.length === 0) return null;
 
@@ -52,7 +55,7 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
                 <td className="px-3 py-2">{t.baseline_start ? formatDisplayDate(t.baseline_start) : "—"}</td>
                 <td className="px-3 py-2">{t.baseline_end ? formatDisplayDate(t.baseline_end) : "—"}</td>
                 <td
-                  className={`px-3 py-2 ${variance != null && variance > 0 ? "text-red-600" : variance != null && variance < 0 ? "text-emerald-600" : ""}`}
+                  className={`px-3 py-2 ${variance != null && variance > 0 ? "text-danger-600" : variance != null && variance < 0 ? "text-success-600" : ""}`}
                 >
                   {variance != null ? `${variance > 0 ? "+" : ""}${variance}` : "—"}
                 </td>
@@ -66,6 +69,8 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
 }
 
 function GanttContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_activities");
@@ -148,12 +153,14 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
-        title="دسترسی ندارید"
-        description="برای مشاهده گانت به مجوز فعالیت‌ها نیاز است."
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.gantt.accessDeniedDescription", {
+          defaultValue: "برای مشاهده گانت به مجوز مشاهده فعالیت‌ها نیاز است.",
+        })}
       />
     );
   }
@@ -173,7 +180,7 @@ function GanttContent() {
           { label: "گانت" },
         ]}
       />
-      <PageHeader title="گانت" subtitle={project.project_name} />
+      <PageHeader title={t("pages.gantt.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
         <Select
@@ -263,9 +270,9 @@ function GanttContent() {
       ) : null}
 
       <style>{`
-        .bar-critical .bar { fill: #dc2626 !important; }
-        .bar-done .bar { fill: #059669 !important; }
-        .bar-normal .bar { fill: #2563eb !important; }
+        .bar-critical .bar { fill: var(--palette-danger-600) !important; }
+        .bar-done .bar { fill: var(--palette-success-600) !important; }
+        .bar-normal .bar { fill: var(--palette-info-600) !important; }
         .gantt-container .grid-row { direction: rtl; }
       `}</style>
 
@@ -295,6 +302,7 @@ function GanttContent() {
 }
 
 export default function ProjectScheduleGanttPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

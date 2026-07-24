@@ -84,7 +84,7 @@ export function ManualProgressDrawer({
       title="ثبت پیشرفت دستی"
       footer={
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-amber-700 dark:text-amber-300">
+          <p className="text-xs text-warning-700 dark:text-warning-300">
             پیشرفت دستی وارد شده توسط گزارش روزانه بازنویسی نخواهد شد مگر اینکه
             گزارش روزانه تأیید شود
           </p>

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Lock } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 
 export interface EmptyStateProps {
@@ -34,4 +35,37 @@ export function EmptyState({
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
   );
+}
+
+/** Consistent "you don't have permission" state. */
+export function AccessDenied({
+  description = "برای مشاهده این بخش به مجوز مربوطه نیاز است.",
+  title = "دسترسی ندارید",
+  className,
+}: {
+  description?: string;
+  title?: string;
+  className?: string;
+}) {
+  return (
+    <EmptyState
+      icon={<Lock />}
+      title={title}
+      description={description}
+      className={className}
+    />
+  );
+}
+
+/** Consistent "not found" state (e.g. missing project/record). */
+export function NotFoundState({
+  title = "یافت نشد",
+  description,
+  className,
+}: {
+  title?: string;
+  description?: string;
+  className?: string;
+}) {
+  return <EmptyState title={title} description={description} className={className} />;
 }

@@ -15,7 +15,7 @@ import { PATHS } from "@/app/routeVars";
 import {
   Badge,
   projectStatusBadge,
-  projectStatusLabels,
+  projectStatusI18nKey,
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -120,7 +120,7 @@ function OverviewContent() {
           <>
             <Badge
               variant={projectStatusBadge[project.status] ?? "neutral"}
-              label={projectStatusLabels[project.status] ?? project.status}
+              label={t(projectStatusI18nKey[project.status] ?? project.status)}
             />
             <Link
               to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_MEMBERS}`}
