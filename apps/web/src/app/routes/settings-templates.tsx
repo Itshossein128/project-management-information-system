@@ -16,6 +16,7 @@ import { Input } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/overlay/modal";
 import { useToast } from "@/components/ui/toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const PROJECT_TYPES: ProjectType[] = [
   "residential",
@@ -111,16 +112,20 @@ export default function SettingsTemplatesPage() {
                 </p>
               </div>
               {!tpl.is_system ? (
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  title={t("templates.delete")}
-                  aria-label={t("templates.delete")}
-                  onClick={() => deleteMutation.mutate(tpl.template_id)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={t("templates.delete")}
+                      onClick={() => deleteMutation.mutate(tpl.template_id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("templates.delete")}</TooltipContent>
+                </Tooltip>
               ) : null}
             </li>
           ))}
