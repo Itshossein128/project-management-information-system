@@ -3,11 +3,8 @@ import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
 import { ActivitiesGrid } from "@/components/activities/activities-grid";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { NotFoundState } from "@/components/layout/empty-state";
 
 function ActivitiesPageContent() {
   const { t } = useTranslation();
@@ -15,7 +12,7 @@ function ActivitiesPageContent() {
   const { projectId, project, isLoading } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   return (
     <>

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "src/app/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+  "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset transition-colors",
   {
     variants: {
       variant: {
@@ -19,6 +19,19 @@ const badgeVariants = cva(
   },
 );
 
+const dotVariants = cva("size-1.5 rounded-full", {
+  variants: {
+    variant: {
+      success: "bg-success-500",
+      warning: "bg-warning-500",
+      danger: "bg-danger-500",
+      info: "bg-info-500",
+      neutral: "bg-muted-foreground/60",
+    },
+  },
+  defaultVariants: { variant: "neutral" },
+});
+
 export interface BadgeProps
   extends VariantProps<typeof badgeVariants>,
     HTMLAttributes<HTMLSpanElement> {
@@ -29,6 +42,7 @@ export interface BadgeProps
 export function Badge({ variant, label, className, ...props }: BadgeProps) {
   return (
     <span className={cn(badgeVariants({ variant }), className)} {...props}>
+      <span aria-hidden className={dotVariants({ variant })} />
       {label}
     </span>
   );

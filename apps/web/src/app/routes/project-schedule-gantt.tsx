@@ -10,7 +10,7 @@ import { downloadGanttPdf, fetchGantt, type GanttTask } from "@/app/lib/api/gant
 import { PATHS } from "@/app/routeVars";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { Checkbox, Select } from "@/components/form";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
@@ -153,12 +153,14 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description="برای مشاهده گانت به مجوز فعالیت‌ها نیاز است."
+        description={t("pages.gantt.accessDeniedDescription", {
+          defaultValue: "برای مشاهده گانت به مجوز مشاهده فعالیت‌ها نیاز است.",
+        })}
       />
     );
   }

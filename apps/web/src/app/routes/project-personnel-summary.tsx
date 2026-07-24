@@ -12,11 +12,8 @@ import { downloadExcel } from "@/app/lib/excel/excel-write";
 import { fetchPersonnelSummary } from "@/app/lib/api/reports";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function todayIso() {
@@ -106,13 +103,16 @@ function PersonnelSummaryContent() {
   };
 
   if (projectLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <p>پروژه یافت نشد</p>;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <p className='rounded-lg border border-border bg-card p-8 text-center text-muted-foreground'>
-        دسترسی به این بخش ندارید — نقش شما مجوز مشاهده گزارش‌ها را ندارد.
-      </p>
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.reports.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
+      />
     );
   }
 

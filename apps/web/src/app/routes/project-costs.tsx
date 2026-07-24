@@ -9,8 +9,8 @@ import { ActualCostsTab } from "@/components/costs/ActualCostsTab";
 import { BudgetGrid } from "@/components/costs/BudgetGrid";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
 import { VarianceTab } from "@/components/costs/VarianceTab";
-import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Button } from "@/components/ui/sprint-button";
@@ -46,12 +46,14 @@ function CostsContent() {
   });
 
   if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description="نقش شما مجوز مشاهده هزینه‌ها را ندارد."
+        description={t("pages.costs.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده هزینه‌ها را ندارد.",
+        })}
       />
     );
   }

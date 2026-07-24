@@ -11,12 +11,8 @@ import { PATHS } from "@/app/routeVars";
 import { IPCDeductionsTable } from "@/components/contracts/IPCDeductionsTable";
 import { IPCLineItemsTable } from "@/components/contracts/IPCLineItemsTable";
 import { IPCWorkflowBar } from "@/components/contracts/IPCWorkflowBar";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
-import { EmptyState } from "@/components/layout/empty-state";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
@@ -46,17 +42,19 @@ function IPCDetailContent() {
     void qc.invalidateQueries({ queryKey: ["ipc", projectId, ipcId] });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description='دسترسی به صورت‌وضعیت‌ها ندارید.'
+        description={t("pages.ipc.accessDeniedDescription", {
+          defaultValue: "برای مشاهده صورت‌وضعیت‌ها به مجوز مربوطه نیاز است.",
+        })}
       />
     );
   }
   if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
-  if (!ipc) return <EmptyState title='صدور موقت یافت نشد' />;
+  if (!ipc) return <NotFoundState title={t("pages.ipc.notFound", { defaultValue: "صدور موقت یافت نشد" })} />;
 
   const canEditLines = canEditIpc && ipc.status === "draft";
 

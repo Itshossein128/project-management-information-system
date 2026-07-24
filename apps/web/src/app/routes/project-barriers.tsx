@@ -3,19 +3,19 @@ import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
 import { BarriersGrid } from "@/components/barriers/BarriersGrid";
-import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { NotFoundState } from "@/components/layout/empty-state";
 
 function BarriersContent() {
   const { t } = useTranslation();
 
   const { projectId, project, isLoading } = useProject();
   if (isLoading) return <LoadingSkeleton rows={6} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   return (
     <>
       <PageHeader title={t("pages.barriers.title")} subtitle={t("pages.barriers.subtitle")} />

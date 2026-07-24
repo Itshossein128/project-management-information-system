@@ -13,8 +13,8 @@ import {
 } from "@/app/lib/api/progress";
 import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
-import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
@@ -125,16 +125,18 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (snapshotError) {
     return <QueryErrorState onRetry={() => void refetchSnapshot()} />;
   }
 
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description="نقش شما مجوز مشاهده داشبورد را ندارد."
+        description={t("pages.progress.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده داشبورد را ندارد.",
+        })}
       />
     );
   }

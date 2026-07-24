@@ -19,12 +19,8 @@ import { ChangeOrderPanel } from "@/components/contracts/ChangeOrderPanel";
 import { ContractBoQGrid } from "@/components/contracts/ContractBoQGrid";
 import { ContractSummaryCards } from "@/components/contracts/ContractSummaryCards";
 import { IPCWizard } from "@/components/contracts/IPCWizard";
-import {
-  Breadcrumb,
-  LoadingSkeleton,
-  PageHeader,
-} from "@/components/layout/page-header";
-import { EmptyState } from "@/components/layout/empty-state";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -72,17 +68,19 @@ function ContractDetailContent() {
   });
 
   if (projectLoading || isLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description='دسترسی به قراردادها ندارید.'
+        description={t("pages.contracts.accessDeniedDescription", {
+          defaultValue: "برای مشاهده قراردادها به مجوز مربوطه نیاز است.",
+        })}
       />
     );
   }
   if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
-  if (!contract) return <EmptyState title='قرارداد یافت نشد' />;
+  if (!contract) return <NotFoundState title={t("pages.contracts.notFound", { defaultValue: "قرارداد یافت نشد" })} />;
 
   const startEdit = () => {
     setValues(contractDetailToForm(contract));

@@ -15,7 +15,7 @@ import {
 import { fetchSuppliers } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
@@ -422,13 +422,15 @@ function MaterialBalanceContent() {
   const [tab, setTab] = useState<Tab>("balance");
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description="نقش شما مجوز مشاهده گزارش‌ها را ندارد."
+        description={t("pages.reports.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
       />
     );
   }

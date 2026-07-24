@@ -78,7 +78,7 @@ export default function Login() {
       <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
         <AppPreferencesBar />
       </div>
-      <Card className='w-full max-w-md border-border/60 shadow-lg'>
+      <Card className='animate-scale-in w-full max-w-md border-border/50 shadow-[var(--shadow-xl)] backdrop-blur-sm'>
         <CardHeader className='justify-items-center text-center'>
           <div
             aria-hidden='true'
@@ -86,7 +86,7 @@ export default function Login() {
           >
             BM
           </div>
-          <CardTitle className='text-xl'>{t("login.title")}</CardTitle>
+          <CardTitle className='text-2xl font-bold tracking-tight'>{t("login.title")}</CardTitle>
           <CardDescription>{t("login.description")}</CardDescription>
         </CardHeader>
         <form

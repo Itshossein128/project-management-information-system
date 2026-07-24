@@ -12,7 +12,7 @@ import { MonteCarloPanel } from "@/components/economic/MonteCarloPanel";
 import { ProfitLayersPanel } from "@/components/economic/ProfitLayersPanel";
 import { SensitivityTornadoChart } from "@/components/economic/SensitivityTornadoChart";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { EmptyState } from "@/components/layout/empty-state";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
@@ -53,12 +53,14 @@ function EconomicContent() {
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <EmptyState title={t("common.projectNotFound")} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
-      <EmptyState
+      <AccessDenied
         title={t("common.accessDenied")}
-        description="برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است."
+        description={t("pages.economic.accessDeniedDescription", {
+          defaultValue: "برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است.",
+        })}
       />
     );
   }
@@ -68,8 +70,13 @@ function EconomicContent() {
   if (!snapshot) {
     return (
       <EmptyState
-        title="داده‌ای برای تحلیل موجود نیست"
-        description="پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود."
+        title={t("pages.economic.noDataTitle", {
+          defaultValue: "داده‌ای برای تحلیل موجود نیست",
+        })}
+        description={t("pages.economic.noDataDescription", {
+          defaultValue:
+            "پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود.",
+        })}
       />
     );
   }

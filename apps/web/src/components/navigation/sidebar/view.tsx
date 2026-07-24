@@ -41,7 +41,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </div>
         <span
           id="text-sidebarBrandTitle"
-          className="text-[10px] text-sidebar-foreground/55"
+          className="text-gradient-brand text-[10px] font-semibold"
         >
           {t("common.brandName", { defaultValue: "Building" })}
         </span>
