@@ -59,7 +59,7 @@ def financial_summary(sub: Subcontractor) -> dict:
     }
 
 
-def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
+def _compute_risk_flag_with_data(sub: Subcontractor, latest_progresses_by_activity: dict, contract_items_by_contract: dict) -> tuple[bool, list[str]]:
     reasons = []
 
     valid_scores = [s for s in sub.scores.all() if not s.is_deleted]
@@ -79,26 +79,65 @@ def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
         reasons.append('وضعیت پیمانکار تعلیق است')
 
     if sub.contract_id:
-        from schedule.models import ActivityProgress
+        items = contract_items_by_contract.get(sub.contract_id)
+        if items is None:
+            # Fallback if not mapped (e.g., single sub call without prefetch)
+            items = [item for item in sub.contract.items.all() if not item.is_deleted]
 
-        activity_ids = sub.contract.items.filter(
-            is_deleted=False, activity_id__isnull=False
-        ).values_list('activity_id', flat=True)
+        activity_ids = [
+            item.activity_id for item in items
+            if not item.is_deleted and item.activity_id is not None
+        ]
 
         if activity_ids:
-            latest_progresses = (
-                ActivityProgress.objects.filter(activity_id__in=activity_ids)
-                .order_by('activity_id', '-report_date')
-                .distinct('activity_id')
-            )
-            for prog in latest_progresses:
-                planned = float(prog.planned_progress or 0)
-                actual = float(prog.actual_progress or 0)
-                if planned - actual > 0.15:
-                    reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
-                    break
+            for act_id in activity_ids:
+                prog = latest_progresses_by_activity.get(act_id)
+                if prog:
+                    planned = float(prog.planned_progress or 0)
+                    actual = float(prog.actual_progress or 0)
+                    if planned - actual > 0.15:
+                        reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
+                        break
 
     return bool(reasons), reasons
+
+
+def precalculate_risk_flags(subs: list[Subcontractor]) -> dict:
+    from schedule.models import ActivityProgress
+    from contracts.models import ContractItem
+
+    activity_ids = set()
+    contract_ids = {sub.contract_id for sub in subs if sub.contract_id}
+
+    contract_items_by_contract = {}
+    if contract_ids:
+        items = ContractItem.objects.filter(contract_id__in=contract_ids, is_deleted=False)
+        for item in items:
+            contract_items_by_contract.setdefault(item.contract_id, []).append(item)
+            if item.activity_id is not None:
+                activity_ids.add(item.activity_id)
+
+    latest_progresses_by_activity = {}
+    if activity_ids:
+        latest_progresses = (
+            ActivityProgress.objects.filter(activity_id__in=activity_ids)
+            .order_by('activity_id', '-report_date')
+            .distinct('activity_id')
+        )
+        for prog in latest_progresses:
+            latest_progresses_by_activity[prog.activity_id] = prog
+
+    risk_map = {}
+    for sub in subs:
+        risk_map[sub.id] = _compute_risk_flag_with_data(sub, latest_progresses_by_activity, contract_items_by_contract)
+
+    return risk_map
+
+
+def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
+    if hasattr(sub, '_risk_cache'):
+        return sub._risk_cache
+    return precalculate_risk_flags([sub]).get(sub.id, (False, []))
 
 
 def score_trend(sub: Subcontractor) -> str:

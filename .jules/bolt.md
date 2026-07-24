@@ -28,3 +28,7 @@
 ## 2024-05-24 - Prevent N+1 queries in temporal aggregations
 **Learning:** Functions that aggregate data over intervals (like daily S-curve points) can easily cause N+1 query problems if they call individual database-querying helpers inside the loop. In `get_s_curve_data`, calling `get_planned_progress_on_date` and `get_project_progress_on_date` per day resulted in 2N queries.
 **Action:** When calculating data over a chronological interval, fetch all required underlying records upfront in a single query ordered by date, then iterate over the interval points while advancing a pointer through the prefetched records to update state in memory.
+
+## 2024-05-19 - DRF SerializerMethodField Bulk Pre-calculation Cache
+**Learning:** Complex N+1 query problems in DRF APIs (caused by nested `SerializerMethodField` calculating logic over related objects or `ViewSet` filters executing functions in loops) cannot always be fixed simply using `prefetch_related`, especially when those functions contain separate ORM calls like `sub.contract.items.filter()`.
+**Action:** Always decouple the logic into a bulk calculation service. Bulk fetch the related IDs using `__in`, process logic in Python memory for the list of objects, and assign the results to a temporary attribute (e.g., `_risk_cache`) *before* serializing. Ensure the serializer function checks for and utilizes this cache attribute to prevent falling back to individual queries.
