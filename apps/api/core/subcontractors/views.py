@@ -140,10 +140,7 @@ class ScoreDetailView(APIView):
             subcontractor__project_id=project_pk,
             is_deleted=False,
         )
-        score.is_deleted = True
-        score.deleted_at = timezone.now()
-        score.updated_by = request.user
-        score.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        score.soft_delete(user=request.user)
         _invalidate_subcontractor_caches(project_pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

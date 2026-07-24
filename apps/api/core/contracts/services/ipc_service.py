@@ -408,10 +408,7 @@ def update_manual_deduction(ipc, deduction, amount, description, user):
 def delete_manual_deduction(ipc, deduction, user):
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
-    deduction.is_deleted = True
-    deduction.deleted_at = timezone.now()
-    deduction.updated_by = user
-    deduction.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+    deduction.soft_delete(user=user)
     apply_deductions(ipc.id)
     ipc.refresh_from_db()
     return ipc
