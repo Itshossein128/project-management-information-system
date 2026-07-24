@@ -1,6 +1,6 @@
 from datetime import date
 from decimal import Decimal
-from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import NotFound
 from django.db import transaction
 from contracts.models import Contract, ContractItem, ChangeOrder, ChangeOrderStatus
 
@@ -38,7 +38,10 @@ def bulk_upsert_contract_items(contract, rows, user):
         item_id = row.get('id')
         payload = _resolve_fk_fields({k: v for k, v in row.items() if k != 'id'})
         if item_id:
-            item = get_object_or_404(ContractItem, pk=item_id, contract=contract)
+            try:
+                item = ContractItem.objects.get(pk=item_id, contract=contract)
+            except ContractItem.DoesNotExist:
+                raise NotFound(f"ContractItem with id {item_id} not found.")
             for k, v in payload.items():
                 setattr(item, k, v)
             item.updated_by = user
