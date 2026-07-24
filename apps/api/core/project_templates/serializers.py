@@ -44,6 +44,10 @@ class ProjectTemplateListSerializer(serializers.ModelSerializer):
         ]
 
     def get_wbs_node_count(self, obj):
+        # ⚡ Bolt: Read annotated wbs_node_count if available to prevent N+1 queries.
+        count = getattr(obj, 'annotated_wbs_node_count', None)
+        if count is not None:
+            return count
         return obj.wbs_nodes.count()
 
 
