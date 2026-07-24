@@ -26,6 +26,9 @@ class AlertType(models.TextChoices):
     SUBCONTRACTOR_SCORE_LOW = 'subcontractor_score_low', 'Subcontractor score low'
     CORRESPONDENCE_RESPONSE_DUE = 'correspondence_response_due', 'Correspondence response due'
     SYNC_CONFLICT_UNRESOLVED = 'sync_conflict_unresolved', 'Sync conflict unresolved'
+    CRITICAL_PATH_DELAY = 'critical_path_delay', 'Critical path delay'
+    IPC_APPROVAL_DELAYED = 'ipc_approval_delayed', 'IPC approval delayed'
+    PROCUREMENT_OVERDUE = 'procurement_overdue', 'Procurement overdue'
 
 
 class AlertRule(UUIDModel):
@@ -85,3 +88,7 @@ class AlertLog(UUIDModel):
 
     class Meta:
         db_table = 'alert_log'
+        indexes = [
+            models.Index(fields=['project', 'acknowledged_at'], name='alertlog_proj_ack_idx'),
+            models.Index(fields=['project', '-fired_at'], name='alertlog_proj_fired_idx'),
+        ]

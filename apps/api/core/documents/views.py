@@ -1,59 +1,47 @@
 from datetime import date
 
 from django.db.models import Q
-from django.utils import timezone
-from rest_framework import status, viewsets
+from django.shortcuts import get_object_or_404
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
-from common.jalali import parse_jalali_or_gregorian
-from documents.models import Correspondence, CorrStatus, DocumentRevision, MeetingMinutes, ProjectDocument
+from common.viewsets import ProjectScopedViewSet
+from common.jalali import parse_date_optional, parse_jalali_or_gregorian
+from documents.models import AccessLevel, Correspondence, CorrStatus, MeetingMinutes, ProjectDocument
 from documents.serializers import (
     CorrespondenceSerializer,
-    DocumentRevisionSerializer,
     MeetingMinutesSerializer,
     ProjectDocumentDetailSerializer,
     ProjectDocumentSerializer,
 )
 from documents.services.correspondence_service import generate_corr_number
 from documents.services.document_service import create_project_document, create_document_revision
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.project import HasProjectPermission
 
 
-class DocScopedViewSet(viewsets.ModelViewSet):
+class DocScopedViewSet(ProjectScopedViewSet):
     view_permission = 'view_documents'
     edit_permission = 'upload_documents'
 
-    def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
 
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return self.view_permission
-        return self.edit_permission
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
-        return Response(status=status.HTTP_204_NO_CONTENT)
+def _visible_documents_qs(project_id, user):
+    """Enforce access_level: public/project for members; restricted to allowlist/uploader."""
+    qs = ProjectDocument.objects.filter(project_id=project_id, is_deleted=False)
+    return qs.filter(
+        Q(access_level__in=[AccessLevel.PUBLIC, AccessLevel.PROJECT])
+        | Q(access_level=AccessLevel.RESTRICTED, restricted_to=user)
+        | Q(uploaded_by=user)
+    ).distinct()
 
 
 class ProjectDocumentViewSet(DocScopedViewSet):
     parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
-        qs = ProjectDocument.objects.filter(
-            project_id=self.kwargs['project_pk'], is_deleted=False
-        )
+        qs = _visible_documents_qs(self.kwargs['project_pk'], self.request.user)
         params = self.request.query_params
         for key in ('doc_type', 'discipline', 'access_level', 'related_activity', 'related_wbs'):
             if params.get(key):
@@ -89,7 +77,10 @@ class DocumentRevisionUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request, project_pk=None, pk=None):
-        doc = ProjectDocument.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
+        doc = get_object_or_404(
+            _visible_documents_qs(project_pk, request.user),
+            pk=pk,
+        )
         create_document_revision(
             doc=doc,
             user=request.user,
@@ -131,12 +122,7 @@ class CorrespondenceViewSet(DocScopedViewSet):
         corr_number = self.request.data.get('corr_number') or generate_corr_number(
             self.kwargs['project_pk'], serializer.validated_data['corr_type']
         )
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            corr_number=corr_number,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer, corr_number=corr_number)
 
 
 class CorrespondenceRespondView(APIView):
@@ -144,8 +130,13 @@ class CorrespondenceRespondView(APIView):
     required_permission = 'edit_correspondence'
 
     def post(self, request, project_pk=None, pk=None):
-        corr = Correspondence.objects.get(pk=pk, project_id=project_pk, is_deleted=False)
-        corr.response_date = parse_jalali_or_gregorian(request.data.get('response_date')) or date.today()
+        corr = get_object_or_404(
+            Correspondence,
+            pk=pk,
+            project_id=project_pk,
+            is_deleted=False,
+        )
+        corr.response_date = parse_date_optional(request.data.get('response_date')) or date.today()
         corr.status = CorrStatus.RESPONDED
         if request.data.get('file_url'):
             corr.file_url = request.data['file_url']
@@ -168,12 +159,6 @@ class MeetingMinutesViewSet(DocScopedViewSet):
     def list(self, request, *args, **kwargs):
         return Response({'results': MeetingMinutesSerializer(self.get_queryset(), many=True).data})
 
-    def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.kwargs['project_pk'],
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)

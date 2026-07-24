@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -10,9 +11,12 @@ import { InflationDetailTable } from "@/components/economic/InflationDetailTable
 import { MonteCarloPanel } from "@/components/economic/MonteCarloPanel";
 import { ProfitLayersPanel } from "@/components/economic/ProfitLayersPanel";
 import { SensitivityTornadoChart } from "@/components/economic/SensitivityTornadoChart";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
-import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 
 type Tab = "overview" | "inflation" | "financing" | "forecast" | "simulation" | "sensitivity" | "history";
@@ -28,70 +32,115 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function EconomicContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
-  const canEdit = has("edit_costs");
+  const canEdit = has("edit_cashflow");
   const [tab, setTab] = useState<Tab>("overview");
   const [asOf, setAsOf] = useState("");
 
-  const { data: snapshot, isLoading: loadingSnap } = useQuery({
+  const {
+    data: snapshot,
+    isLoading: loadingSnap,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["economic-snapshot", projectId, asOf],
     queryFn: () => fetchEconomicSnapshot(projectId, asOf || undefined),
     enabled: canView,
   });
 
   if (isLoading || loadingSnap) return <LoadingSkeleton rows={12} />;
-  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
-  if (!canView) return <AccessDenied description="برای مشاهده تحلیل اقتصادی به مجوز مربوطه نیاز است." />;
-  if (!snapshot) return null;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
+  if (!canView) {
+    return (
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.economic.accessDeniedDescription", {
+          defaultValue: "برای مشاهده تحلیل اقتصادی به مجوز داشبورد نیاز است.",
+        })}
+      />
+    );
+  }
+  if (isError) {
+    return <QueryErrorState onRetry={() => void refetch()} />;
+  }
+  if (!snapshot) {
+    return (
+      <EmptyState
+        title={t("pages.economic.noDataTitle", {
+          defaultValue: "داده‌ای برای تحلیل موجود نیست",
+        })}
+        description={t("pages.economic.noDataDescription", {
+          defaultValue:
+            "پس از ثبت هزینه و پیشرفت، خلاصه اقتصادی اینجا نمایش داده می‌شود.",
+        })}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6" data-testid="economic-page">
-      <PageHeader title="تحلیل اقتصادی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.economic.title")} subtitle={project.project_name} />
 
       <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">
-          تاریخ مبنا (اختیاری)
-          <input
-            type="date"
-            className="mt-1 block rounded-md border px-2 py-1.5 text-sm"
-            value={asOf}
-            onChange={(e) => setAsOf(e.target.value)}
-          />
-        </label>
+        <JalaliDatePicker
+          name="economic_as_of"
+          label="تاریخ مبنا (اختیاری)"
+          value={asOf}
+          onChange={setAsOf}
+        />
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "overview" && <ProfitLayersPanel snapshot={snapshot} />}
-      {tab === "inflation" && (
-        <InflationDetailTable projectId={projectId} canEdit={canEdit} asOf={asOf || undefined} />
-      )}
-      {tab === "financing" && <FinancingCostPanel projectId={projectId} />}
-      {tab === "forecast" && <EvmForecastPanel projectId={projectId} asOf={asOf || undefined} />}
-      {tab === "simulation" && <MonteCarloPanel projectId={projectId} />}
-      {tab === "sensitivity" && <SensitivityTornadoChart projectId={projectId} />}
-      {tab === "history" && <EconomicHistoryChart projectId={projectId} />}
+        <ShadcnTabsContent value="overview" className="mt-0">
+          <ProfitLayersPanel snapshot={snapshot} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="inflation" className="mt-0">
+          <InflationDetailTable projectId={projectId} canEdit={canEdit} asOf={asOf || undefined} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="financing" className="mt-0">
+          <FinancingCostPanel projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="forecast" className="mt-0">
+          <EvmForecastPanel projectId={projectId} asOf={asOf || undefined} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="simulation" className="mt-0">
+          <MonteCarloPanel projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="sensitivity" className="mt-0">
+          <SensitivityTornadoChart projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="history" className="mt-0">
+          <EconomicHistoryChart projectId={projectId} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }
 
 export default function ProjectEconomicPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>
-      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+      <main className="page-main page-shell mx-auto  px-4 py-8">
         <Breadcrumb
           items={[
             { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },

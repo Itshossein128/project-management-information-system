@@ -26,3 +26,19 @@
 ## 2025-02-21 - [Added Loading States with aria-busy for Async Form Actions]
 **Learning:** [Users need immediate visual feedback when submitting forms that trigger async actions, otherwise they may assume the action failed or click the button multiple times. Adding a loading spinner next to the submit text provides clear confirmation. Similarly, using the `aria-busy` attribute correctly announces this temporary transition state to screen readers.]
 **Action:** [Always include a visual loading indicator (like `lucide-react`'s `Loader2` with an `animate-spin` class) inside submit buttons when they are in a busy state. Also, always add `aria-busy={busy}` for screen reader compatibility, and utilize flexbox layouts (`inline-flex items-center gap-2`) to keep text and spinner properly aligned.]
+## 2024-07-19 - Password Input UX Improvement
+Improved the `PasswordInput` component UX by:
+1. Adding right padding (`pr-10`) to the input field so that long passwords don't overflow and hide beneath the visibility toggle icon.
+2. Adding `onPointerDown={(e) => e.preventDefault()}` to the toggle button to prevent the input field from losing focus when the user toggles password visibility. This allows the user to seamlessly continue typing after clicking the toggle.
+## 2026-07-21 - Added aria-busy and aria-hidden to loading buttons
+**Learning:** For components that manage a loading state with an internal spinner, applying `aria-busy` to the root element accurately conveys the component's state to screen readers. In tandem, setting `aria-hidden="true"` on the internal spinner prevents redundant or confusing announcements.
+**Action:** Always add `aria-busy` on the container and `aria-hidden` on the visual loading indicators (like `Loader2`) inside interactive elements that have a loading state.
+
+## 2025-07-23 - Add explicit focus-visible states inside custom modals/panels
+**Learning:** Custom UI components like modals or popover panels that handle their own focus trapping can strip or hide native focus rings on child buttons. Keyboard users navigating these panels rely completely on visual focus indicators, and lacking `focus-visible` styling on lists (e.g., in `NotificationPanel.tsx`) severely degrades accessibility.
+**Action:** Always ensure interactive elements (like `button`s or `a` tags) inside custom focus-trapped components include explicit focus indicators using Tailwind's `focus-visible:` classes (e.g., `focus-visible:ring-2 focus-visible:ring-ring`).
+## 2024-07-23 - Adopted Shadcn Alert for Error States
+Replaced a custom built flex-box alert pattern in `QueryErrorState` with the standard Shadcn UI `Alert` component. This normalizes error visuals to rely on the design system's specific spacing and color definitions for semantic variants (`destructive`), making global style updates much easier. Used a semantic `<div>` wrapper with `w-full` inside the alert to maintain exact layout structures.
+## 2024-07-24 - Tooltips on Icon-Only Buttons
+**Learning:** Native `title` attributes on icon-only buttons create poor accessibility and inconsistent visual presentation. Using Radix UI Tooltip primitives through the Shadcn system (`Tooltip`, `TooltipTrigger`, `TooltipContent`) provides a vastly superior, accessible, and theme-consistent experience for screen readers and sighted users alike. Always ensure the trigger uses `asChild` when wrapping a component that forwards refs like a Button.
+**Action:** Always prefer design system Tooltip components over native `title` attributes for icon-only action buttons across all data grids and list items.

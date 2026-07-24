@@ -153,6 +153,9 @@ def _diff_conflict_fields(snapshot: dict, payload: dict) -> list[str]:
 
 
 def _conflict_result(local_id, report: DailyReport, payload: dict, reason: str) -> dict:
+    from field_reports.services.sync_conflict_service import log_sync_conflict
+
+    log_sync_conflict(report.project_id, local_id, report.id, reason)
     snapshot = _report_conflict_snapshot(report)
     return {
         'local_id': local_id,
@@ -216,6 +219,7 @@ def _replace_children(report, payload) -> list[dict]:
 
 def sync_batch(project_id, user, reports: list) -> dict:
     from field_reports.serializers import DailyReportHeaderSerializer
+    from field_reports.services.sync_conflict_service import resolve_sync_conflict
 
     results = []
     counts = {'created': 0, 'merged': 0, 'skipped': 0, 'conflicts': 0, 'errors': 0}
@@ -315,6 +319,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     'child_errors': child_errors,
                 })
                 counts['merged'] += 1
+                resolve_sync_conflict(project_id, local_id=local_id, daily_report_id=existing.id)
             else:
                 header = DailyReportHeaderSerializer(data=item)
                 if not header.is_valid():
@@ -348,6 +353,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     'child_errors': child_errors,
                 })
                 counts['created'] += 1
+                resolve_sync_conflict(project_id, local_id=local_id, daily_report_id=report.id)
 
     return {'results': results, 'summary': counts}
 

@@ -34,16 +34,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
       >
         <div
           id="text-sidebarBrandMark"
-          className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 via-brand-600 to-brand-700 font-bold text-white shadow-[var(--shadow-glow-sm)] ring-1 ring-white/15 transition-transform duration-200 hover:scale-105"
+          className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-safety-700 font-semibold text-white shadow-sm ring-1 ring-sidebar-ring/30"
           aria-hidden
         >
-          BM
+          {t("common.brandShort", { defaultValue: "BM" })}
         </div>
         <span
           id="text-sidebarBrandTitle"
           className="text-gradient-brand text-[10px] font-semibold"
         >
-          Building
+          {t("common.brandName", { defaultValue: "Building" })}
         </span>
       </div>
 

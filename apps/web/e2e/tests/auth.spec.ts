@@ -37,7 +37,7 @@ test.describe('Authentication Flow', () => {
     await page.click('button[type="submit"]');
 
     // 4. Verify error shown in alert role
-    const errorAlert = page.locator('[data-testid="login-error"]');
+    const errorAlert = page.locator('[data-testid="login-global-error"]');
     await expect(errorAlert).toBeVisible();
   });
 

@@ -11,13 +11,11 @@ from notifications.models import Notification, NotificationType
 @shared_task
 def monitor_correspondence_due():
     threshold = date.today() + timedelta(days=3)
-    today = date.today()
     overdue = Correspondence.objects.filter(
         is_deleted=False,
         status=CorrStatus.OPEN,
         response_due_date__isnull=False,
         response_due_date__lte=threshold,
-        response_due_date__gte=today - timedelta(days=1),
     )
     for corr in overdue:
         message = f'مکاتبه {corr.corr_number} تا {corr.response_due_date} نیاز به پاسخ دارد'

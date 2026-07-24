@@ -1,12 +1,24 @@
 """Real-time alert triggers via Django signals."""
 
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
 def _delay_project_check(project_id):
+    """Queue alert evaluation after the surrounding DB transaction commits.
+
+    When CELERY_TASK_ALWAYS_EAGER is true, running the task inside post_save
+    shares the open transaction; any engine error aborts allocate/create flows.
+    """
     from alerts.tasks import check_and_fire_for_project_task
-    check_and_fire_for_project_task.delay(str(project_id))
+
+    pid = str(project_id)
+
+    def _enqueue():
+        check_and_fire_for_project_task.delay(pid)
+
+    transaction.on_commit(_enqueue)
 
 
 @receiver(post_save, sender='field_reports.DailyReport')

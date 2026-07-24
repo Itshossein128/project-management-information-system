@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "bash ./runserver.sh",
     "migrate": "bash ./django.sh migrate",
-    "seed": "bash ./django.sh seed_rbac_dev"
+    "seed": "bash ./django.sh seed_rbac_dev",
+    "seed:e2e": "bash ./django.sh seed_e2e"
   }
 }

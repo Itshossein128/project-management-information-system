@@ -459,3 +459,29 @@ class EquipmentLog(AuditSoftDeleteModel):
     class Meta:
         db_table = 'equipment_logs'
         ordering = ['-log_date', 'equipment_name']
+
+
+class SyncConflictLog(UUIDModel):
+    """Unresolved offline sync conflict tracked for alert engine."""
+
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='sync_conflict_logs',
+    )
+    local_id = models.CharField(max_length=64, blank=True, default='')
+    daily_report = models.ForeignKey(
+        'field_reports.DailyReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sync_conflict_logs',
+    )
+    conflict_reason = models.TextField()
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'sync_conflict_logs'
+        indexes = [
+            models.Index(fields=['project', 'resolved_at'], name='synclog_project_resolved_idx'),
+        ]

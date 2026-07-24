@@ -144,9 +144,23 @@ def _collect_daily_report_equipment(project_id, date_from=None, date_to=None):
     return rows
 
 
+def _dedupe_key(row: dict) -> tuple:
+    """Prefer equipment_code when present; fall back to name for unregistered units."""
+    code = (row.get('equipment_code') or '').strip().lower()
+    name = (row.get('equipment_name') or '').strip().lower()
+    return (row['date'], code or name)
+
+
 def equipment_utilization_list(project_id, *, date_from=None, date_to=None, equipment_name=None):
-    rows = _collect_standalone_logs(project_id, date_from, date_to)
-    rows.extend(_collect_daily_report_equipment(project_id, date_from, date_to))
+    # Prefer dedicated equipment-log rows over daily-report entries for the same day+unit.
+    standalone = _collect_standalone_logs(project_id, date_from, date_to)
+    seen = {_dedupe_key(r) for r in standalone}
+    daily = [
+        r
+        for r in _collect_daily_report_equipment(project_id, date_from, date_to)
+        if _dedupe_key(r) not in seen
+    ]
+    rows = standalone + daily
     if equipment_name:
         rows = [r for r in rows if equipment_name.lower() in r['equipment_name'].lower()]
 

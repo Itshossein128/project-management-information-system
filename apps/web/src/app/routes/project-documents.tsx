@@ -1,32 +1,76 @@
-import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderOpen, Mail, Users } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
+import {
+  ProjectProvider,
+  usePermission,
+  useProject,
+} from "@/app/contexts/project-context";
 import {
   CORR_STATUS_LABELS,
   CORR_TYPE_LABELS,
+  createCorrespondence,
+  DOC_TYPE_LABELS,
   fetchCorrespondence,
   fetchDocuments,
   fetchMeetings,
   MEETING_TYPE_LABELS,
+  respondCorrespondence,
+  uploadDocument,
 } from "@/app/lib/api/documents";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 import { Field, Input } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { EmptyState } from "@/components/layout/empty-state";
-import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
+import {
+  Breadcrumb,
+  LoadingSkeleton,
+  PageHeader,
+} from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/toast";
 
 type Tab = "archive" | "correspondence" | "meetings";
 
 function DocumentsContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
-  const canView = has("view_documents");
+  const canViewDocs = has("view_documents");
+  const canUpload = has("upload_documents");
+  const canViewCorr = has("view_correspondence") || canViewDocs;
+  const canEditCorr = has("edit_correspondence");
+  const toast = useToast();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("archive");
   const [search, setSearch] = useState("");
+  const [overdueOnly, setOverdueOnly] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [corrOpen, setCorrOpen] = useState(false);
+  const [uploadForm, setUploadForm] = useState({
+    title: "",
+    doc_type: "other",
+    doc_code: "",
+    file: null as File | null,
+  });
+  const [corrForm, setCorrForm] = useState({
+    corr_type: "incoming",
+    subject: "",
+    from_party: "",
+    to_party: "",
+    corr_date: "",
+    response_due_date: "",
+  });
+
+  const canViewCurrent =
+    tab === "archive" ? canViewDocs : tab === "correspondence" ? canViewCorr : canViewDocs;
 
   const {
     data: docs,
@@ -36,7 +80,7 @@ function DocumentsContent() {
   } = useQuery({
     queryKey: ["documents", projectId, search],
     queryFn: () => fetchDocuments(projectId, search ? { search } : {}),
-    enabled: canView && tab === "archive",
+    enabled: canViewDocs && tab === "archive",
   });
 
   const {
@@ -45,9 +89,10 @@ function DocumentsContent() {
     isError: cError,
     refetch: refetchCorr,
   } = useQuery({
-    queryKey: ["correspondence", projectId],
-    queryFn: () => fetchCorrespondence(projectId),
-    enabled: canView && tab === "correspondence",
+    queryKey: ["correspondence", projectId, overdueOnly],
+    queryFn: () =>
+      fetchCorrespondence(projectId, overdueOnly ? { overdue: "true" } : {}),
+    enabled: canViewCorr && tab === "correspondence",
   });
 
   const {
@@ -58,17 +103,52 @@ function DocumentsContent() {
   } = useQuery({
     queryKey: ["meetings", projectId],
     queryFn: () => fetchMeetings(projectId),
-    enabled: canView && tab === "meetings",
+    enabled: canViewDocs && tab === "meetings",
+  });
+
+  const uploadMut = useMutation({
+    mutationFn: () => {
+      const fd = new FormData();
+      fd.append("title", uploadForm.title);
+      fd.append("doc_type", uploadForm.doc_type);
+      if (uploadForm.doc_code) fd.append("doc_code", uploadForm.doc_code);
+      if (uploadForm.file) fd.append("file", uploadForm.file);
+      return uploadDocument(projectId, fd);
+    },
+    onSuccess: () => {
+      toast.success("مدرک بارگذاری شد");
+      setUploadOpen(false);
+      void qc.invalidateQueries({ queryKey: ["documents", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const corrMut = useMutation({
+    mutationFn: () =>
+      createCorrespondence(projectId, {
+        corr_type: corrForm.corr_type,
+        subject: corrForm.subject,
+        from_party: corrForm.from_party,
+        to_party: corrForm.to_party,
+        corr_date: corrForm.corr_date,
+        response_due_date: corrForm.response_due_date || null,
+      }),
+    onSuccess: () => {
+      toast.success("مکاتبه ثبت شد");
+      setCorrOpen(false);
+      void qc.invalidateQueries({ queryKey: ["correspondence", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
   if (!project) {
-    return <EmptyState title="پروژه یافت نشد" />;
+    return <EmptyState title={t("common.projectNotFound")} />;
   }
-  if (!canView) {
+  if (!canViewCurrent) {
     return (
       <EmptyState
-        title="دسترسی ندارید"
+        title={t("common.accessDenied")}
         description="برای مشاهده مدارک و مکاتبات به مجوز مربوطه نیاز است."
       />
     );
@@ -93,24 +173,30 @@ function DocumentsContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="مدارک و مکاتبات" subtitle={project.project_name} />
+      <PageHeader title={t("pages.documents.title")} subtitle={project.project_name} />
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="بخش‌های مدارک">
-        {tabs.map(([id, label]) => (
-          <Button
-            key={id}
-            role="tab"
-            aria-selected={tab === id}
-            variant={tab === id ? "primary" : "secondary"}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <TabsList>
+            {tabs.map(([id, label]) => (
+              <TabsTrigger key={id} value={id}>
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {tab === "archive" && canUpload ? (
+            <Button className="ms-auto" size="sm" onClick={() => setUploadOpen(true)}>
+              بارگذاری مدرک
+            </Button>
+          ) : null}
+          {tab === "correspondence" && canEditCorr ? (
+            <Button className="ms-auto" size="sm" onClick={() => setCorrOpen(true)}>
+              مکاتبه جدید
+            </Button>
+          ) : null}
+        </div>
 
-      {tab === "archive" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="archive" className="space-y-4 mt-0">
           <Field name="doc_search" label="جستجو" htmlFor="doc-search">
             {() => (
               <Input
@@ -142,6 +228,9 @@ function DocumentsContent() {
                 <div key={d.id} className="rounded-lg border p-4">
                   <p className="text-xs text-muted-foreground">{d.doc_code || "—"}</p>
                   <p className="font-medium">{d.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {DOC_TYPE_LABELS[d.doc_type] ?? d.doc_type}
+                  </p>
                   {d.revision ? (
                     <span className="mt-1 inline-block rounded bg-muted px-2 py-0.5 text-xs">
                       {d.revision}
@@ -164,11 +253,9 @@ function DocumentsContent() {
               ))}
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "correspondence" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="correspondence" className="space-y-4 mt-0">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">باز</p>
@@ -176,8 +263,16 @@ function DocumentsContent() {
             </div>
             <div className="rounded-lg border p-4">
               <p className="text-sm text-muted-foreground">سررسید گذشته</p>
-              <p className="text-xl font-semibold text-red-600">{overdueCount}</p>
+              <p className="text-xl font-semibold text-danger-600">{overdueCount}</p>
             </div>
+            <label className="flex items-center gap-2 rounded-lg border p-4 text-sm">
+              <input
+                type="checkbox"
+                checked={overdueOnly}
+                onChange={(e) => setOverdueOnly(e.target.checked)}
+              />
+              فقط سررسید گذشته
+            </label>
           </div>
           {cloading ? (
             <LoadingSkeleton rows={6} />
@@ -194,13 +289,20 @@ function DocumentsContent() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    {["شماره", "نوع", "موضوع", "از", "به", "موعد پاسخ", "وضعیت"].map(
-                      (h) => (
-                        <th key={h} className="px-3 py-2 text-start">
-                          {h}
-                        </th>
-                      ),
-                    )}
+                    {[
+                      "شماره",
+                      "نوع",
+                      "موضوع",
+                      "از",
+                      "به",
+                      "موعد پاسخ",
+                      "وضعیت",
+                      "",
+                    ].map((h) => (
+                      <th key={h} className="px-3 py-2 text-start">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -219,17 +321,35 @@ function DocumentsContent() {
                       <td className="px-3 py-2">
                         {CORR_STATUS_LABELS[c.status] ?? c.status}
                       </td>
+                      <td className="px-3 py-2">
+                        {canEditCorr && c.status === "open" ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              respondCorrespondence(projectId, c.id)
+                                .then(() => {
+                                  toast.success("پاسخ ثبت شد");
+                                  void qc.invalidateQueries({
+                                    queryKey: ["correspondence", projectId],
+                                  });
+                                })
+                                .catch((e: Error) => toast.error(e.message))
+                            }
+                          >
+                            ثبت پاسخ
+                          </Button>
+                        ) : null}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "meetings" ? (
-        <div role="tabpanel">
+        <ShadcnTabsContent value="meetings" className="mt-0">
           {mloading ? (
             <LoadingSkeleton rows={6} />
           ) : mError ? (
@@ -267,17 +387,116 @@ function DocumentsContent() {
               </table>
             </div>
           )}
+        </ShadcnTabsContent>
+      </Tabs>
+
+      <Drawer
+        isOpen={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        title="بارگذاری مدرک"
+        footer={
+          <Button onClick={() => uploadMut.mutate()} loading={uploadMut.isPending}>
+            ذخیره
+          </Button>
+        }
+      >
+        <div className="space-y-3 p-4">
+          <input
+            className="w-full rounded border px-2 py-1"
+            placeholder="عنوان"
+            value={uploadForm.title}
+            onChange={(e) => setUploadForm((f) => ({ ...f, title: e.target.value }))}
+          />
+          <select
+            className="w-full rounded border px-2 py-1"
+            value={uploadForm.doc_type}
+            onChange={(e) => setUploadForm((f) => ({ ...f, doc_type: e.target.value }))}
+          >
+            {Object.entries(DOC_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <input
+            className="w-full rounded border px-2 py-1"
+            placeholder="کد مدرک"
+            value={uploadForm.doc_code}
+            onChange={(e) => setUploadForm((f) => ({ ...f, doc_code: e.target.value }))}
+          />
+          <input
+            type="file"
+            onChange={(e) =>
+              setUploadForm((f) => ({ ...f, file: e.target.files?.[0] ?? null }))
+            }
+          />
         </div>
-      ) : null}
+      </Drawer>
+
+      <Drawer
+        isOpen={corrOpen}
+        onClose={() => setCorrOpen(false)}
+        title="مکاتبه جدید"
+        footer={
+          <Button onClick={() => corrMut.mutate()} loading={corrMut.isPending}>
+            ذخیره
+          </Button>
+        }
+      >
+        <div className="space-y-3 p-4">
+          <select
+            className="w-full rounded border px-2 py-1"
+            value={corrForm.corr_type}
+            onChange={(e) => setCorrForm((f) => ({ ...f, corr_type: e.target.value }))}
+          >
+            {Object.entries(CORR_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <input
+            className="w-full rounded border px-2 py-1"
+            placeholder="موضوع"
+            value={corrForm.subject}
+            onChange={(e) => setCorrForm((f) => ({ ...f, subject: e.target.value }))}
+          />
+          <input
+            className="w-full rounded border px-2 py-1"
+            placeholder="از"
+            value={corrForm.from_party}
+            onChange={(e) => setCorrForm((f) => ({ ...f, from_party: e.target.value }))}
+          />
+          <input
+            className="w-full rounded border px-2 py-1"
+            placeholder="به"
+            value={corrForm.to_party}
+            onChange={(e) => setCorrForm((f) => ({ ...f, to_party: e.target.value }))}
+          />
+          <JalaliDatePicker
+            name="corr_date"
+            label="تاریخ"
+            value={corrForm.corr_date}
+            onChange={(v) => setCorrForm((f) => ({ ...f, corr_date: v }))}
+          />
+          <JalaliDatePicker
+            name="response_due_date"
+            label="موعد پاسخ"
+            value={corrForm.response_due_date}
+            onChange={(v) => setCorrForm((f) => ({ ...f, response_due_date: v }))}
+          />
+        </div>
+      </Drawer>
     </div>
   );
 }
 
 export default function ProjectDocumentsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
   return (
     <ProjectProvider projectId={projectId!}>
-      <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+      <main className="page-main page-shell mx-auto px-4 py-8">
         <Breadcrumb
           items={[
             { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },

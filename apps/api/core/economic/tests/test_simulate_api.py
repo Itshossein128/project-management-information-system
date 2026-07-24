@@ -37,7 +37,7 @@ def test_latest_simulation_includes_p10_aliases(auth_client, project):
 
 
 @pytest.mark.django_db
-@patch('economic.tasks.run_monte_carlo_task')
+@patch('economic.views.run_monte_carlo_task')
 def test_simulate_returns_task_id(mock_task, auth_client, project):
     mock_task.delay.return_value.id = 'test-task-123'
     url = f'{BASE.format(project_id=project.id)}simulate/'

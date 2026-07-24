@@ -3,6 +3,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/app/lib/utils";
 
 /**
  * Form middleware: password input with visibility toggle.
@@ -26,7 +27,7 @@ function PasswordInput({
         dir="ltr"
         type={visible ? "text" : "password"}
         autoComplete="current-password"
-        className={className}
+        className={cn("pr-10", className)}
         {...props}
       />
       <Button
@@ -40,6 +41,7 @@ function PasswordInput({
         title={visible ? t("common.hidePassword") : t("common.showPassword")}
         className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
         onClick={() => setVisible((v) => !v)}
+        onPointerDown={(e) => e.preventDefault()}
       >
         {visible ? <EyeOff size={16} /> : <Eye size={16} />}
       </Button>

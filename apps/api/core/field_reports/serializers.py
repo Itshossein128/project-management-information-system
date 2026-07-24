@@ -340,7 +340,7 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         return _user_name(obj.approved_by)
 
     def _active(self, manager):
-        return manager.filter(is_deleted=False)
+        return [item for item in manager.all() if not item.is_deleted]
 
     def get_activities(self, obj):
         return DailyReportActivitySerializer(self._active(obj.activities), many=True).data

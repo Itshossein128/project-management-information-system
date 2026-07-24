@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
@@ -11,11 +12,14 @@ import {
   type QueueItem,
 } from "@/app/lib/offlineDB";
 import { discardFailedQueueItem, retryFailedQueueItem } from "@/app/lib/syncService";
-import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { ConflictCard } from "@/components/daily_reports/ConflictCard";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/sprint-button";
 
 export default function SyncConflictsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
@@ -26,6 +30,7 @@ export default function SyncConflictsPage() {
   const navigatedRef = useRef(false);
 
   const listHref = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}`;
+  const overviewHref = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`;
 
   const load = useCallback(async () => {
     if (!isOfflineDBAvailable() || !projectId) {
@@ -71,14 +76,16 @@ export default function SyncConflictsPage() {
     >
       <Breadcrumb
         items={[
+          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          { label: "نمای کلی", href: overviewHref },
           { label: "گزارش‌های روزانه", href: listHref },
           { label: "تعارض‌های همگام‌سازی" },
         ]}
       />
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <PageHeader
-          title="تعارض‌های همگام‌سازی"
-          subtitle="مواردی که هنگام همگام‌سازی با نسخه سرور تعارض داشتند"
+          title={t("pages.syncConflicts.title")}
+          subtitle={t("pages.syncConflicts.subtitle")}
         />
         {visibleConflicts.length > 0 ? (
           <Badge
@@ -90,17 +97,14 @@ export default function SyncConflictsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری...</p>
+        <LoadingSkeleton rows={6} />
       ) : visibleConflicts.length === 0 ? (
-        <div
-          data-testid="conflict-empty-state"
-          className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-10 text-center"
-        >
-          <CheckCircle2 className="size-10 text-emerald-500" />
-          <p className="font-medium">هیچ تعارضی وجود ندارد</p>
-          <p className="text-sm text-muted-foreground">
-            تمام داده‌های آفلاین با موفقیت همگام‌سازی شده‌اند
-          </p>
+        <div data-testid="conflict-empty-state">
+          <EmptyState
+            icon={<CheckCircle2 className="text-success-500" />}
+            title={t("pages.syncConflicts.emptyTitle")}
+            description="تمام داده‌های آفلاین با موفقیت همگام‌سازی شده‌اند"
+          />
         </div>
       ) : (
         <div className="space-y-4">
@@ -130,29 +134,31 @@ export default function SyncConflictsPage() {
             >
               <div>
                 <p className="font-medium">{item.entity_type}</p>
-                <p className="text-muted-foreground">{item.error_message ?? "خطای نامشخص"}</p>
+                <p className="text-muted-foreground">
+                  {item.error_message ?? "خطای نامشخص"}
+                </p>
               </div>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 hover:bg-muted/40"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     void retryFailedQueueItem(item.queue_id).then(() => load());
                   }}
                 >
                   <RefreshCw className="size-4" />
                   تلاش مجدد
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-3 py-1.5 text-destructive hover:bg-destructive/10"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => {
                     void discardFailedQueueItem(item.queue_id).then(() => load());
                   }}
                 >
                   <Trash2 className="size-4" />
                   حذف
-                </button>
+                </Button>
               </div>
             </div>
           ))}

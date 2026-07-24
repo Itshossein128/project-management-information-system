@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useState } from "react";
@@ -8,14 +9,18 @@ import { WBSNodeRow } from "@/components/wbs/wbs-node";
 import { WbsEmptyState } from "@/components/wbs/wbs-empty-state";
 import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
 import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
+import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
 function ProjectWBSContent() {
+  const { t } = useTranslation();
+
   const { projectId } = useProjectParams();
   const { has } = usePermission(projectId);
   const canEditWBS = has("edit_wbs");
@@ -23,7 +28,7 @@ function ProjectWBSContent() {
   const [mspOpen, setMspOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
-  const { data: tree = [], isLoading } = useQuery({
+  const { data: tree = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["wbs", projectId],
     queryFn: () => fetchWBSTree(projectId),
   });
@@ -33,12 +38,16 @@ function ProjectWBSContent() {
       <Breadcrumb
         items={[
           { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          {
+            label: "نمای کلی",
+            href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
+          },
           { label: "WBS" },
         ]}
       />
       <PageHeader
-        title='ساختار شکست کار'
-        subtitle={!canEditWBS ? "نمایش فقط خواندنی" : undefined}
+        title={t("pages.wbs.title")}
+        subtitle={!canEditWBS ? t("common.readOnly") : undefined}
         actions={
           canEditWBS ? (
             <div className='flex flex-wrap gap-2'>
@@ -62,6 +71,8 @@ function ProjectWBSContent() {
 
       {isLoading ? (
         <LoadingSkeleton rows={10} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
       ) : tree.length === 0 ? (
         canEditWBS ? (
           <WbsEmptyState
@@ -71,7 +82,10 @@ function ProjectWBSContent() {
             }
           />
         ) : (
-          <p className='text-muted-foreground'>هنوز گره WBS ایجاد نشده است.</p>
+          <EmptyState
+            title={t("pages.wbs.empty")}
+            description="این صفحه فقط‌خواندنی است؛ برای ایجاد ساختار به مجوز ویرایش نیاز دارید."
+          />
         )
       ) : (
         <div className='overflow-x-auto rounded-lg border border-border'>
@@ -115,6 +129,7 @@ function useProjectParams() {
 }
 
 export default function ProjectWBSPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useProjectParams();
 
   return (

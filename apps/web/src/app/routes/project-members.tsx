@@ -16,7 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { DataTable } from "@/components/ui/data-table";
 import { Modal } from "@/components/overlay/modal";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
 
 export default function ProjectMembersPage() {
@@ -29,7 +31,7 @@ export default function ProjectMembersPage() {
   const [deactivateTarget, setDeactivateTarget] =
     useState<ProjectMember | null>(null);
 
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
   });
@@ -157,13 +159,32 @@ export default function ProjectMembersPage() {
         }
       />
 
-      <DataTable
-        columns={columns}
-        data={members}
-        loading={isLoading}
-        rowKey={(r) => r.user_id ?? r.invited_email ?? r.full_name}
-        emptyMessage={t("projectMembers.empty")}
-      />
+      {isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : !isLoading && members.length === 0 ? (
+        <EmptyState
+          title={t("projectMembers.empty")}
+          action={
+            <Button
+              variant="primary"
+              onClick={() => {
+                setEditMember(null);
+                setDrawerOpen(true);
+              }}
+            >
+              {t("projectMembers.add")}
+            </Button>
+          }
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={members}
+          loading={isLoading}
+          rowKey={(r) => r.user_id ?? r.invited_email ?? r.full_name}
+          emptyMessage={t("projectMembers.empty")}
+        />
+      )}
 
       <AddMemberDrawer
         projectId={projectId}

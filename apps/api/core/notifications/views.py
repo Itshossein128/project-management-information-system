@@ -38,6 +38,7 @@ class NotificationViewSet(
     permission_classes = [IsAuthenticated]
     pagination_class = DefaultPageNumberPagination
 
+    # Filters notifications for the authenticated user and handles optional query parameters like `is_read` and `project`
     def get_queryset(self):
         qs = Notification.objects.filter(user=self.request.user).select_related('project')
         is_read = self.request.query_params.get('is_read')
@@ -54,12 +55,14 @@ class NotificationViewSet(
         tags=['Notifications'],
     )
     @action(detail=False, methods=['get'], url_path='unread-count')
+    # Returns the number of unread notifications for the user
     def unread_count(self, request):
         count = Notification.objects.filter(user=request.user, is_read=False).count()
         return Response({'unread': count})
 
     @extend_schema(summary='Mark one notification as read', tags=['Notifications'])
     @action(detail=True, methods=['post'], url_path='mark-read')
+    # Marks a specific notification as read and updates the `read_at` timestamp
     def mark_read(self, request, pk=None):
         notification = self.get_object()
         if not notification.is_read:
@@ -74,6 +77,7 @@ class NotificationViewSet(
         tags=['Notifications'],
     )
     @action(detail=False, methods=['post'], url_path='mark-all-read')
+    # Batch updates all unread notifications for the current user
     def mark_all_read(self, request):
         updated = Notification.objects.filter(user=request.user, is_read=False).update(
             is_read=True,

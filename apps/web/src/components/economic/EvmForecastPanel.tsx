@@ -15,8 +15,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { chartColor } from "@/design/tokens";
 
 export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?: string }) {
+  const colors = {
+    workingCapital: chartColor("danger"),
+    nominalOutflow: chartColor("accent"),
+    realOutflow: chartColor("danger"),
+    inflow: chartColor("success"),
+    netReal: chartColor("info"),
+  };
   const { data: forecast, isLoading: fLoading } = useQuery({
     queryKey: ["economic-forecast", projectId, asOf],
     queryFn: () => fetchEconomicForecast(projectId, asOf),
@@ -80,7 +88,7 @@ export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?
                 <XAxis dataKey="month" />
                 <YAxis tickFormatter={(v) => formatFaAmount(v)} />
                 <Tooltip formatter={(v) => formatFaAmount(Number(v ?? 0))} />
-                <Line type="monotone" dataKey="working_capital" stroke="#dc2626" name="سرمایه در گردش" />
+                <Line type="monotone" dataKey="working_capital" stroke={colors.workingCapital} name="سرمایه در گردش" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -98,10 +106,10 @@ export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?
                 <YAxis tickFormatter={(v) => formatFaAmount(v)} />
                 <Tooltip formatter={(v) => formatFaAmount(Number(v ?? 0))} />
                 <Legend />
-                <Bar dataKey="nominal_outflow" fill="#f97316" name="خروجی اسمی" />
-                <Bar dataKey="real_outflow" fill="#dc2626" name="خروجی واقعی" />
-                <Bar dataKey="inflow" fill="#22c55e" name="ورودی" />
-                <Line type="monotone" dataKey="net_real" stroke="#3b82f6" name="خالص واقعی" />
+                <Bar dataKey="nominal_outflow" fill={colors.nominalOutflow} name="خروجی اسمی" />
+                <Bar dataKey="real_outflow" fill={colors.realOutflow} name="خروجی واقعی" />
+                <Bar dataKey="inflow" fill={colors.inflow} name="ورودی" />
+                <Line type="monotone" dataKey="net_real" stroke={colors.netReal} name="خالص واقعی" />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

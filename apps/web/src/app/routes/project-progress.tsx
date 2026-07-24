@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
@@ -14,6 +15,7 @@ import { isoToJalali } from "@/app/lib/jalali-utils";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
 import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer";
@@ -30,6 +32,8 @@ function todayIso() {
 }
 
 function ProgressPageContent() {
+  const { t } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_dashboard");
@@ -45,7 +49,12 @@ function ProgressPageContent() {
   const effectiveFrom = dateRange.from || project?.start_date || todayIso();
   const effectiveTo = dateRange.to || todayIso();
 
-  const { data: snapshot, isLoading: snapshotLoading } = useQuery({
+  const {
+    data: snapshot,
+    isLoading: snapshotLoading,
+    isError: snapshotError,
+    refetch: refetchSnapshot,
+  } = useQuery({
     queryKey: ["progress-snapshot", projectId],
     queryFn: () => fetchProgressSnapshot(projectId),
     enabled: canView && Boolean(projectId),
@@ -116,20 +125,28 @@ function ProgressPageContent() {
   );
 
   if (projectLoading || snapshotLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
+  if (snapshotError) {
+    return <QueryErrorState onRetry={() => void refetchSnapshot()} />;
+  }
 
   if (!canView) {
     return (
-      <AccessDenied description="نقش شما مجوز مشاهده داشبورد را ندارد." />
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.progress.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده داشبورد را ندارد.",
+        })}
+      />
     );
   }
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <PageHeader title="گزارش پیشرفت پروژه" subtitle={project.project_name} />
+        <PageHeader title={t("pages.progress.title")} subtitle={project.project_name} />
         {canEdit ? (
-          <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)}>
+          <Button variant="secondary" size="sm" onClick={() => setManualOpen(true)} data-testid="progress-manual-btn">
             ثبت پیشرفت دستی
           </Button>
         ) : null}
@@ -158,7 +175,10 @@ function ProgressPageContent() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7">
+      <div
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7"
+        data-testid="progress-kpi-grid"
+      >
         <KPICard
           title="پیشرفت فیزیکی"
           value={`${(snapshot?.actual_progress_pct ?? 0).toFixed(1)}٪`}
@@ -237,7 +257,10 @@ function ProgressPageContent() {
         />
       </div>
 
-      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+      <section
+        className="space-y-3 rounded-xl border border-border bg-card p-4"
+        data-testid="progress-s-curve"
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">منحنی S</h2>
           <div className="flex flex-wrap items-center gap-2">
@@ -256,13 +279,14 @@ function ProgressPageContent() {
               variant="ghost"
               onClick={() => setForceRefresh(true)}
               title="بازخوانی بدون کش"
+              aria-label="بازخوانی بدون کش"
             >
               <RefreshCw className="size-4" />
             </Button>
           </div>
         </div>
         {sCurve?.warning ? (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:bg-warning-950/40 dark:text-warning-100">
             {sCurve.warning}
           </p>
         ) : null}
@@ -279,6 +303,7 @@ function ProgressPageContent() {
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
+              data-testid="progress-behind-checkbox"
               checked={behindOnly}
               onChange={(e) => setBehindOnly(e.target.checked)}
             />
@@ -310,10 +335,11 @@ function ProgressPageContent() {
 }
 
 export default function ProjectProgressPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (
-    <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
+    <main className="page-main page-shell mx-auto  px-4 py-8">
       <ProjectProvider projectId={projectId}>
         <Breadcrumb
           items={[

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -25,6 +26,8 @@ const DISCIPLINES = [
 ] as const;
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const toast = useToast();
   const qc = useQueryClient();
@@ -166,12 +169,13 @@ function Content() {
 }
 
 export default function ProjectSubReportsPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "گزارش‌های رشته‌ای" }]} />
-        <PageHeader title='گزارش روزانه ابنیه / برق / مکانیک' />
+        <PageHeader title={t("pages.subReports.title")} />
         <Content />
       </ProjectProvider>
     </main>

@@ -18,6 +18,9 @@ def submit_overtime(overtime_request, user):
 
 
 def supervisor_approve_overtime(overtime_request, user, approved: bool, notes: str = ''):
+    if overtime_request.status != OvertimeStatus.SUBMITTED:
+        raise ValidationError({'message': 'فقط درخواست‌های ارسال‌شده قابل تأیید سرپرست هستند.'})
+
     overtime_request.supervisor_approved = approved
     overtime_request.supervisor_notes = notes
     overtime_request.status = OvertimeStatus.SUPERVISOR_APPROVED if approved else OvertimeStatus.REJECTED
@@ -27,6 +30,9 @@ def supervisor_approve_overtime(overtime_request, user, approved: bool, notes: s
 
 
 def manager_approve_overtime(overtime_request, user, approved: bool, approved_hours: float = None):
+    if overtime_request.status != OvertimeStatus.SUPERVISOR_APPROVED:
+        raise ValidationError({'message': 'فقط درخواست‌های تأییدشده توسط سرپرست قابل تأیید مدیر هستند.'})
+
     if approved:
         approved_hours_val = approved_hours if approved_hours is not None else overtime_request.requested_hours
         if float(approved_hours_val) > float(overtime_request.requested_hours):
@@ -58,6 +64,9 @@ def submit_leave(leave_request, user):
 
 
 def supervisor_approve_leave(leave_request, user, approved: bool):
+    if leave_request.status != LeaveStatus.SUBMITTED:
+        raise ValidationError({'message': 'فقط درخواست‌های ارسال‌شده قابل تأیید سرپرست هستند.'})
+
     leave_request.supervisor_approved = approved
     leave_request.status = LeaveStatus.SUPERVISOR_APPROVED if approved else LeaveStatus.REJECTED
     leave_request.updated_by = user
@@ -66,6 +75,9 @@ def supervisor_approve_leave(leave_request, user, approved: bool):
 
 
 def manager_approve_leave(leave_request, user, approved: bool):
+    if leave_request.status != LeaveStatus.SUPERVISOR_APPROVED:
+        raise ValidationError({'message': 'فقط درخواست‌های تأییدشده توسط سرپرست قابل تأیید مدیر هستند.'})
+
     leave_request.manager_approved = approved
     leave_request.status = LeaveStatus.MANAGER_APPROVED if approved else LeaveStatus.REJECTED
     leave_request.updated_by = user

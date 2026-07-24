@@ -16,6 +16,9 @@ import {
   formatFaAmount,
   type VarianceRow,
 } from "@/app/lib/api/costs";
+import { EmptyState } from "@/components/layout/empty-state";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
 type GroupBy = "wbs" | "category" | "activity";
@@ -31,17 +34,17 @@ function rowLabel(row: VarianceRow, groupBy: GroupBy): string {
 }
 
 function varianceColor(row: VarianceRow): string {
-  if (row.budget === 0 && row.actual > 0) return "bg-red-50 dark:bg-red-950/30";
+  if (row.budget === 0 && row.actual > 0) return "bg-danger-50 dark:bg-danger-950/30";
   if (row.consumption_pct == null) return "";
-  if (row.consumption_pct > 100) return "bg-red-50 dark:bg-red-950/30";
-  if (row.consumption_pct > 85) return "bg-amber-50 dark:bg-amber-950/30";
+  if (row.consumption_pct > 100) return "bg-danger-50 dark:bg-danger-950/30";
+  if (row.consumption_pct > 85) return "bg-warning-50 dark:bg-warning-950/30";
   return "";
 }
 
 export function VarianceTab({ projectId }: { projectId: string }) {
   const [groupBy, setGroupBy] = useState<GroupBy>("wbs");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["cost-variance", projectId, groupBy],
     queryFn: () => fetchVariance(projectId, { group_by: groupBy }),
   });
@@ -65,13 +68,14 @@ export function VarianceTab({ projectId }: { projectId: string }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="variance-tab">
       <div className="flex flex-wrap gap-2">
         {(["wbs", "category", "activity"] as GroupBy[]).map((g) => (
           <Button
             key={g}
             size="sm"
             variant={groupBy === g ? "primary" : "secondary"}
+            data-testid={`variance-group-${g}`}
             onClick={() => setGroupBy(g)}
           >
             {groupLabels[g]}
@@ -83,7 +87,14 @@ export function VarianceTab({ projectId }: { projectId: string }) {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        <LoadingSkeleton rows={8} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : rows.length === 0 ? (
+        <EmptyState
+          title="داده‌ای یافت نشد"
+          description="پس از ثبت بودجه و هزینه‌های واقعی، واریانس اینجا نمایش داده می‌شود."
+        />
       ) : (
         <>
           <div className="h-72 w-full">
@@ -99,8 +110,8 @@ export function VarianceTab({ projectId }: { projectId: string }) {
                   ]}
                 />
                 <Legend formatter={(v) => (v === "budget" ? "بودجه" : "واقعی")} />
-                <Bar dataKey="budget" fill="hsl(var(--chart-1, 220 70% 50%))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="actual" fill="hsl(var(--chart-2, 160 60% 45%))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="budget" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="actual" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -117,31 +128,23 @@ export function VarianceTab({ projectId }: { projectId: string }) {
                 </tr>
               </thead>
               <tbody>
-                {rows.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
-                      داده‌ای یافت نشد
+                {rows.map((r, i) => (
+                  <tr key={i} className={`border-t border-border ${varianceColor(r)}`}>
+                    <td className="px-3 py-2">{rowLabel(r, groupBy)}</td>
+                    <td className="px-3 py-2">{formatFaAmount(r.budget)}</td>
+                    <td className="px-3 py-2">{formatFaAmount(r.actual)}</td>
+                    <td
+                      className={`px-3 py-2 font-medium ${
+                        r.variance < 0 ? "text-danger-600" : "text-success-600"
+                      }`}
+                    >
+                      {formatFaAmount(r.variance)}
+                    </td>
+                    <td className="px-3 py-2">
+                      {r.consumption_pct != null ? `${r.consumption_pct.toFixed(1)}٪` : "—"}
                     </td>
                   </tr>
-                ) : (
-                  rows.map((r, i) => (
-                    <tr key={i} className={`border-t border-border ${varianceColor(r)}`}>
-                      <td className="px-3 py-2">{rowLabel(r, groupBy)}</td>
-                      <td className="px-3 py-2">{formatFaAmount(r.budget)}</td>
-                      <td className="px-3 py-2">{formatFaAmount(r.actual)}</td>
-                      <td
-                        className={`px-3 py-2 font-medium ${
-                          r.variance < 0 ? "text-red-600" : "text-emerald-600"
-                        }`}
-                      >
-                        {formatFaAmount(r.variance)}
-                      </td>
-                      <td className="px-3 py-2">
-                        {r.consumption_pct != null ? `${r.consumption_pct.toFixed(1)}٪` : "—"}
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

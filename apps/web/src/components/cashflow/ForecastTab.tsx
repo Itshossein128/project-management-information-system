@@ -9,14 +9,18 @@ import {
   type ForecastRow,
 } from "@/app/lib/api/cashflow";
 import { CashFlowChart, monthLabel } from "@/components/cashflow/CashFlowChart";
+import { LoadingSkeleton } from "@/components/layout/page-header";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
 
 function ForecastRowEditor({
   projectId,
   row,
+  canEdit,
 }: {
   projectId: string;
   row: ForecastRow;
+  canEdit: boolean;
 }) {
   const toast = useToast();
   const qc = useQueryClient();
@@ -49,22 +53,30 @@ function ForecastRowEditor({
     <tr className="border-t">
       <td className="px-3 py-2 font-medium">{monthLabel(row.month)}</td>
       <td className="px-3 py-2">
-        <input
-          type="number"
-          className="w-28 rounded border px-2 py-1 text-sm"
-          value={inflow}
-          onChange={(e) => setInflow(e.target.value)}
-          onBlur={() => save.mutate()}
-        />
+        {canEdit ? (
+          <input
+            type="number"
+            className="w-28 rounded border px-2 py-1 text-sm"
+            value={inflow}
+            onChange={(e) => setInflow(e.target.value)}
+            onBlur={() => save.mutate()}
+          />
+        ) : (
+          formatFaAmount(row.expected_inflow)
+        )}
       </td>
       <td className="px-3 py-2">
-        <input
-          type="number"
-          className="w-28 rounded border px-2 py-1 text-sm"
-          value={outflow}
-          onChange={(e) => setOutflow(e.target.value)}
-          onBlur={() => save.mutate()}
-        />
+        {canEdit ? (
+          <input
+            type="number"
+            className="w-28 rounded border px-2 py-1 text-sm"
+            value={outflow}
+            onChange={(e) => setOutflow(e.target.value)}
+            onBlur={() => save.mutate()}
+          />
+        ) : (
+          formatFaAmount(row.expected_outflow)
+        )}
       </td>
       <td className="px-3 py-2">{formatFaAmount(forecastNet)}</td>
       <td className="px-3 py-2">
@@ -77,31 +89,48 @@ function ForecastRowEditor({
         {actualNet != null ? formatFaAmount(actualNet) : "—"}
       </td>
       <td
-        className={`px-3 py-2 ${deviation != null && deviation >= 0 ? "text-emerald-600" : "text-red-600"}`}
+        className={`px-3 py-2 ${deviation != null && deviation >= 0 ? "text-success-600" : "text-danger-600"}`}
       >
         {deviation != null ? formatFaAmount(deviation) : "—"}
       </td>
       <td className="px-3 py-2">
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={confidence}
-          onChange={(e) => setConfidence(Number(e.target.value))}
-          onMouseUp={() => save.mutate()}
-          onTouchEnd={() => save.mutate()}
-          className="w-24"
-        />
-        <span className="ms-2 text-xs">{confidence}٪</span>
+        {canEdit ? (
+          <>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={confidence}
+              onChange={(e) => setConfidence(Number(e.target.value))}
+              onMouseUp={() => save.mutate()}
+              onTouchEnd={() => save.mutate()}
+              className="w-24"
+            />
+            <span className="ms-2 text-xs">{confidence}٪</span>
+          </>
+        ) : (
+          <span>{row.confidence_pct ?? 80}٪</span>
+        )}
       </td>
     </tr>
   );
 }
 
-export function ForecastTab({ projectId }: { projectId: string }) {
+export function ForecastTab({
+  projectId,
+  canEdit,
+}: {
+  projectId: string;
+  canEdit: boolean;
+}) {
   const todayIso = new Date().toISOString().slice(0, 10);
 
-  const { data: forecastData, isLoading: forecastLoading } = useQuery({
+  const {
+    data: forecastData,
+    isLoading: forecastLoading,
+    isError: forecastError,
+    refetch: refetchForecast,
+  } = useQuery({
     queryKey: ["cash-forecast", projectId],
     queryFn: () => fetchForecast(projectId),
   });
@@ -112,6 +141,7 @@ export function ForecastTab({ projectId }: { projectId: string }) {
   });
 
   const rows = useMemo(() => {
+    if (forecastError) return [];
     const existing = forecastData?.results ?? [];
     if (existing.length >= 12) return existing.slice(0, 12);
     const result = [...existing];
@@ -130,14 +160,16 @@ export function ForecastTab({ projectId }: { projectId: string }) {
       });
     }
     return result;
-  }, [forecastData?.results]);
+  }, [forecastData?.results, forecastError]);
 
   const chartData = monthlyData?.results ?? [];
 
   return (
     <div className="space-y-6">
       {forecastLoading ? (
-        <p className="text-muted-foreground">در حال بارگذاری...</p>
+        <LoadingSkeleton rows={8} />
+      ) : forecastError ? (
+        <QueryErrorState onRetry={() => void refetchForecast()} />
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full min-w-[1000px] text-sm">
@@ -156,7 +188,12 @@ export function ForecastTab({ projectId }: { projectId: string }) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <ForecastRowEditor key={row.month} projectId={projectId} row={row} />
+                <ForecastRowEditor
+                  key={row.month}
+                  projectId={projectId}
+                  row={row}
+                  canEdit={canEdit}
+                />
               ))}
             </tbody>
           </table>

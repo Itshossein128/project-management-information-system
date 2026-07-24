@@ -74,7 +74,7 @@ export function ApprovalStatusBar({
                 disabled={busy}
                 onClick={onApprove}
                 data-testid="report-approve-btn"
-                className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-4 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-md bg-success-600 px-4 py-1.5 text-sm text-white hover:bg-success-700 disabled:opacity-50"
               >
                 <CheckCircle2 className="size-4" />
                 تأیید
@@ -84,7 +84,7 @@ export function ApprovalStatusBar({
                 disabled={busy}
                 onClick={() => setRejecting((v) => !v)}
                 data-testid="report-reject-btn"
-                className="inline-flex items-center gap-1 rounded-md bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-md bg-danger-600 px-4 py-1.5 text-sm text-white hover:bg-danger-700 disabled:opacity-50"
               >
                 <XCircle className="size-4" />
                 رد
@@ -95,7 +95,7 @@ export function ApprovalStatusBar({
       </div>
 
       {rejecting ? (
-        <div className="space-y-2 rounded-lg border border-red-300 bg-red-50 p-3 dark:bg-red-950/30">
+        <div className="space-y-2 rounded-lg border border-danger-300 bg-danger-50 p-3 dark:bg-danger-950/30">
           <textarea
             className="min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
             placeholder="دلیل رد را وارد کنید (حداقل ۱۰ کاراکتر)"
@@ -116,7 +116,7 @@ export function ApprovalStatusBar({
               disabled={reason.trim().length < 10 || busy}
               onClick={() => onReject(reason.trim())}
               data-testid="report-reject-confirm-btn"
-              className="rounded-md bg-red-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+              className="rounded-md bg-danger-600 px-3 py-1 text-sm text-white disabled:opacity-50"
             >
               ثبت رد
             </button>
@@ -125,7 +125,7 @@ export function ApprovalStatusBar({
       ) : null}
 
       {status === "rejected" && report.rejection_reason ? (
-        <p className="rounded-md bg-red-50 p-2 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-200">
+        <p className="rounded-md bg-danger-50 p-2 text-sm text-danger-800 dark:bg-danger-950/30 dark:text-danger-200">
           دلیل رد: {report.rejection_reason}
         </p>
       ) : null}

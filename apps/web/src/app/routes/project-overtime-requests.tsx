@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -14,6 +15,8 @@ import {
   LoadingSkeleton,
   PageHeader,
 } from "@/components/layout/page-header";
+import { EmptyState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { Drawer } from "@/components/ui/drawer";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
@@ -21,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
 
 function Content() {
+  const { t } = useTranslation();
+
   const { projectId } = useProject();
   const { has } = usePermission(projectId);
   const canApprove = has("approve_reports");
@@ -35,7 +40,7 @@ function Content() {
     reason: "درخواست اضافه‌کاری پروژه",
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["overtime", projectId, tab],
     queryFn: () => fetchOvertimeRequests(projectId, tab === "mine"),
   });
@@ -61,6 +66,7 @@ function Content() {
   }[];
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
+  if (isError) return <QueryErrorState onRetry={() => void refetch()} />;
 
   return (
     <div className='space-y-4'>
@@ -83,6 +89,17 @@ function Content() {
           درخواست جدید
         </Button>
       </div>
+      {rows.length === 0 ? (
+        <EmptyState
+          title={t("pages.procurement.empty")}
+          description="اولین درخواست اضافه‌کاری را ثبت کنید."
+          action={
+            <Button size="sm" onClick={() => setOpen(true)}>
+              درخواست جدید
+            </Button>
+          }
+        />
+      ) : (
       <table className='w-full text-sm border rounded-lg'>
         <thead className='bg-muted/50'>
           <tr>
@@ -164,26 +181,43 @@ function Content() {
                   </>
                 ) : null}
                 {canApprove && r.status === "supervisor_approved" ? (
-                  <Button
-                    size='sm'
-                    variant='ghost'
-                    onClick={() =>
-                      managerApproveOvertime(projectId, r.id, true)
-                        .then(() => {
-                          toast.success("تأیید مدیر");
-                          void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
-                        })
-                        .catch((e: Error) => toast.error(e.message))
-                    }
-                  >
-                    تأیید مدیر
-                  </Button>
+                  <>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        managerApproveOvertime(projectId, r.id, true)
+                          .then(() => {
+                            toast.success("تأیید مدیر");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      تأیید مدیر
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() =>
+                        managerApproveOvertime(projectId, r.id, false)
+                          .then(() => {
+                            toast.success("رد شد");
+                            void qc.invalidateQueries({ queryKey: ["overtime", projectId] });
+                          })
+                          .catch((e: Error) => toast.error(e.message))
+                      }
+                    >
+                      رد
+                    </Button>
+                  </>
                 ) : null}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      )}
       <Drawer
         isOpen={open}
         onClose={() => setOpen(false)}
@@ -233,12 +267,13 @@ function Content() {
 }
 
 export default function ProjectOvertimePage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <main className='page-main page-shell mx-auto  px-4 py-8'>
       <ProjectProvider projectId={projectId}>
         <Breadcrumb items={[{ label: "اضافه‌کاری" }]} />
-        <PageHeader title='درخواست‌های اضافه‌کاری' />
+        <PageHeader title={t("pages.overtimeRequests.title")} />
         <Content />
       </ProjectProvider>
     </main>

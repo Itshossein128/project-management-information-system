@@ -85,6 +85,8 @@ The global `inventory.Item` API at `/api/items/` is **deprecated**. New work mus
 
 Known gaps (non-blocking): labor model is Shiraz job-title grid (not blueprint type/discipline); photo upload needs MinIO; multi-discipline = entity tabs (not civil/electrical sub-reports).
 
+See module docs: `apps/api/core/field_reports/ENDPOINTS.md`.
+
 ## Sprint 5 completion checklist (Offline Sync)
 
 | Task | Status |
@@ -102,6 +104,8 @@ Known gaps (non-blocking): labor model is Shiraz job-title grid (not blueprint t
 | **C-08** Weighted progress + S-curve endpoint | Done — `schedule/progress_views.py` |
 | **K-01** EVM KPIs (partial) | Done — SPI, CPI, EAC, VAC via `/progress/kpis/` |
 | **UI-05** Progress dashboard | Done — `/projects/{id}/progress` |
+
+See module docs: `apps/api/core/schedule/ENDPOINTS.md` (progress, activities, imports, Gantt).
 
 ## API paths
 
@@ -122,6 +126,8 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 | **UI-06** Cost control screens | Done — `/projects/{id}/costs` (budget, actual, variance, pools) |
 | **Tests** | Done — `cost_control/tests/` in CI |
 
+See module docs: `apps/api/core/cost_control/ENDPOINTS.md`.
+
 ## Sprint 8 completion checklist (Contracts & IPC)
 
 | Task | Status |
@@ -136,14 +142,18 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 
 ### Sprint 8 API paths
 
-- Contracts: `GET/POST /api/v1/projects/{id}/contracts/`
-- Contract detail: `GET/PATCH /api/v1/projects/{id}/contracts/{id}/`
-- BoQ bulk: `POST /api/v1/projects/{id}/contracts/{id}/items/`
-- Change orders: `POST .../change-orders/`, `POST .../change-orders/{id}/approve/`
-- IPCs: `GET/POST /api/v1/projects/{id}/ipcs/`
-- IPC workflow: `POST .../ipcs/{id}/populate|submit|approve|pay|reject`
-- Manual deductions: `POST/PATCH/DELETE .../ipcs/{id}/deductions/`
-- PDF: `GET .../ipcs/{id}/pdf/`
+All paths are under `/api/v1/projects/{projectId}/` unless noted.
+
+- Contracts: `GET/POST .../contracts/`
+- Contract detail: `GET/PATCH/DELETE .../contracts/{contractId}/`
+- BoQ bulk: `POST .../contracts/{contractId}/items/`
+- Change orders: `POST .../contracts/{contractId}/change-orders/`, `PATCH .../change-orders/{changeOrderId}/`, `POST .../change-orders/{changeOrderId}/approve|reject/`
+- IPCs: `GET/POST .../ipcs/`
+- IPC detail: `GET/PATCH .../ipcs/{ipcId}/`
+- IPC line items: `PATCH .../ipcs/{ipcId}/items/{itemId}/`
+- IPC workflow: `POST .../ipcs/{ipcId}/populate|submit|approve|pay|reject`
+- Manual deductions: `POST/PATCH/DELETE .../ipcs/{ipcId}/deductions/` (list returned on IPC detail; no standalone GET)
+- PDF: `GET .../ipcs/{ipcId}/pdf/`
 
 ### Sprint 8 frontend routes
 
@@ -152,21 +162,51 @@ Frontend routes use `/projects/{uuid}/...` (not `/v1/`).
 - `/projects/{id}/contracts/{contractId}` — detail (info, BoQ, change orders, IPC wizard)
 - `/projects/{id}/ipcs/{ipcId}` — IPC detail + workflow
 
-## Sprint 9 completion checklist (Subcontractors, Alerts, Economic Engine & Gantt)
+## Sprint 9 completion checklist (Cash Flow & Procurement) — blueprint Sprint 9
+
+| Task | Status |
+|------|--------|
+| **C-11** Cash flow transaction API + gap analysis | Done — `cash_flow/` app + `/projects/{id}/cash-flow` UI |
+| **C-15** Procurement request workflow (PR → PO → delivery) | Done — `MaterialRequest` workflow + `PurchaseOrder` model; `/projects/{id}/procurement` UI |
+| **UI-08** Cash flow chart + gap analysis view | Done — `project-cash-flow.tsx` |
+
+### Sprint 9 API paths (cash flow & procurement)
+
+**Cash flow** (`view_cashflow` / `edit_cashflow`):
+
+- `GET/POST .../cash-flow/` — list + summary
+- `POST/PATCH/DELETE .../cash-flow/transactions/{id}/`
+- `GET .../cash-flow/monthly/`, `.../forecast/`, `PUT .../forecast/{YYYY-MM}/`
+- `GET .../cash-flow/gap-analysis/`, `.../receivables/`
+
+**Procurement** (`view_procurement` / `edit_procurement` / `approve_procurement`):
+
+- `GET/POST .../material-requests/` — PR list/create
+- `PATCH/DELETE .../material-requests/{id}/`
+- `POST .../material-requests/{id}/approve|place-order|deliver|cancel/`
+
+### Sprint 9 frontend routes (cash flow & procurement)
+
+- `/projects/{id}/cash-flow` — transactions, forecast, gap analysis
+- `/projects/{id}/procurement` — PR → approval → PO → delivery workflow
+
+---
+
+## Sprint 9 early delivery (blueprint Sprints 11–13 pulled forward)
 
 | Task | Status |
 |------|--------|
 | **C-16** Subcontractor registry + scorecard + risk flag engine | Done — `subcontractors/` CRUD, scores, warnings, risk-summary |
-| **K-03** Configurable alert rule engine | Done — `alerts/services/alert_engine.py` (12+ alert types) |
-| **K-05** Alert acknowledgement + log API | Done — alert log list, acknowledge, active counts |
+| **K-03** Configurable alert rule engine | Done — `alerts/services/alert_engine.py` (16 alert types incl. Sprint 13 critical path / IPC approval / procurement) |
+| **K-05** Alert acknowledgement + log API | Done — alert log list, acknowledge, active counts; rule delete in UI |
 | **E-06** Economic P&L snapshot generator | Done — `economic/services/snapshot_service.py` + nightly Celery task |
 | **E-07** Monte Carlo simulation | Done — async `POST .../economic/simulate/` |
-| **UI-09** Gantt chart (read-only, baseline comparison) | Done — frappe-gantt UI + PDF export |
+| **UI-09** Gantt chart (read-only, baseline comparison) | Done — frappe-gantt + baseline comparison table + PDF export |
 | **UI-11** Economic dashboard | Done — `/projects/{id}/economic` (3 profit layers, simulation) |
 | **UI-12** Alert center + rule configuration | Done — `/projects/{id}/alerts` |
-| **Tests** | Done — `alerts/tests/`, `economic/tests/`, `subcontractors/tests/`, `schedule/tests/test_gantt.py` |
+| **Tests** | Done — backend tests + `e2e/tests/sprint9.spec.ts` |
 
-### Sprint 9 API paths (subcontractors, alerts, economic, gantt)
+### Sprint 9 early delivery API paths (subcontractors, alerts, economic, gantt)
 
 All paths are under `/api/v1/projects/{id}/` unless noted.
 
@@ -204,7 +244,7 @@ All paths are under `/api/v1/projects/{id}/` unless noted.
 - `GET .../gantt/` — task data for chart (`?baseline_id=` optional)
 - `GET .../gantt/pdf/` — PDF table export
 
-### Sprint 9 frontend routes (subcontractors, alerts, economic, gantt)
+### Sprint 9 early delivery frontend routes (subcontractors, alerts, economic, gantt)
 
 - `/projects/{id}/subcontractors` — registry with risk badges
 - `/projects/{id}/subcontractors/{subId}` — detail (scores, warnings, radar chart, financials)
@@ -212,7 +252,7 @@ All paths are under `/api/v1/projects/{id}/` unless noted.
 - `/projects/{id}/economic` — 3-layer P&L + Monte Carlo results
 - `/projects/{id}/schedule/gantt` — read-only Gantt with baseline selector + PDF export
 
-### Sprint 9 operational notes
+### Sprint 9 early delivery operational notes
 
 - **Alert evaluation:** `run_daily_alert_checks` Celery beat task scans all active projects; `monitor_cash_gaps` watches cash-flow forecasts. Real-time re-checks fire via Django signals on daily-report approval, actual-cost save, inventory transaction, subcontractor score, and correspondence save.
 - **Cooldown:** Each `AlertRule` has `cooldown_hours` (default 24) — duplicate `trigger_reference` within cooldown is suppressed.
@@ -220,28 +260,20 @@ All paths are under `/api/v1/projects/{id}/` unless noted.
 - **Monte Carlo:** Requires Celery worker (`CELERY_TASK_ALWAYS_EAGER=true` runs inline in local dev without RabbitMQ).
 - **Risk flag criteria:** overall score &lt; 6, unresolved written/final/suspension warnings, suspended status, or &gt;15% progress lag vs plan on linked contract activities.
 
-See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `subcontractors/ENDPOINTS.md`.
-
-## Sprint 9 completion checklist (Cash Flow & Procurement)
-
-| Task | Status |
-|------|--------|
-| **C-11** Cash flow transaction API + gap analysis | Done — `cash_flow/` app + `/projects/{id}/cash-flow` UI |
-| **C-15** Procurement request workflow (PR → PO → delivery) | Partial — `MaterialRequest` status fields only; full workflow deferred |
-| **UI-08** Cash flow chart + gap analysis view | Done — `project-cash-flow.tsx` |
+See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `subcontractors/ENDPOINTS.md`, `cash_flow/ENDPOINTS.md`.
 
 ## Sprint 10 completion checklist (Materials, Equipment & HR)
 
 | Task | Status |
 |------|--------|
-| **C-13** Inventory ledger + running balance + consumption analytics | Done — `resources/` balance + `material-balance/consumption/` |
+| **C-13** Inventory ledger + running balance + consumption analytics | Done — `resources/` balance + `material-balance/consumption/`; ADJUST included in balance; running balance project-scoped |
 | **C-13** Tests | Done — `resources/tests/test_balance.py` |
-| **C-14** Equipment registry + utilization API | Done — `equipment/`, `equipment-utilization/` |
+| **C-14** Equipment registry + utilization API | Done — `equipment/`, `equipment-utilization/`; log vs daily-report dedupe |
 | **C-14** Tests | Done — `field_reports/tests/test_equipment_utilization.py` |
-| **Labor productivity API** | Done — `labor-productivity/` |
-| **UI-04** Daily report labor/equipment tab polish | Done — idle hours, registry combobox, work_hours columns |
+| **Labor productivity API** | Done — `labor-productivity/` with per-activity hour allocation by qty share |
+| **UI-04** Daily report labor/equipment tab polish | Done — idle hours, registry combobox with equipment FK, work_hours columns |
 | **Equipment + labor dashboards** | Done — `equipment-utilization`, `labor-productivity` routes |
-| **HR approval UI** | Done — leave/overtime approve actions in web UI |
+| **HR approval UI** | Done — leave/overtime approve+reject; backend status gates + `approve_reports` |
 | **Nav grouping** | Done — Resources section in project sidebar |
 
 ### Sprint 10 API paths
@@ -260,16 +292,49 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - Resources nav: equipment log, manpower, labor camp, leave, overtime
 
 
+## Sprint 11 completion checklist (Subcontractors, Risks & Documents)
+
+| Task | Status |
+|------|--------|
+| **C-16** Subcontractor scorecard + risk flag engine | Done — early delivery (Sprint 9); `subcontractors/` |
+| **C-17** Risk/delay register API + claim documentation linker | Done — `risk-events/`, matrix, `related_daily_report` / `related_correspondence` |
+| **C-17** Tests | Done — `risk/tests/test_risk_register.py`, `test_risk_matrix_unit.py` |
+| **C-18** Document version control + correspondence tracker | Done — durable object keys + fresh download URLs; `access_level` enforced |
+| **C-18** Tests | Done — `documents/tests/test_documents.py` |
+| **UI-13** Document archive + correspondence tracker | Done — upload, create/respond, overdue filter |
+| **UI-14** Risk register & matrix view | Done — `/projects/{id}/risk-register` |
+
+### Sprint 11 API paths
+
+- Risk events: `GET/POST .../risk-events/`
+- Risk matrix: `GET .../risk-events/matrix/`
+- Barriers (legacy): `GET/POST .../barriers/`
+- Documents: `GET/POST .../documents/`, `POST .../documents/{id}/revisions/`
+- Correspondence: `GET/POST .../correspondence/`, `POST .../correspondence/{id}/respond/`
+
+### Sprint 11 frontend routes
+
+- `/projects/{id}/risk-register` — probability × severity matrix + event list
+- `/projects/{id}/documents` — archive upload + correspondence write path
+- `/projects/{id}/barriers` — barrier logs
+- `/projects/{id}/subcontractors` — scorecards
+
+
 ## Sprint 12 completion checklist (Economic Engine & Simulation)
 
 | Task | Status |
 |------|--------|
-| **E-02** Cost-to-category inflation mapping API | Done — `economic/inflation-mappings/` (global + project CRUD) |
+| **E-01** Inflation index table + ingestion | Done — indices + staff PUT; Persian mapping indices seeded |
+| **E-02** Cost-to-category inflation mapping API | Done — `economic/inflation-mappings/` (list/create/PATCH/delete) |
+| **E-03** Historical cost inflation adjuster | Done — snapshot + `?refresh=1` on-demand regenerate |
+| **E-04/E-05** Payment delay + financing cost | Done — `financing-cost/` + `payment-delay/` alias; configurable rate |
+| **E-06** P&L snapshot nightly | Done — Celery beat `generate_daily_snapshots` |
 | **E-07** Working capital forecast curve | Done — `economic/working-capital/` |
-| **E-08** Monte Carlo productivity + WC P90 | Done — `monte_carlo_service` extended |
-| **E-09** Forecast + sensitivity APIs | Done — `economic/forecast/`, `economic/sensitivity/` |
-| **E-10** Real cash flow curve | Done — `economic/cash-flow-real/` |
-| **Tests** | Done — `economic/tests/test_economic_forecast.py`, `test_inflation_mappings_api.py`, `test_monte_carlo_extended.py`, `test_simulate_api.py` |
+| **E-08** Monte Carlo productivity + WC P90 | Done — `monte_carlo_service` + Celery |
+| **E-09** Forecast + scenario simulate API | Done — `economic/forecast/`, `economic/simulate/` |
+| **E-10** Sensitivity / tornado | Done — `economic/sensitivity/` |
+| **UI-11** Economic dashboard | Done — 7 tabs; mapping edit gated by `edit_cashflow` |
+| **Tests** | Done — economic unit/API tests + deepened `sprint12-economic.spec.ts` |
 
 ### Sprint 12 API paths
 
@@ -277,7 +342,43 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - `GET /api/v1/projects/{id}/economic/working-capital/` — WC curve
 - `GET /api/v1/projects/{id}/economic/cash-flow-real/` — real vs nominal outflows
 - `GET/POST /api/v1/projects/{id}/economic/inflation-mappings/` — mapping list/create
-- `DELETE /api/v1/projects/{id}/economic/inflation-mappings/{mapping_id}/`
+- `PATCH/DELETE /api/v1/projects/{id}/economic/inflation-mappings/{mapping_id}/`
 - `GET /api/v1/projects/{id}/economic/sensitivity/` — latest tornado chart data
+- `GET /api/v1/projects/{id}/economic/payment-delay/` — alias of financing-cost
+- `GET /api/v1/projects/{id}/economic/snapshot/?refresh=1` — force regenerate snapshot
 
 See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)
+
+## Sprint 13 completion checklist (Alerts, Executive Dashboard & Polish)
+
+| Task | Status |
+|------|--------|
+| **K-02** Unified KPI endpoint (`/kpis`) with caching | Done — `GET .../kpis/` + `/health/` alias; Redis TTL 5 min; `projects/kpi_service.py` |
+| **K-03** Alert rule engine | Done — carried from Sprint 9; 16 alert types |
+| **K-04** Notification delivery (email, SMS, in-app) | Done — `notifications/services/delivery.py`; channels via `ALERT_NOTIFY_CHANNELS` (default `in_app,email`); SMS console stub |
+| **K-05** Alert acknowledgement + log API | Done — carried from Sprint 9 |
+| **UI-09** Gantt chart (read-only) | Done — carried from Sprint 9 |
+| **UI-10** Executive dashboard with 10-KPI panel | Done — `/projects/{id}/overview` + `ExecutiveKpiPanel` |
+| **UI-12** Alert center + rule configuration | Done — carried from Sprint 9; new type labels |
+| **15+ alert types** | Done — added `critical_path_delay`, `ipc_approval_delayed`, `procurement_overdue` |
+| **Hardening** | Done — `alert_log` indexes; `apps/api/scripts/load_smoke_kpis.py` |
+| **Tests / E2E** | Done — KPI + delivery + sprint13 alert tests; `e2e/tests/sprint13.spec.ts` |
+| **UAT** | Done — [sprint13-uat-checklist.md](./sprint13-uat-checklist.md) |
+
+### Sprint 13 API paths
+
+- `GET /api/v1/projects/{id}/kpis/` — unified KPIs (`?as_of=`, `?force_refresh=1`); permission `view_dashboard`
+- `GET /api/v1/projects/{id}/health/` — alias of `/kpis/`
+- Alert types (system seeds): prior 13 + `critical_path_delay`, `ipc_approval_delayed`, `procurement_overdue`
+
+### Sprint 13 frontend routes
+
+- `/projects/{id}/overview` — executive 10-KPI panel (permission-gated sections) + module launcher
+- `/projects/{id}/alerts` — alert center (unchanged route; expanded type catalog)
+
+### Sprint 13 operational notes
+
+- **Channels:** `ALERT_NOTIFY_CHANNELS=in_app,email` (add `sms` to enable console SMS backend). `SMS_PROVIDER=console` by default.
+- **Cache:** Unified KPIs use `project_kpis:{id}:{as_of}` (5 min). Progress EVM cache invalidation also clears `project_kpis:*`.
+- **Load smoke:** `ACCESS_TOKEN=… PROJECT_ID=… python apps/api/scripts/load_smoke_kpis.py`
+

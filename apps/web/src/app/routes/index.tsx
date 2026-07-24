@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { redirect } from "react-router";
 import {
   getAccessTokenFromRequest,
@@ -16,5 +17,6 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export default function Index() {
+  const { t, i18n } = useTranslation();
   return null;
 }

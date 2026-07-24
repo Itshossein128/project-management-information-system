@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -14,10 +15,12 @@ import {
 import { fetchSuppliers } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
-import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "balance" | "requests" | "transactions";
 
@@ -28,10 +31,12 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function BalanceTab({ projectId }: { projectId: string }) {
+  const { t, i18n } = useTranslation();
+
   const [discipline, setDiscipline] = useState("");
   const [lowStock, setLowStock] = useState(false);
 
-  const { data = [], isLoading } = useQuery({
+  const { data = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["material-balance", projectId, discipline, lowStock],
     queryFn: () =>
       fetchMaterialBalance(projectId, {
@@ -67,7 +72,14 @@ function BalanceTab({ projectId }: { projectId: string }) {
         </label>
       </div>
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : data.length === 0 ? (
+        <EmptyState
+          title="موردی یافت نشد"
+          description="بالانس مصالح برای این فیلتر خالی است."
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -83,19 +95,12 @@ function BalanceTab({ projectId }: { projectId: string }) {
               </tr>
             </thead>
             <tbody>
-              {data.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="px-3 py-6 text-center text-muted-foreground">
-                    موردی یافت نشد
-                  </td>
-                </tr>
-              ) : (
-                data.map((r) => {
+              {data.map((r) => {
                   const cons = consumptionById.get(r.material_id);
                   return (
                   <tr
                     key={r.material_id}
-                    className={`border-t border-border ${r.is_low_stock ? "bg-red-50 dark:bg-red-950/20" : ""}`}
+                    className={`border-t border-border ${r.is_low_stock ? "bg-danger-50 dark:bg-danger-950/20" : ""}`}
                   >
                     <td className="px-3 py-2 font-mono text-xs">{r.material_code}</td>
                     <td className="px-3 py-2">{r.material_name}</td>
@@ -112,18 +117,17 @@ function BalanceTab({ projectId }: { projectId: string }) {
                       {r.is_low_stock ? (
                         <Link
                           to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_ALERTS}?type=low_stock`}
-                          className="text-xs text-red-600 hover:underline"
+                          className="text-xs text-danger-600 hover:underline"
                         >
                           کمبود
                         </Link>
                       ) : (
-                        <span className="text-xs text-emerald-600">عادی</span>
+                        <span className="text-xs text-success-600">عادی</span>
                       )}
                     </td>
                   </tr>
                 );
-                })
-              )}
+                })}
             </tbody>
           </table>
         </div>
@@ -133,12 +137,14 @@ function BalanceTab({ projectId }: { projectId: string }) {
 }
 
 function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
   const [qty, setQty] = useState("");
 
-  const { data: requests = [], isLoading } = useQuery({
+  const { data: requests = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["material-requests", projectId],
     queryFn: () => fetchMaterialRequests(projectId),
   });
@@ -205,7 +211,11 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
         </div>
       ) : null}
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : requests.length === 0 ? (
+        <EmptyState title={t("pages.procurement.empty")} description="درخواست مصالح اینجا نمایش داده می‌شود." />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -219,14 +229,7 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
               </tr>
             </thead>
             <tbody>
-              {requests.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
-                    درخواستی ثبت نشده
-                  </td>
-                </tr>
-              ) : (
-                requests.map((r) => (
+              {requests.map((r) => (
                   <tr key={r.id} className="border-t border-border">
                     <td className="px-3 py-2">{r.request_number}</td>
                     <td className="px-3 py-2">{r.material_name}</td>
@@ -236,8 +239,7 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
                     <td className="px-3 py-2">{r.required_by_date ?? "—"}</td>
                     <td className="px-3 py-2">{r.status}</td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
@@ -247,6 +249,8 @@ function RequestsTab({ projectId, canEdit }: { projectId: string; canEdit: boole
 }
 
 function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: boolean }) {
+  const { t, i18n } = useTranslation();
+
   const toast = useToast();
   const qc = useQueryClient();
   const [materialId, setMaterialId] = useState("");
@@ -261,7 +265,7 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
     enabled: canEdit,
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["inventory-transactions", projectId],
     queryFn: async () => {
       const res = await fetchInventoryTransactions(projectId);
@@ -365,7 +369,11 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
         </div>
       ) : null}
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">در حال بارگذاری…</p>
+        <LoadingSkeleton rows={6} />
+      ) : isError ? (
+        <QueryErrorState onRetry={() => void refetch()} />
+      ) : rows.length === 0 ? (
+        <EmptyState title="تراکنشی ثبت نشده" description="ورود و خروج مصالح اینجا نمایش داده می‌شود." />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
@@ -379,14 +387,7 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
-                    تراکنشی ثبت نشده
-                  </td>
-                </tr>
-              ) : (
-                rows.map((r) => (
+              {rows.map((r) => (
                   <tr key={r.id} className="border-t border-border">
                     <td className="px-3 py-2">{r.tx_date}</td>
                     <td className="px-3 py-2">{r.material_name}</td>
@@ -396,14 +397,13 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
                     <td className="px-3 py-2">{r.document_ref || "—"}</td>
                     <td className="px-3 py-2">
                       {r.daily_report ? (
-                        <span className="text-xs text-blue-600">گزارش روزانه</span>
+                        <span className="text-xs text-info-600">گزارش روزانه</span>
                       ) : (
-                        <span className="text-xs text-emerald-600">دستی</span>
+                        <span className="text-xs text-success-600">دستی</span>
                       )}
                     </td>
                   </tr>
-                ))
-              )}
+                ))}
             </tbody>
           </table>
         </div>
@@ -413,6 +413,8 @@ function TransactionsTab({ projectId, canEdit }: { projectId: string; canEdit: b
 }
 
 function MaterialBalanceContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
@@ -420,39 +422,50 @@ function MaterialBalanceContent() {
   const [tab, setTab] = useState<Tab>("balance");
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
-  if (!project) return <NotFoundState title="پروژه یافت نشد" />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   if (!canView) {
     return (
-      <AccessDenied description="نقش شما مجوز مشاهده گزارش‌ها را ندارد." />
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.reports.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
+        })}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="بالانس مصالح" subtitle={project.project_name} />
-      <div className="flex flex-wrap gap-2 border-b border-border pb-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            size="sm"
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
-      {tab === "balance" ? <BalanceTab projectId={projectId} /> : null}
-      {tab === "requests" ? <RequestsTab projectId={projectId} canEdit={canEdit} /> : null}
-      {tab === "transactions" ? (
-        <TransactionsTab projectId={projectId} canEdit={canEdit} />
-      ) : null}
+      <PageHeader title={t("pages.materialBalance.title")} subtitle={project.project_name} />
+
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <ShadcnTabsContent value="balance" className="mt-0">
+          <BalanceTab projectId={projectId} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="requests" className="mt-0">
+          <RequestsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="transactions" className="mt-0">
+          <TransactionsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }
 
 export default function ProjectMaterialBalancePage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
 
   return (

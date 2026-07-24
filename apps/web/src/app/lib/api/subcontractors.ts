@@ -162,10 +162,10 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-800",
-  suspended: "bg-amber-100 text-amber-800",
-  completed: "bg-blue-100 text-blue-800",
-  terminated: "bg-red-100 text-red-800",
+  active: "bg-success-100 text-success-800",
+  suspended: "bg-warning-100 text-warning-800",
+  completed: "bg-info-100 text-info-800",
+  terminated: "bg-danger-100 text-danger-800",
 };
 
 export const WARNING_TYPE_LABELS: Record<string, string> = {
@@ -176,24 +176,24 @@ export const WARNING_TYPE_LABELS: Record<string, string> = {
 };
 
 export const WARNING_TYPE_COLORS: Record<string, string> = {
-  verbal: "bg-gray-100 text-gray-700",
-  written: "bg-amber-100 text-amber-800",
-  final: "bg-red-100 text-red-800",
-  contract_suspension: "bg-red-200 text-red-900",
+  verbal: "bg-neutral-100 text-neutral-700",
+  written: "bg-warning-100 text-warning-800",
+  final: "bg-danger-100 text-danger-800",
+  contract_suspension: "bg-danger-200 text-danger-900",
 };
 
 export function scoreColor(score: number | null | undefined): string {
   if (score == null) return "text-muted-foreground";
-  if (score >= 8) return "text-emerald-600";
-  if (score >= 6) return "text-amber-600";
-  return "text-red-600";
+  if (score >= 8) return "text-success-600";
+  if (score >= 6) return "text-warning-600";
+  return "text-danger-600";
 }
 
 export function scoreBg(score: number | null | undefined): string {
   if (score == null) return "";
-  if (score >= 8) return "bg-emerald-50";
-  if (score >= 6) return "bg-amber-50";
-  return "bg-red-50";
+  if (score >= 8) return "bg-success-50";
+  if (score >= 6) return "bg-warning-50";
+  return "bg-danger-50";
 }
 
 export function computeOverallLive(scores: Record<string, number | null>): number | null {

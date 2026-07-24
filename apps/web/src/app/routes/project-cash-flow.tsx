@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -8,6 +9,7 @@ import { TransactionsTab } from "@/components/cashflow/TransactionsTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/sprint-button";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Tab = "transactions" | "forecast" | "gap";
 
@@ -18,6 +20,8 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 function CashFlowContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_cashflow");
@@ -35,30 +39,35 @@ function CashFlowContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="جریان نقدی" subtitle={project.project_name} />
+      <PageHeader title={t("pages.cashFlow.title")} subtitle={project.project_name} />
 
-      <div className="flex flex-wrap gap-2">
-        {TABS.map((t) => (
-          <Button
-            key={t.id}
-            variant={tab === t.id ? "primary" : "secondary"}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
+        <TabsList className="mb-4">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id}>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "transactions" && (
-        <TransactionsTab projectId={projectId} canEdit={canEdit} />
-      )}
-      {tab === "forecast" && <ForecastTab projectId={projectId} />}
-      {tab === "gap" && <GapAnalysisTab projectId={projectId} />}
+        <ShadcnTabsContent value="transactions" className="mt-0">
+          <TransactionsTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="forecast" className="mt-0">
+          <ForecastTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+
+        <ShadcnTabsContent value="gap" className="mt-0">
+          <GapAnalysisTab projectId={projectId} />
+        </ShadcnTabsContent>
+      </Tabs>
     </div>
   );
 }
 
 export default function ProjectCashFlowPage() {
+  const { t, i18n } = useTranslation();
   const { projectId } = useParams();
 
   return (

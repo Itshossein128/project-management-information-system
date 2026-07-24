@@ -2,6 +2,7 @@ import { AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/app/lib/utils";
 import { Button } from "@/components/ui/sprint-button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export interface QueryErrorStateProps {
   message?: string;
@@ -17,22 +18,24 @@ export function QueryErrorState({
   const { t } = useTranslation();
 
   return (
-    <div
+    <Alert
+      variant="destructive"
       className={cn(
-        "flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-6 py-12 text-center",
+        "flex flex-col items-center justify-center gap-3 px-6 py-12 text-center bg-destructive/5",
         className,
       )}
-      role="alert"
     >
-      <AlertCircle className="size-10 text-destructive/70" aria-hidden />
-      <p className="text-base font-medium text-foreground">
-        {message ?? t("common.loadFailed")}
-      </p>
-      {onRetry ? (
-        <Button variant="secondary" size="sm" onClick={onRetry}>
-          {t("common.retry")}
-        </Button>
-      ) : null}
-    </div>
+      <div className="flex flex-col items-center justify-center gap-3 w-full">
+        <div className="text-destructive/70 [&>svg]:size-10"><AlertCircle aria-hidden /></div>
+        <AlertTitle className="text-base font-medium">
+          {message ?? t("common.loadFailed")}
+        </AlertTitle>
+        {onRetry ? (
+          <Button variant="secondary" size="sm" onClick={onRetry} className="mt-2">
+            {t("common.retry")}
+          </Button>
+        ) : null}
+      </div>
+    </Alert>
   );
 }

@@ -1,12 +1,10 @@
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.viewsets import ProjectScopedViewSet
 from config.pagination import DefaultPageNumberPagination
-from hr.models import LeaveRequest, LeaveStatus, LeaveType, OvertimeRequest, OvertimeStatus
+from hr.models import LeaveRequest, OvertimeRequest
 from hr.serializers import LeaveRequestSerializer, OvertimeRequestSerializer
 from hr import services
 
@@ -15,8 +13,20 @@ class BaseHRRequestViewSet(ProjectScopedViewSet):
     pagination_class = DefaultPageNumberPagination
     view_permission = 'view_reports'
     edit_permission = 'edit_reports'
+    approve_permission = 'approve_reports'
+    approve_actions = frozenset(
+        {'supervisor_approve', 'manager_approve', 'security_approve'}
+    )
 
     date_field_name = None
+
+    @property
+    def required_permission(self):
+        if self.action in self.approve_actions:
+            return self.approve_permission
+        if self.action in ('list', 'retrieve'):
+            return self.view_permission
+        return self.edit_permission
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -29,12 +39,7 @@ class BaseHRRequestViewSet(ProjectScopedViewSet):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(
-            project_id=self.get_project_id(),
-            requester=self.request.user,
-            created_by=self.request.user,
-            updated_by=self.request.user,
-        )
+        super().perform_create(serializer, requester=self.request.user)
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()

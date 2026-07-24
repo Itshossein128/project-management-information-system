@@ -39,7 +39,7 @@ export function EquipmentTab({
   });
 
   const equipmentOptions = registry.map((e) => ({
-    value: e.equipment_name,
+    value: e.id,
     label: `${e.equipment_code} — ${e.equipment_name}`,
   }));
 
@@ -49,6 +49,7 @@ export function EquipmentTab({
       header: "دستگاه",
       type: equipmentOptions.length > 0 ? "combobox" : undefined,
       comboOptions: equipmentOptions,
+      refKey: "equipment",
       width: "150px",
     },
     {
@@ -115,10 +116,17 @@ export function EquipmentTab({
       columns={columns}
       serverRows={(report?.equipment ?? []).map((e) => ({
         ...e,
-        activity_description: e.activity_ref ? findActivityLabel(activityOptions, e.activity_ref) : "",
+        equipment_name: e.equipment
+          ? findEquipmentLabel(equipmentOptions, e.equipment) || e.equipment_name
+          : e.equipment_name,
+        activity_description: e.activity_ref
+          ? findActivityLabel(activityOptions, e.activity_ref)
+          : "",
       }))}
       emptyRow={() => ({
+        equipment: null,
         equipment_name: "",
+        equipment_ref: "",
         shift: "full",
         status: "active",
         ownership_type: "owned",
@@ -131,20 +139,29 @@ export function EquipmentTab({
         activity_description: "",
         notes: "",
       })}
-      toPayload={(row: GridRow) => ({
-        equipment_name: row.equipment_name ?? "",
-        shift: row.shift ?? "full",
-        status: row.status ?? "active",
-        ownership_type: row.ownership_type ?? "owned",
-        work_start: row.work_start || null,
-        work_end: row.work_end || null,
-        repair_hours: row.repair_hours ?? 0,
-        idle_hours: row.idle_hours ?? null,
-        idle_reason: row.idle_reason ?? "",
-        productive_hours: computeProductiveHours(row),
-        activity_ref: row.activity_ref ?? null,
-        notes: row.notes ?? "",
-      })}
+      toPayload={(row: GridRow) => {
+        const matched = registry.find((e) => e.id === row.equipment);
+        const name =
+          matched?.equipment_name ||
+          stripEquipmentLabel(String(row.equipment_name ?? "")) ||
+          "";
+        return {
+          equipment: row.equipment ?? null,
+          equipment_name: name,
+          equipment_ref: matched?.equipment_code || row.equipment_ref || "",
+          shift: row.shift ?? "full",
+          status: row.status ?? "active",
+          ownership_type: row.ownership_type ?? "owned",
+          work_start: row.work_start || null,
+          work_end: row.work_end || null,
+          repair_hours: row.repair_hours ?? 0,
+          idle_hours: row.idle_hours ?? null,
+          idle_reason: row.idle_reason ?? "",
+          productive_hours: computeProductiveHours(row),
+          activity_ref: row.activity_ref ?? null,
+          notes: row.notes ?? "",
+        };
+      }}
       onChanged={onChanged}
       readOnly={readOnly}
     />
@@ -153,4 +170,15 @@ export function EquipmentTab({
 
 function findActivityLabel(options: { value: string; label: string }[], id: string) {
   return options.find((o) => o.value === id)?.label ?? "";
+}
+
+function findEquipmentLabel(options: { value: string; label: string }[], id: string) {
+  return options.find((o) => o.value === id)?.label ?? "";
+}
+
+/** "CODE — Name" → "Name" when free-typed without registry match. */
+function stripEquipmentLabel(label: string): string {
+  const sep = " — ";
+  const idx = label.indexOf(sep);
+  return idx >= 0 ? label.slice(idx + sep.length) : label;
 }

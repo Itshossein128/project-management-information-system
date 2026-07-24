@@ -108,7 +108,7 @@ export function IPCWorkflowBar({
       </div>
 
       {ipc.rejection_reason ? (
-        <p className="rounded bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/40">
+        <p className="rounded bg-danger-50 px-3 py-2 text-sm text-danger-800 dark:bg-danger-950/40">
           دلیل رد: {ipc.rejection_reason}
         </p>
       ) : null}

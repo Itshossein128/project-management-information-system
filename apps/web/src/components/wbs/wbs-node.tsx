@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/sprint-button";
 import { Input } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const INDENT_PX = 24;
 
@@ -180,7 +181,7 @@ export function WBSNodeRow({
 
         {weightWarning && (
           <span
-            className="text-xs text-amber-600"
+            className="text-xs text-warning-600"
             title={t("wbs.weightWarning")}
           >
             ⚠
@@ -189,27 +190,37 @@ export function WBSNodeRow({
 
         {canEdit ? (
           <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setAddingChild(true)}
-              aria-label={t("wbs.addChild")}
-              title={t("wbs.addChild")}
-            >
-              <Plus className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={hasChildren}
-              aria-label={
-                hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")
-              }
-              title={hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
-              onClick={() => deleteMutation.mutate()}
-            >
-              <Trash2 className="size-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setAddingChild(true)}
+                  aria-label={t("wbs.addChild")}
+                >
+                  <Plus className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("wbs.addChild")}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={hasChildren}
+                  aria-label={
+                    hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")
+                  }
+                  onClick={() => deleteMutation.mutate()}
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {hasChildren ? t("wbs.deleteDisabled") : t("wbs.delete")}
+              </TooltipContent>
+            </Tooltip>
           </div>
         ) : null}
       </div>

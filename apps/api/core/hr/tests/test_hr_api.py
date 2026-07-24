@@ -25,6 +25,7 @@ def setup_data():
     role = Role.objects.create(role_name='member')
     RolePermission.objects.create(role=role, permission_codename='view_reports')
     RolePermission.objects.create(role=role, permission_codename='edit_reports')
+    RolePermission.objects.create(role=role, permission_codename='approve_reports')
 
     for u in [requester, supervisor, manager]:
         member = ProjectMember.objects.create(project=project, user=u)
@@ -355,3 +356,26 @@ class TestLeaveRequestViewSet:
         url_sec_approve = reverse('leave-security', kwargs={'project_pk': setup_data['project'].id, 'pk': req.id})
         res = api_client.post(url_sec_approve, {'approved': True})
         assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+
+    def test_approve_requires_approve_reports_permission(self, api_client, setup_data):
+        # Requester has approve_reports in shared role — strip it for a dedicated editor
+        from authentication.models import User
+        from master_data.models import ProjectMember, ProjectMemberRole, Role, RolePermission
+
+        editor = User.objects.create(username='editor_only', mobile='12345678909')
+        editor_role = Role.objects.create(role_name='editor_only')
+        RolePermission.objects.create(role=editor_role, permission_codename='view_reports')
+        RolePermission.objects.create(role=editor_role, permission_codename='edit_reports')
+        member = ProjectMember.objects.create(project=setup_data['project'], user=editor)
+        ProjectMemberRole.objects.create(member=member, role=editor_role)
+
+        req = OvertimeRequest.objects.create(
+            project=setup_data['project'], requester=setup_data['requester'],
+            department='D1', overtime_date='2024-01-01', requested_hours='2',
+            reason='reason1', status=OvertimeStatus.SUBMITTED, created_by=setup_data['requester']
+        )
+        api_client.force_authenticate(user=editor)
+        url = reverse('overtime-supervisor', kwargs={'project_pk': setup_data['project'].id, 'pk': req.id})
+        res = api_client.post(url, {'approved': True})
+        assert res.status_code == status.HTTP_403_FORBIDDEN

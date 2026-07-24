@@ -36,7 +36,11 @@ def compute_material_balance(material: Material) -> dict:
         )['total']
         or 0
     )
-    balance = float(received) - float(issued)
+    adjusted = (
+        txs.filter(tx_type=TransactionType.ADJUST).aggregate(total=Sum('quantity'))['total'] or 0
+    )
+    # Match running_balance: IN +, OUT/WASTE -, ADJUST +/- (signed quantity)
+    balance = float(received) + float(adjusted) - float(issued)
     min_level = float(material.min_stock_level) if material.min_stock_level else None
     is_low = min_level is not None and balance <= min_level
     total_requested = (
@@ -60,6 +64,7 @@ def compute_material_balance(material: Material) -> dict:
         'total_requested': float(total_requested),
         'total_received': float(received),
         'total_issued': float(issued),
+        'total_adjusted': float(adjusted),
         'current_balance': balance,
         'min_stock_level': min_level,
         'is_low_stock': is_low,
@@ -67,11 +72,11 @@ def compute_material_balance(material: Material) -> dict:
     }
 
 
-def running_balance(material_id):
-    txs = (
-        InventoryTransaction.objects.filter(material_id=material_id, is_deleted=False)
-        .order_by('tx_date', 'created_at')
-    )
+def running_balance(material_id, *, project_id=None):
+    qs = InventoryTransaction.objects.filter(material_id=material_id, is_deleted=False)
+    if project_id is not None:
+        qs = qs.filter(project_id=project_id)
+    txs = qs.order_by('tx_date', 'created_at')
     running = 0.0
     rows = []
     for tx in txs:

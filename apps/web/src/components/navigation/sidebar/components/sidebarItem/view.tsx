@@ -67,7 +67,7 @@ const itemBaseClass =
   "group flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-center text-xs font-medium text-sidebar-foreground transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:outline-none";
 
 const itemActiveClass =
-  "bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-[var(--shadow-glow-sm)] ring-1 ring-white/15";
+  "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-sm)] ring-1 ring-sidebar-ring/30";
 
 const iconClass =
   "size-7 shrink-0 opacity-90 transition-transform duration-200 group-hover:scale-110";
@@ -275,7 +275,9 @@ export const SidebarItem = ({
                           )
                         }
                       >
-                        {child.label}
+                        {child.labelI18nKey
+                          ? t(child.labelI18nKey, { defaultValue: child.label })
+                          : child.label}
                       </NavLink>
                     </li>
                   ))}

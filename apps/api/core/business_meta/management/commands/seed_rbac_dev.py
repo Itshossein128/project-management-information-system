@@ -6,8 +6,10 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from master_data.models import ProjectMember, ProjectPosition, MemberStatus, WageType
+from master_data.models import MemberStatus, ProjectMember, ProjectPosition, WageType
 from projects.models import Project
+from projects.seeds import DEMO_PROJECT_SPECS, seed_full_project, seed_system_reference
+from projects.services import attach_creator_as_member
 
 User = get_user_model()
 
@@ -43,16 +45,21 @@ def run_seed():
     u_visitor = upsert_user('+10000000003', '10000000003', 'Visitor User', 'visitor')
     u_worker = upsert_user('+10000000004', '10000000004', 'Worker User', None)
 
-    p1, _ = Project.objects.get_or_create(
-        project_code='acme',
-        defaults={'project_name': 'Acme Construction'},
-    )
-    p2, _ = Project.objects.get_or_create(
-        project_code='buildco',
-        defaults={'project_name': 'BuildCo'},
-    )
+    system_stats = seed_system_reference()
 
-    for project in (p1, p2):
+    project_users = {
+        'acme': (u_admin, u_hr, u_worker),
+        'buildco': (u_admin, u_hr, u_worker),
+    }
+    project_results = []
+
+    for spec in DEMO_PROJECT_SPECS:
+        project, _ = Project.objects.get_or_create(
+            project_code=spec.project_code,
+            defaults={'project_name': spec.project_name},
+        )
+        admin_user, hr_user, worker_user = project_users[spec.project_code]
+
         for slug, name, ordering in (
             ('electrician', 'Electrician', 0),
             ('worker', 'Worker', 1),
@@ -65,36 +72,62 @@ def run_seed():
                 defaults={'position_name': name, 'ordering': ordering},
             )
 
-    pos_e = ProjectPosition.objects.get(project=p1, slug='electrician')
-    pos_w = ProjectPosition.objects.get(project=p1, slug='worker')
-    pos_s = ProjectPosition.objects.get(project=p2, slug='supervisor')
+        pos_e = ProjectPosition.objects.get(project=project, slug='electrician')
+        pos_w = ProjectPosition.objects.get(project=project, slug='worker')
+        pos_s = ProjectPosition.objects.get(project=project, slug='supervisor')
 
-    for user, project, position, wage, wage_type, status in (
-        (u_worker, p1, pos_e, Decimal('45.00'), WageType.HOURLY, MemberStatus.ACTIVE),
-        (u_hr, p1, pos_w, Decimal('30.00'), WageType.HOURLY, MemberStatus.ACTIVE),
-        (u_worker, p2, pos_s, Decimal('5000.00'), WageType.MONTHLY, MemberStatus.SUSPENDED),
-    ):
-        ProjectMember.objects.get_or_create(
-            user=user,
-            project=project,
-            defaults={
-                'position': position,
-                'wage': wage,
-                'wage_type': wage_type,
-                'status': status,
-                'tools': ['drill'] if user == u_worker and project == p1 else [],
-            },
+        if spec.project_code == 'acme':
+            member_specs = (
+                (worker_user, pos_e, Decimal('45.00'), WageType.HOURLY, MemberStatus.ACTIVE, ['drill']),
+                (hr_user, pos_w, Decimal('30.00'), WageType.HOURLY, MemberStatus.ACTIVE, []),
+            )
+        else:
+            member_specs = (
+                (worker_user, pos_s, Decimal('5000.00'), WageType.MONTHLY, MemberStatus.SUSPENDED, []),
+                (hr_user, pos_w, Decimal('35.00'), WageType.HOURLY, MemberStatus.ACTIVE, []),
+            )
+
+        members: list[ProjectMember] = []
+        for user, position, wage, wage_type, status, tools in member_specs:
+            member, _ = ProjectMember.objects.get_or_create(
+                user=user,
+                project=project,
+                defaults={
+                    'position': position,
+                    'wage': wage,
+                    'wage_type': wage_type,
+                    'status': status,
+                    'tools': tools,
+                },
+            )
+            members.append(member)
+
+        attach_creator_as_member(project=project, creator=admin_user)
+        admin_member = ProjectMember.objects.get(project=project, user=admin_user)
+        if admin_member not in members:
+            members.insert(0, admin_member)
+
+        project_results.append(
+            seed_full_project(
+                project=project,
+                spec=spec,
+                creator=admin_user,
+                members=members,
+            )
         )
+
+    return system_stats, project_results
 
 
 class Command(BaseCommand):
-    help = 'Seed development RBAC and sample projects. Password: devpass123; Django admin: 10000000001'
+    help = 'Seed development RBAC and two full demo projects (Acme, BuildCo). Password: devpass123'
 
     def handle(self, *args, **options):
-        run_seed()
+        system_stats, project_results = run_seed()
         self.stdout.write(
             self.style.SUCCESS(
-                'Seeded groups, users, projects, members. Password: devpass123. '
-                'Django admin: username 10000000001 (or +10000000001).'
+                'Seeded groups, users, units, inflation indices, and full demo projects. '
+                f'System: {system_stats}. Projects: {project_results}. '
+                'Password: devpass123. Django admin: username 10000000001 (or +10000000001).'
             )
         )

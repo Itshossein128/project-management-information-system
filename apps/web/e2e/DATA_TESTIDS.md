@@ -35,6 +35,21 @@
 - `report-reject-reason` / `report-reject-confirm-btn`
 - `photo-cell` / `photo-upload-input` / `photo-preview-link`
 
+## Physical Progress & S-Curve (Sprint 6)
+- `progress-kpi-grid` — KPI grid section
+- `progress-s-curve` — S-Curve chart section
+- `progress-manual-btn` — Button to enter progress manually
+- `progress-behind-checkbox` — Checkbox to filter behind-schedule activities
+
+## Budget & Cost (Sprint 7)
+- `costs-kpi-grid` / `costs-tabs` / `costs-tab-{budget|actual|variance|pools}`
+- `budget-grid` / `budget-matrix` / `budget-cell-{code}-{category}` / `budget-input-{code}-{category}` / `budget-save-btn`
+- `actual-costs-tab` / `actual-cost-add-btn` / `actual-cost-drawer` / `actual-cost-category` / `actual-cost-amount` / `actual-cost-wbs` / `actual-cost-save-btn`
+- `variance-tab` / `variance-group-{wbs|category|activity}`
+- `cost-pool-tab` / `cost-pool-new-btn` / `cost-pool-create-form` / `cost-pool-name-input` / `cost-pool-category` / `cost-pool-amount-input` / `cost-pool-create-btn`
+- `cost-pool-table` / `cost-pool-row-{id}` / `cost-pool-allocate-btn-{id}`
+- `cost-pool-allocation-wizard` / `cost-pool-auto-method` / `cost-pool-auto-allocate` / `cost-pool-allocate-activity` / `cost-pool-allocate-amount` / `cost-pool-allocate-confirm`
+
 ## Offline Sync (Sprint 5)
 - `offline-indicator` — shell connectivity / pending / conflict badge
 - `daily-reports-sync-now` — list page manual sync CTA

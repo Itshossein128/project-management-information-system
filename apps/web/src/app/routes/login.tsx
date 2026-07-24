@@ -69,13 +69,11 @@ export default function Login() {
   }
 
   return (
-    <div className='relative isolate flex min-h-svh items-center justify-center overflow-hidden bg-background p-4'>
-      <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10 overflow-hidden'>
-        <div className='animate-aurora absolute -top-24 end-[8%] h-[26rem] w-[26rem] rounded-full bg-brand-500/50 blur-3xl' />
-        <div className='animate-aurora absolute -bottom-24 start-[6%] h-[28rem] w-[28rem] rounded-full bg-gold-500/40 blur-3xl [animation-delay:-6s]' />
-        <div className='animate-float absolute start-1/2 top-1/3 h-80 w-80 -translate-x-1/2 rounded-full bg-brand-400/35 blur-3xl' />
-        <div className='animate-aurora absolute bottom-[12%] end-[18%] h-72 w-72 rounded-full bg-brand-300/35 blur-3xl [animation-delay:-11s]' />
-        <div className='absolute inset-0 bg-gradient-to-b from-background/20 via-background/5 to-background/55' />
+    <div className='relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4'>
+      <div aria-hidden='true' className='pointer-events-none absolute inset-0 -z-10'>
+        <div className='absolute -end-24 -top-24 h-72 w-72 rounded-full bg-brand-500/20 blur-3xl' />
+        <div className='absolute -bottom-24 -start-24 h-80 w-80 rounded-full bg-safety-500/25 blur-3xl' />
+        <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60' />
       </div>
       <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
         <AppPreferencesBar />
@@ -84,7 +82,7 @@ export default function Login() {
         <CardHeader className='justify-items-center text-center'>
           <div
             aria-hidden='true'
-            className='animate-float mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 via-brand-600 to-brand-700 text-xl font-bold tracking-tight text-white shadow-[var(--shadow-glow)] ring-1 ring-white/20'
+            className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-safety-600 text-lg font-bold tracking-tight text-white shadow-md'
           >
             BM
           </div>

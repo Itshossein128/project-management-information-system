@@ -6,10 +6,21 @@ from django.db import models
 
 from economic.models import CostCategoryInflationMapping, InflationIndex
 
+# Alternate names accepted when looking up an index (mapping name → aliases).
+INDEX_ALIASES: dict[str, tuple[str, ...]] = {
+    'نیروی کار': ('Labor', 'labor'),
+    'فولاد': ('Construction Materials', 'Steel'),
+    'سیمان': ('Construction Materials', 'Cement'),
+    'CPI': ('Consumer Price Index',),
+    'Construction Materials': ('فولاد', 'سیمان'),
+}
+
 
 def get_index_value(index_name: str, on_date) -> float:
+    """Latest index value on or before ``on_date``; tries aliases; defaults to 100."""
+    names = (index_name, *INDEX_ALIASES.get(index_name, ()))
     record = (
-        InflationIndex.objects.filter(index_name=index_name, index_date__lte=on_date)
+        InflationIndex.objects.filter(index_name__in=names, index_date__lte=on_date)
         .order_by('-index_date')
         .first()
     )

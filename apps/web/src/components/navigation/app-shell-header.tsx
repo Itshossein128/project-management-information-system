@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface AppShellHeaderProps {
   className?: string;
@@ -41,17 +42,24 @@ export function AppShellHeader({ className }: AppShellHeaderProps) {
     >
       <div className="mx-auto flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          <Button
-            id="button-openMobileNav"
-            type="button"
-            variant="outline"
-            size="icon-sm"
-            className="shrink-0 lg:hidden"
-            aria-label={t("nav.openMenu")}
-            onClick={openMobileNav}
-          >
-            <Menu id="icon-menu" className="size-4" aria-hidden />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                id="button-openMobileNav"
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="shrink-0 lg:hidden"
+                aria-label={t("nav.openMenu")}
+                onClick={openMobileNav}
+              >
+                <Menu id="icon-menu" className="size-4" aria-hidden />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {t("nav.openMenu")}
+            </TooltipContent>
+          </Tooltip>
           <h1
             className="text-page-title min-w-0 truncate"
             id="text-appHeaderTitle"

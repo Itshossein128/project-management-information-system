@@ -97,3 +97,59 @@ def test_forecast_upsert(auth_client, project):
     )
     assert resp.status_code == 200
     assert float(resp.data['expected_inflow']) == 2000000.0
+
+
+def test_forecast_list(auth_client, project, user):
+    from cash_flow.models import CashFlowForecast
+    from datetime import date
+
+    CashFlowForecast.objects.create(
+        project=project,
+        month=date(2024, 7, 1),
+        expected_inflow='1000',
+        expected_outflow='500',
+        created_by=user,
+        updated_by=user,
+    )
+    url = f'{BASE.format(project_id=project.id)}/forecast/'
+    resp = auth_client.get(url)
+    assert resp.status_code == 200
+    assert len(resp.data['results']) >= 1
+
+
+def test_patch_transaction(auth_client, project, cash_tx):
+    url = f'{BASE.format(project_id=project.id)}/transactions/{cash_tx.id}/'
+    resp = auth_client.patch(url, {'description': 'Updated'}, format='json')
+    assert resp.status_code == 200
+    assert resp.data['description'] == 'Updated'
+
+
+def test_delete_transaction(auth_client, project, cash_tx):
+    url = f'{BASE.format(project_id=project.id)}/transactions/{cash_tx.id}/'
+    resp = auth_client.delete(url)
+    assert resp.status_code == 204
+    cash_tx.refresh_from_db()
+    assert cash_tx.is_deleted is True
+
+
+def test_receivables_endpoint(auth_client, project):
+    url = f'{BASE.format(project_id=project.id)}/receivables/'
+    resp = auth_client.get(url)
+    assert resp.status_code == 200
+    assert 'receivables' in resp.data
+
+
+def test_viewer_cannot_create_transaction(api_client, project, member, other_user):
+    api_client.force_authenticate(user=other_user)
+    url = f'{BASE.format(project_id=project.id)}/transactions/'
+    resp = api_client.post(
+        url,
+        {
+            'tx_date': '2024-04-01',
+            'tx_type': 'in',
+            'category': 'other_income',
+            'amount': '100',
+        },
+        format='json',
+    )
+    assert resp.status_code == 403

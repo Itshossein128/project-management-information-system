@@ -5,6 +5,10 @@ from sub_reports.models import DisciplineSubReport, DisciplineSubReportActivity
 
 
 class SubReportActivitySerializer(serializers.ModelSerializer):
+    """
+    Serializer for DisciplineSubReportActivity.
+    Handles serialization of individual activities, ensuring `id` is read-only.
+    """
     class Meta:
         model = DisciplineSubReportActivity
         fields = [
@@ -27,6 +31,10 @@ class SubReportActivitySerializer(serializers.ModelSerializer):
 
 
 class DisciplineSubReportSerializer(serializers.ModelSerializer):
+    """
+    Serializer for DisciplineSubReport.
+    Handles creation and modification of a sub-report and its nested activities.
+    """
     report_date = JalaliDateField()
     activities = SubReportActivitySerializer(many=True, required=False)
     activity_count = serializers.SerializerMethodField()
@@ -53,6 +61,9 @@ class DisciplineSubReportSerializer(serializers.ModelSerializer):
         return sum(1 for activity in obj.activities.all() if not activity.is_deleted)
 
     def create(self, validated_data):
+        """
+        Creates a DisciplineSubReport along with its associated DisciplineSubReportActivities.
+        """
         activities = validated_data.pop('activities', [])
         report = DisciplineSubReport.objects.create(**validated_data)
         for row in activities:
@@ -60,6 +71,10 @@ class DisciplineSubReportSerializer(serializers.ModelSerializer):
         return report
 
     def update(self, instance, validated_data):
+        """
+        Updates a DisciplineSubReport instance. If new activities are provided,
+        existing un-deleted activities are soft-deleted, and the new ones are created.
+        """
         activities = validated_data.pop('activities', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

@@ -29,6 +29,7 @@ import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Modal } from "@/components/overlay/modal";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/sprint-button";
 import { Checkbox, Field, Input, Select } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
@@ -342,7 +343,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                       </td>
                       <td className="px-3 py-2">{act.unit_name ?? "—"}</td>
                       <td className="px-3 py-2">{act.total_quantity ?? "—"}</td>
-                      <td className={cn("px-3 py-2", !act.weight && "text-amber-600")}>
+                      <td className={cn("px-3 py-2", !act.weight && "text-warning-600")}>
                         {formatWeight(act.weight)}
                       </td>
                       <td className="px-3 py-2">{act.planned_start ?? "—"}</td>
@@ -354,22 +355,37 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                       <td className="px-3 py-2">
                         <span className="inline-flex items-center gap-1">
                           <Badge variant={st.variant} label={st.label} />
-                          {act.is_overdue ? <Clock className="size-4 text-red-500" aria-label="معوق" /> : null}
+                          {act.is_overdue ? <Clock className="size-4 text-danger-500" aria-label="معوق" /> : null}
                         </span>
                       </td>
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1">
                           {canEdit ? (
                             <>
-                              <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label="ویرایش">
-                                <Pencil className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label="ارتباط">
-                                <GitBranchPlus className="size-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
-                                <Trash2 className="size-4" />
-                              </Button>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label="ویرایش">
+                                    <Pencil className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>ویرایش</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label="ارتباط">
+                                    <GitBranchPlus className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>ارتباط</TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>حذف</TooltipContent>
+                              </Tooltip>
                             </>
                           ) : null}
                         </div>
@@ -493,7 +509,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
             <p>باقی‌مانده: <strong>{Math.round(Math.abs(weightSummary.remaining) * 1000) / 10}٪</strong></p>
             <p>متعادل: {weightSummary.is_balanced ? "بله" : "خیر"}</p>
             {weightSummary.warning ? (
-              <p className="text-amber-700 dark:text-amber-400">{weightSummary.warning}</p>
+              <p className="text-warning-700 dark:text-warning-400">{weightSummary.warning}</p>
             ) : null}
           </div>
         ) : (

@@ -95,12 +95,8 @@ class ActivityViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         assert_can_delete_activity(instance)
-        from django.utils import timezone
 
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        instance.soft_delete(user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(summary='Activity weight summary', tags=['Activities'])

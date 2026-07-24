@@ -81,20 +81,22 @@ def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
     if sub.contract_id:
         from schedule.models import ActivityProgress
 
-        items = sub.contract.items.filter(is_deleted=False, activity_id__isnull=False)
-        for item in items:
-            prog = (
-                ActivityProgress.objects.filter(activity_id=item.activity_id)
-                .order_by('-report_date')
-                .first()
+        activity_ids = sub.contract.items.filter(
+            is_deleted=False, activity_id__isnull=False
+        ).values_list('activity_id', flat=True)
+
+        if activity_ids:
+            latest_progresses = (
+                ActivityProgress.objects.filter(activity_id__in=activity_ids)
+                .order_by('activity_id', '-report_date')
+                .distinct('activity_id')
             )
-            if not prog:
-                continue
-            planned = float(prog.planned_progress or 0)
-            actual = float(prog.actual_progress or 0)
-            if planned - actual > 0.15:
-                reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
-                break
+            for prog in latest_progresses:
+                planned = float(prog.planned_progress or 0)
+                actual = float(prog.actual_progress or 0)
+                if planned - actual > 0.15:
+                    reasons.append('پیشرفت بیش از 15٪ از برنامه عقب است')
+                    break
 
     return bool(reasons), reasons
 

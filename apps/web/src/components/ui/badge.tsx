@@ -1,5 +1,6 @@
 import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 import { cn } from "src/app/lib/utils";
 
 const badgeVariants = cva(
@@ -7,16 +8,11 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        success:
-          "bg-emerald-500/12 text-emerald-700 ring-emerald-500/25 dark:bg-emerald-400/12 dark:text-emerald-300 dark:ring-emerald-400/25",
-        warning:
-          "bg-amber-500/12 text-amber-700 ring-amber-500/25 dark:bg-amber-400/12 dark:text-amber-300 dark:ring-amber-400/25",
-        danger:
-          "bg-red-500/12 text-red-700 ring-red-500/25 dark:bg-red-400/12 dark:text-red-300 dark:ring-red-400/25",
-        info:
-          "bg-brand-500/12 text-brand-700 ring-brand-500/25 dark:bg-brand-400/12 dark:text-brand-300 dark:ring-brand-400/25",
-        neutral:
-          "bg-muted text-muted-foreground ring-border/70",
+        success: "bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300",
+        warning: "bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300",
+        danger: "bg-danger-100 text-danger-800 dark:bg-danger-900/40 dark:text-danger-300",
+        info: "bg-info-100 text-info-800 dark:bg-info-900/40 dark:text-info-300",
+        neutral: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: { variant: "neutral" },
@@ -26,10 +22,10 @@ const badgeVariants = cva(
 const dotVariants = cva("size-1.5 rounded-full", {
   variants: {
     variant: {
-      success: "bg-emerald-500",
-      warning: "bg-amber-500",
-      danger: "bg-red-500",
-      info: "bg-brand-500",
+      success: "bg-success-500",
+      warning: "bg-warning-500",
+      danger: "bg-danger-500",
+      info: "bg-info-500",
       neutral: "bg-muted-foreground/60",
     },
   },
@@ -59,9 +55,25 @@ export const projectStatusBadge: Record<string, BadgeProps["variant"]> = {
   handed_over: "neutral",
 };
 
+/** i18n keys for project status codes — use with `t(projectStatusI18nKey[status])`. */
+export const projectStatusI18nKey: Record<string, string> = {
+  active: "status.active",
+  suspended: "status.suspended",
+  completed: "status.completed",
+  handed_over: "status.handed_over",
+};
+
+/** @deprecated Prefer `projectStatusI18nKey` + `t()` for bilingual UI. */
 export const projectStatusLabels: Record<string, string> = {
   active: "فعال",
   suspended: "معلق",
   completed: "تکمیل‌شده",
   handed_over: "تحویل‌شده",
 };
+
+/** Localized project status label hook helper. */
+export function useProjectStatusLabel(status: string): string {
+  const { t } = useTranslation();
+  const key = projectStatusI18nKey[status];
+  return key ? t(key) : status;
+}

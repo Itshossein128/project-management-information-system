@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -29,6 +30,7 @@ import { WarningTimeline } from "@/components/subcontractors/WarningTimeline";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import * as XLSX from "xlsx";
 
 type Tab = "performance" | "financial" | "warnings" | "activities";
@@ -40,6 +42,8 @@ function trendIcon(trend: string) {
 }
 
 function SubcontractorDetailContent() {
+  const { t, i18n } = useTranslation();
+
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { subId = "" } = useParams();
   const qc = useQueryClient();
@@ -178,7 +182,7 @@ function SubcontractorDetailContent() {
     return (
       <main className="page-main page-shell mx-auto max-w-7xl px-4 py-8">
         <EmptyState
-          title="دسترسی ندارید"
+          title={t("common.accessDenied")}
           description="برای مشاهده جزئیات پیمانکار به مجوز قراردادها نیاز است."
         />
       </main>
@@ -264,23 +268,16 @@ function SubcontractorDetailContent() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="tablist" aria-label="بخش‌های پیمانکار">
-        {tabs.map(([key, label]) => (
-          <Button
-            key={key}
-            role="tab"
-            aria-selected={tab === key}
-            variant={tab === key ? "primary" : "secondary"}
-            size="sm"
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
+        <TabsList className="mb-4">
+          {tabs.map(([key, label]) => (
+            <TabsTrigger key={key} value={key}>
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {tab === "performance" ? (
-        <div className="space-y-6" role="tabpanel">
+        <ShadcnTabsContent value="performance" className="space-y-6 mt-0">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className={`text-4xl font-bold ${scoreColor(latest?.overall_score)}`}>
@@ -341,11 +338,9 @@ function SubcontractorDetailContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "financial" ? (
-        <div className="space-y-6" role="tabpanel">
+        <ShadcnTabsContent value="financial" className="space-y-6 mt-0">
           {!sub.contract ? (
             <EmptyState
               title="قراردادی متصل نیست"
@@ -374,7 +369,7 @@ function SubcontractorDetailContent() {
                 </p>
                 <div className="h-3 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full bg-amber-500"
+                    className="h-full bg-warning-500"
                     style={{
                       width: `${fin.advance_paid > 0 ? (fin.advance_recovered / fin.advance_paid) * 100 : 0}%`,
                     }}
@@ -404,7 +399,7 @@ function SubcontractorDetailContent() {
                           <td className="px-3 py-2">
                             {IPC_STATUS_LABELS[ipc.status] ?? ipc.status}
                           </td>
-                          <td className={`px-3 py-2 ${ipc.days_overdue ? "text-red-600" : ""}`}>
+                          <td className={`px-3 py-2 ${ipc.days_overdue ? "text-danger-600" : ""}`}>
                             {ipc.days_overdue ? `${ipc.days_overdue} روز` : "—"}
                           </td>
                         </tr>
@@ -415,11 +410,9 @@ function SubcontractorDetailContent() {
               )}
             </>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "warnings" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="warnings" className="space-y-4 mt-0">
           <div className="flex justify-end">
             {canEdit ? (
               <Button variant="primary" onClick={() => setWarningDrawer(true)}>
@@ -445,11 +438,9 @@ function SubcontractorDetailContent() {
               onResolve={(w) => setResolveModal(w)}
             />
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
 
-      {tab === "activities" ? (
-        <div className="space-y-4" role="tabpanel">
+        <ShadcnTabsContent value="activities" className="space-y-4 mt-0">
           <div className="flex flex-wrap items-end gap-3">
             <JalaliDatePicker
               name="activity_from"
@@ -507,8 +498,8 @@ function SubcontractorDetailContent() {
               </table>
             </div>
           )}
-        </div>
-      ) : null}
+        </ShadcnTabsContent>
+      </Tabs>
 
       <Drawer
         isOpen={scoreDrawer}
@@ -561,9 +552,9 @@ function SubcontractorDetailContent() {
             onChange={(v) => setScoreForm({ ...scoreForm, cooperation_score: v })}
           />
           {liveOverall != null ? (
-            <div className="rounded-lg bg-amber-50 p-4 text-center">
-              <p className="text-sm text-amber-800">نمره کل محاسبه شده</p>
-              <p className="text-2xl font-bold text-amber-900">{liveOverall.toFixed(1)}</p>
+            <div className="rounded-lg bg-warning-50 p-4 text-center">
+              <p className="text-sm text-warning-800">نمره کل محاسبه شده</p>
+              <p className="text-2xl font-bold text-warning-900">{liveOverall.toFixed(1)}</p>
             </div>
           ) : null}
           <TextArea
@@ -671,6 +662,7 @@ function SubcontractorDetailContent() {
 }
 
 export default function ProjectSubcontractorDetailPage() {
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   return (
     <ProjectProvider projectId={projectId}>

@@ -173,10 +173,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         if instance.status != ReportStatus.DRAFT:
             raise ValidationError('فقط گزارش‌های پیش‌نویس قابل حذف هستند')
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.updated_by = request.user
-        instance.save(update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'])
+        instance.soft_delete(user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # -- Workflow -----------------------------------------------------------
@@ -336,9 +333,7 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         self._assert_editable()
         instance = self.get_object()
-        instance.is_deleted = True
-        instance.deleted_at = timezone.now()
-        instance.save(update_fields=['is_deleted', 'deleted_at'])
+        instance.soft_delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

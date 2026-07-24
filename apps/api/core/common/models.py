@@ -64,7 +64,11 @@ class AuditSoftDeleteModel(UUIDModel, TimeStampedModel):
     class Meta:
         abstract = True
 
-    def soft_delete(self):
+    def soft_delete(self, user=None):
         self.is_deleted = True
         self.deleted_at = timezone.now()
-        self.save(update_fields=['is_deleted', 'deleted_at', 'updated_at'])
+        update_fields = ['is_deleted', 'deleted_at', 'updated_at']
+        if user:
+            self.updated_by = user
+            update_fields.append('updated_by')
+        self.save(update_fields=update_fields)

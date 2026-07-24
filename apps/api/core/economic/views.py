@@ -33,7 +33,10 @@ class EconomicSnapshotView(APIView):
     def get(self, request, project_pk=None):
         as_of_raw = request.query_params.get('as_of')
         as_of = parse_jalali_or_gregorian(as_of_raw) if as_of_raw else date.today()
-        snapshot = EconomicSnapshot.objects.filter(project_id=project_pk, snapshot_date=as_of).first()
+        refresh = request.query_params.get('refresh', '').lower() in ('1', 'true', 'yes')
+        snapshot = None if refresh else EconomicSnapshot.objects.filter(
+            project_id=project_pk, snapshot_date=as_of
+        ).first()
         if not snapshot:
             snapshot = generate_snapshot(project_pk, as_of)
         inflation_detail = inflation_detail_by_category(project_pk, as_of)
@@ -159,6 +162,21 @@ class InflationMappingListCreateView(APIView):
 class InflationMappingDetailView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'edit_cashflow'
+
+    @extend_schema(summary='Update project inflation mapping', tags=['Economic'])
+    def patch(self, request, project_pk=None, mapping_id=None):
+        mapping = CostCategoryInflationMapping.objects.filter(
+            id=mapping_id,
+            project_id=project_pk,
+        ).first()
+        if not mapping:
+            return Response({'detail': 'Not found or global mapping'}, status=status.HTTP_404_NOT_FOUND)
+        ser = CostCategoryInflationMappingSerializer(mapping, data=request.data, partial=True)
+        ser.is_valid(raise_exception=True)
+        for field, value in ser.validated_data.items():
+            setattr(mapping, field, value)
+        mapping.save()
+        return Response(CostCategoryInflationMappingSerializer(mapping).data)
 
     @extend_schema(summary='Delete project inflation mapping', tags=['Economic'])
     def delete(self, request, project_pk=None, mapping_id=None):

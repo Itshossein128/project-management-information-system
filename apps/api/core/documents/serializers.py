@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from common.serializers import JalaliDateField
 from documents.models import Correspondence, DocumentRevision, MeetingMinutes, ProjectDocument
+from documents.services.upload_service import presign_get_url
 
 
 class DocumentRevisionSerializer(serializers.ModelSerializer):
@@ -15,6 +16,11 @@ class DocumentRevisionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['file_url'] = presign_get_url(instance.file_url)
+        return data
+
 
 class ProjectDocumentSerializer(serializers.ModelSerializer):
     revision_date = JalaliDateField(required=False, allow_null=True)
@@ -27,6 +33,11 @@ class ProjectDocumentSerializer(serializers.ModelSerializer):
             'access_level', 'tags', 'related_activity', 'related_wbs', 'uploaded_by',
         ]
         read_only_fields = ['id', 'file_url', 'file_name', 'file_size_kb', 'uploaded_by']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['file_url'] = presign_get_url(instance.file_url)
+        return data
 
 
 class ProjectDocumentDetailSerializer(ProjectDocumentSerializer):
@@ -51,6 +62,11 @@ class CorrespondenceSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['file_url'] = presign_get_url(instance.file_url) if instance.file_url else ''
+        return data
+
 
 class MeetingMinutesSerializer(serializers.ModelSerializer):
     meeting_date = JalaliDateField()
@@ -63,3 +79,8 @@ class MeetingMinutesSerializer(serializers.ModelSerializer):
             'action_items', 'file_url',
         ]
         read_only_fields = ['id']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['file_url'] = presign_get_url(instance.file_url) if instance.file_url else ''
+        return data

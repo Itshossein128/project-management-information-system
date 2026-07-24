@@ -213,6 +213,10 @@ EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.conso
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ipcas.io')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
+# Alert notification channels (K-04): in_app, email, sms
+ALERT_NOTIFY_CHANNELS = os.environ.get('ALERT_NOTIFY_CHANNELS', 'in_app,email')
+SMS_PROVIDER = os.environ.get('SMS_PROVIDER', 'console')
+
 # S3 / MinIO
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', 'http://localhost:9000')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', 'ipcas')
@@ -220,6 +224,9 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', 'ipcas-secret')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'ipcas-files')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
 AWS_S3_USE_SSL = os.environ.get('AWS_S3_USE_SSL', 'false').lower() in ('1', 'true', 'yes')
+
+# Economic engine
+ECONOMIC_ANNUAL_FINANCING_RATE = float(os.environ.get('ECONOMIC_ANNUAL_FINANCING_RATE', '0.28'))
 
 # RabbitMQ
 RABBITMQ_URL = os.environ.get('RABBITMQ_URL', 'amqp://ipcas:ipcas@localhost:5672/')
