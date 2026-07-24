@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react";
+import { useId } from "react";
 import { useNavigate } from "react-router";
 import { Check, CheckCheck, X } from "lucide-react";
 import { cn } from "@/app/lib/utils";
@@ -19,56 +19,16 @@ const TYPE_ACCENT: Record<NotificationType, string> = {
   generic: "bg-info-500",
 };
 
-const FOCUSABLE =
-  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 export function NotificationPanel({
-  open,
   onClose,
 }: {
-  open: boolean;
   onClose: () => void;
 }) {
   const navigate = useNavigate();
   const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const { data, isLoading } = useNotificationList(open);
+  // We pass `true` to useNotificationList since we only mount this when Popover is open
+  const { data, isLoading } = useNotificationList(true);
   const { markRead, markAllRead } = useNotificationActions();
-
-  useEffect(() => {
-    if (!open) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    closeBtnRef.current?.focus();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
-      if (e.key !== "Tab" || !panelRef.current) return;
-      const nodes = Array.from(
-        panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
-      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
-      if (nodes.length === 0) return;
-      const first = nodes[0]!;
-      const last = nodes[nodes.length - 1]!;
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus?.();
-    };
-  }, [open, onClose]);
 
   const handleClick = (n: AppNotification) => {
     if (!n.is_read) markRead.mutate(n.id);
@@ -79,14 +39,7 @@ export function NotificationPanel({
   };
 
   return (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      id="notification-panel"
-      className="absolute inset-e-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card shadow-lg sm:w-96"
-    >
+    <>
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <span id={titleId} className="text-sm font-semibold">
           اعلان‌ها
@@ -102,7 +55,6 @@ export function NotificationPanel({
             خواندن همه
           </button>
           <button
-            ref={closeBtnRef}
             type="button"
             onClick={onClose}
             aria-label="بستن"
@@ -177,6 +129,6 @@ export function NotificationPanel({
           </ul>
         )}
       </div>
-    </div>
+    </>
   );
 }
