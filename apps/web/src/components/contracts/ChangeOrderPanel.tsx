@@ -10,6 +10,14 @@ import { Input, TextArea } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 export function ChangeOrderPanel({
   projectId,
@@ -86,25 +94,23 @@ export function ChangeOrderPanel({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
+      <div className="rounded-lg border bg-background">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {["شماره", "شرح", "مبلغ", "وضعیت", "عملیات"].map((h) => (
-                <th key={h} className="px-3 py-2 text-start">
-                  {h}
-                </th>
+                <TableHead key={h}>{h}</TableHead>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {changeOrders.map((co) => (
-              <tr key={co.id} className="border-t">
-                <td className="px-3 py-2">{co.change_number}</td>
-                <td className="px-3 py-2">{co.description}</td>
-                <td className="px-3 py-2">{formatFaAmount(co.amount_change)}</td>
-                <td className="px-3 py-2">{co.status}</td>
-                <td className="px-3 py-2">
+              <TableRow key={co.id}>
+                <TableCell>{co.change_number}</TableCell>
+                <TableCell>{co.description}</TableCell>
+                <TableCell>{formatFaAmount(co.amount_change)}</TableCell>
+                <TableCell>{co.status}</TableCell>
+                <TableCell>
                   {canEdit && co.status === "draft" ? (
                     <Button
                       size="sm"
@@ -117,11 +123,11 @@ export function ChangeOrderPanel({
                   ) : (
                     "—"
                   )}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
