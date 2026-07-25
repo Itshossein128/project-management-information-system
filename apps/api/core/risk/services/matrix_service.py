@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from risk.models import BarrierStatus, RiskEvent, Severity
 
+# Defines probability ranges (label, lower bound, upper bound) used in the risk matrix
 PROBABILITY_BUCKETS = [
     ('0-20', Decimal('0'), Decimal('0.20')),
     ('21-40', Decimal('0.20'), Decimal('0.40')),
@@ -14,6 +15,7 @@ PROBABILITY_BUCKETS = [
     ('81-100', Decimal('0.80'), Decimal('1.00')),
 ]
 
+# Defines the specific order in which severity levels should be rendered in matrix columns
 SEVERITY_ORDER = [
     Severity.LOW,
     Severity.MEDIUM,
@@ -23,6 +25,7 @@ SEVERITY_ORDER = [
 
 
 def _probability_bucket(probability) -> str | None:
+    """Determine the bucket label for a given probability value."""
     if probability is None:
         return None
     value = Decimal(str(probability))
