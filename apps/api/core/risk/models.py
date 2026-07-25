@@ -5,6 +5,7 @@ from common.models import AuditSoftDeleteModel, UUIDModel
 
 
 class EventType(models.TextChoices):
+    """Enumeration of various types of risk events."""
     DELAY = 'delay', 'Delay'
     BARRIER = 'barrier', 'Barrier'
     RISK = 'risk', 'Risk'
@@ -13,6 +14,7 @@ class EventType(models.TextChoices):
 
 
 class Severity(models.TextChoices):
+    """Enumeration defining the severity levels of a risk event."""
     LOW = 'low', 'Low'
     MEDIUM = 'medium', 'Medium'
     HIGH = 'high', 'High'
@@ -20,6 +22,7 @@ class Severity(models.TextChoices):
 
 
 class BarrierCategory(models.TextChoices):
+    """Enumeration for categorizing the type of barrier."""
     EQUIPMENT_FAILURE = 'equipment_failure', 'خرابی تجهیزات'
     PAYMENT_DELAY = 'payment_delay', 'تأخیر پرداخت'
     DESIGN_CHANGE = 'design_change', 'تغییر طراحی'
@@ -30,12 +33,17 @@ class BarrierCategory(models.TextChoices):
 
 
 class BarrierStatus(models.TextChoices):
+    """Enumeration representing the resolution status of a barrier."""
     OPEN = 'open', 'باز'
     IN_PROGRESS = 'in_progress', 'در حال پیگیری'
     RESOLVED = 'resolved', 'رفع شده'
 
 
 class RiskEvent(AuditSoftDeleteModel):
+    """
+    Model representing a risk, barrier, or delay event in a project.
+    Stores information about the event's impact, severity, and resolution status.
+    """
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='risk_events')
     activity = models.ForeignKey(
         'projects.Activity',

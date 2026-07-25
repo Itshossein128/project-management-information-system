@@ -7,6 +7,7 @@ from risk.models import BarrierStatus, EventType, RiskEvent, Severity
 
 
 class BarrierSerializer(serializers.ModelSerializer):
+    """Serializer for Barrier log instances."""
     log_date = JalaliDateField(source='event_date')
     resolved_date = JalaliDateField(required=False, allow_null=True)
     category_label = serializers.CharField(source='get_category_display', read_only=True)
@@ -35,11 +36,13 @@ class BarrierSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_responsible_user_name(self, obj):
+        """Retrieve the full name or username of the responsible user."""
         if not obj.responsible_user:
             return ''
         return obj.responsible_user.get_full_name() or obj.responsible_user.username
 
     def validate(self, attrs):
+        """Validate that a resolved date is provided if the status is resolved."""
         status = attrs.get('status', getattr(self.instance, 'status', BarrierStatus.OPEN))
         resolved_date = attrs.get('resolved_date', getattr(self.instance, 'resolved_date', None))
         if status == BarrierStatus.RESOLVED and not resolved_date:
@@ -50,14 +53,17 @@ class BarrierSerializer(serializers.ModelSerializer):
 
 
 class BarrierCreateSerializer(BarrierSerializer):
+    """Serializer specifically designed for creating Barrier instances."""
     log_date = JalaliDateField(source='event_date')
 
     def create(self, validated_data):
+        """Create a new Barrier instance, forcing the event_type to BARRIER."""
         validated_data['event_type'] = EventType.BARRIER
         return super().create(validated_data)
 
 
 class RiskEventSerializer(serializers.ModelSerializer):
+    """Serializer for general RiskEvent instances."""
     event_date = JalaliDateField(required=False, allow_null=True)
     resolved_date = JalaliDateField(required=False, allow_null=True)
     target_resolution_date = JalaliDateField(required=False, allow_null=True)
@@ -100,6 +106,7 @@ class RiskEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def validate(self, attrs):
+        """Validate status resolution requirements and related project linkages."""
         status = attrs.get('status', getattr(self.instance, 'status', BarrierStatus.OPEN))
         resolved_date = attrs.get('resolved_date', getattr(self.instance, 'resolved_date', None))
         if status == BarrierStatus.RESOLVED and not resolved_date:
