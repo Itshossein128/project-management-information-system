@@ -32,3 +32,6 @@
 ## 2024-05-19 - DRF SerializerMethodField Bulk Pre-calculation Cache
 **Learning:** Complex N+1 query problems in DRF APIs (caused by nested `SerializerMethodField` calculating logic over related objects or `ViewSet` filters executing functions in loops) cannot always be fixed simply using `prefetch_related`, especially when those functions contain separate ORM calls like `sub.contract.items.filter()`.
 **Action:** Always decouple the logic into a bulk calculation service. Bulk fetch the related IDs using `__in`, process logic in Python memory for the list of objects, and assign the results to a temporary attribute (e.g., `_risk_cache`) *before* serializing. Ensure the serializer function checks for and utilizes this cache attribute to prevent falling back to individual queries.
+## 2024-05-18 - Avoid N+1 queries from .count() on prefetched relations
+**Learning:** In Django, calling `.count()` on a related manager (e.g., `obj.wbs_nodes.count()`) evaluates to a `SELECT COUNT(...)` query, completely bypassing the `prefetch_related` cache and causing N+1 queries.
+**Action:** When a ViewSet uses `prefetch_related`, iterate over the cache in python to count (e.g. `len(obj.wbs_nodes.all())` or `sum(1 for _ in obj.related.all())`) inside the serializer to maintain optimal O(1) performance.
