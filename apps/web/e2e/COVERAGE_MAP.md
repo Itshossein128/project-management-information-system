@@ -7,7 +7,7 @@
 | ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
 | DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
-| OFFLINE | Sync & Conflict | 2 | 15 | 13% |
+| OFFLINE | Sync & Conflict | 5 | 15 | 33% |
 | PROGRESS | Physical Progress & S-Curve | 4 | 10 | 40% |
 | FINANCE | Budget & Cost | 5 | 15 | 33% |
 
