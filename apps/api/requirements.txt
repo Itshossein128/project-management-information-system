@@ -16,7 +16,7 @@ gunicorn>=22.0
 django-storages[boto3]>=1.14
 boto3>=1.34
 pika>=1.4.1
-django-treebeard>=4.7
+django-treebeard==4.7.1
 celery>=5.4
 celery-types>=0.26.0
 redis>=5.0

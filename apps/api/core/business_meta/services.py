@@ -90,56 +90,80 @@ def create_project_from_template(
 create_business_from_template = create_project_from_template
 
 
+def _validate_string(value, slug):
+    if not isinstance(value, str):
+        return None, 'Must be a string.'
+    return value, None
+
+def _validate_number(value, slug):
+    if isinstance(value, bool):
+        return None, 'Must be a number.'
+    if isinstance(value, (int, float)):
+        return value, None
+    try:
+        cleaned_val = float(value) if '.' in str(value) else int(value)
+        return cleaned_val, None
+    except (TypeError, ValueError):
+        return None, 'Must be a number.'
+
+def _validate_date(value, slug):
+    from datetime import datetime
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace('Z', '+00:00')).isoformat(), None
+        except ValueError:
+            return None, 'Invalid date format (use ISO 8601).'
+    if isinstance(value, datetime):
+        return value.isoformat(), None
+    return None, 'Must be a date (ISO 8601 string).'
+
+def _validate_boolean(value, slug):
+    if isinstance(value, bool):
+        return value, None
+    return None, 'Must be a boolean.'
+
+def _validate_reference(value, slug):
+    if isinstance(value, str):
+        return value, None
+    if value is not None:
+        return None, 'Reference must be a string (target row id).'
+    return None, None
+
+FIELD_VALIDATORS = {
+    FieldType.STRING: _validate_string,
+    FieldType.NUMBER: _validate_number,
+    FieldType.DATE: _validate_date,
+    FieldType.BOOLEAN: _validate_boolean,
+    FieldType.REFERENCE: _validate_reference,
+}
+
 def validate_row_data(field_defs, data):
     """Validate payload against field definitions. Return (cleaned_data, errors)."""
-    from datetime import datetime
-
     cleaned = {}
     errors = {}
+
     for fdef in field_defs:
         slug = fdef.slug
         value = data.get(slug)
+
         if value is None or value == '':
             if fdef.required:
                 errors[slug] = 'This field is required.'
             continue
-        if fdef.field_type == FieldType.STRING:
-            if not isinstance(value, str):
-                errors[slug] = 'Must be a string.'
-            else:
-                cleaned[slug] = value
-        elif fdef.field_type == FieldType.NUMBER:
-            if isinstance(value, bool):
-                errors[slug] = 'Must be a number.'
-            elif isinstance(value, (int, float)):
-                cleaned[slug] = value
-            else:
-                try:
-                    cleaned[slug] = float(value) if '.' in str(value) else int(value)
-                except (TypeError, ValueError):
-                    errors[slug] = 'Must be a number.'
-        elif fdef.field_type == FieldType.DATE:
-            if isinstance(value, str):
-                try:
-                    cleaned[slug] = datetime.fromisoformat(value.replace('Z', '+00:00')).isoformat()
-                except ValueError:
-                    errors[slug] = 'Invalid date format (use ISO 8601).'
-            elif isinstance(value, datetime):
-                cleaned[slug] = value.isoformat()
-            else:
-                errors[slug] = 'Must be a date (ISO 8601 string).'
-        elif fdef.field_type == FieldType.BOOLEAN:
-            if isinstance(value, bool):
-                cleaned[slug] = value
-            else:
-                errors[slug] = 'Must be a boolean.'
-        elif fdef.field_type == FieldType.REFERENCE:
-            if isinstance(value, str):
-                cleaned[slug] = value
-            elif value is not None:
-                errors[slug] = 'Reference must be a string (target row id).'
+
+        validator = FIELD_VALIDATORS.get(fdef.field_type)
+        if validator:
+            cleaned_val, err = validator(value, slug)
+            if err:
+                errors[slug] = err
+            elif cleaned_val is not None:
+                cleaned[slug] = cleaned_val
+        else:
+            errors[slug] = f'Unknown field type {fdef.field_type}.'
+
     allowed = {f.slug for f in field_defs}
     for key in data:
         if key not in allowed and not key.startswith('_'):
             errors[key] = 'Unknown field.'
+
     return cleaned, errors
