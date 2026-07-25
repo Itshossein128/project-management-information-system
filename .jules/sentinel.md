@@ -25,3 +25,11 @@
 **Vulnerability:** Found an API endpoint (`apps/api/core/inventory/views.py`) returning a raw exception string (`str(e)`) inside a generic 400 response.
 **Learning:** Returning `str(e)` directly to clients leaks internal implementation details, such as file paths or module internals, exposing the application to reconnaissance attacks.
 **Prevention:** Instead of stringifying generic exceptions in JSON responses, explicitly catch the expected errors, log them using `logger.exception()` to preserve debugging information server-side, and return a safe, generic error message (like "Invalid request.") to the client.
+## 2026-07-25 - Add max_length bounds to authentication input fields
+**Vulnerability:** Missing input length limits on DRF s (DoS risk).
+**Learning:** In Django REST Framework,  without  allows unbounded payloads, making endpoints vulnerable to resource exhaustion (e.g., massive passwords freezing the server during PBKDF2 hashing).
+**Prevention:** Always apply explicit, sensible  constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.
+## $(date +%Y-%m-%d) - Add max_length bounds to authentication input fields
+**Vulnerability:** Missing input length limits on DRF `CharField`s (DoS risk).
+**Learning:** In Django REST Framework, `serializers.CharField()` without `max_length` allows unbounded payloads, making endpoints vulnerable to resource exhaustion (e.g., massive passwords freezing the server during PBKDF2 hashing).
+**Prevention:** Always apply explicit, sensible `max_length` constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.

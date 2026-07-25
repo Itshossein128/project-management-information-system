@@ -12,9 +12,9 @@ User = get_user_model()
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    password_confirm = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    phone_number = serializers.CharField(required=False, allow_blank=True)
+    password = serializers.CharField(write_only=True, required=True, max_length=128, style={'input_type': 'password'})
+    password_confirm = serializers.CharField(write_only=True, required=True, max_length=128, style={'input_type': 'password'})
+    phone_number = serializers.CharField(required=False, allow_blank=True, max_length=20)
     username = serializers.CharField(required=False, allow_blank=True, max_length=60)
     first_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
     last_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
@@ -110,9 +110,9 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(required=False, allow_blank=True)
-    username = serializers.CharField(required=False, allow_blank=True)
-    password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    phone_number = serializers.CharField(required=False, allow_blank=True, max_length=20)
+    username = serializers.CharField(required=False, allow_blank=True, max_length=60)
+    password = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
 
     def validate(self, attrs):
         login = attrs.get('phone_number') or attrs.get('username')
@@ -123,9 +123,9 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
-    new_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
-    new_password_confirm = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    old_password = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
+    new_password = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
+    new_password_confirm = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
 
     def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
@@ -134,13 +134,13 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class ForgotPasswordSerializer(serializers.Serializer):
-    phone_number = serializers.CharField(required=True)
+    phone_number = serializers.CharField(required=True, max_length=20)
 
 
 class ResetPasswordSerializer(serializers.Serializer):
-    token = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
-    new_password_confirm = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'})
+    token = serializers.CharField(required=True, max_length=128)
+    new_password = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
+    new_password_confirm = serializers.CharField(required=True, write_only=True, max_length=128, style={'input_type': 'password'})
 
     def validate(self, attrs):
         if attrs['new_password'] != attrs['new_password_confirm']:
