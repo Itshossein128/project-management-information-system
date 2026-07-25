@@ -47,21 +47,18 @@ def _publish_ipc_submitted(ipc):
 
 def _ipc_cash_transaction_defaults(ipc, user, payment_date):
     contract = ipc.contract
-    if contract.contract_type == ContractType.MAIN:
-        tx_type = CashTransactionType.IN
-        category = InflowCategory.IPC_RECEIPT
-    elif contract.contract_type == ContractType.SUBCONTRACT:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.SUBCONTRACTOR_PAYMENT
-    elif contract.contract_type == ContractType.PURCHASE:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.SUPPLIER_PAYMENT
-    elif contract.contract_type == ContractType.EQUIPMENT_RENTAL:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.EQUIPMENT_RENTAL
-    else:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.OTHER_EXPENSE
+
+    CONTRACT_TX_MAP = {
+        ContractType.MAIN: (CashTransactionType.IN, InflowCategory.IPC_RECEIPT),
+        ContractType.SUBCONTRACT: (CashTransactionType.OUT, OutflowCategory.SUBCONTRACTOR_PAYMENT),
+        ContractType.PURCHASE: (CashTransactionType.OUT, OutflowCategory.SUPPLIER_PAYMENT),
+        ContractType.EQUIPMENT_RENTAL: (CashTransactionType.OUT, OutflowCategory.EQUIPMENT_RENTAL),
+    }
+
+    tx_type, category = CONTRACT_TX_MAP.get(
+        contract.contract_type,
+        (CashTransactionType.OUT, OutflowCategory.OTHER_EXPENSE)
+    )
 
     return {
         'project_id': ipc.project_id,
