@@ -7,9 +7,10 @@ import {
   type RelationType,
 } from "@/app/lib/api/activities";
 import { Modal } from "@/components/overlay/modal";
-import { Input } from "@/components/form";
+import { Input, Select } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/sprint-button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const RELATION_TYPES: { value: RelationType; label: string }[] = [
   { value: "FS", label: "پایان به شروع (FS)" },
@@ -92,27 +93,22 @@ export function AddRelationModal({
         </p>
 
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium">این فعالیت نقش:</legend>
-          <div className="flex gap-4 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="role"
-                checked={role === "predecessor"}
-                onChange={() => setRole("predecessor")}
-              />
+          <legend className="text-sm font-medium mb-1">این فعالیت نقش:</legend>
+          <ToggleGroup
+            type="single"
+            value={role}
+            onValueChange={(val) => {
+              if (val) setRole(val as "predecessor" | "successor");
+            }}
+            className="justify-start gap-2"
+          >
+            <ToggleGroupItem value="predecessor" className="flex-1 sm:flex-none">
               پیش‌نیاز (predecessor)
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="role"
-                checked={role === "successor"}
-                onChange={() => setRole("successor")}
-              />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="successor" className="flex-1 sm:flex-none">
               جانشین (successor)
-            </label>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </fieldset>
 
         <div className="space-y-2">
@@ -122,31 +118,26 @@ export function AddRelationModal({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          <Select
+            name="otherId"
             value={otherId}
             onChange={(e) => setOtherId(e.target.value)}
-          >
-            <option value="">انتخاب فعالیت…</option>
-            {options.map((a) => (
-              <option key={a.activity_id} value={a.activity_id}>
-                {a.activity_code} — {a.activity_name}
-              </option>
-            ))}
-          </select>
+            placeholder="انتخاب فعالیت…"
+            options={options.map((a) => ({
+              value: a.activity_id,
+              label: `${a.activity_code} — ${a.activity_name}`,
+            }))}
+          />
         </div>
 
         <div className="space-y-2">
           <Label>نوع ارتباط</Label>
-          <select
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          <Select
+            name="relationType"
             value={relationType}
             onChange={(e) => setRelationType(e.target.value as RelationType)}
-          >
-            {RELATION_TYPES.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
+            options={RELATION_TYPES}
+          />
         </div>
 
         <div className="space-y-2">

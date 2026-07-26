@@ -7,7 +7,7 @@ import {
 } from "@/app/lib/api/templates";
 import { Modal } from "@/components/overlay/modal";
 import { Button } from "@/components/ui/sprint-button";
-import { Input } from "@/components/form";
+import { Input, Select } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 
@@ -79,17 +79,15 @@ export function SaveAsTemplateModal({
         </div>
         <div>
           <Label>نوع پروژه</Label>
-          <select
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          <Select
+            name="projectType"
             value={projectType}
             onChange={(e) => setProjectType(e.target.value as ProjectType)}
-          >
-            {PROJECT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {projectTypeLabels[t]}
-              </option>
-            ))}
-          </select>
+            options={PROJECT_TYPES.map((t) => ({
+              value: t,
+              label: projectTypeLabels[t],
+            }))}
+          />
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
