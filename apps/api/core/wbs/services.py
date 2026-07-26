@@ -133,6 +133,11 @@ def create_wbs_node(
 
 @transaction.atomic
 def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
+    """
+    Updates the properties of a given WBS node, saves it, and checks for
+    any weight warnings based on its siblings. Returns the updated node
+    and a list of warnings (if any).
+    """
     for key, value in fields.items():
         if value is not None or key in ('weight_physical', 'weight_financial'):
             setattr(node, key, value)
@@ -144,6 +149,10 @@ def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
 
 @transaction.atomic
 def delete_wbs_node(node: WBS) -> None:
+    """
+    Deletes a WBS node provided it has no children or associated activities.
+    After successful deletion, it propagates WBS codes for the project.
+    """
     if node.numchild > 0:
         raise WBSConflictError('Cannot delete a WBS node that has children.')
     if Activity.objects.filter(wbs=node).exists():
@@ -234,4 +243,8 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
 
 
 def build_tree_queryset(project_id):
+    """
+    Retrieves the entire WBS tree for a specific project, ordered sequentially
+    by its hierarchical path to maintain tree structure.
+    """
     return WBS.objects.filter(project_id=project_id).order_by('path')
