@@ -227,7 +227,8 @@ class IPCDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'ipc_number', 'gross_amount', 'net_amount']
 
     def get_deductions_total(self, obj):
-        total = sum(float(d.amount) for d in obj.deductions.filter(is_deleted=False))
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
+        total = sum(float(d.amount) for d in obj.deductions.all() if not d.is_deleted)
         return total
 
     def get_net_amount_computed(self, obj):

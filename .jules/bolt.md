@@ -35,3 +35,7 @@
 ## 2024-05-18 - Avoid N+1 queries from .count() on prefetched relations
 **Learning:** In Django, calling `.count()` on a related manager (e.g., `obj.wbs_nodes.count()`) evaluates to a `SELECT COUNT(...)` query, completely bypassing the `prefetch_related` cache and causing N+1 queries.
 **Action:** When a ViewSet uses `prefetch_related`, iterate over the cache in python to count (e.g. `len(obj.wbs_nodes.all())` or `sum(1 for _ in obj.related.all())`) inside the serializer to maintain optimal O(1) performance.
+
+## 2024-07-26 - Resolve N+1 query in IPCDetailSerializer deductions_total
+**Learning:** In Django REST Framework serializers, using `obj.deductions.filter(...)` inside a `SerializerMethodField` ignores any database prefetching done in the viewset, resulting in N+1 database queries.
+**Action:** When calculating aggregations (like sums or counts) on related objects in serializers, ensure the viewset uses `prefetch_related('deductions')` and then perform the aggregation in Python using `.all()` (e.g., `sum(d.amount for d in obj.deductions.all() if not d.is_deleted)`) to leverage the prefetched cache.
