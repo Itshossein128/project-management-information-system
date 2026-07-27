@@ -39,3 +39,6 @@
 ## 2024-07-26 - Resolve N+1 query in IPCDetailSerializer deductions_total
 **Learning:** In Django REST Framework serializers, using `obj.deductions.filter(...)` inside a `SerializerMethodField` ignores any database prefetching done in the viewset, resulting in N+1 database queries.
 **Action:** When calculating aggregations (like sums or counts) on related objects in serializers, ensure the viewset uses `prefetch_related('deductions')` and then perform the aggregation in Python using `.all()` (e.g., `sum(d.amount for d in obj.deductions.all() if not d.is_deleted)`) to leverage the prefetched cache.
+## 2026-07-27 - Fetch latest related record for multiple parents with distinct
+**Learning:** When iterating over a list of parent records and needing the latest related record for each, performing a query inside the loop causes N+1 queries. Using `.distinct('parent_id')` combined with `.order_by('parent_id', '-date_field')` retrieves all latest records efficiently in a single query.
+**Action:** Instead of `parent.related.order_by('-date').first()` inside a loop, extract all parent IDs, query the related model with `.filter(parent_id__in=ids).order_by('parent_id', '-date').distinct('parent_id')`, and build a Python dictionary mapping `parent_id` to the related record before the loop.
