@@ -73,11 +73,13 @@ class ContractListSerializer(serializers.ModelSerializer):
 
     def get_total_ipc_count(self, obj):
         stats = self._ipc_stats(obj)
-        return stats['total'] if stats else obj.ipcs.filter(is_deleted=False).count()
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
+        return stats['total'] if stats else sum(1 for ipc in obj.ipcs.all() if not ipc.is_deleted)
 
     def get_paid_ipc_count(self, obj):
         stats = self._ipc_stats(obj)
-        return stats['paid'] if stats else obj.ipcs.filter(is_deleted=False, status='paid').count()
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
+        return stats['paid'] if stats else sum(1 for ipc in obj.ipcs.all() if not ipc.is_deleted and ipc.status == 'paid')
 
     def get_total_billed(self, obj):
         stats = self._ipc_stats(obj)
