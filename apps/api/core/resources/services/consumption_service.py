@@ -9,19 +9,28 @@ from resources.models import InventoryTransaction, Material, TransactionType
 
 
 def _issued_qty(qs):
-    """Materials issued to the field (excludes waste — tracked separately)."""
+    """
+    Calculates the total quantity of materials issued to the field from a given queryset
+    of inventory transactions (excludes waste which is tracked separately).
+    """
     return float(
         qs.filter(tx_type=TransactionType.OUT).aggregate(total=Sum('quantity'))['total'] or 0
     )
 
 
 def _waste_qty(qs):
+    """
+    Calculates the total quantity of materials wasted from a given queryset of inventory transactions.
+    """
     return float(
         qs.filter(tx_type=TransactionType.WASTE).aggregate(total=Sum('quantity'))['total'] or 0
     )
 
 
 def _received_qty(qs):
+    """
+    Calculates the total quantity of materials received from a given queryset of inventory transactions.
+    """
     return float(qs.filter(tx_type=TransactionType.IN).aggregate(total=Sum('quantity'))['total'] or 0)
 
 
@@ -33,7 +42,11 @@ def material_consumption_list(
     date_from=None,
     date_to=None,
 ):
-    """Per-material consumption vs estimated total and waste ratio."""
+    """
+    Generates a list detailing per-material consumption against estimated totals,
+    including calculated consumption and waste percentages, optionally filtered by material,
+    activity, and date range.
+    """
     qs = Material.objects.filter(project_id=project_id)
     if material_id:
         qs = qs.filter(pk=material_id)
@@ -78,7 +91,10 @@ def activity_consumption_list(
     date_from=None,
     date_to=None,
 ):
-    """Per-activity issued qty vs activity total_quantity."""
+    """
+    Generates a list detailing per-activity material consumption against the total planned quantity
+    for each activity, optionally filtered by activity and date range.
+    """
     act_qs = Activity.objects.filter(project_id=project_id, is_deleted=False)
     if activity_id:
         act_qs = act_qs.filter(pk=activity_id)
@@ -121,7 +137,10 @@ def material_consumption_report(
     date_from=None,
     date_to=None,
 ):
-    """Combined consumption report for materials and activities."""
+    """
+    Generates a comprehensive consumption report for a project, combining both
+    per-material and per-activity consumption analytics.
+    """
     return {
         'materials': material_consumption_list(
             project_id,

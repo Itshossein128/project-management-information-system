@@ -8,6 +8,10 @@ from resources.models import InventoryTransaction, Material, MaterialRequest, Tr
 
 
 def material_balance_list(project_id, *, discipline=None, location=None, block_type=None, low_stock=False):
+    """
+    Returns a list of material balances for a given project, optionally filtered by discipline,
+    location, block type, and low stock status.
+    """
     qs = Material.objects.filter(project_id=project_id)
     if discipline:
         qs = qs.filter(discipline=discipline)
@@ -26,6 +30,10 @@ def material_balance_list(project_id, *, discipline=None, location=None, block_t
 
 
 def compute_material_balance(material: Material) -> dict:
+    """
+    Calculates the current balance, totals (received, issued, adjusted, requested),
+    and low stock status for a specific material based on inventory transactions.
+    """
     txs = InventoryTransaction.objects.filter(material=material, is_deleted=False)
     received = (
         txs.filter(tx_type=TransactionType.IN).aggregate(total=Sum('quantity'))['total'] or 0
@@ -73,6 +81,10 @@ def compute_material_balance(material: Material) -> dict:
 
 
 def running_balance(material_id, *, project_id=None):
+    """
+    Generates a chronological list of inventory transactions for a specific material,
+    calculating the running balance after each transaction.
+    """
     qs = InventoryTransaction.objects.filter(material_id=material_id, is_deleted=False)
     if project_id is not None:
         qs = qs.filter(project_id=project_id)
