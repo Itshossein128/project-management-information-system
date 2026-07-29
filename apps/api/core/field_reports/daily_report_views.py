@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.mixins import WorkflowViewSetMixin
 from common.jalali import parse_date_optional
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
@@ -80,7 +81,7 @@ def _validate_report_ready_for_submit(report: DailyReport):
     partial_update=extend_schema(summary='Update daily report header', tags=['Daily Reports']),
     destroy=extend_schema(summary='Soft-delete daily report', tags=['Daily Reports']),
 )
-class DailyReportViewSet(viewsets.ModelViewSet):
+class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     lookup_url_kwarg = 'pk'
     pagination_class = DefaultPageNumberPagination
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
@@ -178,10 +179,7 @@ class DailyReportViewSet(viewsets.ModelViewSet):
 
     # -- Workflow -----------------------------------------------------------
 
-    @extend_schema(summary='Submit for approval', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def submit(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _submit(self, instance, request):
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
         _validate_report_ready_for_submit(instance)
@@ -197,19 +195,13 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         services.review_report(instance, request.user, request.data.get('notes', ''))
         return Response(DailyReportDetailSerializer(instance).data)
 
-    @extend_schema(summary='Approve report', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def approve(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _approve(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل تأیید هستند')
         services.approve_report(instance, request.user)
         return Response(DailyReportDetailSerializer(instance).data)
 
-    @extend_schema(summary='Reject report', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def reject(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _reject(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل رد هستند')
         reason = (request.data.get('reason') or '').strip()
