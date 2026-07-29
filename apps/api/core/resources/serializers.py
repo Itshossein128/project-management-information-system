@@ -28,6 +28,19 @@ class MaterialSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
+class MaterialRequestPlaceOrderSerializer(serializers.Serializer):
+    supplier = serializers.UUIDField(required=True)
+    order_date = JalaliDateField(required=False, allow_null=True)
+    expected_delivery_date = JalaliDateField(required=False, allow_null=True)
+    unit_price = serializers.DecimalField(max_digits=18, decimal_places=4, required=False, allow_null=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
+
+
+class MaterialRequestDeliverSerializer(serializers.Serializer):
+    actual_delivery_date = JalaliDateField(required=False, allow_null=True)
+    document_ref = serializers.CharField(required=False, allow_blank=True)
+
+
 class MaterialRequestSerializer(serializers.ModelSerializer):
     request_date = JalaliDateField(required=False, allow_null=True)
     required_by_date = JalaliDateField(required=False, allow_null=True)
