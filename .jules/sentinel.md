@@ -33,3 +33,7 @@
 **Vulnerability:** Missing input length limits on DRF `CharField`s (DoS risk).
 **Learning:** In Django REST Framework, `serializers.CharField()` without `max_length` allows unbounded payloads, making endpoints vulnerable to resource exhaustion (e.g., massive passwords freezing the server during PBKDF2 hashing).
 **Prevention:** Always apply explicit, sensible `max_length` constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.
+## $(date +%Y-%m-%d) - Add max_length bounds to authentication input fields
+**Vulnerability:** Missing input length limits on DRF `CharField`s (DoS risk).
+**Learning:** In Django REST Framework, `serializers.CharField()` without `max_length` allows unbounded payloads, making endpoints vulnerable to resource exhaustion (e.g., massive passwords freezing the server during PBKDF2 hashing).
+**Prevention:** Always apply explicit, sensible `max_length` constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.
