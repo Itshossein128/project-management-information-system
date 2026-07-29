@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from projects.models import Activity, ActivityRelation, Project, RelationType, WBS
 from schedule.models import BaselineActivity, BaselineSchedule
+from schedule.services.shared_import import extract_activities_from_tasks, bulk_create_relations
 
 MSP_RELATION_MAP = {
     '1': RelationType.FS,
@@ -277,43 +278,20 @@ def execute_msp_import(
             progress_callback(int(done / max(total, 1) * 80))
 
     existing_activities = set(Activity.objects.filter(project=project).values_list('activity_code', flat=True))
-    activities_to_create = []
-    task_uid_to_activity_index = {}
-
-    for task in parsed.tasks:
-        if task.is_summary:
-            continue
+    def get_wbs_msp(task, outline_to_wbs, warnings):
         parent_key = '.'.join(task.outline_number.split('.')[:-1])
         wbs = outline_to_wbs.get(parent_key)
         if wbs is None and outline_to_wbs:
             wbs = list(outline_to_wbs.values())[0]
         if wbs is None:
             warnings.append(f'Activity "{task.name}" has no WBS parent.')
-            continue
+            return None
+        return wbs
 
-        code = task.wbs_code or task.uid
-        if code in existing_activities:
-            warnings.append(f'Duplicate activity code "{code}" — skipped.')
-            continue
-
-        activities_to_create.append(Activity(
-            project=project,
-            wbs=wbs,
-            activity_code=code,
-            activity_name=task.name,
-            planned_start=task.start,
-            planned_finish=task.finish,
-            created_by=audit_user,
-            updated_by=audit_user,
-        ))
-        task_uid_to_activity_index[task.uid] = len(activities_to_create) - 1
-        existing_activities.add(code)
-        activity_count += 1
-        done += 1
-
-    created_activities = Activity.objects.bulk_create(activities_to_create)
-    for task_uid, index in task_uid_to_activity_index.items():
-        uid_to_activity[task_uid] = created_activities[index]
+    done, activity_count = extract_activities_from_tasks(
+        parsed.tasks, project, existing_activities, uid_to_activity,
+        outline_to_wbs, warnings, audit_user, done, activity_count, get_wbs_msp
+    )
 
     baseline = BaselineSchedule.objects.create(
         project=project,
@@ -360,14 +338,6 @@ def execute_msp_import(
                 updated_by=audit_user,
             ))
             relation_count += 1
-    ActivityRelation.objects.bulk_create(relations_to_create, ignore_conflicts=True)
-
-    if progress_callback:
-        progress_callback(100)
-
-    return {
-        'wbs_nodes_created': wbs_count,
-        'activities_created': activity_count,
-        'relations_created': relation_count,
-        'warnings': warnings,
-    }
+    return bulk_create_relations(
+        relations_to_create, wbs_count, activity_count, relation_count, warnings, progress_callback
+    )
