@@ -194,11 +194,24 @@ def _check_subcontractor_risk(rule, project_id):
 
 @alert_registry.register('subcontractor_score_low')
 def _check_subcontractor_score_low(rule, project_id):
-    from subcontractors.models import Subcontractor
+    from subcontractors.models import Subcontractor, SubcontractorPerformanceScore
 
     threshold = float(rule.threshold or 6)
-    for sub in Subcontractor.objects.filter(project_id=project_id, is_deleted=False):
-        latest = sub.scores.filter(is_deleted=False).order_by('-score_date').first()
+    subs = list(Subcontractor.objects.filter(project_id=project_id, is_deleted=False))
+    if not subs:
+        return
+
+    # ⚡ Bolt: Fetch all latest scores in a single query to avoid N+1 inside the loop
+    sub_ids = [sub.id for sub in subs]
+    latest_scores = (
+        SubcontractorPerformanceScore.objects.filter(subcontractor_id__in=sub_ids, is_deleted=False)
+        .order_by('subcontractor_id', '-score_date')
+        .distinct('subcontractor_id')
+    )
+    score_map = {score.subcontractor_id: score for score in latest_scores}
+
+    for sub in subs:
+        latest = score_map.get(sub.id)
         if latest and latest.overall_score is not None and float(latest.overall_score) < threshold:
             fire_alert(
                 rule.id,
