@@ -57,10 +57,30 @@ class BaseHRRequestViewSet(ProjectScopedViewSet):
         obj = self._submit_request(obj, request.user)
         return Response(self.get_serializer(obj).data)
 
+    @action(detail=True, methods=['post'], url_path='supervisor-approve')
+    def supervisor_approve(self, request, project_pk=None, pk=None):
+        obj = self.get_object()
+        approved = request.data.get('approved', True)
+        obj = self._supervisor_approve(obj, request.user, approved, request.data)
+        return Response(self.get_serializer(obj).data)
+
+    @action(detail=True, methods=['post'], url_path='manager-approve')
+    def manager_approve(self, request, project_pk=None, pk=None):
+        obj = self.get_object()
+        approved = request.data.get('approved', True)
+        obj = self._manager_approve(obj, request.user, approved, request.data)
+        return Response(self.get_serializer(obj).data)
+
     def _check_draft_status(self, obj):
         raise NotImplementedError
 
     def _submit_request(self, obj, user):
+        raise NotImplementedError
+
+    def _supervisor_approve(self, obj, user, approved: bool, data: dict):
+        raise NotImplementedError
+
+    def _manager_approve(self, obj, user, approved: bool, data: dict):
         raise NotImplementedError
 
 
@@ -81,21 +101,13 @@ class OvertimeRequestViewSet(BaseHRRequestViewSet):
     def _submit_request(self, obj, user):
         return services.submit_overtime(obj, user)
 
-    @action(detail=True, methods=['post'], url_path='supervisor-approve')
-    def supervisor_approve(self, request, project_pk=None, pk=None):
-        obj = self.get_object()
-        approved = request.data.get('approved', True)
-        notes = request.data.get('notes', '')
-        obj = services.supervisor_approve_overtime(obj, request.user, approved, notes)
-        return Response(self.get_serializer(obj).data)
+    def _supervisor_approve(self, obj, user, approved: bool, data: dict):
+        notes = data.get('notes', '')
+        return services.supervisor_approve_overtime(obj, user, approved, notes)
 
-    @action(detail=True, methods=['post'], url_path='manager-approve')
-    def manager_approve(self, request, project_pk=None, pk=None):
-        obj = self.get_object()
-        approved = request.data.get('approved', True)
-        approved_hours = request.data.get('approved_hours')
-        obj = services.manager_approve_overtime(obj, request.user, approved, approved_hours)
-        return Response(self.get_serializer(obj).data)
+    def _manager_approve(self, obj, user, approved: bool, data: dict):
+        approved_hours = data.get('approved_hours')
+        return services.manager_approve_overtime(obj, user, approved, approved_hours)
 
 
 @extend_schema_view(
@@ -115,19 +127,11 @@ class LeaveRequestViewSet(BaseHRRequestViewSet):
     def _submit_request(self, obj, user):
         return services.submit_leave(obj, user)
 
-    @action(detail=True, methods=['post'], url_path='supervisor-approve')
-    def supervisor_approve(self, request, project_pk=None, pk=None):
-        obj = self.get_object()
-        approved = request.data.get('approved', True)
-        obj = services.supervisor_approve_leave(obj, request.user, approved)
-        return Response(self.get_serializer(obj).data)
+    def _supervisor_approve(self, obj, user, approved: bool, data: dict):
+        return services.supervisor_approve_leave(obj, user, approved)
 
-    @action(detail=True, methods=['post'], url_path='manager-approve')
-    def manager_approve(self, request, project_pk=None, pk=None):
-        obj = self.get_object()
-        approved = request.data.get('approved', True)
-        obj = services.manager_approve_leave(obj, request.user, approved)
-        return Response(self.get_serializer(obj).data)
+    def _manager_approve(self, obj, user, approved: bool, data: dict):
+        return services.manager_approve_leave(obj, user, approved)
 
     @action(detail=True, methods=['post'], url_path='security-approve')
     def security_approve(self, request, project_pk=None, pk=None):
