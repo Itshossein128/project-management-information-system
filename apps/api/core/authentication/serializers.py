@@ -16,8 +16,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password_confirm = serializers.CharField(write_only=True, required=True, max_length=128, style={'input_type': 'password'})
     phone_number = serializers.CharField(required=False, allow_blank=True, max_length=20)
     username = serializers.CharField(required=False, allow_blank=True, max_length=60)
-    first_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    last_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    first_name = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=120)
+    last_name = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=120)
 
     class Meta:
         model = User
