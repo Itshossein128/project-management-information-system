@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.mixins import WorkflowViewSetMixin
 from common.viewsets import ProjectScopedViewSet
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
@@ -18,7 +19,7 @@ from sub_reports.services import submit_sub_report, approve_sub_report, reject_s
     partial_update=extend_schema(summary='Update discipline sub-report', tags=['Sub-reports']),
     destroy=extend_schema(summary='Delete discipline sub-report', tags=['Sub-reports']),
 )
-class DisciplineSubReportViewSet(ProjectScopedViewSet):
+class DisciplineSubReportViewSet(WorkflowViewSetMixin, ProjectScopedViewSet):
     """
     ViewSet for managing Discipline Sub-Reports.
     Provides standard CRUD operations along with custom actions for submitting,
@@ -46,32 +47,14 @@ class DisciplineSubReportViewSet(ProjectScopedViewSet):
             qs = qs.filter(discipline=discipline)
         return qs.order_by('-report_date')
 
-    @action(detail=True, methods=['post'])
-    def submit(self, request, project_pk=None, pk=None):
-        """
-        Custom action to submit a draft sub-report.
-        Requires 'edit_reports' permission.
-        """
-        obj = self.get_object()
-        obj = submit_sub_report(obj, request.user)
+    def _submit(self, instance, request):
+        obj = submit_sub_report(instance, request.user)
         return Response(self.get_serializer(obj).data)
 
-    @action(detail=True, methods=['post'])
-    def approve(self, request, project_pk=None, pk=None):
-        """
-        Custom action to approve a submitted sub-report.
-        Requires 'approve_reports' permission.
-        """
-        obj = self.get_object()
-        obj = approve_sub_report(obj, request.user)
+    def _approve(self, instance, request):
+        obj = approve_sub_report(instance, request.user)
         return Response(self.get_serializer(obj).data)
 
-    @action(detail=True, methods=['post'])
-    def reject(self, request, project_pk=None, pk=None):
-        """
-        Custom action to reject a submitted sub-report, requiring a reason.
-        Requires 'approve_reports' permission.
-        """
-        obj = self.get_object()
-        obj = reject_sub_report(obj, request.user, request.data.get('rejection_reason'))
+    def _reject(self, instance, request):
+        obj = reject_sub_report(instance, request.user, request.data.get('rejection_reason'))
         return Response(self.get_serializer(obj).data)
