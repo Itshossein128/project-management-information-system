@@ -24,3 +24,5 @@
 - `e2e/tests/sprint3-schedule.spec.ts` — WBS rename + reparent (`sorted_child`), activity create + FS relation + cycle reject, MSP XML preview→import
 - WBS DnD affordance asserted via `draggable`; reparent exercised through the same move API the drop handler calls
 - BoQ linkage on activities is deferred (not in e2e scope)
+
+| RISK REGISTER | Matrix & Events List | 2 | 4 | 50% |
