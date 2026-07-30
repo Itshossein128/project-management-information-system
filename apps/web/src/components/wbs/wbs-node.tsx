@@ -127,7 +127,7 @@ export function WBSNodeRow({
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="text-muted-foreground [&[data-state=open]>svg]:-rotate-90"
+                className="rounded-sm text-muted-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 [&[data-state=open]>svg]:-rotate-90"
                 aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
               >
                 <ChevronLeft className="size-4 transition-transform duration-200" />
@@ -166,7 +166,7 @@ export function WBSNodeRow({
         {canEdit ? (
           <button
             type="button"
-            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+            className="rounded-sm opacity-0 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
             onClick={() => setEditing(true)}
             aria-label={t("wbs.edit")}
           >
