@@ -23,26 +23,16 @@ from field_reports.models import (
 from rest_framework import serializers
 
 
-class LaborCampSerializer(serializers.ModelSerializer):
+from field_reports.serializers import BaseLaborCampEntrySerializer
+
+class LaborCampSerializer(BaseLaborCampEntrySerializer):
     report_date = JalaliDateField()
     empty_capacity = serializers.SerializerMethodField()
     warning = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(BaseLaborCampEntrySerializer.Meta):
         model = LaborCampReport
-        fields = [
-            'id',
-            'report_date',
-            'connex_number',
-            'subcontractor_name',
-            'total_residents',
-            'present_count',
-            'on_leave_count',
-            'capacity',
-            'empty_capacity',
-            'warning',
-        ]
-        read_only_fields = ['id']
+        fields = BaseLaborCampEntrySerializer.Meta.fields + ['report_date', 'empty_capacity', 'warning']
 
     def get_empty_capacity(self, obj):
         return obj.capacity - obj.total_residents
@@ -121,34 +111,15 @@ class LaborCampReportViewSet(ProjectScopedViewSet):
         return resp
 
 
-class EquipmentLogSerializer(serializers.ModelSerializer):
+from field_reports.serializers import BaseEquipmentEntrySerializer
+
+class EquipmentLogSerializer(BaseEquipmentEntrySerializer):
     log_date = JalaliDateField()
     warning = serializers.SerializerMethodField()
 
-    class Meta:
+    class Meta(BaseEquipmentEntrySerializer.Meta):
         model = EquipmentLog
-        fields = [
-            'id',
-            'equipment',
-            'log_date',
-            'equipment_name',
-            'equipment_ref',
-            'shift',
-            'status',
-            'ownership_type',
-            'work_start',
-            'work_end',
-            'repair_hours',
-            'idle_hours',
-            'idle_reason',
-            'productive_hours',
-            'hourly_rate',
-            'fuel_cost',
-            'activity_ref',
-            'notes',
-            'warning',
-        ]
-        read_only_fields = ['id']
+        fields = BaseEquipmentEntrySerializer.Meta.fields + ['log_date', 'warning']
 
     def get_warning(self, obj):
         if obj.work_start and obj.work_end and obj.productive_hours is not None:
