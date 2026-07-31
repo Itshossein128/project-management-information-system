@@ -135,9 +135,8 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'total_count']
 
 
-class DailyReportEquipmentSerializer(serializers.ModelSerializer):
+class BaseEquipmentEntrySerializer(serializers.ModelSerializer):
     class Meta:
-        model = DailyReportEquipment
         fields = [
             'id',
             'equipment',
@@ -158,6 +157,11 @@ class DailyReportEquipmentSerializer(serializers.ModelSerializer):
             'notes',
         ]
         read_only_fields = ['id']
+
+
+class DailyReportEquipmentSerializer(BaseEquipmentEntrySerializer):
+    class Meta(BaseEquipmentEntrySerializer.Meta):
+        model = DailyReportEquipment
 
 
 class DailyReportMaterialSerializer(serializers.ModelSerializer):
@@ -193,9 +197,8 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class DailyReportLaborCampSerializer(serializers.ModelSerializer):
+class BaseLaborCampEntrySerializer(serializers.ModelSerializer):
     class Meta:
-        model = DailyReportLaborCamp
         fields = [
             'id',
             'connex_number',
@@ -206,6 +209,11 @@ class DailyReportLaborCampSerializer(serializers.ModelSerializer):
             'capacity',
         ]
         read_only_fields = ['id']
+
+
+class DailyReportLaborCampSerializer(BaseLaborCampEntrySerializer):
+    class Meta(BaseLaborCampEntrySerializer.Meta):
+        model = DailyReportLaborCamp
 
 
 class DailyReportIncidentSerializer(serializers.ModelSerializer):
