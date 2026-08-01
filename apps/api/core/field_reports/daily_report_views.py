@@ -9,6 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.mixins import WorkflowViewSetMixin
 from common.jalali import parse_date_optional
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
@@ -43,6 +44,36 @@ from field_reports import services
 EDITABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
 
 
+def _validate_report_ready_for_submit(report: DailyReport):
+    errors: list[str] = []
+
+    activities = list(report.activities.filter(is_deleted=False))
+    if not activities:
+        errors.append('گزارش باید حداقل یک فعالیت داشته باشد')
+    for idx, row in enumerate(activities, start=1):
+        if row.quantity_measured and row.quantity is None:
+            errors.append(f'ردیف فعالیت {idx}: در حالت اندازه‌گیری شده، مقدار باید ثبت شود')
+
+    equipment_rows = list(report.equipment_entries.filter(is_deleted=False))
+    for idx, row in enumerate(equipment_rows, start=1):
+        has_start = bool(row.work_start)
+        has_end = bool(row.work_end)
+        if has_start != has_end:
+            errors.append(f'ردیف ماشین‌آلات {idx}: ساعت شروع و پایان باید با هم ثبت شوند')
+
+    camp_rows = list(report.labor_camp_entries.filter(is_deleted=False))
+    for idx, row in enumerate(camp_rows, start=1):
+        if (row.present_count + row.on_leave_count) != row.total_residents:
+            errors.append(
+                f'ردیف کمپ {idx}: مجموع حاضر و مرخصی باید با کل ساکنین برابر باشد',
+            )
+        if row.total_residents > row.capacity:
+            errors.append(f'ردیف کمپ {idx}: کل ساکنین نمی‌تواند بیشتر از ظرفیت باشد')
+
+    if errors:
+        raise ValidationError({'submit_validation': errors})
+
+
 @extend_schema_view(
     list=extend_schema(summary='List daily reports', tags=['Daily Reports']),
     create=extend_schema(summary='Create daily report header', tags=['Daily Reports']),
@@ -50,7 +81,7 @@ EDITABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
     partial_update=extend_schema(summary='Update daily report header', tags=['Daily Reports']),
     destroy=extend_schema(summary='Soft-delete daily report', tags=['Daily Reports']),
 )
-class DailyReportViewSet(viewsets.ModelViewSet):
+class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     lookup_url_kwarg = 'pk'
     pagination_class = DefaultPageNumberPagination
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
@@ -148,13 +179,10 @@ class DailyReportViewSet(viewsets.ModelViewSet):
 
     # -- Workflow -----------------------------------------------------------
 
-    @extend_schema(summary='Submit for approval', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def submit(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _submit(self, instance, request):
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
-        services.validate_report_ready_for_submit(instance)
+        _validate_report_ready_for_submit(instance)
         services.submit_report(instance, request.user)
         return Response(DailyReportDetailSerializer(instance).data)
 
@@ -167,19 +195,13 @@ class DailyReportViewSet(viewsets.ModelViewSet):
         services.review_report(instance, request.user, request.data.get('notes', ''))
         return Response(DailyReportDetailSerializer(instance).data)
 
-    @extend_schema(summary='Approve report', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def approve(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _approve(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل تأیید هستند')
         services.approve_report(instance, request.user)
         return Response(DailyReportDetailSerializer(instance).data)
 
-    @extend_schema(summary='Reject report', tags=['Daily Reports'])
-    @action(detail=True, methods=['post'])
-    def reject(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def _reject(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل رد هستند')
         reason = (request.data.get('reason') or '').strip()

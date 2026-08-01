@@ -22,6 +22,10 @@ from risk.services.matrix_service import build_risk_matrix
     destroy=extend_schema(summary='Soft-delete barrier log', tags=['Barriers']),
 )
 class BarrierLogViewSet(ProjectScopedViewSet):
+    """
+    ViewSet for listing, creating, and updating barrier logs.
+    Restricts results to events of type BARRIER.
+    """
     queryset = RiskEvent.objects.select_related('responsible_user').all()
     serializer_class = BarrierSerializer
     pagination_class = DefaultPageNumberPagination
@@ -30,11 +34,13 @@ class BarrierLogViewSet(ProjectScopedViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def get_serializer_class(self):
+        """Use BarrierCreateSerializer for creation to automatically set event type."""
         if self.action == 'create':
             return BarrierCreateSerializer
         return BarrierSerializer
 
     def get_queryset(self):
+        """Filter the queryset by query parameters such as status, category, and date ranges."""
         qs = super().get_queryset().filter(event_type=EventType.BARRIER)
         params = self.request.query_params
         if params.get('status'):
@@ -54,9 +60,11 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         return qs.order_by('-event_date', '-created_at')
 
     def perform_create(self, serializer):
+        """Enforce the BARRIER event_type when creating a new barrier log."""
         super().perform_create(serializer, event_type=EventType.BARRIER)
 
     def partial_update(self, request, *args, **kwargs):
+        """Ensure a resolved date is provided if the barrier log's status is changed to resolved."""
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -78,6 +86,9 @@ class BarrierLogViewSet(ProjectScopedViewSet):
     destroy=extend_schema(summary='Soft-delete risk/delay event', tags=['Risk']),
 )
 class RiskEventViewSet(ProjectScopedViewSet):
+    """
+    ViewSet handling CRUD operations for all generic risk/delay events.
+    """
     queryset = RiskEvent.objects.select_related(
         'owner',
         'responsible_user',
@@ -92,11 +103,13 @@ class RiskEventViewSet(ProjectScopedViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def get_serializer_context(self):
+        """Inject the currently resolved project_id into the serializer context."""
         ctx = super().get_serializer_context()
         ctx['project_id'] = self.get_project_id()
         return ctx
 
     def get_queryset(self):
+        """Apply query parameter filters to the list of risk events."""
         qs = super().get_queryset()
         params = self.request.query_params
         if params.get('event_type'):
@@ -122,6 +135,7 @@ class RiskEventViewSet(ProjectScopedViewSet):
 
 
 class RiskMatrixView(APIView):
+    """API endpoint providing aggregated risk data representing a probability × severity matrix."""
     permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'view_reports'
 

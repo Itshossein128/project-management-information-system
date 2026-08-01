@@ -6,8 +6,8 @@
 | WBS | Tree Operations | 3 | 10 | 30% |
 | ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
 | SCHEDULE | Baseline & Import | 2 | 10 | 20% |
-| DAILY REPORT | Create & Workflow | 5 | 20 | 25% |
-| OFFLINE | Sync & Conflict | 2 | 15 | 13% |
+| DAILY REPORT | Create & Workflow | 6 | 20 | 30% |
+| OFFLINE | Sync & Conflict | 5 | 15 | 33% |
 | PROGRESS | Physical Progress & S-Curve | 4 | 10 | 40% |
 | FINANCE | Budget & Cost | 5 | 15 | 33% |
 
@@ -24,5 +24,3 @@
 - `e2e/tests/sprint3-schedule.spec.ts` — WBS rename + reparent (`sorted_child`), activity create + FS relation + cycle reject, MSP XML preview→import
 - WBS DnD affordance asserted via `draggable`; reparent exercised through the same move API the drop handler calls
 - BoQ linkage on activities is deferred (not in e2e scope)
-
-| RISK REGISTER | Matrix & Events List | 2 | 4 | 50% |

@@ -28,3 +28,17 @@
 ## 2024-05-24 - Prevent N+1 queries in temporal aggregations
 **Learning:** Functions that aggregate data over intervals (like daily S-curve points) can easily cause N+1 query problems if they call individual database-querying helpers inside the loop. In `get_s_curve_data`, calling `get_planned_progress_on_date` and `get_project_progress_on_date` per day resulted in 2N queries.
 **Action:** When calculating data over a chronological interval, fetch all required underlying records upfront in a single query ordered by date, then iterate over the interval points while advancing a pointer through the prefetched records to update state in memory.
+
+## 2024-05-19 - DRF SerializerMethodField Bulk Pre-calculation Cache
+**Learning:** Complex N+1 query problems in DRF APIs (caused by nested `SerializerMethodField` calculating logic over related objects or `ViewSet` filters executing functions in loops) cannot always be fixed simply using `prefetch_related`, especially when those functions contain separate ORM calls like `sub.contract.items.filter()`.
+**Action:** Always decouple the logic into a bulk calculation service. Bulk fetch the related IDs using `__in`, process logic in Python memory for the list of objects, and assign the results to a temporary attribute (e.g., `_risk_cache`) *before* serializing. Ensure the serializer function checks for and utilizes this cache attribute to prevent falling back to individual queries.
+## 2024-05-18 - Avoid N+1 queries from .count() on prefetched relations
+**Learning:** In Django, calling `.count()` on a related manager (e.g., `obj.wbs_nodes.count()`) evaluates to a `SELECT COUNT(...)` query, completely bypassing the `prefetch_related` cache and causing N+1 queries.
+**Action:** When a ViewSet uses `prefetch_related`, iterate over the cache in python to count (e.g. `len(obj.wbs_nodes.all())` or `sum(1 for _ in obj.related.all())`) inside the serializer to maintain optimal O(1) performance.
+
+## 2024-07-26 - Resolve N+1 query in IPCDetailSerializer deductions_total
+**Learning:** In Django REST Framework serializers, using `obj.deductions.filter(...)` inside a `SerializerMethodField` ignores any database prefetching done in the viewset, resulting in N+1 database queries.
+**Action:** When calculating aggregations (like sums or counts) on related objects in serializers, ensure the viewset uses `prefetch_related('deductions')` and then perform the aggregation in Python using `.all()` (e.g., `sum(d.amount for d in obj.deductions.all() if not d.is_deleted)`) to leverage the prefetched cache.
+## 2026-07-27 - Fetch latest related record for multiple parents with distinct
+**Learning:** When iterating over a list of parent records and needing the latest related record for each, performing a query inside the loop causes N+1 queries. Using `.distinct('parent_id')` combined with `.order_by('parent_id', '-date_field')` retrieves all latest records efficiently in a single query.
+**Action:** Instead of `parent.related.order_by('-date').first()` inside a loop, extract all parent IDs, query the related model with `.filter(parent_id__in=ids).order_by('parent_id', '-date').distinct('parent_id')`, and build a Python dictionary mapping `parent_id` to the related record before the loop.

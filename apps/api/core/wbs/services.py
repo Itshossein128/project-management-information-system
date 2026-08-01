@@ -133,6 +133,11 @@ def create_wbs_node(
 
 @transaction.atomic
 def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
+    """
+    Updates the properties of a given WBS node, saves it, and checks for
+    any weight warnings based on its siblings. Returns the updated node
+    and a list of warnings (if any).
+    """
     for key, value in fields.items():
         if value is not None or key in ('weight_physical', 'weight_financial'):
             setattr(node, key, value)
@@ -144,6 +149,10 @@ def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
 
 @transaction.atomic
 def delete_wbs_node(node: WBS) -> None:
+    """
+    Deletes a WBS node provided it has no children or associated activities.
+    After successful deletion, it propagates WBS codes for the project.
+    """
     if node.numchild > 0:
         raise WBSConflictError('Cannot delete a WBS node that has children.')
     if Activity.objects.filter(wbs=node).exists():
@@ -211,29 +220,31 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
         target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id)
 
     pos = position.replace('-', '_')
+
     # treebeard requires sorted-* positions when node_order_by is set on the model.
-    if pos == 'first_child':
-        if target_parent is None:
-            raise WBSValidationError('new_parent_id is required for first_child position.')
-        node.move(target_parent, pos='sorted-child')
-    elif pos == 'sorted_child':
-        if target_parent is None:
-            raise WBSValidationError('new_parent_id is required for sorted_child position.')
-        node.move(target_parent, pos='sorted-child')
-    elif pos == 'last_child':
-        if target_parent is None:
-            raise WBSValidationError('new_parent_id is required for last_child position.')
-        node.move(target_parent, pos='sorted-child')
-    elif pos in ('left', 'right'):
-        if target_parent is None:
-            raise WBSValidationError('new_parent_id is required for sibling positioning.')
-        node.move(target_parent, pos='sorted-sibling')
-    else:
+    pos_map = {
+        'first_child': 'sorted-child',
+        'sorted_child': 'sorted-child',
+        'last_child': 'sorted-child',
+        'left': 'sorted-sibling',
+        'right': 'sorted-sibling',
+    }
+
+    if pos not in pos_map:
         raise WBSValidationError(f'Invalid position: {position}')
+
+    if target_parent is None:
+        raise WBSValidationError(f'new_parent_id is required for {pos} position.')
+
+    node.move(target_parent, pos=pos_map[pos])
 
     propagate_project_wbs_codes(node.project_id)
     return WBS.objects.get(pk=node.pk)
 
 
 def build_tree_queryset(project_id):
+    """
+    Retrieves the entire WBS tree for a specific project, ordered sequentially
+    by its hierarchical path to maintain tree structure.
+    """
     return WBS.objects.filter(project_id=project_id).order_by('path')

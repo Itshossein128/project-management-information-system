@@ -44,7 +44,8 @@ class ProjectTemplateListSerializer(serializers.ModelSerializer):
         ]
 
     def get_wbs_node_count(self, obj):
-        return obj.wbs_nodes.count()
+        # ⚡ Bolt: Use len(all()) instead of .count() on prefetched relation to avoid N+1 queries
+        return len(obj.wbs_nodes.all())
 
 
 class ProjectTemplateDetailSerializer(ProjectTemplateListSerializer):

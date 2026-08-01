@@ -21,6 +21,59 @@ def _quantize_amount(value: Decimal) -> Decimal:
     return value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
+def _weight_by_budget(pool: CostPool, activities: list) -> dict:
+    weights: dict = {}
+    budgets = (
+        Budget.objects.filter(
+            project_id=pool.project_id,
+            is_deleted=False,
+            activity_id__in=[a.id for a in activities],
+        )
+        .values('activity_id')
+        .annotate(total=Sum('budget_amount'))
+    )
+    for row in budgets:
+        if row['total']:
+            weights[row['activity_id']] = Decimal(str(row['total']))
+    return weights
+
+
+def _weight_by_quantity(pool: CostPool, activities: list) -> dict:
+    weights: dict = {}
+    for activity in activities:
+        if activity.total_quantity:
+            weights[activity.id] = Decimal(str(activity.total_quantity))
+    return weights
+
+
+def _weight_by_hours(pool: CostPool, activities: list) -> dict:
+    from field_reports.models import DailyReportEquipment
+
+    weights: dict = {}
+    equip_hours = (
+        DailyReportEquipment.objects.filter(
+            report__project_id=pool.project_id,
+            report__is_deleted=False,
+            is_deleted=False,
+            activity_ref_id__isnull=False,
+        )
+        .values('activity_ref_id')
+        .annotate(total=Sum('productive_hours'))
+    )
+    for row in equip_hours:
+        aid = row['activity_ref_id']
+        if aid and row['total']:
+            weights[aid] = weights.get(aid, Decimal('0')) + Decimal(str(row['total']))
+    return weights
+
+
+ALLOCATION_STRATEGIES = {
+    'by_budget_weight': _weight_by_budget,
+    'by_quantity': _weight_by_quantity,
+    'by_hours': _weight_by_hours,
+}
+
+
 def compute_auto_allocations(pool: CostPool, method: str, activity_ids: list | None = None) -> list[dict]:
     """Compute allocation rows for the remaining pool amount using the given method."""
     if method not in ALLOCATION_METHODS:
@@ -39,41 +92,11 @@ def compute_auto_allocations(pool: CostPool, method: str, activity_ids: list | N
     if not activities:
         return []
 
-    weights: dict = {}
-    if method == 'by_budget_weight':
-        budgets = (
-            Budget.objects.filter(
-                project_id=pool.project_id,
-                is_deleted=False,
-                activity_id__in=[a.id for a in activities],
-            )
-            .values('activity_id')
-            .annotate(total=Sum('budget_amount'))
-        )
-        for row in budgets:
-            if row['total']:
-                weights[row['activity_id']] = Decimal(str(row['total']))
-    elif method == 'by_quantity':
-        for activity in activities:
-            if activity.total_quantity:
-                weights[activity.id] = Decimal(str(activity.total_quantity))
-    elif method == 'by_hours':
-        from field_reports.models import DailyReportEquipment
+    strategy = ALLOCATION_STRATEGIES.get(method)
+    if not strategy:
+        raise ValueError(f'Unknown allocation method: {method}')
 
-        equip_hours = (
-            DailyReportEquipment.objects.filter(
-                report__project_id=pool.project_id,
-                report__is_deleted=False,
-                is_deleted=False,
-                activity_ref_id__isnull=False,
-            )
-            .values('activity_ref_id')
-            .annotate(total=Sum('productive_hours'))
-        )
-        for row in equip_hours:
-            aid = row['activity_ref_id']
-            if aid and row['total']:
-                weights[aid] = weights.get(aid, Decimal('0')) + Decimal(str(row['total']))
+    weights = strategy(pool, activities)
 
     if not weights:
         # Equal split fallback when no weight data exists

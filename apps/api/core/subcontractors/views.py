@@ -20,7 +20,7 @@ from subcontractors.serializers import (
     WarningSerializer,
 )
 from subcontractors.services.performance import SubcontractorPerformanceService
-from subcontractors.services.risk_service import average_overall_score, compute_risk_flag, score_trend
+from subcontractors.services.risk_service import average_overall_score, compute_risk_flag, precalculate_risk_flags, score_trend
 
 
 def _invalidate_subcontractor_caches(project_id):
@@ -37,9 +37,10 @@ class SubScopedViewSet(ProjectScopedViewSet):
         return Subcontractor.objects.filter(
             project_id=self.get_project_id(),
             is_deleted=False
-        ).prefetch_related(
+        ).select_related('contract').prefetch_related(
             Prefetch('scores', queryset=SubcontractorPerformanceScore.objects.filter(is_deleted=False).order_by('-score_date')),
             Prefetch('warnings', queryset=SubcontractorWarning.objects.filter(is_deleted=False).order_by('-warning_date')),
+            'contract__items'
         )
 
     def post_save(self, instance):
@@ -62,17 +63,22 @@ class SubcontractorViewSet(SubScopedViewSet):
         discipline = request.query_params.get('discipline')
         if discipline:
             qs = qs.filter(discipline__icontains=discipline)
-        if request.query_params.get('risk_only') == 'true':
-            at_risk_ids = []
-            for sub in qs:
-                if compute_risk_flag(sub)[0]:
-                    at_risk_ids.append(sub.id)
-            qs = qs.filter(id__in=at_risk_ids)
         return qs
 
     def list(self, request, *args, **kwargs):
         qs = self._filter_queryset(self.get_queryset(), request)
-        return Response({'results': SubcontractorSerializer(qs, many=True).data})
+        subs = list(qs)
+        risk_map = precalculate_risk_flags(subs)
+
+        filtered_subs = []
+        risk_only = request.query_params.get('risk_only') == 'true'
+        for sub in subs:
+            sub._risk_cache = risk_map.get(sub.id, (False, []))
+            if risk_only and not sub._risk_cache[0]:
+                continue
+            filtered_subs.append(sub)
+
+        return Response({'results': SubcontractorSerializer(filtered_subs, many=True).data})
 
 
 class ScoreListCreateView(APIView):
@@ -125,10 +131,8 @@ class ScoreDetailView(APIView):
         )
         ser = PerformanceScoreSerializer(score, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        for attr, val in ser.validated_data.items():
-            setattr(score, attr, val)
-        score.updated_by = request.user
-        score.save()
+        service = SubcontractorPerformanceService()
+        score = service.update_score(score, ser.validated_data, request.user)
         _invalidate_subcontractor_caches(project_pk)
         return Response(PerformanceScoreSerializer(score).data)
 
@@ -188,12 +192,8 @@ class WarningPatchView(APIView):
         )
         ser = WarningSerializer(w, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        for attr, val in ser.validated_data.items():
-            setattr(w, attr, val)
-        if w.resolved and not w.resolved_date:
-            w.resolved_date = date.today()
-        w.updated_by = request.user
-        w.save()
+        service = SubcontractorPerformanceService()
+        w = service.update_warning(w, ser.validated_data, request.user)
         _invalidate_subcontractor_caches(project_pk)
         return Response(WarningSerializer(w).data)
 
@@ -208,9 +208,11 @@ class RiskSummaryView(APIView):
         key = cache_key('subcontractor_risk', project_pk, fp)
 
         def compute():
+            subs = list(Subcontractor.objects.filter(project_id=project_pk, is_deleted=False))
+            risk_map = precalculate_risk_flags(subs)
             results = []
-            for sub in Subcontractor.objects.filter(project_id=project_pk, is_deleted=False):
-                flag, reasons = compute_risk_flag(sub)
+            for sub in subs:
+                flag, reasons = risk_map.get(sub.id, (False, []))
                 if flag:
                     results.append({
                         'id': str(sub.id),

@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +15,8 @@ from permissions.project import HasProjectPermission, IsProjectMember
 from resources.models import InventoryTransaction, Material, MaterialRequest, PurchaseOrder
 from resources.serializers import (
     InventoryTransactionSerializer,
+    MaterialRequestDeliverSerializer,
+    MaterialRequestPlaceOrderSerializer,
     MaterialRequestSerializer,
     MaterialSerializer,
     PurchaseOrderSerializer,
@@ -53,15 +54,6 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
     view_permission = 'view_procurement'
     edit_permission = 'edit_reports'
 
-    @property
-    def required_permission(self):
-        if self.action in ('list', 'retrieve'):
-            return 'view_procurement'
-        if self.action == 'approve':
-            return 'approve_procurement'
-        if self.action in ('place_order', 'deliver', 'cancel'):
-            return 'edit_procurement'
-        return self.edit_permission
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -94,45 +86,67 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
             return Response({'detail': 'Only pending requests can be edited'}, status=status.HTTP_400_BAD_REQUEST)
         return super().partial_update(request, *args, **kwargs)
 
-    @extend_schema(summary='Approve material request', tags=['Procurement'])
-    @action(detail=True, methods=['post'], url_path='approve')
-    def approve(self, request, project_pk=None, pk=None):
-        obj = approve_material_request(self.get_object(), request.user)
-        return Response(self.get_serializer(obj).data)
+class MaterialRequestApproveView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'approve_procurement'
 
-    @extend_schema(summary='Place purchase order', tags=['Procurement'])
-    @action(detail=True, methods=['post'], url_path='place-order')
-    def place_order(self, request, project_pk=None, pk=None):
-        obj = self.get_object()
+    @extend_schema(summary='Approve material request', tags=['Procurement'], responses={200: MaterialRequestSerializer})
+    def post(self, request, project_pk=None, pk=None):
+        req = get_object_or_404(MaterialRequest, pk=pk, project_id=project_pk)
+        obj = approve_material_request(req, request.user)
+        return Response(MaterialRequestSerializer(obj).data)
+
+
+class MaterialRequestPlaceOrderView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
+    @extend_schema(summary='Place purchase order', tags=['Procurement'], request=MaterialRequestPlaceOrderSerializer, responses={200: MaterialRequestSerializer})
+    def post(self, request, project_pk=None, pk=None):
+        req = get_object_or_404(MaterialRequest, pk=pk, project_id=project_pk)
+        ser = MaterialRequestPlaceOrderSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
         po = place_purchase_order(
-            obj,
+            req,
             request.user,
-            supplier_id=request.data.get('supplier'),
-            order_date=request.data.get('order_date') or timezone.localdate(),
-            expected_delivery_date=request.data.get('expected_delivery_date'),
-            unit_price=request.data.get('unit_price'),
-            notes=request.data.get('notes', ''),
+            supplier_id=ser.validated_data['supplier'],
+            order_date=ser.validated_data.get('order_date') or timezone.localdate(),
+            expected_delivery_date=ser.validated_data.get('expected_delivery_date'),
+            unit_price=ser.validated_data.get('unit_price'),
+            notes=ser.validated_data.get('notes', ''),
         )
-        data = self.get_serializer(obj).data
+        data = MaterialRequestSerializer(req).data
         data['purchase_order'] = PurchaseOrderSerializer(po).data
         return Response(data)
 
-    @extend_schema(summary='Mark purchase order delivered', tags=['Procurement'])
-    @action(detail=True, methods=['post'], url_path='deliver')
-    def deliver(self, request, project_pk=None, pk=None):
-        obj = deliver_purchase_order(
-            self.get_object(),
-            request.user,
-            actual_delivery_date=request.data.get('actual_delivery_date') or timezone.localdate(),
-            document_ref=request.data.get('document_ref', ''),
-        )
-        return Response(self.get_serializer(obj).data)
 
-    @extend_schema(summary='Cancel material request', tags=['Procurement'])
-    @action(detail=True, methods=['post'], url_path='cancel')
-    def cancel(self, request, project_pk=None, pk=None):
-        obj = cancel_material_request(self.get_object(), request.user)
-        return Response(self.get_serializer(obj).data)
+class MaterialRequestDeliverView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
+    @extend_schema(summary='Mark purchase order delivered', tags=['Procurement'], request=MaterialRequestDeliverSerializer, responses={200: MaterialRequestSerializer})
+    def post(self, request, project_pk=None, pk=None):
+        req = get_object_or_404(MaterialRequest, pk=pk, project_id=project_pk)
+        ser = MaterialRequestDeliverSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        obj = deliver_purchase_order(
+            req,
+            request.user,
+            actual_delivery_date=ser.validated_data.get('actual_delivery_date') or timezone.localdate(),
+            document_ref=ser.validated_data.get('document_ref', ''),
+        )
+        return Response(MaterialRequestSerializer(obj).data)
+
+
+class MaterialRequestCancelView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
+    @extend_schema(summary='Cancel material request', tags=['Procurement'], responses={200: MaterialRequestSerializer})
+    def post(self, request, project_pk=None, pk=None):
+        req = get_object_or_404(MaterialRequest, pk=pk, project_id=project_pk)
+        obj = cancel_material_request(req, request.user)
+        return Response(MaterialRequestSerializer(obj).data)
 
 
 class InventoryTransactionViewSet(ProjectScopedViewSet):
