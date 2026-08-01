@@ -17,6 +17,14 @@ test.describe("Daily reports — Sprint 4", () => {
     await loginAs(page, E2E_USERS.admin);
   });
 
+  test("visitor cannot see new report button", async ({ page }) => {
+    const base = await createProjectViaApi(page);
+    await loginAs(page, E2E_USERS.visitor);
+    await page.goto(`${base}/daily-reports`);
+    await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("daily-report-new-btn")).toHaveCount(0);
+  });
+
   test("daily reports list page loads", async ({ page }) => {
     const base = await createProjectViaApi(page);
     await page.goto(`${base}/daily-reports`);

@@ -42,3 +42,6 @@ Replaced a custom built flex-box alert pattern in `QueryErrorState` with the sta
 ## 2024-07-24 - Tooltips on Icon-Only Buttons
 **Learning:** Native `title` attributes on icon-only buttons create poor accessibility and inconsistent visual presentation. Using Radix UI Tooltip primitives through the Shadcn system (`Tooltip`, `TooltipTrigger`, `TooltipContent`) provides a vastly superior, accessible, and theme-consistent experience for screen readers and sighted users alike. Always ensure the trigger uses `asChild` when wrapping a component that forwards refs like a Button.
 **Action:** Always prefer design system Tooltip components over native `title` attributes for icon-only action buttons across all data grids and list items.
+## 2024-05-18 - Keyboard Accessibility in Interactive Elements
+**Learning:** Added `peer` to visually hidden inputs to allow styling sibling elements on focus.
+**Action:** When wrapping native inputs, use `peer` and `peer-focus-visible` to maintain keyboard accessibility.

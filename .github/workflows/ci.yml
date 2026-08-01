@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "apps/**"
       - "pnpm-lock.yaml"
@@ -10,7 +10,7 @@ on:
       - "pnpm-workspace.yaml"
       - ".github/workflows/ci.yml"
   pull_request:
-    branches: [develop]
+    branches: [main]
     paths:
       - "apps/**"
       - "pnpm-lock.yaml"

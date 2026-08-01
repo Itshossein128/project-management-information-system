@@ -172,7 +172,7 @@ class TestWBSServicesExtended:
         child1, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.1', wbs_name='Child 1')
         child2, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.2', wbs_name='Child 2')
 
-        with pytest.raises(WBSValidationError, match="new_parent_id is required for sibling positioning."):
+        with pytest.raises(WBSValidationError, match="new_parent_id is required for right position."):
             move_wbs_node(child2, new_parent_id=None, position='right')
         with pytest.raises(WBSValidationError, match="new_parent_id is required for sorted_child position."):
             move_wbs_node(child2, new_parent_id=None, position='sorted_child')

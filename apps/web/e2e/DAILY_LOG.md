@@ -20,7 +20,7 @@ Selected flow: Physical Progress Control
 Coverage score: 1/10 branches tested
 Reason: Flow had the lowest coverage of 10% (1/10 branches tested).
 
-Date: $(date +%Y-%m-%d)
-Selected flow: Risk Register (Module 14)
-Coverage score: 2/4 branches tested
-Reason: Flow had 0 coverage, Module 14 was the earliest untested module.
+Date: 2026-07-27
+Selected flow: Daily report create and approval workflow
+Coverage score: 6/20 branches tested
+Reason: It had low coverage (25%) so I added a role-based test.

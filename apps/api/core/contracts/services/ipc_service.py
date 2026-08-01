@@ -47,21 +47,18 @@ def _publish_ipc_submitted(ipc):
 
 def _ipc_cash_transaction_defaults(ipc, user, payment_date):
     contract = ipc.contract
-    if contract.contract_type == ContractType.MAIN:
-        tx_type = CashTransactionType.IN
-        category = InflowCategory.IPC_RECEIPT
-    elif contract.contract_type == ContractType.SUBCONTRACT:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.SUBCONTRACTOR_PAYMENT
-    elif contract.contract_type == ContractType.PURCHASE:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.SUPPLIER_PAYMENT
-    elif contract.contract_type == ContractType.EQUIPMENT_RENTAL:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.EQUIPMENT_RENTAL
-    else:
-        tx_type = CashTransactionType.OUT
-        category = OutflowCategory.OTHER_EXPENSE
+
+    CONTRACT_TX_MAP = {
+        ContractType.MAIN: (CashTransactionType.IN, InflowCategory.IPC_RECEIPT),
+        ContractType.SUBCONTRACT: (CashTransactionType.OUT, OutflowCategory.SUBCONTRACTOR_PAYMENT),
+        ContractType.PURCHASE: (CashTransactionType.OUT, OutflowCategory.SUPPLIER_PAYMENT),
+        ContractType.EQUIPMENT_RENTAL: (CashTransactionType.OUT, OutflowCategory.EQUIPMENT_RENTAL),
+    }
+
+    tx_type, category = CONTRACT_TX_MAP.get(
+        contract.contract_type,
+        (CashTransactionType.OUT, OutflowCategory.OTHER_EXPENSE)
+    )
 
     return {
         'project_id': ipc.project_id,
@@ -104,6 +101,11 @@ def _upsert_ipc_cash_transaction(ipc, user, payment_date=None):
 
 @transaction.atomic
 def create_ipc(project_id, contract, validated_data, user):
+    """
+    Creates a new draft Interim Payment Certificate (IPC).
+    Automatically assigns the next sequential IPC number and triggers
+    asynchronous auto-population of line items and deductions.
+    """
     ipc = IPC.objects.create(
         project_id=project_id,
         contract=contract,
@@ -128,6 +130,10 @@ def create_ipc(project_id, contract, validated_data, user):
 
 @transaction.atomic
 def update_ipc(ipc, validated_data, user):
+    """
+    Partially updates the header details of a draft IPC.
+    Raises a validation error if the IPC is not in DRAFT status.
+    """
     from rest_framework.exceptions import ValidationError
     if ipc.status != IPCStatus.DRAFT:
         raise ValidationError({'detail': 'Only draft IPCs can be edited.'})
@@ -295,11 +301,19 @@ def apply_deductions(ipc_id):
 
 
 def next_ipc_number(contract_id) -> int:
+    """
+    Determines the next sequential IPC number for a given contract.
+    Returns 1 if no previous IPCs exist.
+    """
     last = IPC.objects.filter(contract_id=contract_id, is_deleted=False).order_by('-ipc_number').first()
     return (last.ipc_number + 1) if last else 1
 
 
 def next_change_number(contract_id) -> int:
+    """
+    Determines the next sequential change order number for a given contract.
+    Returns 1 if no previous change orders exist.
+    """
     from contracts.models import ChangeOrder
 
     last = ChangeOrder.objects.filter(contract_id=contract_id, is_deleted=False).order_by('-change_number').first()
@@ -308,6 +322,10 @@ def next_change_number(contract_id) -> int:
 
 @transaction.atomic
 def submit_ipc(ipc, user):
+    """
+    Submits a draft IPC for approval.
+    Transitions status to SUBMITTED, sets the submitted date, and publishes a domain event.
+    """
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Only draft IPCs can be submitted.')
     ipc.status = IPCStatus.SUBMITTED
@@ -321,6 +339,11 @@ def submit_ipc(ipc, user):
 
 @transaction.atomic
 def approve_ipc(ipc, user):
+    """
+    Approves a submitted IPC.
+    Transitions status to APPROVED, sets the approval date, and assigns a default
+    planned payment date (+30 days) if none was provided.
+    """
     from datetime import timedelta
     ipc.status = IPCStatus.APPROVED
     ipc.approval_date = date.today()
@@ -333,6 +356,10 @@ def approve_ipc(ipc, user):
 
 @transaction.atomic
 def pay_ipc(ipc, user, payment_date):
+    """
+    Marks an approved IPC as paid and records the actual payment date.
+    Triggers the creation or update of a corresponding CashTransaction.
+    """
     ipc.status = IPCStatus.PAID
     ipc.actual_payment_date = payment_date
     ipc.updated_by = user
@@ -343,6 +370,10 @@ def pay_ipc(ipc, user, payment_date):
 
 @transaction.atomic
 def reject_ipc(ipc, user, reason):
+    """
+    Rejects an IPC, reverting its status back to DRAFT.
+    Records the reason for rejection to inform the preparer.
+    """
     ipc.status = IPCStatus.DRAFT
     ipc.rejection_reason = reason
     ipc.updated_by = user
@@ -352,6 +383,11 @@ def reject_ipc(ipc, user, reason):
 
 @transaction.atomic
 def update_ipc_item(ipc, item, qty_current, user):
+    """
+    Updates the current period quantity for a specific IPC line item.
+    Recalculates the item's cumulative quantities, amounts, and triggers
+    a full recalculation of the IPC's gross amount and deductions.
+    """
     qty_current = Decimal(str(qty_current))
     item.qty_current = qty_current
     item.qty_cumulative = Decimal(str(item.qty_previous or 0)) + qty_current
@@ -372,6 +408,10 @@ def update_ipc_item(ipc, item, qty_current, user):
 
 @transaction.atomic
 def add_manual_deduction(ipc, deduction_type, amount, description, user):
+    """
+    Adds a manual deduction (e.g., material price difference) to a draft IPC.
+    Validates the deduction type and triggers a recalculation of the IPC's net amount.
+    """
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
     if deduction_type not in MANUAL_DEDUCTION_TYPES:
@@ -391,6 +431,10 @@ def add_manual_deduction(ipc, deduction_type, amount, description, user):
 
 @transaction.atomic
 def update_manual_deduction(ipc, deduction, amount, description, user):
+    """
+    Updates an existing manual deduction on a draft IPC.
+    Triggers a recalculation of the IPC's net amount.
+    """
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
     if amount is not None:
@@ -406,6 +450,10 @@ def update_manual_deduction(ipc, deduction, amount, description, user):
 
 @transaction.atomic
 def delete_manual_deduction(ipc, deduction, user):
+    """
+    Soft-deletes a manual deduction from a draft IPC.
+    Triggers a recalculation of the IPC's net amount.
+    """
     if ipc.status != IPCStatus.DRAFT:
         raise ValueError('Deductions can only be edited on draft IPCs.')
     deduction.soft_delete(user=user)

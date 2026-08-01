@@ -22,6 +22,10 @@ class ProcurementWorkflowError(ValidationError):
 
 
 def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], action: str):
+    """
+    Validates that a material request is in the expected state before performing an action,
+    raising a ValidationError if it is not.
+    """
     allowed = (expected,) if isinstance(expected, str) else expected
     if request.status not in allowed:
         raise ProcurementWorkflowError(
@@ -41,6 +45,10 @@ def approve_material_request(request: MaterialRequest, user) -> MaterialRequest:
 
 
 def _parse_date(value):
+    """
+    Parses a date string (Jalali or Gregorian) or returns an existing date object,
+    handling None or empty string values gracefully.
+    """
     if value is None or value == '':
         return None
     if hasattr(value, 'isoformat'):
@@ -59,6 +67,10 @@ def place_purchase_order(
     unit_price=None,
     notes='',
 ) -> PurchaseOrder:
+    """
+    Creates a new purchase order for an approved material request,
+    advancing the material request status to ORDERED.
+    """
     _ensure_status(request, MaterialRequestStatus.APPROVED, 'place order')
     if not supplier_id:
         raise ProcurementWorkflowError({'supplier': ['Supplier is required']})
@@ -92,6 +104,10 @@ def deliver_purchase_order(
     actual_delivery_date,
     document_ref='',
 ) -> MaterialRequest:
+    """
+    Records the delivery of a purchase order by creating an IN inventory transaction
+    and advancing the material request status to DELIVERED.
+    """
     _ensure_status(request, MaterialRequestStatus.ORDERED, 'deliver')
     try:
         po = request.purchase_order
@@ -125,6 +141,10 @@ def deliver_purchase_order(
 
 @transaction.atomic
 def cancel_material_request(request: MaterialRequest, user) -> MaterialRequest:
+    """
+    Cancels a material request that is either PENDING or APPROVED,
+    updating its status to CANCELLED.
+    """
     _ensure_status(
         request,
         (MaterialRequestStatus.PENDING, MaterialRequestStatus.APPROVED),

@@ -1,5 +1,6 @@
-import { ChevronDown, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 interface PreviewNode {
   wbs_code: string;
@@ -28,20 +29,21 @@ function PreviewRow({
   const activityCount = node.activities?.length ?? 0;
 
   return (
-    <div>
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
       <div
         className="flex items-center gap-2 border-b border-border/40 py-1.5 text-sm"
         style={{ paddingInlineStart: depth * indentPx + 8 }}
       >
         {hasChildren ? (
-          <button
-            type="button"
-            className="text-muted-foreground"
-            onClick={() => setExpanded(!expanded)}
-            aria-expanded={expanded}
-          >
-            {expanded ? <ChevronDown className="size-3.5" /> : <ChevronLeft className="size-3.5" />}
-          </button>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="text-muted-foreground [&[data-state=open]>svg]:-rotate-90"
+              aria-expanded={expanded}
+            >
+              <ChevronLeft className="size-3.5 transition-transform duration-200" />
+            </button>
+          </CollapsibleTrigger>
         ) : (
           <span className="w-3.5" />
         )}
@@ -51,11 +53,12 @@ function PreviewRow({
           <span className="text-xs text-muted-foreground">({activityCount} فعالیت)</span>
         ) : null}
       </div>
-      {expanded &&
-        node.children?.map((child) => (
+      <CollapsibleContent>
+        {node.children?.map((child) => (
           <PreviewRow key={child.wbs_code} node={child} depth={depth + 1} indentPx={indentPx} />
         ))}
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

@@ -175,10 +175,10 @@ export function MspImportWizard({
               <input
                 type="file"
                 accept=".xml,.xer,application/xml,text/xml"
-                className="sr-only"
+                className="peer sr-only"
                 onChange={(e) => onFileSelect(e.target.files?.[0] ?? null)}
               />
-              <span className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm hover:bg-muted/80">
+              <span className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm hover:bg-muted/80 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
                 <FileUp className="size-4" />
                 انتخاب فایل
               </span>

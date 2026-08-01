@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/sprint-button";
 import { Input } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 const INDENT_PX = 24;
 
@@ -93,8 +94,9 @@ export function WBSNodeRow({
   const weightWarning = hasChildren && Math.abs(childrenWeightSum - 1) > 0.01;
 
   return (
-    <div data-testid={`wbs-node-${node.wbs_code}`} data-wbs-id={node.wbs_id}>
-      <div
+    <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
+      <div data-testid={`wbs-node-${node.wbs_code}`} data-wbs-id={node.wbs_id}>
+        <div
         className="group flex flex-wrap items-center gap-2 border-b border-border/50 py-2 pe-2"
         style={{ paddingInlineStart: indent + 8 }}
         data-testid={`wbs-row-${node.wbs_code}`}
@@ -120,25 +122,22 @@ export function WBSNodeRow({
             .then(() => invalidate())
             .catch((err: Error) => toast.error(err.message));
         }}
-      >
-        {hasChildren ? (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="text-muted-foreground"
-            aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
-          >
-            {expanded ? (
-              <ChevronDown className="size-4" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
-          </button>
-        ) : (
-          <span className="w-4" />
-        )}
+        >
+          {hasChildren ? (
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="rounded-sm text-muted-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 [&[data-state=open]>svg]:-rotate-90"
+                aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
+              >
+                <ChevronLeft className="size-4 transition-transform duration-200" />
+              </button>
+            </CollapsibleTrigger>
+          ) : (
+            <span className="w-4" />
+          )}
 
-        <span className="text-xs text-muted-foreground">{node.wbs_code}</span>
+          <span className="text-xs text-muted-foreground">{node.wbs_code}</span>
 
         {editing && canEdit ? (
           <Input
@@ -167,7 +166,7 @@ export function WBSNodeRow({
         {canEdit ? (
           <button
             type="button"
-            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+            className="rounded-sm opacity-0 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
             onClick={() => setEditing(true)}
             aria-label={t("wbs.edit")}
           >
@@ -222,54 +221,56 @@ export function WBSNodeRow({
               </TooltipContent>
             </Tooltip>
           </div>
-        ) : null}
-      </div>
-
-      {canEdit && addingChild && (
-        <div
-          className="flex flex-wrap gap-2 py-2"
-          style={{ paddingInlineStart: indent + 32 }}
-        >
-          <Input
-            placeholder={t("wbs.code")}
-            value={childCode}
-            onChange={(e) => setChildCode(e.target.value)}
-            className="h-8 w-24"
-          />
-          <Input
-            placeholder={t("wbs.name")}
-            value={childName}
-            onChange={(e) => setChildName(e.target.value)}
-            className="h-8 max-w-xs"
-          />
-          <Button
-            size="sm"
-            variant="primary"
-            loading={createMutation.isPending}
-            onClick={() => createMutation.mutate()}
-          >
-            {t("wbs.save")}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setAddingChild(false)}
-          >
-            {t("wbs.cancel")}
-          </Button>
+          ) : null}
         </div>
-      )}
 
-      {expanded &&
-        node.children.map((child) => (
-          <WBSNodeRow
-            key={child.wbs_id}
-            node={child}
-            projectId={projectId}
-            depth={depth + 1}
-            canEdit={canEdit}
-          />
-        ))}
-    </div>
+        <CollapsibleContent>
+          {canEdit && addingChild && (
+            <div
+              className="flex flex-wrap gap-2 py-2"
+              style={{ paddingInlineStart: indent + 32 }}
+            >
+              <Input
+                placeholder={t("wbs.code")}
+                value={childCode}
+                onChange={(e) => setChildCode(e.target.value)}
+                className="h-8 w-24"
+              />
+              <Input
+                placeholder={t("wbs.name")}
+                value={childName}
+                onChange={(e) => setChildName(e.target.value)}
+                className="h-8 max-w-xs"
+              />
+              <Button
+                size="sm"
+                variant="primary"
+                loading={createMutation.isPending}
+                onClick={() => createMutation.mutate()}
+              >
+                {t("wbs.save")}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setAddingChild(false)}
+              >
+                {t("wbs.cancel")}
+              </Button>
+            </div>
+          )}
+
+          {node.children.map((child) => (
+            <WBSNodeRow
+              key={child.wbs_id}
+              node={child}
+              projectId={projectId}
+              depth={depth + 1}
+              canEdit={canEdit}
+            />
+          ))}
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   );
 }

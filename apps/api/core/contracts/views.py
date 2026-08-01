@@ -227,7 +227,7 @@ class IPCViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, project_pk=None, pk=None):
         self.action = 'retrieve'
-        ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        ipc = get_object_or_404(IPC.objects.prefetch_related('items', 'deductions'), pk=pk, project_id=project_pk, is_deleted=False)
         return Response(IPCDetailSerializer(ipc).data)
 
     def create(self, request, project_pk=None):
