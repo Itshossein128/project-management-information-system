@@ -20,7 +20,7 @@ django-treebeard==4.7.1
 celery>=5.4
 celery-types>=0.26.0
 redis>=5.0
-jdatetime>=5.0.0
+jdatetime>=6.0.1
 defusedxml==0.7.1
 python-magic>=0.4.27
 django-ratelimit>=4.1.0
