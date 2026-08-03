@@ -1,64 +1,55 @@
 # Sub-Reports Endpoints
 
-This module manages Discipline Sub-Reports for projects. It allows project members to create, view, submit, approve, and reject reports regarding the work done by different disciplines.
+Discipline sub-reports (civil, electrical, mechanical, etc.) with nested activity rows and an approval workflow. All routes are nested under:
 
-All endpoints require project-scoped permissions. The view permissions are:
-- `view_reports`: For listing and retrieving sub-reports.
-- `edit_reports`: For creating, updating, and submitting sub-reports.
-- `approve_reports`: For approving and rejecting sub-reports.
+`/api/v1/projects/{project_pk}/`
 
-The base path for these endpoints typically looks like `/api/projects/<project_id>/sub-reports/`.
+## Permissions
+
+| Action | Permission | Notes |
+|--------|------------|-------|
+| List / retrieve | `view_reports` + `IsProjectMember` | |
+| Create / update / delete / submit | `edit_reports` | |
+| Approve / reject | `approve_reports` | |
 
 ## Endpoints
 
-### 1. List Sub-Reports
-- **Method:** `GET`
-- **Path:** `/`
-- **Description:** Returns a paginated list of discipline sub-reports for a specific project.
-- **Query Parameters:**
-  - `discipline`: Filter by discipline (e.g., `civil`, `electrical`, `mechanical`, `plumbing`, `hvac`, `finishing`).
-- **Permissions:** Requires `view_reports` project permission.
+Base path: `sub-reports/`
 
-### 2. Create Sub-Report
-- **Method:** `POST`
-- **Path:** `/`
-- **Description:** Creates a new discipline sub-report along with its nested activities.
-- **Payload:** Accepts `report_date`, `discipline`, `weather_condition`, `form_code`, `revision_number`, `linked_daily_report`, and a list of `activities`.
-- **Permissions:** Requires `edit_reports` project permission.
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `sub-reports/` | GET | List sub-reports. Filter: `discipline`. Ordered by `-report_date`. |
+| `sub-reports/` | POST | Create sub-report with nested `activities`. |
+| `sub-reports/{pk}/` | GET | Detail with prefetched activities and activity count. |
+| `sub-reports/{pk}/` | PATCH | Update header. If `activities` provided, existing activities are soft-deleted and replaced. |
+| `sub-reports/{pk}/` | DELETE | Soft-delete |
+| `sub-reports/{pk}/submit/` | POST | Draft → `submitted` |
+| `sub-reports/{pk}/approve/` | POST | Submitted → `approved` |
+| `sub-reports/{pk}/reject/` | POST | Submitted → `rejected`. Body: `rejection_reason` (min 10 chars). |
 
-### 3. Retrieve Sub-Report
-- **Method:** `GET`
-- **Path:** `/<uuid:pk>/`
-- **Description:** Returns the details of a specific sub-report, including its activities and the count of activities.
-- **Permissions:** Requires `view_reports` project permission.
+### Approval workflow
 
-### 4. Update Sub-Report
-- **Method:** `PATCH`
-- **Path:** `/<uuid:pk>/`
-- **Description:** Updates the details of a specific sub-report. If `activities` are provided, the old activities are soft-deleted and replaced by the new ones.
-- **Permissions:** Requires `edit_reports` project permission.
+```
+draft ──submit──► submitted ──approve──► approved
+  ▲                    │
+  └────reject──────────┘
+```
 
-### 5. Delete Sub-Report
-- **Method:** `DELETE`
-- **Path:** `/<uuid:pk>/`
-- **Description:** Soft deletes a discipline sub-report.
-- **Permissions:** Requires `edit_reports` project permission.
+Workflow actions (`submit`, `approve`, `reject`) are registered by `WorkflowViewSetMixin` (`common/mixins.py`). `DisciplineSubReportViewSet` implements template methods `_submit`, `_approve`, `_reject` that delegate to `sub_reports/services.py`.
 
-### 6. Submit Sub-Report
-- **Method:** `POST`
-- **Path:** `/<uuid:pk>/submit/`
-- **Description:** Transitions a draft sub-report to the `SUBMITTED` state.
-- **Permissions:** Requires `edit_reports` project permission.
+Unlike daily reports, sub-reports have no `under_review` step and no separate `review` action.
 
-### 7. Approve Sub-Report
-- **Method:** `POST`
-- **Path:** `/<uuid:pk>/approve/`
-- **Description:** Approves a previously submitted sub-report, transitioning it to the `APPROVED` state.
-- **Permissions:** Requires `approve_reports` project permission.
+## Payload (create / update)
 
-### 8. Reject Sub-Report
-- **Method:** `POST`
-- **Path:** `/<uuid:pk>/reject/`
-- **Description:** Rejects a previously submitted sub-report, transitioning it to the `REJECTED` state.
-- **Payload:** Requires a `rejection_reason` (minimum 10 characters).
-- **Permissions:** Requires `approve_reports` project permission.
+| Field | Notes |
+|-------|-------|
+| `report_date` | Jalali or Gregorian |
+| `discipline` | e.g. `civil`, `electrical`, `mechanical`, `plumbing`, `hvac`, `finishing` |
+| `weather_condition`, `form_code`, `revision_number` | Optional metadata |
+| `linked_daily_report` | Optional FK to `field_reports.DailyReport` |
+| `activities` | Array of activity progress rows (replaced wholesale on PATCH when provided) |
+
+## Operational notes
+
+- **Shared pattern:** same `WorkflowViewSetMixin` used by `field_reports.DailyReportViewSet`; see `field_reports/ENDPOINTS.md` for the daily-report variant (includes `review` and stricter submit validation).
+- **Permissions:** list/retrieve require project membership; write paths use `HasProjectPermission` only.

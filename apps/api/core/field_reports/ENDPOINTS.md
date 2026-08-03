@@ -95,7 +95,7 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 | :--- | :--- | :--- |
 | `manpower/` | GET, POST | Standalone manpower entries |
 | `manpower/{pk}/` | PATCH, DELETE | |
-| `labor-camp/` | GET, POST | Standalone labor-camp reports |
+| `labor-camp/` | GET, POST | Standalone labor-camp reports. Supports batch POST (array body). Query `grouped=true` returns date-grouped rollups. |
 | `labor-camp/{pk}/` | PATCH, DELETE | |
 | `equipment-log/` | GET, POST | Equipment usage log |
 | `equipment-log/summary/` | GET | Aggregated equipment log KPIs |
@@ -109,6 +109,42 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 | `activity-log/` | GET | Filtered activity log export |
 | `activity-log/filters/` | GET | Filter option metadata |
 
+## Shared equipment & labor-camp schema
+
+Daily-report child rows and standalone forms share abstract base models and serializers so field definitions stay in one place (`models.py`, `serializers.py`).
+
+| Abstract base | Daily-report model | Standalone model | Serializer base |
+|---------------|-------------------|------------------|-----------------|
+| `BaseEquipmentEntry` | `DailyReportEquipment` | `EquipmentLog` | `BaseEquipmentEntrySerializer` |
+| `BaseLaborCampEntry` | `DailyReportLaborCamp` | `LaborCampReport` | `BaseLaborCampEntrySerializer` |
+
+### Equipment fields (both contexts)
+
+| Field | Type / choices | Notes |
+|-------|----------------|-------|
+| `equipment_name`, `equipment_ref` | string | Free-text name + optional registry code |
+| `equipment` | FK → `Equipment` | Optional link to project equipment registry |
+| `shift` | `day` \| `night` \| `full` | Same as daily report header |
+| `status` | `active` \| `standby` \| `broken` | |
+| `ownership_type` | `owned` \| `rented` | |
+| `work_start`, `work_end` | time | Validated as pairs on daily-report submit |
+| `repair_hours`, `idle_hours`, `productive_hours` | decimal | Standalone `equipment-log` may return a `warning` when productive hours diverge from start/end |
+| `hourly_rate`, `fuel_cost` | decimal | Optional cost inputs |
+| `activity_ref` | FK → `Activity` | Optional activity linkage |
+
+Standalone `EquipmentLog` adds `log_date` (Jalali or Gregorian). Daily-report equipment rows inherit `report_date` from the parent header.
+
+### Labor-camp fields (both contexts)
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `connex_number`, `subcontractor_name` | string | One row per connex/unit |
+| `total_residents`, `present_count`, `on_leave_count`, `capacity` | integer | Standalone serializer exposes computed `empty_capacity` and a `warning` when present + on_leave ≠ total_residents |
+
+Standalone `LaborCampReport` adds `report_date`. Daily-report labor-camp rows are scoped to the parent report date.
+
+**Constraint:** labor-camp counts are validated on daily-report **submit** (at least one row required). Child writes remain blocked unless parent status is `draft` or `rejected`.
+
 ## Frontend routes
 
 - `/projects/{id}/daily-reports` — list
@@ -119,6 +155,7 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 ## Operational notes
 
 - **Shift values:** `day`, `night`, `full` (default `full`).
+- **Workflow actions:** `submit`, `approve`, and `reject` are exposed via `WorkflowViewSetMixin` (`common/mixins.py`). `DailyReportViewSet` also implements a custom `review` action (not part of the mixin).
 - **Progress side effect:** approving a report enqueues progress recalculation for linked activities.
 - **Auto costs:** approved labor entries with `daily_rate` feed `cost_control.ActualCost` (see `cost_control/ENDPOINTS.md`).
 - **Photo attachments:** activity photos require MinIO/S3 (`storage` app); not available in Docker-less cloud dev.
