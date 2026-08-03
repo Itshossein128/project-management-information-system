@@ -14,10 +14,10 @@
     "e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
-    "@playwright/test": "^1.51.0",
+    "@playwright/test": "^1.62.1",
     "concurrently": "^10.0.4"
   },
   "dependencies": {
-    "@radix-ui/react-popover": "^1.1.21"
+    "@radix-ui/react-popover": "^1.1.23"
   }
 }
