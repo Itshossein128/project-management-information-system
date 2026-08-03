@@ -131,8 +131,10 @@ class ScoreDetailView(APIView):
         )
         ser = PerformanceScoreSerializer(score, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        service = SubcontractorPerformanceService()
-        score = service.update_score(score, ser.validated_data, request.user)
+        for attr, val in ser.validated_data.items():
+            setattr(score, attr, val)
+        score.updated_by = request.user
+        score.save()
         _invalidate_subcontractor_caches(project_pk)
         return Response(PerformanceScoreSerializer(score).data)
 
@@ -192,8 +194,12 @@ class WarningPatchView(APIView):
         )
         ser = WarningSerializer(w, data=request.data, partial=True)
         ser.is_valid(raise_exception=True)
-        service = SubcontractorPerformanceService()
-        w = service.update_warning(w, ser.validated_data, request.user)
+        for attr, val in ser.validated_data.items():
+            setattr(w, attr, val)
+        if w.resolved and not w.resolved_date:
+            w.resolved_date = date.today()
+        w.updated_by = request.user
+        w.save()
         _invalidate_subcontractor_caches(project_pk)
         return Response(WarningSerializer(w).data)
 
