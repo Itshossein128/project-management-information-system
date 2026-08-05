@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
 
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/form";
+import { Button } from "@/components/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { readExcelFile } from "@/app/lib/excel/excel-read";
 import {
   type ExcelColumnMapping,
@@ -46,21 +47,15 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
     }));
   }, [result]);
 
-  if (!open) return null;
-
   return (
-    <div
-      id={`modal-excelImport-${name}`}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0 sm:items-center sm:p-4"
-      role="dialog"
-      aria-modal="true"
-    >
-      <Card
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && !loading && onClose()}>
+      <DialogContent
         id={`container-excelImportCard-${name}`}
-        className="flex max-h-[min(90dvh,100%)] w-full max-w-3xl flex-col rounded-t-xl sm:max-h-[90dvh] sm:rounded-xl"
+        className="flex max-h-[95dvh] w-full max-w-3xl flex-col p-0 sm:max-h-[90dvh]"
+        showCloseButton={false}
       >
-        <CardHeader className="flex shrink-0 flex-wrap items-center justify-between gap-2 space-y-0">
-          <CardTitle id={`text-excelImportTitle-${name}`}>{title}</CardTitle>
+        <DialogHeader className="flex shrink-0 flex-row items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <DialogTitle id={`text-excelImportTitle-${name}`} className="text-base font-semibold text-start">{title}</DialogTitle>
           <Button
             id={`button-closeExcelImport-${name}`}
             type="button"
@@ -73,8 +68,8 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
           >
             Close
           </Button>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 space-y-4">
           <div id={`container-excelImportFile-${name}`} className="space-y-2">
             <label id={`text-excelImportFileLabel-${name}`} className="text-sm font-medium">
               Excel file (.xlsx)
@@ -222,9 +217,9 @@ export function ExcelImportModal<T extends Record<string, unknown>>({
               Import {validCount ? `(${validCount})` : ""}
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
