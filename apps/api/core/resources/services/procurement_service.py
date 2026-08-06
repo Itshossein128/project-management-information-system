@@ -21,6 +21,24 @@ class ProcurementWorkflowError(ValidationError):
     pass
 
 
+def get_material_request_defaults(project_id, material, unit=None, request_date=None) -> dict:
+    """
+    Computes default values (request_number, unit, request_date) for a new material request.
+    """
+    derived_unit = unit or (material.unit.symbol if getattr(material, 'unit_id', None) else '')
+    max_num = (
+        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
+            m=Max('request_number')
+        )['m']
+        or 0
+    )
+    return {
+        'request_number': max_num + 1,
+        'unit': derived_unit or '—',
+        'request_date': request_date or timezone.localdate(),
+    }
+
+
 def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], action: str):
     """
     Validates that a material request is in the expected state before performing an action,
@@ -31,26 +49,6 @@ def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], ac
         raise ProcurementWorkflowError(
             {'detail': f'Cannot {action} while status is {request.status}'}
         )
-
-
-def build_material_request_kwargs(project_id, **validated_data) -> dict:
-    material = validated_data['material']
-    unit = validated_data.get('unit') or (
-        material.unit.symbol if getattr(material, 'unit_id', None) else ''
-    )
-    max_num = (
-        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
-            m=Max('request_number')
-        )['m']
-        or 0
-    )
-    request_date = validated_data.get('request_date') or timezone.localdate()
-
-    return {
-        'unit': unit or '—',
-        'request_number': max_num + 1,
-        'request_date': request_date,
-    }
 
 
 @transaction.atomic
