@@ -21,19 +21,7 @@ class ProcurementWorkflowError(ValidationError):
     pass
 
 
-def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], action: str):
-    """
-    Validates that a material request is in the expected state before performing an action,
-    raising a ValidationError if it is not.
-    """
-    allowed = (expected,) if isinstance(expected, str) else expected
-    if request.status not in allowed:
-        raise ProcurementWorkflowError(
-            {'detail': f'Cannot {action} while status is {request.status}'}
-        )
-
-
-def build_material_request_kwargs(project_id, **validated_data) -> dict:
+def compute_material_request_kwargs(project_id: str, validated_data: dict) -> dict:
     material = validated_data['material']
     unit = validated_data.get('unit') or (
         material.unit.symbol if getattr(material, 'unit_id', None) else ''
@@ -44,13 +32,23 @@ def build_material_request_kwargs(project_id, **validated_data) -> dict:
         )['m']
         or 0
     )
-    request_date = validated_data.get('request_date') or timezone.localdate()
-
     return {
-        'unit': unit or '—',
         'request_number': max_num + 1,
-        'request_date': request_date,
+        'unit': unit or '—',
+        'request_date': validated_data.get('request_date') or timezone.localdate(),
     }
+
+
+def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], action: str):
+    """
+    Validates that a material request is in the expected state before performing an action,
+    raising a ValidationError if it is not.
+    """
+    allowed = (expected,) if isinstance(expected, str) else expected
+    if request.status not in allowed:
+        raise ProcurementWorkflowError(
+            {'detail': f'Cannot {action} while status is {request.status}'}
+        )
 
 
 @transaction.atomic
