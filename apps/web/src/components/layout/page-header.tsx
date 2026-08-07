@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { cn } from "src/app/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface PageHeaderProps {
   title: string;
@@ -52,10 +53,12 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
 }
 
 export function LoadingSkeleton({ rows = 5, className }: { rows?: number; className?: string }) {
+  const widths = ["w-full", "w-[90%]", "w-[95%]", "w-[85%]", "w-[92%]"];
+
   return (
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="skeleton-shimmer h-10 rounded-lg" />
+        <Skeleton key={i} className={cn("h-10", widths[i % widths.length])} />
       ))}
     </div>
   );
