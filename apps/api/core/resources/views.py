@@ -25,8 +25,8 @@ from resources.services.balance_service import compute_material_balance, materia
 from resources.services.consumption_service import material_consumption_report
 from resources.services.procurement_service import (
     approve_material_request,
-    build_material_request_kwargs,
     cancel_material_request,
+    compute_material_request_kwargs,
     deliver_purchase_order,
     place_purchase_order,
 )
@@ -64,9 +64,9 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
         return qs.order_by('-request_date', '-request_number')
 
     def perform_create(self, serializer):
-        kwargs = build_material_request_kwargs(
+        kwargs = compute_material_request_kwargs(
             self.get_project_id(),
-            **serializer.validated_data
+            serializer.validated_data,
         )
         super().perform_create(serializer, **kwargs)
 
