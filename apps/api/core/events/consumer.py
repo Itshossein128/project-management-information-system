@@ -22,11 +22,13 @@ def _handle_shutdown(signum, frame):
 
 
 def handle_audit_log(envelope: dict[str, Any]) -> None:
+    """Extracts the payload from the event envelope and persists it to the database as an audit log."""
     payload = envelope.get('payload') or {}
     persist_audit_log(payload)
 
 
 def handle_default(topic: str, envelope: dict[str, Any]) -> None:
+    """Fallback handler for unmapped topics that logs the received event."""
     logger.info('Received event topic=%s project_id=%s', topic, envelope.get('project_id'))
 
 
@@ -49,11 +51,16 @@ TOPIC_HANDLERS: dict[str, Callable[[dict[str, Any]], None]] = {
 
 
 def dispatch_message(topic: str, envelope: dict[str, Any]) -> None:
+    """Routes incoming messages to the appropriate handler function based on the event's topic."""
     handler = TOPIC_HANDLERS.get(topic, lambda env: handle_default(topic, env))
     handler(envelope)
 
 
 def _on_message(channel, method, properties, body):
+    """
+    Processes individual messages from RabbitMQ queues, parses the JSON payload,
+    dispatches it to handlers, and acknowledges (ACK) or negatively acknowledges (NACK) the message.
+    """
     routing_key = method.routing_key
     try:
         envelope = json.loads(body.decode('utf-8'))
@@ -66,6 +73,10 @@ def _on_message(channel, method, properties, body):
 
 
 def run_consumer(url: str | None = None) -> None:
+    """
+    Connects to RabbitMQ, declares topology, sets up consumer callbacks for queues,
+    and starts a blocking loop to continuously process messages until a shutdown signal is received.
+    """
     global _shutdown
     signal.signal(signal.SIGTERM, _handle_shutdown)
     signal.signal(signal.SIGINT, _handle_shutdown)
