@@ -7,6 +7,12 @@ import jdatetime
 from documents.models import Correspondence, CorrType
 
 
+def build_correspondence_create_kwargs(project_id, corr_type: str, provided_corr_number: str | None = None) -> dict:
+    """Computes derived fields for new correspondence."""
+    corr_number = provided_corr_number or generate_corr_number(project_id, corr_type)
+    return {'corr_number': corr_number}
+
+
 def generate_corr_number(project_id, corr_type: str) -> str:
     prefix_map = {
         CorrType.OUTGOING: 'OUT',

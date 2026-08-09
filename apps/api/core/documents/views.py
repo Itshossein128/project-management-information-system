@@ -17,7 +17,7 @@ from documents.serializers import (
     ProjectDocumentDetailSerializer,
     ProjectDocumentSerializer,
 )
-from documents.services.correspondence_service import generate_corr_number
+from documents.services.correspondence_service import build_correspondence_create_kwargs
 from documents.services.document_service import create_project_document, create_document_revision
 from permissions.project import HasProjectPermission
 
@@ -119,10 +119,12 @@ class CorrespondenceViewSet(DocScopedViewSet):
         return Response({'results': CorrespondenceSerializer(self.get_queryset(), many=True).data})
 
     def perform_create(self, serializer):
-        corr_number = self.request.data.get('corr_number') or generate_corr_number(
-            self.kwargs['project_pk'], serializer.validated_data['corr_type']
+        kwargs = build_correspondence_create_kwargs(
+            self.kwargs['project_pk'],
+            serializer.validated_data['corr_type'],
+            provided_corr_number=self.request.data.get('corr_number'),
         )
-        super().perform_create(serializer, corr_number=corr_number)
+        super().perform_create(serializer, **kwargs)
 
 
 class CorrespondenceRespondView(APIView):
