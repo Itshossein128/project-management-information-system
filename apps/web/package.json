@@ -10,7 +10,7 @@
     "test:e2e": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.4",
+    "@dagrejs/dagre": "^3.1.0",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/vazirmatn": "^5.2.8",
     "@radix-ui/react-accordion": "^1.2.20",
