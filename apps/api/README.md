@@ -61,6 +61,16 @@ Scoped subclasses set permission names and optionally override `post_save` / `po
 
 Business logic belongs in `services.py`; viewsets should delegate to services for multi-step workflows (see `field_reports/services/` for daily report approval and offline sync).
 
+## Workflow ViewSet mixin
+
+Report-style approval flows use `common.mixins.WorkflowViewSetMixin`:
+
+- Exposes `@action` routes: `submit`, `approve`, `reject` (POST, detail=True).
+- Subclasses implement `_submit`, `_approve`, `_reject` template methods.
+- Used by `field_reports.daily_report_views.DailyReportViewSet` (plus a custom `review` action) and `sub_reports.views.DisciplineSubReportViewSet`.
+
+Procurement workflow actions on material requests are **not** mixin-based; they are standalone APIViews in `resources/views.py` (see `resources/ENDPOINTS.md`).
+
 ## File upload validation
 
 Shared validators live in `common/validators.py`:

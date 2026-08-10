@@ -5,6 +5,20 @@ It uses JSON Web Tokens (JWT) for authentication. All endpoints are grouped unde
 
 ## Base URL: `/api/auth/`
 
+## Input validation bounds
+
+Auth serializers enforce `max_length` on write fields (returns `400` when exceeded):
+
+| Field | Max length | Endpoints |
+|-------|------------|-----------|
+| `password`, `new_password`, `old_password`, `password_confirm`, `new_password_confirm` | 128 | register, login, change-password, reset-password |
+| `phone_number` | 20 | register, login, forgot-password |
+| `username` | 60 | register, login |
+| `first_name`, `last_name` | 120 | register |
+| `token` (reset) | 128 | reset-password |
+
+Password strength is still validated via Django's `validate_password` on registration and reset.
+
 ## Endpoints
 
 ### 1. User Registration

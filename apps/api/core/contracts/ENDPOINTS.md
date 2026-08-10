@@ -6,7 +6,8 @@ This document describes the API endpoints provided by the `contracts` app within
 
 ### `GET /contracts/`
 *   **Purpose**: Retrieves a list of all contracts associated with the project.
-*   **Behavior**: Supports filtering via query params: `contract_type`, `status`, `counterparty`. Returns `{ results: [...] }` with per-contract IPC stats.
+*   **Behavior**: Supports filtering via query params: `contract_type`, `status`, `counterparty`. Returns `{ results: [...] }` with per-contract IPC stats (`total_ipc_count`, `paid_ipc_count`, `total_billed`, `total_paid`).
+*   **Performance**: `ContractViewSet.list` pre-aggregates IPC counts in one query and attaches `_ipc_stats` on each contract. `ContractListSerializer` uses those aggregates when present; otherwise it iterates prefetched `ipcs` (safe fallback, no extra `.filter()` queries).
 
 ### `POST /contracts/`
 *   **Purpose**: Creates a new contract within the project.

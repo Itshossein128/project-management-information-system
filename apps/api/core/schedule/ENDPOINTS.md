@@ -40,6 +40,17 @@ Progress KPI endpoints use `view_dashboard` (see `progress_views.py`).
 
 Local dev: set `CELERY_TASK_ALWAYS_EAGER=true` to run imports inline without a Celery worker.
 
+### Shared import services
+
+MSP and P6 import jobs share logic in `schedule/services/shared_import.py`:
+
+| Function | Purpose |
+|----------|---------|
+| `extract_activities_from_tasks(...)` | Skips summary tasks, resolves WBS via caller-supplied `get_wbs_func`, bulk-creates `Activity` rows, updates `uid_to_activity` map. Duplicate activity codes are skipped with a warning. |
+| `bulk_create_relations(...)` | `ActivityRelation.objects.bulk_create(..., ignore_conflicts=True)` and returns the import summary dict (`wbs_nodes_created`, `activities_created`, `relations_created`, `warnings`). |
+
+Format-specific parsers live in `msp_import.py` and `p6_import.py`; both call the shared helpers after normalizing vendor task/relation shapes.
+
 ## Progress dashboard (Sprint 6)
 
 | Endpoint | Method | Query params | Description |

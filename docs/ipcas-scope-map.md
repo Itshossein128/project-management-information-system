@@ -382,3 +382,17 @@ See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Bluepri
 - **Cache:** Unified KPIs use `project_kpis:{id}:{as_of}` (5 min). Progress EVM cache invalidation also clears `project_kpis:*`.
 - **Load smoke:** `ACCESS_TOKEN=… PROJECT_ID=… python apps/api/scripts/load_smoke_kpis.py`
 
+## Recent refactors (Aug 2026)
+
+Cross-cutting API changes documented in module `ENDPOINTS.md` files:
+
+| Change | Location | Doc |
+|--------|----------|-----|
+| `WorkflowViewSetMixin` (submit/approve/reject) | `common/mixins.py` → daily reports, sub-reports | `field_reports/ENDPOINTS.md`, `sub_reports/ENDPOINTS.md`, `apps/api/README.md` |
+| Material request workflow → APIViews | `resources/views.py`, `resources/urls.py` | `resources/ENDPOINTS.md` |
+| Shared MSP/P6 import helpers | `schedule/services/shared_import.py` | `schedule/ENDPOINTS.md` |
+| `BaseEquipmentEntry` / `BaseLaborCampEntry` abstract models | `field_reports/models.py` | `field_reports/ENDPOINTS.md` |
+| Legacy `/api/items/` requires JWT | `inventory/views.py` | `inventory/ENDPOINTS.md` |
+| Auth serializer `max_length` bounds | `authentication/serializers.py` | `authentication/ENDPOINTS.md` |
+| Contract list IPC stats aggregation | `contracts/views.py`, `contracts/serializers.py` | `contracts/ENDPOINTS.md` |
+

@@ -10,8 +10,12 @@ Daily reports, offline sync, approval workflow, and related field-data APIs (wea
 |--------|------------|-------|
 | List/retrieve daily reports, child rows, PDF, analytics | `view_reports` + `IsProjectMember` | Read paths require project membership |
 | Create/update/delete reports and child rows, sync-batch | `edit_reports` | Writes do not require membership check |
-| Submit | `edit_reports` | Reporter action |
-| Review / approve / reject | `approve_reports` | Approver action |
+| Submit | `edit_reports` | Reporter action; routed via `WorkflowViewSetMixin.submit` |
+| Review / approve / reject | `approve_reports` | Approver action; `review` is a custom action on `DailyReportViewSet` (not in the mixin) |
+
+### Workflow mixin
+
+`DailyReportViewSet` inherits `WorkflowViewSetMixin` (`common/mixins.py`) for `submit`, `approve`, and `reject`. The mixin exposes standard `@action` routes; subclasses implement `_submit`, `_approve`, and `_reject` template methods that delegate to `field_reports/services/`. Daily reports additionally expose **`review`** (`submitted` → `under_review`) as a ViewSet-specific action.
 
 ## Daily Reports
 
@@ -62,6 +66,17 @@ Nested under `daily-reports/{report_pk}/`. All child writes require parent statu
 | `labor-camp/{pk}/` | PATCH, DELETE | |
 | `incidents/` | GET, POST | |
 | `incidents/{pk}/` | PATCH, DELETE | |
+
+### Shared entry models (equipment & labor camp)
+
+Equipment and labor-camp rows share field definitions between daily-report child rows and standalone forms:
+
+| Abstract base | Daily-report model | Standalone model | Serializer base |
+|---------------|-------------------|------------------|-----------------|
+| `BaseEquipmentEntry` | `DailyReportEquipment` | `EquipmentLog` | `BaseEquipmentEntrySerializer` |
+| `BaseLaborCampEntry` | `DailyReportLaborCamp` | `LaborCampReport` | `BaseLaborCampEntrySerializer` |
+
+Shared fields include shift/status/ownership/hours for equipment and connex/resident counts for labor camp. Daily-report rows add FK links (`report`, optional `equipment`/`activity_ref`); standalone rows are project-scoped via `ProjectScopedViewSet` at `equipment-log/` and `labor-camp/`.
 
 ### Offline sync (`sync-batch`)
 

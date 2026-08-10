@@ -11,6 +11,8 @@ Legacy inventory APIs and project-scoped department activity logs. The blueprint
 | `/api/items/` | `/api/v1/projects/{uuid}/materials/` |
 | Global `Item` catalog | `resources.Material` + inventory transactions |
 
+**Auth:** All `/api/items/` operations require JWT (`IsAuthenticated`). Unauthenticated requests receive `401`.
+
 **Timeline:** `/api/items/` remains mounted for backward compatibility with legacy dynamic-table workflows. New features must use `resources`. Removal is planned after frontend callers migrate to material-balance (`/projects/:id/material-balance`).
 
 See also: [docs/ipcas-scope-map.md](../../../../docs/ipcas-scope-map.md) (Materials ledger row).
@@ -24,7 +26,9 @@ See also: [docs/ipcas-scope-map.md](../../../../docs/ipcas-scope-map.md) (Materi
 
 ### Global Items (deprecated)
 
-*   **GET/POST/PUT/PATCH/DELETE** `/api/items/`: Legacy global catalog items.
+*   **GET/POST/PUT/PATCH/DELETE** `/api/items/`: Legacy global catalog items. **Requires authentication** (`IsAuthenticated`).
+*   **GET** `/api/items/export/`: Excel export of all items.
+*   **POST** `/api/items/import/`: Excel import (multipart `file`; columns: name, quantity, category).
 
 ### Project-Scoped Operations
 
