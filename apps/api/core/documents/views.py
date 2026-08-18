@@ -17,7 +17,7 @@ from documents.serializers import (
     ProjectDocumentDetailSerializer,
     ProjectDocumentSerializer,
 )
-from documents.services.correspondence_service import build_correspondence_create_kwargs
+from documents.services.correspondence_service import generate_corr_number, respond_to_correspondence
 from documents.services.document_service import create_project_document, create_document_revision
 from permissions.project import HasProjectPermission
 
@@ -119,12 +119,10 @@ class CorrespondenceViewSet(DocScopedViewSet):
         return Response({'results': CorrespondenceSerializer(self.get_queryset(), many=True).data})
 
     def perform_create(self, serializer):
-        kwargs = build_correspondence_create_kwargs(
-            self.kwargs['project_pk'],
-            serializer.validated_data['corr_type'],
-            provided_corr_number=self.request.data.get('corr_number'),
+        corr_number = self.request.data.get('corr_number') or generate_corr_number(
+            self.kwargs['project_pk'], serializer.validated_data['corr_type']
         )
-        super().perform_create(serializer, **kwargs)
+        super().perform_create(serializer, corr_number=corr_number)
 
 
 class CorrespondenceRespondView(APIView):
@@ -138,12 +136,7 @@ class CorrespondenceRespondView(APIView):
             project_id=project_pk,
             is_deleted=False,
         )
-        corr.response_date = parse_date_optional(request.data.get('response_date')) or date.today()
-        corr.status = CorrStatus.RESPONDED
-        if request.data.get('file_url'):
-            corr.file_url = request.data['file_url']
-        corr.updated_by = request.user
-        corr.save()
+        corr = respond_to_correspondence(corr, request.data, request.user)
         return Response(CorrespondenceSerializer(corr).data)
 
 

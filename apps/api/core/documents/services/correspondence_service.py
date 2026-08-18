@@ -3,14 +3,10 @@
 from __future__ import annotations
 
 import jdatetime
+from datetime import date
 
-from documents.models import Correspondence, CorrType
-
-
-def build_correspondence_create_kwargs(project_id, corr_type: str, provided_corr_number: str | None = None) -> dict:
-    """Computes derived fields for new correspondence."""
-    corr_number = provided_corr_number or generate_corr_number(project_id, corr_type)
-    return {'corr_number': corr_number}
+from common.jalali import parse_date_optional
+from documents.models import Correspondence, CorrStatus, CorrType
 
 
 def generate_corr_number(project_id, corr_type: str) -> str:
@@ -28,3 +24,14 @@ def generate_corr_number(project_id, corr_type: str) -> str:
         is_deleted=False,
     ).count() + 1
     return f'{prefix}-{year}-{seq:03d}'
+
+
+def respond_to_correspondence(corr: Correspondence, data: dict, user) -> Correspondence:
+    """Respond to a correspondence and update its state."""
+    corr.response_date = parse_date_optional(data.get('response_date')) or date.today()
+    corr.status = CorrStatus.RESPONDED
+    if data.get('file_url'):
+        corr.file_url = data['file_url']
+    corr.updated_by = user
+    corr.save()
+    return corr
