@@ -17,6 +17,22 @@ from resources.models import (
 )
 
 
+def compute_material_request_create_kwargs(project_id, material, provided_unit, provided_date):
+    """Computes the creation arguments for a MaterialRequest, extracting logic from views."""
+    unit = provided_unit or (material.unit.symbol if getattr(material, 'unit_id', None) else '')
+    max_num = (
+        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
+            m=Max('request_number')
+        )['m']
+        or 0
+    )
+    return {
+        'request_number': max_num + 1,
+        'unit': unit or '—',
+        'request_date': provided_date or timezone.localdate(),
+    }
+
+
 class ProcurementWorkflowError(ValidationError):
     pass
 

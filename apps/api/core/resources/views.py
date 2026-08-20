@@ -26,6 +26,7 @@ from resources.services.consumption_service import material_consumption_report
 from resources.services.procurement_service import (
     approve_material_request,
     cancel_material_request,
+    compute_material_request_create_kwargs,
     deliver_purchase_order,
     place_purchase_order,
 )
@@ -63,22 +64,13 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
         return qs.order_by('-request_date', '-request_number')
 
     def perform_create(self, serializer):
-        material = serializer.validated_data['material']
-        unit = serializer.validated_data.get('unit') or (
-            material.unit.symbol if getattr(material, 'unit_id', None) else ''
+        kwargs = compute_material_request_create_kwargs(
+            project_id=self.get_project_id(),
+            material=serializer.validated_data['material'],
+            provided_unit=serializer.validated_data.get('unit'),
+            provided_date=serializer.validated_data.get('request_date'),
         )
-        max_num = (
-            MaterialRequest.objects.filter(project_id=self.get_project_id(), material=material).aggregate(
-                m=Max('request_number')
-            )['m']
-            or 0
-        )
-        super().perform_create(
-            serializer,
-            request_number=max_num + 1,
-            unit=unit or '—',
-            request_date=serializer.validated_data.get('request_date') or timezone.localdate(),
-        )
+        super().perform_create(serializer, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()
