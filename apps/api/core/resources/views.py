@@ -1,6 +1,6 @@
 """Material balance and inventory API."""
 
-from django.db.models import Max, Prefetch
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -25,11 +25,11 @@ from resources.services.balance_service import compute_material_balance, materia
 from resources.services.consumption_service import material_consumption_report
 from resources.services.procurement_service import (
     approve_material_request,
-    build_material_request_kwargs,
     cancel_material_request,
     deliver_purchase_order,
     place_purchase_order,
 )
+from resources.services.request_service import compute_material_request_defaults
 
 
 class MaterialViewSet(ProjectScopedViewSet):
@@ -64,9 +64,9 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
         return qs.order_by('-request_date', '-request_number')
 
     def perform_create(self, serializer):
-        kwargs = build_material_request_kwargs(
-            self.get_project_id(),
-            **serializer.validated_data
+        material = serializer.validated_data['material']
+        kwargs = compute_material_request_defaults(
+            self.get_project_id(), material, serializer.validated_data
         )
         super().perform_create(serializer, **kwargs)
 

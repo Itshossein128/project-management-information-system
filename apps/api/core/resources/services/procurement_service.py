@@ -33,26 +33,6 @@ def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], ac
         )
 
 
-def build_material_request_kwargs(project_id, **validated_data) -> dict:
-    material = validated_data['material']
-    unit = validated_data.get('unit') or (
-        material.unit.symbol if getattr(material, 'unit_id', None) else ''
-    )
-    max_num = (
-        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
-            m=Max('request_number')
-        )['m']
-        or 0
-    )
-    request_date = validated_data.get('request_date') or timezone.localdate()
-
-    return {
-        'unit': unit or '—',
-        'request_number': max_num + 1,
-        'request_date': request_date,
-    }
-
-
 @transaction.atomic
 def approve_material_request(request: MaterialRequest, user) -> MaterialRequest:
     _ensure_status(request, MaterialRequestStatus.PENDING, 'approve')

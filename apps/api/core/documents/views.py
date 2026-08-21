@@ -17,7 +17,7 @@ from documents.serializers import (
     ProjectDocumentDetailSerializer,
     ProjectDocumentSerializer,
 )
-from documents.services.correspondence_service import generate_corr_number
+from documents.services.correspondence_service import generate_corr_number, respond_to_correspondence
 from documents.services.document_service import create_project_document, create_document_revision
 from permissions.project import HasProjectPermission
 
@@ -136,12 +136,7 @@ class CorrespondenceRespondView(APIView):
             project_id=project_pk,
             is_deleted=False,
         )
-        corr.response_date = parse_date_optional(request.data.get('response_date')) or date.today()
-        corr.status = CorrStatus.RESPONDED
-        if request.data.get('file_url'):
-            corr.file_url = request.data['file_url']
-        corr.updated_by = request.user
-        corr.save()
+        corr = respond_to_correspondence(corr, request.data, request.user)
         return Response(CorrespondenceSerializer(corr).data)
 
 
