@@ -162,8 +162,8 @@ class ProcurementStatusReportView(APIView):
             )
             .values(
                 'assigned_to',
-                'assigned_to__first_name',
-                'assigned_to__last_name',
+                'assigned_to__full_name',
+                'assigned_to__username',
                 'status',
             )
             .annotate(
@@ -174,7 +174,15 @@ class ProcurementStatusReportView(APIView):
             .order_by('assigned_to', 'status')
         )
 
+        summary_list = []
+        for row in officer_summary:
+            full_name = row.get('assigned_to__full_name') or row.get('assigned_to__username') or ''
+            row['assigned_to__full_name'] = full_name
+            row['assigned_to__first_name'] = full_name
+            row['assigned_to__last_name'] = ''
+            summary_list.append(row)
+
         return Response({
             'project_id': str(project.id),
-            'summary': list(officer_summary),
+            'summary': summary_list,
         })

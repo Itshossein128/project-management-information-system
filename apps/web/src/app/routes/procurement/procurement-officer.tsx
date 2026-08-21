@@ -37,7 +37,9 @@ function OfficerDashboardContent() {
             <div key={`${s.assigned_to}-${s.status}-${idx}`} className="bg-card border border-border rounded-lg p-5 space-y-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h4 className="font-semibold">{s.assigned_to__first_name} {s.assigned_to__last_name}</h4>
+                  <h4 className="font-semibold">
+                    {s.assigned_to__full_name || `${s.assigned_to__first_name || ""} ${s.assigned_to__last_name || ""}`.trim() || s.assigned_to}
+                  </h4>
                   <p className="text-xs text-muted-foreground mt-1">شناسه کاربری: {s.assigned_to}</p>
                 </div>
                 <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
