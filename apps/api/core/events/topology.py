@@ -1,7 +1,9 @@
 """RabbitMQ event topology and publisher."""
 
+# Name of the central RabbitMQ topic exchange where events are published
 TOPIC_EXCHANGE = 'ipcas.events'
 
+# Allowed valid topic routing keys
 BLUEPRINT_TOPICS = (
     'daily-report.approved',
     'cost.recorded',
@@ -10,6 +12,7 @@ BLUEPRINT_TOPICS = (
     'audit.log',
 )
 
+# Maps routing keys/topics to specific queue names for consumers
 TOPIC_QUEUE_MAP = {
     'daily-report.approved': 'daily-report.approved.q',
     'cost.recorded': 'cost.recorded.q',
