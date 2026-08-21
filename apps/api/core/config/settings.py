@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'wbs',
     'project_templates',
     'inventory',
+    'procurement',
 ]
 
 MIDDLEWARE = [
