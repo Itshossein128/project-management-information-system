@@ -30,10 +30,12 @@ function ProcurementNewContent() {
     queryFn: () => fetchBlocks(projectId),
   });
 
-  const { data: materials = [] } = useQuery({
+  const { data: rawMaterials = [] } = useQuery({
     queryKey: ["materials", projectId],
     queryFn: () => fetchMaterials(projectId),
   });
+
+  const materials = Array.isArray(rawMaterials) ? rawMaterials : ((rawMaterials as any)?.results ?? []);
 
   const createMut = useMutation({
     mutationFn: (payload: any) => createRequisition(projectId, payload),

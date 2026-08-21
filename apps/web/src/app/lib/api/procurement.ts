@@ -105,52 +105,58 @@ export interface InternalTransfer {
   updated_at: string;
 }
 
+function normalizeList<T>(data: any): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.results)) return data.results;
+  return [];
+}
+
 // Blocks API
-export async function fetchBlocks(projectId: string) {
-  const { data } = await client.get<Block[]>(`/v1/projects/${projectId}/blocks/`);
-  return data;
+export async function fetchBlocks(projectId: string): Promise<Block[]> {
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/blocks/`);
+  return normalizeList<Block>(data);
 }
 
 // Requisitions API
-export async function fetchRequisitions(projectId: string, params?: Record<string, any>) {
-  const { data } = await client.get<RequisitionHeader[]>(`/v1/projects/${projectId}/requisitions/`, { params });
-  return data;
+export async function fetchRequisitions(projectId: string, params?: Record<string, any>): Promise<RequisitionHeader[]> {
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/requisitions/`, { params });
+  return normalizeList<RequisitionHeader>(data);
 }
 
-export async function fetchRequisition(projectId: string, reqId: string) {
+export async function fetchRequisition(projectId: string, reqId: string): Promise<RequisitionHeader> {
   const { data } = await client.get<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/${reqId}/`);
   return data;
 }
 
-export async function createRequisition(projectId: string, payload: any) {
+export async function createRequisition(projectId: string, payload: any): Promise<RequisitionHeader> {
   const { data } = await client.post<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/`, payload);
   return data;
 }
 
 // Approval Workflow API
-export async function submitRequisition(projectId: string, reqId: string, comments: string = "") {
+export async function submitRequisition(projectId: string, reqId: string, comments: string = ""): Promise<RequisitionHeader> {
   const { data } = await client.post<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/${reqId}/submit/`, { comments });
   return data;
 }
 
-export async function approveRequisition(projectId: string, reqId: string, comments: string = "") {
+export async function approveRequisition(projectId: string, reqId: string, comments: string = ""): Promise<RequisitionHeader> {
   const { data } = await client.post<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/${reqId}/approve/`, { comments });
   return data;
 }
 
-export async function rejectRequisition(projectId: string, reqId: string, comments: string = "") {
+export async function rejectRequisition(projectId: string, reqId: string, comments: string = ""): Promise<RequisitionHeader> {
   const { data } = await client.post<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/${reqId}/reject/`, { comments });
   return data;
 }
 
-export async function returnRequisition(projectId: string, reqId: string, comments: string = "") {
+export async function returnRequisition(projectId: string, reqId: string, comments: string = ""): Promise<RequisitionHeader> {
   const { data } = await client.post<RequisitionHeader>(`/v1/projects/${projectId}/requisitions/${reqId}/return/`, { comments });
   return data;
 }
 
-export async function fetchApprovalLogs(projectId: string, reqId: string) {
-  const { data } = await client.get<ApprovalLog[]>(`/v1/projects/${projectId}/requisitions/${reqId}/approval-logs/`);
-  return data;
+export async function fetchApprovalLogs(projectId: string, reqId: string): Promise<ApprovalLog[]> {
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/requisitions/${reqId}/approval-logs/`);
+  return normalizeList<ApprovalLog>(data);
 }
 
 // Procurement Operations API
@@ -165,9 +171,9 @@ export async function partialApprove(projectId: string, reqId: string, approvals
 }
 
 // Block Inventory API
-export async function fetchBlockStock(projectId: string, blockId: string) {
-  const { data } = await client.get<any[]>(`/v1/projects/${projectId}/blocks/${blockId}/stock/`);
-  return data;
+export async function fetchBlockStock(projectId: string, blockId: string): Promise<any[]> {
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/blocks/${blockId}/stock/`);
+  return normalizeList<any>(data);
 }
 
 export async function recordGRN(projectId: string, blockId: string, payload: { requisition_item_id: string; received_qty: number }) {
@@ -181,12 +187,12 @@ export async function issueStock(projectId: string, blockId: string, payload: { 
 }
 
 // Internal Transfers API
-export async function fetchTransfers(projectId: string) {
-  const { data } = await client.get<InternalTransfer[]>(`/v1/projects/${projectId}/transfers/`);
-  return data;
+export async function fetchTransfers(projectId: string): Promise<InternalTransfer[]> {
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/transfers/`);
+  return normalizeList<InternalTransfer>(data);
 }
 
-export async function createTransfer(projectId: string, payload: any) {
+export async function createTransfer(projectId: string, payload: any): Promise<InternalTransfer> {
   const { data } = await client.post<InternalTransfer>(`/v1/projects/${projectId}/transfers/`, payload);
   return data;
 }
