@@ -21,24 +21,6 @@ class ProcurementWorkflowError(ValidationError):
     pass
 
 
-def compute_material_request_kwargs(project_id: str, validated_data: dict) -> dict:
-    material = validated_data['material']
-    unit = validated_data.get('unit') or (
-        material.unit.symbol if getattr(material, 'unit_id', None) else ''
-    )
-    max_num = (
-        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
-            m=Max('request_number')
-        )['m']
-        or 0
-    )
-    return {
-        'request_number': max_num + 1,
-        'unit': unit or '—',
-        'request_date': validated_data.get('request_date') or timezone.localdate(),
-    }
-
-
 def _ensure_status(request: MaterialRequest, expected: str | tuple[str, ...], action: str):
     """
     Validates that a material request is in the expected state before performing an action,
