@@ -91,8 +91,9 @@ export function fetchMaterialBalanceDetail(projectId: string, materialId: string
   >(`${base(projectId)}/material-balance/${materialId}/`);
 }
 
-export function fetchMaterials(projectId: string) {
-  return apiJson<Material[]>(`${base(projectId)}/materials/`);
+export async function fetchMaterials(projectId: string): Promise<Material[]> {
+  const res = await apiJson<Material[] | { results: Material[] }>(`${base(projectId)}/materials/`);
+  return Array.isArray(res) ? res : (res?.results ?? []);
 }
 
 export function fetchMaterialRequests(projectId: string) {

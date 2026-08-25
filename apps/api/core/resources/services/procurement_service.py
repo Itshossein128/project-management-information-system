@@ -139,6 +139,28 @@ def deliver_purchase_order(
     return request
 
 
+def create_material_request(user, project_id, validated_data):
+    """
+    Creates a new material request, computing the next request number and defaulting
+    the unit and request_date if not provided.
+    """
+    material = validated_data['material']
+    unit = validated_data.get('unit') or (
+        material.unit.symbol if getattr(material, 'unit_id', None) else ''
+    )
+    max_num = (
+        MaterialRequest.objects.filter(project_id=project_id, material=material).aggregate(
+            m=Max('request_number')
+        )['m']
+        or 0
+    )
+    return {
+        'request_number': max_num + 1,
+        'unit': unit or '—',
+        'request_date': validated_data.get('request_date') or timezone.localdate(),
+    }
+
+
 @transaction.atomic
 def cancel_material_request(request: MaterialRequest, user) -> MaterialRequest:
     """

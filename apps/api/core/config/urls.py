@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/v1/', include('storage.urls')),
     path('api/v1/project-templates/', include('project_templates.urls')),
     path('api/v1/projects/', include('projects.urls')),
+    path('api/v1/projects/<uuid:project_pk>/', include('procurement.urls')),
     path('api/v1/roles/', include('projects.role_urls')),
     path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
     path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),

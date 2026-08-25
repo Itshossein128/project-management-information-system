@@ -42,3 +42,7 @@
 ## 2026-07-27 - Fetch latest related record for multiple parents with distinct
 **Learning:** When iterating over a list of parent records and needing the latest related record for each, performing a query inside the loop causes N+1 queries. Using `.distinct('parent_id')` combined with `.order_by('parent_id', '-date_field')` retrieves all latest records efficiently in a single query.
 **Action:** Instead of `parent.related.order_by('-date').first()` inside a loop, extract all parent IDs, query the related model with `.filter(parent_id__in=ids).order_by('parent_id', '-date').distinct('parent_id')`, and build a Python dictionary mapping `parent_id` to the related record before the loop.
+
+## 2024-07-30 - Resolve N+1 queries in Subcontractor API serializers
+**Learning:** Using `.aggregate()` and `.order_by().first()` inside python functions that are subsequently called within `SerializerMethodField`s completely bypasses the `prefetch_related` cache. In `average_overall_score` and `score_trend`, hitting the database manually meant multiple N+1 queries per subcontractor detail request.
+**Action:** When a queryset is already prefetched (e.g., `Prefetch('scores')`), calculate averages and trend sorting directly in Python by iterating over `sub.scores.all()` to take advantage of the prefetched cache and eliminate the extra database queries.

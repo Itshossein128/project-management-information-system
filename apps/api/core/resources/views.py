@@ -1,6 +1,6 @@
 """Material balance and inventory API."""
 
-from django.db.models import Prefetch
+from django.db.models import Max, Prefetch
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -24,12 +24,12 @@ from resources.serializers import (
 from resources.services.balance_service import compute_material_balance, material_balance_list, running_balance
 from resources.services.consumption_service import material_consumption_report
 from resources.services.procurement_service import (
+    create_material_request,
     approve_material_request,
     cancel_material_request,
     deliver_purchase_order,
     place_purchase_order,
 )
-from resources.services.request_service import compute_material_request_defaults
 
 
 class MaterialViewSet(ProjectScopedViewSet):
@@ -64,11 +64,12 @@ class MaterialRequestViewSet(ProjectScopedViewSet):
         return qs.order_by('-request_date', '-request_number')
 
     def perform_create(self, serializer):
-        material = serializer.validated_data['material']
-        kwargs = compute_material_request_defaults(
-            self.get_project_id(), material, serializer.validated_data
+        computed_kwargs = create_material_request(
+            self.request.user,
+            self.get_project_id(),
+            serializer.validated_data,
         )
-        super().perform_create(serializer, **kwargs)
+        super().perform_create(serializer, **computed_kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         obj = self.get_object()

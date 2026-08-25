@@ -523,25 +523,6 @@
     color: transparent;
   }
 
-  /* Shimmering skeleton surface */
-  .skeleton-shimmer {
-    position: relative;
-    overflow: hidden;
-    background-color: var(--muted);
-  }
-  .skeleton-shimmer::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in oklch, var(--foreground) 8%, transparent),
-      transparent
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.6s linear infinite;
-  }
 
   .surface-panel {
     @apply overflow-hidden rounded-xl border border-border/80 bg-card;
