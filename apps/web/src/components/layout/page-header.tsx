@@ -1,3 +1,4 @@
+import { Skeleton } from "src/components/ui/skeleton";
 import { Link } from "react-router";
 import { cn } from "src/app/lib/utils";
 
@@ -51,11 +52,13 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   );
 }
 
+
+
 export function LoadingSkeleton({ rows = 5, className }: { rows?: number; className?: string }) {
   return (
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="skeleton-shimmer h-10 rounded-lg" />
+        <Skeleton key={i} className="h-10 w-full" />
       ))}
     </div>
   );

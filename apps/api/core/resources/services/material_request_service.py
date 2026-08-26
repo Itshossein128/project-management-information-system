@@ -1,13 +1,9 @@
-"""Material request calculation and workflow services."""
-
-from __future__ import annotations
-
 from django.db.models import Max
 from django.utils import timezone
-
 from resources.models import MaterialRequest
 
-def compute_material_request_defaults(project_id, material, validated_data: dict) -> dict:
+def prepare_material_request_kwargs(project_id, validated_data):
+    material = validated_data['material']
     unit = validated_data.get('unit') or (
         material.unit.symbol if getattr(material, 'unit_id', None) else ''
     )
