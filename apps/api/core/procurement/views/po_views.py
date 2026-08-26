@@ -1,9 +1,11 @@
 """Procurement operations: assign items, partial approval, GRN, issue stock, transfers."""
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from permissions.project import HasProjectPermission
 from procurement.models import (
     Block,
     InventoryAllocation,
@@ -24,6 +26,7 @@ from procurement.serializers import (
 
 class AssignItemsView(APIView):
     """Line-item splitting: assign requisition items to procurement officers."""
+    permission_classes = [IsAuthenticated, HasProjectPermission]
 
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.requisition_service import assign_items
@@ -47,6 +50,7 @@ class AssignItemsView(APIView):
 
 class PartialApproveView(APIView):
     """Partially approve requisition items (sets approved_qty or ON_HOLD)."""
+    permission_classes = [IsAuthenticated, HasProjectPermission]
 
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.requisition_service import partial_approve_items
