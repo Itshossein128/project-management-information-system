@@ -1,12 +1,12 @@
-# Verona — Monorepo
+# Velora — Monorepo
 
-Monorepo for the Verona construction project management platform: React Router web app + Django API.
+Monorepo for the Velora construction project management platform: React Router web app + Django API.
 
 ## Structure
 
 ```
 apps/web/     React Router 7 + Vite frontend
-apps/api/     Django 4.2 + DRF backend (Verona foundation through later domain sprints; see scope map)
+apps/api/     Django 4.2 + DRF backend (Velora foundation through later domain sprints; see scope map)
 docs/         Engineering blueprint and scope map
 infra/        Traefik gateway config
 packages/     Shared packages (future)
@@ -27,7 +27,7 @@ Smoke test (full stack): `bash scripts/smoke-stack.sh` after `docker compose up`
 
 ## Current scope vs blueprint
 
-**Sprints 1–3** are complete for their core goals (auth/infra, projects/WBS/members, activities + MSP/P6 import + WBS tree editor). Later sprints (daily reports, offline sync, progress/EVM, cost, contracts, etc.) are tracked with Done/Partial status in [docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md](docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md).
+**Sprints 1–3** are complete for their core goals (auth/infra, projects/WBS/members, activities + MSP/P6 import + WBS tree editor). Later sprints (daily reports, offline sync, progress/EVM, cost, contracts, etc.) are tracked with Done/Partial status in [docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md](docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md).
 
 **API:** `/api/v1/projects/` (UUID). **Frontend routes:** `/projects/{uuid}/...`
 

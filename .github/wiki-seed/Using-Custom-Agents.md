@@ -36,7 +36,7 @@ Open Copilot Chat → Agent mode → agent picker → choose the repo agent.
 
 **Sprint Scope Guide**
 
-> Read `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md`. For “labor productivity”, say status, API paths, web routes, and a first-PR slice.
+> Read `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md`. For “labor productivity”, say status, API paths, web routes, and a first-PR slice.
 
 **Django API Reviewer**
 

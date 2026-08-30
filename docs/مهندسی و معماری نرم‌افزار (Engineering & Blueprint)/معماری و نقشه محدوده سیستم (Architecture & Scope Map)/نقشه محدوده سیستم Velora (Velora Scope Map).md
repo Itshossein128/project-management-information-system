@@ -1,4 +1,4 @@
-# Verona Scope Map
+# Velora Scope Map
 
 Maps the **engineering blueprint** to the **monorepo implementation**.
 
@@ -347,7 +347,7 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - `GET /api/v1/projects/{id}/economic/payment-delay/` — alias of financing-cost
 - `GET /api/v1/projects/{id}/economic/snapshot/?refresh=1` — force regenerate snapshot
 
-See full blueprint: [بلوپرینت مهندسی Verona (Engineering Blueprint).md](./بلوپرینت مهندسی Verona (Engineering Blueprint).md)
+See full blueprint: [بلوپرینت مهندسی Velora (Engineering Blueprint).md](./بلوپرینت مهندسی Velora (Engineering Blueprint).md)
 
 ## Sprint 13 completion checklist (Alerts, Executive Dashboard & Polish)
 

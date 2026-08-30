@@ -20,11 +20,11 @@ if errorlevel 1 (
 )
 
 echo.
-echo Stopping Verona...
+echo Stopping Velora...
 call "%ROOT_DIR%\customer\scripts\compose.bat" down
 
 echo.
-echo Verona stopped. Your data is kept in Docker volumes.
+echo Velora stopped. Your data is kept in Docker volumes.
 echo Run start.bat to start again.
 echo.
 pause

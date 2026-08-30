@@ -10,16 +10,16 @@ customer_check_docker
 customer_ensure_env
 
 if customer_is_stack_up; then
-  echo "Verona is already running."
+  echo "Velora is already running."
   customer_open_browser "${APP_URL}"
   exit 0
 fi
 
-echo "==> Starting Verona..."
+echo "==> Starting Velora..."
 customer_compose up -d --build
 
 "${CUSTOMER_DIR}/scripts/wait-for-stack.sh" "${HEALTH_URL}" "${WAIT_MAX_ATTEMPTS}"
 
 customer_open_browser "${APP_URL}"
 
-echo "Verona is running at ${APP_URL}"
+echo "Velora is running at ${APP_URL}"

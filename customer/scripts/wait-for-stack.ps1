@@ -11,13 +11,13 @@ if (-not $IntervalSec -or $IntervalSec -le 0) { $IntervalSec = 2 }
 for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
   try {
     Invoke-WebRequest -Uri $Url -UseBasicParsing -TimeoutSec 5 | Out-Null
-    Write-Host "Verona is ready."
+    Write-Host "Velora is ready."
     exit 0
   } catch {
-    Write-Host "Waiting for Verona... ($attempt/$MaxAttempts)"
+    Write-Host "Waiting for Velora... ($attempt/$MaxAttempts)"
     Start-Sleep -Seconds $IntervalSec
   }
 }
 
-Write-Error "Timed out waiting for Verona at $Url"
+Write-Error "Timed out waiting for Velora at $Url"
 exit 1

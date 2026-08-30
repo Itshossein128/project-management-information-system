@@ -17,11 +17,11 @@ echo "==> Pulling latest code (${GIT_REMOTE}/${GIT_BRANCH})..."
   git pull "${GIT_REMOTE}" "${GIT_BRANCH}"
 )
 
-echo "==> Rebuilding and restarting Verona..."
+echo "==> Rebuilding and restarting Velora..."
 customer_compose up -d --build --remove-orphans
 
 "${CUSTOMER_DIR}/scripts/wait-for-stack.sh" "${HEALTH_URL}" "${WAIT_MAX_ATTEMPTS}"
 
 customer_open_browser "${APP_URL}"
 
-echo "Verona updated and running at ${APP_URL}"
+echo "Velora updated and running at ${APP_URL}"

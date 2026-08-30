@@ -1,8 +1,8 @@
-# Verona Brand Color Guidelines
+# Velora Brand Color Guidelines
 
 ## Product
 
-**Verona** — Integrated Project Control Automation System for civil/construction projects.
+**Velora** — Integrated Project Control Automation System for civil/construction projects.
 
 ## Palette story
 
@@ -20,7 +20,7 @@
 - Primitives: `apps/web/src/design/tokens/palette.css`
 - Semantics + Tailwind: `apps/web/src/app/app.css`
 - TS helpers: `apps/web/src/design/tokens/colors.ts`, `chart-colors.ts`
-- Master UX rules: `design-system/verona/MASTER.md`
+- Master UX rules: `design-system/velora/MASTER.md`
 
 ## Do / Don't
 

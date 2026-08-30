@@ -96,7 +96,7 @@ add_edge(f4, n_proj_route_chunk, n_biz_setup_routes, "references", "EXTRACTED", 
 
 # 5. customer/README.md
 f5 = "/home/hossein/Desktop/projects/mehdi/building-management/customer/README.md"
-n_cust_deploy = add_node(f5, "VeronaStandaloneDeployment", "Verona Standalone Customer Deployment", "document")
+n_cust_deploy = add_node(f5, "VeloraStandaloneDeployment", "Velora Standalone Customer Deployment", "document")
 n_cust_launchers = add_node(f5, "CustomerLauncherScripts", "Customer Launcher Scripts (.bat / .sh)", "code")
 n_cust_prebuild = add_node(f5, "CustomerPrebuildPipeline", "Customer Pre-build Image Pipeline", "concept")
 n_cust_config = add_node(f5, "CustomerEnvironmentConfig", "customer/ipcas.config Configuration", "code")
@@ -148,13 +148,13 @@ add_edge(f7, n_dc_cust_traefik, n_dc_traefik, "semantically_similar_to", "INFERR
 
 # 8. e2e/COVERAGE_MAP.md
 f8 = "/home/hossein/Desktop/projects/mehdi/building-management/e2e/COVERAGE_MAP.md"
-n_e2e_cov = add_node(f8, "VeronaE2ECoverageMap", "Verona E2E Coverage Map", "document")
+n_e2e_cov = add_node(f8, "VeloraE2ECoverageMap", "Velora E2E Coverage Map", "document")
 n_auth_prio = add_node(f8, "AuthPriorityQueue", "Auth E2E Test Priority Queue", "concept")
 add_edge(f8, n_e2e_cov, n_auth_prio, "references", "EXTRACTED", 1.0)
 
 # 9. e2e/DAILY_LOG.md
 f9 = "/home/hossein/Desktop/projects/mehdi/building-management/e2e/DAILY_LOG.md"
-n_e2e_log = add_node(f9, "VeronaE2EDailyLog", "Verona E2E Daily Test Log", "document")
+n_e2e_log = add_node(f9, "VeloraE2EDailyLog", "Velora E2E Daily Test Log", "document")
 add_edge(f9, n_e2e_log, n_e2e_cov, "conceptually_related_to", "INFERRED", 0.85)
 
 # 10. e2e/DATA_TESTIDS.md
@@ -195,8 +195,8 @@ add_edge(f12, n_prd_mr, n_blueprint, "semantically_similar_to", "INFERRED", 0.85
 
 # Hyperedges
 add_hyperedge(f3, "frontend_routing_stack", "Frontend Modular Routing Stack", [n_web_routing, n_routests, n_biz_setup_routes, n_auth_routes], "participate_in", "INFERRED", 0.85)
-add_hyperedge(f6, "customer_docker_stack", "Verona Standalone Customer Stack Services", [n_dc_cust_api, n_dc_cust_web, n_dc_cust_traefik, n_dc_cust_pg, n_dc_cust_redis], "participate_in", "INFERRED", 0.95)
-add_hyperedge(f8, "e2e_testing_suite", "Verona E2E Testing & Quality Framework", [n_e2e_cov, n_e2e_log, n_testids, n_playwright], "participate_in", "INFERRED", 0.85)
+add_hyperedge(f6, "customer_docker_stack", "Velora Standalone Customer Stack Services", [n_dc_cust_api, n_dc_cust_web, n_dc_cust_traefik, n_dc_cust_pg, n_dc_cust_redis], "participate_in", "INFERRED", 0.95)
+add_hyperedge(f8, "e2e_testing_suite", "Velora E2E Testing & Quality Framework", [n_e2e_cov, n_e2e_log, n_testids, n_playwright], "participate_in", "INFERRED", 0.85)
 
 output = {
     "nodes": nodes,

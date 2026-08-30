@@ -60,7 +60,7 @@
     "pending": "در انتظار",
     "completed": "تکمیل‌شده",
     "suspended": "معلق",
-    "brandName": "Verona",
+    "brandName": "Velora",
     "brandShort": "V"
   },
   "form": {
@@ -226,14 +226,14 @@
     "failed": "بازنشانی ناموفق بود."
   },
   "home": {
-    "pageTitle": "خانه | Verona",
+    "pageTitle": "خانه | Velora",
     "pageDescription": "داشبورد اصلی",
     "chooseBusinessTitle": "کسب‌وکارهای شما",
     "chooseBusinessSubtitle": "یک کسب‌وکار را برای ورود به فضای پروژه آن انتخاب کنید. نوار کناری ثابت است؛ داخل هر کسب‌وکار از کارت‌ها به بخش‌های پروژه بروید.",
     "businessesHeading": "کسب‌وکارها",
     "businessSlugLabel": "نامک: {{slug}}",
     "noBusinesses": "هنوز کسب‌وکاری ثبت نشده است.",
-    "headerTitle": "Verona",
+    "headerTitle": "Velora",
     "welcome": "{{name}} عزیز، خوش آمدید. می‌توانید کارت‌های داشبورد و بخش‌های مبتنی بر نقش را بعداً اضافه کنید.",
     "cardPlaceholder": "کارت نمونه {{number}}",
     "cardContent": "محتوای این کارت در اینجا قرار می‌گیرد.",

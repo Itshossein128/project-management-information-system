@@ -60,7 +60,7 @@
     "pending": "Pending",
     "completed": "Completed",
     "suspended": "Suspended",
-    "brandName": "Verona",
+    "brandName": "Velora",
     "brandShort": "V"
   },
   "form": {
@@ -226,14 +226,14 @@
     "failed": "Reset failed."
   },
   "home": {
-    "pageTitle": "Home | Verona",
+    "pageTitle": "Home | Velora",
     "pageDescription": "Dashboard home",
     "chooseBusinessTitle": "Your businesses",
     "chooseBusinessSubtitle": "Choose a business to open its project hub. The sidebar stays the same; use cards inside each business to go to project users, tables, and more.",
     "businessesHeading": "Businesses",
     "businessSlugLabel": "Slug: {{slug}}",
     "noBusinesses": "No businesses yet.",
-    "headerTitle": "Verona",
+    "headerTitle": "Velora",
     "welcome": "Welcome, {{name}}. You can add dashboard cards and role-based sections here later.",
     "cardPlaceholder": "Card placeholder {{number}}",
     "cardContent": "Content for this card will go here.",

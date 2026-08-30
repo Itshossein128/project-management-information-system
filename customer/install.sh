@@ -16,7 +16,7 @@ if [[ ! -f "${config_file}" && -f "${config_example}" ]]; then
   echo "Created customer/ipcas.config from example."
 fi
 
-echo "==> Building and starting Verona (first run may take several minutes)..."
+echo "==> Building and starting Velora (first run may take several minutes)..."
 customer_compose up -d --build
 
 "${CUSTOMER_DIR}/scripts/wait-for-stack.sh" "${HEALTH_URL}" "${WAIT_MAX_ATTEMPTS}"
@@ -25,7 +25,7 @@ customer_open_browser "${APP_URL}"
 
 cat <<EOF
 
-Verona is installed and running.
+Velora is installed and running.
 
 Open in browser: ${APP_URL}
 Demo login: +10000000001 / devpass123

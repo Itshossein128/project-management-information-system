@@ -1,10 +1,10 @@
-# GitHub Tools Guide (for Verona)
+# GitHub Tools Guide (for Velora)
 
 You asked what each GitHub tool is for. Here is a practical map for **this** repo.
 
 ## Cheat sheet
 
-| Tool | One-line purpose | Best for Verona |
+| Tool | One-line purpose | Best for Velora |
 | --- | --- | --- |
 | **Actions** | Automated jobs on push/PR/schedule | CI (typecheck, pytest), e2e, Dependabot, labeling |
 | **Agents** | Specialized Copilot helpers (prompt + tools) | API review, Playwright coverage, sprint scoping |
@@ -55,7 +55,7 @@ Idea → Issue (template)
 
 **What:** Markdown “agent profiles” in `.github/agents/*.agent.md`. Each one is a specialist persona Copilot can load (CLI, IDE, or github.com Agents).
 
-**Samples added for Verona**
+**Samples added for Velora**
 
 | File | Use when… |
 | --- | --- |
@@ -98,7 +98,7 @@ See also [[Using-Custom-Agents]].
 
 **How to try**
 
-1. Open **Projects** → open **Verona Sprint Board** (created as a sample).
+1. Open **Projects** → open **Velora Sprint Board** (created as a sample).
 2. Drag an Issue between columns.
 3. From an Issue sidebar, link it to the Project.
 

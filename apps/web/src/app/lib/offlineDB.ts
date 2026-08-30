@@ -1,5 +1,5 @@
 /**
- * IndexedDB wrapper for Verona offline support (Sprint 4, O-01).
+ * IndexedDB wrapper for Velora offline support (Sprint 4, O-01).
  *
  * All access goes through `idb`. Every exported function is client-only:
  * IndexedDB does not exist during SSR, so callers must invoke these from
@@ -113,7 +113,7 @@ export interface PendingPhoto {
   data: ArrayBuffer;
 }
 
-interface VeronaDB extends DBSchema {
+interface VeloraDB extends DBSchema {
   offline_queue: {
     key: string;
     value: QueueItem;
@@ -161,7 +161,7 @@ interface VeronaDB extends DBSchema {
   };
 }
 
-let dbPromise: Promise<IDBPDatabase<VeronaDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<VeloraDB>> | null = null;
 
 export function generateUUID(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -179,12 +179,12 @@ export function isOfflineDBAvailable(): boolean {
   return typeof window !== "undefined" && typeof indexedDB !== "undefined";
 }
 
-export function initDB(): Promise<IDBPDatabase<VeronaDB>> {
+export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
   if (!isOfflineDBAvailable()) {
     return Promise.reject(new Error("IndexedDB is not available in this environment"));
   }
   if (!dbPromise) {
-    dbPromise = openDB<VeronaDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
+    dbPromise = openDB<VeloraDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
       upgrade(db, oldVersion) {
         if (oldVersion < 1) {
           const queue = db.createObjectStore("offline_queue", { keyPath: "queue_id" });
@@ -234,7 +234,7 @@ export function initDB(): Promise<IDBPDatabase<VeronaDB>> {
   return dbPromise;
 }
 
-function getDB(): Promise<IDBPDatabase<VeronaDB>> {
+function getDB(): Promise<IDBPDatabase<VeloraDB>> {
   return initDB();
 }
 

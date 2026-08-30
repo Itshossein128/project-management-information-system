@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** Verona (Integrated Project Control Automation System)
+**Project:** Velora (Integrated Project Control Automation System)
 **Generated:** 2026-07-23
 **Category:** Construction / project-control enterprise dashboard
 **Design Dials:** Variance 4/10 (Balanced) | Motion 3/10 (Subtle) | Density 8/10 (Dense)
@@ -17,7 +17,7 @@
 
 ### Color concept
 
-Verona is a **civil/construction project-control** platform. Colors must feel like
+Velora is a **civil/construction project-control** platform. Colors must feel like
 steel structure, site safety, and operational status — not generic SaaS purple/blue.
 
 | Role | Meaning | Token | Approx hex |

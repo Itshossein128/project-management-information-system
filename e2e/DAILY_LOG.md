@@ -1,4 +1,4 @@
-# Verona E2E Daily Test Log
+# Velora E2E Daily Test Log
 Started: 2025-07-10
 
 ---

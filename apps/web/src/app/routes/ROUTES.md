@@ -5,7 +5,7 @@ This directory contains segmented routing definitions. Only some chunks are impo
 ## Route Chunks
 
 ### `business-setup.routes.ts` (active)
-- **Purpose**: Verona project workspace routes under `/projects`.
+- **Purpose**: Velora project workspace routes under `/projects`.
 - **Imported by**: `routes.ts` via `...projectRoutes`.
 
 Schema-admin routes (`/projects/setup`, `/projects/:businessId/setup`) are registered in `routes.ts` before dynamic `:businessId` catch-all routes.
