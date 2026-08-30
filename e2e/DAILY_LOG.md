@@ -1,4 +1,4 @@
-# IPCAS E2E Daily Test Log
+# Verona E2E Daily Test Log
 Started: 2025-07-10
 
 ---

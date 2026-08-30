@@ -4,7 +4,7 @@
 
 ```text
 apps/web/     React Router 7 + Vite frontend
-apps/api/     Django 4.2 + DRF (IPCAS API)
+apps/api/     Django 4.2 + DRF (Verona API)
 docs/         Blueprint + scope map
 infra/        Traefik / gateway config
 .github/      Actions, Agents, issue/PR templates
@@ -38,5 +38,5 @@ Blueprint **Project** ≈ API `projects` (UUID). Older docs may say `Business`.
 
 ## Deeper reading
 
-- [Blueprint](https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/IPCAS_Engineering_Blueprint.md)
-- [Scope map](https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/ipcas-scope-map.md)
+- [Blueprint](https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/بلوپرینت مهندسی Verona (Engineering Blueprint).md)
+- [Scope map](https://github.com/Itshossein128/project-management-information-system/blob/develop/docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md)

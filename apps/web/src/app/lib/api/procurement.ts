@@ -1,16 +1,31 @@
 import { client } from "./client";
 
 // Types
+export type RequisitionScope = 'block' | 'workshop';
+
 export interface Block {
   id: string;
   project: string;
   block_code: string;
   block_name: string;
   wbs: string | null;
+  wbs_code?: string | null;
+  wbs_name?: string | null;
   budget: string;
   is_active: boolean;
+  block_kind?: 'standard' | 'workshop';
+  block_kind_display?: string;
+  is_system?: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface BlockPayload {
+  block_code: string;
+  block_name: string;
+  wbs?: string | null;
+  budget?: string | number;
+  is_active?: boolean;
 }
 
 export interface RequisitionItem {
@@ -30,9 +45,58 @@ export interface RequisitionItem {
   notes: string;
 }
 
+export type WorkflowStepState = "completed" | "current" | "pending" | "skipped" | "rejected";
+
+export interface PartialApproveDetail {
+  item_id: string;
+  line_number: number;
+  material_code: string;
+  requested_qty: string;
+  approved_qty: string;
+  status: string;
+}
+
+export interface WorkflowStepEvent {
+  action?: string;
+  action_display?: string;
+  performed_at?: string;
+  performed_by_name?: string;
+  details?: PartialApproveDetail[];
+}
+
+export interface WorkflowStep {
+  code: string;
+  label: string;
+  required_role: string;
+  required_role_label: string;
+  state: WorkflowStepState;
+  completed_at?: string | null;
+  completed_by_name?: string | null;
+  events?: WorkflowStepEvent[];
+}
+
+export interface NextApprover {
+  role: string;
+  role_label: string;
+}
+
+export interface ApprovalSummary {
+  last_action?: {
+    at: string;
+    by_name: string | null;
+    action: string;
+    action_display: string;
+    step_label: string;
+  } | null;
+  workflow_progress: string;
+  workflow_step_label: string | null;
+}
+
 export interface RequisitionHeader {
   id: string;
   project: string;
+  scope: RequisitionScope;
+  scope_display?: string;
   block: string;
   block_code: string;
   block_name: string;
@@ -51,6 +115,17 @@ export interface RequisitionHeader {
   is_grn_provisional: boolean;
   notes: string;
   items?: RequisitionItem[];
+  item_count?: number;
+  workflow_timeline?: WorkflowStep[];
+  next_approver?: NextApprover | null;
+  approval_summary?: ApprovalSummary;
+  last_action_at?: string | null;
+  last_action_by_name?: string | null;
+  last_action_display?: string | null;
+  next_approver_role?: string | null;
+  next_approver_role_label?: string | null;
+  workflow_progress?: string | null;
+  workflow_step_label?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +133,8 @@ export interface RequisitionHeader {
 export interface ApprovalLog {
   id: string;
   requisition: string;
+  requisition_number?: string;
+  requisition_scope?: RequisitionScope;
   step_from: string;
   step_from_display: string;
   step_to: string;
@@ -68,6 +145,7 @@ export interface ApprovalLog {
   performed_by_name: string;
   performed_at: string;
   comments: string;
+  details?: PartialApproveDetail[];
 }
 
 export interface InventoryAllocation {
@@ -112,9 +190,36 @@ function normalizeList<T>(data: any): T[] {
 }
 
 // Blocks API
-export async function fetchBlocks(projectId: string): Promise<Block[]> {
-  const { data } = await client.get<any>(`/v1/projects/${projectId}/blocks/`);
+export async function fetchBlocks(
+  projectId: string,
+  options?: { standardOnly?: boolean; includeSystem?: boolean },
+): Promise<Block[]> {
+  const params: Record<string, string> = {};
+  if (options?.includeSystem) {
+    params.include_system = 'true';
+  } else if (options?.standardOnly !== false) {
+    params.exclude_system = 'true';
+  }
+  const { data } = await client.get<any>(`/v1/projects/${projectId}/blocks/`, { params });
   return normalizeList<Block>(data);
+}
+
+export async function createBlock(projectId: string, payload: BlockPayload): Promise<Block> {
+  const { data } = await client.post<Block>(`/v1/projects/${projectId}/blocks/`, payload);
+  return data;
+}
+
+export async function updateBlock(
+  projectId: string,
+  blockId: string,
+  payload: Partial<BlockPayload>,
+): Promise<Block> {
+  const { data } = await client.patch<Block>(`/v1/projects/${projectId}/blocks/${blockId}/`, payload);
+  return data;
+}
+
+export async function deleteBlock(projectId: string, blockId: string): Promise<void> {
+  await client.delete(`/v1/projects/${projectId}/blocks/${blockId}/`);
 }
 
 // Requisitions API
@@ -197,19 +302,62 @@ export async function createTransfer(projectId: string, payload: any): Promise<I
   return data;
 }
 
+export interface LiquidityStatusItem {
+  block_code: string;
+  block_name: string;
+  budget: number;
+  total_requested_value: number;
+  remaining_liquidity: number;
+}
+
+export interface LiquidityReportResponse {
+  project_id: string;
+  on_hold_count?: number;
+  liquidity_status: LiquidityStatusItem[];
+}
+
+export interface MaterialDeviationItem {
+  block_code: string;
+  block_name?: string;
+  material_code?: string;
+  material_name: string;
+  estimated_qty: number | null;
+  requested_qty: number;
+  deviation_qty: number;
+  deviation_percent: number;
+}
+
+export interface MaterialDeviationReportResponse {
+  project_id: string;
+  deviation_data: MaterialDeviationItem[];
+}
+
+export interface AuditTrailSummary {
+  total_actions: number;
+  approved_actions: number;
+  rejected_actions: number;
+}
+
+export interface AuditTrailReportResponse {
+  project_id: string;
+  count: number;
+  summary: AuditTrailSummary;
+  logs?: ApprovalLog[];
+}
+
 // Reports API
-export async function fetchLiquidityReport(projectId: string) {
-  const { data } = await client.get<any>(`/v1/projects/${projectId}/reports/liquidity/`);
+export async function fetchLiquidityReport(projectId: string): Promise<LiquidityReportResponse> {
+  const { data } = await client.get<LiquidityReportResponse>(`/v1/projects/${projectId}/reports/liquidity/`);
   return data;
 }
 
-export async function fetchMaterialDeviationReport(projectId: string) {
-  const { data } = await client.get<any>(`/v1/projects/${projectId}/reports/material-deviation/`);
+export async function fetchMaterialDeviationReport(projectId: string): Promise<MaterialDeviationReportResponse> {
+  const { data } = await client.get<MaterialDeviationReportResponse>(`/v1/projects/${projectId}/reports/material-deviation/`);
   return data;
 }
 
-export async function fetchAuditTrailReport(projectId: string, params?: Record<string, any>) {
-  const { data } = await client.get<any>(`/v1/projects/${projectId}/reports/audit-trail/`, { params });
+export async function fetchAuditTrailReport(projectId: string, params?: Record<string, any>): Promise<AuditTrailReportResponse> {
+  const { data } = await client.get<AuditTrailReportResponse>(`/v1/projects/${projectId}/reports/audit-trail/`, { params });
   return data;
 }
 

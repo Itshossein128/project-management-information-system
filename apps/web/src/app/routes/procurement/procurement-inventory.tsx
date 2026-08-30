@@ -100,9 +100,9 @@ function ProcurementInventoryContent() {
                       <td className="px-3 py-2 font-mono text-xs">{item.mr_tag}</td>
                       <td className="px-3 py-2 font-medium">{item.material_name}</td>
                       <td className="px-3 py-2">{item.allocated_qty}</td>
-                      <td className="px-3 py-2 text-blue-700">{item.received_qty}</td>
-                      <td className="px-3 py-2 text-amber-600">{item.issued_qty}</td>
-                      <td className="px-3 py-2 text-green-700 font-bold">{item.available_qty}</td>
+                      <td className="px-3 py-2 text-info-700">{item.received_qty}</td>
+                      <td className="px-3 py-2 text-warning-600">{item.issued_qty}</td>
+                      <td className="px-3 py-2 text-success-700 font-bold">{item.available_qty}</td>
                       <td className="px-3 py-2">
                         <Button 
                           size="sm" 
@@ -134,7 +134,7 @@ function ProcurementInventoryContent() {
       >
         {issueDrawer && (
           <div className="space-y-6">
-            <div className="bg-amber-50 p-4 rounded-md border border-amber-200 text-amber-900 text-sm">
+            <div className="bg-warning-50 p-4 rounded-md border border-warning-200 text-warning-900 text-sm">
               <p className="font-semibold mb-2">توجه (قانون Hard Stop):</p>
               <p>مجموع مقدار حواله نمی‌تواند از موجودی واقعی تخصیص این متریال برای کد <strong>{issueDrawer.mr_tag}</strong> بیشتر باشد.</p>
               <p className="mt-2 font-mono">موجودی مجاز: {issueDrawer.available_qty}</p>

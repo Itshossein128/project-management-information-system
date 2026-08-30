@@ -1,4 +1,4 @@
-# GitHub configuration for IPCAS
+# GitHub configuration for Verona
 
 This folder wires up **Actions**, **Agents**, issue/PR templates, and a **Wiki seed**.
 
@@ -36,6 +36,6 @@ For a plain-language tour of Actions vs Agents vs Wiki vs Projects, start with:
 ## Manual steps (UI / token scopes)
 
 1. **Wiki:** Wiki → Create first page → Save, then push `wiki-seed/*.md` (see `wiki-seed/README.md`).
-2. **Projects:** Projects → New project → template **Board** → name `IPCAS Sprint Board` → link issues `#103`–`#105`.
+2. **Projects:** Projects → New project → template **Board** → name `Verona Sprint Board` → link issues `#103`–`#105`.
 3. **CLI projects API (optional):** `gh auth refresh -s project,read:project`
 4. **Agents:** After merging `.github/agents/`, open the **Agents** tab and pick a profile.

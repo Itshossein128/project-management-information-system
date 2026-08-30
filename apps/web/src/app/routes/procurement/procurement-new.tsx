@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useNavigate, useParams, Link } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { PageHeader, Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
+import { PageHeader, Breadcrumb } from "@/components/layout/page-header";
 import { ProjectProvider, useProject } from "~/contexts/project-context";
-import { fetchBlocks, createRequisition } from "~/lib/api/procurement";
+import { fetchBlocks, createRequisition, type RequisitionScope } from "~/lib/api/procurement";
 import { fetchMaterials } from "~/lib/api/materials";
 import { PATHS } from "~/routeVars";
 import { useToast } from "@/components/ui/toast";
@@ -13,10 +13,13 @@ import { useToast } from "@/components/ui/toast";
 function ProcurementNewContent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const toast = useToast();
   const qc = useQueryClient();
   const { projectId, project } = useProject();
 
+  const initialScope = (searchParams.get("scope") === "workshop" ? "workshop" : "block") as RequisitionScope;
+  const [scope, setScope] = useState<RequisitionScope>(initialScope);
   const [block, setBlock] = useState("");
   const [reqType, setReqType] = useState("planned");
   const [priority, setPriority] = useState("normal");
@@ -26,8 +29,8 @@ function ProcurementNewContent() {
   const [items, setItems] = useState([{ material: "", requested_qty: "", notes: "" }]);
 
   const { data: blocks = [] } = useQuery({
-    queryKey: ["blocks", projectId],
-    queryFn: () => fetchBlocks(projectId),
+    queryKey: ["blocks", projectId, "standard"],
+    queryFn: () => fetchBlocks(projectId, { standardOnly: true }),
   });
 
   const { data: rawMaterials = [] } = useQuery({
@@ -40,35 +43,43 @@ function ProcurementNewContent() {
   const createMut = useMutation({
     mutationFn: (payload: any) => createRequisition(projectId, payload),
     onSuccess: () => {
-      toast.success("درخواست با موفقیت ثبت شد (پیش‌نویس)");
+      toast.success(t("pages.procurement.workshop.createSuccess"));
       void qc.invalidateQueries({ queryKey: ["procurement", projectId] });
       navigate(`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT}`);
     },
-    onError: (e: any) => toast.error(e.message || "خطا در ثبت درخواست"),
+    onError: (e: any) => toast.error(e.message || t("pages.procurement.workshop.createError")),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!block) return toast.error("انتخاب بلوک الزامی است.");
-    
-    const validItems = items.filter((i: any) => i.material && i.requested_qty);
-    if (validItems.length === 0) return toast.error("حداقل یک آیتم با متریال و مقدار وارد کنید.");
+    if (scope === "block" && !block) {
+      return toast.error(t("pages.procurement.workshop.blockRequired"));
+    }
 
-    const payload = {
+    const validItems = items.filter((i: any) => i.material && i.requested_qty);
+    if (validItems.length === 0) {
+      return toast.error(t("pages.procurement.workshop.itemsRequired"));
+    }
+
+    const payload: Record<string, unknown> = {
       project: projectId,
-      block,
+      scope,
       requisition_type: reqType,
       priority,
       urgency,
-      request_date: new Date().toISOString().split('T')[0], // today
+      request_date: new Date().toISOString().split("T")[0],
       is_grn_provisional: isGrnProvisional,
       notes,
       items: validItems.map((i: any) => ({
         material: i.material,
         requested_qty: parseFloat(i.requested_qty),
-        notes: i.notes
-      }))
+        notes: i.notes,
+      })),
     };
+
+    if (scope === "block") {
+      payload.block = block;
+    }
 
     createMut.mutate(payload);
   };
@@ -80,98 +91,198 @@ function ProcurementNewContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="ثبت درخواست خرید جدید" subtitle={project.project_name} />
+      <PageHeader
+        title={
+          scope === "workshop"
+            ? t("pages.procurement.workshop.newTitle")
+            : t("pages.procurement.workshop.newBlockTitle")
+        }
+        subtitle={project.project_name}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-8 rounded-lg border border-border bg-card p-6">
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium">{t("pages.procurement.workshop.scopeLabel")}</legend>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="scope"
+                value="block"
+                checked={scope === "block"}
+                onChange={() => setScope("block")}
+              />
+              {t("pages.procurement.workshop.scopeBlock")}
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="scope"
+                value="workshop"
+                checked={scope === "workshop"}
+                onChange={() => setScope("workshop")}
+              />
+              {t("pages.procurement.workshop.scopeWorkshop")}
+            </label>
+          </div>
+        </fieldset>
+
+        {scope === "workshop" ? (
+          <div className="rounded-lg border border-info-200 bg-info-50 p-4 text-sm text-info-900">
+            {t("pages.procurement.workshop.workshopInfo")}
+          </div>
+        ) : blocks.length === 0 ? (
+          <div className="rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
+            <p className="mb-2">{t("pages.procurement.blocks.noBlocksHint")}</p>
+            <Link
+              to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_BLOCKS}`}
+              className="font-medium underline"
+            >
+              {t("pages.procurement.blocks.manage")}
+            </Link>
+          </div>
+        ) : null}
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {scope === "block" && (
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.workshop.blockField")}</span>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={block}
+                onChange={(e: any) => setBlock(e.target.value)}
+                required
+              >
+                <option value="">{t("pages.procurement.workshop.selectBlock")}</option>
+                {blocks.map((b: any) => (
+                  <option key={b.id} value={b.id}>
+                    {b.block_code} - {b.block_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="flex flex-col gap-1 text-sm">
-            <span>بلوک/فاز (الزامی)</span>
-            <select className="rounded-md border px-3 py-2" value={block} onChange={(e: any) => setBlock(e.target.value)} required>
-              <option value="">انتخاب بلوک...</option>
-              {blocks.map((b: any) => <option key={b.id} value={b.id}>{b.block_code} - {b.block_name}</option>)}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span>نوع درخواست</span>
+            <span>{t("pages.procurement.workshop.reqType")}</span>
             <select className="rounded-md border px-3 py-2" value={reqType} onChange={(e: any) => setReqType(e.target.value)}>
-              <option value="planned">عادی (Planned)</option>
-              <option value="fast_track">فورس‌ماژور (Fast-Track)</option>
-              <option value="post_facto">پس‌نگر (Post-Facto)</option>
+              <option value="planned">{t("pages.procurement.workshop.typePlanned")}</option>
+              <option value="fast_track">{t("pages.procurement.workshop.typeFastTrack")}</option>
+              <option value="post_facto">{t("pages.procurement.workshop.typePostFacto")}</option>
             </select>
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span>اولویت</span>
+            <span>{t("pages.procurement.workshop.priority")}</span>
             <select className="rounded-md border px-3 py-2" value={priority} onChange={(e: any) => setPriority(e.target.value)}>
-              <option value="normal">عادی</option>
-              <option value="high">بالا</option>
-              <option value="emergency">اضطراری</option>
+              <option value="normal">{t("pages.procurement.workshop.priorityNormal")}</option>
+              <option value="high">{t("pages.procurement.workshop.priorityHigh")}</option>
+              <option value="emergency">{t("pages.procurement.workshop.priorityEmergency")}</option>
             </select>
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span>دلیل فوریت</span>
-            <input type="text" className="rounded-md border px-3 py-2" value={urgency} onChange={(e: any) => setUrgency(e.target.value)} placeholder="اختیاری..." />
+            <span>{t("pages.procurement.workshop.urgency")}</span>
+            <input
+              type="text"
+              className="rounded-md border px-3 py-2"
+              value={urgency}
+              onChange={(e: any) => setUrgency(e.target.value)}
+              placeholder={t("pages.procurement.workshop.urgencyPlaceholder")}
+            />
           </label>
         </div>
 
-        {reqType === 'post_facto' && (
-          <label className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+        {reqType === "post_facto" && (
+          <label className="flex items-center gap-2 rounded border border-warning-200 bg-warning-50 p-3 text-sm text-warning-600">
             <input type="checkbox" checked={isGrnProvisional} onChange={(e: any) => setIsGrnProvisional(e.target.checked)} />
-            <span>صدور رسید انبار موقت (به‌دلیل خرید پس‌نگر)</span>
+            <span>{t("pages.procurement.workshop.provisionalGrn")}</span>
           </label>
         )}
 
         <div>
-          <h3 className="mb-4 text-lg font-medium">ردیف‌های درخواستی</h3>
+          <h3 className="mb-4 text-lg font-medium">{t("pages.procurement.workshop.itemsTitle")}</h3>
           <div className="space-y-4">
             {items.map((item, idx) => (
-              <div key={idx} className="flex flex-wrap items-start gap-4 rounded border p-4 bg-muted/20">
-                <label className="flex flex-1 flex-col gap-1 text-sm min-w-[200px]">
-                  <span>متریال</span>
-                  <select className="rounded-md border px-3 py-2" value={item.material} onChange={(e: any) => {
-                    const newItems = [...items];
-                    newItems[idx].material = e.target.value;
-                    setItems(newItems);
-                  }} required>
-                    <option value="">انتخاب متریال...</option>
-                    {materials.map((m: any) => <option key={m.id} value={m.id}>{m.material_code} - {m.material_name}</option>)}
+              <div key={idx} className="flex flex-wrap items-start gap-4 rounded border bg-muted/20 p-4">
+                <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-sm">
+                  <span>{t("pages.procurement.workshop.material")}</span>
+                  <select
+                    className="rounded-md border px-3 py-2"
+                    value={item.material}
+                    onChange={(e: any) => {
+                      const newItems = [...items];
+                      newItems[idx].material = e.target.value;
+                      setItems(newItems);
+                    }}
+                    required
+                  >
+                    <option value="">{t("pages.procurement.workshop.selectMaterial")}</option>
+                    {materials.map((m: any) => (
+                      <option key={m.id} value={m.id}>
+                        {m.material_code} - {m.material_name}
+                      </option>
+                    ))}
                   </select>
                 </label>
-                <label className="flex flex-col gap-1 text-sm w-32">
-                  <span>مقدار</span>
-                  <input type="number" step="any" min="0.0001" className="rounded-md border px-3 py-2" value={item.requested_qty} onChange={(e: any) => {
-                    const newItems = [...items];
-                    newItems[idx].requested_qty = e.target.value;
-                    setItems(newItems);
-                  }} required />
+                <label className="flex w-32 flex-col gap-1 text-sm">
+                  <span>{t("pages.procurement.workshop.quantity")}</span>
+                  <input
+                    type="number"
+                    step="any"
+                    min="0.0001"
+                    className="rounded-md border px-3 py-2"
+                    value={item.requested_qty}
+                    onChange={(e: any) => {
+                      const newItems = [...items];
+                      newItems[idx].requested_qty = e.target.value;
+                      setItems(newItems);
+                    }}
+                    required
+                  />
                 </label>
-                <label className="flex flex-1 flex-col gap-1 text-sm min-w-[200px]">
-                  <span>توضیحات</span>
-                  <input type="text" className="rounded-md border px-3 py-2" value={item.notes} onChange={(e: any) => {
-                    const newItems = [...items];
-                    newItems[idx].notes = e.target.value;
-                    setItems(newItems);
-                  }} />
+                <label className="flex min-w-[200px] flex-1 flex-col gap-1 text-sm">
+                  <span>{t("pages.procurement.workshop.itemNotes")}</span>
+                  <input
+                    type="text"
+                    className="rounded-md border px-3 py-2"
+                    value={item.notes}
+                    onChange={(e: any) => {
+                      const newItems = [...items];
+                      newItems[idx].notes = e.target.value;
+                      setItems(newItems);
+                    }}
+                  />
                 </label>
                 <div className="pt-6">
-                  <Button type="button" variant="outline" onClick={() => removeItem(idx)} disabled={items.length === 1} className="text-red-500 hover:text-red-700">حذف</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => removeItem(idx)}
+                    disabled={items.length === 1}
+                    className="text-danger-500 hover:text-danger-700"
+                  >
+                    {t("common.delete")}
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
-          <Button type="button" variant="outline" className="mt-4" onClick={addItem}>+ افزودن ردیف جدید</Button>
+          <Button type="button" variant="outline" className="mt-4" onClick={addItem}>
+            {t("pages.procurement.workshop.addItem")}
+          </Button>
         </div>
 
         <label className="flex flex-col gap-1 text-sm">
-          <span>توضیحات کلی درخواست</span>
+          <span>{t("pages.procurement.workshop.notes")}</span>
           <textarea className="rounded-md border px-3 py-2" rows={3} value={notes} onChange={(e: any) => setNotes(e.target.value)} />
         </label>
 
-        <div className="flex gap-4 pt-4 border-t border-border">
+        <div className="flex gap-4 border-t border-border pt-4">
           <Button type="submit" variant="default" disabled={createMut.isPending}>
-            ثبت پیش‌نویس
+            {t("pages.procurement.workshop.saveDraft")}
           </Button>
           <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT}`}>
-            <Button type="button" variant="outline">انصراف</Button>
+            <Button type="button" variant="outline">
+              {t("common.cancel")}
+            </Button>
           </Link>
         </div>
       </form>
@@ -181,14 +292,16 @@ function ProcurementNewContent() {
 
 export default function ProcurementNewPage() {
   const { projectId } = useParams();
+  const { t } = useTranslation();
+
   return (
     <ProjectProvider projectId={projectId!}>
       <main className="page-main page-shell mx-auto px-4 py-8">
         <Breadcrumb
           items={[
-            { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
-            { label: "تدارکات", href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT}` },
-            { label: "درخواست جدید" },
+            { label: t("project.title"), href: `/${PATHS.PROJECT}` },
+            { label: t("pages.procurement.title"), href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT}` },
+            { label: t("pages.procurement.workshop.newBreadcrumb") },
           ]}
         />
         <ProcurementNewContent />

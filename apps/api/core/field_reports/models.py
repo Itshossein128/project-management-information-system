@@ -377,6 +377,8 @@ class WeatherLog(AuditSoftDeleteModel):
     temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
     weather_condition = models.CharField(max_length=20, choices=WeatherCondition.choices)
     site_status = models.CharField(max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE)
+    wind_speed = models.CharField(max_length=50, blank=True, default='')
+    soil_condition = models.CharField(max_length=100, blank=True, default='')
 
     class Meta:
         db_table = 'weather_logs'

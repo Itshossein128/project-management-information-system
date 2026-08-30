@@ -9,13 +9,24 @@ class ApprovalLogSerializer(serializers.ModelSerializer):
     step_from_display = serializers.SerializerMethodField()
     step_to_display = serializers.SerializerMethodField()
     action_display = serializers.CharField(source='get_action_display', read_only=True)
+    requisition_number = serializers.CharField(
+        source='requisition.requisition_number',
+        read_only=True,
+        default=None,
+    )
+    requisition_scope = serializers.CharField(
+        source='requisition.scope',
+        read_only=True,
+        default=None,
+    )
 
     class Meta:
         model = ApprovalLog
         fields = [
-            'id', 'requisition', 'step_from', 'step_from_display',
+            'id', 'requisition', 'requisition_number', 'requisition_scope',
+            'step_from', 'step_from_display',
             'step_to', 'step_to_display', 'action', 'action_display',
-            'performed_by', 'performed_by_name', 'performed_at', 'comments',
+            'performed_by', 'performed_by_name', 'performed_at', 'comments', 'details',
         ]
         read_only_fields = ['id', 'performed_at']
 

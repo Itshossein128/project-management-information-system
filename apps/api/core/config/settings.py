@@ -1,5 +1,5 @@
 """
-Django settings for IPCAS API.
+Django settings for Verona API.
 """
 
 import os
@@ -168,8 +168,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'IPCAS API',
-    'DESCRIPTION': 'Integrated Project Control Automation System API',
+    'TITLE': 'Verona API',
+    'DESCRIPTION': 'Verona project control platform API',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
@@ -211,7 +211,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ipcas.io')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@verona.local')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # Alert notification channels (K-04): in_app, email, sms

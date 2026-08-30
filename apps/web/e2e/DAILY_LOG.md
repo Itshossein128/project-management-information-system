@@ -1,4 +1,4 @@
-# IPCAS E2E Daily Run Log
+# Verona E2E Daily Run Log
 
 Date: 2024-07-13
 Selected flow: Project Foundation (List & Create)

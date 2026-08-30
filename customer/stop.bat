@@ -20,11 +20,11 @@ if errorlevel 1 (
 )
 
 echo.
-echo Stopping IPCAS...
+echo Stopping Verona...
 call "%ROOT_DIR%\customer\scripts\compose.bat" down
 
 echo.
-echo IPCAS stopped. Your data is kept in Docker volumes.
+echo Verona stopped. Your data is kept in Docker volumes.
 echo Run start.bat to start again.
 echo.
 pause

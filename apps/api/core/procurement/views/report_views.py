@@ -8,19 +8,30 @@ from projects.models import Project
 
 class LiquidityDashboardView(APIView):
     """
-    Requisitions on hold due to missing budget.
+    Requisitions on hold due to missing budget & block liquidity status.
     GET /api/v1/projects/{pid}/reports/liquidity/
     """
 
     def get(self, request, project_pk=None):
-        from django.db.models import Count, Sum
-        from procurement.models import RequisitionHeader, ItemStatus
+        from django.db.models import Sum
+        from procurement.models import Block, ItemStatus, RequisitionItem
 
         project = get_object_or_404(Project, id=project_pk)
 
+        blocks = Block.objects.filter(project=project, is_deleted=False)
+
+        req_by_block = (
+            RequisitionItem.objects.filter(
+                header__project=project,
+                is_deleted=False,
+            )
+            .values('header__block_id')
+            .annotate(total_req=Sum('requested_qty'))
+        )
+        req_map = {row['header__block_id']: float(row['total_req'] or 0) for row in req_by_block}
+
         on_hold_items = (
-            __import__('procurement.models', fromlist=['RequisitionItem'])
-            .RequisitionItem.objects.filter(
+            RequisitionItem.objects.filter(
                 header__project=project,
                 status=ItemStatus.ON_HOLD,
                 is_deleted=False,
@@ -28,34 +39,52 @@ class LiquidityDashboardView(APIView):
             .select_related('header__block', 'material')
         )
 
-        data = []
+        on_hold_data = []
         for item in on_hold_items:
-            data.append({
-                'requisition_number': item.header.requisition_number,
-                'block_code': item.header.block.block_code,
-                'block_name': item.header.block.block_name,
+            header = item.header
+            on_hold_data.append({
+                'requisition_number': header.requisition_number,
+                'scope': header.scope,
+                'scope_display': header.get_scope_display(),
+                'block_code': header.block.block_code,
+                'block_name': header.block.block_name,
                 'material_code': item.material.material_code,
                 'material_name': item.material.material_name,
-                'requested_qty': item.requested_qty,
+                'requested_qty': float(item.requested_qty),
                 'status': item.status,
+            })
+
+        liquidity_status = []
+        for block in blocks:
+            budget = float(block.budget or 0)
+            total_requested_value = req_map.get(block.id, 0.0)
+            remaining_liquidity = budget - total_requested_value
+            liquidity_status.append({
+                'block_code': block.block_code,
+                'block_name': block.block_name,
+                'block_kind': getattr(block, 'block_kind', 'standard'),
+                'budget': budget,
+                'total_requested_value': total_requested_value,
+                'remaining_liquidity': remaining_liquidity,
             })
 
         return Response({
             'project_id': str(project.id),
-            'on_hold_count': len(data),
-            'items': data,
+            'on_hold_count': len(on_hold_data),
+            'items': on_hold_data,
+            'liquidity_status': liquidity_status,
         })
 
 
 class MaterialDeviationReportView(APIView):
     """
-    Requested vs purchased vs consumed per material per block.
+    Requested vs purchased vs consumed per material per block with deviation calculation.
     GET /api/v1/projects/{pid}/reports/material-deviation/
     """
 
     def get(self, request, project_pk=None):
         from django.db.models import Sum
-        from procurement.models import RequisitionItem, InventoryAllocation
+        from procurement.models import InventoryAllocation, RequisitionItem
 
         project = get_object_or_404(Project, id=project_pk)
 
@@ -66,10 +95,13 @@ class MaterialDeviationReportView(APIView):
                 is_deleted=False,
             )
             .values(
+                'header__scope',
                 'header__block__block_code',
                 'header__block__block_name',
+                'header__block__block_kind',
                 'material__material_code',
                 'material__material_name',
+                'material__estimated_total_qty',
             )
             .annotate(
                 total_requested=Sum('requested_qty'),
@@ -91,26 +123,49 @@ class MaterialDeviationReportView(APIView):
         )
         for row in issued_qs:
             key = (row['block__block_code'], row['material__material_code'])
-            issued_map[key] = row['total_issued']
+            issued_map[key] = float(row['total_issued'] or 0)
 
-        results = []
+        deviation_data = []
         for row in requested:
             block_code = row['header__block__block_code']
             material_code = row['material__material_code']
-            total_issued = issued_map.get((block_code, material_code), 0)
-            results.append({
+            material_name = row['material__material_name']
+            est_raw = row['material__estimated_total_qty']
+            estimated_qty = float(est_raw) if est_raw is not None else None
+            requested_qty = float(row['total_requested'] or 0)
+            total_approved = float(row['total_approved'] or 0)
+            total_purchased = float(row['total_purchased'] or 0)
+            total_issued = issued_map.get((block_code, material_code), 0.0)
+
+            if estimated_qty is not None and estimated_qty > 0:
+                deviation_qty = requested_qty - estimated_qty
+                deviation_percent = ((requested_qty - estimated_qty) / estimated_qty) * 100.0
+            else:
+                deviation_qty = requested_qty
+                deviation_percent = 0.0
+
+            deviation_data.append({
+                'scope': row['header__scope'],
                 'block_code': block_code,
                 'block_name': row['header__block__block_name'],
+                'block_kind': row['header__block__block_kind'],
                 'material_code': material_code,
-                'material_name': row['material__material_name'],
-                'total_requested': row['total_requested'],
-                'total_approved': row['total_approved'],
-                'total_purchased': row['total_purchased'],
+                'material_name': material_name,
+                'estimated_qty': estimated_qty,
+                'requested_qty': requested_qty,
+                'deviation_qty': deviation_qty,
+                'deviation_percent': deviation_percent,
+                'total_approved': total_approved,
+                'total_purchased': total_purchased,
                 'total_issued': total_issued,
-                'deviation': (row['total_requested'] or 0) - (row['total_purchased'] or 0),
+                'deviation': requested_qty - total_purchased,
             })
 
-        return Response({'project_id': str(project.id), 'items': results})
+        return Response({
+            'project_id': str(project.id),
+            'deviation_data': deviation_data,
+            'items': deviation_data,
+        })
 
 
 class AuditTrailReportView(APIView):
@@ -120,24 +175,44 @@ class AuditTrailReportView(APIView):
     """
 
     def get(self, request, project_pk=None):
-        from procurement.models import ApprovalLog
+        from procurement.models import ApprovalAction, ApprovalLog
         from procurement.serializers import ApprovalLogSerializer
 
         project = get_object_or_404(Project, id=project_pk)
 
-        # Optional filter by requisition
         req_id = request.query_params.get('requisition_id')
+        action_filter = request.query_params.get('action')
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+
         logs_qs = ApprovalLog.objects.filter(
             requisition__project=project,
         ).select_related('requisition', 'performed_by').order_by('performed_at')
 
         if req_id:
             logs_qs = logs_qs.filter(requisition_id=req_id)
+        if action_filter:
+            logs_qs = logs_qs.filter(action=action_filter)
+        if date_from:
+            logs_qs = logs_qs.filter(performed_at__date__gte=date_from)
+        if date_to:
+            logs_qs = logs_qs.filter(performed_at__date__lte=date_to)
+
+        total_actions = logs_qs.count()
+        approved_actions = logs_qs.filter(action=ApprovalAction.APPROVE).count()
+        rejected_actions = logs_qs.filter(action=ApprovalAction.REJECT).count()
+
+        summary = {
+            'total_actions': total_actions,
+            'approved_actions': approved_actions,
+            'rejected_actions': rejected_actions,
+        }
 
         serializer = ApprovalLogSerializer(logs_qs, many=True)
         return Response({
             'project_id': str(project.id),
-            'count': logs_qs.count(),
+            'count': total_actions,
+            'summary': summary,
             'logs': serializer.data,
         })
 

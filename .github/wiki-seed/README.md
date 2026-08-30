@@ -1,6 +1,6 @@
 # Wiki seed (copy into GitHub Wiki)
 
-GitHub Wiki is a **separate git repo**. These Markdown files are ready-made pages for IPCAS.
+GitHub Wiki is a **separate git repo**. These Markdown files are ready-made pages for Verona.
 
 ## One-time publish (after the first empty Wiki page exists)
 
@@ -14,7 +14,7 @@ cp ../building-management/.github/wiki-seed/*.md .
 # do not copy this README.md into the wiki root unless you want it
 rm -f README.md
 git add *.md
-git commit -m "Add IPCAS wiki guides (Actions, Agents, Projects)"
+git commit -m "Add Verona wiki guides (Actions, Agents, Projects)"
 git push
 ```
 

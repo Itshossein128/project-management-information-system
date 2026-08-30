@@ -1,4 +1,4 @@
-# IPCAS customer / demo stack (standalone).
+# Verona customer / demo stack (standalone).
 # Used by customer/*.bat and customer/*.sh launchers.
 # Only Traefik is exposed on the host — avoids port conflicts on customer PCs.
 

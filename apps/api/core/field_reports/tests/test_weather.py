@@ -45,6 +45,8 @@ class TestWeatherLogCreate:
                 'temp_min': '22.0',
                 'weather_condition': 'sunny',
                 'site_status': 'active',
+                'wind_speed': '15 km/h NW',
+                'soil_condition': 'Dry / Moderate',
             },
             format='json',
         )
@@ -52,6 +54,8 @@ class TestWeatherLogCreate:
         assert response.data['log_date'] == '1403/03/12'
         assert response.data['day_of_week'] == 'شنبه'
         assert response.data['weather_condition_label'] == 'آفتابی'
+        assert response.data['wind_speed'] == '15 km/h NW'
+        assert response.data['soil_condition'] == 'Dry / Moderate'
 
     def test_duplicate_date_returns_409(self, auth_client, weather_url, project, user):
         WeatherLog.objects.create(

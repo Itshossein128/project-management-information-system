@@ -4,7 +4,7 @@ globs:
   - apps/api/**
 ---
 
-# Backend Advisor — IPCAS Monorepo
+# Backend Advisor — Verona Monorepo
 
 Django 4.2 + Django REST Framework API in `apps/api/core/`. PostgreSQL is required (`DATABASE_URL`). No SQLite fallback.
 
@@ -49,4 +49,4 @@ Blueprint **Project** maps to `projects.Project` and `/api/v1/projects/{uuid}/`.
 
 ## Blueprint reference
 
-Full target spec: `docs/IPCAS_Engineering_Blueprint.md`. Status: `docs/ipcas-scope-map.md`.
+Full target spec: `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/بلوپرینت مهندسی Verona (Engineering Blueprint).md`. Status: `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md`.

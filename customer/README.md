@@ -1,6 +1,6 @@
-# IPCAS — Customer PC deployment (Docker)
+# Verona — Customer PC deployment (Docker)
 
-Run IPCAS on a customer PC without cloud hosting. **Double-click** launcher scripts — no terminal commands needed on Windows.
+Run Verona on a customer PC without cloud hosting. **Double-click** launcher scripts — no terminal commands needed on Windows.
 
 ## What you need on the PC
 
@@ -28,7 +28,7 @@ On **demo day**, the customer only needs:
 
 The browser opens to **http://localhost:8080**. Demo login: `+10000000001` / `devpass123`.
 
-Pin a desktop shortcut to `start.bat` so they can launch IPCAS with one click later.
+Pin a desktop shortcut to `start.bat` so they can launch Verona with one click later.
 
 **First install** on a PC without pre-built images: use `install.bat` / `install.sh` instead (5–20 minutes, needs internet).
 

@@ -1,4 +1,4 @@
-# IPCAS Scope Map
+# Verona Scope Map
 
 Maps the **engineering blueprint** to the **monorepo implementation**.
 
@@ -347,7 +347,7 @@ See module docs: `apps/api/core/alerts/ENDPOINTS.md`, `economic/ENDPOINTS.md`, `
 - `GET /api/v1/projects/{id}/economic/payment-delay/` — alias of financing-cost
 - `GET /api/v1/projects/{id}/economic/snapshot/?refresh=1` — force regenerate snapshot
 
-See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Blueprint.md)
+See full blueprint: [بلوپرینت مهندسی Verona (Engineering Blueprint).md](./بلوپرینت مهندسی Verona (Engineering Blueprint).md)
 
 ## Sprint 13 completion checklist (Alerts, Executive Dashboard & Polish)
 
@@ -381,4 +381,3 @@ See full blueprint: [IPCAS_Engineering_Blueprint.md](./IPCAS_Engineering_Bluepri
 - **Channels:** `ALERT_NOTIFY_CHANNELS=in_app,email` (add `sms` to enable console SMS backend). `SMS_PROVIDER=console` by default.
 - **Cache:** Unified KPIs use `project_kpis:{id}:{as_of}` (5 min). Progress EVM cache invalidation also clears `project_kpis:*`.
 - **Load smoke:** `ACCESS_TOKEN=… PROJECT_ID=… python apps/api/scripts/load_smoke_kpis.py`
-

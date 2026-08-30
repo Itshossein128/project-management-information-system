@@ -209,6 +209,7 @@ class StandaloneManpowerSerializer(serializers.ModelSerializer):
             'report_date',
             'labor_category',
             'job_title',
+            'custom_title',
             'shift_1_count',
             'shift_2_count',
             'shift_3_count',
@@ -260,9 +261,12 @@ class StandaloneManpowerViewSet(ProjectScopedViewSet):
                 labor_category=data['labor_category'],
                 job_title=data['job_title'],
                 defaults={
+                    'custom_title': data.get('custom_title', ''),
                     'shift_1_count': data.get('shift_1_count', 0),
                     'shift_2_count': data.get('shift_2_count', 0),
                     'shift_3_count': data.get('shift_3_count', 0),
+                    'work_hours': data.get('work_hours'),
+                    'overtime_hours': data.get('overtime_hours'),
                     'is_deleted': False,
                 },
             )

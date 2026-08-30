@@ -10,6 +10,7 @@ from procurement.models import (
     RequisitionItem,
     RequisitionStatus,
 )
+from procurement.services.workflow_timeline_service import log_partial_approve
 
 
 @transaction.atomic
@@ -50,7 +51,10 @@ def partial_approve_items(
         item_id = approval.get('item_id')
         approved_qty = approval.get('approved_qty')
         try:
-            item = requisition.items.get(id=item_id, is_deleted=False)
+            item = (
+                requisition.items.select_related('material')
+                .get(id=item_id, is_deleted=False)
+            )
         except RequisitionItem.DoesNotExist:
             raise ValidationError({'detail': f'Item {item_id} not found'})
         if approved_qty is None or approved_qty <= 0:
@@ -62,6 +66,8 @@ def partial_approve_items(
         item.updated_by = user
         item.save(update_fields=['approved_qty', 'status', 'updated_by', 'updated_at'])
         updated.append(item)
+
+    log_partial_approve(requisition, user, updated)
     return updated
 
 

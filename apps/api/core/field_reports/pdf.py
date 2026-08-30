@@ -39,7 +39,9 @@ def _register_font() -> str:
         return _FONT_NAME
     _FONT_READY = True
     candidates = [
+        getattr(settings, 'VERONA_PDF_FONT_PATH', None),
         getattr(settings, 'IPCAS_PDF_FONT_PATH', None),
+        os.environ.get('VERONA_PDF_FONT_PATH'),
         os.environ.get('IPCAS_PDF_FONT_PATH'),
         os.path.join(os.path.dirname(__file__), 'fonts', 'Vazirmatn.ttf'),
         '/usr/share/fonts/truetype/vazirmatn/Vazirmatn-Regular.ttf',
@@ -50,8 +52,8 @@ def _register_font() -> str:
     for path in candidates:
         if path and os.path.exists(path):
             try:
-                pdfmetrics.registerFont(TTFont('IpcasFa', path))
-                _FONT_NAME = 'IpcasFa'
+                pdfmetrics.registerFont(TTFont('VeronaFa', path))
+                _FONT_NAME = 'VeronaFa'
                 break
             except Exception:  # noqa: BLE001
                 continue

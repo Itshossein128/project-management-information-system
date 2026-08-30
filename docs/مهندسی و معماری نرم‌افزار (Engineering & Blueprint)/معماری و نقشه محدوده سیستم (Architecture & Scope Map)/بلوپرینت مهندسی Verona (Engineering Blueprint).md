@@ -1,4 +1,4 @@
-# IPCAS — Integrated Project Control Automation System
+# Verona — Integrated Project Control Automation System
 
 ## Engineering Blueprint (Rev. 2)
 
@@ -10,7 +10,7 @@
 
 ### 1.1 Architectural Overview
 
-IPCAS is a **multi-tenant, project-scoped SaaS platform** for civil/construction project management. The architecture follows a clean layered model with offline-first edge nodes for field crews.
+Verona is a **multi-tenant, project-scoped SaaS platform** for civil/construction project management. The architecture follows a clean layered model with offline-first edge nodes for field crews.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐

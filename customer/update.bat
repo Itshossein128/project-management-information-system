@@ -54,7 +54,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Rebuilding and restarting IPCAS...
+echo Rebuilding and restarting Verona...
 call "%ROOT_DIR%\customer\scripts\compose.bat" up -d --build --remove-orphans
 if errorlevel 1 (
   echo Docker compose failed.
@@ -64,14 +64,14 @@ if errorlevel 1 (
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT_DIR%\customer\scripts\wait-for-stack.ps1"
 if errorlevel 1 (
-  echo IPCAS did not become ready in time.
+  echo Verona did not become ready in time.
   pause
   exit /b 1
 )
 
 start "" "%APP_URL%"
 echo.
-echo IPCAS updated and running at %APP_URL%
+echo Verona updated and running at %APP_URL%
 echo.
 pause
 endlocal

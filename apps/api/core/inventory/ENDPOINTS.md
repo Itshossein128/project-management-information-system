@@ -13,7 +13,7 @@ Legacy inventory APIs and project-scoped department activity logs. The blueprint
 
 **Timeline:** `/api/items/` remains mounted for backward compatibility with legacy dynamic-table workflows. New features must use `resources`. Removal is planned after frontend callers migrate to material-balance (`/projects/:id/material-balance`).
 
-See also: [docs/ipcas-scope-map.md](../../../../docs/ipcas-scope-map.md) (Materials ledger row).
+See also: [docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md](../../../../docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md) (Materials ledger row).
 
 ## Base Paths
 

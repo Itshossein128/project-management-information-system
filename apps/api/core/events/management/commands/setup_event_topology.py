@@ -6,7 +6,7 @@ from events.publisher import declare_topology, get_rabbitmq_url
 
 
 class Command(BaseCommand):
-    help = 'Declare RabbitMQ exchanges, queues, and bindings for IPCAS blueprint topics.'
+    help = 'Declare RabbitMQ exchanges, queues, and bindings for Verona blueprint topics.'
 
     def handle(self, *args, **options):
         connection = pika.BlockingConnection(pika.URLParameters(get_rabbitmq_url()))

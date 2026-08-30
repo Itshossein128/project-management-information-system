@@ -4,9 +4,11 @@ from common.models import UUIDModel
 
 
 class ApprovalAction(models.TextChoices):
+    CREATE = 'create', 'ثبت پیش‌نویس'
     APPROVE = 'approve', 'تایید'
     REJECT  = 'reject',  'رد'
     RETURN  = 'return',  'بازگشت'
+    PARTIAL_APPROVE = 'partial_approve', 'تایید جزئی آیتم'
 
 
 class ApprovalLog(UUIDModel):
@@ -18,7 +20,7 @@ class ApprovalLog(UUIDModel):
     )
     step_from = models.CharField(max_length=30)
     step_to = models.CharField(max_length=30)
-    action = models.CharField(max_length=10, choices=ApprovalAction.choices)
+    action = models.CharField(max_length=20, choices=ApprovalAction.choices)
     performed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -26,6 +28,7 @@ class ApprovalLog(UUIDModel):
     )
     performed_at = models.DateTimeField(auto_now_add=True)
     comments = models.TextField(blank=True, default='')
+    details = models.JSONField(null=True, blank=True)
 
     class Meta:
         db_table = 'procurement_approval_logs'

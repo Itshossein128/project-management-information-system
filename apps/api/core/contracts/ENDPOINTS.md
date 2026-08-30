@@ -1,6 +1,6 @@
 # Contracts Endpoints Documentation
 
-This document describes the API endpoints provided by the `contracts` app within the IPCAS project. These endpoints manage contracts, change orders, and Interim Payment Certificates (IPCs). All URLs are nested under a specific project context (i.e., prefixed with `/api/v1/projects/<uuid:project_pk>/`).
+This document describes the API endpoints provided by the `contracts` app within the Verona project. These endpoints manage contracts, change orders, and Interim Payment Certificates (IPCs). All URLs are nested under a specific project context (i.e., prefixed with `/api/v1/projects/<uuid:project_pk>/`).
 
 ## Contracts
 

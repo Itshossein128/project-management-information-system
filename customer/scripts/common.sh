@@ -18,6 +18,7 @@ customer_load_config() {
   HEALTH_URL="${HEALTH_URL:-http://localhost:8080/api/schema/}"
   WAIT_INTERVAL_SEC="${WAIT_INTERVAL_SEC:-2}"
   WAIT_MAX_ATTEMPTS="${WAIT_MAX_ATTEMPTS:-90}"
+  # Historical compose project name — keep so existing Docker volumes stay attached.
   COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-ipcas}"
 
   if [[ -f "${config_file}" ]]; then

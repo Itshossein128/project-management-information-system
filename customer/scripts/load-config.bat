@@ -13,6 +13,7 @@ set "APP_URL=http://localhost:8080"
 set "HEALTH_URL=http://localhost:8080/api/schema/"
 set "WAIT_MAX_ATTEMPTS=90"
 set "WAIT_INTERVAL_SEC=2"
+rem Historical compose project name — keep so existing Docker volumes stay attached.
 set "COMPOSE_PROJECT_NAME=ipcas"
 
 if exist "%ROOT_DIR%\customer\ipcas.config" (

@@ -8,8 +8,8 @@ source "${CUSTOMER_DIR}/scripts/common.sh"
 customer_load_config
 customer_check_docker
 
-echo "==> Stopping IPCAS..."
+echo "==> Stopping Verona..."
 customer_compose down
 
-echo "IPCAS stopped. Your data is kept in Docker volumes."
+echo "Verona stopped. Your data is kept in Docker volumes."
 echo "Run start.sh (or start.bat) to start again."

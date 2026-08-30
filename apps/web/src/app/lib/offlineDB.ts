@@ -1,5 +1,5 @@
 /**
- * IndexedDB wrapper for IPCAS offline support (Sprint 4, O-01).
+ * IndexedDB wrapper for Verona offline support (Sprint 4, O-01).
  *
  * All access goes through `idb`. Every exported function is client-only:
  * IndexedDB does not exist during SSR, so callers must invoke these from
@@ -8,6 +8,7 @@
  */
 import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 
+// Keep the historical IndexedDB name so existing offline caches stay readable.
 export const OFFLINE_DB_NAME = "ipcas-offline";
 export const OFFLINE_DB_VERSION = 2;
 
@@ -112,7 +113,7 @@ export interface PendingPhoto {
   data: ArrayBuffer;
 }
 
-interface IpcasDB extends DBSchema {
+interface VeronaDB extends DBSchema {
   offline_queue: {
     key: string;
     value: QueueItem;
@@ -160,7 +161,7 @@ interface IpcasDB extends DBSchema {
   };
 }
 
-let dbPromise: Promise<IDBPDatabase<IpcasDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<VeronaDB>> | null = null;
 
 export function generateUUID(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -178,12 +179,12 @@ export function isOfflineDBAvailable(): boolean {
   return typeof window !== "undefined" && typeof indexedDB !== "undefined";
 }
 
-export function initDB(): Promise<IDBPDatabase<IpcasDB>> {
+export function initDB(): Promise<IDBPDatabase<VeronaDB>> {
   if (!isOfflineDBAvailable()) {
     return Promise.reject(new Error("IndexedDB is not available in this environment"));
   }
   if (!dbPromise) {
-    dbPromise = openDB<IpcasDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
+    dbPromise = openDB<VeronaDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
       upgrade(db, oldVersion) {
         if (oldVersion < 1) {
           const queue = db.createObjectStore("offline_queue", { keyPath: "queue_id" });
@@ -233,7 +234,7 @@ export function initDB(): Promise<IDBPDatabase<IpcasDB>> {
   return dbPromise;
 }
 
-function getDB(): Promise<IDBPDatabase<IpcasDB>> {
+function getDB(): Promise<IDBPDatabase<VeronaDB>> {
   return initDB();
 }
 

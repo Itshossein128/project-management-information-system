@@ -24,8 +24,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ["favicon.ico", "robots.txt"],
       manifest: {
-        name: "IPCAS — کنترل پروژه",
-        short_name: "IPCAS",
+        name: "Verona — کنترل پروژه",
+        short_name: "Verona",
         description: "سیستم اتوماسیون یکپارچه کنترل پروژه",
         theme_color: "#334155",
         background_color: "#F8FAFC",

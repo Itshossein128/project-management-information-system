@@ -1,14 +1,18 @@
 """Approval workflow action views (approve / reject / return / submit)."""
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from procurement.models import ApprovalLog, RequisitionHeader
+from procurement.permissions import ProcurementStepPermission
 from procurement.serializers import ApprovalActionSerializer, ApprovalLogSerializer, RequisitionHeaderSerializer
 
 
 class _BaseApprovalActionView(APIView):
     """Base class for approval action views."""
+
+    permission_classes = [IsAuthenticated, ProcurementStepPermission]
     action: str = ''
 
     def post(self, request, project_pk=None, pk=None):
@@ -20,6 +24,8 @@ class _BaseApprovalActionView(APIView):
             project_id=project_pk,
             is_deleted=False,
         )
+        self.check_object_permissions(request, requisition)
+
         serializer = ApprovalActionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

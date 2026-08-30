@@ -42,7 +42,7 @@ function OfficerDashboardContent() {
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">شناسه کاربری: {s.assigned_to}</p>
                 </div>
-                <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                <span className="bg-info-100 text-info-800 text-xs px-2 py-1 rounded-full font-medium">
                   وضعیت آیتم: {s.status}
                 </span>
               </div>
@@ -58,7 +58,7 @@ function OfficerDashboardContent() {
                 </div>
                 <div className="col-span-2">
                   <p className="text-muted-foreground text-xs mb-1">خریداری شده تا الان</p>
-                  <p className="font-medium text-green-700">{s.total_purchased || 0}</p>
+                  <p className="font-medium text-success-700">{s.total_purchased || 0}</p>
                 </div>
               </div>
             </div>

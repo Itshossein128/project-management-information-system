@@ -1,8 +1,8 @@
-# IPCAS Brand Color Guidelines
+# Verona Brand Color Guidelines
 
 ## Product
 
-**IPCAS** — Integrated Project Control Automation System for civil/construction projects.
+**Verona** — Integrated Project Control Automation System for civil/construction projects.
 
 ## Palette story
 
@@ -20,7 +20,7 @@
 - Primitives: `apps/web/src/design/tokens/palette.css`
 - Semantics + Tailwind: `apps/web/src/app/app.css`
 - TS helpers: `apps/web/src/design/tokens/colors.ts`, `chart-colors.ts`
-- Master UX rules: `design-system/ipcas/MASTER.md`
+- Master UX rules: `design-system/verona/MASTER.md`
 
 ## Do / Don't
 

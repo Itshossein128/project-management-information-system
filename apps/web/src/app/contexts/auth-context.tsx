@@ -6,7 +6,10 @@ import {
   getStoredAccessToken,
   getStoredRefreshToken,
   getStoredUser,
+  hasStoredSession,
   setStoredAuth,
+  subscribeAuthStorage,
+  syncAuthCookieFromStorage,
 } from "src/app/lib/auth-storage";
 import type { AuthUser } from "src/app/lib/auth-types";
 
@@ -137,10 +140,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
+    // Keep SSR cookie aligned with localStorage so hard reloads don't bounce to /login.
+    syncAuthCookieFromStorage();
+  }, []);
+
+  React.useEffect(() => {
     if (getStoredAccessToken() && !user) {
       void restoreSession();
     }
   }, [restoreSession, user]);
+
+  React.useEffect(() => {
+    // api-client clearAuth() wipes storage without going through logout(); keep React state in sync.
+    return subscribeAuthStorage(() => {
+      if (!hasStoredSession()) {
+        setUser(null);
+      }
+    });
+  }, []);
 
   const value: AuthContextValue = {
     user,

@@ -1,5 +1,5 @@
 name: Feature request
-description: New capability mapped to IPCAS blueprint / sprint scope
+description: New capability mapped to Verona blueprint / sprint scope
 title: "[feature] "
 labels: ["enhancement"]
 body:
@@ -7,7 +7,7 @@ body:
     id: blueprint
     attributes:
       label: Blueprint module
-      description: From docs/IPCAS_Engineering_Blueprint.md or ipcas-scope-map.md
+      description: From the Verona engineering blueprint or scope map under docs/
       placeholder: "e.g. Field Reports / Resources / HR"
     validations:
       required: true
@@ -34,5 +34,5 @@ body:
     attributes:
       label: Before opening
       options:
-        - label: Checked docs/ipcas-scope-map.md for existing work
+        - label: Checked docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Verona (Verona Scope Map).md for existing work
         - label: Identified roles/permissions impact (if any)

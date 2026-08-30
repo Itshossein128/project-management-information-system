@@ -21,6 +21,13 @@ import { isRTL } from "./lib/i18n";
 
 const themeInitScript = `(function(){try{var t=localStorage.getItem("app-theme");var d=t==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
 
+export function meta() {
+  return [
+    { title: "Verona" },
+    { name: "description", content: "Verona project control platform" },
+  ];
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
 

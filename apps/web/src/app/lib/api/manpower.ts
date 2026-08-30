@@ -2,14 +2,17 @@ import { PATHS } from "@/app/routeVars";
 import { apiJson } from "@/app/lib/api-client";
 
 export interface ManpowerRow {
-  id: string;
-  report_date: string;
+  id?: string;
+  report_date?: string;
   labor_category: "indirect" | "direct";
   job_title: string;
+  custom_title?: string;
   shift_1_count: number;
   shift_2_count: number;
   shift_3_count: number;
-  total_count: number;
+  total_count?: number;
+  work_hours?: number | null;
+  overtime_hours?: number | null;
 }
 
 export interface JobTitles {
@@ -30,7 +33,9 @@ export function fetchJobTitles(projectId: string) {
 }
 
 export function fetchManpower(projectId: string, date: string) {
-  return apiJson<ManpowerRow[]>(`${base(projectId)}/manpower/?date=${encodeURIComponent(date)}`);
+  return apiJson<ManpowerRow[] | { results: ManpowerRow[] }>(
+    `${base(projectId)}/manpower/?date=${encodeURIComponent(date)}`,
+  ).then((data) => (Array.isArray(data) ? data : data.results ?? []));
 }
 
 export function saveManpowerDay(projectId: string, rows: Partial<ManpowerRow>[]) {

@@ -37,13 +37,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
           className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-safety-700 font-semibold text-white shadow-sm ring-1 ring-sidebar-ring/30"
           aria-hidden
         >
-          {t("common.brandShort", { defaultValue: "BM" })}
+          {t("common.brandShort", { defaultValue: "V" })}
         </div>
         <span
           id="text-sidebarBrandTitle"
           className="text-gradient-brand text-[10px] font-semibold"
         >
-          {t("common.brandName", { defaultValue: "Building" })}
+          {t("common.brandName", { defaultValue: "Verona" })}
         </span>
       </div>
 

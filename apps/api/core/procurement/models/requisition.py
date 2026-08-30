@@ -15,6 +15,11 @@ class RequisitionPriority(models.TextChoices):
     EMERGENCY = 'emergency', 'Emergency'
 
 
+class RequisitionScope(models.TextChoices):
+    BLOCK = 'block', 'Block'
+    WORKSHOP = 'workshop', 'Workshop'
+
+
 class RequisitionStatus(models.TextChoices):
     DRAFT                = 'draft',                'پیشنویس'
     TECHNICAL_REVIEW     = 'technical_review',     'بررسی فنی'
@@ -48,6 +53,11 @@ class RequisitionHeader(AuditSoftDeleteModel):
         'procurement.Block',
         on_delete=models.PROTECT,
         related_name='requisitions',
+    )
+    scope = models.CharField(
+        max_length=20,
+        choices=RequisitionScope.choices,
+        default=RequisitionScope.BLOCK,
     )
     requisition_number = models.CharField(max_length=30, unique=True, editable=False)
     requisition_type = models.CharField(
@@ -85,6 +95,7 @@ class RequisitionHeader(AuditSoftDeleteModel):
         indexes = [
             models.Index(fields=['project', 'status'], name='req_project_status_idx'),
             models.Index(fields=['block', 'status'], name='req_block_status_idx'),
+            models.Index(fields=['project', 'scope', 'status'], name='req_project_scope_status_idx'),
         ]
 
     def __str__(self):

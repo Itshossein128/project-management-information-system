@@ -1,12 +1,12 @@
 # Excel Forms & Grids Documentation
 ## Shiraz Project (پروژه 2000 واحدی مسکن ملی کمیل‌آباد شیراز)
-### Source Files Analysis — IPCAS Module Mapping
+### Source Files Analysis — Verona Module Mapping
 
 ---
 
 ## Summary Table
 
-| # | File | Persian Name | Module in IPCAS | Type |
+| # | File | Persian Name | Module in Verona | Type |
 |---|---|---|---|---|
 | 1 | `data_base_shiraz__1_.xlsx` | بانک اطلاعاتی (فاز 1) | Daily Report + Resources | Master database |
 | 2 | `data_base_shiraz_2_from_14040701_to_140401208.xlsx` | بانک اطلاعاتی (فاز 2 — دوره 1) | Daily Report + Resources | Master database |
@@ -52,7 +52,7 @@
 
 **Observed activity types:** survey work, rebar bending/cutting, formwork, concrete pouring, scaffolding, rebar installation, earthworks
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Each row maps to one `daily_activities` record
 - `پیمانکار` maps to `subcontractor` FK or "direct" flag
 - `قطعه / بلوک / طبقه` maps to the `work_front` / location fields
@@ -71,9 +71,9 @@
 |---|---|---|---|
 | L | توضیحات | Text | Additional notes (e.g. "با جرثقیل 25" = using 25-ton crane) |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This sheet demonstrates the requirement for **per-subcontractor activity filtering**
-- In IPCAS, this becomes a filtered view of `daily_activities` where `subcontractor = 'خنکا'`
+- In Verona, this becomes a filtered view of `daily_activities` where `subcontractor = 'خنکا'`
 - No separate table needed — it is a report query, not a distinct data source
 - In Phase 2 databases this sheet is renamed to `Khaneka`
 
@@ -94,11 +94,11 @@
 | E | وضعیت جوی | Text | Weather condition (آفتابی، ابری، بارانی، طوفانی، برفی) |
 | F | وضعیت کارگاه | Text | Site activity status (فعال / غیرفعال) |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - One row per calendar day (including weekends / holidays with `غیرفعال` status)
 - Maps directly to the `weather` section of `daily_reports` model
 - `وضعیت کارگاه = غیرفعال` means no report is expected for that day — useful for alert suppression ("missing daily report" alert should not fire on inactive days)
-- Weather condition values should be an enum/dropdown in IPCAS
+- Weather condition values should be an enum/dropdown in Verona
 
 ---
 
@@ -119,10 +119,10 @@
 - Ground concrete pump hydraulic oil and fuel hose failures
 - Payment delays causing masonry work to proceed with minimum crew
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Maps to the `risk_events` table with `event_type = 'barrier'`
-- The `responsible_party`, `severity`, and `corrective_action` fields are missing in the Excel — they need to be added in the IPCAS form
-- These entries are currently free-text. IPCAS should provide a category dropdown (equipment failure / payment delay / design change / weather / subcontractor / other) to enable reporting
+- The `responsible_party`, `severity`, and `corrective_action` fields are missing in the Excel — they need to be added in the Verona form
+- These entries are currently free-text. Verona should provide a category dropdown (equipment failure / payment delay / design change / weather / subcontractor / other) to enable reporting
 
 ---
 
@@ -143,7 +143,7 @@
 | G | ظرفیت کانکس | Integer | Maximum capacity of the connex |
 | H | ظرفیت خالی کانکس | Integer | Empty/available slots |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This is a specialized sub-module of Human Resources
 - Multiple rows per date (one per connex unit)
 - Maps to a `labor_camp_report` table or can be a sub-section of the daily report
@@ -168,9 +168,9 @@
 **Observed job categories:**
 نیروهای ستادی، راننده و اپراتور، حراست، کارگر روزمزد شرکتی (and more)
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This is a summary/aggregate view of `daily_labor` entries
-- In IPCAS, this becomes an auto-generated report from the daily labor entries — not a separate manual input
+- In Verona, this becomes an auto-generated report from the daily labor entries — not a separate manual input
 - The three-shift structure is identical to the daily report form structure
 
 ---
@@ -197,11 +197,11 @@
 | L | کارکرد مفید | Numeric | Productive working hours |
 | M | توضیحات | Text | Notes |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Maps to `daily_equipment` table
 - `فعال / آماده / خراب` → `status` enum field
 - `تملیکی / اجاره‌ای` → `ownership_type` field on the equipment master record
-- Productive hours = (end time − start time) − repair hours. Validate this in IPCAS rather than making the user calculate it.
+- Productive hours = (end time − start time) − repair hours. Validate this in Verona rather than making the user calculate it.
 
 ---
 
@@ -220,10 +220,10 @@
 
 **Observed job titles (34 listed):** مدیرشعبه، مدیر پروژه، سرپرست کارگاه، معاونت کارگاه، سرپرست دفتر فنی، برنامه‌ریزی و کنترل پروژه، کارشناس دفتر فنی، سرپرست اجرا، کارشناس اجرا، حسابداری، واحد مکانیک، واحد برق، اداری و مالی، کارمند اداری، تدارکات، کنترل کیفیت، سرپرست ایمنی و بهداشت، کارشناس ایمنی و بهداشت، انباردار، نقشه‌بردار، نگهبان، خدمات، تأسیسات، مسئول ماشین‌آلات، تکنسین اجرا، فناوری اطلاعات، سرپرست بچینگ، آزمایشگاه، مهمان
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This becomes the `daily_labor` table, `labor_type = 'indirect'` (staff/overhead)
 - The job title list is a fixed dropdown in the system — seed from this list
-- One row per job title per day. In IPCAS this is entered as a grid inside the daily report form
+- One row per job title per day. In Verona this is entered as a grid inside the daily report form
 
 ---
 
@@ -246,7 +246,7 @@
 
 **Observed equipment types:** بچینگ 1.5 متری اتوماتیک، موتور سیکلت، جرثقیل تا 10 تن، خودرو مزدا-نیسان (and more)
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This is a daily aggregated summary — auto-generated from `daily_equipment` entries
 - One row per equipment type per day
 - `کل = فعال + آماده + غیرفعال + در دست تعمیر` — always validate this constraint
@@ -273,9 +273,9 @@
 | Weather data | Fully populated | Partially populated (some dates blank) |
 | Problems sheet | Rich entries | Has entries but some dates are empty rows |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - The three files together cover the full project timeline — they must all import into the same `daily_activities`, `daily_equipment`, and `daily_labor` tables
-- The column structure difference in ACTIVITY between phases indicates the customer used evolving Excel templates. IPCAS must standardize this into a single consistent form
+- The column structure difference in ACTIVITY between phases indicates the customer used evolving Excel templates. Verona must standardize this into a single consistent form
 - The "Khaneka" sheet in Phase 2 is identical data structure to Phase 1 — confirmed as the same subcontractor tracking sheet
 
 ---
@@ -287,7 +287,7 @@
 **Date range:** 1403/11/14 to 1404/12/08 (330+ sheets)
 **Structure:** One sheet per calendar day, each sheet is a full daily report form
 
-This is the most important file — it defines the complete structure of the daily report that IPCAS must replicate as a digital form.
+This is the most important file — it defines the complete structure of the daily report that Verona must replicate as a digital form.
 
 ---
 
@@ -382,14 +382,14 @@ Rows 63 onwards
 | بلوک | Block | Text |
 | طبقه | Floor | Text |
 
-**Notes for IPCAS digital form:**
+**Notes for Verona digital form:**
 - This section is the most data-rich — typically 15–25 activities per day
 - Each row maps to one `daily_activities` record
-- The activity description is free-text but should be linkable to a WBS activity in IPCAS
-- `نام پیمانکار` is free-text in Excel; in IPCAS it should be a FK to the subcontractors table
+- The activity description is free-text but should be linkable to a WBS activity in Verona
+- `نام پیمانکار` is free-text in Excel; in Verona it should be a FK to the subcontractors table
 - The form should allow attaching site photos to individual activity rows
 
-**IPCAS Implementation Notes — Complete Daily Report:**
+**Verona Implementation Notes — Complete Daily Report:**
 - The daily report is a single-page form with 5 sections submitted once per day per site
 - Recommended digital flow: each section can be saved independently (partial save), with final submit locking the form for approval
 - The fixed job title lists (Section A & B) should be seeded from this document as system defaults
@@ -445,9 +445,9 @@ This is the **civil/structural discipline sub-report** — submitted separately 
 
 **Observed civil activities:** اجرای دیوار داخلی کناف، اجرای سازه 3D پنل، آزمایشگاه و بچینگ، نصب وال‌پست جان‌پناه بام، جوشکاری، نصب قاب پنجره، نصب پله داربست، کمک نقشه‌بردار جابجایی نبشی رامکا
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This is a **discipline sub-report** that feeds into the main daily report
-- The `درصد اجرا` (execution percentage) column is unique to this file — not present in the main daily report. Include it in the IPCAS civil sub-report form.
+- The `درصد اجرا` (execution percentage) column is unique to this file — not present in the main daily report. Include it in the Verona civil sub-report form.
 - Submitter: site civil supervisor (role: `site_supervisor` with discipline = `civil`)
 - After approval by civil supervisor, data feeds into the master `daily_activities` table
 - The `استاد کار` (foreman count) and `کارگر` (laborer count) as separate columns is more granular than the main report — preserve both in the database
@@ -493,7 +493,7 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 - No `درصد اجرا` column
 - Shift is recorded as an integer (1, 2, 3) not text
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Same database table as civil activities — `daily_activities` with `discipline = 'electrical'`
 - The absence of `قطعه` suggests electrical crews work across lots and only reference block numbers — make `قطعه` optional in the form
 - Crew names like `رضایی` match subcontractor names in the main daily report — confirm FK linkage
@@ -534,10 +534,10 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 
 **Observed materials:** سیمان، شن نخودی، شن بادامی، ماسه شسته، آرماتور 10/12/14/16/18/25
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Each row is one material in one location/block type
 - The repeating request columns (درخواست 1, 2, 3…) are a normalized purchase request sequence
-- In IPCAS this becomes: one `material` record + multiple `purchase_requests` linked to it
+- In Verona this becomes: one `material` record + multiple `purchase_requests` linked to it
 - This sheet is the source for the Procurement module's "Material Needs" view
 
 ---
@@ -564,7 +564,7 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 | تجهیز کارگاه | Site setup column | (varies) | |
 | قطعه 12 — بلوک 1, 2… | Per-block columns | Numeric | Consumption per block |
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This is the core **Material Balance** view: Estimated → Requested → Received → Consumed
 - Each column group maps to the `inventory_transactions` table
 - The per-block breakdown confirms that material tracking is at the block level, not just site-wide
@@ -577,7 +577,7 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 
 **Purpose:** Same structure as ابنیه sheet but for electrical and mechanical materials respectively.
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - The material balance module must support filtering by discipline (civil / electrical / mechanical)
 - The `discipline` field on `materials` or on the WBS linkage handles this
 
@@ -587,10 +587,10 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 
 **Purpose:** Financial summary of material costs — links quantity consumed to unit price to give total material expenditure.
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This sheet connects the Material module to the Cost Control module
 - Material cost = `مقدار خارج شده × نرخ واحد`
-- In IPCAS this is computed automatically from `inventory_transactions.unit_cost`
+- In Verona this is computed automatically from `inventory_transactions.unit_cost`
 
 ---
 
@@ -598,13 +598,13 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 
 **Purpose:** Room-level material request list for final fit-out stage.
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Sub-level of procurement — requests at residential unit level rather than block level
 - Relevant when the project enters finishing/handover phase
 
 ---
 
-**Overall Notes for IPCAS Material Module:**
+**Overall Notes for Verona Material Module:**
 - The balance formula across all sheets: `موجودی = وارده − خارج شده` — auto-compute, never manual entry
 - Alert threshold: when `موجودی < حداقل مجاز` (minimum stock level), fire a materials shortage alert
 - The three discipline sheets (civil, electrical, mechanical) should be tabs/filters in one unified material balance view
@@ -654,14 +654,14 @@ This is the **electrical/MEP discipline sub-report** — identical structure to 
 - Start and end times sometimes blank even when duration is filled
 - Some requests show manager approval without supervisor approval (approval chain skipped)
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - This maps to an `overtime_requests` table in the Human Resources module
 - The approval workflow is: Draft → Supervisor Approved → Manager Approved → Finalized
 - `مدت ساعت تأییدشده` may be different from `مدت اضافه‌کاری` — store both and flag discrepancies
 - Requesting unit should be a FK to the department/unit master
 - Employee name should be a FK to `users` table
-- IPCAS should enforce: `start_time` and `end_time` are both required if duration is entered
-- The "Email Address" column (Google Forms) is replaced by user authentication in IPCAS
+- Verona should enforce: `start_time` and `end_time` are both required if duration is entered
+- The "Email Address" column (Google Forms) is replaced by user authentication in Verona
 
 **Database table: `overtime_requests`**
 
@@ -732,12 +732,12 @@ created_at        TIMESTAMPTZ
 - `همکار جایگزین` sometimes blank even for mission type
 - Security approval often blank (appears optional in practice for short missions)
 
-**Notes for IPCAS:**
+**Notes for Verona:**
 - Maps to a `leave_requests` table in the Human Resources module
 - `نوع درخواست` determines which fields are required: `ماموریت` requires `موضوع مأموریت`; `ساعتی` requires exact times
-- `همکار جایگزین` should be a FK to `users` — a required field in IPCAS (currently unenforced in Excel)
+- `همکار جایگزین` should be a FK to `users` — a required field in Verona (currently unenforced in Excel)
 - Site security approval (`تایید حراست کارگاه`) should be a separate approval step triggered only when request type = `ماموریت`
-- Start and end should be separate date + time fields (not concatenated) in IPCAS to avoid the data quality issues seen here
+- Start and end should be separate date + time fields (not concatenated) in Verona to avoid the data quality issues seen here
 
 **Database table: `leave_requests`**
 
@@ -765,7 +765,7 @@ created_at            TIMESTAMPTZ
 
 ---
 
-## Cross-File Relationships & IPCAS Module Mapping
+## Cross-File Relationships & Verona Module Mapping
 
 ```
                     ┌─────────────────────────┐

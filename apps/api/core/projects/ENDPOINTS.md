@@ -1,6 +1,6 @@
 # Projects Endpoints
 
-This module handles the core project management functionality within IPCAS, including projects, project members, roles, templates, and dynamic data tables.
+This module handles the core project management functionality within Verona, including projects, project members, roles, templates, and dynamic data tables.
 
 ## Base URL: `/api/v1/projects/`
 

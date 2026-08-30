@@ -34,6 +34,9 @@ def attach_creator_as_member(*, project: Project, creator: User) -> ProjectMembe
 def create_project_with_creator(*, creator: User, **project_fields) -> Project:
     project = Project.objects.create(**project_fields)
     attach_creator_as_member(project=project, creator=creator)
+    from procurement.services.workshop_block_service import ensure_workshop_block
+
+    ensure_workshop_block(project, created_by=creator)
     return project
 
 
