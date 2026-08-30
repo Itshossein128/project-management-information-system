@@ -585,7 +585,7 @@ CREATE TABLE alert_log (
 
 ### 3.1 Conventions
 
-- Base URL: `https://api.ipcas.io/v1`
+- Base URL: `https://api.velora.io/v1`
 - Auth: Bearer JWT (`Authorization: Bearer <token>`)
 - Dates: ISO 8601 (`2025-01-15`)
 - Amounts: always in the project's base currency as a numeric string to avoid float drift
