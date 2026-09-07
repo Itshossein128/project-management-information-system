@@ -88,7 +88,7 @@ function Content() {
         },
       },
       {
-        element: "[data-tour='offline-indicator']",
+        element: "[data-tour='manpower-actions']",
         popover: {
           title: t("tour.projectManpower.step2Title"),
           description: t("tour.projectManpower.step2Desc"),
@@ -304,7 +304,7 @@ function Content() {
         </table>
       </div>
 
-      <div className='flex items-center gap-2' data-tour="offline-indicator">
+      <div className='flex items-center gap-2' data-tour="manpower-actions">
         <Button
           type='button'
           variant='secondary'

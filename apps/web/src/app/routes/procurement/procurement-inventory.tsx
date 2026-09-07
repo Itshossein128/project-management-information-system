@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -12,6 +14,27 @@ import { useToast } from "@/components/ui/toast";
 import { Drawer } from "@/components/ui/drawer";
 
 function ProcurementInventoryContent() {
+  const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-inventory",
+    steps: [
+      {
+        element: "[data-tour='inventory-block-select']",
+        popover: {
+          title: t("tour.procurementInventory.step1Title"),
+          description: t("tour.procurementInventory.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-stock']",
+        popover: {
+          title: t("tour.procurementInventory.step2Title"),
+          description: t("tour.procurementInventory.step2Desc"),
+        },
+      },
+    ],
+  });
+
   const { projectId, project } = useProject();
   const qc = useQueryClient();
   const toast = useToast();
@@ -52,35 +75,45 @@ function ProcurementInventoryContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="انبارداری بلوکی" subtitle={project?.project_name} />
-      
-      <div className="bg-card border border-border p-4 rounded-lg">
+      <div className="flex items-center justify-between">
+        <PageHeader title="انبارداری بلوکی" subtitle={project?.project_name} />
+        <ProductTourButton onClick={startTour} />
+      </div>
+
+      <div className="bg-card border border-border p-4 rounded-lg" data-tour="inventory-block-select">
         <label className="flex flex-col gap-2 text-sm max-w-sm">
           <span className="font-medium">انتخاب بلوک/فاز پروژه</span>
-          <select 
-            className="rounded-md border px-3 py-2" 
-            value={selectedBlock} 
+          <select
+            className="rounded-md border px-3 py-2"
+            value={selectedBlock}
             onChange={(e) => setSelectedBlock(e.target.value)}
           >
             <option value="">برای مشاهده انبار، یک بلوک انتخاب کنید...</option>
-            {blocks.map((b: any) => <option key={b.id} value={b.id}>{b.block_code} - {b.block_name}</option>)}
+            {blocks.map((b: any) => (
+              <option key={b.id} value={b.id}>
+                {b.block_code} - {b.block_name}
+              </option>
+            ))}
           </select>
         </label>
       </div>
 
-      {selectedBlock && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">موجودی و تخصیص‌ها</h3>
-          
-          {isLoading ? (
-            <LoadingSkeleton rows={5} />
-          ) : isError ? (
-            <QueryErrorState onRetry={() => void refetch()} />
-          ) : stock.length === 0 ? (
-            <div className="p-8 text-center border rounded-lg bg-muted/20">
-              هیچ ورودی انباری (GRN) برای این بلوک ثبت نشده است.
-            </div>
-          ) : (
+      <div className="space-y-4" data-tour="inventory-stock">
+        {!selectedBlock ? (
+          <div className="p-8 text-center border rounded-lg bg-muted/20 text-sm text-muted-foreground">
+            برای مشاهده موجودی و صدور حواله، ابتدا یک بلوک انتخاب کنید.
+          </div>
+        ) : isLoading ? (
+          <LoadingSkeleton rows={5} />
+        ) : isError ? (
+          <QueryErrorState onRetry={() => void refetch()} />
+        ) : stock.length === 0 ? (
+          <div className="p-8 text-center border rounded-lg bg-muted/20">
+            هیچ ورودی انباری (GRN) برای این بلوک ثبت نشده است.
+          </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium">موجودی و تخصیص‌ها</h3>
             <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm text-start">
                 <thead className="bg-muted/50">
@@ -104,9 +137,9 @@ function ProcurementInventoryContent() {
                       <td className="px-3 py-2 text-warning-600">{item.issued_qty}</td>
                       <td className="px-3 py-2 text-success-700 font-bold">{item.available_qty}</td>
                       <td className="px-3 py-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
+                        <Button
+                          size="sm"
+                          variant="outline"
                           disabled={item.available_qty <= 0}
                           onClick={() => setIssueDrawer(item)}
                         >
@@ -118,9 +151,9 @@ function ProcurementInventoryContent() {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-      )}
+          </>
+        )}
+      </div>
 
       <Drawer
         isOpen={!!issueDrawer}
@@ -136,19 +169,22 @@ function ProcurementInventoryContent() {
           <div className="space-y-6">
             <div className="bg-warning-50 p-4 rounded-md border border-warning-200 text-warning-900 text-sm">
               <p className="font-semibold mb-2">توجه (قانون Hard Stop):</p>
-              <p>مجموع مقدار حواله نمی‌تواند از موجودی واقعی تخصیص این متریال برای کد <strong>{issueDrawer.mr_tag}</strong> بیشتر باشد.</p>
+              <p>
+                مجموع مقدار حواله نمی‌تواند از موجودی واقعی تخصیص این متریال برای کد{" "}
+                <strong>{issueDrawer.mr_tag}</strong> بیشتر باشد.
+              </p>
               <p className="mt-2 font-mono">موجودی مجاز: {issueDrawer.available_qty}</p>
             </div>
-            
+
             <label className="flex flex-col gap-1 text-sm">
               <span>مقدار مصرف (Issue Quantity)</span>
-              <input 
-                type="number" 
-                step="any" 
+              <input
+                type="number"
+                step="any"
                 max={issueDrawer.available_qty}
-                className="rounded-md border px-3 py-2" 
-                value={issueQty} 
-                onChange={(e: any) => setIssueQty(e.target.value)} 
+                className="rounded-md border px-3 py-2"
+                value={issueQty}
+                onChange={(e: any) => setIssueQty(e.target.value)}
               />
             </label>
           </div>

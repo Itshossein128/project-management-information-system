@@ -22,13 +22,26 @@ interface UseProductTourOptions {
 export function useProductTour({ tourId, steps, autoStart = true }: UseProductTourOptions) {
   const { t, i18n } = useTranslation();
   const driverObj = useRef<Driver | null>(null);
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
 
   const startTour = useCallback(() => {
-    if (!steps || steps.length === 0) return;
+    const currentSteps = stepsRef.current;
+    if (!currentSteps || currentSteps.length === 0) return;
+
+    // Skip steps whose targets are not in the DOM yet (avoids empty popovers).
+    const availableSteps = currentSteps.filter((step) => {
+      try {
+        return Boolean(document.querySelector(step.element));
+      } catch {
+        return false;
+      }
+    });
+    if (availableSteps.length === 0) return;
 
     const rtl = isRTL(i18n.language);
 
-    const formattedSteps: DriveStep[] = steps.map((step) => ({
+    const formattedSteps: DriveStep[] = availableSteps.map((step) => ({
       element: step.element,
       popover: {
         title: step.popover.title,
@@ -37,6 +50,10 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
         align: step.popover.align || "start",
       },
     }));
+
+    if (driverObj.current) {
+      driverObj.current.destroy();
+    }
 
     const driverInstance = driver({
       showProgress: true,
@@ -57,24 +74,29 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
 
     driverObj.current = driverInstance;
     driverInstance.drive();
-  }, [tourId, steps, i18n.language, t]);
+  }, [tourId, i18n.language, t]);
 
   useEffect(() => {
     if (!autoStart) return;
 
     try {
       const hasSeen = localStorage.getItem(`tour_seen_${tourId}`);
-      if (!hasSeen) {
-        // Small delay to ensure DOM elements are fully mounted
-        const timer = setTimeout(() => {
-          startTour();
-        }, 600);
-        return () => clearTimeout(timer);
-      }
+      if (hasSeen) return;
+
+      const timer = window.setTimeout(() => {
+        startTour();
+      }, 600);
+      return () => window.clearTimeout(timer);
     } catch (e) {
       console.error("Failed to check tour status from localStorage", e);
     }
   }, [tourId, autoStart, startTour]);
+
+  useEffect(() => {
+    return () => {
+      driverObj.current?.destroy();
+    };
+  }, []);
 
   return { startTour };
 }

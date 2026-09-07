@@ -85,14 +85,14 @@ function ReportsDashboardContent() {
     tourId: "procurement-reports",
     steps: [
       {
-        element: "[data-tour='reports-metrics']",
+        element: "[data-tour='reports-tabs']",
         popover: {
           title: t("tour.procurementReports.step1Title"),
           description: t("tour.procurementReports.step1Desc"),
         },
       },
       {
-        element: "[data-tour='reports-tabs']",
+        element: "[data-tour='reports-metrics']",
         popover: {
           title: t("tour.procurementReports.step2Title"),
           description: t("tour.procurementReports.step2Desc"),
@@ -141,9 +141,9 @@ function ReportsDashboardContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between" data-tour="reports-metrics">
-      <PageHeader title={t("pages.procurement.approval.reportsTitle")} subtitle={project.project_name} />
-      <ProductTourButton onClick={startTour} />
+      <div className="flex items-center justify-between">
+        <PageHeader title={t("pages.procurement.approval.reportsTitle")} subtitle={project.project_name} />
+        <ProductTourButton onClick={startTour} />
       </div>
 
       <div className="flex border-b border-border" data-tour="reports-tabs">
@@ -167,7 +167,7 @@ function ReportsDashboardContent() {
         ))}
       </div>
 
-      <div className="pt-4">
+      <div className="pt-4" data-tour="reports-metrics">
         {activeTab === "liquidity" && (
           <div className="space-y-4">
             {loadL ? (

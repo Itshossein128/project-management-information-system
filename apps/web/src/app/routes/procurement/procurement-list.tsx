@@ -136,26 +136,28 @@ function ProcurementListContent() {
             <Button variant="outline">{t("pages.procurement.blocks.manage")}</Button>
           </Link>
         )}
-        {canCreate && (
-          <>
-            <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_NEW}`}>
-              <Button variant="default">{t("pages.procurement.workshop.newBlockRequest")}</Button>
-            </Link>
-            <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_NEW}?scope=workshop`}>
-              <Button variant="outline">{t("pages.procurement.workshop.newWorkshopRequest")}</Button>
-            </Link>
-          </>
-        )}
+        <div className="flex flex-wrap items-center gap-3" data-tour="quick-actions">
+          {canCreate && (
+            <>
+              <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_NEW}`}>
+                <Button variant="default">{t("pages.procurement.workshop.newBlockRequest")}</Button>
+              </Link>
+              <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_NEW}?scope=workshop`}>
+                <Button variant="outline">{t("pages.procurement.workshop.newWorkshopRequest")}</Button>
+              </Link>
+            </>
+          )}
 
-        <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_OFFICER}`}>
-          <Button variant="outline">{t("pages.procurement.workshop.officerDesk")}</Button>
-        </Link>
-        <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_INVENTORY}`}>
-          <Button variant="outline">{t("pages.procurement.workshop.blockInventory")}</Button>
-        </Link>
-        <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_REPORTS}`}>
-          <Button variant="outline">{t("pages.procurement.workshop.reports")}</Button>
-        </Link>
+          <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_OFFICER}`}>
+            <Button variant="outline">{t("pages.procurement.workshop.officerDesk")}</Button>
+          </Link>
+          <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_INVENTORY}`}>
+            <Button variant="outline">{t("pages.procurement.workshop.blockInventory")}</Button>
+          </Link>
+          <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_REPORTS}`}>
+            <Button variant="outline">{t("pages.procurement.workshop.reports")}</Button>
+          </Link>
+        </div>
       </div>
 
       {loadingReqs ? (
@@ -241,7 +243,7 @@ function ProcurementListContent() {
                       <span className="text-xs text-muted-foreground">{t("pages.procurement.approval.noNextApprover")}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2" data-tour="quick-actions">
+                  <td className="px-3 py-2">
                     <Link to={`/${PATHS.PROJECT}/${projectId}/procurement/req/${req.id}`}>
                       <Button size="sm" variant="outline">
                         {t("pages.procurement.workshop.view")}

@@ -330,38 +330,43 @@ function ProcurementBlocksContent() {
         title={t("pages.procurement.blocks.title")}
         subtitle={project.project_name}
         actions={
-          canEdit ? (
-            <Button variant="primary" onClick={openCreate}>
-              {t("pages.procurement.blocks.add")}
-            </Button>
-          ) : undefined
-        }
-      />
-
-      {isLoading ? (
-        <LoadingSkeleton rows={8} />
-      ) : isError ? (
-        <QueryErrorState onRetry={() => void refetch()} />
-      ) : blocks.length === 0 ? (
-        <EmptyState
-          title={t("pages.procurement.blocks.empty")}
-          description={t("pages.procurement.blocks.emptyDescription")}
-          action={
-            canEdit ? (
+          <div className="flex flex-wrap items-center gap-2" data-tour="blocks-overview">
+            <ProductTourButton onClick={startTour} />
+            {canEdit ? (
               <Button variant="primary" onClick={openCreate}>
                 {t("pages.procurement.blocks.add")}
               </Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={blocks}
-          rowKey={(row) => row.id}
-          emptyMessage={t("pages.procurement.blocks.empty")}
-        />
-      )}
+            ) : null}
+          </div>
+        }
+      />
+
+      <div data-tour="blocks-catalog">
+        {isLoading ? (
+          <LoadingSkeleton rows={8} />
+        ) : isError ? (
+          <QueryErrorState onRetry={() => void refetch()} />
+        ) : blocks.length === 0 ? (
+          <EmptyState
+            title={t("pages.procurement.blocks.empty")}
+            description={t("pages.procurement.blocks.emptyDescription")}
+            action={
+              canEdit ? (
+                <Button variant="primary" onClick={openCreate}>
+                  {t("pages.procurement.blocks.add")}
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={blocks}
+            rowKey={(row) => row.id}
+            emptyMessage={t("pages.procurement.blocks.empty")}
+          />
+        )}
+      </div>
 
       <BlockFormModal
         open={formOpen}

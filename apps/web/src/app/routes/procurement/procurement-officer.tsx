@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -8,6 +10,27 @@ import { PATHS } from "~/routeVars";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 
 function OfficerDashboardContent() {
+  const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-officer",
+    steps: [
+      {
+        element: "[data-tour='officer-summary']",
+        popover: {
+          title: t("tour.procurementOfficer.step1Title"),
+          description: t("tour.procurementOfficer.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='officer-cards']",
+        popover: {
+          title: t("tour.procurementOfficer.step2Title"),
+          description: t("tour.procurementOfficer.step2Desc"),
+        },
+      },
+    ],
+  });
+
   const { projectId, project, isLoading } = useProject();
 
   const { data: report, isLoading: loading, isError, refetch } = useQuery({
@@ -23,48 +46,57 @@ function OfficerDashboardContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="داشبورد کارپردازان" subtitle={project.project_name} />
-      
-      <p className="text-sm text-muted-foreground">وضعیت ردیف‌های تخصیص‌یافته به کارپردازان (Line-item Tracking)</p>
+      <div className="flex items-center justify-between">
+        <PageHeader title="داشبورد کارپردازان" subtitle={project.project_name} />
+        <ProductTourButton onClick={startTour} />
+      </div>
 
-      {summaries.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground border border-border rounded-lg bg-card">
-          هیچ آیتمی به کارپردازان تخصیص داده نشده است.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {summaries.map((s: any, idx: number) => (
-            <div key={`${s.assigned_to}-${s.status}-${idx}`} className="bg-card border border-border rounded-lg p-5 space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-semibold">
-                    {s.assigned_to__full_name || `${s.assigned_to__first_name || ""} ${s.assigned_to__last_name || ""}`.trim() || s.assigned_to}
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1">شناسه کاربری: {s.assigned_to}</p>
+      <p className="text-sm text-muted-foreground" data-tour="officer-summary">
+        وضعیت ردیف‌های تخصیص‌یافته به کارپردازان (Line-item Tracking)
+      </p>
+
+      <div data-tour="officer-cards">
+        {summaries.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground border border-border rounded-lg bg-card">
+            هیچ آیتمی به کارپردازان تخصیص داده نشده است.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {summaries.map((s: any, idx: number) => (
+              <div key={`${s.assigned_to}-${s.status}-${idx}`} className="bg-card border border-border rounded-lg p-5 space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-semibold">
+                      {s.assigned_to__full_name ||
+                        `${s.assigned_to__first_name || ""} ${s.assigned_to__last_name || ""}`.trim() ||
+                        s.assigned_to}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-1">شناسه کاربری: {s.assigned_to}</p>
+                  </div>
+                  <span className="bg-info-100 text-info-800 text-xs px-2 py-1 rounded-full font-medium">
+                    وضعیت آیتم: {s.status}
+                  </span>
                 </div>
-                <span className="bg-info-100 text-info-800 text-xs px-2 py-1 rounded-full font-medium">
-                  وضعیت آیتم: {s.status}
-                </span>
+
+                <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-md">
+                  <div>
+                    <p className="text-muted-foreground text-xs mb-1">تعداد ردیف‌ها</p>
+                    <p className="font-medium text-lg">{s.item_count}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs mb-1">مجموع درخواستی</p>
+                    <p className="font-medium">{s.total_requested}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground text-xs mb-1">خریداری شده تا الان</p>
+                    <p className="font-medium text-success-700">{s.total_purchased || 0}</p>
+                  </div>
+                </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-md">
-                <div>
-                  <p className="text-muted-foreground text-xs mb-1">تعداد ردیف‌ها</p>
-                  <p className="font-medium text-lg">{s.item_count}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs mb-1">مجموع درخواستی</p>
-                  <p className="font-medium">{s.total_requested}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground text-xs mb-1">خریداری شده تا الان</p>
-                  <p className="font-medium text-success-700">{s.total_purchased || 0}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -912,28 +912,42 @@
       "step2Title": "Requisition Cards & Summary",
       "step2Desc": "Browse active and past requisitions with at-a-glance scope badges, dates, and progress percentage.",
       "step3Title": "Quick Actions",
-      "step3Desc": "Click any requisition to view its detailed timeline, review items, or create new material requests."
+      "step3Desc": "Create new block or workshop requisitions, or jump to officer desk, block inventory, and reports."
     },
     "procurementBlocks": {
       "title": "Procurement Blocks Tour",
       "step1Title": "Material Block Catalog",
       "step1Desc": "Organize material requests into structured block categories for streamlined inventory allocation.",
-      "step2Title": "Block Status Overview",
-      "step2Desc": "Monitor block allocation status, associated requisitions, and usage across active project sites."
+      "step2Title": "Add & Manage Blocks",
+      "step2Desc": "Create new blocks and manage status for material categories used across requisitions and inventory."
     },
     "procurementReports": {
       "title": "Procurement Analytics Tour",
-      "step1Title": "Key Performance Metrics",
-      "step1Desc": "Review real-time summaries of total requisitions, pending approvals, completed orders, and fulfillment rates.",
-      "step2Title": "Analytical Charts & Filters",
-      "step2Desc": "Filter procurement analytics by date range, scope, or project to track material delivery performance."
+      "step1Title": "Report Tabs",
+      "step1Desc": "Switch between liquidity, material deviation, and approval audit trail reports.",
+      "step2Title": "Report Results",
+      "step2Desc": "Inspect the selected report’s KPIs, tables, and filters for procurement performance."
+    },
+    "procurementInventory": {
+      "title": "Block Inventory Tour",
+      "step1Title": "Select a Block",
+      "step1Desc": "Choose a project block/phase to load its warehouse allocations and available stock.",
+      "step2Title": "Stock & Issue Actions",
+      "step2Desc": "Review allocated, received, issued, and available quantities, then issue stock with hard-stop limits."
+    },
+    "procurementOfficer": {
+      "title": "Officer Dashboard Tour",
+      "step1Title": "Line-item Tracking",
+      "step1Desc": "This desk shows procurement officer assignments for requisition line items.",
+      "step2Title": "Assignment Cards",
+      "step2Desc": "Each card summarizes an officer’s assigned rows, requested totals, and purchased progress by status."
     },
     "projectManpower": {
       "title": "Project Manpower Tour",
       "step1Title": "Daily Attendance & Trades",
       "step1Desc": "Log daily contractor and site worker manpower across trade categories (electricians, masons, carpenters, etc.).",
-      "step2Title": "Offline Persistence Indicator",
-      "step2Desc": "Manpower entries are stored locally on offline devices and automatically synchronized when connection restores."
+      "step2Title": "Save Day Entries",
+      "step2Desc": "Add custom job titles if needed, then save the day’s direct or indirect manpower counts for the selected date."
     }
   }
 }
