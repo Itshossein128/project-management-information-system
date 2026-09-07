@@ -8,6 +8,7 @@ from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
 from field_reports.models import WeatherLog
 from field_reports.serializers import WeatherLogCreateSerializer, WeatherLogSerializer
+from field_reports.services.weather_log import check_weather_log_conflict
 
 
 @extend_schema_view(
@@ -47,15 +48,8 @@ class WeatherLogViewSet(ProjectScopedViewSet):
             qs = qs.order_by('-log_date')
         return qs
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer):
         log_date = serializer.validated_data['log_date']
         project_id = self.get_project_id()
-
-        if WeatherLog.objects.filter(project_id=project_id, log_date=log_date).exists():
-            raise ConflictError('گزارش جوی برای این تاریخ قبلاً ثبت شده است')
-
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        check_weather_log_conflict(project_id, log_date)
+        super().perform_create(serializer)
