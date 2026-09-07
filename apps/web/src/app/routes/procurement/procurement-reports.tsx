@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
@@ -79,6 +81,26 @@ function AuditLogTable({
 
 function ReportsDashboardContent() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-reports",
+    steps: [
+      {
+        element: "[data-tour='reports-metrics']",
+        popover: {
+          title: t("tour.procurementReports.step1Title"),
+          description: t("tour.procurementReports.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='reports-tabs']",
+        popover: {
+          title: t("tour.procurementReports.step2Title"),
+          description: t("tour.procurementReports.step2Desc"),
+        },
+      },
+    ],
+  });
+
   const { projectId, project } = useProject();
   const [activeTab, setActiveTab] = useState("liquidity");
   const [requisitionFilter, setRequisitionFilter] = useState("");
@@ -119,9 +141,12 @@ function ReportsDashboardContent() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between" data-tour="reports-metrics">
       <PageHeader title={t("pages.procurement.approval.reportsTitle")} subtitle={project.project_name} />
+      <ProductTourButton onClick={startTour} />
+      </div>
 
-      <div className="flex border-b border-border">
+      <div className="flex border-b border-border" data-tour="reports-tabs">
         {[
           { id: "liquidity", label: t("pages.procurement.approval.tabLiquidity") },
           { id: "deviation", label: t("pages.procurement.approval.tabDeviation") },

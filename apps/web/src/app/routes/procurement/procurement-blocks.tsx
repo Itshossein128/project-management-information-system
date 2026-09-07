@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
@@ -197,6 +199,26 @@ function BlockFormModal({
 
 function ProcurementBlocksContent() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-blocks",
+    steps: [
+      {
+        element: "[data-tour='blocks-catalog']",
+        popover: {
+          title: t("tour.procurementBlocks.step1Title"),
+          description: t("tour.procurementBlocks.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='blocks-overview']",
+        popover: {
+          title: t("tour.procurementBlocks.step2Title"),
+          description: t("tour.procurementBlocks.step2Desc"),
+        },
+      },
+    ],
+  });
+
   const toast = useToast();
   const qc = useQueryClient();
   const { projectId, project, isLoading: projectLoading } = useProject();

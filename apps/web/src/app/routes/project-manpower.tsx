@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -75,6 +77,26 @@ function rowsForCategory(
 
 function Content() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "project-manpower",
+    steps: [
+      {
+        element: "[data-tour='manpower-table']",
+        popover: {
+          title: t("tour.projectManpower.step1Title"),
+          description: t("tour.projectManpower.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='offline-indicator']",
+        popover: {
+          title: t("tour.projectManpower.step2Title"),
+          description: t("tour.projectManpower.step2Desc"),
+        },
+      },
+    ],
+  });
+
 
   const { projectId } = useProject();
   const toast = useToast();
@@ -171,6 +193,9 @@ function Content() {
 
   return (
     <div className='space-y-4'>
+      <div className="flex items-center justify-end">
+        <ProductTourButton onClick={startTour} />
+      </div>
       <JalaliDatePicker
         name='manpower_date'
         label='تاریخ'
@@ -194,7 +219,7 @@ function Content() {
         </Button>
       </div>
 
-      <div className='overflow-x-auto rounded-lg border border-border'>
+      <div className='overflow-x-auto rounded-lg border border-border' data-tour="manpower-table">
         <table className='w-full min-w-[520px] text-sm'>
           <thead>
             <tr className='bg-muted/50 text-muted-foreground'>
@@ -279,7 +304,7 @@ function Content() {
         </table>
       </div>
 
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2' data-tour="offline-indicator">
         <Button
           type='button'
           variant='secondary'

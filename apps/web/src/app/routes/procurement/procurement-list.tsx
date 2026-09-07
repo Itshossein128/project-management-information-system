@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router";
@@ -26,6 +28,33 @@ function ScopeBadge({ scope }: { scope: RequisitionScope }) {
 
 function ProcurementListContent() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-list",
+    steps: [
+      {
+        element: "[data-tour='list-filters']",
+        popover: {
+          title: t("tour.procurementList.step1Title"),
+          description: t("tour.procurementList.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisitions-table']",
+        popover: {
+          title: t("tour.procurementList.step2Title"),
+          description: t("tour.procurementList.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='quick-actions']",
+        popover: {
+          title: t("tour.procurementList.step3Title"),
+          description: t("tour.procurementList.step3Desc"),
+        },
+      },
+    ],
+  });
+
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_procurement");
@@ -58,9 +87,12 @@ function ProcurementListContent() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
       <PageHeader title={t("pages.procurement.workshop.listTitle")} subtitle={project.project_name} />
+      <ProductTourButton onClick={startTour} />
+      </div>
 
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3" data-tour="list-filters">
         <label className="flex flex-col gap-1 text-sm">
           <span>{t("pages.procurement.workshop.filterScope")}</span>
           <select className="rounded-md border px-3 py-2" value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value)}>
@@ -133,7 +165,7 @@ function ProcurementListContent() {
       ) : requisitions.length === 0 ? (
         <p className="p-8 text-center text-muted-foreground">{t("pages.procurement.empty")}</p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border" data-tour="requisitions-table">
           <table className="w-full text-sm text-start">
             <thead className="bg-muted/50">
               <tr>
@@ -209,7 +241,7 @@ function ProcurementListContent() {
                       <span className="text-xs text-muted-foreground">{t("pages.procurement.approval.noNextApprover")}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2" data-tour="quick-actions">
                     <Link to={`/${PATHS.PROJECT}/${projectId}/procurement/req/${req.id}`}>
                       <Button size="sm" variant="outline">
                         {t("pages.procurement.workshop.view")}

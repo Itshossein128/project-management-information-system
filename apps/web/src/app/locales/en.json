@@ -876,5 +876,64 @@
   },
   "dialog": {
     "close": "Close"
+  },
+  "tour": {
+    "next": "Next →",
+    "prev": "← Prev",
+    "done": "Got it",
+    "buttonLabel": "Tour",
+    "buttonTitle": "Start Product Tour",
+    "procurementNew": {
+      "title": "New Requisition Tour",
+      "step1Title": "Requisition Scope",
+      "step1Desc": "Choose whether this requisition is for a specific Project or a Workshop/Warehouse operation. Workshop scope skips specific site approval stages.",
+      "step2Title": "Material Request Blocks",
+      "step2Desc": "Select material block templates or search items to populate requested materials efficiently.",
+      "step3Title": "Requested Items Table",
+      "step3Desc": "Specify quantities, units, required dates, and custom notes for each material request line item.",
+      "step4Title": "Submit Requisition",
+      "step4Desc": "Review your entered requisition details and click submit to kick off the multi-stage approval workflow."
+    },
+    "procurementDetail": {
+      "title": "Requisition Detail Tour",
+      "step1Title": "Workflow Timeline Stepper",
+      "step1Desc": "Track real-time progress across approval stages: green for completed, blue for current stage, gray for skipped or pending steps.",
+      "step2Title": "Requisition Overview",
+      "step2Desc": "View key metadata including requisition number, scope, creation date, requester, and current workflow status.",
+      "step3Title": "Line Items Breakdown",
+      "step3Desc": "Inspect detailed item lists, quantities, estimations, and fulfillment status for this request.",
+      "step4Title": "Approval Actions",
+      "step4Desc": "Authorized reviewers can approve, reject, or request revisions directly from this action panel."
+    },
+    "procurementList": {
+      "title": "Requisitions List Tour",
+      "step1Title": "Search & Status Filters",
+      "step1Desc": "Quickly filter requisitions by status (e.g. pending approval, approved, rejected) or search by requisition number.",
+      "step2Title": "Requisition Cards & Summary",
+      "step2Desc": "Browse active and past requisitions with at-a-glance scope badges, dates, and progress percentage.",
+      "step3Title": "Quick Actions",
+      "step3Desc": "Click any requisition to view its detailed timeline, review items, or create new material requests."
+    },
+    "procurementBlocks": {
+      "title": "Procurement Blocks Tour",
+      "step1Title": "Material Block Catalog",
+      "step1Desc": "Organize material requests into structured block categories for streamlined inventory allocation.",
+      "step2Title": "Block Status Overview",
+      "step2Desc": "Monitor block allocation status, associated requisitions, and usage across active project sites."
+    },
+    "procurementReports": {
+      "title": "Procurement Analytics Tour",
+      "step1Title": "Key Performance Metrics",
+      "step1Desc": "Review real-time summaries of total requisitions, pending approvals, completed orders, and fulfillment rates.",
+      "step2Title": "Analytical Charts & Filters",
+      "step2Desc": "Filter procurement analytics by date range, scope, or project to track material delivery performance."
+    },
+    "projectManpower": {
+      "title": "Project Manpower Tour",
+      "step1Title": "Daily Attendance & Trades",
+      "step1Desc": "Log daily contractor and site worker manpower across trade categories (electricians, masons, carpenters, etc.).",
+      "step2Title": "Offline Persistence Indicator",
+      "step2Desc": "Manpower entries are stored locally on offline devices and automatically synchronized when connection restores."
+    }
   }
 }
