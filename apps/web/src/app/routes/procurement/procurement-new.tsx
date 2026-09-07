@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
@@ -12,6 +14,40 @@ import { useToast } from "@/components/ui/toast";
 
 function ProcurementNewContent() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-new",
+    steps: [
+      {
+        element: "[data-tour='requisition-scope']",
+        popover: {
+          title: t("tour.procurementNew.step1Title"),
+          description: t("tour.procurementNew.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='material-blocks']",
+        popover: {
+          title: t("tour.procurementNew.step2Title"),
+          description: t("tour.procurementNew.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='items-table']",
+        popover: {
+          title: t("tour.procurementNew.step3Title"),
+          description: t("tour.procurementNew.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='submit-requisition']",
+        popover: {
+          title: t("tour.procurementNew.step4Title"),
+          description: t("tour.procurementNew.step4Desc"),
+        },
+      },
+    ],
+  });
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const toast = useToast();
@@ -91,17 +127,20 @@ function ProcurementNewContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={
-          scope === "workshop"
-            ? t("pages.procurement.workshop.newTitle")
-            : t("pages.procurement.workshop.newBlockTitle")
-        }
-        subtitle={project.project_name}
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title={
+            scope === "workshop"
+              ? t("pages.procurement.workshop.newTitle")
+              : t("pages.procurement.workshop.newBlockTitle")
+          }
+          subtitle={project.project_name}
+        />
+        <ProductTourButton onClick={startTour} />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-8 rounded-lg border border-border bg-card p-6">
-        <fieldset className="space-y-3">
+        <fieldset className="space-y-3" data-tour="requisition-scope">
           <legend className="text-sm font-medium">{t("pages.procurement.workshop.scopeLabel")}</legend>
           <div className="flex flex-wrap gap-4">
             <label className="flex items-center gap-2 text-sm">
@@ -143,7 +182,7 @@ function ProcurementNewContent() {
           </div>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2" data-tour="material-blocks">
           {scope === "block" && (
             <label className="flex flex-col gap-1 text-sm">
               <span>{t("pages.procurement.workshop.blockField")}</span>
@@ -197,7 +236,7 @@ function ProcurementNewContent() {
           </label>
         )}
 
-        <div>
+        <div data-tour="items-table">
           <h3 className="mb-4 text-lg font-medium">{t("pages.procurement.workshop.itemsTitle")}</h3>
           <div className="space-y-4">
             {items.map((item, idx) => (
@@ -275,7 +314,7 @@ function ProcurementNewContent() {
           <textarea className="rounded-md border px-3 py-2" rows={3} value={notes} onChange={(e: any) => setNotes(e.target.value)} />
         </label>
 
-        <div className="flex gap-4 border-t border-border pt-4">
+        <div className="flex gap-4 border-t border-border pt-4" data-tour="submit-requisition">
           <Button type="submit" variant="default" disabled={createMut.isPending}>
             {t("pages.procurement.workshop.saveDraft")}
           </Button>

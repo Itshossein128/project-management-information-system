@@ -1,3 +1,5 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -93,6 +95,40 @@ function ApprovalLogEntry({ log }: { log: ApprovalLog }) {
 
 function ProcurementDetailContent() {
   const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-detail",
+    steps: [
+      {
+        element: "[data-tour='workflow-stepper']",
+        popover: {
+          title: t("tour.procurementDetail.step1Title"),
+          description: t("tour.procurementDetail.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisition-overview']",
+        popover: {
+          title: t("tour.procurementDetail.step2Title"),
+          description: t("tour.procurementDetail.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='line-items-table']",
+        popover: {
+          title: t("tour.procurementDetail.step3Title"),
+          description: t("tour.procurementDetail.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='approval-actions']",
+        popover: {
+          title: t("tour.procurementDetail.step4Title"),
+          description: t("tour.procurementDetail.step4Desc"),
+        },
+      },
+    ],
+  });
+
   const { projectId, project } = useProject();
   const { reqId } = useParams();
   const qc = useQueryClient();
@@ -155,17 +191,22 @@ function ProcurementDetailContent() {
 
   return (
     <div className="space-y-8">
-      <PageHeader 
-        title={`${t("pages.procurement.workshop.detailTitle")} ${req.requisition_number}`} 
-        subtitle={`${project.project_name} — ${
-          req.scope === "workshop"
-            ? t("pages.procurement.workshop.badgeWorkshop")
-            : `${t("pages.procurement.workshop.blockColumn")} ${req.block_code}`
-        }`} 
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title={`${t("pages.procurement.workshop.detailTitle")} ${req.requisition_number}`}
+          subtitle={`${project.project_name} — ${
+            req.scope === "workshop"
+              ? t("pages.procurement.workshop.badgeWorkshop")
+              : `${t("pages.procurement.workshop.blockColumn")} ${req.block_code}`
+          }`}
+        />
+        <ProductTourButton onClick={startTour} />
+      </div>
 
       {req.workflow_timeline && req.workflow_timeline.length > 0 ? (
-        <ProcurementWorkflowStepper timeline={req.workflow_timeline} scope={req.scope} status={req.status} />
+        <div data-tour="workflow-stepper">
+          <ProcurementWorkflowStepper timeline={req.workflow_timeline} scope={req.scope} status={req.status} />
+        </div>
       ) : null}
 
       {!isTerminalStatus(req.status) && req.next_approver ? (
@@ -181,7 +222,7 @@ function ProcurementDetailContent() {
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-4 p-4 bg-muted/20 rounded-lg border border-border">
+      <div className="flex flex-wrap gap-4 p-4 bg-muted/20 rounded-lg border border-border" data-tour="requisition-overview">
         <div className="w-full md:w-auto md:flex-1 space-y-1">
           <p className="text-xs text-muted-foreground">{t("pages.procurement.workshop.scopeColumn")}</p>
           <p className="font-medium">
@@ -208,7 +249,7 @@ function ProcurementDetailContent() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4" data-tour="line-items-table">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">آیتم‌های درخواست</h3>
           {canPartialApprove && (
@@ -271,7 +312,7 @@ function ProcurementDetailContent() {
           </div>
         )}
 
-      <div className="flex gap-4 border-t border-border pt-4">
+      <div className="flex gap-4 border-t border-border pt-4" data-tour="approval-actions">
         {req.status === 'draft' && (
           <Button variant="default" onClick={() => actionMut.mutate({ action: 'submit', msg: '' })} disabled={actionMut.isPending}>
             ارسال برای بررسی فنی (Submit)
