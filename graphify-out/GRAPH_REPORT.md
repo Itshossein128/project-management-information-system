@@ -1,76 +1,81 @@
-# Graph Report - building-management  (2026-08-30)
+# Graph Report - building-management  (2026-09-02)
 
 ## Corpus Check
-- 59 files · ~541,907 words
+- 1214 files · ~542,374 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 8790 nodes · 18725 edges · 776 communities (473 shown, 303 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 471 edges (avg confidence: 0.92)
+- 9469 nodes · 19393 edges · 819 communities (512 shown, 307 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 461 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
+## Graph Freshness
+- Built from commit: `be265948`
+- Run `git rev-parse HEAD` and compare to check if the graph is stale.
+- Run `graphify update .` after code changes (no API cost).
+
 ## Community Hubs (Navigation)
-- offlineDB.ts
-- page-header.tsx
-- business_meta/serializers.py
-- master_data/models.py
+- DailyReportForm.tsx
+- useProject
+- data_views.py
+- projects/models.py
 - HasProjectPermission
 - apiJson
 - test_subcontractors.py
 - queries.ts
 - cn
-- economic/views.py
-- useToast
+- cost_control/models.py
+- toast.tsx
 - routeVars.ts
 - procurement.ts
-- project-economic.tsx
+- چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md
 - contracts/views.py
-- create_wbs_node
-- ProjectScopedViewSet
+- wbs/services.py
+- BarrierLogViewSet
 - progress_views.py
 - activity_views.py
 - contracts/models.py
 - resources/views.py
-- test_workflow_timeline.py
+- workflow_timeline_service.py
 - api-client.ts
-- projects/models.py
+- Activity
 - activities-grid.tsx
 - field_reports/models.py
-- models/__init__.py
-- views/__init__.py
-- ipc_service.py
-- app-shell-header.tsx
+- procurement/admin.py
+- po_views.py
+- cash_flow/models.py
+- root.tsx
 - search
 - search
 - search
-- CanAccessStoredFile
+- tests_unit.py
 - User
 - costs.ts
 - parse_jalali_or_gregorian
 - AlertLog
-- cash_flow/views.py
-- DailyReportDetailSerializer
+- kpi_service.py
+- field_reports/serializers.py
 - RoleViewSet
 - .agents/skills/design-system/scripts/slide_search_core.py
 - .cursor/skills/design-system/scripts/slide_search_core.py
 - .gemini/skills/design-system/scripts/slide_search_core.py
-- ensure_workshop_block
-- weather-log-grid.tsx
-- RequisitionHeader
-- parse_msp_xml
-- project-subcontractors.tsx
-- cashflow.ts
-- project_templates/views.py
-- form/index.ts
-- jalali.py
+- models/__init__.py
+- project-progress.tsx
+- has_procurement_step_role
+- Velora Scope Map
+- project-subcontractor-detail.tsx
+- useToast
+- UUIDModel
+- useAuth
+- 📋 فازهای پیاده‌سازی
 - field_reports/services/__init__.py
-- JalaliDateField
+- sub_reports/models.py
 - inventory/tests.py
-- settings-roles.tsx
+- Excel Forms & Grids Documentation
 - authentication/views.py
 - test_coverage_gaps.py
 - inventory/views.py
-- test_report_views.py
+- TestProcurementReportViews
 - dependencies
 - spacing
 - spacing
@@ -78,13 +83,13 @@
 - full_project.py
 - project.ts
 - Notification
-- requisition_views.py
+- InlineGridTab.tsx
 - wbs/views.py
 - project-create-wizard.tsx
 - UI Styling Skill
 - TestTailwindConfigGenerator
 - test_validators.py
-- field_reports/urls.py
+- daily_report_views.py
 - equipment_utilization.py
 - sidebarItem/view.tsx
 - TestTailwindConfigGenerator
@@ -92,11 +97,11 @@
 - compilerOptions
 - test_cost_control.py
 - msp-import-wizard.tsx
-- modal.tsx
+- excel-import-modal.tsx
 - .agents/skills/design-system/scripts/html-token-validator.py
 - checkers.py
-- extend_schema
-- ProjectViewSet
+- isOfflineDBAvailable
+- business_meta/services.py
 - .cursor/skills/design-system/scripts/html-token-validator.py
 - .gemini/skills/design-system/scripts/html-token-validator.py
 - radius
@@ -107,47 +112,47 @@
 - NotificationBell.tsx
 - Brand Skill System
 - BM25
+- AuditSoftDeleteModel
+- Budget
 - documents/views.py
-- cost_control/models.py
-- CorrespondenceViewSet
 - BaseHRRequestViewSet
 - devDependencies
 - BM25
 - common.sh
 - BM25
 - cost_control/views.py
-- test_approval_engine.py
+- transition
 - TailwindConfigGenerator
 - TailwindConfigGenerator
 - ContractDetailSerializer
 - test_views_extended.py
-- test_risk_matrix_unit.py
+- risk/serializers.py
 - gray
 - Slides Design Skill Reference
 - TailwindConfigGenerator
-- declare_topology
-- alerts/views.py
+- EventPublisher
+- test_sprint8_carryover.py
 - test_hr_api.py
 - color
 - Design System Skill System
 - .agents/skills/design-system/scripts/generate-slide.py
 - fontSize
-- color
-- authentication/services.py
-- rows_url
-- documents/serializers.py
+- gray
+- UsernameOrMobileBackend
+- test_dynamic_rows.py
+- syncService.ts
 - labor_productivity.py
-- TestHRServices
+- طرح اولیه سیستم اتوماسیون یکپارچه کنترل پروژه‌های عمرانی
 - components.json
-- project-personnel-summary.tsx
+- reports.ts
 - .cursor/skills/design-system/scripts/generate-slide.py
 - fontSize
 - .gemini/skills/design-system/scripts/generate-slide.py
 - fontSize
-- gray
+- procurement_service.py
 - color
 - DesignSystemGenerator
-- alerts/tasks.py
+- signals.py
 - TestDailyReportCrud
 - project-documents.tsx
 - color
@@ -159,19 +164,19 @@
 - Brand Asset Management Workflow
 - .agents/skills/design-system/scripts/fetch-background.py
 - test_delivery.py
-- AuditSoftDeleteModel
-- cost_control/serializers.py
+- create_wbs_node
+- projects/views.py
 - consumer.py
 - .cursor/skills/design-system/scripts/fetch-background.py
 - .gemini/skills/design-system/scripts/fetch-background.py
 - .agents/skills/ui-ux-pro-max/scripts/design_system.py
-- test_alert_api.py
-- resolve_resource
+- TestAlertRuleAPI
+- AuditLogMiddleware
 - core/conftest.py
-- EventPublisher
+- handle_daily_report_approved
 - test_weather.py
 - compute_material_balance
-- inventory_lock_service.py
+- business_meta/serializers.py
 - card
 - .cursor/skills/ui-ux-pro-max/scripts/design_system.py
 - scripts
@@ -179,20 +184,20 @@
 - TestShadcnInstaller
 - TestSyncBatch
 - department_activity_data_views.py
-- risk/serializers.py
+- DailyReportViewSet
 - .cursor/skills/design/scripts/icon/generate.py
 - TestShadcnInstaller
 - .gemini/skills/design/scripts/icon/generate.py
 - TestShadcnInstaller
-- UserListView
-- apply_deductions
-- TestApprovalWorkflow
+- generate_snapshot
+- ipc_service.py
+- field_reports/tasks.py
 - get_department_activity_queryset
-- blue
+- 50
 - .agents/skills/brand/scripts/extract-colors.cjs
 - .agents/skills/brand/scripts/validate-asset.cjs
 - search
-- material_consumption_report
+- CanAccessStoredFile
 - Schedule & Progress Module Endpoints
 - _create_activity
 - .cursor/skills/brand/scripts/extract-colors.cjs
@@ -205,7 +210,7 @@
 - Slides Reference Guide
 - Color System Hierarchy
 - .agents/skills/design-system/templates/design-tokens-starter.json
-- cost_pool_service.py
+- wbs-node.tsx
 - ViewsTests
 - TestProjectList
 - tokens/index.ts
@@ -221,8 +226,8 @@
 - ShadcnInstaller
 - .check_shadcn_config
 - .generate_config_string
-- business_meta/permissions.py
-- budget_service.py
+- business_meta/views.py
+- 4. Feature Breakdown
 - TestBlockCRUD
 - .cursor/skills/design-system/scripts/validate-tokens.cjs
 - ShadcnInstaller
@@ -235,14 +240,14 @@
 - .generate_config_string
 - .agents/skills/brand/scripts/inject-brand-context.cjs
 - .agents/skills/design-system/scripts/embed-tokens.cjs
-- primitive
+- duration
 - patch
 - .agents/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - AlertCheckerRegistry
 - service.py
 - TestRiskRegisterAPI
 - get_gantt_data
-- would_create_cycle
+- Color Semantics
 - .cursor/skills/brand/scripts/inject-brand-context.cjs
 - .cursor/skills/design-system/scripts/embed-tokens.cjs
 - primitive
@@ -250,7 +255,7 @@
 - .cursor/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - .gemini/skills/brand/scripts/inject-brand-context.cjs
 - .gemini/skills/design-system/scripts/embed-tokens.cjs
-- primitive
+- duration
 - patch
 - .gemini/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - Unified Design Skill
@@ -261,12 +266,12 @@
 - button
 - ._base_config
 - RoleAwareUserRateThrottle
-- TestAuthenticationAPI
-- extend_schema
+- project-alerts.tsx
+- economic/views.py
 - django_db
 - test_models.py
 - TestLeaveRequestViewSet
-- procurement/admin.py
+- offlineWrite.ts
 - web/package.json
 - use-sticky-form-fields.ts
 - .cursor/skills/design/scripts/logo/generate.py
@@ -281,19 +286,19 @@
 - .agents/skills/brand/scripts/sync-brand-to-tokens.cjs
 - _run
 - BM25
-- AuditLogMiddleware
+- TestWBSServicesExtended
 - Authentication Module
-- config/urls.py
-- hr/views.py
-- TestOvertimeRequestViewSet
-- ItemViewSet
+- risk-events.ts
+- alerts/tasks.py
+- BarriersGrid.tsx
+- item_services.py
 - TestNotificationsApi
 - TestProjectMembersAPI
 - frappe-gantt.d.ts
 - .cursor/skills/brand/scripts/sync-brand-to-tokens.cjs
 - _run
 - BM25
-- Velora Master Engineering Blueprint
+- Sprint 6 Security Audit Report
 - .gemini/skills/brand/scripts/sync-brand-to-tokens.cjs
 - _run
 - BM25
@@ -302,41 +307,41 @@
 - Component Interactive States
 - format_ascii_box
 - TestDocumentsAPI
-- test_approval_e2e.py
+- 6. Sprint Plan (13 Sprints × 2 Weeks)
 - Command
 - TestProcurementWorkflow
 - scripts
 - routes.ts Root Config
 - input
-- format_ascii_box
+- project-manpower.tsx
 - input
 - Logo Design Reference
 - Logo Design Reference
-- IsHrOrAdmin
+- ContractListSerializer
 - test_ratelimit.py
 - test_simulate_api.py
 - TestStandaloneManpower
 - Risk & Barriers Module Endpoints
 - Standalone Customer Docker Stack
 - Django API Service (Dev Stack)
-- Smart Logistics & Procurement PRD
+- سند نیازمندی‌های فنی (PRD): سیستم یکپارچه تدارکات و لجستیک هوشمند (Block-Based Traceability)
 - Slide Layout Patterns
 - Banner Sizes and Styles Reference
-- $type
-- ratelimit_handlers.py
+- 2. Database Schema
+- 3.2 Core Endpoints
 - Daily Field Reports Module
 - inventory/admin.py
-- devDependencies
-- ConflictMergeEditor.tsx
-- Procurement Module Implementation Plan
-- Daily Site Progress Report Ingestion
-- Earned Value Management (EVM) Engine
-- _generate_intelligent_overrides
+- Primitive Tokens
+- offlineDB.ts
+- Component Tokens
+- business_meta/models.py
+- WBS
+- 9. سطح‌بندی دسترسی‌ها
 - Monorepo Migration Plan
 - Canvas Design System
 - CI GitHub Actions Workflow
-- $type
-- radius
+- Velora — Integrated Project Control Automation System
+- format_ascii_box
 - Command
 - Cost Control Module
 - Economic & Cost Module Endpoints
@@ -350,7 +355,7 @@
 - radius
 - Velora Design System Master Spec
 - $type
-- $type
+- resolve_resource
 - radius
 - Icon Design Reference
 - Slides Copywriting Formulas Reference
@@ -362,33 +367,33 @@
 - Icon Design Reference
 - PR Labeler Configuration
 - Brand Guideline Template
-- 50
-- 800
+- LaborCampSerializer
+- 11. روش‌های تخصیص هزینه‌های سرجمع
 - AlertsConfig
 - UserAdmin
 - Contracts API Endpoints
-- test_management_command.py
-- CostPool
+- 21. فرآیند پیشنهادی پیاده‌سازی
+- 5. Engineering Tasks
 - 0010_shiraz_labor_titles.py
 - 0005_seed_field_supervisor.py
-- PermissionCatalogView
+- EventPublisherIntegrationTests
 - Business Setup Routes Chunk
 - 800
 - padding-y
-- Sprint 1-3 UAT Checklist
+- Velora E2E Test Coverage Matrix
 - padding-y
-- Design Master Orchestrator Skill
+- _generate_intelligent_overrides
 - Unified Design Skill Routing
 - Tailwind CSS @theme Directive
 - Local Development Guide
 - .agents/skills/brand/scripts/tests/test_sync_brand_to_tokens.py
 - main
-- destructive-foreground
-- muted
-- primary
-- primary-foreground
-- ring
-- secondary-foreground
+- Sprint 13 UAT Sign-off
+- 25. شاخص‌های کلیدی عملکرد پروژه
+- 17. ساختار پیشنهادی صفحات نرم‌افزار
+- generate_chunk_12.py
+- MaterialRequestViewSet
+- 11. ماژول جریان نقدی
 - .__init__
 - 0003_alert_engine_fields.py
 - 0004_sprint13_alert_types.py
@@ -414,7 +419,7 @@
 - Inventory API & Deprecation Notice
 - main
 - MasterDataConfig
-- 0007_sprint7_permissions.py
+- 10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool
 - NotificationsConfig
 - ProcurementConfig
 - 0002_workshop_scope.py
@@ -441,7 +446,7 @@
 - destructive
 - foreground
 - muted-foreground
-- primary
+- 13. سطوح ورود اطلاعات گذشته
 - primary-hover
 - ring
 - .__init__
@@ -450,11 +455,11 @@
 - .gemini/skills/brand/scripts/tests/test_sync_brand_to_tokens.py
 - main
 - destructive
-- destructive-foreground
-- muted
-- primary-foreground
+- 22. ساختار پیشنهادی فایل Excel ورود اطلاعات افتتاحیه
+- 3. اجزای اصلی این بخش از نرم‌افزار
+- 3. چالش‌های اصلی در پیاده‌سازی سیستم در میانه پروژه
 - ring
-- secondary-foreground
+- lg
 - .__init__
 - .temp_project
 - Auth and Permissions Full-Stack Plan
@@ -462,13 +467,13 @@
 - Messaging Architecture Framework
 - UI Styling Skill Dependencies
 - GitHub Bug Report Issue Template
-- .agents/skills/ui-styling/scripts/tests/test_shadcn_add.py
-- .test_add_components_no_config
+- generate_graph.py
+- xl
 - .test_add_components_already_installed
-- .test_add_all_components_no_config
-- .test_list_installed_no_config
-- .test_list_installed_with_components
-- .test_init_default_project_root
+- 0004_seed_roles_permissions.py
+- 50
+- طرح اولیه سیستم کنترل پروژه (بخش دوم- ماژول‌های مالی و تکمیلی ۱۱ تا ۲۶).md
+- 12. ماژول قراردادها
 - .test_add_components_no_components
 - .test_add_breakpoints
 - .test_recommend_plugins
@@ -568,28 +573,28 @@
 - runserver.sh
 - wait-for-postgres.sh
 - auth-role-redirect.spec.ts
-- class-variance-authority
-- @fontsource/vazirmatn
-- frappe-gantt
+- 13. ماژول صورت‌وضعیت‌ها
+- 14. ماژول منابع انسانی
+- 15. ماژول ماشین‌آلات
 - i18next
 - idb
-- isbot
+- 16. ماژول مصالح، کالا و انبار
 - @radix-ui/react-accordion
 - @radix-ui/react-collapsible
 - @radix-ui/react-switch
-- @radix-ui/react-tabs
+- 17. ماژول خرید و تدارکات
 - @radix-ui/react-toggle
-- @radix-ui/react-toggle-group
-- react-date-object
+- 18. ماژول کنترل پیمانکاران جزء
+- 19. ماژول تأخیرات، موانع و ریسک‌ها
 - react-icons
-- react-multi-date-picker
+- 20. ماژول اسناد و مدارک پروژه
 - react-router
 - recharts
 - tailwind-merge
-- @tanstack/react-query
+- 21. ماژول داشبورد و گزارش‌های مدیریتی
 - xlsx
 - @xyflow/react
-- zustand
+- 12. تعریف سطح اطمینان داده‌ها
 - Playwright Test Report
 - Web PWA Icon 192x192
 - Welcome Dark Mode Logo Asset
@@ -615,7 +620,7 @@
 - .test_default_content_paths_react
 - .test_default_content_paths_nextjs
 - .test_add_colors
-- Form 5 Manpower Allocation Architecture Decision
+- 14. تهیه Data Inventory
 - UI data-testid Selector Conventions
 - .test_add_components_already_installed
 - .test_add_components_dry_run
@@ -686,8 +691,50 @@
 - Palette UI Focus Ring Conventions
 - Sentinel Security & Information Leakage Rules
 - Robots.txt Crawl Policy
-- Graphify Extraction Chunks Manifest
+- 15. طراحی جدول Mapping بین حسابداری و PMIS
 - pnpm Monorepo Workspace Configuration
+- 16. ثبت Opening Progress
+- 17. ثبت Opening Cost
+- 18. تطبیق اطلاعات با حسابداری
+- 19. نقش حسابداری و PMIS
+- 4. اصل کلیدی: تعیین تاریخ برش
+- 7. مفهوم Opening Balance در پروژه
+- 800
+- replace_ipcas.py
+- .temp_project
+- muted
+- 1.1.1 فونداسیون
+- 20. الزامات ثبت اطلاعات بعد از تاریخ برش
+- 5. تفکیک داده‌های پروژه به دو گروه اصلی
+- 6. رویکرد صحیح نسبت به اطلاعات گذشته
+- 8. تهیه Snapshot پروژه در تاریخ برش
+- 9. نحوه برخورد با اعداد سرجمع حسابداری
+- foreground
+- muted-foreground
+- primary
+- primary-hover
+- rules/graphify.md
+- .test_add_components_dry_run
+- .test_init_custom_project_root
+- .test_check_shadcn_config_exists
+- .test_check_shadcn_config_not_exists
+- .test_get_installed_components_no_config
+- workflows/graphify.md
+- clsx
+- @fontsource/inter
+- i18next-browser-languagedetector
+- radix-ui
+- @radix-ui/react-checkbox
+- @radix-ui/react-slider
+- @radix-ui/react-tooltip
+- react
+- react-dom
+- react-i18next
+- @react-router/node
+- @react-router/serve
+- workbox-window
+- zod
+- مدل مدیریت و تخصیص نیروی انسانی (Manpower Allocation Model).md
 
 ## God Nodes (most connected - your core abstractions)
 1. `apiJson()` - 268 edges
@@ -717,19 +764,16 @@
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Copilot Custom Agents Suite** — _github_agents_django_api_reviewer_agent_django_api_reviewer, _github_agents_playwright_e2e_agent_jules_e2e_agent, _github_agents_sprint_scope_agent_sprint_scope_guide [EXTRACTED 1.00]
-- **Velora API Core Domain Endpoints** — apps_api_core_contracts_endpoints_contracts_api, apps_api_core_inventory_endpoints_inventory_api, apps_api_core_projects_endpoints_projects_api [EXTRACTED 1.00]
-- **GitHub Wiki Seed Guides** — _github_wiki_seed_architecture_overview_architecture_overview, _github_wiki_seed_github_tools_guide_github_tools_guide, _github_wiki_seed_home_wiki_home, _github_wiki_seed_using_custom_agents_using_custom_agents [EXTRACTED 1.00]
-- **Customer Standalone Local PC Deployment Stack** — customer_readme_customer_pc_deployment, customer_readme_traefik_local_routing, customer_readme_customer_launcher_scripts, docker_compose_customer_standalone_customer_stack, docker_compose_customer_traefik_customer_gateway, docker_compose_customer_postgres_customer_db, docker_compose_customer_redis_customer_cache [EXTRACTED 1.00]
-- **Project Control Progress & EVM Calculation Engine** — docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_اول_کلیات_و_ماژولهای_پایه_۱_تا_۱۰_project_control_system_part1, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_اول_کلیات_و_ماژولهای_پایه_۱_تا_۱۰_wbs_structure_module, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_اول_کلیات_و_ماژولهای_پایه_۱_تا_۱۰_daily_report_automation, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_دوم_ماژولهای_مالی_و_تکمیلی_۱۱_تا_۲۶_project_control_system_part2, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_دوم_ماژولهای_مالی_و_تکمیلی_۱۱_تا_۲۶_ipc_interim_payment_certificates, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_طرح_اولیه_سیستم_کنترل_پروژه_بخش_دوم_ماژولهای_مالی_و_تکمیلی_۱۱_تا_۲۶_cash_flow_forecasting, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_چرخه_اطلاعات_و_عملیات_کنترل_پروژه_بخش_سوم_چرخهها_محاسبات_پیشرفت_و_فرمولها_physical_progress_calculation, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_چرخه_اطلاعات_و_عملیات_کنترل_پروژه_بخش_سوم_چرخهها_محاسبات_پیشرفت_و_فرمولها_evm_earned_value_management, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_سیستم_کنترل_پروژه_و_اتوماسیون_integrated_project_control_system_چرخه_اطلاعات_و_عملیات_کنترل_پروژه_بخش_سوم_چرخهها_محاسبات_پیشرفت_و_فرمولها_schedule_control_indices [INFERRED 0.95]
-- **Block-Based Procurement Traceability & Approval Pipeline** — docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_برنامه_پیادهسازی_ماژول_تدارکات_procurement_implementation_plan_procurement_implementation_plan, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_برنامه_پیادهسازی_ماژول_تدارکات_procurement_implementation_plan_material_requisition_workflow, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_برنامه_پیادهسازی_ماژول_تدارکات_procurement_implementation_plan_purchase_order_tracking, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_نیازمندیهای_سیستم_تدارکات_و_خریدهای_تفکیکشده_mr_traceability_block_based_traceability, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_نیازمندیهای_سیستم_تدارکات_و_خریدهای_تفکیکشده_mr_traceability_inventory_lock_mechanism, docs_طرح_اولیه_و_نیازمندیهای_سیستم_system_requirements_تدارکات_و_درخواستهای_خرید_procurement_requisitions_نیازمندیهای_سیستم_تدارکات_و_خریدهای_تفکیکشده_mr_traceability_sequential_approval_engine [INFERRED 0.95]
 - **Brand Visual Identity Architecture** — agents_skills_brand_references_visual_identity_core_visual_identity_elements, agents_skills_brand_references_color_palette_management_color_system_hierarchy, agents_skills_brand_references_logo_usage_rules_logo_variants, agents_skills_brand_references_typography_specifications_font_stack_hierarchy, agents_skills_brand_skill_brand_strategy_framework [EXTRACTED 1.00]
 - **Three Layer Design Token Flow** — agents_skills_design_system_references_primitive_tokens_primitive_design_values, agents_skills_design_system_references_semantic_tokens_purpose_based_semantic_aliases, agents_skills_design_system_references_component_tokens_component_level_design_tokens, agents_skills_design_system_skill_three_layer_token_architecture [EXTRACTED 1.00]
 - **Brand Identity and Consistency Framework** — _gemini_skills_brand_skill_brand_skill, _gemini_skills_brand_references_approval_checklist_asset_approval_checklist, _gemini_skills_brand_references_asset_organization_asset_organization_guide, _gemini_skills_brand_references_brand_guideline_template_brand_guideline_template, _gemini_skills_brand_references_color_palette_management_color_palette_management, _gemini_skills_brand_references_consistency_checklist_brand_consistency_checklist [EXTRACTED 1.00]
 - **CI and Testing Automation Pipeline** — _github_workflows_ci_ci_workflow, _github_workflows_e2e_e2e_workflow, _github_workflows_integration_smoke_integration_smoke_workflow [EXTRACTED 1.00]
 - **Corporate Identity Program Documentation Suite** — _gemini_skills_design_references_cip_design_cip_design_reference, _gemini_skills_design_references_cip_deliverable_guide_cip_deliverables, _gemini_skills_design_references_cip_style_guide_cip_design_styles, _gemini_skills_design_references_cip_prompt_engineering_cip_mockup_prompt_engineering [EXTRACTED 1.00]
 - **Corporate Identity Program Suite** — _cursor_skills_design_references_cip_design_cip_design_reference, _cursor_skills_design_references_cip_style_guide_cip_style_guide, _cursor_skills_design_references_cip_prompt_engineering_cip_prompt_engineering, _cursor_skills_design_references_cip_deliverable_guide_cip_deliverable_guide [EXTRACTED 1.00]
+- **Copilot Custom Agents Suite** — _github_agents_django_api_reviewer_agent_django_api_reviewer, _github_agents_playwright_e2e_agent_jules_e2e_agent, _github_agents_sprint_scope_agent_sprint_scope_guide [EXTRACTED 1.00]
+- **Customer Standalone Local PC Deployment Stack** — customer_readme_customer_pc_deployment, customer_readme_traefik_local_routing, customer_readme_customer_launcher_scripts, docker_compose_customer_standalone_customer_stack, docker_compose_customer_traefik_customer_gateway, docker_compose_customer_postgres_customer_db, docker_compose_customer_redis_customer_cache [EXTRACTED 1.00]
 - **Design Skills System Hierarchy** — _cursor_skills_design_skill_design_master_skill, _cursor_skills_brand_skill_brand_skill, _cursor_skills_design_system_skill_design_system_skill [EXTRACTED 1.00]
+- **GitHub Wiki Seed Guides** — _github_wiki_seed_architecture_overview_architecture_overview, _github_wiki_seed_github_tools_guide_github_tools_guide, _github_wiki_seed_home_wiki_home, _github_wiki_seed_using_custom_agents_using_custom_agents [EXTRACTED 1.00]
 - **HTML Slides Creation Knowledge Base** — _agents_skills_design_references_slides_html_template_html_slide_template, _agents_skills_design_references_slides_layout_patterns_slides_layout_patterns, _agents_skills_design_references_slides_copywriting_formulas_slides_copywriting_formulas, _agents_skills_design_references_slides_strategies_slide_strategies_reference [EXTRACTED 1.00]
 - **AI Logo Design & Style Architecture** — _gemini_skills_design_references_logo_design_logodesignreference, _gemini_skills_design_references_logo_style_guide_logostyleguide, _gemini_skills_design_references_logo_color_psychology_logocolorpsychology, _gemini_skills_design_references_logo_prompt_engineering_logopromptengineering [EXTRACTED 1.00]
 - **Logo Design Reference Suite** — _cursor_skills_design_references_logo_design_logo_design_reference, _cursor_skills_design_references_logo_style_guide_logo_style_guide, _cursor_skills_design_references_logo_prompt_engineering_logo_prompt_engineering, _cursor_skills_design_references_logo_color_psychology_logo_color_psychology [EXTRACTED 1.00]
@@ -742,6 +786,7 @@
 - **UI Styling and Design System Framework** — _gemini_skills_ui_styling_skill_uistylingskill, _gemini_skills_ui_styling_references_canvas_design_system_canvasdesignsystem, _gemini_skills_ui_styling_references_shadcn_accessibility_shadcnaccessibility [EXTRACTED 1.00]
 - **UI Styling & Tailwind Reference Suite** — _gemini_skills_ui_styling_references_shadcn_components_shadcn_ui_components, _gemini_skills_ui_styling_references_shadcn_theming_shadcn_ui_theming, _gemini_skills_ui_styling_references_tailwind_customization_theme_directive, _gemini_skills_ui_styling_references_tailwind_responsive_mobile_first_design, _gemini_skills_ui_styling_references_tailwind_utilities_utility_classes [EXTRACTED 1.00]
 - **UI Styling Complete Reference System** — _cursor_skills_ui_styling_skill_ui_styling_skill, _cursor_skills_ui_styling_references_shadcn_components_shadcn_component_catalog, _cursor_skills_ui_styling_references_shadcn_theming_shadcn_theming_system, _cursor_skills_ui_styling_references_shadcn_accessibility_shadcn_accessibility_patterns, _cursor_skills_ui_styling_references_tailwind_utilities_tailwind_utility_classes, _cursor_skills_ui_styling_references_tailwind_customization_tailwind_customization, _cursor_skills_ui_styling_references_tailwind_responsive_tailwind_responsive_design, _cursor_skills_ui_styling_references_canvas_design_system_canvas_design_system [EXTRACTED 1.00]
+- **Velora API Core Domain Endpoints** — apps_api_core_contracts_endpoints_contracts_api, apps_api_core_inventory_endpoints_inventory_api, apps_api_core_projects_endpoints_projects_api [EXTRACTED 1.00]
 - **Verona Frontend E2E Playwright Testing Suite** — apps_web_e2e_coverage_map_e2e_coverage_matrix, apps_web_e2e_data_testids_data_testids_catalog [EXTRACTED 1.00]
 - **Brand Governance and Quality Assurance** — agents_skills_brand_references_approval_checklist_brand_compliance_audit, agents_skills_brand_references_consistency_checklist_visual_and_voice_alignment_check, agents_skills_brand_references_update_brand_synchronization_workflow, agents_skills_brand_skill_brand_asset_management_workflow [INFERRED 0.85]
 - **AI Brand Asset Generators Framework** — _agents_skills_design_references_cip_design_gemini_cip_mockup_generation, _agents_skills_design_references_icon_design_gemini_3_1_pro_svg_generation [INFERRED 0.85]
@@ -751,127 +796,127 @@
 - **Traefik Rate Limiting and Route Protection Pipeline** — infra_traefik_dynamic_routes_login_ratelimit, infra_traefik_dynamic_routes_api_write_ratelimit, infra_traefik_dynamic_routes_api_read_ratelimit, infra_traefik_dynamic_routes_api_login_router, infra_traefik_dynamic_routes_api_write_router, infra_traefik_dynamic_routes_api_read_router [INFERRED 0.85]
 - **Visual Communication and Layout Design System** — _cursor_skills_slides_references_layout_patterns_slide_layout_patterns, _cursor_skills_slides_references_slide_strategies_slide_presentation_strategies, _gemini_skills_banner_design_skill_banner_design_skill, _gemini_skills_banner_design_references_banner_sizes_and_styles_banner_sizes_and_styles [INFERRED 0.85]
 
-## Communities (776 total, 303 thin omitted)
+## Communities (819 total, 307 thin omitted)
 
-### Community 0 - "offlineDB.ts"
+### Community 0 - "DailyReportForm.tsx"
+Cohesion: 0.07
+Nodes (52): ActivityRow, approveReport(), base(), batchSaveLabor(), buildQuery(), ConcreteRow, DailyReportDetail, DailyReportListItem (+44 more)
+
+### Community 1 - "useProject"
+Cohesion: 0.05
+Nodes (101): ProjectContext, ProjectContextValue, ProjectProvider(), usePermission(), useProject(), COST_CATEGORIES, CostCategory, costCategoryLabel() (+93 more)
+
+### Community 2 - "data_views.py"
+Cohesion: 0.09
+Nodes (30): DynamicRowDetailView, DynamicRowsExportView, DynamicRowsImportView, DynamicRowsView, get_project_and_table(), parse_row_id(), APIView, extend_schema (+22 more)
+
+### Community 3 - "projects/models.py"
 Cohesion: 0.03
-Nodes (179): useAutoSync(), SaveHeaderResult, useDailyReportForm(), useOnlineStatus(), ActivityRow, approveReport(), base(), batchSaveLabor() (+171 more)
-
-### Community 1 - "page-header.tsx"
-Cohesion: 0.06
-Nodes (68): ProjectContext, ProjectContextValue, ProjectProvider(), CreateProjectPayload, fetchProject(), fetchProjects(), ProjectDetail, ProjectListItem (+60 more)
-
-### Community 2 - "business_meta/serializers.py"
-Cohesion: 0.03
-Nodes (74): IsBusinessSetup, Allow only users in the 'business-setup' group. Can add businesses and control…, create_assignment_for_user(), ProjectMember, DynamicRowDetailView, DynamicRowsExportView, DynamicRowsImportView, DynamicRowsView (+66 more)
-
-### Community 3 - "master_data/models.py"
-Cohesion: 0.04
-Nodes (69): ProjectAdmin, ProjectMemberAdmin, ProjectPositionAdmin, register, TableDefinitionAdmin, Business rules for project member assignments., Command, atomic (+61 more)
+Nodes (83): ProjectAdmin, ProjectMemberAdmin, ProjectPositionAdmin, register, TableDefinitionAdmin, create_assignment_for_user(), ProjectMember, Business rules for project member assignments. (+75 more)
 
 ### Community 4 - "HasProjectPermission"
-Cohesion: 0.05
-Nodes (65): Shared ViewSet mixins for project-scoped form APIs., CashFlowRealView, EconomicForecastView, EconomicHistoryView, EconomicSnapshotView, FinancingCostView, InflationIndexUpsertView, InflationIndicesView (+57 more)
+Cohesion: 0.03
+Nodes (80): AlertLogSerializer, AlertRuleSerializer, Meta, ActiveAlertsView, AlertAcknowledgeView, AlertLogListView, AlertRuleDetailView, AlertRuleListCreateView (+72 more)
 
 ### Community 5 - "apiJson"
 Cohesion: 0.05
-Nodes (90): acknowledgeAlert(), ALERT_TYPE_LABELS, AlertLogEntry, AlertRule, base(), createAlertRule(), deleteAlertRule(), fetchActiveAlertCounts() (+82 more)
+Nodes (94): apiJson(), fetchSuppliers(), base(), createInflationMapping(), deleteInflationMapping(), EconomicForecast, EconomicSnapshot, fetchCashFlowReal() (+86 more)
 
 ### Community 6 - "test_subcontractors.py"
-Cohesion: 0.04
-Nodes (42): Meta, Subcontractor, SubcontractorPerformanceScore, SubcontractorStatus, SubcontractorWarning, WarningType, Meta, PerformanceScoreSerializer (+34 more)
+Cohesion: 0.05
+Nodes (41): invalidate_project_caches(), Redis cache invalidation for project-scoped endpoints., Invalidate cached KPI, variance, activity log, and personnel summary data., _redis_client(), Meta, Subcontractor, SubcontractorPerformanceScore, SubcontractorStatus (+33 more)
 
 ### Community 7 - "queries.ts"
-Cohesion: 0.05
-Nodes (73): useAuth(), buildDepartmentActivityRecordsSearch(), HrUserRow, useAssignmentsForBusiness(), useAssignmentsForBusinessQuery(), useBusinessesQuery(), useCreateAssignment(), useCreateDepartmentActivityRecord() (+65 more)
+Cohesion: 0.07
+Nodes (52): buildDepartmentActivityRecordsSearch(), HrUserRow, useAssignmentsForBusiness(), useAssignmentsForBusinessQuery(), useBusinessesQuery(), useCreateAssignment(), useCreateHrUser(), useCreateJobPosition() (+44 more)
 
 ### Community 8 - "cn"
-Cohesion: 0.05
-Nodes (61): ChangeOrderRow, ReportShift, SiteStatus, WeatherCondition, cn(), SyncCell(), HeaderState, ReportHeader() (+53 more)
+Cohesion: 0.04
+Nodes (101): CreateHrUserPayload, useCreateDepartmentActivityRecord(), RelationType, ChangeOrderRow, WEATHER_META, ApplyTemplateResult, createProjectTemplate(), deleteProjectTemplate() (+93 more)
 
-### Community 9 - "economic/views.py"
-Cohesion: 0.05
-Nodes (51): IPCStatus, CostCategoryInflationMapping, EconomicSnapshot, InflationIndex, Meta, SimulationResult, EconomicSnapshotSerializer, InflationIndexSerializer (+43 more)
+### Community 9 - "cost_control/models.py"
+Cohesion: 0.09
+Nodes (31): ActualCost, ConfidenceLevel, CostCategory, PoolStatus, CostCategoryInflationMapping, EconomicSnapshot, InflationIndex, Meta (+23 more)
 
-### Community 10 - "useToast"
+### Community 10 - "toast.tsx"
 Cohesion: 0.07
-Nodes (67): usePermission(), useProject(), fetchActivities(), addIPCDeduction(), approveChangeOrder(), approveIPC(), base(), bulkContractItems() (+59 more)
+Nodes (59): fetchActivities(), addIPCDeduction(), approveChangeOrder(), approveIPC(), base(), bulkContractItems(), CONTRACT_TYPE_LABELS, ContractDetail (+51 more)
 
 ### Community 11 - "routeVars.ts"
-Cohesion: 0.05
-Nodes (47): base(), downloadGanttPdf(), fetchGantt(), GanttBaseline, GanttData, GanttTask, base(), fetchProjectKpis() (+39 more)
+Cohesion: 0.08
+Nodes (24): useDepartmentActivityRecordsQuery(), base(), fetchProjectKpis(), ProjectKpis, base(), fetchLaborProductivity(), LaborProductivityReport, LaborProductivityRow (+16 more)
 
 ### Community 12 - "procurement.ts"
 Cohesion: 0.05
-Nodes (60): client, fetchMaterials(), ApprovalLog, ApprovalSummary, approveRequisition(), AuditTrailReportResponse, AuditTrailSummary, Block (+52 more)
+Nodes (58): client, fetchMaterials(), ApprovalLog, ApprovalSummary, approveRequisition(), AuditTrailReportResponse, AuditTrailSummary, Block (+50 more)
 
-### Community 13 - "project-economic.tsx"
-Cohesion: 0.07
-Nodes (58): base(), createInflationMapping(), deleteInflationMapping(), EconomicForecast, EconomicSnapshot, fetchCashFlowReal(), fetchEconomicForecast(), fetchEconomicHistory() (+50 more)
+### Community 13 - "چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md"
+Cohesion: 0.01
+Nodes (263): 10. تفاوت با سیستم‌های رایج, 10. خلاصه کل سیستم (خیلی ساده), 10. داشبورد اقتصادی پروژه, 10. دامنه نهم: جریان نقدی, 10. مدیریت جریان نقدی, 10. مشکلات و موانع, 10. پیشنهاد برای نمایش در نرم‌افزار, 10. کاربردهای واقعی (+255 more)
 
 ### Community 14 - "contracts/views.py"
-Cohesion: 0.05
-Nodes (53): ChangeOrderSerializer, IPCDetailSerializer, approve_change_order(), bulk_upsert_contract_items(), _contract_adjusted_base(), create_change_order(), atomic, Approves a ChangeOrder and updates the associated contract's adjusted_amount.… (+45 more)
+Cohesion: 0.11
+Nodes (30): ChangeOrderSerializer, ContractItemSerializer, approve_change_order(), bulk_upsert_contract_items(), _contract_adjusted_base(), create_change_order(), atomic, Approves a ChangeOrder and updates the associated contract's adjusted_amount.… (+22 more)
 
-### Community 15 - "create_wbs_node"
-Cohesion: 0.06
-Nodes (31): build_tree_queryset(), check_weight_warnings(), create_wbs_node(), delete_wbs_node(), get_project_roots(), move_wbs_node(), propagate_project_wbs_codes(), atomic (+23 more)
+### Community 15 - "wbs/services.py"
+Cohesion: 0.13
+Nodes (16): build_tree_queryset(), delete_wbs_node(), move_wbs_node(), propagate_project_wbs_codes(), atomic, Exception, WBS tree operations using django-treebeard., Updates the properties of a given WBS node, saves it, and checks for any weight… (+8 more)
 
-### Community 16 - "ProjectScopedViewSet"
-Cohesion: 0.04
-Nodes (35): action, Mixin to provide standard workflow actions (submit, approve, reject) for DRF…, WorkflowViewSetMixin, ProjectScopedViewSet, Base ViewSet: project tenancy, permissions, audit, soft delete., DefaultPageNumberPagination, PageNumberPagination, Honors `page`, `page_size`, and `per_page` query params for grid UIs. (+27 more)
+### Community 16 - "BarrierLogViewSet"
+Cohesion: 0.10
+Nodes (14): BarrierLogViewSet, APIView, extend_schema_view, Inject the currently resolved project_id into the serializer context., Apply query parameter filters to the list of risk events., API endpoint providing aggregated risk data representing a probability ×…, ViewSet for listing, creating, and updating barrier logs. Restricts results to…, Use BarrierCreateSerializer for creation to automatically set event type. (+6 more)
 
 ### Community 17 - "progress_views.py"
 Cohesion: 0.06
-Nodes (39): ActivityRowShift, ReportStatus, shared_task, Celery tasks and notification helpers for daily reports., Recompute cumulative progress for activities linked to an approved report.…, recalculate_activity_progress(), django_db, TestProgressRecalculation (+31 more)
+Nodes (42): compute_economic_forecast(), Inflation-adjusted EAC forecast., shared_task, Recompute cumulative progress for activities linked to an approved report.…, recalculate_activity_progress(), django_db, TestProgressRecalculation, _parse_date() (+34 more)
 
 ### Community 18 - "activity_views.py"
-Cohesion: 0.06
-Nodes (44): APIException, ConflictError, custom_exception_handler(), _error_code(), _extract_message(), ActivityStatus, ActivityViewSet, action (+36 more)
+Cohesion: 0.05
+Nodes (46): APIException, ConflictError, custom_exception_handler(), _error_code(), _extract_message(), extend_schema_view, WeatherLogViewSet, ActivityStatus (+38 more)
 
 ### Community 19 - "contracts/models.py"
-Cohesion: 0.06
-Nodes (41): Seed demo contracts with BoQ items linked to project activities., ChangeOrder, ChangeOrderStatus, Contract, ContractItem, ContractStatus, ContractType, DeductionType (+33 more)
+Cohesion: 0.10
+Nodes (26): Seed demo contracts with BoQ items linked to project activities., ChangeOrder, ChangeOrderStatus, Contract, ContractItem, ContractType, DeductionType, IPC (+18 more)
 
 ### Community 20 - "resources/views.py"
-Cohesion: 0.07
-Nodes (48): InventoryTransaction, Material, MaterialRequest, MaterialRequestStatus, Meta, PurchaseOrder, Supplier, TransactionType (+40 more)
+Cohesion: 0.09
+Nodes (38): InventoryTransaction, Material, MaterialRequest, MaterialRequestStatus, Meta, PurchaseOrder, Supplier, TransactionType (+30 more)
 
-### Community 21 - "test_workflow_timeline.py"
+### Community 21 - "workflow_timeline_service.py"
 Cohesion: 0.06
-Nodes (37): ApprovalLog, RequisitionStatus, Requisition serializers., Lightweight list serializer., Full detail serializer with nested items., RequisitionHeaderListSerializer, RequisitionHeaderSerializer, build_approval_summary() (+29 more)
+Nodes (38): ApprovalLog, Lightweight list serializer., RequisitionHeaderListSerializer, assign_items(), partial_approve_items(), put_item_on_hold(), atomic, RequisitionHeader (+30 more)
 
 ### Community 22 - "api-client.ts"
-Cohesion: 0.08
-Nodes (50): AuthApiResponse, AuthContext, AuthContextValue, AuthProvider(), LoginCredentials, normalizeRoles(), RegisterCredentials, API_BASE (+42 more)
-
-### Community 23 - "projects/models.py"
 Cohesion: 0.09
-Nodes (38): Activity, ActivityRelation, Meta, RelationType, BaseImportJob, BaselineActivity, BaselineSchedule, Meta (+30 more)
+Nodes (47): AuthApiResponse, AuthContext, AuthContextValue, AuthProvider(), LoginCredentials, normalizeRoles(), RegisterCredentials, API_BASE (+39 more)
+
+### Community 23 - "Activity"
+Cohesion: 0.04
+Nodes (76): Activity, ActivityRelation, Meta, RelationType, ActivityProgress, BaseImportJob, BaselineActivity, BaselineSchedule (+68 more)
 
 ### Community 24 - "activities-grid.tsx"
-Cohesion: 0.06
-Nodes (52): Activity, ActivityLink, ActivityListParams, ActivityNetwork, ActivityPayload, ActivityStatus, buildQuery(), createActivity() (+44 more)
+Cohesion: 0.08
+Nodes (42): Activity, ActivityLink, ActivityListParams, ActivityNetwork, ActivityPayload, ActivityStatus, buildQuery(), createActivity() (+34 more)
 
 ### Community 25 - "field_reports/models.py"
-Cohesion: 0.08
-Nodes (44): Daily report CRUD, approval workflow, offline sync-batch and PDF export., BaseEquipmentEntry, BaseLaborCampEntry, ChildRowModel, DailyReportConcreteLog, DailyReportEquipment, DailyReportIncident, DailyReportLabor (+36 more)
+Cohesion: 0.12
+Nodes (27): BaseEquipmentEntry, BaseLaborCampEntry, ChildRowModel, DailyReportConcreteLog, DailyReportEquipment, DailyReportIncident, DailyReportLabor, DailyReportLaborCamp (+19 more)
 
-### Community 26 - "models/__init__.py"
-Cohesion: 0.07
-Nodes (31): InternalTransfer, Meta, انتقال بینبلوکی — فقط با تایید مدیر پروژه, TransferStatus, InventoryAllocation, Meta, قفلگذاری موجودی به کد MR و بلوک, Approval serializers. (+23 more)
-
-### Community 27 - "views/__init__.py"
+### Community 26 - "procurement/admin.py"
 Cohesion: 0.06
-Nodes (38): ApprovalActionSerializer, Input for approve/reject/return actions., Procurement URL configuration. All routes are nested under…, ApprovalLogListView, _BaseApprovalActionView, APIView, Approval workflow action views (approve / reject / return / submit)., Base class for approval action views. (+30 more)
+Nodes (36): ApprovalLogAdmin, ApprovalLogInline, BlockAdmin, InternalTransferAdmin, InventoryAllocationAdmin, register, RequisitionHeaderAdmin, RequisitionItemAdmin (+28 more)
 
-### Community 28 - "ipc_service.py"
-Cohesion: 0.06
-Nodes (22): CashFlowForecast, CashTransaction, CashTransactionType, InflowCategory, Meta, OutflowCategory, _format_amount(), Cash flow serializers. (+14 more)
+### Community 27 - "po_views.py"
+Cohesion: 0.03
+Nodes (76): ApprovalActionSerializer, ApprovalLogSerializer, Meta, Approval serializers., Input for approve/reject/return actions., AssignItemsSerializer, AssignmentSerializer, GRNSerializer (+68 more)
 
-### Community 29 - "app-shell-header.tsx"
+### Community 28 - "cash_flow/models.py"
 Cohesion: 0.07
-Nodes (31): isRTL(), languageNames, SupportedLanguage, supportedLanguages, Layout(), getInitialLanguage(), LANGUAGE_STORAGE_KEY, LanguageState (+23 more)
+Nodes (15): CashFlowForecast, CashTransaction, CashTransactionType, InflowCategory, Meta, OutflowCategory, _format_amount(), Cash flow serializers. (+7 more)
+
+### Community 29 - "root.tsx"
+Cohesion: 0.11
+Nodes (18): isRTL(), languageNames, SupportedLanguage, supportedLanguages, Layout(), getInitialLanguage(), LANGUAGE_STORAGE_KEY, LanguageState (+10 more)
 
 ### Community 30 - "search"
 Cohesion: 0.07
@@ -885,37 +930,37 @@ Nodes (42): BM25, detect_domain(), get_cip_brief(), _load_csv(), Load CSV and re
 Cohesion: 0.07
 Nodes (42): BM25, detect_domain(), get_cip_brief(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection (+34 more)
 
-### Community 33 - "CanAccessStoredFile"
-Cohesion: 0.07
-Nodes (22): CanAccessStoredFile, Uploader (confirm) or project member (download) with admin override., confirm_upload(), generate_download_url(), generate_upload_url(), _NamedUpload, Validates a file upload request, creates a StoredFile record in the database,…, Marks a StoredFile as successfully uploaded and records its size in the… (+14 more)
+### Community 33 - "tests_unit.py"
+Cohesion: 0.10
+Nodes (27): Meta, StoredFile, confirm_upload(), generate_download_url(), generate_upload_url(), _NamedUpload, Validates a file upload request, creates a StoredFile record in the database,…, Marks a StoredFile as successfully uploaded and records its size in the… (+19 more)
 
 ### Community 34 - "User"
-Cohesion: 0.06
-Nodes (33): CustomUserManager, Meta, PasswordResetToken, AbstractBaseUser, Blueprint-aligned User model (Domain 1: Master Data). UUID primary key; login…, User, UserStatus, IsCommentor (+25 more)
+Cohesion: 0.08
+Nodes (16): CustomUserManager, Meta, PasswordResetToken, AbstractBaseUser, Blueprint-aligned User model (Domain 1: Master Data). UUID primary key; login…, User, UserStatus, IsManagerOrHR (+8 more)
 
 ### Community 35 - "costs.ts"
-Cohesion: 0.09
-Nodes (42): ActualCostListResponse, ActualCostRow, allocateCostPool(), AUTO_ALLOCATE_METHODS, autoAllocateCostPool(), AutoAllocateMethod, base(), BudgetListResponse (+34 more)
+Cohesion: 0.10
+Nodes (30): ActualCostListResponse, ActualCostRow, allocateCostPool(), AUTO_ALLOCATE_METHODS, autoAllocateCostPool(), AutoAllocateMethod, base(), BudgetListResponse (+22 more)
 
 ### Community 36 - "parse_jalali_or_gregorian"
-Cohesion: 0.09
-Nodes (29): cache_key(), get_cached_or_compute(), params_fingerprint(), Any, Redis-backed response caching helpers., parse_jalali_or_gregorian(), Accept Jalali ``1403/07/15`` or ISO Gregorian ``2024-10-06``., DailyReportActivity (+21 more)
+Cohesion: 0.07
+Nodes (40): cache_key(), get_cached_or_compute(), params_fingerprint(), Any, Redis-backed response caching helpers., gregorian_to_jalali(), jalali_to_gregorian(), parse_jalali_or_gregorian() (+32 more)
 
 ### Community 37 - "AlertLog"
+Cohesion: 0.09
+Nodes (35): AlertRule, AlertCondition, AlertLog, AlertRule, AlertType, Meta, check_and_fire_for_project(), _evaluate_rule() (+27 more)
+
+### Community 38 - "kpi_service.py"
+Cohesion: 0.06
+Nodes (32): CashFlowForecastSerializer, CashTransactionSerializer, Meta, get_cash_flow_summary(), get_forecast_with_actuals(), get_gap_analysis(), get_receivables_payables(), get_transaction_summary() (+24 more)
+
+### Community 39 - "field_reports/serializers.py"
 Cohesion: 0.10
-Nodes (32): AlertRule, AlertCondition, AlertLog, AlertRule, AlertType, Meta, check_and_fire_for_project(), _evaluate_rule() (+24 more)
-
-### Community 38 - "cash_flow/views.py"
-Cohesion: 0.08
-Nodes (27): CashFlowForecastSerializer, CashTransactionSerializer, Meta, get_cash_flow_summary(), get_forecast_with_actuals(), get_transaction_summary(), date, Return actual monthly cash flow with cumulative balance. (+19 more)
-
-### Community 39 - "DailyReportDetailSerializer"
-Cohesion: 0.07
-Nodes (9): DailyReportViewSet, action, extend_schema, extend_schema_view, _validate_report_ready_for_submit(), WeatherCondition, DailyReportDetailSerializer, DailyReportListSerializer (+1 more)
+Nodes (18): persian_day_of_week(), WeatherCondition, BaseEquipmentEntrySerializer, BaseLaborCampEntrySerializer, DailyReportActivitySerializer, DailyReportConcreteLogSerializer, DailyReportDetailSerializer, DailyReportEquipmentSerializer (+10 more)
 
 ### Community 40 - "RoleViewSet"
-Cohesion: 0.09
-Nodes (19): Migration, Migration, Migration, Project-scoped permission codenames and human labels., is_system_role(), atomic, Role management helpers for system vs custom project roles., set_role_permissions() (+11 more)
+Cohesion: 0.10
+Nodes (17): is_system_role(), atomic, set_role_permissions(), validate_permission_codenames(), APIView, extend_schema, Deprecated: use RoleViewSet at /api/v1/roles/. Kept for import compatibility., RoleListView (+9 more)
 
 ### Community 41 - ".agents/skills/design-system/scripts/slide_search_core.py"
 Cohesion: 0.08
@@ -929,77 +974,73 @@ Nodes (36): format_context(), format_result(), main(), Format a single search re
 Cohesion: 0.08
 Nodes (36): format_context(), format_result(), main(), Format a single search result for display, Format contextual recommendations for display., BM25, calculate_pattern_break(), detect_domain() (+28 more)
 
-### Community 44 - "ensure_workshop_block"
-Cohesion: 0.08
-Nodes (24): Block, BlockKind, Meta, بلوک/فاز پروژه — مرکز هزینه و انبار مجازی مستقل, ensure_workshop_block(), Block, Provisioning and lookup for the reserved workshop block per project., Get or create the single system workshop block for a project. (+16 more)
+### Community 44 - "models/__init__.py"
+Cohesion: 0.05
+Nodes (56): ApprovalAction, ApprovalLog, Meta, ردپای تاییدها — immutable audit record, Block, BlockKind, Meta, بلوک/فاز پروژه — مرکز هزینه و انبار مجازی مستقل (+48 more)
 
-### Community 45 - "weather-log-grid.tsx"
-Cohesion: 0.09
-Nodes (29): ActivityProgressRow, createWeatherLog(), deleteWeatherLog(), fetchWeatherLogs(), formToPayload(), PaginatedWeatherLogs, SiteStatus, updateWeatherLog() (+21 more)
-
-### Community 46 - "RequisitionHeader"
-Cohesion: 0.08
-Nodes (16): سرتیتر درخواست خرید — چند آیتمی, RequisitionHeader, RequisitionScope, has_procurement_step_role(), ProcurementStepPermission, BasePermission, Procurement RBAC permissions., Verify that request.user has the required role for the requisition's current… (+8 more)
-
-### Community 47 - "parse_msp_xml"
+### Community 45 - "project-progress.tsx"
 Cohesion: 0.07
-Nodes (25): build_preview(), _local(), _parse_duration_days(), _parse_msp_date(), parse_msp_xml(), ParseResult, date, Non-destructive preview tree. (+17 more)
+Nodes (48): ActivityProgressRow, base(), EvmKpis, fetchActivityProgress(), fetchProgressHistory(), fetchProgressKpis(), fetchProgressSnapshot(), fetchSCurve() (+40 more)
 
-### Community 48 - "project-subcontractors.tsx"
-Cohesion: 0.09
-Nodes (35): base(), computeOverallLive(), createScore(), createSubcontractor(), createWarning(), fetchScores(), fetchSubcontractor(), fetchSubcontractors() (+27 more)
-
-### Community 49 - "cashflow.ts"
-Cohesion: 0.12
-Nodes (34): base(), CashFlowListResponse, CashFlowSummary, CashTransactionRow, categoryLabel(), createCashTransaction(), deleteCashTransaction(), fetchCashFlowList() (+26 more)
-
-### Community 50 - "project_templates/views.py"
+### Community 46 - "has_procurement_step_role"
 Cohesion: 0.10
-Nodes (20): Meta, ProjectTemplate, ProjectTemplateActivity, ProjectTemplateRole, ProjectTemplateWBS, ProjectType, Meta, ProjectTemplateActivitySerializer (+12 more)
+Nodes (10): has_procurement_step_role(), ProcurementStepPermission, BasePermission, Verify that request.user has the required role for the requisition's current…, Check if a user has the required role for a procurement step., django_db, fixture, TestHasProcurementStepRole (+2 more)
 
-### Community 51 - "form/index.ts"
-Cohesion: 0.18
-Nodes (22): CreateHrUserPayload, BusinessesListResponse, BusinessItem, BusinessDetail, BusinessSetupSchema(), FIELD_TYPES, FieldItem, PaginatedResults (+14 more)
+### Community 47 - "Velora Scope Map"
+Cohesion: 0.06
+Nodes (35): API paths, Legacy inventory deprecation (`/api/items/`), Sprint 10 API paths, Sprint 10 completion checklist (Materials, Equipment & HR), Sprint 10 frontend routes, Sprint 11 API paths, Sprint 11 completion checklist (Subcontractors, Risks & Documents), Sprint 11 frontend routes (+27 more)
 
-### Community 52 - "jalali.py"
+### Community 48 - "project-subcontractor-detail.tsx"
+Cohesion: 0.09
+Nodes (41): base(), computeOverallLive(), createScore(), createSubcontractor(), createWarning(), fetchScores(), fetchSubcontractor(), fetchSubcontractors() (+33 more)
+
+### Community 49 - "useToast"
+Cohesion: 0.12
+Nodes (36): base(), CashFlowListResponse, CashFlowSummary, CashTransactionRow, categoryLabel(), createCashTransaction(), deleteCashTransaction(), fetchCashFlowList() (+28 more)
+
+### Community 50 - "UUIDModel"
+Cohesion: 0.09
+Nodes (25): AuditLog, Meta, UUIDModel, Meta, ProjectTemplate, ProjectTemplateActivity, ProjectTemplateRole, ProjectTemplateWBS (+17 more)
+
+### Community 51 - "useAuth"
 Cohesion: 0.11
-Nodes (27): gregorian_to_jalali(), jalali_to_gregorian(), parse_date_optional(), persian_day_of_week(), date, Gregorian ↔ Jalali conversion helpers (serializer boundary only)., Accept an optional Jalali or ISO Gregorian date., ReportLab PDF export for IPC certificates. (+19 more)
+Nodes (31): useAuth(), Permission, usePermission(), useRoles(), BusinessesListResponse, BusinessItem, BusinessSetup(), BusinessDetail (+23 more)
+
+### Community 52 - "📋 فازهای پیاده‌سازی"
+Cohesion: 0.06
+Nodes (34): 1.1 مدل `Block` (بلوک / فاز), 1.2 مدل `RequisitionHeader` (سرتیتر درخواست خرید), 1.3 مدل `RequisitionItem` (ردیف‌های درخواست), 1.4 مدل `ApprovalLog` (ردپای تاییدها), 1.5 مدل `InventoryAllocation` (قفل‌گذاری بلوکی), 1.6 مدل `InternalTransfer` (انتقال بین‌بلوکی), 3.1 تفکیک ردیفی (Line-Item Splitting), 3.2 خرید ناقص (Partial Fulfillment) (+26 more)
 
 ### Community 53 - "field_reports/services/__init__.py"
-Cohesion: 0.10
-Nodes (31): DailyReport, DailyReportHeaderSerializer, Create / update of header fields only., _apply_header_merge(), approve_report(), _child_sections_in_payload(), _child_serializers(), _clear_child_sections() (+23 more)
+Cohesion: 0.11
+Nodes (29): DailyReport, DailyReportHeaderSerializer, Create / update of header fields only., _apply_header_merge(), approve_report(), _child_sections_in_payload(), _child_serializers(), _clear_child_sections() (+21 more)
 
-### Community 54 - "JalaliDateField"
-Cohesion: 0.07
-Nodes (21): JalaliDateField, Read/write Jalali date strings; stores Gregorian ``date`` in the ORM., Discipline, DisciplineSubReport, DisciplineSubReportActivity, Meta, Represents a discipline-specific sub-report within a project, which can…, Represents an individual work activity tracked within a specific discipline… (+13 more)
+### Community 54 - "sub_reports/models.py"
+Cohesion: 0.06
+Nodes (29): Discipline, DisciplineSubReport, DisciplineSubReportActivity, Meta, Represents a discipline-specific sub-report within a project, which can…, Represents an individual work activity tracked within a specific discipline…, SubReportStatus, DisciplineSubReportSerializer (+21 more)
 
 ### Community 55 - "inventory/tests.py"
-Cohesion: 0.12
-Nodes (19): department_display_label(), export_activities_to_xlsx(), generate_activity_report_pdf(), import_activities_from_xlsx(), _map_header_row(), _parse_date_value(), Any, date (+11 more)
+Cohesion: 0.16
+Nodes (15): department_display_label(), export_activities_to_xlsx(), generate_activity_report_pdf(), import_activities_from_xlsx(), _map_header_row(), _parse_date_value(), Any, date (+7 more)
 
-### Community 56 - "settings-roles.tsx"
-Cohesion: 0.10
-Nodes (29): RelationType, createProjectRole(), deleteProjectRole(), fetchPermissionCatalog(), fetchProjectRole(), fetchProjectRoles(), groupPermissionsByModule(), PERMISSION_MODULE_ORDER (+21 more)
+### Community 56 - "Excel Forms & Grids Documentation"
+Cohesion: 0.06
+Nodes (34): Civil Sub-Report Form Structure (per sheet/day), Cross-File Relationships & Velora Module Mapping, Daily Report Form Structure (per sheet/day), Electrical Sub-Report Form Structure (per sheet/day), Excel Forms & Grids Documentation, FILE 1 — بانک اطلاعاتی فاز 1, FILE 2 — بانک اطلاعاتی فاز 2 (دوره اول), FILE 3 — بانک اطلاعاتی فاز 2 (دوره دوم) (+26 more)
 
 ### Community 57 - "authentication/views.py"
-Cohesion: 0.11
-Nodes (26): auth_ratelimit(), Apply IP-based POST rate limit to a DRF class-based view., ChangePasswordSerializer, ForgotPasswordSerializer, LoginSerializer, Authentication serializers., ResetPasswordSerializer, UserSerializer (+18 more)
+Cohesion: 0.04
+Nodes (63): IsHrOrAdmin, HR / admin user listing: Django groups `admin` or `hr`, or staff / superuser.…, auth_ratelimit(), handle_ratelimit_403(), ratelimit_view(), django-ratelimit helpers for auth endpoints., RATELIMIT_VIEW handler — return 429 with localized message., Django handler403 — return 429 JSON for django-ratelimit blocks. (+55 more)
 
 ### Community 58 - "test_coverage_gaps.py"
-Cohesion: 0.07
-Nodes (14): ContractListSerializer, IPCCreateSerializer, Convert UUID strings in FK fields to model instances for ORM create/update. It…, _resolve_fk_fields(), _invalidate(), Tests for remaining coverage gaps in contracts module., test_contract_item_total_amount_none(), test_contract_list_serializer_without_ipc_stats() (+6 more)
+Cohesion: 0.10
+Nodes (10): IPCCreateSerializer, Convert UUID strings in FK fields to model instances for ORM create/update. It…, _resolve_fk_fields(), _invalidate(), Tests for remaining coverage gaps in contracts module., test_contract_item_total_amount_none(), test_contract_viewset_helpers(), test_invalidate_swallows_cache_errors() (+2 more)
 
 ### Community 59 - "inventory/views.py"
-Cohesion: 0.13
-Nodes (27): _bulk_save_items(), export_items_to_excel(), _get_or_create_categories(), import_items_from_excel(), _parse_items_from_dataframe(), Import items from an Excel file. Returns a tuple of (imported_count, list of…, Export all items to an Excel file and return as bytes., _read_and_validate_excel() (+19 more)
-
-### Community 60 - "test_report_views.py"
-Cohesion: 0.08
-Nodes (19): ApprovalAction, ApprovalLog, Meta, ردپای تاییدها — immutable audit record, ItemStatus, ApprovalLogSerializer, Meta, django_db (+11 more)
+Cohesion: 0.12
+Nodes (20): IsHrOrAdminOrReadOnly, Category, Item, Meta, Deprecated global inventory item — use resources.Material instead., SpaceMaterialRequest, CategorySerializer, DepartmentActivityRecordSerializer (+12 more)
 
 ### Community 61 - "dependencies"
-Cohesion: 0.06
-Nodes (35): dependencies, clsx, @dagrejs/dagre, @fontsource/inter, i18next-browser-languagedetector, lucide-react, radix-ui, @radix-ui/react-checkbox (+27 more)
+Cohesion: 0.07
+Nodes (27): dependencies, class-variance-authority, @dagrejs/dagre, @fontsource/vazirmatn, frappe-gantt, isbot, lucide-react, @radix-ui/react-tabs (+19 more)
 
 ### Community 62 - "spacing"
 Cohesion: 0.06
@@ -1014,8 +1055,8 @@ Cohesion: 0.06
 Nodes (34): $type, $value, $type, $value, $type, $value, $type, $value (+26 more)
 
 ### Community 65 - "full_project.py"
-Cohesion: 0.18
-Nodes (29): Project, _apply_wbs_template(), _assign_role(), _audit(), DemoProjectSpec, _ensure_leaf_activities(), AbstractBaseUser, Activity (+21 more)
+Cohesion: 0.20
+Nodes (27): Project, _apply_wbs_template(), _assign_role(), _audit(), DemoProjectSpec, _ensure_leaf_activities(), AbstractBaseUser, Activity (+19 more)
 
 ### Community 66 - "project.ts"
 Cohesion: 0.20
@@ -1025,17 +1066,17 @@ Nodes (13): E2E_USERS, loginAs(), loginViaUI(), authHeaders(), createActivityVia
 Cohesion: 0.10
 Nodes (20): monitor_correspondence_due(), _notify_roles(), shared_task, Document monitoring Celery tasks., NotificationAdmin, register, Meta, Notification (+12 more)
 
-### Community 68 - "requisition_views.py"
-Cohesion: 0.09
-Nodes (20): BlockSerializer, Meta, Serializer for creating a requisition with items., RequisitionHeaderCreateSerializer, RequisitionItemSerializer, assign_items(), partial_approve_items(), put_item_on_hold() (+12 more)
+### Community 68 - "InlineGridTab.tsx"
+Cohesion: 0.15
+Nodes (26): ChildResource, createChildRow(), deleteChildRow(), updateChildRow(), getDownloadUrl(), RowSyncStatus, DailyTabProps, SHIFT_OPTIONS (+18 more)
 
 ### Community 69 - "wbs/views.py"
-Cohesion: 0.11
-Nodes (18): WBS, Meta, WBSCreateSerializer, WBSFlatSerializer, WBSMoveSerializer, WBSTreeSerializer, WBSUpdateSerializer, build_nested_wbs_tree() (+10 more)
+Cohesion: 0.16
+Nodes (12): Meta, WBSCreateSerializer, WBSFlatSerializer, WBSMoveSerializer, WBSTreeSerializer, WBSUpdateSerializer, action, extend_schema (+4 more)
 
 ### Community 70 - "project-create-wizard.tsx"
-Cohesion: 0.15
-Nodes (27): addMember(), clearMemberPermissionOverride(), fetchMemberPermissions(), fetchMembers(), fetchRoles(), lookupUsers(), PermissionSummary, ProjectMember (+19 more)
+Cohesion: 0.09
+Nodes (44): addMember(), clearMemberPermissionOverride(), fetchMemberPermissions(), fetchMembers(), fetchRoles(), lookupUsers(), PermissionSummary, ProjectMember (+36 more)
 
 ### Community 71 - "UI Styling Skill"
 Cohesion: 0.07
@@ -1049,13 +1090,13 @@ Nodes (16): Test adding full color palette., Test adding custom fonts., Test add
 Cohesion: 0.12
 Nodes (22): _ErrorUpload, _FakeUpload, Upload validator unit tests., test_accepts_document_upload_with_expected_mime(), test_accepts_p6_upload(), test_accepts_xlsx_extension(), test_accepts_xml_extension(), test_mime_detection_exception_handling() (+14 more)
 
-### Community 74 - "field_reports/urls.py"
-Cohesion: 0.11
-Nodes (15): DailyReportActivityViewSet, DailyReportChildViewSet, DailyReportConcreteLogViewSet, DailyReportEquipmentViewSet, DailyReportIncidentViewSet, DailyReportLaborCampViewSet, DailyReportLaborViewSet, DailyReportMaterialViewSet (+7 more)
+### Community 74 - "daily_report_views.py"
+Cohesion: 0.20
+Nodes (9): DailyReportActivityViewSet, DailyReportChildViewSet, DailyReportConcreteLogViewSet, DailyReportEquipmentViewSet, DailyReportIncidentViewSet, DailyReportLaborCampViewSet, DailyReportLaborViewSet, DailyReportMaterialViewSet (+1 more)
 
 ### Community 75 - "equipment_utilization.py"
-Cohesion: 0.11
-Nodes (22): extend_schema, EquipmentStatus, OwnershipType, ReportShift, _collect_daily_report_equipment(), _collect_standalone_logs(), _cost_rollup(), _dedupe_key() (+14 more)
+Cohesion: 0.18
+Nodes (15): _collect_daily_report_equipment(), _collect_standalone_logs(), _cost_rollup(), _dedupe_key(), equipment_utilization_list(), equipment_utilization_summary(), _idle_hours(), _productive_hours() (+7 more)
 
 ### Community 76 - "sidebarItem/view.tsx"
 Cohesion: 0.16
@@ -1071,35 +1112,35 @@ Nodes (16): Test adding full color palette., Test adding custom fonts., Test add
 
 ### Community 79 - "compilerOptions"
 Cohesion: 0.07
-Nodes (29): compilerOptions, baseUrl, esModuleInterop, jsx, lib, module, moduleResolution, noEmit (+21 more)
+Nodes (30): compilerOptions, esModuleInterop, jsx, lib, module, moduleResolution, noEmit, paths (+22 more)
 
 ### Community 80 - "test_cost_control.py"
-Cohesion: 0.09
-Nodes (14): budget(), cost_pool(), costs_base(), django_db, fixture, Cost control API tests., TestActualCostAPI, TestBudgetAPI (+6 more)
+Cohesion: 0.07
+Nodes (27): CostType, allocate_cost_pool(), auto_allocate_cost_pool(), compute_auto_allocations(), atomic, Decimal, _quantize_amount(), Cost pool allocation. (+19 more)
 
 ### Community 81 - "msp-import-wizard.tsx"
-Cohesion: 0.14
-Nodes (24): apiFormData(), fetchMspImportStatus(), fetchP6ImportStatus(), isP6File(), mspBase(), MspImportJobStatus, MspImportStartResult, MspImportStatusResult (+16 more)
+Cohesion: 0.23
+Nodes (17): fetchMspImportStatus(), fetchP6ImportStatus(), isP6File(), mspBase(), MspImportJobStatus, MspImportStartResult, MspImportStatusResult, MspPreviewResult (+9 more)
 
-### Community 82 - "modal.tsx"
-Cohesion: 0.11
-Nodes (21): ExcelReadOptions, ExcelReadResult, normalizeHeader(), readExcelFile(), ExcelCoerceOptions, ExcelColumnMapping, ExcelRowError, ExcelValidationResult (+13 more)
+### Community 82 - "excel-import-modal.tsx"
+Cohesion: 0.19
+Nodes (14): ExcelReadOptions, ExcelReadResult, normalizeHeader(), readExcelFile(), ExcelCoerceOptions, ExcelColumnMapping, ExcelRowError, ExcelValidationResult (+6 more)
 
 ### Community 83 - ".agents/skills/design-system/scripts/html-token-validator.py"
 Cohesion: 0.13
 Nodes (24): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+16 more)
 
 ### Community 84 - "checkers.py"
-Cohesion: 0.16
-Nodes (26): fire_alert(), Fire an alert if rule is active and cooldown allows., _check_activity_behind(), _check_baseline_not_set(), _check_budget_overrun(), _check_cash_gap(), _check_correspondence_due(), _check_critical_path_delay() (+18 more)
+Cohesion: 0.17
+Nodes (25): fire_alert(), Fire an alert if rule is active and cooldown allows., _check_activity_behind(), _check_baseline_not_set(), _check_budget_overrun(), _check_cash_gap(), _check_correspondence_due(), _check_critical_path_delay() (+17 more)
 
-### Community 85 - "extend_schema"
+### Community 85 - "isOfflineDBAvailable"
+Cohesion: 0.13
+Nodes (19): useAutoSync(), SaveHeaderResult, useDailyReportForm(), useOnlineStatus(), createDailyReport(), HeaderPayload, updateDailyReport(), countUnresolvedConflicts() (+11 more)
+
+### Community 86 - "business_meta/services.py"
 Cohesion: 0.09
-Nodes (16): APIView, extend_schema, Handle forgot password request., Handle password reset., User profile endpoint. Single Responsibility: Handle user profile retrieval and…, Return the current authenticated user., Retrieve user profile., Partially update user profile. (+8 more)
-
-### Community 86 - "ProjectViewSet"
-Cohesion: 0.10
-Nodes (13): Command, BaseCommand, get_available_templates(), ProjectStatus, Meta, ProjectCreateSerializer, ProjectDetailSerializer, ProjectListSerializer (+5 more)
+Nodes (10): Command, BaseCommand, create_project_from_template(), get_available_templates(), atomic, Business logic for project meta. Template application and validation., ProjectViewSet, action (+2 more)
 
 ### Community 87 - ".cursor/skills/design-system/scripts/html-token-validator.py"
 Cohesion: 0.13
@@ -1110,8 +1151,8 @@ Cohesion: 0.13
 Nodes (24): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+16 more)
 
 ### Community 89 - "radius"
-Cohesion: 0.11
-Nodes (27): $type, $value, lg, sm, $type, $value, $type, $value (+19 more)
+Cohesion: 0.12
+Nodes (23): $type, $value, sm, $type, $value, $type, $value, $type (+15 more)
 
 ### Community 90 - "grid/index.ts"
 Cohesion: 0.18
@@ -1122,8 +1163,8 @@ Cohesion: 0.11
 Nodes (27): $type, $value, lg, sm, $type, $value, $type, $value (+19 more)
 
 ### Community 92 - "radius"
-Cohesion: 0.11
-Nodes (27): $type, $value, lg, sm, $type, $value, $type, $value (+19 more)
+Cohesion: 0.12
+Nodes (23): $type, $value, sm, $type, $value, $type, $value, $type (+15 more)
 
 ### Community 93 - "set_permission_override"
 Cohesion: 0.10
@@ -1131,7 +1172,7 @@ Nodes (9): set_permission_override(), django_db, TestPermissions, admin_client()
 
 ### Community 94 - "NotificationBell.tsx"
 Cohesion: 0.15
-Nodes (20): LIST_KEY, UNREAD_KEY, useNotificationActions(), useNotificationList(), useUnreadCount(), AppNotification, fetchNotifications(), fetchUnreadCount() (+12 more)
+Nodes (19): LIST_KEY, UNREAD_KEY, useNotificationActions(), useNotificationList(), useUnreadCount(), AppNotification, fetchNotifications(), fetchUnreadCount() (+11 more)
 
 ### Community 95 - "Brand Skill System"
 Cohesion: 0.09
@@ -1141,25 +1182,25 @@ Nodes (25): Brand Approval Checklist, Messaging and Copy Approval, Visual Identi
 Cohesion: 0.11
 Nodes (19): BM25, detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+11 more)
 
-### Community 97 - "documents/views.py"
-Cohesion: 0.19
-Nodes (18): validate_document_upload(), AccessLevel, Correspondence, CorrStatus, CorrType, DocType, DocumentRevision, MeetingMinutes (+10 more)
+### Community 97 - "AuditSoftDeleteModel"
+Cohesion: 0.12
+Nodes (17): AllObjectsManager, AuditSoftDeleteModel, Meta, SoftDeleteManager, SoftDeleteQuerySet, TimeStampedModel, AccessLevel, Correspondence (+9 more)
 
-### Community 98 - "cost_control/models.py"
+### Community 98 - "Budget"
 Cohesion: 0.15
-Nodes (18): ActualCost, Budget, ConfidenceLevel, CostCategory, CostType, Meta, PoolStatus, cost_summary() (+10 more)
+Nodes (14): Budget, CostPool, Meta, cost_summary(), date, Cost summary for dashboards and EVM., _empty_row(), _finalize() (+6 more)
 
-### Community 99 - "CorrespondenceViewSet"
-Cohesion: 0.10
-Nodes (10): CorrespondenceRespondView, CorrespondenceViewSet, DocScopedViewSet, DocumentRevisionUploadView, MeetingMinutesViewSet, ProjectDocumentViewSet, APIView, extend_schema (+2 more)
+### Community 99 - "documents/views.py"
+Cohesion: 0.08
+Nodes (32): parse_date_optional(), Accept an optional Jalali or ISO Gregorian date., validate_document_upload(), ProjectDocument, CorrespondenceSerializer, DocumentRevisionSerializer, MeetingMinutesSerializer, Meta (+24 more)
 
 ### Community 100 - "BaseHRRequestViewSet"
 Cohesion: 0.11
 Nodes (5): BaseHRRequestViewSet, LeaveRequestViewSet, OvertimeRequestViewSet, action, extend_schema_view
 
 ### Community 101 - "devDependencies"
-Cohesion: 0.08
-Nodes (25): devDependencies, @react-router/dev, shadcn, tailwindcss, @tailwindcss/vite, tw-animate-css, @types/node, @types/react (+17 more)
+Cohesion: 0.07
+Nodes (27): devDependencies, @playwright/test, @react-router/dev, shadcn, tailwindcss, @tailwindcss/vite, tw-animate-css, @types/node (+19 more)
 
 ### Community 102 - "BM25"
 Cohesion: 0.11
@@ -1174,12 +1215,12 @@ Cohesion: 0.11
 Nodes (19): BM25, detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search across all domains and combine results (+11 more)
 
 ### Community 105 - "cost_control/views.py"
-Cohesion: 0.17
-Nodes (16): AllocationExceededError, Exception, ActualCostViewSet, BudgetBulkView, BudgetViewSet, CostPoolAllocateView, CostPoolAutoAllocateView, CostPoolViewSet (+8 more)
+Cohesion: 0.07
+Nodes (32): ActualCostSerializer, BudgetBulkItemSerializer, BudgetSerializer, CostPoolAllocationItemSerializer, CostPoolSerializer, _format_amount(), Meta, Cost control serializers. (+24 more)
 
-### Community 106 - "test_approval_engine.py"
-Cohesion: 0.13
-Nodes (16): ApprovalEngineError, get_transitions(), atomic, RequisitionHeader, ValidationError, Gate 1: total requested qty must not exceed estimated block budget per material., Advance (or reject/return) a requisition through the approval workflow., transition() (+8 more)
+### Community 106 - "transition"
+Cohesion: 0.16
+Nodes (11): ApprovalEngineError, get_transitions(), atomic, RequisitionHeader, ValidationError, Gate 1: total requested qty must not exceed estimated block budget per material., Advance (or reject/return) a requisition through the approval workflow., transition() (+3 more)
 
 ### Community 107 - "TailwindConfigGenerator"
 Cohesion: 0.09
@@ -1191,19 +1232,19 @@ Nodes (13): main(), Add custom font families. Args: fonts: Dict of font_type: [f
 
 ### Community 109 - "ContractDetailSerializer"
 Cohesion: 0.11
-Nodes (10): ContractDetailSerializer, ContractItemSerializer, ContractWriteSerializer, _format_amount(), IPCDeductionSerializer, IPCItemSerializer, IPCListSerializer, Meta (+2 more)
+Nodes (11): ContractDetailSerializer, ContractWriteSerializer, _format_amount(), IPCDeductionSerializer, IPCItemSerializer, IPCListSerializer, Meta, test_contract_detail_serializer() (+3 more)
 
 ### Community 110 - "test_views_extended.py"
 Cohesion: 0.09
 Nodes (3): next_change_number(), Determines the next sequential change order number for a given contract.…, test_next_change_number()
 
-### Community 111 - "test_risk_matrix_unit.py"
-Cohesion: 0.12
-Nodes (20): BarrierStatus, EventType, Meta, Enumeration defining the severity levels of a risk event., Enumeration representing the resolution status of a barrier., Model representing a risk, barrier, or delay event in a project. Stores…, Enumeration of various types of risk events., RiskEvent (+12 more)
+### Community 111 - "risk/serializers.py"
+Cohesion: 0.07
+Nodes (33): BarrierCategory, BarrierStatus, EventType, Meta, Enumeration defining the severity levels of a risk event., Enumeration for categorizing the type of barrier., Enumeration representing the resolution status of a barrier., Model representing a risk, barrier, or delay event in a project. Stores… (+25 more)
 
 ### Community 112 - "gray"
-Cohesion: 0.09
-Nodes (23): $type, $value, $type, $value, $type, $value, $type, $value (+15 more)
+Cohesion: 0.11
+Nodes (19): $type, $value, $type, $value, $type, $value, $type, $value (+11 more)
 
 ### Community 113 - "Slides Design Skill Reference"
 Cohesion: 0.10
@@ -1213,65 +1254,65 @@ Nodes (22): Banner Sizes and Art Direction Styles Reference, Corporate Identity 
 Cohesion: 0.10
 Nodes (12): main(), Add custom font families. Args: fonts: Dict of font_type: [font_names] e.g.,…, Add custom spacing values. Args: spacing: Dict of name: value e.g., {'18':…, Add custom breakpoints. Args: breakpoints: Dict of name: width e.g., {'3xl':…, Add plugin requirements. Args: plugins: List of plugin names e.g.,…, Get plugin recommendations based on configuration. Returns: List of recommended…, Generate Tailwind CSS configuration files., Validate configuration. Returns: Tuple of (valid, message) (+4 more)
 
-### Community 115 - "declare_topology"
+### Community 115 - "EventPublisher"
 Cohesion: 0.16
-Nodes (12): Command, BaseCommand, declare_topology(), get_rabbitmq_url(), Gets the RabbitMQ connection string from the environment or uses a default…, Declares the main topic exchange, creates queues, and binds them to the…, EventPublisherIntegrationTests, ProjectCreateEventIntegrationTests (+4 more)
+Nodes (11): Command, BaseCommand, declare_topology(), EventPublisher, get_rabbitmq_url(), Any, Gets the RabbitMQ connection string from the environment or uses a default…, Declares the main topic exchange, creates queues, and binds them to the… (+3 more)
 
-### Community 116 - "alerts/views.py"
-Cohesion: 0.20
-Nodes (10): AlertLogSerializer, AlertRuleSerializer, Meta, ActiveAlertsView, AlertAcknowledgeView, AlertLogListView, AlertRuleDetailView, AlertRuleListCreateView (+2 more)
+### Community 116 - "test_sprint8_carryover.py"
+Cohesion: 0.13
+Nodes (19): ContractStatus, IPCStatus, monitor_guarantee_expiry(), monitor_ipc_payment_delays(), _notify_ipc_payment_delay(), populate_ipc_async(), _project_role_user_ids(), shared_task (+11 more)
 
 ### Community 117 - "test_hr_api.py"
-Cohesion: 0.15
-Nodes (8): LeaveStatus, LeaveType, OvertimeStatus, api_client(), fixture, setup_data(), fixture, setup_data()
+Cohesion: 0.06
+Nodes (16): LeaveRequest, LeaveStatus, LeaveType, Meta, OvertimeRequest, OvertimeStatus, LeaveRequestSerializer, Meta (+8 more)
 
 ### Community 118 - "color"
 Cohesion: 0.15
 Nodes (21): $type, $value, $type, $value, 500, 600, blue, green (+13 more)
 
 ### Community 119 - "Design System Skill System"
-Cohesion: 0.13
-Nodes (20): Button Component Spec, Component Specifications, Input Component Spec, Button Tokens, Component Tokens, Primitive Tokens, Spacing Scale Primitive, Color Semantics (+12 more)
+Cohesion: 0.11
+Nodes (23): Corporate Identity Program (CIP) Workflow, Design Master Orchestrator Skill, Logo Design Workflow, Button Component Spec, Component Specifications, Input Component Spec, Button Tokens, Component Tokens (+15 more)
 
 ### Community 120 - ".agents/skills/design-system/scripts/generate-slide.py"
 Cohesion: 0.15
 Nodes (19): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+11 more)
 
 ### Community 121 - "fontSize"
-Cohesion: 0.11
-Nodes (20): $type, $value, $type, $value, $type, $value, $type, $value (+12 more)
+Cohesion: 0.10
+Nodes (21): $type, $value, $type, $value, $type, $value, $type, $value (+13 more)
 
-### Community 122 - "color"
+### Community 122 - "gray"
+Cohesion: 0.05
+Nodes (53): $type, $value, $type, $value, $type, $value, $type, $value (+45 more)
+
+### Community 123 - "UsernameOrMobileBackend"
+Cohesion: 0.40
+Nodes (3): Authenticate by username or mobile number., UsernameOrMobileBackend, ModelBackend
+
+### Community 124 - "test_dynamic_rows.py"
 Cohesion: 0.15
-Nodes (20): $type, $value, $type, $value, 500, 700, blue, green (+12 more)
+Nodes (9): dynamic_table(), django_db, fixture, Tests for dynamic table row CRUD and Excel import/export., row_detail_url(), rows_url(), TestDynamicRowCrud, TestDynamicRowExcel (+1 more)
 
-### Community 123 - "authentication/services.py"
-Cohesion: 0.14
-Nodes (10): Authenticate by username or mobile number., UsernameOrMobileBackend, blacklist_user_tokens(), _hash_token(), PasswordResetService, Authentication services., authenticate_user(), get_tokens_for_user() (+2 more)
-
-### Community 124 - "rows_url"
-Cohesion: 0.14
-Nodes (8): dynamic_table(), django_db, fixture, row_detail_url(), rows_url(), TestDynamicRowCrud, TestDynamicRowExcel, TestTableDefinitionApi
-
-### Community 125 - "documents/serializers.py"
-Cohesion: 0.18
-Nodes (14): CorrespondenceSerializer, DocumentRevisionSerializer, MeetingMinutesSerializer, Meta, ProjectDocumentDetailSerializer, ProjectDocumentSerializer, presign_get_url(), Document upload and storage helpers. (+6 more)
+### Community 125 - "syncService.ts"
+Cohesion: 0.13
+Nodes (26): syncBatch(), SyncBatchResult, confirmUpload(), requestUploadUrl(), uploadProjectFile(), UploadUrlResponse, addConflict(), clearSyncedItems() (+18 more)
 
 ### Community 126 - "labor_productivity.py"
-Cohesion: 0.16
-Nodes (14): _activity_qty_queryset(), _allocate_labor_to_activities(), _effective_work_hours(), labor_productivity_report(), _labor_queryset(), _planned_man_days(), Labor productivity = executed quantity / labor hours., Budget labor amount as proxy; returns None if no budget rows. (+6 more)
+Cohesion: 0.15
+Nodes (15): LaborCategory, _activity_qty_queryset(), _allocate_labor_to_activities(), _effective_work_hours(), labor_productivity_report(), _labor_queryset(), _planned_man_days(), Labor productivity = executed quantity / labor hours. (+7 more)
 
-### Community 127 - "TestHRServices"
-Cohesion: 0.12
-Nodes (5): LeaveRequest, Meta, OvertimeRequest, django_db, TestHRServices
+### Community 127 - "طرح اولیه سیستم اتوماسیون یکپارچه کنترل پروژه‌های عمرانی"
+Cohesion: 0.07
+Nodes (27): 10-1. هدف ماژول, 10-2. داده‌های ورودی, 10-3. خروجی‌های مورد انتظار, 10-4. شاخص‌های پیشنهادی, 10. ماژول کنترل هزینه و بودجه, 1. مقدمه, 2. اهداف اصلی سیستم, 3. کاربران اصلی سیستم (+19 more)
 
 ### Community 128 - "components.json"
 Cohesion: 0.10
 Nodes (19): aliases, components, hooks, lib, ui, utils, iconLibrary, registries (+11 more)
 
-### Community 129 - "project-personnel-summary.tsx"
-Cohesion: 0.16
-Nodes (16): ActivityLogFilterOptions, ActivityLogRow, base(), fetchActivityLog(), fetchActivityLogFilters(), fetchPersonnelSummary(), PaginatedActivityLog, PersonnelSummary (+8 more)
+### Community 129 - "reports.ts"
+Cohesion: 0.23
+Nodes (11): ActivityLogFilterOptions, ActivityLogRow, base(), fetchActivityLog(), fetchActivityLogFilters(), fetchPersonnelSummary(), PaginatedActivityLog, PersonnelSummary (+3 more)
 
 ### Community 130 - ".cursor/skills/design-system/scripts/generate-slide.py"
 Cohesion: 0.15
@@ -1289,21 +1330,21 @@ Nodes (19): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(),
 Cohesion: 0.11
 Nodes (20): $type, $value, $type, $value, $type, $value, $type, $value (+12 more)
 
-### Community 134 - "gray"
-Cohesion: 0.11
-Nodes (19): $type, $value, $type, $value, $type, $value, $type, $value (+11 more)
+### Community 134 - "procurement_service.py"
+Cohesion: 0.14
+Nodes (20): MaterialRequestSerializer, Meta, PurchaseOrderSerializer, approve_material_request(), cancel_material_request(), deliver_purchase_order(), _ensure_status(), _parse_date() (+12 more)
 
 ### Community 135 - "color"
-Cohesion: 0.11
-Nodes (19): $type, $value, background, destructive, foreground, muted-foreground, primary-hover, secondary (+11 more)
+Cohesion: 0.05
+Nodes (37): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+29 more)
 
 ### Community 136 - "DesignSystemGenerator"
 Cohesion: 0.14
 Nodes (11): DesignSystemGenerator, Find matching reasoning rule for a category., Apply reasoning rules to search results., Select best matching result based on priority keywords., Extract results list from search result dict., Generate complete design system recommendation. variance/motion/density are…, Bucket a 1-10 dial value into its tier config. Returns None if value is None., Generates design system recommendations from aggregated searches. (+3 more)
 
-### Community 137 - "alerts/tasks.py"
-Cohesion: 0.18
-Nodes (17): fire_cash_gap(), _delay_project_check(), on_actual_cost_saved(), on_correspondence_saved(), on_daily_report_saved(), on_inventory_tx_saved(), on_score_saved(), Real-time alert triggers via Django signals. (+9 more)
+### Community 137 - "signals.py"
+Cohesion: 0.40
+Nodes (9): _delay_project_check(), on_actual_cost_saved(), on_correspondence_saved(), on_daily_report_saved(), on_inventory_tx_saved(), on_score_saved(), Real-time alert triggers via Django signals., Queue alert evaluation after the surrounding DB transaction commits. When… (+1 more)
 
 ### Community 138 - "TestDailyReportCrud"
 Cohesion: 0.12
@@ -1315,7 +1356,7 @@ Nodes (16): base(), CORR_STATUS_LABELS, CORR_TYPE_LABELS, CorrespondenceRow, cre
 
 ### Community 140 - "color"
 Cohesion: 0.11
-Nodes (19): $type, $value, background, destructive-foreground, muted, primary-foreground, secondary, secondary-foreground (+11 more)
+Nodes (19): $type, $value, background, destructive-foreground, primary, primary-foreground, secondary, secondary-foreground (+11 more)
 
 ### Community 141 - "DesignSystemGenerator"
 Cohesion: 0.14
@@ -1327,11 +1368,11 @@ Nodes (19): $type, $value, $type, $value, $type, $value, $type, $value (+11 more
 
 ### Community 143 - "color"
 Cohesion: 0.11
-Nodes (19): $type, $value, background, foreground, muted-foreground, primary, primary-hover, secondary (+11 more)
+Nodes (19): $type, $value, background, destructive-foreground, muted, primary-foreground, secondary, secondary-foreground (+11 more)
 
 ### Community 144 - ".gemini/skills/ui-ux-pro-max/scripts/design_system.py"
-Cohesion: 0.15
-Nodes (18): ansi_ljust(), format_ascii_box(), format_markdown(), format_master_md(), generate_design_system(), hex_to_ansi(), persist_design_system(), Convert hex color to ANSI True Color swatch (██) with fallback. (+10 more)
+Cohesion: 0.17
+Nodes (16): _detect_page_type(), format_markdown(), format_master_md(), format_page_override_md(), generate_design_system(), _generate_intelligent_overrides(), persist_design_system(), Format a page-specific override file with intelligent AI-generated content. (+8 more)
 
 ### Community 145 - "DesignSystemGenerator"
 Cohesion: 0.14
@@ -1349,13 +1390,13 @@ Nodes (17): generate_css_for_background(), get_background_image(), get_curated_i
 Cohesion: 0.19
 Nodes (13): Backward compatibility alias for mobile., configured_channels(), ConsoleSmsBackend, deliver_alert_notifications(), get_sms_backend(), Multi-channel notification delivery (blueprint K-04)., Default SMS backend — logs only unless SMS_PROVIDER is configured., Deliver alert to recipients across configured channels. Returns count of… (+5 more)
 
-### Community 149 - "AuditSoftDeleteModel"
-Cohesion: 0.15
-Nodes (8): AllObjectsManager, AuditSoftDeleteModel, SoftDeleteManager, SoftDeleteQuerySet, Meta, RequisitionItem, RequisitionPriority, RequisitionType
+### Community 149 - "create_wbs_node"
+Cohesion: 0.13
+Nodes (5): create_wbs_node(), Creates a new WBS node within the tree hierarchy and attaches it to a project.…, django_db, TestWBSTree, TestWBSViewsMocks
 
-### Community 150 - "cost_control/serializers.py"
-Cohesion: 0.17
-Nodes (9): ActualCostSerializer, BudgetSerializer, CostPoolAllocationItemSerializer, CostPoolSerializer, _format_amount(), Meta, Cost control serializers., SupplierSerializer (+1 more)
+### Community 150 - "projects/views.py"
+Cohesion: 0.11
+Nodes (18): IsCommentor, IsHumanResource, IsInGroup, IsManager, IsVisitor, Role-based permission classes (SOLID: one concern per class). Use Django's…, Allow only if the user belongs to the given Django group (role). Use for role-…, Allow only users in the 'visitor' group. (+10 more)
 
 ### Community 151 - "consumer.py"
 Cohesion: 0.16
@@ -1373,61 +1414,65 @@ Nodes (17): generate_css_for_background(), get_background_image(), get_curated_i
 Cohesion: 0.17
 Nodes (16): _detect_page_type(), format_markdown(), format_master_md(), format_page_override_md(), generate_design_system(), _generate_intelligent_overrides(), persist_design_system(), Format a page-specific override file with intelligent AI-generated content. (+8 more)
 
-### Community 155 - "test_alert_api.py"
-Cohesion: 0.13
-Nodes (7): alert_log(), project_rule(), django_db, fixture, Alert REST API tests., TestAlertLogAPI, TestAlertRuleAPI
+### Community 155 - "TestAlertRuleAPI"
+Cohesion: 0.17
+Nodes (3): django_db, TestAlertLogAPI, TestAlertRuleAPI
 
-### Community 156 - "resolve_resource"
-Cohesion: 0.18
-Nodes (10): _parse_uuid(), UUID, Resolve resource_type and resource_id from API request paths., Match path against known API patterns and return resource metadata., resolve_resource(), ResolvedResource, AuditLogMiddlewareTests, APITestCase (+2 more)
+### Community 156 - "AuditLogMiddleware"
+Cohesion: 0.16
+Nodes (7): AuditLogMiddleware, AuditLogMiddlewareTests, AuditLogRedactionTests, APITestCase, override_settings, ResolveResourceTests, MiddlewareMixin
 
 ### Community 157 - "core/conftest.py"
 Cohesion: 0.21
 Nodes (16): activity(), api_client(), auth_client(), member(), other_user(), project(), project_manager_role(), fixture (+8 more)
 
-### Community 158 - "EventPublisher"
-Cohesion: 0.15
-Nodes (11): handle_daily_report_approved(), Enqueue progress recalculation when a daily report is approved., EventPublisher, Any, Encapsulates publishing JSON-formatted domain events to the RabbitMQ broker., Validates the topic, formats the payload into a JSON envelope, connects to the…, DailyReportApprovedHandlerTests, EventPublisherTests (+3 more)
+### Community 158 - "handle_daily_report_approved"
+Cohesion: 0.25
+Nodes (7): handle_daily_report_approved(), Enqueue progress recalculation when a daily report is approved., DailyReportApprovedHandlerTests, EventPublisherTests, override_settings, patch, TestCase
 
 ### Community 159 - "test_weather.py"
 Cohesion: 0.14
 Nodes (8): SiteStatus, django_db, fixture, TestWeatherLogCreate, TestWeatherLogFilters, TestWeatherLogList, TestWeatherLogSoftDelete, weather_url()
 
 ### Community 160 - "compute_material_balance"
-Cohesion: 0.13
-Nodes (9): _auto_create_inventory_from_report(), Create inventory transactions from approved daily report material entries., compute_material_balance(), Calculates the current balance, totals (received, issued, adjusted, requested),…, django_db, TestBalanceService, TestInventoryAutoPost, TestInventoryTransactionAPI (+1 more)
+Cohesion: 0.11
+Nodes (11): _auto_create_inventory_from_report(), Create inventory transactions from approved daily report material entries., compute_material_balance(), material_balance_list(), Returns a list of material balances for a given project, optionally filtered by…, Calculates the current balance, totals (received, issued, adjusted, requested),…, django_db, TestBalanceService (+3 more)
 
-### Community 161 - "inventory_lock_service.py"
-Cohesion: 0.15
-Nodes (15): get_block_stock(), HardStopError, issue_stock(), atomic, Block, Decimal, RequisitionItem, ValidationError (+7 more)
+### Community 161 - "business_meta/serializers.py"
+Cohesion: 0.12
+Nodes (14): FieldType, FieldDefinitionSerializer, Meta, PositionNestedSerializer, ProjectMemberCreateSerializer, ProjectMemberReadSerializer, ProjectMemberWriteSerializer, ProjectNestedMiniSerializer (+6 more)
 
 ### Community 162 - "card"
 Cohesion: 0.15
 Nodes (17): $type, $value, $type, $value, bg, bg, border, padding (+9 more)
 
 ### Community 163 - ".cursor/skills/ui-ux-pro-max/scripts/design_system.py"
-Cohesion: 0.17
-Nodes (16): _detect_page_type(), format_markdown(), format_master_md(), format_page_override_md(), generate_design_system(), _generate_intelligent_overrides(), persist_design_system(), Format a page-specific override file with intelligent AI-generated content. (+8 more)
+Cohesion: 0.15
+Nodes (18): ansi_ljust(), format_ascii_box(), format_markdown(), format_master_md(), generate_design_system(), hex_to_ansi(), persist_design_system(), Convert hex color to ANSI True Color swatch (██) with fallback. (+10 more)
 
 ### Community 164 - "scripts"
-Cohesion: 0.12
-Nodes (16): dependencies, @radix-ui/react-popover, name, private, scripts, build, db:migrate, db:seed (+8 more)
+Cohesion: 0.09
+Nodes (21): concurrently, dependencies, @radix-ui/react-popover, devDependencies, concurrently, @playwright/test, @playwright/test, name (+13 more)
 
 ### Community 165 - ".agents/skills/design/scripts/icon/generate.py"
 Cohesion: 0.20
 Nodes (15): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+7 more)
 
 ### Community 166 - "TestShadcnInstaller"
-Cohesion: 0.13
-Nodes (9): fixture, Test ShadcnInstaller class., Test adding all components in dry run mode., Create temporary project structure., Test initialization with custom project root., Test checking for existing shadcn config., Test checking for non-existent shadcn config., Test getting installed components without config. (+1 more)
+Cohesion: 0.12
+Nodes (9): Tests for shadcn_add.py, Test adding components without shadcn config., Test ShadcnInstaller class., Test adding all components in dry run mode., Test listing installed components without config., Test initialization with default project root., Test getting installed components when none exist., Test getting installed components when files exist. (+1 more)
+
+### Community 167 - "TestSyncBatch"
+Cohesion: 0.11
+Nodes (4): django_db, fixture, sync_url(), TestSyncBatch
 
 ### Community 168 - "department_activity_data_views.py"
-Cohesion: 0.25
-Nodes (9): DepartmentActivityDailyReportView, _DepartmentActivityDataBase, DepartmentActivityExportView, DepartmentActivityImportView, _DepartmentActivityReportView, DepartmentActivityWeeklyReportView, APIView, extend_schema (+1 more)
+Cohesion: 0.17
+Nodes (13): DepartmentActivityDailyReportView, _DepartmentActivityDataBase, DepartmentActivityExportView, DepartmentActivityImportView, _DepartmentActivityReportView, DepartmentActivityWeeklyReportView, APIView, extend_schema (+5 more)
 
-### Community 169 - "risk/serializers.py"
-Cohesion: 0.14
-Nodes (11): BarrierCreateSerializer, BarrierSerializer, Meta, Serializer for Barrier log instances., Validate status resolution requirements and related project linkages., Retrieve the full name or username of the responsible user., Validate that a resolved date is provided if the status is resolved., Serializer specifically designed for creating Barrier instances. (+3 more)
+### Community 169 - "DailyReportViewSet"
+Cohesion: 0.11
+Nodes (8): action, Mixin to provide standard workflow actions (submit, approve, reject) for DRF…, WorkflowViewSetMixin, DailyReportViewSet, action, extend_schema, extend_schema_view, _validate_report_ready_for_submit()
 
 ### Community 170 - ".cursor/skills/design/scripts/icon/generate.py"
 Cohesion: 0.20
@@ -1445,25 +1490,25 @@ Nodes (15): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(
 Cohesion: 0.12
 Nodes (9): Tests for shadcn_add.py, Test adding components without shadcn config., Test ShadcnInstaller class., Test adding all components in dry run mode., Test listing installed components without config., Test initialization with default project root., Test getting installed components when none exist., Test getting installed components when files exist. (+1 more)
 
-### Community 174 - "UserListView"
-Cohesion: 0.16
-Nodes (6): Meta, UserListSerializer, UserRegistrationSerializer, UserRegistrationService, Paginated list of all application users (phone-based accounts). Restricted to…, UserListView
+### Community 174 - "generate_snapshot"
+Cohesion: 0.12
+Nodes (16): annual_financing_rate(), compute_financing_cost(), Financing cost from delayed IPC payments., run_monte_carlo(), generate_snapshot(), generate_daily_snapshots(), shared_task, run_monte_carlo_task() (+8 more)
 
-### Community 175 - "apply_deductions"
-Cohesion: 0.21
-Nodes (14): apply_deductions(), auto_populate_ipc(), create_ipc(), next_ipc_number(), Creates a new draft Interim Payment Certificate (IPC). Automatically assigns…, Automatically populates the items of an Interim Payment Certificate (IPC) based…, Recalculates and applies standard automatic deductions (such as retention, tax,…, Determines the next sequential IPC number for a given contract. Returns 1 if no… (+6 more)
+### Community 175 - "ipc_service.py"
+Cohesion: 0.07
+Nodes (39): IPCDetailSerializer, add_manual_deduction(), apply_deductions(), approve_ipc(), auto_populate_ipc(), create_ipc(), delete_manual_deduction(), _ipc_cash_transaction_defaults() (+31 more)
 
-### Community 176 - "TestApprovalWorkflow"
-Cohesion: 0.20
-Nodes (6): _add_activity(), base_url(), draft_report(), django_db, fixture, TestApprovalWorkflow
+### Community 176 - "field_reports/tasks.py"
+Cohesion: 0.10
+Nodes (17): ActivityRowShift, DailyReportActivity, MaterialTransactionType, ReportStatus, Celery tasks and notification helpers for daily reports., celery_eager(), dr_base(), django_db (+9 more)
 
 ### Community 177 - "get_department_activity_queryset"
 Cohesion: 0.19
 Nodes (6): get_department_activity_queryset(), Any, DepartmentActivityRecord, QuerySet, Apply list/export filters from query parameters., DepartmentActivityServicesTests
 
-### Community 178 - "blue"
-Cohesion: 0.18
-Nodes (15): $type, $value, $type, $value, $type, $value, 50, 600 (+7 more)
+### Community 178 - "50"
+Cohesion: 0.67
+Nodes (4): $type, $value, 50, 50
 
 ### Community 179 - ".agents/skills/brand/scripts/extract-colors.cjs"
 Cohesion: 0.22
@@ -1477,9 +1522,9 @@ Nodes (13): checkManifest(), formatBytes(), formatOutput(), fs, main(), parseFil
 Cohesion: 0.20
 Nodes (12): detect_domain(), _load_csv(), Load CSV and return list of dicts, Core search function using BM25, Auto-detect the most relevant domain from query, Main search function with auto-domain detection, Search stack-specific guidelines, search() (+4 more)
 
-### Community 182 - "material_consumption_report"
-Cohesion: 0.15
-Nodes (12): activity_consumption_list(), _issued_qty(), material_consumption_list(), material_consumption_report(), Calculates the total quantity of materials issued to the field from a given…, Generates a comprehensive consumption report for a project, combining both per-…, Calculates the total quantity of materials wasted from a given queryset of…, Calculates the total quantity of materials received from a given queryset of… (+4 more)
+### Community 182 - "CanAccessStoredFile"
+Cohesion: 0.12
+Nodes (6): CanAccessStoredFile, Uploader (confirm) or project member (download) with admin override., django_db, patch, TestCanAccessStoredFile, TestStorageViews
 
 ### Community 183 - "Schedule & Progress Module Endpoints"
 Cohesion: 0.14
@@ -1510,8 +1555,8 @@ Cohesion: 0.25
 Nodes (13): checkManifest(), formatBytes(), formatOutput(), fs, main(), parseFilename(), path, RULES (+5 more)
 
 ### Community 190 - "color"
-Cohesion: 0.21
-Nodes (14): $type, $value, 500, green, red, white, yellow, 500 (+6 more)
+Cohesion: 0.15
+Nodes (21): $type, $value, $type, $value, 500, 600, blue, green (+13 more)
 
 ### Community 191 - "search"
 Cohesion: 0.20
@@ -1529,9 +1574,9 @@ Nodes (13): Color Scales Primitive, Core Visual Elements, Color Contrast Ratios,
 Cohesion: 0.15
 Nodes (12): component, $type, $value, dark, semantic, $schema, $type, $value (+4 more)
 
-### Community 195 - "cost_pool_service.py"
-Cohesion: 0.28
-Nodes (12): allocate_cost_pool(), auto_allocate_cost_pool(), compute_auto_allocations(), atomic, Decimal, _quantize_amount(), Cost pool allocation., Compute allocation rows for the remaining pool amount using the given method. (+4 more)
+### Community 195 - "wbs-node.tsx"
+Cohesion: 0.17
+Nodes (16): createWBSNode(), deleteWBSNode(), moveWBSNode(), updateWBSNode(), WBSFlatNode, WBSNode, PreviewNode, TemplateWBSPreviewTree() (+8 more)
 
 ### Community 196 - "ViewsTests"
 Cohesion: 0.15
@@ -1575,15 +1620,15 @@ Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), pat
 
 ### Community 206 - "card"
 Cohesion: 0.20
-Nodes (12): $type, $value, bg, bg, padding, shadow, card, bg (+4 more)
+Nodes (12): $type, $value, border, padding, shadow, border, card, border (+4 more)
 
 ### Community 207 - "input"
-Cohesion: 0.20
-Nodes (12): padding-x, padding-y, input, $type, $value, focus-ring, padding-x, padding-y (+4 more)
+Cohesion: 0.15
+Nodes (17): padding-x, padding-y, radius, radius, input, $type, $value, focus-ring (+9 more)
 
 ### Community 208 - "ShadcnInstaller"
 Cohesion: 0.18
-Nodes (7): main(), Handle shadcn/ui component installation., ShadcnInstaller, Test listing installed components when none exist., Test initialization with dry run mode., Test getting installed components when none exist., Test getting installed components when files exist.
+Nodes (7): main(), Handle shadcn/ui component installation., ShadcnInstaller, Test adding all components without config., Test listing installed components when none exist., Test listing installed components when they exist., Test initialization with dry run mode.
 
 ### Community 209 - ".check_shadcn_config"
 Cohesion: 0.21
@@ -1593,13 +1638,13 @@ Nodes (6): Add all available shadcn/ui components. Args: overwrite: If True, ove
 Cohesion: 0.20
 Nodes (6): Generate configuration file content. Returns: Configuration file as string, Generate TypeScript configuration., Generate JavaScript configuration., Format plugins array for config. Validates each plugin name against a strict…, Add indentation to JSON string., Write configuration to file. Returns: Tuple of (success, message)
 
-### Community 211 - "business_meta/permissions.py"
-Cohesion: 0.20
-Nodes (6): IsHrOrAdminOrReadOnly, IsVisitorReadOnly, Permissions for project-scoped assignment and position APIs., DepartmentActivityRecordViewSet, extend_schema_view, Project-scoped CRUD for `DepartmentActivityRecord`. Frontend per-department…
+### Community 211 - "business_meta/views.py"
+Cohesion: 0.11
+Nodes (15): IsBusinessSetup, Allow only users in the 'business-setup' group. Can add businesses and control…, FieldDefinition, CanViewProjectMembers, IsVisitorReadOnly, TableDefinitionWithFieldsSerializer, FieldDefinitionViewSet, ProjectPositionViewSet (+7 more)
 
-### Community 212 - "budget_service.py"
-Cohesion: 0.21
-Nodes (7): BudgetBulkItemSerializer, budget_summary(), bulk_upsert_budgets(), check_wbs_overrun(), atomic, Budget bulk upsert and overrun warnings., Return warning message if activity budgets exceed WBS-level budget per category.
+### Community 212 - "4. Feature Breakdown"
+Cohesion: 0.11
+Nodes (19): 4. Feature Breakdown, Module 10 — Equipment, Module 11 — Materials & Warehouse, Module 12 — Procurement, Module 13 — Subcontractor Control, Module 14 — Delays, Barriers & Risk, Module 15 — Document Control, Module 16 — Economic Engine (+11 more)
 
 ### Community 213 - "TestBlockCRUD"
 Cohesion: 0.17
@@ -1626,8 +1671,8 @@ Cohesion: 0.24
 Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), path, patterns (+3 more)
 
 ### Community 219 - "card"
-Cohesion: 0.20
-Nodes (12): $type, $value, bg, bg, padding, shadow, card, bg (+4 more)
+Cohesion: 0.15
+Nodes (17): $type, $value, $type, $value, bg, bg, border, padding (+9 more)
 
 ### Community 220 - "ShadcnInstaller"
 Cohesion: 0.18
@@ -1649,9 +1694,9 @@ Nodes (10): extractColorsFromTable(), extractCoreAttributes(), extractHexColors(
 Cohesion: 0.18
 Nodes (8): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle
 
-### Community 225 - "primitive"
-Cohesion: 0.18
-Nodes (11): fast, normal, slow, $type, $value, $type, $value, primitive (+3 more)
+### Community 225 - "duration"
+Cohesion: 0.20
+Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 
 ### Community 226 - "patch"
 Cohesion: 0.18
@@ -1666,16 +1711,16 @@ Cohesion: 0.20
 Nodes (6): AlertCheckerRegistry, Registry for alert checkers., A registry for alert checkers, adhering to the Open-Closed Principle. New…, Decorator to register a new checker function for a specific alert type., Retrieve the checker for a specific alert type., Execute the checker for the given rule.
 
 ### Community 229 - "service.py"
-Cohesion: 0.29
-Nodes (9): AuditLog, Meta, build_audit_payload(), persist_audit_log(), Any, UUID, Persist audit log entries from middleware or async consumer., Publish audit event asynchronously; fall back to synchronous DB write. (+1 more)
+Cohesion: 0.39
+Nodes (7): build_audit_payload(), persist_audit_log(), Any, UUID, Persist audit log entries from middleware or async consumer., Publish audit event asynchronously; fall back to synchronous DB write., record_audit_log()
 
 ### Community 231 - "get_gantt_data"
 Cohesion: 0.22
 Nodes (5): extend_schema, get_gantt_data(), django_db, TestGanttAPI, TestGanttService
 
-### Community 232 - "would_create_cycle"
-Cohesion: 0.25
-Nodes (8): _build_adjacency(), UUID, DFS cycle detection for activity predecessor/successor graphs., Map activity id -> list of successor ids (edges predecessor -> successor)., Return True if adding edge predecessor -> successor creates a cycle. DFS from…, would_create_cycle(), django_db, TestCycleDetection
+### Community 232 - "Color Semantics"
+Cohesion: 0.11
+Nodes (17): Accent, Applying Semantic Tokens, Background & Foreground, Border & Ring, Color Semantics, Dark Mode Overrides, Destructive, Interactive States (+9 more)
 
 ### Community 233 - ".cursor/skills/brand/scripts/inject-brand-context.cjs"
 Cohesion: 0.31
@@ -1705,9 +1750,9 @@ Nodes (10): extractColorsFromTable(), extractCoreAttributes(), extractHexColors(
 Cohesion: 0.18
 Nodes (8): args, fs, minimal, MINIMAL_TOKENS, path, projectRoot, tokensPath, wrapStyle
 
-### Community 240 - "primitive"
-Cohesion: 0.18
-Nodes (11): fast, normal, slow, $type, $value, $type, $value, primitive (+3 more)
+### Community 240 - "duration"
+Cohesion: 0.20
+Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 
 ### Community 241 - "patch"
 Cohesion: 0.18
@@ -1738,8 +1783,8 @@ Cohesion: 0.36
 Nodes (9): flattenTokens(), fs, generateCSS(), generateTailwind(), main(), parseArgs(), path, resolveReference() (+1 more)
 
 ### Community 248 - "button"
-Cohesion: 0.20
-Nodes (10): fg, font-size, hover-bg, button, $type, $value, $type, $value (+2 more)
+Cohesion: 0.15
+Nodes (15): $type, $value, bg, fg, font-size, hover-bg, bg, button (+7 more)
 
 ### Community 249 - "._base_config"
 Cohesion: 0.22
@@ -1749,9 +1794,13 @@ Nodes (6): Any, Path, Initialize generator. Args: typescript: If True, generate 
 Cohesion: 0.27
 Nodes (7): AnonRateThrottle, BurstAnonRateThrottle, BurstUserRateThrottle, LoginRateThrottle, Pick throttle scope from user role (admin > hr > default user)., RoleAwareUserRateThrottle, UserRateThrottle
 
-### Community 251 - "TestAuthenticationAPI"
-Cohesion: 0.22
-Nodes (5): api_client(), django_db, fixture, test_user(), TestAuthenticationAPI
+### Community 251 - "project-alerts.tsx"
+Cohesion: 0.29
+Nodes (14): acknowledgeAlert(), ALERT_TYPE_LABELS, AlertLogEntry, AlertRule, base(), createAlertRule(), deleteAlertRule(), fetchActiveAlertCounts() (+6 more)
+
+### Community 252 - "economic/views.py"
+Cohesion: 0.10
+Nodes (21): CostCategoryInflationMappingSerializer, EconomicSnapshotSerializer, InflationIndexSerializer, Meta, SimulationResultSerializer, CashFlowRealView, EconomicForecastView, EconomicHistoryView (+13 more)
 
 ### Community 253 - "django_db"
 Cohesion: 0.20
@@ -1761,9 +1810,13 @@ Nodes (5): django_db, TestEconomicHistoryAPI, TestEconomicSnapshotAPI, TestFinan
 Cohesion: 0.24
 Nodes (5): daily_report(), django_db, fixture, TestChildRows, TestDailyReportModel
 
-### Community 256 - "procurement/admin.py"
-Cohesion: 0.31
-Nodes (9): ApprovalLogAdmin, ApprovalLogInline, BlockAdmin, InternalTransferAdmin, InventoryAllocationAdmin, register, RequisitionHeaderAdmin, RequisitionItemAdmin (+1 more)
+### Community 255 - "TestLeaveRequestViewSet"
+Cohesion: 0.11
+Nodes (3): django_db, TestLeaveRequestViewSet, TestOvertimeRequestViewSet
+
+### Community 256 - "offlineWrite.ts"
+Cohesion: 0.26
+Nodes (16): addToQueue(), generateUUID(), getOfflineReport(), getQueueByProject(), getUnresolvedConflicts(), saveOfflineReport(), updateOfflineReport(), buildChildRowSyncMap() (+8 more)
 
 ### Community 257 - "web/package.json"
 Cohesion: 0.20
@@ -1821,25 +1874,29 @@ Nodes (8): CompletedProcess, Path, Regression tests for validate-tokens.cjs. The
 Cohesion: 0.28
 Nodes (5): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query
 
-### Community 271 - "AuditLogMiddleware"
-Cohesion: 0.36
-Nodes (3): AuditLogMiddleware, AuditLogRedactionTests, MiddlewareMixin
+### Community 271 - "TestWBSServicesExtended"
+Cohesion: 0.14
+Nodes (10): check_weight_warnings(), get_project_roots(), Decimal, Retrieves all root nodes (depth=1) of the WBS tree for a specific project. Root…, Calculates the total sum of a specific weight field (physical or financial)…, Validates that the sum of weights (both physical and financial) for a group of…, _sibling_weight_sum(), django_db (+2 more)
 
 ### Community 272 - "Authentication Module"
 Cohesion: 0.25
 Nodes (9): Authentication Module, User Login Endpoint (/login/), User Registration Endpoint (/register/), Authentication Routes Specification, LoginRateThrottle Rate Limiter, LoginView, UserRegistrationView, Business Meta Dynamic Schema Engine (+1 more)
 
-### Community 273 - "config/urls.py"
-Cohesion: 0.25
-Nodes (6): APIView, extend_schema, Deprecated: use RoleViewSet at /api/v1/roles/. Kept for import compatibility., Search users by name or email for member invitation., RoleListView, UserLookupView
+### Community 273 - "risk-events.ts"
+Cohesion: 0.18
+Nodes (15): base(), createRiskEvent(), deleteRiskEvent(), EVENT_TYPE_LABELS, fetchRiskEvents(), fetchRiskMatrix(), PaginatedRiskEvents, RiskEvent (+7 more)
 
-### Community 274 - "hr/views.py"
-Cohesion: 0.31
-Nodes (3): LeaveRequestSerializer, Meta, OvertimeRequestSerializer
+### Community 274 - "alerts/tasks.py"
+Cohesion: 0.18
+Nodes (10): ensure_project_rules(), fire_cash_gap(), fire_subcontractor_at_risk(), Alert evaluation helpers — delegates to alert_engine., Legacy helper — default rules are seeded system-wide., check_and_fire_for_project_task(), monitor_cash_gaps(), shared_task (+2 more)
 
-### Community 276 - "ItemViewSet"
-Cohesion: 0.28
-Nodes (6): ItemViewSet, action, extend_schema, Import items from Excel file, ViewSet for managing inventory items. Provides CRUD operations for items and…, Export all items to Excel file
+### Community 275 - "BarriersGrid.tsx"
+Cohesion: 0.30
+Nodes (12): BarrierCategory, BarrierLog, BarrierStatus, base(), CATEGORY_META, createBarrier(), deleteBarrier(), fetchBarriers() (+4 more)
+
+### Community 276 - "item_services.py"
+Cohesion: 0.16
+Nodes (17): _bulk_save_items(), export_items_to_excel(), _get_or_create_categories(), import_items_from_excel(), _parse_items_from_dataframe(), Import items from an Excel file. Returns a tuple of (imported_count, list of…, Export all items to an Excel file and return as bytes., _read_and_validate_excel() (+9 more)
 
 ### Community 279 - "frappe-gantt.d.ts"
 Cohesion: 0.22
@@ -1857,9 +1914,9 @@ Nodes (8): CompletedProcess, Path, Regression tests for validate-tokens.cjs. The
 Cohesion: 0.28
 Nodes (5): BM25, BM25 ranking algorithm for text search, Lowercase, split, remove punctuation, filter short words, Build BM25 index from documents, Score all documents against query
 
-### Community 283 - "Velora Master Engineering Blueprint"
-Cohesion: 0.22
-Nodes (9): MSP Import defusedxml Hardening, Sprint 6 Security Audit Report, ORM Parameterized SQL Injection Safeguards, Master Data Domain Database Schema, Offline-First Field PWA Strategy, Velora Master Engineering Blueprint, Legacy Inventory API Deprecation Rationale, Sprint 1-6 Completion Criteria Checklist (+1 more)
+### Community 283 - "Sprint 6 Security Audit Report"
+Cohesion: 0.67
+Nodes (3): MSP Import defusedxml Hardening, Sprint 6 Security Audit Report, ORM Parameterized SQL Injection Safeguards
 
 ### Community 284 - ".gemini/skills/brand/scripts/sync-brand-to-tokens.cjs"
 Cohesion: 0.33
@@ -1893,9 +1950,9 @@ Nodes (8): ansi_ljust(), format_ascii_box(), hex_to_ansi(), Convert hex color to
 Cohesion: 0.25
 Nodes (3): django_db, patch, TestDocumentsAPI
 
-### Community 292 - "test_approval_e2e.py"
-Cohesion: 0.29
-Nodes (6): celery_eager(), dr_base(), django_db, fixture, Approve daily report → progress update integration., TestApprovalProgressE2E
+### Community 292 - "6. Sprint Plan (13 Sprints × 2 Weeks)"
+Cohesion: 0.14
+Nodes (14): 6. Sprint Plan (13 Sprints × 2 Weeks), Sprint 10 — Materials, Equipment & HR, Sprint 11 — Subcontractors, Risks & Documents, Sprint 12 — Economic Engine & Simulation, Sprint 13 — Alerts, Executive Dashboard & Polish, Sprint 1 — Infrastructure & Auth, Sprint 2 — Projects, WBS & Members, Sprint 3 — Activities & Schedule Baseline (+6 more)
 
 ### Community 293 - "Command"
 Cohesion: 0.25
@@ -1913,9 +1970,9 @@ Nodes (8): auth.routes.ts Module, business.routes.ts Module, business-setup.rout
 Cohesion: 0.29
 Nodes (8): padding-x, input, $type, $value, focus-ring, padding-x, $type, $value
 
-### Community 298 - "format_ascii_box"
-Cohesion: 0.25
-Nodes (8): ansi_ljust(), format_ascii_box(), hex_to_ansi(), Convert hex color to ANSI True Color swatch (██) with fallback., Like str.ljust but accounts for zero-width ANSI escape sequences., Create a Unicode section separator: ├─── NAME ───...┤, Format design system as Unicode box with ANSI color swatches., section_header()
+### Community 298 - "project-manpower.tsx"
+Cohesion: 0.29
+Nodes (10): base(), fetchJobTitles(), fetchManpower(), JobTitles, ManpowerRow, saveManpowerDay(), Content(), Draft (+2 more)
 
 ### Community 299 - "input"
 Cohesion: 0.29
@@ -1929,9 +1986,9 @@ Nodes (7): Logo Design Reference, Logo AI Prompt Engineering Guide, Logo Negativ
 Cohesion: 0.29
 Nodes (7): Logo Design Reference, Core Logo Prompt Structure, Logo AI Prompt Engineering, Logo Negative Prompts, Core Logo Types (7 Types), Logo Scalability Checklist, Logo Style Guide
 
-### Community 302 - "IsHrOrAdmin"
-Cohesion: 0.33
-Nodes (3): IsHrOrAdmin, HR / admin user listing: Django groups `admin` or `hr`, or staff / superuser.…, UserAssignmentsListView
+### Community 302 - "ContractListSerializer"
+Cohesion: 0.23
+Nodes (4): ContractListSerializer, test_contract_list_serializer_without_ipc_stats(), test_contract_list_serializer_ipc_stats(), test_contract_list_serializer_n1_queries()
 
 ### Community 303 - "test_ratelimit.py"
 Cohesion: 0.33
@@ -1953,9 +2010,9 @@ Nodes (7): Customer Desktop Launcher Scripts, Customer PC Deployment Strategy, T
 Cohesion: 0.29
 Nodes (7): Django API Service (Dev Stack), MinIO Storage Service (Dev Stack), PostgreSQL Service (Dev Stack), RabbitMQ Service (Dev Stack), Redis Cache Service (Dev Stack), Traefik Gateway Service (Dev Stack), React Web Service (Dev Stack)
 
-### Community 309 - "Smart Logistics & Procurement PRD"
-Cohesion: 0.38
-Nodes (7): Block-Based Material Traceability, Block-Level Inventory Lock & Tagging, Material Requisition Sequential Workflow, Smart Logistics & Procurement PRD, Physical & Financial Progress Control, Project Control Automation System Blueprint, WBS Control Engine
+### Community 309 - "سند نیازمندی‌های فنی (PRD): سیستم یکپارچه تدارکات و لجستیک هوشمند (Block-Based Traceability)"
+Cohesion: 0.17
+Nodes (11): سند نیازمندی‌های فنی (PRD): سیستم یکپارچه تدارکات و لجستیک هوشمند (Block-Based Traceability), ۱. هدف سیستم (Executive Summary), ۲. ساختار شکست و کدینگ (Data Structures), ۳. انواع درخواست و منطق ورودی (Input Logic), ۴. موتور گردش کار و امضای ترتیبی (Strict Sequential Workflow), ۵. منطق خرید و توزیع بین کارپردازان (Procurement Logic), ۶. سیستم انبارداری و قفل‌گذاری متریال (Block-Level Inventory Lock), ۷. نیازمندی‌های دیتابیس و فنی (Technical Requirements) (+3 more)
 
 ### Community 310 - "Slide Layout Patterns"
 Cohesion: 0.33
@@ -1965,13 +2022,13 @@ Nodes (6): Card Grid Layout Pattern, Hero Focus Layout Pattern, Slide Layout Pat
 Cohesion: 0.40
 Nodes (6): Banner Sizes and Styles Reference, Banner Visual Styles, Standard Banner Dimensions, Banner Art Direction, Banner Design Skill, Banner Generation Workflow
 
-### Community 312 - "$type"
-Cohesion: 0.53
-Nodes (6): $type, $value, 600, 600, 600, 600
+### Community 312 - "2. Database Schema"
+Cohesion: 0.17
+Nodes (12): 2. Database Schema, Domain 10: Risk & Delays, Domain 11: Alerts / Notifications, Domain 1: Master Data, Domain 2: Project & WBS, Domain 3: Schedule, Domain 4: Daily Reports, Domain 5: Resources (Materials / Equipment) (+4 more)
 
-### Community 313 - "ratelimit_handlers.py"
-Cohesion: 0.40
-Nodes (5): handle_ratelimit_403(), ratelimit_view(), django-ratelimit helpers for auth endpoints., RATELIMIT_VIEW handler — return 429 with localized message., Django handler403 — return 429 JSON for django-ratelimit blocks.
+### Community 313 - "3.2 Core Endpoints"
+Cohesion: 0.17
+Nodes (12): 3.1 Conventions, 3.2 Core Endpoints, 3.3 Key Response Shape Examples, 3. API Design, Cash Flow, Contracts & IPCs, Cost Control, Daily Reports (+4 more)
 
 ### Community 314 - "Daily Field Reports Module"
 Cohesion: 0.33
@@ -1981,29 +2038,29 @@ Nodes (6): Daily Report Sub-Sections Ledger, Daily Report Approval Workflow, Dai
 Cohesion: 0.53
 Nodes (5): CategoryAdmin, DepartmentActivityRecordAdmin, ItemAdmin, register, SpaceMaterialRequestAdmin
 
-### Community 316 - "devDependencies"
-Cohesion: 0.33
-Nodes (6): @playwright/test, concurrently, devDependencies, concurrently, @playwright/test, @playwright/test
+### Community 316 - "Primitive Tokens"
+Cohesion: 0.17
+Nodes (11): Border Radius, Color Scales, Gray Scale, Motion / Duration, Primary Colors (Blue), Primitive Tokens, Shadows, Spacing Scale (+3 more)
 
-### Community 317 - "ConflictMergeEditor.tsx"
-Cohesion: 0.53
-Nodes (5): asRecord(), ConflictMergeEditor(), ConflictMergeEditorProps, formatValue(), inputTypeFor()
+### Community 317 - "offlineDB.ts"
+Cohesion: 0.07
+Nodes (47): JobTitleDTO, SubcontractorDTO, warmProjectCache(), cacheActivities(), CachedActivity, CachedManpowerTitle, CachedProject, CachedSubcontractor (+39 more)
 
-### Community 318 - "Procurement Module Implementation Plan"
-Cohesion: 0.33
-Nodes (6): Material Requisition (MR) Workflow, Procurement Module Implementation Plan, Purchase Order & Delivery Tracking Pipeline, Block-Based Material Traceability System, Block-Level Inventory Lock Mechanism, Sequential Procurement Signature Engine
+### Community 318 - "Component Tokens"
+Cohesion: 0.20
+Nodes (9): Alert Tokens, Badge Tokens, Button Tokens, Card Tokens, Component Tokens, Dialog/Modal Tokens, Input Tokens, Table Tokens (+1 more)
 
-### Community 319 - "Daily Site Progress Report Ingestion"
-Cohesion: 0.33
-Nodes (6): Daily Site Progress Report Ingestion, Project Control System Part 1 Blueprint, WBS Breakdown Structure Module, Shiraz Daily Activity Sheet Ingestion Schema, Shiraz 2000-Unit Project Excel Mapping Spec, Weather & Labor Log Spreadsheet Schema
+### Community 319 - "business_meta/models.py"
+Cohesion: 0.25
+Nodes (6): Meta, Meta models for multi-project dynamic schema. TableDefinition, FieldDefinition,…, A logical table (collection) within a project., RelationDefinition, RelationKind, TableDefinition
 
-### Community 320 - "Earned Value Management (EVM) Engine"
-Cohesion: 0.33
-Nodes (6): Cash Flow Risk Forecasting Module, IPC Payment Certificate Processing, Project Control System Part 2 Financial Blueprint, Earned Value Management (EVM) Engine, Physical Progress Weighted Rollup Engine, Schedule Variance & Delay Tracking Indices
+### Community 320 - "WBS"
+Cohesion: 0.31
+Nodes (6): WBS, build_nested_wbs_tree(), node_to_dict(), Iterative WBS tree serialization — no recursive Python calls., Builds a fully nested, hierarchical JSON representation of the WBS tree for a…, MP_Node
 
-### Community 321 - "_generate_intelligent_overrides"
-Cohesion: 0.33
-Nodes (6): _detect_page_type(), format_page_override_md(), _generate_intelligent_overrides(), Format a page-specific override file with intelligent AI-generated content., Generate intelligent overrides based on page type using layered search. Uses…, Detect page type from context and search results.
+### Community 321 - "9. سطح‌بندی دسترسی‌ها"
+Cohesion: 0.25
+Nodes (8): 9.1. دسترسی‌های برنامه‌ریزی, 9.2. دسترسی‌های مالی و هزینه, 9.3. دسترسی‌های قرارداد و صورت‌وضعیت, 9.4. دسترسی‌های اسناد, 9.5. دسترسی‌های خرید و تدارکات, 9.6. دسترسی‌های منابع انسانی پروژه, 9.7. دسترسی‌های مدیریتی, 9. سطح‌بندی دسترسی‌ها
 
 ### Community 322 - "Monorepo Migration Plan"
 Cohesion: 0.40
@@ -2017,13 +2074,13 @@ Nodes (5): Canvas Design System, Canvas Design Philosophy Approach, Color Contra
 Cohesion: 0.40
 Nodes (5): API Check CI Job, CI GitHub Actions Workflow, Web Check CI Job, E2E Playwright Workflow, Integration Smoke Test Workflow
 
-### Community 325 - "$type"
-Cohesion: 0.60
-Nodes (5): $type, $value, border, border, border
+### Community 325 - "Velora — Integrated Project Control Automation System"
+Cohesion: 0.25
+Nodes (7): 1.1 Architectural Overview, 1.2 Service Breakdown, 1.3 Offline-First Field Strategy, 1. System Architecture, Engineering Blueprint (Rev. 2), Key Formulas Reference, Velora — Integrated Project Control Automation System
 
-### Community 326 - "radius"
-Cohesion: 0.60
-Nodes (5): radius, radius, radius, $type, $value
+### Community 326 - "format_ascii_box"
+Cohesion: 0.25
+Nodes (8): ansi_ljust(), format_ascii_box(), hex_to_ansi(), Convert hex color to ANSI True Color swatch (██) with fallback., Like str.ljust but accounts for zero-width ANSI escape sequences., Create a Unicode section separator: ├─── NAME ───...┤, Format design system as Unicode box with ANSI color swatches., section_header()
 
 ### Community 327 - "Command"
 Cohesion: 0.40
@@ -2061,9 +2118,9 @@ Nodes (5): Velora Design Dials Config, Velora Design System Master Spec, Design 
 Cohesion: 0.60
 Nodes (5): $type, $value, 700, 700, 700
 
-### Community 340 - "$type"
-Cohesion: 0.60
-Nodes (5): $type, $value, border, border, border
+### Community 340 - "resolve_resource"
+Cohesion: 0.48
+Nodes (6): _parse_uuid(), UUID, Resolve resource_type and resource_id from API request paths., Match path against known API patterns and return resource metadata., resolve_resource(), ResolvedResource
 
 ### Community 341 - "radius"
 Cohesion: 0.60
@@ -2109,13 +2166,13 @@ Nodes (4): Dependabot Configuration, PR Labeler Configuration, GitHub Pull Reque
 Cohesion: 0.50
 Nodes (4): Brand Guideline Template, Brand Guidelines Architecture, Brand Guidelines Starter Template, Brand Starter Kit Palette
 
-### Community 352 - "50"
-Cohesion: 0.67
-Nodes (4): $type, $value, 50, 50
+### Community 352 - "LaborCampSerializer"
+Cohesion: 0.29
+Nodes (4): EquipmentLogSerializer, LaborCampSerializer, Meta, StandaloneManpowerSerializer
 
-### Community 353 - "800"
-Cohesion: 0.67
-Nodes (4): $type, $value, 800, 800
+### Community 353 - "11. روش‌های تخصیص هزینه‌های سرجمع"
+Cohesion: 0.29
+Nodes (7): 11.1. تخصیص بر اساس مقدار اجراشده, 11.2. تخصیص بر اساس بودجه مصوب, 11.3. تخصیص بر اساس نفرساعت, 11.4. تخصیص بر اساس ماشین‌ساعت, 11.5. تخصیص بر اساس آیتم‌های قرارداد یا BoQ, 11.6. تخصیص دستی با تأیید مسئول, 11. روش‌های تخصیص هزینه‌های سرجمع
 
 ### Community 355 - "UserAdmin"
 Cohesion: 0.50
@@ -2125,13 +2182,17 @@ Nodes (3): register, UserAdmin, BaseUserAdmin
 Cohesion: 0.50
 Nodes (4): Change Orders API Endpoints, Contracts API Endpoints, Interim Payment Certificates (IPCs) API Endpoints, Projects API Endpoints
 
-### Community 357 - "test_management_command.py"
-Cohesion: 0.67
-Nodes (3): django_db, test_seed_contracts_demo(), test_seed_contracts_demo_requires_activities()
+### Community 357 - "21. فرآیند پیشنهادی پیاده‌سازی"
+Cohesion: 0.29
+Nodes (7): 21.1. فاز اول: Stabilize, 21.2. فاز دوم: Opening Snapshot, 21.3. فاز سوم: Reconciliation, 21.4. فاز چهارم: Go-Live, 21.5. فاز پنجم: Gradual Enrichment, 21.6. فاز ششم: Parallel Run, 21. فرآیند پیشنهادی پیاده‌سازی
 
-### Community 361 - "PermissionCatalogView"
-Cohesion: 0.50
-Nodes (3): PermissionCatalogView, APIView, extend_schema
+### Community 358 - "5. Engineering Tasks"
+Cohesion: 0.29
+Nodes (7): 5.1 Foundation Layer, 5.2 Core Business Logic, 5.3 Economic Engine, 5.4 KPIs & Alerts, 5.5 Offline Sync, 5.6 Frontend, 5. Engineering Tasks
+
+### Community 361 - "EventPublisherIntegrationTests"
+Cohesion: 0.47
+Nodes (5): EventPublisherIntegrationTests, ProjectCreateEventIntegrationTests, APITestCase, override_settings, skipUnless
 
 ### Community 362 - "Business Setup Routes Chunk"
 Cohesion: 0.50
@@ -2145,17 +2206,13 @@ Nodes (4): $type, $value, 800, 800
 Cohesion: 0.67
 Nodes (4): padding-y, padding-y, $type, $value
 
-### Community 365 - "Sprint 1-3 UAT Checklist"
-Cohesion: 0.50
-Nodes (4): User Acceptance Criteria, Sprint 1-3 UAT Checklist, Velora E2E Test Coverage Matrix, Untested Module Priority Queue
-
 ### Community 366 - "padding-y"
 Cohesion: 0.67
 Nodes (4): padding-y, padding-y, $type, $value
 
-### Community 367 - "Design Master Orchestrator Skill"
-Cohesion: 0.67
-Nodes (3): Corporate Identity Program (CIP) Workflow, Design Master Orchestrator Skill, Logo Design Workflow
+### Community 367 - "_generate_intelligent_overrides"
+Cohesion: 0.33
+Nodes (6): _detect_page_type(), format_page_override_md(), _generate_intelligent_overrides(), Format a page-specific override file with intelligent AI-generated content., Generate intelligent overrides based on page type using layered search. Uses…, Detect page type from context and search results.
 
 ### Community 368 - "Unified Design Skill Routing"
 Cohesion: 0.67
@@ -2169,29 +2226,25 @@ Nodes (3): Tailwind CSS @theme Directive, Tailwind Mobile-First Responsive Desig
 Cohesion: 0.67
 Nodes (3): Local Environment Overrides, Local Development Guide, Native PostgreSQL and Redis Runner
 
-### Community 373 - "destructive-foreground"
-Cohesion: 0.67
-Nodes (3): destructive-foreground, $type, $value
+### Community 373 - "Sprint 13 UAT Sign-off"
+Cohesion: 0.33
+Nodes (5): Checklist, Load smoke (optional), Preconditions, Sign-off, Sprint 13 UAT Sign-off
 
-### Community 374 - "muted"
-Cohesion: 0.67
-Nodes (3): muted, $type, $value
+### Community 374 - "25. شاخص‌های کلیدی عملکرد پروژه"
+Cohesion: 0.33
+Nodes (6): 1. معماری عملیاتی سیستم, 25. شاخص‌های کلیدی عملکرد پروژه, 2. چرخه اطلاعات در پروژه, 3-1 ثبت گزارش روزانه, 3-2 تأیید گزارش روزانه, 3. چرخه روزانه سیستم
 
-### Community 375 - "primary"
-Cohesion: 0.67
-Nodes (3): primary, $type, $value
+### Community 375 - "17. ساختار پیشنهادی صفحات نرم‌افزار"
+Cohesion: 0.33
+Nodes (6): 17.1. صفحه پروژه‌ها, 17.2. صفحه تنظیمات پروژه, 17.3. صفحه تیم پروژه, 17.4. صفحه سمت‌ها, 17.5. صفحه دسترسی‌ها, 17. ساختار پیشنهادی صفحات نرم‌افزار
 
-### Community 376 - "primary-foreground"
-Cohesion: 0.67
-Nodes (3): primary-foreground, $type, $value
+### Community 376 - "generate_chunk_12.py"
+Cohesion: 0.47
+Nodes (3): add_node(), make_node_id(), normalize_id()
 
-### Community 377 - "ring"
-Cohesion: 0.67
-Nodes (3): ring, $type, $value
-
-### Community 378 - "secondary-foreground"
-Cohesion: 0.67
-Nodes (3): secondary-foreground, $type, $value
+### Community 378 - "11. ماژول جریان نقدی"
+Cohesion: 0.40
+Nodes (5): 11-1. هدف ماژول, 11-2. داده‌های ورودی, 11-3. خروجی‌های مورد انتظار, 11-4. فرمول‌های پیشنهادی, 11. ماژول جریان نقدی
 
 ### Community 392 - "Documents API Module"
 Cohesion: 0.67
@@ -2205,6 +2258,10 @@ Nodes (3): HR & Personnel Module Endpoints, Overtime Request Approval Workflow, 
 Cohesion: 0.67
 Nodes (3): Inventory API & Deprecation Notice, Dynamic Tables & Fields API Endpoints, Velora API Overview
 
+### Community 404 - "10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool"
+Cohesion: 0.40
+Nodes (5): 10.1. تعریف Cost Pool, 10.2. نمونه Cost Poolها, 10.3. وضعیت تخصیص Cost Pool, 10.4. مثال, 10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool
+
 ### Community 428 - "destructive"
 Cohesion: 0.67
 Nodes (3): destructive, $type, $value
@@ -2217,9 +2274,9 @@ Nodes (3): foreground, $type, $value
 Cohesion: 0.67
 Nodes (3): muted-foreground, $type, $value
 
-### Community 431 - "primary"
-Cohesion: 0.67
-Nodes (3): primary, $type, $value
+### Community 431 - "13. سطوح ورود اطلاعات گذشته"
+Cohesion: 0.40
+Nodes (5): 13.1. سطح اول: حداقلی و سریع, 13.2. سطح دوم: نیمه‌تفصیلی, 13.3. سطح سوم: تفصیلی, 13.4. پیشنهاد اجرایی, 13. سطوح ورود اطلاعات گذشته
 
 ### Community 432 - "primary-hover"
 Cohesion: 0.67
@@ -2233,45 +2290,185 @@ Nodes (3): ring, $type, $value
 Cohesion: 0.67
 Nodes (3): destructive, $type, $value
 
-### Community 440 - "destructive-foreground"
-Cohesion: 0.67
-Nodes (3): destructive-foreground, $type, $value
+### Community 440 - "22. ساختار پیشنهادی فایل Excel ورود اطلاعات افتتاحیه"
+Cohesion: 0.40
+Nodes (5): 22.1. Sheet اطلاعات پروژه, 22.2. Sheet WBS, 22.3. Sheet Opening Progress, 22.4. Sheet Opening Cost, 22. ساختار پیشنهادی فایل Excel ورود اطلاعات افتتاحیه
 
-### Community 441 - "muted"
-Cohesion: 0.67
-Nodes (3): muted, $type, $value
+### Community 441 - "3. اجزای اصلی این بخش از نرم‌افزار"
+Cohesion: 0.40
+Nodes (5): 3.1. شخص یا کاربر, 3.2. پروژه, 3.3. سمت یا نقش, 3.4. دسترسی, 3. اجزای اصلی این بخش از نرم‌افزار
 
-### Community 442 - "primary-foreground"
-Cohesion: 0.67
-Nodes (3): primary-foreground, $type, $value
+### Community 442 - "3. چالش‌های اصلی در پیاده‌سازی سیستم در میانه پروژه"
+Cohesion: 0.40
+Nodes (5): 3.1. ناقص بودن داده‌های تاریخی, 3.2. وجود اعداد سرجمع در حسابداری, 3.3. نبود ارتباط مستقیم بین حسابداری و WBS, 3.4. خطر تصمیم‌گیری بر اساس داده‌های نادرست, 3. چالش‌های اصلی در پیاده‌سازی سیستم در میانه پروژه
 
 ### Community 443 - "ring"
 Cohesion: 0.67
 Nodes (3): ring, $type, $value
 
-### Community 444 - "secondary-foreground"
+### Community 444 - "lg"
+Cohesion: 0.60
+Nodes (5): lg, $type, $value, lg, lg
+
+### Community 453 - "xl"
 Cohesion: 0.67
-Nodes (3): secondary-foreground, $type, $value
+Nodes (4): xl, xl, $type, $value
+
+### Community 456 - "50"
+Cohesion: 0.67
+Nodes (4): $type, $value, 50, 50
+
+### Community 457 - "طرح اولیه سیستم کنترل پروژه (بخش دوم- ماژول‌های مالی و تکمیلی ۱۱ تا ۲۶).md"
+Cohesion: 0.50
+Nodes (3): 22. هشدارها و اعلان‌های سیستم, 23. ارتباط بین ماژول‌ها, 24. گزارش‌های کلیدی پیشنهادی سیستم
+
+### Community 458 - "12. ماژول قراردادها"
+Cohesion: 0.50
+Nodes (4): 12-1. هدف ماژول, 12-2. داده‌های ورودی, 12-3. خروجی‌های مورد انتظار, 12. ماژول قراردادها
+
+### Community 558 - "13. ماژول صورت‌وضعیت‌ها"
+Cohesion: 0.50
+Nodes (4): 13-1. هدف ماژول, 13-2. داده‌های ورودی, 13-3. خروجی‌های مورد انتظار, 13. ماژول صورت‌وضعیت‌ها
+
+### Community 559 - "14. ماژول منابع انسانی"
+Cohesion: 0.50
+Nodes (4): 14-1. هدف ماژول, 14-2. داده‌های ورودی, 14-3. خروجی‌های مورد انتظار, 14. ماژول منابع انسانی
+
+### Community 560 - "15. ماژول ماشین‌آلات"
+Cohesion: 0.50
+Nodes (4): 15-1. هدف ماژول, 15-2. داده‌های ورودی, 15-3. خروجی‌های مورد انتظار, 15. ماژول ماشین‌آلات
+
+### Community 563 - "16. ماژول مصالح، کالا و انبار"
+Cohesion: 0.50
+Nodes (4): 16-1. هدف ماژول, 16-2. داده‌های ورودی, 16-3. خروجی‌های مورد انتظار, 16. ماژول مصالح، کالا و انبار
+
+### Community 567 - "17. ماژول خرید و تدارکات"
+Cohesion: 0.50
+Nodes (4): 17-1. هدف ماژول, 17-2. داده‌های ورودی, 17-3. خروجی‌های مورد انتظار, 17. ماژول خرید و تدارکات
+
+### Community 569 - "18. ماژول کنترل پیمانکاران جزء"
+Cohesion: 0.50
+Nodes (4): 18-1. هدف ماژول, 18-2. داده‌های ورودی, 18-3. خروجی‌های مورد انتظار, 18. ماژول کنترل پیمانکاران جزء
+
+### Community 570 - "19. ماژول تأخیرات، موانع و ریسک‌ها"
+Cohesion: 0.50
+Nodes (4): 19-1. هدف ماژول, 19-2. داده‌های ورودی, 19-3. خروجی‌های مورد انتظار, 19. ماژول تأخیرات، موانع و ریسک‌ها
+
+### Community 572 - "20. ماژول اسناد و مدارک پروژه"
+Cohesion: 0.50
+Nodes (4): 20-1. هدف ماژول, 20-2. داده‌های ورودی, 20-3. خروجی‌های مورد انتظار, 20. ماژول اسناد و مدارک پروژه
+
+### Community 576 - "21. ماژول داشبورد و گزارش‌های مدیریتی"
+Cohesion: 0.50
+Nodes (4): 21-1. هدف ماژول, 21-2. داده‌های ورودی, 21-3. خروجی‌های مورد انتظار, 21. ماژول داشبورد و گزارش‌های مدیریتی
+
+### Community 579 - "12. تعریف سطح اطمینان داده‌ها"
+Cohesion: 0.50
+Nodes (4): 12.1. ضرورت Data Confidence Level, 12.2. سطوح پیشنهادی اطمینان داده, 12.3. مثال, 12. تعریف سطح اطمینان داده‌ها
+
+### Community 606 - "14. تهیه Data Inventory"
+Cohesion: 0.50
+Nodes (4): 14.1. تعریف Data Inventory, 14.2. منابع اطلاعاتی قابل بررسی, 14.3. جدول پیشنهادی Data Inventory, 14. تهیه Data Inventory
+
+### Community 773 - "15. طراحی جدول Mapping بین حسابداری و PMIS"
+Cohesion: 0.50
+Nodes (4): 15.1. ضرورت Mapping, 15.2. ساختار Mapping, 15.3. جدول نمونه Mapping, 15. طراحی جدول Mapping بین حسابداری و PMIS
+
+### Community 776 - "16. ثبت Opening Progress"
+Cohesion: 0.50
+Nodes (4): 16.1. تعریف Opening Progress, 16.2. اطلاعات موردنیاز, 16.3. جدول نمونه, 16. ثبت Opening Progress
+
+### Community 777 - "17. ثبت Opening Cost"
+Cohesion: 0.50
+Nodes (4): 17.1. تعریف Opening Cost, 17.2. انواع هزینه در Opening Cost, 17.3. جدول نمونه Opening Cost, 17. ثبت Opening Cost
+
+### Community 778 - "18. تطبیق اطلاعات با حسابداری"
+Cohesion: 0.50
+Nodes (4): 18.1. هدف Reconciliation, 18.2. نمونه تطبیق هزینه, 18.3. جدول Reconciliation, 18. تطبیق اطلاعات با حسابداری
+
+### Community 779 - "19. نقش حسابداری و PMIS"
+Cohesion: 0.50
+Nodes (4): 19.1. حسابداری, 19.2. PMIS, 19.3. تعریف رابطه درست, 19. نقش حسابداری و PMIS
+
+### Community 780 - "4. اصل کلیدی: تعیین تاریخ برش"
+Cohesion: 0.50
+Nodes (4): 4.1. تعریف تاریخ برش, 4.2. مثال, 4.3. اهمیت تاریخ برش, 4. اصل کلیدی: تعیین تاریخ برش
+
+### Community 781 - "7. مفهوم Opening Balance در پروژه"
+Cohesion: 0.50
+Nodes (4): 7.1. تعریف Opening Balance, 7.2. اجزای اصلی Opening Balance, 7.3. کاربرد Opening Balance, 7. مفهوم Opening Balance در پروژه
+
+### Community 782 - "800"
+Cohesion: 0.67
+Nodes (4): $type, $value, 800, 800
+
+### Community 783 - "replace_ipcas.py"
+Cohesion: 1.00
+Nodes (3): main(), process_page(), replace_text()
+
+### Community 785 - "muted"
+Cohesion: 0.67
+Nodes (3): muted, $type, $value
+
+### Community 786 - "1.1.1 فونداسیون"
+Cohesion: 0.67
+Nodes (3): 1.1.1.1 بتن مگر, 1.1.1 فونداسیون, 1.1 ساختمان اداری
+
+### Community 787 - "20. الزامات ثبت اطلاعات بعد از تاریخ برش"
+Cohesion: 0.67
+Nodes (3): 20.1. الزامات کلی, 20.2. جدول الزامات, 20. الزامات ثبت اطلاعات بعد از تاریخ برش
+
+### Community 788 - "5. تفکیک داده‌های پروژه به دو گروه اصلی"
+Cohesion: 0.67
+Nodes (3): 5.1. داده‌های تاریخی, 5.2. داده‌های جاری, 5. تفکیک داده‌های پروژه به دو گروه اصلی
+
+### Community 789 - "6. رویکرد صحیح نسبت به اطلاعات گذشته"
+Cohesion: 0.67
+Nodes (3): 6.1. پرهیز از کمال‌گرایی, 6.2. اصل پیشنهادی, 6. رویکرد صحیح نسبت به اطلاعات گذشته
+
+### Community 790 - "8. تهیه Snapshot پروژه در تاریخ برش"
+Cohesion: 0.67
+Nodes (3): 8.1. تعریف Snapshot, 8.2. جدول پیشنهادی Snapshot, 8. تهیه Snapshot پروژه در تاریخ برش
+
+### Community 791 - "9. نحوه برخورد با اعداد سرجمع حسابداری"
+Cohesion: 0.67
+Nodes (3): 9.1. مسئله اعداد سرجمع, 9.2. اصل مهم, 9. نحوه برخورد با اعداد سرجمع حسابداری
+
+### Community 792 - "foreground"
+Cohesion: 0.67
+Nodes (3): foreground, $type, $value
+
+### Community 793 - "muted-foreground"
+Cohesion: 0.67
+Nodes (3): muted-foreground, $type, $value
+
+### Community 794 - "primary"
+Cohesion: 0.67
+Nodes (3): primary, $type, $value
+
+### Community 795 - "primary-hover"
+Cohesion: 0.67
+Nodes (3): primary-hover, $type, $value
 
 ## Knowledge Gaps
-- **1129 isolated node(s):** `DeductionType`, `Meta`, `ProgressSource`, `Meta`, `MspImportJobStatus` (+1124 more)
+- **1711 isolated node(s):** `fs`, `path`, `fs`, `path`, `fs` (+1706 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **303 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **307 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ProjectMember` connect `master_data/models.py` to `business_meta/serializers.py`, `HasProjectPermission`, `test_subcontractors.py`, `create_wbs_node`, `progress_views.py`, `contracts/models.py`, `resources/views.py`, `core/conftest.py`, `User`, `AlertLog`, `ensure_workshop_block`, `RequisitionHeader`, `project_templates/views.py`, `inventory/tests.py`, `authentication/views.py`, `full_project.py`, `Notification`, `business_meta/permissions.py`, `documents/views.py`, `test_approval_engine.py`, `test_views_extended.py`, `declare_topology`, `test_hr_api.py`?**
-  _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `Project` connect `full_project.py` to `business_meta/serializers.py`, `master_data/models.py`, `HasProjectPermission`, `alerts/tasks.py`, `economic/views.py`, `create_wbs_node`, `progress_views.py`, `contracts/models.py`, `resources/views.py`, `projects/models.py`, `models/__init__.py`, `core/conftest.py`, `User`, `department_activity_data_views.py`, `RequisitionHeader`, `project_templates/views.py`, `jalali.py`, `inventory/tests.py`, `inventory/views.py`, `test_report_views.py`, `test_validators.py`, `ProjectViewSet`, `documents/views.py`, `test_hr_api.py`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `AuditSoftDeleteModel` connect `AuditSoftDeleteModel` to `business_meta/serializers.py`, `master_data/models.py`, `test_subcontractors.py`, `contracts/models.py`, `resources/views.py`, `projects/models.py`, `field_reports/models.py`, `models/__init__.py`, `ipc_service.py`, `ensure_workshop_block`, `RequisitionHeader`, `field_reports/services/__init__.py`, `JalaliDateField`, `documents/views.py`, `cost_control/models.py`, `CostPool`, `test_risk_matrix_unit.py`, `test_hr_api.py`, `TestHRServices`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `HasProjectPermission` connect `HasProjectPermission` to `projects/models.py`, `test_subcontractors.py`, `contracts/views.py`, `BarrierLogViewSet`, `progress_views.py`, `activity_views.py`, `resources/views.py`, `projects/views.py`, `Activity`, `parse_jalali_or_gregorian`, `DailyReportViewSet`, `UUIDModel`, `test_coverage_gaps.py`, `wbs/views.py`, `daily_report_views.py`, `business_meta/services.py`, `documents/views.py`, `cost_control/views.py`, `economic/views.py`?**
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `ProjectMember` connect `projects/models.py` to `HasProjectPermission`, `test_subcontractors.py`, `contracts/models.py`, `resources/views.py`, `projects/views.py`, `core/conftest.py`, `business_meta/serializers.py`, `tests_unit.py`, `AlertLog`, `models/__init__.py`, `field_reports/tasks.py`, `UUIDModel`, `inventory/tests.py`, `authentication/views.py`, `full_project.py`, `Notification`, `business_meta/views.py`, `test_views_extended.py`, `EventPublisher`, `test_sprint8_carryover.py`, `test_hr_api.py`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `ProjectScopedViewSet` connect `HasProjectPermission` to `documents/views.py`, `BaseHRRequestViewSet`, `test_subcontractors.py`, `cost_control/views.py`, `models/__init__.py`, `ContractDetailSerializer`, `contracts/views.py`, `BarrierLogViewSet`, `activity_views.py`, `resources/views.py`, `test_hr_api.py`, `sub_reports/models.py`, `MaterialRequestViewSet`, `po_views.py`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Are the 83 inferred relationships involving `HasProjectPermission` (e.g. with `ActiveAlertsView` and `AlertAcknowledgeView`) actually correct?**
   _`HasProjectPermission` has 83 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `DeductionType`, `Meta`, `ProgressSource` to the rest of the system?**
-  _1129 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `offlineDB.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.028124723181858446 - nodes in this community are weakly interconnected._
-- **Should `page-header.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.058018179777802714 - nodes in this community are weakly interconnected._
+- **What connects `fs`, `path`, `fs` to the rest of the system?**
+  _1711 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `DailyReportForm.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.06656426011264721 - nodes in this community are weakly interconnected._
+- **Should `useProject` be split into smaller, more focused modules?**
+  _Cohesion score 0.04528763769889841 - nodes in this community are weakly interconnected._
