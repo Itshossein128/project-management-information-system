@@ -26,6 +26,14 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
   const stepsRef = useRef(steps);
   stepsRef.current = steps;
 
+  const markTourSeen = useCallback(() => {
+    try {
+      localStorage.setItem(`tour_seen_${tourId}`, "true");
+    } catch (e) {
+      console.error("Failed to save tour status to localStorage", e);
+    }
+  }, [tourId]);
+
   const startTour = useCallback(() => {
     const currentSteps = stepsRef.current;
     if (!currentSteps || currentSteps.length === 0) return;
@@ -68,18 +76,16 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
         const index = state.activeIndex ?? 0;
         availableSteps[index]?.onHighlight?.();
       },
-      onDestroyed: () => {
-        try {
-          localStorage.setItem(`tour_seen_${tourId}`, "true");
-        } catch (e) {
-          console.error("Failed to save tour status to localStorage", e);
-        }
-      },
     });
 
     driverObj.current = driverInstance;
     driverInstance.drive();
-  }, [tourId, i18n.language, t]);
+    // Record the tour as seen now rather than on driver's onDestroyed: driver
+    // only fires that hook once its entry animation has committed the active
+    // step, so dismissing the tour within that window would lose the flag and
+    // auto-start the tour again on the next visit.
+    markTourSeen();
+  }, [i18n.language, t, markTourSeen]);
 
   useEffect(() => {
     if (!autoStart) return;

@@ -25,6 +25,13 @@ function ProcurementNewContent() {
         },
       },
       {
+        element: "[data-tour='requisition-context']",
+        popover: {
+          title: t("tour.procurementNew.step3Title"),
+          description: t("tour.procurementNew.step3Desc"),
+        },
+      },
+      {
         element: "[data-tour='material-blocks']",
         popover: {
           title: t("tour.procurementNew.step2Title"),
@@ -32,17 +39,24 @@ function ProcurementNewContent() {
         },
       },
       {
+        element: "[data-tour='requisition-type']",
+        popover: {
+          title: t("tour.procurementNew.step9Title"),
+          description: t("tour.procurementNew.step9Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisition-priority']",
+        popover: {
+          title: t("tour.procurementNew.step10Title"),
+          description: t("tour.procurementNew.step10Desc"),
+        },
+      },
+      {
         element: "[data-tour='required-by-date']",
         popover: {
           title: t("tour.procurementNew.step8Title"),
           description: t("tour.procurementNew.step8Desc"),
-        },
-      },
-      {
-        element: "[data-tour='requisition-context']",
-        popover: {
-          title: t("tour.procurementNew.step3Title"),
-          description: t("tour.procurementNew.step3Desc"),
         },
       },
       {
@@ -237,7 +251,7 @@ function ProcurementNewContent() {
               </select>
             </label>
           )}
-          <label className="flex flex-col gap-1 text-sm">
+          <label className="flex flex-col gap-1 text-sm" data-tour="requisition-type">
             <span>{t("pages.procurement.workshop.reqType")}</span>
             <select
               className="rounded-md border px-3 py-2"
@@ -256,7 +270,7 @@ function ProcurementNewContent() {
               <option value="post_facto">{t("pages.procurement.workshop.typePostFacto")}</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-sm">
+          <label className="flex flex-col gap-1 text-sm" data-tour="requisition-priority">
             <span>{t("pages.procurement.workshop.priority")}</span>
             <select className="rounded-md border px-3 py-2" value={priority} onChange={(e: any) => setPriority(e.target.value)}>
               <option value="normal">{t("pages.procurement.workshop.priorityNormal")}</option>

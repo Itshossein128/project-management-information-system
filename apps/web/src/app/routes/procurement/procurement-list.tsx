@@ -59,6 +59,15 @@ function ProcurementListContent() {
           description: t("tour.procurementList.step4Desc"),
         },
       },
+      {
+        element: "[data-tour='notification-bell']",
+        popover: {
+          title: t("tour.procurementList.step5Title"),
+          description: t("tour.procurementList.step5Desc"),
+          side: "bottom",
+          align: "end",
+        },
+      },
     ],
   });
 

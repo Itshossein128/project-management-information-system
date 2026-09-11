@@ -144,6 +144,13 @@ function ProcurementDetailContent() {
         },
       },
       {
+        element: "[data-tour='line-item-hold']",
+        popover: {
+          title: t("tour.procurementDetail.step10Title"),
+          description: t("tour.procurementDetail.step10Desc"),
+        },
+      },
+      {
         element: "[data-tour='approval-timeline']",
         popover: {
           title: t("tour.procurementDetail.step5Title"),
@@ -386,7 +393,7 @@ function ProcurementDetailContent() {
               </tr>
             </thead>
             <tbody>
-              {req.items?.map((item) => (
+              {req.items?.map((item, itemIndex) => (
                 <tr key={item.id} className="border-t border-border">
                   <td className="px-3 py-2">{item.line_number}</td>
                   <td className="px-3 py-2">
@@ -438,6 +445,7 @@ function ProcurementDetailContent() {
                         variant="outline"
                         disabled={holdMut.isPending}
                         onClick={() => holdMut.mutate(item.id)}
+                        {...(itemIndex === 0 ? { "data-tour": "line-item-hold" } : {})}
                       >
                         {t("pages.procurement.approval.onHold")}
                       </Button>

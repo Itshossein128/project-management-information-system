@@ -933,8 +933,8 @@
       "title": "New Requisition Tour",
       "step1Title": "Requisition Scope",
       "step1Desc": "Choose block (site/phase) or workshop. Workshop requests skip some site-approval stages.",
-      "step2Title": "Request Details",
-      "step2Desc": "Set block (when needed), type (planned, fast-track, post-facto), priority, and urgency.",
+      "step2Title": "Target Block",
+      "step2Desc": "Pick the destination block. Each block is its own cost centre and virtual warehouse, so material bought on this request can only be consumed in that block.",
       "step3Title": "Scope Guidance",
       "step3Desc": "Workshop notes explain the shorter path. If no blocks exist, open block management first.",
       "step4Title": "Provisional GRN",
@@ -946,12 +946,16 @@
       "step7Title": "Save Draft",
       "step7Desc": "Save as draft to start the workflow later, or cancel to return to the list.",
       "step8Title": "Need Date",
-      "step8Desc": "Set the required-by date so planned requests can be compared with the project schedule."
+      "step8Desc": "Set the required-by date so planned requests can be compared with the project schedule.",
+      "step9Title": "Request Type",
+      "step9Desc": "Planned: validated against the required-by date and the baseline schedule. Fast-track: gets a red tag, notifies managers the moment it is saved, and jumps the procurement queue. Post-facto: records a purchase already made by phone, and its goods receipt stays provisional until every signature is collected.",
+      "step10Title": "Priority and Urgency",
+      "step10Desc": "Priority follows the request type automatically (fast-track becomes high, post-facto becomes emergency) and can still be overridden. Use the urgency field to explain the rush; that text is included in the manager notification."
     },
     "procurementDetail": {
       "title": "Requisition Detail Tour",
       "step1Title": "Workflow Stepper",
-      "step1Desc": "Follow approval stages: completed, current, skipped, or pending.",
+      "step1Desc": "Follow approval stages: completed, current, skipped, or pending. The workflow is strictly sequential — a stage only opens once the previous one is approved, and nobody can jump ahead or override it.",
       "step2Title": "Requisition Overview",
       "step2Desc": "See scope, status, type/priority, requester, and request date.",
       "step3Title": "Waiting Banner",
@@ -966,8 +970,10 @@
       "step7Desc": "Drafts can be submitted. In-flight requests can be approved, returned, or rejected with a comment.",
       "step8Title": "Split Between Officers",
       "step8Desc": "Assign each line to a procurement officer. Different rows can go to different people.",
-      "step9Title": "Partial Approval / On-Hold",
-      "step9Desc": "At final approval, approve some quantities and put the rest on-hold for later budget instead of cancelling them."
+      "step9Title": "Partial Approval",
+      "step9Desc": "At final approval you can approve less than the requested quantity on any line — for example when the budget only covers 5 of 20 lines. Edit the quantities, then save them here.",
+      "step10Title": "Put a Line On-Hold",
+      "step10Desc": "An unapproved line is never cancelled. Use this to move it to \"waiting for budget\" so it can be bought in a later batch. On-hold lines are tracked in the liquidity tab of the reports page."
     },
     "procurementList": {
       "title": "Requisitions List Tour",
@@ -978,7 +984,9 @@
       "step3Title": "Results",
       "step3Desc": "The table lists number, scope, progress, last action, and next approver. Fast-track rows show a red tag and notify the project manager immediately.",
       "step4Title": "Open a Request",
-      "step4Desc": "Use View to open requisition detail and continue approval."
+      "step4Desc": "Use View to open requisition detail and continue approval.",
+      "step5Title": "Fast-Track Notifications",
+      "step5Desc": "The moment a fast-track request is saved, its notification lands on this bell and the counter turns red. Clicking the notification opens that requisition directly. The same alerts are archived in the project Alert Center."
     },
     "procurementBlocks": {
       "title": "Procurement Blocks Tour",
@@ -1034,6 +1042,19 @@
       "step2Desc": "Pending documents wait here until a project manager approves or rejects them.",
       "step3Title": "PM Approval",
       "step3Desc": "Approval adjusts both blocks’ allocations. Rejection leaves stock locked on the source block."
+    },
+    "projectAlerts": {
+      "title": "Alert Center Tour",
+      "step1Title": "Project Alert Center",
+      "step1Desc": "Every automatic project alert collects here. The active tab holds what still needs attention; the rules tab controls how alerts are raised.",
+      "step2Title": "Active Alerts",
+      "step2Desc": "Alerts are grouped by type — for example \"Fast-Track Purchase Requisition\" for requests filed with the red tag, alongside budget overruns, low stock, and late procurement.",
+      "step3Title": "Clearing an Alert",
+      "step3Desc": "Read the message and the time it fired, then close it with \"Resolved\" once you have followed up. \"Mark all\" clears the whole list at once.",
+      "step4Title": "Live Notification",
+      "step4Desc": "Each alert also arrives on this bell as it fires. A fast-track notification links straight to its requisition so a manager lands on it without searching.",
+      "step5Title": "Alert Rules",
+      "step5Desc": "This tab defines the threshold for each alert, which roles are notified, and how long to wait before repeating it. System rules (marked with a lock) cannot be deleted but can be switched off. Use \"Add alert rule\" to create your own; the cooldown in hours is what stops the same subject notifying repeatedly."
     },
     "projectManpower": {
       "title": "Project Manpower Tour",

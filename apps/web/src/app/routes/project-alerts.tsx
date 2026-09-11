@@ -22,6 +22,8 @@ import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 
 type Tab = "active" | "rules";
 
@@ -52,6 +54,55 @@ function AlertCenterContent() {
     threshold_value: 90,
     notify_roles: "project_manager",
     cooldown_hours: 48,
+  });
+
+  const { startTour } = useProductTour({
+    tourId: "project-alerts",
+    steps: [
+      {
+        element: "[data-tour='alerts-tabs']",
+        popover: {
+          title: t("tour.projectAlerts.step1Title"),
+          description: t("tour.projectAlerts.step1Desc"),
+        },
+        onHighlight: () => setTab("active"),
+      },
+      {
+        element: "[data-tour='alerts-active-list']",
+        popover: {
+          title: t("tour.projectAlerts.step2Title"),
+          description: t("tour.projectAlerts.step2Desc"),
+        },
+        onHighlight: () => setTab("active"),
+      },
+      {
+        element: "[data-tour='alerts-acknowledge']",
+        popover: {
+          title: t("tour.projectAlerts.step3Title"),
+          description: t("tour.projectAlerts.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='notification-bell']",
+        popover: {
+          title: t("tour.projectAlerts.step4Title"),
+          description: t("tour.projectAlerts.step4Desc"),
+          side: "bottom",
+          align: "end",
+        },
+      },
+      {
+        // Opens the rules tab so its table is visible while this step is read.
+        // Steps cannot target the rules markup directly: useProductTour drops
+        // steps whose element is unmounted when the tour starts.
+        element: "[data-tour='alerts-rules-tab']",
+        popover: {
+          title: t("tour.projectAlerts.step5Title"),
+          description: t("tour.projectAlerts.step5Desc"),
+        },
+        onHighlight: () => setTab("rules"),
+      },
+    ],
   });
 
   const {
@@ -133,21 +184,30 @@ function AlertCenterContent() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={t("pages.alerts.title")} subtitle={project.project_name} />
+      <PageHeader
+        title={t("pages.alerts.title")}
+        subtitle={project.project_name}
+        actions={<ProductTourButton onClick={startTour} />}
+      />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" data-tour="alerts-tabs">
         <Button variant={tab === "active" ? "primary" : "secondary"} size="sm" onClick={() => setTab("active")}>
           هشدارهای فعال
         </Button>
         {canManage ? (
-          <Button variant={tab === "rules" ? "primary" : "secondary"} size="sm" onClick={() => setTab("rules")}>
+          <Button
+            variant={tab === "rules" ? "primary" : "secondary"}
+            size="sm"
+            data-tour="alerts-rules-tab"
+            onClick={() => setTab("rules")}
+          >
             قوانین هشدار
           </Button>
         ) : null}
       </div>
 
       {tab === "active" ? (
-        <div className="space-y-4">
+        <div className="space-y-4" data-tour="alerts-active-list">
           <div className="flex justify-end">
             {(alerts?.results?.length ?? 0) > 0 ? (
               <Button variant="secondary" size="sm" onClick={() => ackAll.mutate()} disabled={ackAll.isPending}>
@@ -162,14 +222,20 @@ function AlertCenterContent() {
               description="وقتی آستانه‌ای رد شود، هشدارها اینجا نمایش داده می‌شوند."
             />
           ) : (
-            Array.from(grouped.entries()).map(([type, items]) => (
+            Array.from(grouped.entries()).map(([type, items], groupIdx) => (
               <div key={type} className="rounded-lg border">
                 <div className="border-b bg-muted/40 px-4 py-2 font-medium">
                   {ALERT_TYPE_LABELS[type] ?? type}
                 </div>
                 <ul className="divide-y">
-                  {items.map((item) => (
-                    <li key={item.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+                  {items.map((item, itemIdx) => (
+                    <li
+                      key={item.id}
+                      className="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
+                      {...(groupIdx === 0 && itemIdx === 0
+                        ? { "data-tour": "alerts-acknowledge" }
+                        : {})}
+                    >
                       <div>
                         <p className="text-sm">{item.message}</p>
                         <p className="mt-1 text-xs text-muted-foreground">{new Date(item.fired_at).toLocaleString("fa-IR")}</p>
