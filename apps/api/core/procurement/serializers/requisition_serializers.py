@@ -13,6 +13,7 @@ from procurement.models import (
     ItemStatus,
     WORKSHOP_BLOCK_CODE,
 )
+from procurement.services.fast_track_notify import notify_fast_track_requisition
 from procurement.services.workshop_block_service import ensure_workshop_block
 
 
@@ -198,6 +199,7 @@ class RequisitionHeaderCreateSerializer(serializers.ModelSerializer):
         from procurement.services.workflow_timeline_service import log_requisition_created
 
         log_requisition_created(header, user)
+        notify_fast_track_requisition(header)
         return header
 
     def validate(self, attrs):

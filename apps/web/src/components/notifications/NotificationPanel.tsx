@@ -89,7 +89,9 @@ export function NotificationPanel({
                   <span
                     className={cn(
                       "mt-1.5 size-2 shrink-0 rounded-full",
-                      TYPE_ACCENT[n.notification_type],
+                      n.link.includes("/procurement/req/")
+                        ? "bg-danger-500"
+                        : TYPE_ACCENT[n.notification_type],
                       n.is_read && "opacity-30",
                     )}
                     aria-hidden

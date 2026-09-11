@@ -976,7 +976,7 @@
       "step2Title": "Quick Actions",
       "step2Desc": "Create a block or workshop request, or jump to officer desk, inventory, reports, and inter-block transfers.",
       "step3Title": "Results",
-      "step3Desc": "The table lists number, scope, progress, last action, and next approver. Empty or error states also appear here.",
+      "step3Desc": "The table lists number, scope, progress, last action, and next approver. Fast-track rows show a red tag and notify the project manager immediately.",
       "step4Title": "Open a Request",
       "step4Desc": "Use View to open requisition detail and continue approval."
     },

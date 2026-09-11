@@ -396,3 +396,29 @@ def _check_procurement_overdue(rule, project_id):
             project_id,
             extra_context={'link': f'/projects/{project_id}/procurement'},
         )
+
+
+@alert_registry.register('procurement_fast_track')
+def _check_procurement_fast_track(rule, project_id):
+    """Catch-up for fast-track MRs that missed the live create/submit hook."""
+    from procurement.models import RequisitionHeader, RequisitionStatus, RequisitionType
+    from procurement.services.fast_track_notify import (
+        fast_track_link,
+        fast_track_message,
+        fast_track_trigger_ref,
+    )
+
+    open_fast_tracks = RequisitionHeader.objects.filter(
+        project_id=project_id,
+        requisition_type=RequisitionType.FAST_TRACK,
+        is_deleted=False,
+    ).exclude(status=RequisitionStatus.REJECTED)
+
+    for req in open_fast_tracks:
+        fire_alert(
+            rule.id,
+            fast_track_trigger_ref(req),
+            fast_track_message(req),
+            project_id,
+            extra_context={'link': fast_track_link(req)},
+        )

@@ -83,3 +83,20 @@ def test_fire_alert_for_type_returns_none_without_rule(db, project):
     AlertRule.objects.filter(alert_type='ipc_payment_overdue').delete()
     log = fire_alert_for_type(project.id, 'ipc_payment_overdue', 'ipc:x', 'msg')
     assert log is None
+
+
+def test_fire_alert_notifies_project_manager_fk(db, project, user, alert_rule):
+    from master_data.models import ProjectMember, ProjectMemberRole
+
+    ProjectMemberRole.objects.filter(
+        member__project=project,
+        role__role_name='project_manager',
+    ).delete()
+    ProjectMember.objects.filter(project=project, user=user).delete()
+    project.project_manager = user
+    project.save(update_fields=['project_manager'])
+
+    log = fire_alert(alert_rule.id, 'wbs:pm-fk', 'PM fallback', project.id)
+    assert log is not None
+    assert log.notifications_sent >= 1
+    assert Notification.objects.filter(user=user, project=project).exists()

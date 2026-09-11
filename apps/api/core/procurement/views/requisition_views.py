@@ -22,6 +22,7 @@ from procurement.serializers import (
     RequisitionHeaderSerializer,
     RequisitionItemSerializer,
 )
+from procurement.services.fast_track_notify import notify_fast_track_requisition
 
 
 class BlockViewSet(ProjectScopedViewSet):
@@ -144,7 +145,8 @@ class RequisitionHeaderViewSet(viewsets.ModelViewSet):
             raise ValidationError(
                 {'detail': 'Requisition can only be edited in DRAFT status.'}
             )
-        serializer.save(updated_by=self.request.user)
+        instance = serializer.save(updated_by=self.request.user)
+        notify_fast_track_requisition(instance)
 
     def perform_destroy(self, instance):
         if instance.status != RequisitionStatus.DRAFT:

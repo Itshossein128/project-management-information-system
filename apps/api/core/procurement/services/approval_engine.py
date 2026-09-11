@@ -6,6 +6,7 @@ from django.db.models import Sum
 from rest_framework.exceptions import ValidationError
 
 from procurement.models import RequisitionHeader, RequisitionItem, RequisitionScope, RequisitionStatus
+from procurement.services.fast_track_notify import notify_fast_track_requisition
 
 # Block-scoped requisitions include workshop_approval step.
 BLOCK_WORKFLOW_TRANSITIONS: dict[str, dict[str, str]] = {
@@ -192,4 +193,8 @@ def transition(
     requisition.status = next_status
     requisition.updated_by = performed_by
     requisition.save(update_fields=['status', 'updated_by', 'updated_at'])
+
+    if current_status == RequisitionStatus.DRAFT and action == 'approve':
+        notify_fast_track_requisition(requisition)
+
     return requisition

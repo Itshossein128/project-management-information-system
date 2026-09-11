@@ -59,6 +59,7 @@ test.describe("Sprint 13 — Executive Dashboard & Alerts Polish", () => {
     await expect(page.getByRole("option", { name: /مسیر بحرانی/i })).toBeVisible();
     await expect(page.getByRole("option", { name: /تأیید IPC/i })).toBeVisible();
     await expect(page.getByRole("option", { name: /تأمین و خرید/i })).toBeVisible();
+    await expect(page.getByRole("option", { name: /فورس‌ماژور/i })).toBeVisible();
   });
 
   test("health alias returns same shape as kpis", async ({ page }) => {
