@@ -395,6 +395,7 @@
 
   html {
     color-scheme: light;
+    --driver-popover-font-family: var(--font-sans);
   }
 
   html.dark {
@@ -403,10 +404,12 @@
 
   html:lang(fa) {
     font-family: var(--font-persian);
+    --driver-popover-font-family: var(--font-persian);
   }
 
   html:lang(en) {
     font-family: var(--font-latin);
+    --driver-popover-font-family: var(--font-latin);
   }
 
   body {
@@ -660,4 +663,19 @@
 
 button {
   cursor: pointer;
+}
+
+/* driver.js popovers use `all: unset` plus a Helvetica stack, so they skip app fonts. */
+.driver-popover,
+.driver-popover-title,
+.driver-popover-description,
+.driver-popover-footer-btn,
+.driver-popover-progress-text,
+.driver-popover-close-btn {
+  font-family: var(--driver-popover-font-family, var(--font-sans));
+}
+
+[dir="rtl"] .driver-popover-close-btn {
+  right: auto;
+  left: 0;
 }

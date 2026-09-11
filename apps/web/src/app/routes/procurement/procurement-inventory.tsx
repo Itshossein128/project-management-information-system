@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { PageHeader, Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
 import { ProjectProvider, useProject } from "~/contexts/project-context";
-import { fetchBlocks, fetchBlockStock, issueStock } from "~/lib/api/procurement";
+import { fetchBlocks, fetchBlockStock, issueStock, recordGRN, fetchRequisitions, fetchRequisition } from "~/lib/api/procurement";
 import { PATHS } from "~/routeVars";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
@@ -32,6 +32,27 @@ function ProcurementInventoryContent() {
           description: t("tour.procurementInventory.step2Desc"),
         },
       },
+      {
+        element: "[data-tour='inventory-stock-table']",
+        popover: {
+          title: t("tour.procurementInventory.step3Title"),
+          description: t("tour.procurementInventory.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-issue-action']",
+        popover: {
+          title: t("tour.procurementInventory.step4Title"),
+          description: t("tour.procurementInventory.step4Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-grn']",
+        popover: {
+          title: t("tour.procurementInventory.step5Title"),
+          description: t("tour.procurementInventory.step5Desc"),
+        },
+      },
     ],
   });
 
@@ -42,6 +63,9 @@ function ProcurementInventoryContent() {
   const [selectedBlock, setSelectedBlock] = useState("");
   const [issueDrawer, setIssueDrawer] = useState<any>(null);
   const [issueQty, setIssueQty] = useState("");
+  const [grnReqId, setGrnReqId] = useState("");
+  const [grnItemId, setGrnItemId] = useState("");
+  const [grnQty, setGrnQty] = useState("");
 
   const { data: blocks = [] } = useQuery({
     queryKey: ["blocks", projectId],
@@ -54,6 +78,18 @@ function ProcurementInventoryContent() {
     enabled: !!selectedBlock,
   });
 
+  const { data: approvedReqs = [] } = useQuery({
+    queryKey: ["procurement", projectId, "approved", selectedBlock],
+    queryFn: () => fetchRequisitions(projectId, { status: "approved", block: selectedBlock }),
+    enabled: !!selectedBlock,
+  });
+
+  const { data: grnReq } = useQuery({
+    queryKey: ["requisition", projectId, grnReqId],
+    queryFn: () => fetchRequisition(projectId, grnReqId),
+    enabled: !!grnReqId,
+  });
+
   const issueMut = useMutation({
     mutationFn: (payload: { allocation_id: string; issue_qty: number }) => issueStock(projectId, selectedBlock, payload),
     onSuccess: () => {
@@ -63,6 +99,22 @@ function ProcurementInventoryContent() {
       void qc.invalidateQueries({ queryKey: ["blockStock", projectId, selectedBlock] });
     },
     onError: (e: any) => toast.error(e.message || "خطا در صدور حواله (Hard Stop ممکن است رخ داده باشد)"),
+  });
+
+  const grnMut = useMutation({
+    mutationFn: () =>
+      recordGRN(projectId, selectedBlock, {
+        requisition_item_id: grnItemId,
+        received_qty: Number(grnQty),
+      }),
+    onSuccess: () => {
+      toast.success(t("pages.procurement.inventory.grnSuccess"));
+      setGrnQty("");
+      setGrnItemId("");
+      void qc.invalidateQueries({ queryKey: ["blockStock", projectId, selectedBlock] });
+      void qc.invalidateQueries({ queryKey: ["requisition", projectId, grnReqId] });
+    },
+    onError: (e: Error) => toast.error(e.message || t("pages.procurement.inventory.grnError")),
   });
 
   const handleIssue = () => {
@@ -98,6 +150,69 @@ function ProcurementInventoryContent() {
         </label>
       </div>
 
+      {selectedBlock ? (
+        <div className="space-y-3 rounded-lg border border-border bg-card p-4" data-tour="inventory-grn">
+          <h3 className="font-medium">{t("pages.procurement.inventory.grnTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("pages.procurement.inventory.grnHint")}</p>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.workshop.colNumber")}</span>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={grnReqId}
+                onChange={(e) => {
+                  setGrnReqId(e.target.value);
+                  setGrnItemId("");
+                }}
+              >
+                <option value="">{t("pages.procurement.inventory.selectRequisition")}</option>
+                {approvedReqs.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.requisition_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.workshop.material")}</span>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={grnItemId}
+                onChange={(e) => setGrnItemId(e.target.value)}
+              >
+                <option value="">{t("pages.procurement.workshop.selectMaterial")}</option>
+                {(grnReq?.items ?? []).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.material_code} — {item.material_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.inventory.receivedQty")}</span>
+              <input
+                type="number"
+                min="0.0001"
+                step="any"
+                className="rounded-md border px-3 py-2"
+                value={grnQty}
+                onChange={(e) => setGrnQty(e.target.value)}
+              />
+            </label>
+          </div>
+          <Button
+            type="button"
+            disabled={grnMut.isPending}
+            onClick={() => {
+              if (!grnItemId || !grnQty) return toast.error(t("pages.procurement.inventory.grnRequired"));
+              grnMut.mutate();
+            }}
+          >
+            {t("pages.procurement.inventory.recordGrn")}
+          </Button>
+        </div>
+      ) : null}
+
       <div className="space-y-4" data-tour="inventory-stock">
         {!selectedBlock ? (
           <div className="p-8 text-center border rounded-lg bg-muted/20 text-sm text-muted-foreground">
@@ -114,7 +229,10 @@ function ProcurementInventoryContent() {
         ) : (
           <>
             <h3 className="text-lg font-medium">موجودی و تخصیص‌ها</h3>
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div
+              className="overflow-x-auto rounded-lg border border-border"
+              data-tour="inventory-stock-table"
+            >
               <table className="w-full text-sm text-start">
                 <thead className="bg-muted/50">
                   <tr>
@@ -128,7 +246,7 @@ function ProcurementInventoryContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {stock.map((item: any) => (
+                  {stock.map((item: any, index: number) => (
                     <tr key={item.id} className="border-t border-border">
                       <td className="px-3 py-2 font-mono text-xs">{item.mr_tag}</td>
                       <td className="px-3 py-2 font-medium">{item.material_name}</td>
@@ -142,6 +260,7 @@ function ProcurementInventoryContent() {
                           variant="outline"
                           disabled={item.available_qty <= 0}
                           onClick={() => setIssueDrawer(item)}
+                          {...(index === 0 ? { "data-tour": "inventory-issue-action" } : {})}
                         >
                           صدور حواله (Issue)
                         </Button>

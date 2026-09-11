@@ -109,14 +109,16 @@ class IssueStockView(APIView):
 
 
 class BlockStockView(APIView):
-    """Get reserved/received/issued stock summary for a block."""
+    """Get reserved/received/issued stock rows for a block (MR-tagged allocations)."""
 
     def get(self, request, project_pk=None, block_pk=None):
-        from procurement.services.inventory_lock_service import get_block_stock
-
         block = get_object_or_404(Block, id=block_pk, project_id=project_pk, is_deleted=False)
-        stock_data = get_block_stock(block)
-        return Response(stock_data)
+        allocations = (
+            InventoryAllocation.objects.filter(block=block, is_deleted=False)
+            .select_related('material', 'block', 'requisition_item')
+            .order_by('mr_tag')
+        )
+        return Response(InventoryAllocationSerializer(allocations, many=True).data)
 
 
 class InternalTransferViewSet(viewsets.ModelViewSet):

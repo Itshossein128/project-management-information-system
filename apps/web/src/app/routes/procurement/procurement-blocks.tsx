@@ -203,17 +203,24 @@ function ProcurementBlocksContent() {
     tourId: "procurement-blocks",
     steps: [
       {
-        element: "[data-tour='blocks-catalog']",
+        element: "[data-tour='blocks-overview']",
         popover: {
           title: t("tour.procurementBlocks.step1Title"),
           description: t("tour.procurementBlocks.step1Desc"),
         },
       },
       {
-        element: "[data-tour='blocks-overview']",
+        element: "[data-tour='blocks-add']",
         popover: {
           title: t("tour.procurementBlocks.step2Title"),
           description: t("tour.procurementBlocks.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='blocks-catalog']",
+        popover: {
+          title: t("tour.procurementBlocks.step3Title"),
+          description: t("tour.procurementBlocks.step3Desc"),
         },
       },
     ],
@@ -333,7 +340,7 @@ function ProcurementBlocksContent() {
           <div className="flex flex-wrap items-center gap-2" data-tour="blocks-overview">
             <ProductTourButton onClick={startTour} />
             {canEdit ? (
-              <Button variant="primary" onClick={openCreate}>
+              <Button variant="primary" onClick={openCreate} data-tour="blocks-add">
                 {t("pages.procurement.blocks.add")}
               </Button>
             ) : null}

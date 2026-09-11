@@ -28,6 +28,20 @@ function OfficerDashboardContent() {
           description: t("tour.procurementOfficer.step2Desc"),
         },
       },
+      {
+        element: "[data-tour='officer-card-identity']",
+        popover: {
+          title: t("tour.procurementOfficer.step3Title"),
+          description: t("tour.procurementOfficer.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='officer-card-metrics']",
+        popover: {
+          title: t("tour.procurementOfficer.step4Title"),
+          description: t("tour.procurementOfficer.step4Desc"),
+        },
+      },
     ],
   });
 
@@ -64,7 +78,10 @@ function OfficerDashboardContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {summaries.map((s: any, idx: number) => (
               <div key={`${s.assigned_to}-${s.status}-${idx}`} className="bg-card border border-border rounded-lg p-5 space-y-4">
-                <div className="flex justify-between items-start">
+                <div
+                  className="flex justify-between items-start"
+                  {...(idx === 0 ? { "data-tour": "officer-card-identity" } : {})}
+                >
                   <div>
                     <h4 className="font-semibold">
                       {s.assigned_to__full_name ||
@@ -78,7 +95,10 @@ function OfficerDashboardContent() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-md">
+                <div
+                  className="grid grid-cols-2 gap-4 text-sm bg-muted/30 p-3 rounded-md"
+                  {...(idx === 0 ? { "data-tour": "officer-card-metrics" } : {})}
+                >
                   <div>
                     <p className="text-muted-foreground text-xs mb-1">تعداد ردیف‌ها</p>
                     <p className="font-medium text-lg">{s.item_count}</p>

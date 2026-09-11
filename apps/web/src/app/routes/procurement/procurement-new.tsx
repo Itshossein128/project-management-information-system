@@ -32,17 +32,45 @@ function ProcurementNewContent() {
         },
       },
       {
-        element: "[data-tour='items-table']",
+        element: "[data-tour='required-by-date']",
+        popover: {
+          title: t("tour.procurementNew.step8Title"),
+          description: t("tour.procurementNew.step8Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisition-context']",
         popover: {
           title: t("tour.procurementNew.step3Title"),
           description: t("tour.procurementNew.step3Desc"),
         },
       },
       {
-        element: "[data-tour='submit-requisition']",
+        element: "[data-tour='provisional-grn']",
         popover: {
           title: t("tour.procurementNew.step4Title"),
           description: t("tour.procurementNew.step4Desc"),
+        },
+      },
+      {
+        element: "[data-tour='items-table']",
+        popover: {
+          title: t("tour.procurementNew.step5Title"),
+          description: t("tour.procurementNew.step5Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisition-notes']",
+        popover: {
+          title: t("tour.procurementNew.step6Title"),
+          description: t("tour.procurementNew.step6Desc"),
+        },
+      },
+      {
+        element: "[data-tour='submit-requisition']",
+        popover: {
+          title: t("tour.procurementNew.step7Title"),
+          description: t("tour.procurementNew.step7Desc"),
         },
       },
     ],
@@ -59,6 +87,7 @@ function ProcurementNewContent() {
   const [block, setBlock] = useState("");
   const [reqType, setReqType] = useState("planned");
   const [priority, setPriority] = useState("normal");
+  const [requiredByDate, setRequiredByDate] = useState("");
   const [urgency, setUrgency] = useState("");
   const [notes, setNotes] = useState("");
   const [isGrnProvisional, setIsGrnProvisional] = useState(false);
@@ -104,6 +133,7 @@ function ProcurementNewContent() {
       priority,
       urgency,
       request_date: new Date().toISOString().split("T")[0],
+      required_by_date: requiredByDate || null,
       is_grn_provisional: isGrnProvisional,
       notes,
       items: validItems.map((i: any) => ({
@@ -167,11 +197,17 @@ function ProcurementNewContent() {
         </fieldset>
 
         {scope === "workshop" ? (
-          <div className="rounded-lg border border-info-200 bg-info-50 p-4 text-sm text-info-900">
+          <div
+            className="rounded-lg border border-info-200 bg-info-50 p-4 text-sm text-info-900"
+            data-tour="requisition-context"
+          >
             {t("pages.procurement.workshop.workshopInfo")}
           </div>
         ) : blocks.length === 0 ? (
-          <div className="rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800">
+          <div
+            className="rounded-lg border border-warning-200 bg-warning-50 p-4 text-sm text-warning-800"
+            data-tour="requisition-context"
+          >
             <p className="mb-2">{t("pages.procurement.blocks.noBlocksHint")}</p>
             <Link
               to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_BLOCKS}`}
@@ -203,7 +239,18 @@ function ProcurementNewContent() {
           )}
           <label className="flex flex-col gap-1 text-sm">
             <span>{t("pages.procurement.workshop.reqType")}</span>
-            <select className="rounded-md border px-3 py-2" value={reqType} onChange={(e: any) => setReqType(e.target.value)}>
+            <select
+              className="rounded-md border px-3 py-2"
+              value={reqType}
+              onChange={(e) => {
+                const nextType = e.target.value;
+                setReqType(nextType);
+                setPriority(
+                  nextType === "fast_track" ? "high" : nextType === "post_facto" ? "emergency" : "normal",
+                );
+                if (nextType === "post_facto") setIsGrnProvisional(true);
+              }}
+            >
               <option value="planned">{t("pages.procurement.workshop.typePlanned")}</option>
               <option value="fast_track">{t("pages.procurement.workshop.typeFastTrack")}</option>
               <option value="post_facto">{t("pages.procurement.workshop.typePostFacto")}</option>
@@ -227,10 +274,22 @@ function ProcurementNewContent() {
               placeholder={t("pages.procurement.workshop.urgencyPlaceholder")}
             />
           </label>
+          <label className="flex flex-col gap-1 text-sm" data-tour="required-by-date">
+            <span>{t("pages.procurement.workshop.requiredByDate")}</span>
+            <input
+              type="date"
+              className="rounded-md border px-3 py-2"
+              value={requiredByDate}
+              onChange={(e) => setRequiredByDate(e.target.value)}
+            />
+          </label>
         </div>
 
         {reqType === "post_facto" && (
-          <label className="flex items-center gap-2 rounded border border-warning-200 bg-warning-50 p-3 text-sm text-warning-600">
+          <label
+            className="flex items-center gap-2 rounded border border-warning-200 bg-warning-50 p-3 text-sm text-warning-600"
+            data-tour="provisional-grn"
+          >
             <input type="checkbox" checked={isGrnProvisional} onChange={(e: any) => setIsGrnProvisional(e.target.checked)} />
             <span>{t("pages.procurement.workshop.provisionalGrn")}</span>
           </label>
@@ -309,7 +368,7 @@ function ProcurementNewContent() {
           </Button>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm" data-tour="requisition-notes">
           <span>{t("pages.procurement.workshop.notes")}</span>
           <textarea className="rounded-md border px-3 py-2" rows={3} value={notes} onChange={(e: any) => setNotes(e.target.value)} />
         </label>

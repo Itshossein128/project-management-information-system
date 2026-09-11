@@ -44,6 +44,7 @@ function AuditLogTable({
             <th className="px-3 py-2 text-start">{t("pages.procurement.approval.auditColAction")}</th>
             <th className="px-3 py-2 text-start">{t("pages.procurement.approval.auditColUser")}</th>
             <th className="px-3 py-2 text-start">{t("pages.procurement.approval.auditColTime")}</th>
+            <th className="px-3 py-2 text-start">{t("pages.procurement.approval.auditColDelay")}</th>
             <th className="px-3 py-2 text-start">{t("pages.procurement.approval.auditColComments")}</th>
           </tr>
         </thead>
@@ -68,6 +69,9 @@ function AuditLogTable({
               <td className="px-3 py-2">{log.action_display}</td>
               <td className="px-3 py-2">{log.performed_by_name}</td>
               <td className="px-3 py-2 whitespace-nowrap">{formatDisplayDateTime(log.performed_at)}</td>
+              <td className="px-3 py-2">
+                {log.delay_hours == null ? "—" : t("pages.procurement.approval.auditDelayHours", { hours: log.delay_hours })}
+              </td>
               <td className="px-3 py-2 max-w-xs truncate" title={log.comments}>
                 {log.comments || "—"}
               </td>
@@ -81,15 +85,27 @@ function AuditLogTable({
 
 function ReportsDashboardContent() {
   const { t } = useTranslation();
+  const { projectId, project } = useProject();
+  const [activeTab, setActiveTab] = useState("liquidity");
+  const [requisitionFilter, setRequisitionFilter] = useState("");
   const { startTour } = useProductTour({
     tourId: "procurement-reports",
     steps: [
       {
-        element: "[data-tour='reports-tabs']",
+        element: "[data-tour='reports-liquidity-tab']",
         popover: {
           title: t("tour.procurementReports.step1Title"),
           description: t("tour.procurementReports.step1Desc"),
         },
+        onHighlight: () => setActiveTab("liquidity"),
+      },
+      {
+        element: "[data-tour='reports-on-hold']",
+        popover: {
+          title: t("tour.procurementReports.step5Title"),
+          description: t("tour.procurementReports.step5Desc"),
+        },
+        onHighlight: () => setActiveTab("liquidity"),
       },
       {
         element: "[data-tour='reports-metrics']",
@@ -98,12 +114,24 @@ function ReportsDashboardContent() {
           description: t("tour.procurementReports.step2Desc"),
         },
       },
+      {
+        element: "[data-tour='reports-deviation-tab']",
+        popover: {
+          title: t("tour.procurementReports.step3Title"),
+          description: t("tour.procurementReports.step3Desc"),
+        },
+        onHighlight: () => setActiveTab("deviation"),
+      },
+      {
+        element: "[data-tour='reports-audit-tab']",
+        popover: {
+          title: t("tour.procurementReports.step4Title"),
+          description: t("tour.procurementReports.step4Desc"),
+        },
+        onHighlight: () => setActiveTab("audit"),
+      },
     ],
   });
-
-  const { projectId, project } = useProject();
-  const [activeTab, setActiveTab] = useState("liquidity");
-  const [requisitionFilter, setRequisitionFilter] = useState("");
 
   const { data: liquidity, isLoading: loadL } = useQuery({
     queryKey: ["reportLiquidity", projectId],
@@ -155,6 +183,7 @@ function ReportsDashboardContent() {
           <button
             key={tab.id}
             type="button"
+            data-tour={`reports-${tab.id}-tab`}
             onClick={() => setActiveTab(tab.id)}
             className={`border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
@@ -173,6 +202,36 @@ function ReportsDashboardContent() {
             {loadL ? (
               <LoadingSkeleton rows={5} />
             ) : (
+              <>
+                <p className="text-sm font-medium" data-tour="reports-on-hold">
+                  {t("pages.procurement.approval.onHoldCount", { count: liquidity?.on_hold_count ?? 0 })}
+                </p>
+                {(liquidity?.items?.length ?? 0) > 0 ? (
+                  <div className="overflow-x-auto rounded-lg border border-warning-200">
+                    <table className="w-full text-sm text-start">
+                      <thead className="bg-warning-50">
+                        <tr>
+                          <th className="px-3 py-2 text-start">{t("pages.procurement.workshop.colNumber")}</th>
+                          <th className="px-3 py-2 text-start">{t("pages.procurement.workshop.colBlock")}</th>
+                          <th className="px-3 py-2 text-start">{t("pages.procurement.workshop.material")}</th>
+                          <th className="px-3 py-2 text-start">{t("pages.procurement.workshop.quantity")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {liquidity?.items?.map((item, idx) => (
+                          <tr key={`${item.requisition_number}-${idx}`} className="border-t border-border">
+                            <td className="px-3 py-2">{item.requisition_number}</td>
+                            <td className="px-3 py-2">{item.block_code}</td>
+                            <td className="px-3 py-2">
+                              {item.material_code} — {item.material_name}
+                            </td>
+                            <td className="px-3 py-2">{item.requested_qty}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {liquidity?.liquidity_status?.map((b) => (
                   <div key={b.block_code} className="rounded-lg border border-border bg-card p-4">
@@ -198,6 +257,7 @@ function ReportsDashboardContent() {
                   </div>
                 ))}
               </div>
+              </>
             )}
           </div>
         )}
@@ -215,6 +275,8 @@ function ReportsDashboardContent() {
                       <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColMaterial")}</th>
                       <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColEstimated")}</th>
                       <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColRequested")}</th>
+                      <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColPurchased")}</th>
+                      <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColConsumed")}</th>
                       <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColDelta")}</th>
                       <th className="px-3 py-2 text-start">{t("pages.procurement.approval.deviationColStatus")}</th>
                     </tr>
@@ -226,6 +288,8 @@ function ReportsDashboardContent() {
                         <td className="px-3 py-2">{d.material_name}</td>
                         <td className="px-3 py-2">{d.estimated_qty ?? "-"}</td>
                         <td className="px-3 py-2">{d.requested_qty}</td>
+                        <td className="px-3 py-2">{d.total_purchased ?? "—"}</td>
+                        <td className="px-3 py-2">{d.total_issued ?? "—"}</td>
                         <td className="px-3 py-2" dir="ltr">
                           {d.deviation_qty}
                         </td>
@@ -254,7 +318,10 @@ function ReportsDashboardContent() {
               <LoadingSkeleton rows={5} />
             ) : (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4">
+                <div
+                  className="grid grid-cols-2 gap-4 text-center md:grid-cols-4"
+                  data-tour="reports-audit-summary"
+                >
                   <div className="rounded-lg border border-border bg-card p-4">
                     <p className="text-sm text-muted-foreground">{t("pages.procurement.approval.auditTotal")}</p>
                     <p className="text-2xl font-bold">{audit?.summary?.total_actions ?? 0}</p>
@@ -269,7 +336,10 @@ function ReportsDashboardContent() {
                   </div>
                 </div>
 
-                <label className="flex max-w-xs flex-col gap-1 text-sm">
+                <label
+                  className="flex max-w-xs flex-col gap-1 text-sm"
+                  data-tour="reports-audit-filter"
+                >
                   <span>{t("pages.procurement.approval.auditFilterRequisition")}</span>
                   <select
                     className="rounded-md border px-3 py-2"

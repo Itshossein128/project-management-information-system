@@ -81,17 +81,31 @@ function Content() {
     tourId: "project-manpower",
     steps: [
       {
-        element: "[data-tour='manpower-table']",
+        element: "[data-tour='manpower-date']",
         popover: {
           title: t("tour.projectManpower.step1Title"),
           description: t("tour.projectManpower.step1Desc"),
         },
       },
       {
-        element: "[data-tour='manpower-actions']",
+        element: "[data-tour='manpower-category-tabs']",
         popover: {
           title: t("tour.projectManpower.step2Title"),
           description: t("tour.projectManpower.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='manpower-table']",
+        popover: {
+          title: t("tour.projectManpower.step3Title"),
+          description: t("tour.projectManpower.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='manpower-actions']",
+        popover: {
+          title: t("tour.projectManpower.step4Title"),
+          description: t("tour.projectManpower.step4Desc"),
         },
       },
     ],
@@ -196,13 +210,15 @@ function Content() {
       <div className="flex items-center justify-end">
         <ProductTourButton onClick={startTour} />
       </div>
-      <JalaliDatePicker
-        name='manpower_date'
-        label='تاریخ'
-        value={date}
-        onChange={handleDateChange}
-      />
-      <div className='flex gap-2'>
+      <div data-tour="manpower-date">
+        <JalaliDatePicker
+          name='manpower_date'
+          label='تاریخ'
+          value={date}
+          onChange={handleDateChange}
+        />
+      </div>
+      <div className='flex gap-2' data-tour="manpower-category-tabs">
         <Button
           variant={tab === "indirect" ? "primary" : "secondary"}
           size='sm'

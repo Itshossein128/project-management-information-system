@@ -40,7 +40,7 @@ export interface RequisitionItem {
   purchased_qty: string;
   status: string;
   status_display: string;
-  assigned_to: number | null;
+  assigned_to: string | null;
   assigned_to_name: string | null;
   notes: string;
 }
@@ -146,6 +146,7 @@ export interface ApprovalLog {
   performed_at: string;
   comments: string;
   details?: PartialApproveDetail[];
+  delay_hours?: number | null;
 }
 
 export interface InventoryAllocation {
@@ -275,6 +276,21 @@ export async function partialApprove(projectId: string, reqId: string, approvals
   return data;
 }
 
+export async function holdRequisitionItem(projectId: string, itemId: string) {
+  const { data } = await client.patch(`/v1/projects/${projectId}/requisition-items/${itemId}/hold/`);
+  return data;
+}
+
+export async function approveTransfer(projectId: string, transferId: string): Promise<InternalTransfer> {
+  const { data } = await client.post<InternalTransfer>(`/v1/projects/${projectId}/transfers/${transferId}/approve/`);
+  return data;
+}
+
+export async function rejectTransfer(projectId: string, transferId: string, reason = ""): Promise<InternalTransfer> {
+  const { data } = await client.post<InternalTransfer>(`/v1/projects/${projectId}/transfers/${transferId}/reject/`, { reason });
+  return data;
+}
+
 // Block Inventory API
 export async function fetchBlockStock(projectId: string, blockId: string): Promise<any[]> {
   const { data } = await client.get<any>(`/v1/projects/${projectId}/blocks/${blockId}/stock/`);
@@ -310,9 +326,21 @@ export interface LiquidityStatusItem {
   remaining_liquidity: number;
 }
 
+export interface LiquidityOnHoldItem {
+  requisition_number: string;
+  scope?: RequisitionScope;
+  block_code: string;
+  block_name: string;
+  material_code: string;
+  material_name: string;
+  requested_qty: number;
+  status: string;
+}
+
 export interface LiquidityReportResponse {
   project_id: string;
   on_hold_count?: number;
+  items?: LiquidityOnHoldItem[];
   liquidity_status: LiquidityStatusItem[];
 }
 
@@ -323,6 +351,8 @@ export interface MaterialDeviationItem {
   material_name: string;
   estimated_qty: number | null;
   requested_qty: number;
+  total_purchased?: number;
+  total_issued?: number;
   deviation_qty: number;
   deviation_percent: number;
 }

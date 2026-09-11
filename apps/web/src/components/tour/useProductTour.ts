@@ -11,6 +11,7 @@ export interface TourStepConfig {
     side?: "top" | "right" | "bottom" | "left";
     align?: "start" | "center" | "end";
   };
+  onHighlight?: () => void;
 }
 
 interface UseProductTourOptions {
@@ -63,6 +64,10 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
       prevBtnText: t("tour.prev", { defaultValue: rtl ? "→ قبلی" : "← Prev" }),
       doneBtnText: t("tour.done", { defaultValue: "متوجه شدم / Done" }),
       steps: formattedSteps,
+      onHighlightStarted: (_element, _step, { state }) => {
+        const index = state.activeIndex ?? 0;
+        availableSteps[index]?.onHighlight?.();
+      },
       onDestroyed: () => {
         try {
           localStorage.setItem(`tour_seen_${tourId}`, "true");
@@ -83,10 +88,27 @@ export function useProductTour({ tourId, steps, autoStart = true }: UseProductTo
       const hasSeen = localStorage.getItem(`tour_seen_${tourId}`);
       if (hasSeen) return;
 
-      const timer = window.setTimeout(() => {
-        startTour();
-      }, 600);
-      return () => window.clearTimeout(timer);
+      let attempts = 0;
+      const maxAttempts = 20;
+      const timer = window.setInterval(() => {
+        attempts += 1;
+        const hasAvailableTarget = stepsRef.current.some((step) => {
+          try {
+            return Boolean(document.querySelector(step.element));
+          } catch {
+            return false;
+          }
+        });
+
+        if (hasAvailableTarget) {
+          window.clearInterval(timer);
+          startTour();
+        } else if (attempts >= maxAttempts) {
+          window.clearInterval(timer);
+        }
+      }, 300);
+
+      return () => window.clearInterval(timer);
     } catch (e) {
       console.error("Failed to check tour status from localStorage", e);
     }

@@ -39,17 +39,24 @@ function ProcurementListContent() {
         },
       },
       {
-        element: "[data-tour='requisitions-table']",
+        element: "[data-tour='quick-actions']",
         popover: {
           title: t("tour.procurementList.step2Title"),
           description: t("tour.procurementList.step2Desc"),
         },
       },
       {
-        element: "[data-tour='quick-actions']",
+        element: "[data-tour='requisitions-results']",
         popover: {
           title: t("tour.procurementList.step3Title"),
           description: t("tour.procurementList.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='requisition-row-actions']",
+        popover: {
+          title: t("tour.procurementList.step4Title"),
+          description: t("tour.procurementList.step4Desc"),
         },
       },
     ],
@@ -136,7 +143,8 @@ function ProcurementListContent() {
             <Button variant="outline">{t("pages.procurement.blocks.manage")}</Button>
           </Link>
         )}
-        <div className="flex flex-wrap items-center gap-3" data-tour="quick-actions">
+      </div>
+      <div className="flex flex-wrap items-center gap-3" data-tour="quick-actions">
           {canCreate && (
             <>
               <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_NEW}`}>
@@ -157,17 +165,20 @@ function ProcurementListContent() {
           <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_REPORTS}`}>
             <Button variant="outline">{t("pages.procurement.workshop.reports")}</Button>
           </Link>
-        </div>
+          <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT_TRANSFERS}`}>
+            <Button variant="outline">{t("pages.procurement.transfers.nav")}</Button>
+          </Link>
       </div>
 
-      {loadingReqs ? (
-        <LoadingSkeleton rows={8} />
-      ) : isError ? (
-        <QueryErrorState onRetry={() => void refetch()} />
-      ) : requisitions.length === 0 ? (
-        <p className="p-8 text-center text-muted-foreground">{t("pages.procurement.empty")}</p>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-border" data-tour="requisitions-table">
+      <div data-tour="requisitions-results">
+        {loadingReqs ? (
+          <LoadingSkeleton rows={8} />
+        ) : isError ? (
+          <QueryErrorState onRetry={() => void refetch()} />
+        ) : requisitions.length === 0 ? (
+          <p className="p-8 text-center text-muted-foreground">{t("pages.procurement.empty")}</p>
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm text-start">
             <thead className="bg-muted/50">
               <tr>
@@ -197,7 +208,21 @@ function ProcurementListContent() {
                   <td className="px-3 py-2">
                     {req.scope === "workshop" ? t("pages.procurement.workshop.workshopBlockLabel") : req.block_code}
                   </td>
-                  <td className="px-3 py-2">{req.requisition_type_display}</td>
+                  <td className="px-3 py-2">
+                    <span className="flex flex-wrap items-center gap-1">
+                      <span>{req.requisition_type_display}</span>
+                      {req.requisition_type === "fast_track" ? (
+                        <span className="rounded-full bg-danger-100 px-2 py-0.5 text-[10px] font-semibold text-danger-800">
+                          {t("pages.procurement.workshop.fastTrackTag")}
+                        </span>
+                      ) : null}
+                      {req.priority === "emergency" || req.requisition_type === "post_facto" ? (
+                        <span className="rounded-full bg-warning-100 px-2 py-0.5 text-[10px] text-warning-800">
+                          {t("pages.procurement.workshop.priorityEmergency")}
+                        </span>
+                      ) : null}
+                    </span>
+                  </td>
                   <td className="px-3 py-2">{req.request_date}</td>
                   <td className="px-3 py-2">{(req as any).item_count || 0}</td>
                   <td className="px-3 py-2">
@@ -243,7 +268,10 @@ function ProcurementListContent() {
                       <span className="text-xs text-muted-foreground">{t("pages.procurement.approval.noNextApprover")}</span>
                     )}
                   </td>
-                  <td className="px-3 py-2">
+                  <td
+                    className="px-3 py-2"
+                    {...(req === requisitions[0] ? { "data-tour": "requisition-row-actions" } : {})}
+                  >
                     <Link to={`/${PATHS.PROJECT}/${projectId}/procurement/req/${req.id}`}>
                       <Button size="sm" variant="outline">
                         {t("pages.procurement.workshop.view")}
@@ -254,8 +282,9 @@ function ProcurementListContent() {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

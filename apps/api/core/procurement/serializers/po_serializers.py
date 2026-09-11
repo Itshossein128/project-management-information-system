@@ -69,7 +69,7 @@ class AssignItemsSerializer(serializers.Serializer):
 
     class AssignmentSerializer(serializers.Serializer):
         item_id = serializers.UUIDField()
-        assigned_to_id = serializers.IntegerField(allow_null=True)
+        assigned_to_id = serializers.UUIDField(allow_null=True)
 
     assignments = AssignmentSerializer(many=True, min_length=1)
 

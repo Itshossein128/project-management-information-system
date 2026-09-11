@@ -209,6 +209,17 @@ class RequisitionHeaderCreateSerializer(serializers.ModelSerializer):
         block = attrs.get('block')
         project = attrs.get('project')
 
+        req_type = attrs.get('requisition_type', RequisitionType.PLANNED)
+        default_priority = {
+            RequisitionType.PLANNED: RequisitionPriority.NORMAL,
+            RequisitionType.FAST_TRACK: RequisitionPriority.HIGH,
+            RequisitionType.POST_FACTO: RequisitionPriority.EMERGENCY,
+        }.get(req_type, RequisitionPriority.NORMAL)
+        if not attrs.get('priority'):
+            attrs['priority'] = default_priority
+        if req_type == RequisitionType.POST_FACTO:
+            attrs.setdefault('is_grn_provisional', True)
+
         if scope == RequisitionScope.WORKSHOP:
             workshop_block = ensure_workshop_block(project, created_by=self.context['request'].user)
             attrs['block'] = workshop_block

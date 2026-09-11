@@ -208,12 +208,23 @@ class AuditTrailReportView(APIView):
             'rejected_actions': rejected_actions,
         }
 
-        serializer = ApprovalLogSerializer(logs_qs, many=True)
+        logs = list(logs_qs)
+        payload = ApprovalLogSerializer(logs, many=True).data
+        previous_at: dict = {}
+        for index, log in enumerate(logs):
+            req_id_key = str(log.requisition_id)
+            delay_hours = None
+            prev_at = previous_at.get(req_id_key)
+            if prev_at is not None:
+                delay_hours = round((log.performed_at - prev_at).total_seconds() / 3600.0, 2)
+            previous_at[req_id_key] = log.performed_at
+            payload[index]['delay_hours'] = delay_hours
+
         return Response({
             'project_id': str(project.id),
             'count': total_actions,
             'summary': summary,
-            'logs': serializer.data,
+            'logs': payload,
         })
 
 
