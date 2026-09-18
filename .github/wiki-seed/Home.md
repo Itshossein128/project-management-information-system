@@ -1,6 +1,6 @@
-# IPCAS Wiki
+# Velora Wiki
 
-Welcome to the **Project Management Information System (IPCAS)** wiki.
+Welcome to the **Project Management Information System (Velora)** wiki.
 
 This wiki is for **human-friendly guides** (how we work, how GitHub tools fit together). Long engineering specs stay in the repo under `docs/`.
 
@@ -16,8 +16,8 @@ This wiki is for **human-friendly guides** (how we work, how GitHub tools fit to
 
 | Doc | Purpose |
 | --- | --- |
-| `docs/IPCAS_Engineering_Blueprint.md` | Full target design |
-| `docs/ipcas-scope-map.md` | Blueprint ↔ code status |
+| `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/بلوپرینت مهندسی Velora (Engineering Blueprint).md` | Full target design |
+| `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md` | Blueprint ↔ code status |
 | `AGENTS.md` | Cursor Cloud / agent setup notes |
 | `.github/agents/*.agent.md` | Copilot custom agents |
 

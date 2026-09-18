@@ -42,7 +42,7 @@ if not exist "%ROOT_DIR%\customer\ipcas.config" (
 )
 
 echo.
-echo Building and starting IPCAS. First run may take several minutes...
+echo Building and starting Velora. First run may take several minutes...
 echo.
 
 call "%ROOT_DIR%\customer\scripts\compose.bat" up -d --build
@@ -54,7 +54,7 @@ if errorlevel 1 (
 
 powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT_DIR%\customer\scripts\wait-for-stack.ps1"
 if errorlevel 1 (
-  echo IPCAS did not become ready in time.
+  echo Velora did not become ready in time.
   pause
   exit /b 1
 )
@@ -62,7 +62,7 @@ if errorlevel 1 (
 start "" "%APP_URL%"
 
 echo.
-echo IPCAS is installed and running.
+echo Velora is installed and running.
 echo Open in browser: %APP_URL%
 echo Demo login: +10000000001 / devpass123
 echo.

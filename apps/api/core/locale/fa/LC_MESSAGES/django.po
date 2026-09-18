@@ -1,7 +1,7 @@
-# Persian translations for IPCAS API authentication messages.
+# Persian translations for Velora API authentication messages.
 msgid ""
 msgstr ""
-"Project-Id-Version: IPCAS API\n"
+"Project-Id-Version: Velora API\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

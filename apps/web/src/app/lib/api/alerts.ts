@@ -42,6 +42,7 @@ export const ALERT_TYPE_LABELS: Record<string, string> = {
   critical_path_delay: "تأخیر مسیر بحرانی",
   ipc_approval_delayed: "تأخیر تأیید IPC",
   procurement_overdue: "تأخیر تأمین و خرید",
+  procurement_fast_track: "درخواست خرید فورس‌ماژور",
 };
 
 export function fetchAlertRules(projectId: string) {

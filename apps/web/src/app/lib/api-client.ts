@@ -1,5 +1,5 @@
 /**
- * API client for IPCAS backend. Attaches Bearer token, refreshes on 401, handles auth cleanup.
+ * API client for Velora backend. Attaches Bearer token, refreshes on 401, handles auth cleanup.
  */
 
 import {

@@ -21,6 +21,7 @@ export function NotificationBell() {
       <PopoverTrigger asChild>
         <button
           type="button"
+          data-tour="notification-bell"
           aria-label={t("notifications.title")}
           title={t("notifications.title")}
           className={cn(

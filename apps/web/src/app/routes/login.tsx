@@ -16,10 +16,21 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { redirect, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
-import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
+import {
+  getAccessTokenFromRequest,
+  hasStoredSession,
+} from "src/app/lib/auth-storage";
 
 export async function loader({ request }: { request: Request }) {
-  if (typeof window === "undefined" && getAccessTokenFromRequest(request)) {
+  if (typeof window !== "undefined") {
+    if (hasStoredSession()) {
+      const url = new URL(request.url);
+      const redirectTo = url.searchParams.get("redirectTo") || "/home";
+      throw redirect(redirectTo);
+    }
+    return {};
+  }
+  if (getAccessTokenFromRequest(request)) {
     throw redirect("/home");
   }
   return {};
@@ -84,8 +95,11 @@ export default function Login() {
             aria-hidden='true'
             className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 via-brand-700 to-safety-600 text-lg font-bold tracking-tight text-white shadow-md'
           >
-            BM
+            V
           </div>
+          <p className='mb-1 text-sm font-semibold tracking-wide text-muted-foreground'>
+            {t("common.brandName")}
+          </p>
           <CardTitle className='text-2xl font-bold tracking-tight'>{t("login.title")}</CardTitle>
           <CardDescription>{t("login.description")}</CardDescription>
         </CardHeader>

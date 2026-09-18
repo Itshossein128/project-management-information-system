@@ -34,7 +34,7 @@ if not exist "%ROOT_DIR%\.env" (
 )
 
 echo.
-echo Preparing IPCAS for demo (download images + build). This may take 10-20 minutes.
+echo Preparing Velora for demo (download images + build). This may take 10-20 minutes.
 echo Run this once before the customer meeting while you have a stable internet connection.
 echo.
 
@@ -51,7 +51,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo IPCAS images are ready.
+echo Velora images are ready.
 echo On demo day, double-click customer\start.bat (or install.bat on a fresh PC).
 echo.
 pause

@@ -10,13 +10,13 @@ import {
 const UNREAD_KEY = ["notifications", "unread-count"] as const;
 const LIST_KEY = ["notifications", "list"] as const;
 
-/** Poll the unread notification count every 60s. */
+/** Poll the unread notification count every 15s so live alerts appear quickly. */
 export function useUnreadCount(enabled = true) {
   return useQuery({
     queryKey: UNREAD_KEY,
     enabled,
     queryFn: fetchUnreadCount,
-    refetchInterval: 60_000,
+    refetchInterval: 15_000,
     refetchOnWindowFocus: true,
     select: (d) => d.unread,
   });

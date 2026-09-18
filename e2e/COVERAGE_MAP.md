@@ -1,4 +1,4 @@
-# IPCAS E2E Coverage Map
+# Velora E2E Coverage Map
 Last updated: 2026-07-17
 
 ## Coverage by Module

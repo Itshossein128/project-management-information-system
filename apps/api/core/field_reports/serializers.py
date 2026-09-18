@@ -47,6 +47,8 @@ class WeatherLogSerializer(serializers.ModelSerializer):
             'weather_condition_label',
             'site_status',
             'site_status_label',
+            'wind_speed',
+            'soil_condition',
             'created_at',
             'updated_at',
         ]

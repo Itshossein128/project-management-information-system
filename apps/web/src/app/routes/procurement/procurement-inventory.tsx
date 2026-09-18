@@ -1,0 +1,332 @@
+import { useProductTour } from "@/components/tour/useProductTour";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { PageHeader, Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
+import { ProjectProvider, useProject } from "~/contexts/project-context";
+import { fetchBlocks, fetchBlockStock, issueStock, recordGRN, fetchRequisitions, fetchRequisition } from "~/lib/api/procurement";
+import { PATHS } from "~/routeVars";
+import { QueryErrorState } from "@/components/layout/query-error-state";
+import { useToast } from "@/components/ui/toast";
+import { Drawer } from "@/components/ui/drawer";
+
+function ProcurementInventoryContent() {
+  const { t } = useTranslation();
+  const { startTour } = useProductTour({
+    tourId: "procurement-inventory",
+    steps: [
+      {
+        element: "[data-tour='inventory-block-select']",
+        popover: {
+          title: t("tour.procurementInventory.step1Title"),
+          description: t("tour.procurementInventory.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-stock']",
+        popover: {
+          title: t("tour.procurementInventory.step2Title"),
+          description: t("tour.procurementInventory.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-stock-table']",
+        popover: {
+          title: t("tour.procurementInventory.step3Title"),
+          description: t("tour.procurementInventory.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-issue-action']",
+        popover: {
+          title: t("tour.procurementInventory.step4Title"),
+          description: t("tour.procurementInventory.step4Desc"),
+        },
+      },
+      {
+        element: "[data-tour='inventory-grn']",
+        popover: {
+          title: t("tour.procurementInventory.step5Title"),
+          description: t("tour.procurementInventory.step5Desc"),
+        },
+      },
+    ],
+  });
+
+  const { projectId, project } = useProject();
+  const qc = useQueryClient();
+  const toast = useToast();
+
+  const [selectedBlock, setSelectedBlock] = useState("");
+  const [issueDrawer, setIssueDrawer] = useState<any>(null);
+  const [issueQty, setIssueQty] = useState("");
+  const [grnReqId, setGrnReqId] = useState("");
+  const [grnItemId, setGrnItemId] = useState("");
+  const [grnQty, setGrnQty] = useState("");
+
+  const { data: blocks = [] } = useQuery({
+    queryKey: ["blocks", projectId],
+    queryFn: () => fetchBlocks(projectId),
+  });
+
+  const { data: stock = [], isLoading, isError, refetch } = useQuery({
+    queryKey: ["blockStock", projectId, selectedBlock],
+    queryFn: () => fetchBlockStock(projectId, selectedBlock),
+    enabled: !!selectedBlock,
+  });
+
+  const { data: approvedReqs = [] } = useQuery({
+    queryKey: ["procurement", projectId, "approved", selectedBlock],
+    queryFn: () => fetchRequisitions(projectId, { status: "approved", block: selectedBlock }),
+    enabled: !!selectedBlock,
+  });
+
+  const { data: grnReq } = useQuery({
+    queryKey: ["requisition", projectId, grnReqId],
+    queryFn: () => fetchRequisition(projectId, grnReqId),
+    enabled: !!grnReqId,
+  });
+
+  const issueMut = useMutation({
+    mutationFn: (payload: { allocation_id: string; issue_qty: number }) => issueStock(projectId, selectedBlock, payload),
+    onSuccess: () => {
+      toast.success("حواله انبار با موفقیت صادر شد.");
+      setIssueDrawer(null);
+      setIssueQty("");
+      void qc.invalidateQueries({ queryKey: ["blockStock", projectId, selectedBlock] });
+    },
+    onError: (e: any) => toast.error(e.message || "خطا در صدور حواله (Hard Stop ممکن است رخ داده باشد)"),
+  });
+
+  const grnMut = useMutation({
+    mutationFn: () =>
+      recordGRN(projectId, selectedBlock, {
+        requisition_item_id: grnItemId,
+        received_qty: Number(grnQty),
+      }),
+    onSuccess: () => {
+      toast.success(t("pages.procurement.inventory.grnSuccess"));
+      setGrnQty("");
+      setGrnItemId("");
+      void qc.invalidateQueries({ queryKey: ["blockStock", projectId, selectedBlock] });
+      void qc.invalidateQueries({ queryKey: ["requisition", projectId, grnReqId] });
+    },
+    onError: (e: Error) => toast.error(e.message || t("pages.procurement.inventory.grnError")),
+  });
+
+  const handleIssue = () => {
+    if (!issueQty || isNaN(Number(issueQty))) return toast.error("مقدار معتبر وارد کنید");
+    issueMut.mutate({
+      allocation_id: issueDrawer.id,
+      issue_qty: Number(issueQty),
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <PageHeader title="انبارداری بلوکی" subtitle={project?.project_name} />
+        <ProductTourButton onClick={startTour} />
+      </div>
+
+      <div className="bg-card border border-border p-4 rounded-lg" data-tour="inventory-block-select">
+        <label className="flex flex-col gap-2 text-sm max-w-sm">
+          <span className="font-medium">انتخاب بلوک/فاز پروژه</span>
+          <select
+            className="rounded-md border px-3 py-2"
+            value={selectedBlock}
+            onChange={(e) => setSelectedBlock(e.target.value)}
+          >
+            <option value="">برای مشاهده انبار، یک بلوک انتخاب کنید...</option>
+            {blocks.map((b: any) => (
+              <option key={b.id} value={b.id}>
+                {b.block_code} - {b.block_name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {selectedBlock ? (
+        <div className="space-y-3 rounded-lg border border-border bg-card p-4" data-tour="inventory-grn">
+          <h3 className="font-medium">{t("pages.procurement.inventory.grnTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("pages.procurement.inventory.grnHint")}</p>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.workshop.colNumber")}</span>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={grnReqId}
+                onChange={(e) => {
+                  setGrnReqId(e.target.value);
+                  setGrnItemId("");
+                }}
+              >
+                <option value="">{t("pages.procurement.inventory.selectRequisition")}</option>
+                {approvedReqs.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.requisition_number}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.workshop.material")}</span>
+              <select
+                className="rounded-md border px-3 py-2"
+                value={grnItemId}
+                onChange={(e) => setGrnItemId(e.target.value)}
+              >
+                <option value="">{t("pages.procurement.workshop.selectMaterial")}</option>
+                {(grnReq?.items ?? []).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.material_code} — {item.material_name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>{t("pages.procurement.inventory.receivedQty")}</span>
+              <input
+                type="number"
+                min="0.0001"
+                step="any"
+                className="rounded-md border px-3 py-2"
+                value={grnQty}
+                onChange={(e) => setGrnQty(e.target.value)}
+              />
+            </label>
+          </div>
+          <Button
+            type="button"
+            disabled={grnMut.isPending}
+            onClick={() => {
+              if (!grnItemId || !grnQty) return toast.error(t("pages.procurement.inventory.grnRequired"));
+              grnMut.mutate();
+            }}
+          >
+            {t("pages.procurement.inventory.recordGrn")}
+          </Button>
+        </div>
+      ) : null}
+
+      <div className="space-y-4" data-tour="inventory-stock">
+        {!selectedBlock ? (
+          <div className="p-8 text-center border rounded-lg bg-muted/20 text-sm text-muted-foreground">
+            برای مشاهده موجودی و صدور حواله، ابتدا یک بلوک انتخاب کنید.
+          </div>
+        ) : isLoading ? (
+          <LoadingSkeleton rows={5} />
+        ) : isError ? (
+          <QueryErrorState onRetry={() => void refetch()} />
+        ) : stock.length === 0 ? (
+          <div className="p-8 text-center border rounded-lg bg-muted/20">
+            هیچ ورودی انباری (GRN) برای این بلوک ثبت نشده است.
+          </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-medium">موجودی و تخصیص‌ها</h3>
+            <div
+              className="overflow-x-auto rounded-lg border border-border"
+              data-tour="inventory-stock-table"
+            >
+              <table className="w-full text-sm text-start">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="px-3 py-2 text-start">شناسه تخصیص (MR Tag)</th>
+                    <th className="px-3 py-2 text-start">متریال</th>
+                    <th className="px-3 py-2 text-start">تخصیص یافته (MR)</th>
+                    <th className="px-3 py-2 text-start">رسید شده (موجود)</th>
+                    <th className="px-3 py-2 text-start">حواله شده (مصرفی)</th>
+                    <th className="px-3 py-2 text-start">موجودی واقعی (قابل مصرف)</th>
+                    <th className="px-3 py-2 text-start">عملیات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stock.map((item: any, index: number) => (
+                    <tr key={item.id} className="border-t border-border">
+                      <td className="px-3 py-2 font-mono text-xs">{item.mr_tag}</td>
+                      <td className="px-3 py-2 font-medium">{item.material_name}</td>
+                      <td className="px-3 py-2">{item.allocated_qty}</td>
+                      <td className="px-3 py-2 text-info-700">{item.received_qty}</td>
+                      <td className="px-3 py-2 text-warning-600">{item.issued_qty}</td>
+                      <td className="px-3 py-2 text-success-700 font-bold">{item.available_qty}</td>
+                      <td className="px-3 py-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={item.available_qty <= 0}
+                          onClick={() => setIssueDrawer(item)}
+                          {...(index === 0 ? { "data-tour": "inventory-issue-action" } : {})}
+                        >
+                          صدور حواله (Issue)
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+
+      <Drawer
+        isOpen={!!issueDrawer}
+        onClose={() => setIssueDrawer(null)}
+        title="صدور حواله (مصرف پای کار)"
+        footer={
+          <Button variant="default" onClick={handleIssue} disabled={issueMut.isPending}>
+            ثبت حواله
+          </Button>
+        }
+      >
+        {issueDrawer && (
+          <div className="space-y-6">
+            <div className="bg-warning-50 p-4 rounded-md border border-warning-200 text-warning-900 text-sm">
+              <p className="font-semibold mb-2">توجه (قانون Hard Stop):</p>
+              <p>
+                مجموع مقدار حواله نمی‌تواند از موجودی واقعی تخصیص این متریال برای کد{" "}
+                <strong>{issueDrawer.mr_tag}</strong> بیشتر باشد.
+              </p>
+              <p className="mt-2 font-mono">موجودی مجاز: {issueDrawer.available_qty}</p>
+            </div>
+
+            <label className="flex flex-col gap-1 text-sm">
+              <span>مقدار مصرف (Issue Quantity)</span>
+              <input
+                type="number"
+                step="any"
+                max={issueDrawer.available_qty}
+                className="rounded-md border px-3 py-2"
+                value={issueQty}
+                onChange={(e: any) => setIssueQty(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
+      </Drawer>
+    </div>
+  );
+}
+
+export default function ProcurementInventoryPage() {
+  const { projectId } = useParams();
+  return (
+    <ProjectProvider projectId={projectId!}>
+      <main className="page-main page-shell mx-auto px-4 py-8">
+        <Breadcrumb
+          items={[
+            { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+            { label: "تدارکات", href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_PROCUREMENT}` },
+            { label: "انبارداری بلوکی" },
+          ]}
+        />
+        <ProcurementInventoryContent />
+      </main>
+    </ProjectProvider>
+  );
+}

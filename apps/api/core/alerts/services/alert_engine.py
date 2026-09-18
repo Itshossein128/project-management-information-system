@@ -16,7 +16,8 @@ def _normalize_alert_type(value: str) -> str:
 
 
 def _resolve_recipients(rule: AlertRule, project_id):
-    from master_data.models import ProjectMember, ProjectMemberRole
+    from master_data.models import MemberStatus, ProjectMember
+    from projects.models import Project
 
     if rule.recipient_ids:
         return list(set(rule.recipient_ids))
@@ -25,12 +26,27 @@ def _resolve_recipients(rule: AlertRule, project_id):
     if not role_names:
         return []
 
+    role_set = set(role_names)
     user_ids = set()
-    members = ProjectMember.objects.filter(project_id=project_id, status='active')
+    members = ProjectMember.objects.filter(
+        project_id=project_id,
+        status=MemberStatus.ACTIVE,
+    ).prefetch_related('member_roles__role')
     for member in members:
-        roles = ProjectMemberRole.objects.filter(member=member).select_related('role')
-        if any(r.role.role_name in role_names for r in roles):
+        names = {r.role.role_name for r in member.member_roles.all()}
+        if member.user_id and names.intersection(role_set):
             user_ids.add(member.user_id)
+
+    # Project.project_manager is the live PM even if the member-role row is missing.
+    if 'project_manager' in role_set:
+        pm_id = (
+            Project.objects.filter(pk=project_id)
+            .values_list('project_manager_id', flat=True)
+            .first()
+        )
+        if pm_id:
+            user_ids.add(pm_id)
+
     return list(user_ids)
 
 

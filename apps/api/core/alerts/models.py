@@ -29,6 +29,7 @@ class AlertType(models.TextChoices):
     CRITICAL_PATH_DELAY = 'critical_path_delay', 'Critical path delay'
     IPC_APPROVAL_DELAYED = 'ipc_approval_delayed', 'IPC approval delayed'
     PROCUREMENT_OVERDUE = 'procurement_overdue', 'Procurement overdue'
+    PROCUREMENT_FAST_TRACK = 'procurement_fast_track', 'Procurement fast-track'
 
 
 class AlertRule(UUIDModel):

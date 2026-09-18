@@ -1,6 +1,6 @@
-# IPCAS API (`apps/api`)
+# Velora API (`apps/api`)
 
-Django 4.2 + Django REST Framework backend for the IPCAS construction management platform.
+Django 4.2 + Django REST Framework backend for the Velora construction management platform.
 
 ## Layout
 
@@ -86,6 +86,6 @@ Integration tests (`*_integration.py`) need RabbitMQ + MinIO (Docker).
 
 ## References
 
-- Blueprint: `docs/IPCAS_Engineering_Blueprint.md`
-- Implementation status: `docs/ipcas-scope-map.md`
+- Blueprint: `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/بلوپرینت مهندسی Velora (Engineering Blueprint).md`
+- Implementation status: `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md`
 - Per-app endpoint notes: `core/*/ENDPOINTS.md` (including `field_reports/`, `schedule/`, `cost_control/`)

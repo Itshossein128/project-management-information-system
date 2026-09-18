@@ -36,7 +36,7 @@ export function meta() {
   const { t } = useTranslation();
 
   return [
-    { title: "Users | Building Management" },
+    { title: "Users | Velora" },
     { name: "description", content: "Directory of application users" },
   ];
 }

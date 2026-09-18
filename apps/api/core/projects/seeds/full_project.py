@@ -76,7 +76,7 @@ DEMO_PROJECT_SPECS: tuple[DemoProjectSpec, ...] = (
         project_name='Acme Construction',
         template_type='residential',
         employer='Acme Development Co.',
-        contractor='IPCAS Builders',
+        contractor='Velora Builders',
         consultant='Urban Design Partners',
         location='Tehran, District 2 — Residential complex',
         start_date=date(2025, 3, 1),
@@ -649,7 +649,7 @@ def seed_full_project(
     creator: AbstractBaseUser,
     members: list[ProjectMember],
 ) -> dict:
-    """Idempotently enrich one project with demo data across IPCAS domains."""
+    """Idempotently enrich one project with demo data across Velora domains."""
     _update_project_metadata(project, spec, creator)
     _apply_wbs_template(project, spec, creator)
 
