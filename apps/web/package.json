@@ -35,7 +35,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "idb": "^8.0.3",
     "isbot": "^5.1.31",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^1.46.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
     "react-date-object": "^2.1.9",
