@@ -32,9 +32,9 @@ export function isoRangeToJalali(from: string, to: string): { date_from?: string
 
 /** Format ISO date for display; returns Jalali when parsable, otherwise em dash. */
 export function formatDisplayDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso || iso.startsWith("Invalid")) return "—";
   const jalali = isoToJalali(iso.slice(0, 10));
-  return jalali || iso.slice(0, 10);
+  return jalali || (iso.slice(0, 10) === "Invalid Da" ? "—" : iso.slice(0, 10));
 }
 
 /** Format an ISO datetime as Jalali date + HH:MM (local wall-clock from the string). */

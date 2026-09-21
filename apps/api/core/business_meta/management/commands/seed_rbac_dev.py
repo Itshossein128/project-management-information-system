@@ -61,10 +61,10 @@ def run_seed():
         admin_user, hr_user, worker_user = project_users[spec.project_code]
 
         for slug, name, ordering in (
-            ('electrician', 'Electrician', 0),
-            ('worker', 'Worker', 1),
-            ('supervisor', 'Supervisor', 2),
-            ('plumber', 'Plumber', 3),
+            ('electrician', 'برق‌کار', 0),
+            ('worker', 'کارگر', 1),
+            ('supervisor', 'سرپرست', 2),
+            ('plumber', 'لوله‌کش', 3),
         ):
             ProjectPosition.objects.get_or_create(
                 project=project,
