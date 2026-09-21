@@ -14,7 +14,7 @@ class AuditLog(UUIDModel):
     )
     project = models.ForeignKey(
         'projects.Project',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
         related_name='audit_logs',

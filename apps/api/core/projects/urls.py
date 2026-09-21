@@ -52,7 +52,7 @@ urlpatterns = [
 
     # Project Details (Specific Project)
     path('<uuid:project_pk>/', ProjectViewSet.as_view(
-        {'get': 'retrieve', 'patch': 'partial_update'}
+        {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}
     ), name='project-detail'),
 
     # Project Positions
