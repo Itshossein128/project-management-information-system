@@ -1,0 +1,60 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - "apps/**"
+      - "infra/**"
+      - "docker-compose*.yml"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy.yml"
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE || '' }}
+          password: ${{ secrets.SSH_PASSWORD || '' }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            echo "==> Navigating to application directory..."
+            cd /opt/building-management
+
+            echo "==> Pulling latest changes from branch..."
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+
+            echo "==> Rebuilding and restarting containers..."
+            docker compose -f docker-compose.customer.yml up --build -d
+
+            echo "==> Waiting for API health check..."
+            for i in {1..30}; do
+              if curl -s -f http://127.0.0.1:8000/api/schema/ > /dev/null; then
+                echo "==> Deployment successful! API is healthy."
+                exit 0
+              fi
+              echo "Waiting for API to become healthy ($i/30)..."
+              sleep 3
+            done
+
+            echo "==> Health check timed out!"
+            docker compose -f docker-compose.customer.yml ps
+            docker compose -f docker-compose.customer.yml logs --tail=50 api
+            exit 1
