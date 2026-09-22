@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
 import { useState } from "react";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
@@ -24,7 +25,7 @@ function toLine(row: ContractItemRow): BoQLine {
     activity: row.activity ?? "",
     boq_code: row.boq_code,
     description: row.description,
-    unit_price: String(row.unit_price ?? ""),
+    unit_price: row.unit_price != null ? formatWithCommas(row.unit_price) : "",
     quantity: String(row.quantity ?? ""),
   };
 }
@@ -65,7 +66,7 @@ export function ContractBoQGrid({
             activity: l.activity || null,
             boq_code: l.boq_code,
             description: l.description,
-            unit_price: l.unit_price ? Number(l.unit_price) : 0,
+            unit_price: l.unit_price ? parseFormattedNumber(l.unit_price) : 0,
             quantity: l.quantity ? Number(l.quantity) : 0,
           })),
       ),
@@ -96,7 +97,7 @@ export function ContractBoQGrid({
           <tbody>
             {lines.map((line, idx) => {
               const total =
-                (Number(line.unit_price) || 0) * (Number(line.quantity) || 0);
+                (parseFormattedNumber(line.unit_price) || 0) * (Number(line.quantity) || 0);
               return (
                 <tr key={line.id ?? idx} className="border-t">
                   <td className="px-2 py-1">
@@ -135,8 +136,8 @@ export function ContractBoQGrid({
                       className="w-24 rounded border px-2 py-1 text-xs"
                       type="number"
                       disabled={!canEdit}
-                      value={line.unit_price}
-                      onChange={(e) => updateLine(idx, { unit_price: e.target.value })}
+                      value={formatWithCommas(line.unit_price)}
+                      onChange={(e) => updateLine(idx, { unit_price: formatWithCommas(e.target.value) })}
                     />
                   </td>
                   <td className="px-2 py-1">

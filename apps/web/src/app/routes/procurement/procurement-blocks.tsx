@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
+import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
 import { ProjectProvider, usePermission, useProject } from "~/contexts/project-context";
 import {
   createBlock,
@@ -172,8 +173,8 @@ function BlockFormModal({
             min="0"
             step="any"
             className="rounded-md border px-3 py-2"
-            value={form.budget ?? "0"}
-            onChange={(e) => setForm({ ...form, budget: e.target.value })}
+            value={formatWithCommas(form.budget ?? "0")}
+            onChange={(e) => setForm({ ...form, budget: formatWithCommas(e.target.value) })}
           />
         </label>
         <label className="flex items-center gap-2 text-sm">

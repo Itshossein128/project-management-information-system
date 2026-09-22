@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
 import { useState } from "react";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
@@ -43,7 +44,7 @@ export function AllocationWizard({
   const activities = activitiesData?.results ?? [];
   const remaining = pool?.remaining ?? 0;
 
-  const totalAllocated = lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
+  const totalAllocated = lines.reduce((s, l) => s + (parseFormattedNumber(l.amount) || 0), 0);
 
   const save = useMutation({
     mutationFn: () =>
@@ -163,9 +164,9 @@ export function AllocationWizard({
               <input
                 type="number"
                 className="rounded-md border px-3 py-2"
-                value={line.amount}
+                value={formatWithCommas(line.amount)}
                 data-testid={idx === 0 ? "cost-pool-allocate-amount" : undefined}
-                onChange={(e) => updateLine(idx, { amount: e.target.value })}
+                onChange={(e) => updateLine(idx, { amount: formatWithCommas(e.target.value) })}
               />
             </label>
             {lines.length > 1 ? (

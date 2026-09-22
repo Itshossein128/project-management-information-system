@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
+import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
   COST_CATEGORIES,
@@ -77,7 +78,7 @@ function AddCostDrawer({
       createActualCost(projectId, {
         cost_date: costDate,
         cost_category: category,
-        amount: Number(amount),
+        amount: parseFormattedNumber(amount),
         description,
         wbs: wbsId || null,
         activity: activityId || null,
@@ -131,8 +132,8 @@ function AddCostDrawer({
             type="number"
             className="rounded-md border border-input px-3 py-2"
             data-testid="actual-cost-amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={formatWithCommas(amount)}
+            onChange={(e) => setAmount(formatWithCommas(e.target.value))}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
