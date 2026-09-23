@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Input, JalaliDatePicker, Select, TextArea } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { CONTRACT_TYPE_LABELS } from "@/app/lib/api/contracts";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 
 export interface ContractFormValues {
   contract_number: string;
@@ -136,18 +137,18 @@ export function ContractForm({
         <Input
           name="original_amount"
           type="number"
-          value={values.original_amount}
+          value={formatWithCommas(values.original_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ original_amount: e.target.value })}
+          onChange={(e) => onChange({ original_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <FormField label="مبلغ تعدیل‌شده">
         <Input
           name="adjusted_amount"
           type="number"
-          value={values.adjusted_amount}
+          value={formatWithCommas(values.adjusted_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ adjusted_amount: e.target.value })}
+          onChange={(e) => onChange({ adjusted_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <FormField label="درصد پیش‌پرداخت">
@@ -190,9 +191,9 @@ export function ContractForm({
         <Input
           name="performance_guarantee_amount"
           type="number"
-          value={values.performance_guarantee_amount}
+          value={formatWithCommas(values.performance_guarantee_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ performance_guarantee_amount: e.target.value })}
+          onChange={(e) => onChange({ performance_guarantee_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <JalaliDatePicker
@@ -206,9 +207,9 @@ export function ContractForm({
         <Input
           name="advance_guarantee_amount"
           type="number"
-          value={values.advance_guarantee_amount}
+          value={formatWithCommas(values.advance_guarantee_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ advance_guarantee_amount: e.target.value })}
+          onChange={(e) => onChange({ advance_guarantee_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <JalaliDatePicker
@@ -284,7 +285,7 @@ export function contractDetailToForm(c: {
 }
 
 export function formToContractPayload(values: ContractFormValues): Record<string, unknown> {
-  const num = (v: string) => (v.trim() === "" ? null : Number(v));
+  const num = (v: string) => (v.trim() === "" ? null : parseFormattedNumber(v));
   return {
     contract_number: values.contract_number,
     contract_type: values.contract_type,
