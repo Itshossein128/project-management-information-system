@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useState } from "react";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
@@ -166,7 +166,7 @@ export function AllocationWizard({
                 className="rounded-md border px-3 py-2"
                 value={formatWithCommas(line.amount)}
                 data-testid={idx === 0 ? "cost-pool-allocate-amount" : undefined}
-                onChange={(e) => updateLine(idx, { amount: formatWithCommas(e.target.value) })}
+                onChange={(e) => updateLine(idx, { amount: toRawNumericString(e.target.value) })}
               />
             </label>
             {lines.length > 1 ? (

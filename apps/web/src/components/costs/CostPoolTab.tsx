@@ -10,7 +10,7 @@ import {
   type CostCategory,
 } from "@/app/lib/api/costs";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -129,7 +129,7 @@ export function CostPoolTab({
                 className="rounded-md border px-2 py-1"
                 data-testid="cost-pool-amount-input"
                 value={formatWithCommas(totalAmount)}
-                onChange={(e) => setTotalAmount(formatWithCommas(e.target.value))}
+                onChange={(e) => setTotalAmount(toRawNumericString(e.target.value))}
               />
             </label>
           </div>

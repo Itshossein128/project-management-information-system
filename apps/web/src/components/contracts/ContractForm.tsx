@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Input, JalaliDatePicker, Select, TextArea } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { CONTRACT_TYPE_LABELS } from "@/app/lib/api/contracts";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 
 export interface ContractFormValues {
   contract_number: string;
@@ -139,7 +139,7 @@ export function ContractForm({
           type="number"
           value={formatWithCommas(values.original_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ original_amount: formatWithCommas(e.target.value) })}
+          onChange={(e) => onChange({ original_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <FormField label="مبلغ تعدیل‌شده">
@@ -148,7 +148,7 @@ export function ContractForm({
           type="number"
           value={formatWithCommas(values.adjusted_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ adjusted_amount: formatWithCommas(e.target.value) })}
+          onChange={(e) => onChange({ adjusted_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <FormField label="درصد پیش‌پرداخت">
@@ -193,7 +193,7 @@ export function ContractForm({
           type="number"
           value={formatWithCommas(values.performance_guarantee_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ performance_guarantee_amount: formatWithCommas(e.target.value) })}
+          onChange={(e) => onChange({ performance_guarantee_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <JalaliDatePicker
@@ -209,7 +209,7 @@ export function ContractForm({
           type="number"
           value={formatWithCommas(values.advance_guarantee_amount)}
           disabled={disabled}
-          onChange={(e) => onChange({ advance_guarantee_amount: formatWithCommas(e.target.value) })}
+          onChange={(e) => onChange({ advance_guarantee_amount: toRawNumericString(e.target.value) })}
         />
       </FormField>
       <JalaliDatePicker
@@ -266,17 +266,17 @@ export function contractDetailToForm(c: {
     counterparty: c.counterparty ?? "",
     start_date: c.start_date ?? "",
     finish_date: c.finish_date ?? "",
-    original_amount: c.original_amount != null ? formatWithCommas(c.original_amount) : "",
-    adjusted_amount: c.adjusted_amount != null ? formatWithCommas(c.adjusted_amount) : "",
+    original_amount: c.original_amount != null ? String(c.original_amount) : "",
+    adjusted_amount: c.adjusted_amount != null ? String(c.adjusted_amount) : "",
     advance_payment_pct: String(c.advance_payment_pct ?? 0),
     retention_pct: String(c.retention_pct ?? 0),
     insurance_pct: String(c.insurance_pct ?? 0),
     tax_pct: String(c.tax_pct ?? 0),
     performance_guarantee_amount:
-      c.performance_guarantee_amount != null ? formatWithCommas(c.performance_guarantee_amount) : "",
+      c.performance_guarantee_amount != null ? String(c.performance_guarantee_amount) : "",
     performance_guarantee_expiry: c.performance_guarantee_expiry ?? "",
     advance_guarantee_amount:
-      c.advance_guarantee_amount != null ? formatWithCommas(c.advance_guarantee_amount) : "",
+      c.advance_guarantee_amount != null ? String(c.advance_guarantee_amount) : "",
     advance_guarantee_expiry: c.advance_guarantee_expiry ?? "",
     status: c.status ?? "active",
     file_url: c.file_url ?? "",

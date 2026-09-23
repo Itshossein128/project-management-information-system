@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useState } from "react";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
@@ -25,7 +25,7 @@ function toLine(row: ContractItemRow): BoQLine {
     activity: row.activity ?? "",
     boq_code: row.boq_code,
     description: row.description,
-    unit_price: row.unit_price != null ? formatWithCommas(row.unit_price) : "",
+    unit_price: row.unit_price != null ? String(row.unit_price) : "",
     quantity: String(row.quantity ?? ""),
   };
 }
@@ -137,7 +137,7 @@ export function ContractBoQGrid({
                       type="number"
                       disabled={!canEdit}
                       value={formatWithCommas(line.unit_price)}
-                      onChange={(e) => updateLine(idx, { unit_price: formatWithCommas(e.target.value) })}
+                      onChange={(e) => updateLine(idx, { unit_price: toRawNumericString(e.target.value) })}
                     />
                   </td>
                   <td className="px-2 py-1">

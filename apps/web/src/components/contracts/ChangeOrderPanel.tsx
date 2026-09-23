@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useState } from "react";
 import {
   approveChangeOrder,
@@ -81,7 +81,7 @@ export function ChangeOrderPanel({
               name="co_amount"
               type="number"
               value={formatWithCommas(amount)}
-              onChange={(e) => setAmount(formatWithCommas(e.target.value))}
+              onChange={(e) => setAmount(toRawNumericString(e.target.value))}
             />
           </div>
           <Button

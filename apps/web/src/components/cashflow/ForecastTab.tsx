@@ -11,7 +11,7 @@ import {
 import { CashFlowChart, monthLabel } from "@/components/cashflow/CashFlowChart";
 import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useToast } from "@/components/ui/toast";
 
 function ForecastRowEditor({
@@ -59,7 +59,7 @@ function ForecastRowEditor({
             type="number"
             className="w-28 rounded border px-2 py-1 text-sm"
             value={formatWithCommas(inflow)}
-            onChange={(e) => setInflow(formatWithCommas(e.target.value))}
+            onChange={(e) => setInflow(toRawNumericString(e.target.value))}
             onBlur={() => save.mutate()}
           />
         ) : (
@@ -72,7 +72,7 @@ function ForecastRowEditor({
             type="number"
             className="w-28 rounded border px-2 py-1 text-sm"
             value={formatWithCommas(outflow)}
-            onChange={(e) => setOutflow(formatWithCommas(e.target.value))}
+            onChange={(e) => setOutflow(toRawNumericString(e.target.value))}
             onBlur={() => save.mutate()}
           />
         ) : (

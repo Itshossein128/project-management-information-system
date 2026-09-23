@@ -19,7 +19,7 @@ import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
-import { formatWithCommas, parseFormattedNumber } from "@/app/lib/utils";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -145,7 +145,7 @@ function AddTransactionDrawer({
             type="number"
             className="rounded-md border border-input bg-background px-3 py-2"
             value={formatWithCommas(amount)}
-            onChange={(e) => setAmount(formatWithCommas(e.target.value))}
+            onChange={(e) => setAmount(toRawNumericString(e.target.value))}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -253,7 +253,7 @@ function EditTransactionDrawer({
             type="number"
             className="rounded-md border border-input bg-background px-3 py-2"
             value={formatWithCommas(amount)}
-            onChange={(e) => setAmount(formatWithCommas(e.target.value))}
+            onChange={(e) => setAmount(toRawNumericString(e.target.value))}
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
