@@ -19,32 +19,61 @@ http:
       rule: PathPrefix(`/api/auth/login`)
       entryPoints:
         - web
+        - websecure
       middlewares:
         - login-ratelimit
       service: api
       priority: 100
+
     api-write:
       rule: PathPrefix(`/api`) && (Method(`POST`) || Method(`PUT`) || Method(`PATCH`) || Method(`DELETE`))
       entryPoints:
         - web
+        - websecure
       middlewares:
         - api-write-ratelimit
       service: api
       priority: 90
+
     api-read:
       rule: PathPrefix(`/api`)
       entryPoints:
         - web
+        - websecure
       middlewares:
         - api-read-ratelimit
       service: api
       priority: 80
+
+    admin:
+      rule: PathPrefix(`/admin`)
+      entryPoints:
+        - web
+        - websecure
+      service: api
+      priority: 85
+
+    static:
+      rule: PathPrefix(`/static`)
+      entryPoints:
+        - web
+        - websecure
+      service: api
+      priority: 85
+
     web:
       rule: PathPrefix(`/`)
       entryPoints:
         - web
+        - websecure
       service: web
       priority: 1
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "www.toop-e-ghelgheli-2.ir"
+            sans:
+              - "toop-e-ghelgheli-2.ir"
 
   services:
     api:

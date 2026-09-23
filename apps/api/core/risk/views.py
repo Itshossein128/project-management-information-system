@@ -65,15 +65,18 @@ class BarrierLogViewSet(ProjectScopedViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         """Ensure a resolved date is provided if the barrier log's status is changed to resolved."""
+        from rest_framework.exceptions import ValidationError
+        from risk.services.barrier_service import validate_barrier_resolution
+
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        if serializer.validated_data.get('status') == BarrierStatus.RESOLVED:
-            if not serializer.validated_data.get('resolved_date') and not instance.resolved_date:
-                return Response(
-                    {'error': {'message': 'برای وضعیت رفع شده، تاریخ رفع الزامی است.'}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+        try:
+            validate_barrier_resolution(serializer.validated_data, instance)
+        except ValidationError as e:
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
         self.perform_update(serializer)
         return Response(serializer.data)
 
