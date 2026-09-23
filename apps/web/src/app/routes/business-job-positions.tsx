@@ -357,7 +357,7 @@ export default function BusinessJobPositionsPage() {
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
                     required
-                    placeholder='e.g. Electrician'
+                    placeholder='مثلاً برق‌کار'
                   />
                 </div>
                 <div>
