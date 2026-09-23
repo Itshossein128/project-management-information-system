@@ -92,7 +92,7 @@ class ActivityStatus(models.TextChoices):
 
 class Activity(AuditSoftDeleteModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='activities')
-    wbs = models.ForeignKey(WBS, on_delete=models.PROTECT, related_name='activities')
+    wbs = models.ForeignKey(WBS, on_delete=models.CASCADE, related_name='activities')
     activity_code = models.CharField(max_length=30)
     activity_name = models.CharField(max_length=200)
     unit = models.ForeignKey(

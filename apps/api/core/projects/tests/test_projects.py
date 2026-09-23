@@ -112,3 +112,18 @@ class TestProjectPatch:
         api_client.force_authenticate(user=other_user)
         response = api_client.get(f'/api/v1/projects/{project.id}/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+
+@pytest.mark.django_db
+class TestProjectDelete:
+    def test_delete_project_success(self, auth_client, project):
+        response = auth_client.delete(f"/api/v1/projects/{project.id}/")
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Project.objects.filter(id=project.id).exists()
+
+    def test_delete_project_without_permission(self, api_client, other_user, project, member):
+        api_client.force_authenticate(user=other_user)
+        response = api_client.delete(f"/api/v1/projects/{project.id}/")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert Project.objects.filter(id=project.id).exists()
