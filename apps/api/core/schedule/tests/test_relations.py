@@ -49,3 +49,22 @@ class TestCycleDetection:
             predecessor=b, successor=c, created_by=user, updated_by=user,
         )
         assert would_create_cycle(project.id, c.id, a.id) is True
+
+
+@pytest.mark.django_db
+def test_create_relation_from_anchor_invalid_role():
+    from uuid import uuid4
+    from rest_framework.exceptions import ValidationError
+    from schedule.services.relation_service import create_relation_from_anchor
+
+    with pytest.raises(ValidationError) as exc_info:
+        create_relation_from_anchor(
+            project_id=uuid4(),
+            anchor_activity_id=uuid4(),
+            role='invalid_role',
+            other_activity_id=uuid4(),
+            relation_type='FS',
+            lag_days=0,
+            user=None,
+        )
+    assert 'role' in exc_info.value.detail
