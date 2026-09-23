@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from alerts.models import AlertLog, AlertRule, AlertType
+from alerts.models import AlertLog, AlertRule
 
 
 class AlertRuleSerializer(serializers.ModelSerializer):
