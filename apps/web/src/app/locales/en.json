@@ -552,7 +552,10 @@
     }
   },
   "notifications": {
-    "title": "Notifications"
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "empty": "No notifications"
   },
   "pages": {
     "wbs": {
