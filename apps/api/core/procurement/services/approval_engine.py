@@ -129,16 +129,27 @@ def get_required_role(requisition: RequisitionHeader) -> str | None:
 def _validate_control_check(requisition: RequisitionHeader) -> None:
     """Gate 1: total requested qty must not exceed estimated block budget per material."""
     block = requisition.block
-    for item in requisition.items.filter(is_deleted=False):
-        total_requested = (
-            RequisitionItem.objects.filter(
-                header__block=block,
-                header__project=requisition.project,
-                material=item.material,
-                status__in=['pending', 'approved', 'ordered'],
-                is_deleted=False,
-            ).aggregate(total=Sum('requested_qty'))['total'] or 0
+    items = [item for item in requisition.items.all() if not item.is_deleted]
+    if not items:
+        return
+
+    material_ids = [item.material_id for item in items]
+    # ⚡ Bolt: Bulk aggregate total requested quantities for all materials in requisition in a single query
+    totals_qs = (
+        RequisitionItem.objects.filter(
+            header__block=block,
+            header__project=requisition.project,
+            material_id__in=material_ids,
+            status__in=['pending', 'approved', 'ordered'],
+            is_deleted=False,
         )
+        .values('material_id')
+        .annotate(total=Sum('requested_qty'))
+    )
+    totals_map = {row['material_id']: row['total'] or 0 for row in totals_qs}
+
+    for item in items:
+        total_requested = totals_map.get(item.material_id, 0)
         budget_qty = item.material.estimated_total_qty or 0
         if budget_qty > 0 and total_requested > budget_qty:
             scope_label = 'کارگاه' if requisition.scope == RequisitionScope.WORKSHOP else block.block_code
