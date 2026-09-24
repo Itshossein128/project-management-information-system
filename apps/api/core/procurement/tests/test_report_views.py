@@ -16,6 +16,7 @@ from procurement.views.report_views import (
     MaterialDeviationReportView,
     ProcurementStatusReportView,
 )
+from master_data.models import ProjectMember
 from projects.models import Project
 from resources.models import Material
 
@@ -27,6 +28,7 @@ class TestProcurementReportViews:
     def test_procurement_status_report_returns_200(self):
         user = User.objects.create(username="testuser", full_name="Test User")
         project = Project.objects.create(project_name="Test Project", project_code="PRJ-TEST")
+        ProjectMember.objects.create(project=project, user=user, status="active")
 
         rf = APIRequestFactory()
         req = rf.get(f"/api/v1/projects/{project.id}/reports/procurement-status/")
@@ -42,6 +44,7 @@ class TestProcurementReportViews:
     def test_liquidity_dashboard_view_structure(self):
         user = User.objects.create(username="liquidity_user", full_name="Liquidity User")
         project = Project.objects.create(project_name="Liquidity Project", project_code="PRJ-LIQ")
+        ProjectMember.objects.create(project=project, user=user, status="active")
         block = Block.objects.create(project=project, block_code="BLK-01", block_name="Block 1", budget=100000.0, created_by=user)
         material = Material.objects.create(project=project, material_code="MAT-01", material_name="Concrete")
         
@@ -83,6 +86,7 @@ class TestProcurementReportViews:
     def test_material_deviation_report_view_structure(self):
         user = User.objects.create(username="deviation_user", full_name="Deviation User")
         project = Project.objects.create(project_name="Deviation Project", project_code="PRJ-DEV")
+        ProjectMember.objects.create(project=project, user=user, status="active")
         block = Block.objects.create(project=project, block_code="BLK-02", block_name="Block 2", budget=50000.0, created_by=user)
         material = Material.objects.create(
             project=project,
@@ -130,6 +134,7 @@ class TestProcurementReportViews:
     def test_audit_trail_report_view_structure(self):
         user = User.objects.create(username="audit_user", full_name="Audit User")
         project = Project.objects.create(project_name="Audit Project", project_code="PRJ-AUD")
+        ProjectMember.objects.create(project=project, user=user, status="active")
         block = Block.objects.create(project=project, block_code="BLK-03", block_name="Block 3", created_by=user)
         req_header = RequisitionHeader.objects.create(
             project=project,
