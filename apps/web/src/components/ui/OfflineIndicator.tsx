@@ -59,6 +59,8 @@ export function OfflineIndicator() {
   if (conflicts > 0) {
     return (
       <div
+        role="status"
+        aria-live="polite"
         data-testid="offline-indicator"
         className="flex w-full items-center justify-between gap-3 bg-danger-600 px-4 py-2 text-sm text-white"
       >
@@ -81,6 +83,8 @@ export function OfflineIndicator() {
   if (isOnline && stats.syncing > 0) {
     return (
       <div
+        role="status"
+        aria-live="polite"
         data-testid="offline-indicator"
         className="flex w-full items-center gap-2 bg-info-600 px-4 py-2 text-sm text-white"
       >
@@ -93,6 +97,8 @@ export function OfflineIndicator() {
   if (!isOnline) {
     return (
       <div
+        role="status"
+        aria-live="polite"
         data-testid="offline-indicator"
         className="flex w-full items-center justify-between gap-3 bg-warning-500 px-4 py-2 text-sm text-warning-950"
       >
@@ -112,6 +118,8 @@ export function OfflineIndicator() {
   if (stats.pending > 0 || stats.failed > 0) {
     return (
       <div
+        role="status"
+        aria-live="polite"
         data-testid="offline-indicator"
         className={cn(
           "flex w-full items-center justify-between gap-3 bg-warning-100 px-4 py-2 text-sm text-warning-900",
