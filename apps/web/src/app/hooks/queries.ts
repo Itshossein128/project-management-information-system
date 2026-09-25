@@ -18,7 +18,7 @@ export interface HrUserRow {
   first_name: string;
   last_name: string;
   full_name: string;
-  date_joined: string;
+  created_at: string;
   is_active: boolean;
   roles: string[];
   assignments_preview?: UserBusinessAssignment[];

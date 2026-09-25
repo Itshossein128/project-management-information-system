@@ -1,5 +1,6 @@
 import re
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from master_data.models import Role
@@ -7,7 +8,21 @@ from permissions.constants import ALL_PERMISSION_CODENAMES
 from permissions.role_services import is_system_role, set_role_permissions
 
 
-ROLE_NAME_RE = re.compile(r'^[a-z][a-z0-9_]*$')
+# Letters (any script, e.g. Persian), digits, spaces, hyphens, underscores.
+ROLE_NAME_RE = re.compile(r'^[\w]([\w\s\-]*[\w])?$', re.UNICODE)
+
+
+def _normalize_role_name(value: str) -> str:
+    return ' '.join(value.split())
+
+
+def _validate_role_name_format(name: str) -> None:
+    if not name:
+        raise serializers.ValidationError(_('Role name is required.'))
+    if not ROLE_NAME_RE.match(name):
+        raise serializers.ValidationError(
+            _('Role name may only contain letters, numbers, spaces, hyphens, and underscores.'),
+        )
 
 
 class RoleDetailSerializer(serializers.ModelSerializer):
@@ -35,13 +50,10 @@ class RoleCreateSerializer(serializers.Serializer):
     )
 
     def validate_role_name(self, value):
-        name = value.strip()
-        if not ROLE_NAME_RE.match(name):
-            raise serializers.ValidationError(
-                'Role name must start with a letter and contain only lowercase letters, numbers, and underscores.',
-            )
+        name = _normalize_role_name(value)
+        _validate_role_name_format(name)
         if Role.objects.filter(role_name=name).exists():
-            raise serializers.ValidationError('A role with this name already exists.')
+            raise serializers.ValidationError(_('A role with this name already exists.'))
         return name
 
 
@@ -50,14 +62,11 @@ class RoleUpdateSerializer(serializers.Serializer):
     description = serializers.CharField(required=False, allow_blank=True)
 
     def validate_role_name(self, value):
-        name = value.strip()
-        if not ROLE_NAME_RE.match(name):
-            raise serializers.ValidationError(
-                'Role name must start with a letter and contain only lowercase letters, numbers, and underscores.',
-            )
+        name = _normalize_role_name(value)
+        _validate_role_name_format(name)
         role = self.context['role']
         if Role.objects.filter(role_name=name).exclude(pk=role.pk).exists():
-            raise serializers.ValidationError('A role with this name already exists.')
+            raise serializers.ValidationError(_('A role with this name already exists.'))
         return name
 
 

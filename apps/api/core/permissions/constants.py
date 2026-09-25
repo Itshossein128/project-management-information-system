@@ -108,12 +108,12 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
 }
 
 DEFAULT_ROLE_DESCRIPTIONS: dict[str, str] = {
-    'project_manager': 'Full access to all project modules.',
-    'planning_engineer': 'Planning and scheduling access.',
-    'site_supervisor': 'Site reporting and progress tracking.',
-    'field_supervisor': 'Field crew filling daily reports on mobile/tablet.',
-    'finance_manager': 'Financial and contract management.',
-    'procurement_officer': 'Procurement and document upload.',
-    'document_controller': 'Document management.',
-    'viewer': 'Read-only access to project data.',
+    'project_manager': 'دسترسی کامل به همه ماژول‌های پروژه.',
+    'planning_engineer': 'دسترسی به برنامه‌ریزی و زمان‌بندی.',
+    'site_supervisor': 'گزارش‌گیری کارگاهی و پیگیری پیشرفت.',
+    'field_supervisor': 'تیم میدان برای ثبت گزارش روزانه در موبایل/تبلت.',
+    'finance_manager': 'مدیریت مالی و قراردادها.',
+    'procurement_officer': 'تدارکات و بارگذاری اسناد.',
+    'document_controller': 'مدیریت اسناد.',
+    'viewer': 'دسترسی فقط‌خواندنی به داده‌های پروژه.',
 }
