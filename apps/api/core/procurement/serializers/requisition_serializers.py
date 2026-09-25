@@ -282,10 +282,19 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
         return obj._cached_last_action
 
     def get_last_action_at(self, obj):
+        # ⚡ Bolt: Fast-path for annotated subquery field from RequisitionHeaderViewSet list queryset
+        if hasattr(obj, '_last_action_at'):
+            val = obj._last_action_at
+            if val is None:
+                return None
+            return val.isoformat() if hasattr(val, 'isoformat') else str(val)
         summary = self._get_last_action_summary(obj)
         return summary['at'] if summary else None
 
     def get_last_action_by_name(self, obj):
+        # ⚡ Bolt: Fast-path for annotated subquery field from RequisitionHeaderViewSet list queryset
+        if hasattr(obj, '_last_action_by_name'):
+            return obj._last_action_by_name
         summary = self._get_last_action_summary(obj)
         return summary['by_name'] if summary else None
 
