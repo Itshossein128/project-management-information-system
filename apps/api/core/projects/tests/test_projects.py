@@ -101,10 +101,12 @@ class TestProjectPatch:
         api_client.force_authenticate(user=other_user)
         response = api_client.patch(
             f'/api/v1/projects/{project.id}/',
-            {'project_name': 'Hacked'},
+            {'project_name': 'Unauthorized Edit'},
             format='json',
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
+        project.refresh_from_db()
+        assert project.project_name != 'Unauthorized Edit'
 
     def test_inactive_member_cannot_access(self, api_client, other_user, project, member):
         member.status = MemberStatus.INACTIVE
