@@ -270,7 +270,8 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
         return obj.block.block_code
 
     def get_item_count(self, obj):
-        return obj.items.filter(is_deleted=False).count()
+        # ⚡ Bolt: Use python iteration over prefetched items collection to avoid N+1 queries from .filter().count()
+        return sum(1 for item in obj.items.all() if not item.is_deleted)
 
     def _get_last_action_summary(self, obj):
         if hasattr(obj, '_cached_last_action'):

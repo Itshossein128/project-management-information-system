@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Check, CheckCheck, X } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
@@ -24,6 +25,7 @@ export function NotificationPanel({
 }: {
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const titleId = useId();
   // We pass `true` to useNotificationList since we only mount this when Popover is open
@@ -42,7 +44,7 @@ export function NotificationPanel({
     <>
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <span id={titleId} className="text-sm font-semibold">
-          اعلان‌ها
+          {t("notifications.title")}
         </span>
         <div className="flex items-center gap-2">
           <button
@@ -52,12 +54,13 @@ export function NotificationPanel({
             className="inline-flex items-center gap-1 rounded-sm text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
             <CheckCheck className="size-3.5" aria-hidden />
-            خواندن همه
+            {t("notifications.markAllRead")}
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="بستن"
+            aria-label={t("common.close")}
+            title={t("common.close")}
             className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="size-4" aria-hidden />
@@ -68,11 +71,11 @@ export function NotificationPanel({
       <div className="max-h-96 overflow-y-auto">
         {isLoading ? (
           <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-            در حال بارگذاری...
+            {t("common.loading")}
           </p>
         ) : !data || data.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-            اعلانی وجود ندارد
+            {t("notifications.empty")}
           </p>
         ) : (
           <ul className="divide-y divide-border">
@@ -119,8 +122,8 @@ export function NotificationPanel({
                   <button
                     type="button"
                     className="shrink-0 px-3 text-muted-foreground hover:bg-muted/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    aria-label="خواندن"
-                    title="خواندن"
+                    aria-label={t("notifications.markAsRead")}
+                    title={t("notifications.markAsRead")}
                     onClick={() => markRead.mutate(n.id)}
                   >
                     <Check className="size-3.5" aria-hidden />

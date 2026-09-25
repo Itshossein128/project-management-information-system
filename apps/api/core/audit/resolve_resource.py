@@ -70,6 +70,13 @@ def resolve_resource(path: str, project_id: uuid.UUID | None = None) -> Resolved
                 resource_id = uuid.UUID(groups['id'])
             except ValueError:
                 pass
+        if resource_type == 'project' and _parse_uuid(groups.get('id')):
+            # Avoid FK to a project that is being deleted; keep resource_id for the audit row.
+            return ResolvedResource(
+                resource_type='project',
+                resource_id=resource_id,
+                project_id=None,
+            )
         return ResolvedResource(
             resource_type=resource_type,
             resource_id=resource_id,

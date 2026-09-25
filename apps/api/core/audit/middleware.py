@@ -65,6 +65,8 @@ class AuditLogMiddleware(MiddlewareMixin):
                 resource_id = resolved.resource_id
                 if resolved.project_id is not None:
                     project_fk_id = resolved.project_id
+            if request.method == 'DELETE' and resource_type == 'project':
+                project_fk_id = None
 
             payload = build_audit_payload(
                 actor_id=actor.id if actor else None,

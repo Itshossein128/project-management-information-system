@@ -1,8 +1,11 @@
 """Procurement operations: assign items, partial approval, GRN, issue stock, transfers."""
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from permissions.project import HasProjectPermission, IsProjectMember
 
 from procurement.models import (
     Block,
@@ -24,6 +27,9 @@ from procurement.serializers import (
 
 class AssignItemsView(APIView):
     """Line-item splitting: assign requisition items to procurement officers."""
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
 
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.requisition_service import assign_items
@@ -48,6 +54,9 @@ class AssignItemsView(APIView):
 class PartialApproveView(APIView):
     """Partially approve requisition items (sets approved_qty or ON_HOLD)."""
 
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.requisition_service import partial_approve_items
 
@@ -71,6 +80,9 @@ class PartialApproveView(APIView):
 class GRNView(APIView):
     """Record goods receipt (GRN) and tag to block allocation."""
 
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
     def post(self, request, project_pk=None, block_pk=None):
         from procurement.services.inventory_lock_service import record_grn
 
@@ -91,6 +103,9 @@ class GRNView(APIView):
 class IssueStockView(APIView):
     """Issue stock from a block allocation (Hard Stop enforced)."""
 
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
     def post(self, request, project_pk=None, block_pk=None):
         from procurement.services.inventory_lock_service import issue_stock
 
@@ -110,6 +125,9 @@ class IssueStockView(APIView):
 
 class BlockStockView(APIView):
     """Get reserved/received/issued stock rows for a block (MR-tagged allocations)."""
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None, block_pk=None):
         block = get_object_or_404(Block, id=block_pk, project_id=project_pk, is_deleted=False)
@@ -145,6 +163,9 @@ class InternalTransferViewSet(viewsets.ModelViewSet):
 class TransferApproveView(APIView):
     """Approve an inter-block transfer (PM only)."""
 
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
+
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.transfer_service import approve_transfer
 
@@ -160,6 +181,9 @@ class TransferApproveView(APIView):
 
 class TransferRejectView(APIView):
     """Reject an inter-block transfer."""
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_procurement'
 
     def post(self, request, project_pk=None, pk=None):
         from procurement.services.transfer_service import reject_transfer

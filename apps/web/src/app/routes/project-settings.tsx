@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
 import {
   fetchProject,
   updateProject,
+  deleteProject,
   type CreateProjectPayload,
 } from "@/app/lib/api/projects";
 import { PATHS } from "@/app/routeVars";
@@ -20,6 +21,7 @@ function ProjectSettingsContent() {
   const { projectId } = useParams();
   const id = projectId ?? "";
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const toast = useToast();
   const qc = useQueryClient();
   const { has } = usePermission(id);
@@ -40,6 +42,16 @@ function ProjectSettingsContent() {
       toast.success(t("projectSettings.saveSuccess", "تغییرات ذخیره شد"));
       void qc.invalidateQueries({ queryKey: ["project", id] });
       void qc.invalidateQueries({ queryKey: ["projects"] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteProject(id),
+    onSuccess: () => {
+      toast.success(t("projectSettings.deleteSuccess", "پروژه با موفقیت حذف شد"));
+      void qc.invalidateQueries({ queryKey: ["projects"] });
+      navigate(`/${PATHS.PROJECT}`);
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -188,9 +200,30 @@ function ProjectSettingsContent() {
         </div>
 
         {canEdit ? (
-          <Button type='submit' loading={saveMutation.isPending}>
-            {t("projectSettings.save", "ذخیره")}
-          </Button>
+          <div className='flex items-center justify-between border-t pt-4'>
+            <Button type='submit' loading={saveMutation.isPending}>
+              {t("projectSettings.save", "ذخیره")}
+            </Button>
+            <Button
+              type='button'
+              variant='danger'
+              loading={deleteMutation.isPending}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    t(
+                      "projectSettings.deleteConfirm",
+                      "آیا از حذف این پروژه و تمامی داده‌های مربوط به آن اطمینان دارید؟",
+                    ),
+                  )
+                ) {
+                  deleteMutation.mutate();
+                }
+              }}
+            >
+              {t("projectSettings.delete", "حذف پروژه")}
+            </Button>
+          </div>
         ) : null}
       </form>
     </>

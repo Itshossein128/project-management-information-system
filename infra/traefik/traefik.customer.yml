@@ -1,7 +1,23 @@
-# Customer / demo Traefik — single entry point on :8080 (no dashboard API on same port).
 entryPoints:
   web:
-    address: ":8080"
+    address: ":80"
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "www.toop-e-ghelgheli-2.ir"
+            sans:
+              - "toop-e-ghelgheli-2.ir"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@toop-e-ghelgheli-2.ir
+      storage: /etc/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
 
 providers:
   file:

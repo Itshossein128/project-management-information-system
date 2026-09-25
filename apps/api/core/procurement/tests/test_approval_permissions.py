@@ -255,3 +255,25 @@ class TestWorkshopDraftPermissions:
             url = f"/api/projects/{data['project'].id}/requisitions/{data['workshop_req'].id}/submit/"
             response = client.post(url, {}, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_approval_log_list_requires_project_permission(self, workshop_setup):
+        client = APIClient()
+        data = workshop_setup
+        url = f"/api/v1/projects/{data['project'].id}/requisitions/{data['workshop_req'].id}/approval-logs/"
+
+        # Unauthenticated request returns 401
+        res = client.get(url)
+        if res.status_code == 404:
+            url = f"/api/projects/{data['project'].id}/requisitions/{data['workshop_req'].id}/approval-logs/"
+            res = client.get(url)
+        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
+        # Authenticated non-project member returns 403
+        client.force_authenticate(user=data['user_unauth'])
+        res = client.get(url)
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+        # Authenticated project member returns 200
+        client.force_authenticate(user=data['user_supervisor'])
+        res = client.get(url)
+        assert res.status_code == status.HTTP_200_OK, res.data

@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useState } from "react";
 import {
   addIPCDeduction,
@@ -34,7 +35,7 @@ export function IPCDeductionsTable({
     mutationFn: () =>
       addIPCDeduction(projectId, ipc.id, {
         deduction_type: deductionType,
-        amount: Number(amount) || 0,
+        amount: parseFormattedNumber(amount),
         description,
       }),
     onSuccess: () => {
@@ -121,8 +122,8 @@ export function IPCDeductionsTable({
             <Input
               name="ded_amount"
               type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={formatWithCommas(amount)}
+              onChange={(e) => setAmount(toRawNumericString(e.target.value))}
             />
           </div>
           <div>

@@ -16,22 +16,29 @@ export function NotificationBell() {
 
   if (!enabled) return null;
 
+  const bellLabel = unread > 0
+    ? `${t("notifications.title")} (${unread})`
+    : t("notifications.title");
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
           data-tour="notification-bell"
-          aria-label={t("notifications.title")}
-          title={t("notifications.title")}
+          aria-label={bellLabel}
+          title={bellLabel}
           className={cn(
             "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
             open && "bg-muted",
           )}
         >
-          <Bell className="size-4" />
+          <Bell className="size-4" aria-hidden="true" />
           {unread > 0 ? (
-            <span className="absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-background bg-danger-500 px-1 text-[10px] font-semibold leading-none text-white">
+            <span
+              aria-hidden="true"
+              className="absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-background bg-danger-500 px-1 text-[10px] font-semibold leading-none text-white"
+            >
               {unread > 99 ? "99+" : unread}
             </span>
           ) : null}

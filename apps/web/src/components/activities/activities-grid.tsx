@@ -333,6 +333,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                           type="button"
                           className="font-mono text-primary hover:underline"
                           onClick={(e) => { e.stopPropagation(); void openEdit(act); }}
+                          aria-label={`ویرایش ${act.activity_code}`}
                         >
                           {act.activity_code}
                         </button>

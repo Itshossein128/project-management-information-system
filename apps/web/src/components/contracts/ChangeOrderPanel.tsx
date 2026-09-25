@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useState } from "react";
 import {
   approveChangeOrder,
@@ -40,7 +41,7 @@ export function ChangeOrderPanel({
     mutationFn: () =>
       createChangeOrder(projectId, contractId, {
         description,
-        amount_change: Number(amount) || 0,
+        amount_change: parseFormattedNumber(amount),
       }),
     onSuccess: () => {
       toast.success("تغییر مقادیر ثبت شد");
@@ -79,8 +80,8 @@ export function ChangeOrderPanel({
             <Input
               name="co_amount"
               type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={formatWithCommas(amount)}
+              onChange={(e) => setAmount(toRawNumericString(e.target.value))}
             />
           </div>
           <Button

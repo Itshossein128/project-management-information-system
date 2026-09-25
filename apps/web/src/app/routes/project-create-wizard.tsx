@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 import { Input } from "@/components/form";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
 import { LayoutTemplate } from "lucide-react";
@@ -330,9 +331,10 @@ export default function ProjectCreateWizardPage() {
           <div>
             <Label>مبلغ قرارداد</Label>
             <Input
-              type="number"
-              value={form.contract_amount ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, contract_amount: e.target.value }))}
+              type="text"
+              inputMode="decimal"
+              value={formatWithCommas(form.contract_amount ?? "")}
+              onChange={(e) => setForm((f) => ({ ...f, contract_amount: toRawNumericString(e.target.value) }))}
             />
           </div>
           {durationDays != null ? (

@@ -30,9 +30,10 @@ logger = logging.getLogger(__name__)
     create=extend_schema(summary='Create project', tags=['Projects']),
     retrieve=extend_schema(summary='Get project', tags=['Projects']),
     partial_update=extend_schema(summary='Patch project', tags=['Projects']),
+    destroy=extend_schema(summary='Delete project', tags=['Projects']),
 )
 class ProjectViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'post', 'patch', 'head', 'options']
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     lookup_field = 'pk'
     lookup_url_kwarg = 'project_pk'
 
@@ -41,14 +42,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
         if self.action in ('list', 'retrieve'):
             return [IsAuthenticated(), IsProjectMember()]
-        if self.action in ('update', 'partial_update'):
+        if self.action in ('update', 'partial_update', 'destroy'):
             return [IsAuthenticated(), HasProjectPermission()]
         if self.action in ('templates', 'from_template'):
             return [IsBusinessSetup()]
         return [IsAuthenticated(), IsProjectMember()]
 
     def get_required_permission(self):
-        if self.action in ('update', 'partial_update'):
+        if self.action in ('update', 'partial_update', 'destroy'):
             return 'edit_project'
         return ''
 
