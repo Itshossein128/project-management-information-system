@@ -39,3 +39,8 @@
 **Prevention:** Always apply explicit, sensible `max_length` constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.
 ## 2024-05-24 - Missing Authentication in ViewSets\n\nFound that `ItemViewSet` in `apps/api/core/inventory/views.py` was missing `permission_classes`, potentially exposing all inventory CRUD and import/export endpoints. Added `permission_classes = [IsAuthenticated]` to secure it.
 - Discovered missing HasProjectPermission/permission_classes on multiple project-scoped APIViews across multiple apps (procurement, economic, etc).
+
+## 2026-03-30 - Missing Permission Verification on Requisition Hold Endpoint
+**Vulnerability:** `RequisitionItemHoldView` in `apps/api/core/procurement/views/requisition_views.py` lacked `permission_classes` and `required_permission`, allowing unauthenticated/unauthorized users to modify requisition item hold statuses.
+**Learning:** Raw `APIView` subclasses in DRF do not inherit project permission checks automatically unless `permission_classes = [IsAuthenticated, HasProjectPermission]` and `required_permission` are explicitly declared.
+**Prevention:** Always verify that every custom `APIView` handling project resources includes `IsAuthenticated` and `HasProjectPermission` alongside a valid `required_permission` attribute.

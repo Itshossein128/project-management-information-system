@@ -3,8 +3,11 @@ from django.db.models import OuterRef, Prefetch, Subquery
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from permissions.project import HasProjectPermission
 
 from common.viewsets import ProjectScopedViewSet
 from procurement.models import (
@@ -158,6 +161,9 @@ class RequisitionHeaderViewSet(viewsets.ModelViewSet):
 
 class RequisitionItemHoldView(APIView):
     """Put a requisition item on hold (awaiting budget)."""
+
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_procurement'
 
     def patch(self, request, project_pk=None, pk=None):
         from procurement.services.requisition_service import put_item_on_hold
