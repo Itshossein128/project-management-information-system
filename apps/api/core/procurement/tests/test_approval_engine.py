@@ -126,3 +126,10 @@ class TestApprovalEngine:
 
     def test_workshop_workflow_has_no_workshop_approval_step(self):
         assert RequisitionStatus.WORKSHOP_APPROVAL not in WORKSHOP_WORKFLOW_TRANSITIONS
+
+    def test_control_check_validation_bulk_aggregation(self, block_requisition, material, user):
+        block_requisition.status = RequisitionStatus.WORKSHOP_APPROVAL
+        block_requisition.save(update_fields=['status'])
+        # Transition to CONTROL_CHECK triggers _validate_control_check
+        updated = transition(block_requisition, 'approve', user, comments='control check pass')
+        assert updated.status == RequisitionStatus.CONTROL_CHECK

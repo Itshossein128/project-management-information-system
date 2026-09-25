@@ -10,6 +10,7 @@ import {
   type CostCategory,
 } from "@/app/lib/api/costs";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
+import { formatWithCommas } from "@/app/lib/utils";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
@@ -264,7 +265,10 @@ export function BudgetGrid({
                           autoFocus
                           className="w-24 rounded border px-1 py-0.5 text-center text-xs"
                           data-testid={`budget-input-${row.code}-${cat.value}`}
-                          defaultValue={amount ? String(amount) : ""}
+                          defaultValue={amount ? formatWithCommas(amount) : ""}
+                          onChange={(e) => {
+                            e.target.value = formatWithCommas(e.target.value);
+                          }}
                           onBlur={(e) => {
                             const val = parseFaAmount(e.target.value);
                             setEdits((prev) => ({ ...prev, [k]: val }));

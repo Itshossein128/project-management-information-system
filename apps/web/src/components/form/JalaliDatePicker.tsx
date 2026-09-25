@@ -1,8 +1,10 @@
-import { cn } from "@/app/lib/utils";
-import MultiDatePicker from "react-multi-date-picker";
-import type { DateObject } from "react-multi-date-picker";
+import { useTranslation } from "react-i18next";
+import MultiDatePicker, { DateObject } from "react-multi-date-picker";
+import gregorian from "react-date-object/calendars/gregorian";
 import persian from "react-date-object/calendars/persian";
+import gregorian_en from "react-date-object/locales/gregorian_en";
 import persian_fa from "react-date-object/locales/persian_fa";
+import { cn } from "@/app/lib/utils";
 import { Field, type FieldProps } from "./Field";
 
 /** Vite SSR may expose the CJS module namespace; unwrap to the real component. */
@@ -10,20 +12,34 @@ const DatePicker =
   (MultiDatePicker as unknown as { default?: typeof MultiDatePicker }).default ??
   MultiDatePicker;
 
-const ISO_DATE_FORMAT = "YYYY-MM-DD";
+/**
+ * Parses an ISO Gregorian string (`YYYY-MM-DD`) into a `DateObject` converted to
+ * the active calendar and locale for display.
+ */
+function parseIsoToDateObject(
+  iso: string | undefined | null,
+  calendar: any,
+  locale: any,
+): DateObject | "" {
+  if (!iso) return "";
+  const parts = iso.slice(0, 10).split("-").map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return "";
+  const [year, month, day] = parts;
+  const d = new DateObject({ year, month, day, calendar: gregorian });
+  return d.convert(calendar, locale);
+}
 
 /**
- * `react-multi-date-picker` returns a `DateObject` (or null) that we serialize
- * to an ISO `YYYY-MM-DD` string for storage / API transport. The Jalali
- * calendar is for display only — the wire format stays Gregorian/ISO.
+ * Converts a `DateObject` (which could be in Solar Hijri or Gregorian calendar)
+ * back to an ISO `YYYY-MM-DD` Gregorian date string for wire/API storage.
  */
 function dateObjectToIso(value: DateObject | null): string {
   if (!value) return "";
-  // `react-date-object` defaults to Gregorian when no calendar is provided.
-  // Type defs require a calendar argument, so we pass `undefined` to preserve
-  // the runtime default behavior while keeping SSR-friendly imports.
-  const g = value.convert(undefined as unknown as any);
-  return g.format(ISO_DATE_FORMAT);
+  const g = value.convert(gregorian, gregorian_en);
+  const year = g.year;
+  const month = String(g.month.number).padStart(2, "0");
+  const day = String(g.day).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export interface JalaliDatePickerProps {
@@ -49,11 +65,11 @@ export interface JalaliDatePickerProps {
 }
 
 /**
- * Single-date input with a Jalali (Persian) calendar UI.
+ * Single-date input with locale-matched calendar UI.
  *
- * - User sees Persian dates and Persian digits.
- * - The component emits ISO Gregorian (`YYYY-MM-DD`) strings via `onChange`,
- *   which is what the Django backend (`DateField`) expects.
+ * - When language is 'fa': displays Solar Hijri (Persian) calendar and digits.
+ * - When language is 'en': displays Gregorian calendar and digits.
+ * - Always emits and accepts ISO Gregorian (`YYYY-MM-DD`) strings via `value` / `onChange`.
  */
 export function JalaliDatePicker({
   name,
@@ -74,7 +90,17 @@ export function JalaliDatePicker({
   onStickyChange,
   stickyAriaLabel,
 }: JalaliDatePickerProps) {
+  const { i18n } = useTranslation();
+  const isFa = i18n.language === "fa";
+  const activeCalendar = isFa ? persian : gregorian;
+  const activeLocale = isFa ? persian_fa : gregorian_en;
+  const format = isFa ? "YYYY/MM/DD" : "YYYY-MM-DD";
+
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
+
+  const parsedValue = parseIsoToDateObject(value, activeCalendar, activeLocale);
+  const parsedMinDate = parseIsoToDateObject(minDate, activeCalendar, activeLocale);
+  const parsedMaxDate = parseIsoToDateObject(maxDate, activeCalendar, activeLocale);
 
   return (
     <Field
@@ -92,14 +118,14 @@ export function JalaliDatePicker({
         <DatePicker
           id={inputId}
           name={name}
-          value={value || ""}
+          value={parsedValue}
           onChange={(date) => {
             const next = Array.isArray(date) ? date[0] ?? null : date ?? null;
             onChange(dateObjectToIso(next as DateObject | null));
           }}
-          calendar={persian}
-          locale={persian_fa}
-          format={ISO_DATE_FORMAT}
+          calendar={activeCalendar}
+          locale={activeLocale}
+          format={format}
           calendarPosition="bottom-right"
           inputClass={cn(
             "border-input bg-transparent dark:bg-input/30 h-9 w-full rounded-md border px-3 text-base shadow-xs outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
@@ -111,8 +137,8 @@ export function JalaliDatePicker({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          minDate={minDate}
-          maxDate={maxDate}
+          minDate={parsedMinDate || undefined}
+          maxDate={parsedMaxDate || undefined}
           editable={false}
         />
       )}

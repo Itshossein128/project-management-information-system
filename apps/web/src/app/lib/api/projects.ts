@@ -59,3 +59,9 @@ export function updateProject(projectId: string, payload: Partial<CreateProjectP
     body: JSON.stringify(payload),
   });
 }
+
+export function deleteProject(projectId: string) {
+  return apiJson<void>(`/${PATHS.API_PROJECTS}/${projectId}/`, {
+    method: "DELETE",
+  });
+}

@@ -38,3 +38,5 @@
 **Learning:** In Django REST Framework, `serializers.CharField()` without `max_length` allows unbounded payloads, making endpoints vulnerable to resource exhaustion (e.g., massive passwords freezing the server during PBKDF2 hashing).
 **Prevention:** Always apply explicit, sensible `max_length` constraints on all user-controlled text inputs, particularly for passwords, tokens, usernames, and phone numbers in public-facing authentication endpoints.
 ## 2024-05-24 - Missing Authentication in ViewSets\n\nFound that `ItemViewSet` in `apps/api/core/inventory/views.py` was missing `permission_classes`, potentially exposing all inventory CRUD and import/export endpoints. Added `permission_classes = [IsAuthenticated]` to secure it.
+- Discovered missing HasProjectPermission/permission_classes on multiple project-scoped APIViews across multiple apps (procurement, economic, etc).
+Added missing authentication and permission checks to RequisitionItemHoldView to prevent unauthorized users from putting requisition items on hold.

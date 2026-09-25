@@ -11,6 +11,7 @@ import {
 import { CashFlowChart, monthLabel } from "@/components/cashflow/CashFlowChart";
 import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { useToast } from "@/components/ui/toast";
 
 function ForecastRowEditor({
@@ -31,8 +32,8 @@ function ForecastRowEditor({
   const save = useMutation({
     mutationFn: () =>
       upsertForecast(projectId, monthIsoToKey(row.month), {
-        expected_inflow: Number(inflow),
-        expected_outflow: Number(outflow),
+        expected_inflow: parseFormattedNumber(inflow),
+        expected_outflow: parseFormattedNumber(outflow),
         confidence_pct: confidence,
       }),
     onSuccess: () => {
@@ -57,8 +58,8 @@ function ForecastRowEditor({
           <input
             type="number"
             className="w-28 rounded border px-2 py-1 text-sm"
-            value={inflow}
-            onChange={(e) => setInflow(e.target.value)}
+            value={formatWithCommas(inflow)}
+            onChange={(e) => setInflow(toRawNumericString(e.target.value))}
             onBlur={() => save.mutate()}
           />
         ) : (
@@ -70,8 +71,8 @@ function ForecastRowEditor({
           <input
             type="number"
             className="w-28 rounded border px-2 py-1 text-sm"
-            value={outflow}
-            onChange={(e) => setOutflow(e.target.value)}
+            value={formatWithCommas(outflow)}
+            onChange={(e) => setOutflow(toRawNumericString(e.target.value))}
             onBlur={() => save.mutate()}
           />
         ) : (
