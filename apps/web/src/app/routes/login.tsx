@@ -16,12 +16,18 @@ import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { redirect, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
-import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
+import {
+  getAccessTokenFromRequest,
+  hasStoredSession,
+} from "src/app/lib/auth-storage";
 
 export async function loader({ request }: { request: Request }) {
-  // Client: do not trust localStorage alone — AuthProvider validates the session and
-  // the Login component redirects once isAuthenticated is confirmed.
   if (typeof window !== "undefined") {
+    if (hasStoredSession()) {
+      const url = new URL(request.url);
+      const redirectTo = url.searchParams.get("redirectTo") || "/home";
+      throw redirect(redirectTo);
+    }
     return {};
   }
   if (getAccessTokenFromRequest(request)) {
