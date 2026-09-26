@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "src/app/lib/utils";
 
 type ToastVariant = "success" | "error" | "warning";
@@ -25,6 +26,7 @@ const variantClass: Record<ToastVariant, string> = {
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const dismiss = useCallback((id: number) => {
@@ -56,22 +58,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         aria-live="polite"
         aria-relevant="additions text"
       >
-        {toasts.map((t) => (
+        {toasts.map((toast) => (
           <div
-            key={t.id}
+            key={toast.id}
             className={cn(
               "pointer-events-auto flex items-start gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg",
-              variantClass[t.variant],
+              variantClass[toast.variant],
             )}
-            role={t.variant === "error" ? "alert" : "status"}
-            aria-live={t.variant === "error" ? "assertive" : "polite"}
+            role={toast.variant === "error" ? "alert" : "status"}
+            aria-live={toast.variant === "error" ? "assertive" : "polite"}
           >
-            <p className="flex-1">{t.message}</p>
+            <p className="flex-1">{toast.message}</p>
             <button
               type="button"
               className="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="بستن"
-              onClick={() => dismiss(t.id)}
+              aria-label={t("common.close")}
+              onClick={() => dismiss(toast.id)}
             >
               <X className="size-4" aria-hidden />
             </button>
