@@ -12,15 +12,10 @@ import {
   setProjectRolePermissions,
   type ProjectRole,
 } from "@/app/lib/api/roles";
-import {
-  AVAILABLE_PROJECT_ROLE_CODES,
-  formatRoleDescription,
-  formatRoleLabel,
-} from "@/app/lib/role-labels";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
-import { Input, Select } from "@/components/form";
+import { Input } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { Modal } from "@/components/overlay/modal";
 import { useToast } from "@/components/ui/toast";
@@ -55,24 +50,6 @@ export default function SettingsRolesPage() {
 
   const selectedRole = roles.find((r) => r.id === selectedId) ?? null;
   const grouped = useMemo(() => groupPermissionsByModule(catalog), [catalog]);
-  const existingRoleNames = useMemo(
-    () => new Set(roles.map((r) => r.role_name)),
-    [roles],
-  );
-  const roleOptions = useMemo(
-    () =>
-      AVAILABLE_PROJECT_ROLE_CODES.map((code) => ({
-        value: code,
-        label: formatRoleLabel(code, t),
-        disabled: existingRoleNames.has(code),
-      })),
-    [existingRoleNames, t],
-  );
-
-  const handleRoleSelect = (code: string) => {
-    setRoleName(code);
-    setDescription(formatRoleDescription(code, "", t));
-  };
 
   const selectRole = (role: ProjectRole) => {
     setSelectedId(role.id);
@@ -88,21 +65,6 @@ export default function SettingsRolesPage() {
       else next.add(codename);
       return next;
     });
-  };
-
-  const allPermissionCodenames = useMemo(
-    () => catalog.map((p) => p.codename),
-    [catalog],
-  );
-  const allPermissionsSelected =
-    allPermissionCodenames.length > 0 &&
-    allPermissionCodenames.every((c) => draftPermissions.has(c));
-
-  const toggleAllPermissions = () => {
-    if (selectedRole?.is_system) return;
-    setDraftPermissions(
-      allPermissionsSelected ? new Set() : new Set(allPermissionCodenames),
-    );
   };
 
   const createMutation = useMutation({
@@ -178,13 +140,7 @@ export default function SettingsRolesPage() {
             </p>
           ) : (
             <ul className='divide-y divide-border'>
-              {roles.map((role) => {
-                const description = formatRoleDescription(
-                  role.role_name,
-                  role.description,
-                  t,
-                );
-                return (
+              {roles.map((role) => (
                 <li key={role.id}>
                   <button
                     type='button'
@@ -197,19 +153,16 @@ export default function SettingsRolesPage() {
                       <Lock className='mt-0.5 size-4 shrink-0 text-muted-foreground' />
                     ) : null}
                     <span className='min-w-0 flex-1'>
-                      <span className='font-medium'>
-                        {formatRoleLabel(role.role_name, t)}
-                      </span>
-                      {description ? (
+                      <span className='font-medium'>{role.role_name}</span>
+                      {role.description ? (
                         <span className='mt-0.5 block text-xs text-muted-foreground line-clamp-2'>
-                          {description}
+                          {role.description}
                         </span>
                       ) : null}
                     </span>
                   </button>
                 </li>
-                );
-              })}
+              ))}
             </ul>
           )}
         </aside>
@@ -224,7 +177,7 @@ export default function SettingsRolesPage() {
               <div className='flex flex-wrap items-center justify-between gap-2'>
                 <div>
                   <h2 className='text-lg font-semibold'>
-                    {formatRoleLabel(selectedRole.role_name, t)}
+                    {selectedRole.role_name}
                   </h2>
                   <Badge
                     variant={selectedRole.is_system ? "neutral" : "info"}
@@ -253,21 +206,7 @@ export default function SettingsRolesPage() {
                 </p>
               ) : null}
 
-              <div className='flex items-center justify-between gap-2'>
-                <h3 className='font-medium'>{t("roles.permissions")}</h3>
-                {!selectedRole.is_system ? (
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    onClick={toggleAllPermissions}
-                  >
-                    {allPermissionsSelected
-                      ? t("roles.deselectAll")
-                      : t("roles.selectAll")}
-                  </Button>
-                ) : null}
-              </div>
+              <h3 className='font-medium'>{t("roles.permissions")}</h3>
               <div className='space-y-4'>
                 {PERMISSION_MODULE_ORDER.map((mod) => {
                   const items = grouped[mod];
@@ -326,14 +265,14 @@ export default function SettingsRolesPage() {
         className='max-w-lg'
       >
         <div className='space-y-4'>
-          <Select
-            name='roleName'
-            label={`${t("roles.roleName")} *`}
-            value={roleName || undefined}
-            placeholder={t("roles.roleNamePlaceholder")}
-            options={roleOptions}
-            onChange={(e) => handleRoleSelect(e.target.value)}
-          />
+          <div>
+            <Label>{t("roles.roleName")} *</Label>
+            <Input
+              value={roleName}
+              onChange={(e) => setRoleName(e.target.value)}
+              placeholder='custom_role'
+            />
+          </div>
           <div>
             <Label>{t("roles.description")}</Label>
             <Input
@@ -351,7 +290,7 @@ export default function SettingsRolesPage() {
               disabled={!roleName.trim()}
               onClick={() => createMutation.mutate()}
             >
-              {t("common.create")}
+              {t("templates.create")}
             </Button>
           </div>
         </div>
@@ -360,15 +299,11 @@ export default function SettingsRolesPage() {
       <Modal
         open={Boolean(deleteTarget)}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
-        title={t("roles.deleteTitle")}
+        title={t("roles.delete")}
         idBase='deleteRole'
       >
         <p className='mb-4 text-sm'>
-          {t("roles.deleteConfirm", {
-            name: deleteTarget
-              ? formatRoleLabel(deleteTarget.role_name, t)
-              : "",
-          })}
+          {t("roles.deleteConfirm", { name: deleteTarget?.role_name })}
         </p>
         <div className='flex justify-end gap-2'>
           <Button variant='ghost' onClick={() => setDeleteTarget(null)}>

@@ -2,8 +2,6 @@ import { useAuth } from "@/app/contexts/auth-context";
 import { useCreateHrUser, useHrUsersQuery } from "@/app/hooks/queries";
 import type { UserBusinessAssignment } from "@/app/lib/api-types";
 import { splitAssignmentsForTablePreview } from "@/app/lib/assignment-preview";
-import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
-import { formatRoleLabels } from "@/app/lib/role-labels";
 import { PATHS } from "@/app/routeVars";
 import { AllAssignmentsModal } from "@/components/assignments/all-assignments-modal";
 import {
@@ -28,7 +26,7 @@ export interface HrUserRow {
   first_name: string;
   last_name: string;
   full_name: string;
-  created_at: string;
+  date_joined: string;
   is_active: boolean;
   roles: string[];
   assignments_preview?: UserBusinessAssignment[];
@@ -43,8 +41,19 @@ export function meta() {
   ];
 }
 
+function formatJoinedAt(iso: string, language: string) {
+  try {
+    return new Date(iso).toLocaleString(language, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return iso;
+  }
+}
+
 export default function HrUsersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, hasRole } = useAuth();
   const canAccess = hasRole(ROLES.HR) || hasRole(ROLES.ADMIN);
@@ -117,9 +126,7 @@ export default function HrUsersPage() {
         header: t("hrUsers.columnRoles"),
         cell: ({ row }) => (
           <span id={`text-hrUserRoles-${row.index}`}>
-            {row.original.roles.length
-              ? formatRoleLabels(row.original.roles, t)
-              : "—"}
+            {row.original.roles.length ? row.original.roles.join(", ") : "—"}
           </span>
         ),
       },
@@ -189,7 +196,7 @@ export default function HrUsersPage() {
         header: t("hrUsers.columnJoined"),
         cell: ({ row }) => (
           <span id={`text-hrUserJoined-${row.index}`}>
-            {formatDisplayDateTime(row.original.created_at)}
+            {formatJoinedAt(row.original.date_joined, i18n.language)}
           </span>
         ),
       },
@@ -212,7 +219,7 @@ export default function HrUsersPage() {
         ),
       },
     ],
-    [t],
+    [i18n.language, t],
   );
 
   const excelMapping = useMemo(

@@ -7,7 +7,6 @@ import { ProjectProvider, usePermission, useProject } from "@/app/contexts/proje
 import { fetchMembers } from "@/app/lib/api/members";
 import { fetchProjectKpis } from "@/app/lib/api/kpis";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
-import { formatRoleLabel } from "@/app/lib/role-labels";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { warmProjectCache } from "@/app/lib/offlineCache";
 import { isOfflineDBAvailable } from "@/app/lib/offlineDB";
@@ -211,9 +210,7 @@ function OverviewContent() {
                 className='flex justify-between rounded border border-border px-3 py-2 text-sm'
               >
                 <span>{m.full_name}</span>
-                <span className='text-muted-foreground'>
-                  {m.roles[0] ? formatRoleLabel(m.roles[0], t) : "—"}
-                </span>
+                <span className='text-muted-foreground'>{m.roles[0] ?? "—"}</span>
               </li>
             ))}
         </ul>

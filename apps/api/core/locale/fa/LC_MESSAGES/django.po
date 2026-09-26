@@ -88,33 +88,3 @@ msgstr "نوع فایل مجاز نیست."
 
 msgid "This field is required."
 msgstr "این فیلد الزامی است."
-
-msgid "Role name is required."
-msgstr "نام نقش الزامی است."
-
-msgid "Role name may only contain letters, numbers, spaces, hyphens, and underscores."
-msgstr "نام نقش فقط می‌تواند شامل حروف، اعداد، فاصله، خط تیره و زیرخط باشد."
-
-msgid "A role with this name already exists."
-msgstr "نقشی با این نام از قبل وجود دارد."
-
-msgid "Admin"
-msgstr "مدیر سیستم"
-
-msgid "HR"
-msgstr "منابع انسانی"
-
-msgid "Manager"
-msgstr "مدیر"
-
-msgid "Visitor"
-msgstr "بازدیدکننده"
-
-msgid "Engineer"
-msgstr "مهندس"
-
-msgid "Accountant"
-msgstr "حسابدار"
-
-msgid "Business setup"
-msgstr "راه‌اندازی کسب‌وکار"

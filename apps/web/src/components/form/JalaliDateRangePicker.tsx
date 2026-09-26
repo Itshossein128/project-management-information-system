@@ -1,17 +1,44 @@
 import { useTranslation } from "react-i18next";
-import MultiDatePicker from "react-multi-date-picker";
-import DateObject from "react-date-object";
-import {
-  dateObjectToIso,
-  getDatePickerCalendarConfig,
-  parseIsoToDateObject,
-} from "@/app/lib/jalali-utils";
+import MultiDatePicker, { DateObject } from "react-multi-date-picker";
+import gregorian from "react-date-object/calendars/gregorian";
+import persian from "react-date-object/calendars/persian";
+import gregorian_en from "react-date-object/locales/gregorian_en";
+import persian_fa from "react-date-object/locales/persian_fa";
 import { cn } from "@/app/lib/utils";
 import { Field, type FieldProps } from "./Field";
 
 const DatePicker =
   (MultiDatePicker as unknown as { default?: typeof MultiDatePicker }).default ??
   MultiDatePicker;
+
+/**
+ * Parses an ISO Gregorian string (`YYYY-MM-DD`) into a `DateObject` converted to
+ * the active calendar and locale for display.
+ */
+function parseIsoToDateObject(
+  iso: string | undefined | null,
+  calendar: any,
+  locale: any,
+): DateObject | null {
+  if (!iso) return null;
+  const parts = iso.slice(0, 10).split("-").map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+  const [year, month, day] = parts;
+  const d = new DateObject({ year, month, day, calendar: gregorian });
+  return d.convert(calendar, locale);
+}
+
+/**
+ * Converts a `DateObject` back to an ISO `YYYY-MM-DD` Gregorian date string.
+ */
+function dateObjectToIso(value: DateObject | null | undefined): string {
+  if (!value) return "";
+  const g = value.convert(gregorian, gregorian_en);
+  const year = g.year;
+  const month = String(g.month.number).padStart(2, "0");
+  const day = String(g.day).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export interface DateRangeValue {
   /** ISO `YYYY-MM-DD` Gregorian, or "" when not set. */
@@ -54,14 +81,17 @@ export function JalaliDateRangePicker({
   fieldClassName,
   id,
 }: JalaliDateRangePickerProps) {
-  const { i18n } = useTranslation();
-  const { isFa, calendar, locale, format } = getDatePickerCalendarConfig(i18n.language);
+  const { i18n, t } = useTranslation();
+  const isFa = i18n.language === "fa";
+  const activeCalendar = isFa ? persian : gregorian;
+  const activeLocale = isFa ? persian_fa : gregorian_en;
+  const format = isFa ? "YYYY/MM/DD" : "YYYY-MM-DD";
   const dateSeparator = isFa ? " تا " : " to ";
 
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
 
-  const parsedFrom = parseIsoToDateObject(value.from, calendar, locale);
-  const parsedTo = parseIsoToDateObject(value.to, calendar, locale);
+  const parsedFrom = parseIsoToDateObject(value.from, activeCalendar, activeLocale);
+  const parsedTo = parseIsoToDateObject(value.to, activeCalendar, activeLocale);
 
   const valueArr: DateObject[] = [parsedFrom, parsedTo].filter(
     (item): item is DateObject => item !== null,
@@ -83,15 +113,15 @@ export function JalaliDateRangePicker({
           range
           dateSeparator={dateSeparator}
           value={valueArr}
-          onChange={(dates: DateObject | DateObject[] | null) => {
-            const arr = Array.isArray(dates) ? dates : [];
+          onChange={(dates) => {
+            const arr = Array.isArray(dates) ? (dates as DateObject[]) : [];
             onChange({
               from: dateObjectToIso(arr[0]),
               to: dateObjectToIso(arr[1]),
             });
           }}
-          calendar={calendar}
-          locale={locale}
+          calendar={activeCalendar}
+          locale={activeLocale}
           format={format}
           calendarPosition="bottom-right"
           inputClass={cn(
