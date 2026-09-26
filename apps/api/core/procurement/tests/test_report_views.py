@@ -16,7 +16,7 @@ from procurement.views.report_views import (
     MaterialDeviationReportView,
     ProcurementStatusReportView,
 )
-from master_data.models import ProjectMember
+from master_data.models import ProjectMember, ProjectMemberRole, Role, RolePermission
 from projects.models import Project
 from resources.models import Material
 
@@ -28,7 +28,10 @@ class TestProcurementReportViews:
     def test_procurement_status_report_returns_200(self):
         user = User.objects.create(username="testuser", full_name="Test User")
         project = Project.objects.create(project_name="Test Project", project_code="PRJ-TEST")
-        ProjectMember.objects.create(project=project, user=user, status="active")
+        role = Role.objects.create(role_name="Procurement Viewer Test")
+        RolePermission.objects.create(role=role, permission_codename="view_procurement")
+        member = ProjectMember.objects.create(project=project, user=user, status="active")
+        ProjectMemberRole.objects.create(member=member, role=role)
 
         rf = APIRequestFactory()
         req = rf.get(f"/api/v1/projects/{project.id}/reports/procurement-status/")
@@ -44,7 +47,10 @@ class TestProcurementReportViews:
     def test_liquidity_dashboard_view_structure(self):
         user = User.objects.create(username="liquidity_user", full_name="Liquidity User")
         project = Project.objects.create(project_name="Liquidity Project", project_code="PRJ-LIQ")
-        ProjectMember.objects.create(project=project, user=user, status="active")
+        role, _ = Role.objects.get_or_create(role_name="Procurement Viewer Test")
+        RolePermission.objects.get_or_create(role=role, permission_codename="view_procurement")
+        member = ProjectMember.objects.create(project=project, user=user, status="active")
+        ProjectMemberRole.objects.create(member=member, role=role)
         block = Block.objects.create(project=project, block_code="BLK-01", block_name="Block 1", budget=100000.0, created_by=user)
         material = Material.objects.create(project=project, material_code="MAT-01", material_name="Concrete")
         
@@ -86,7 +92,10 @@ class TestProcurementReportViews:
     def test_material_deviation_report_view_structure(self):
         user = User.objects.create(username="deviation_user", full_name="Deviation User")
         project = Project.objects.create(project_name="Deviation Project", project_code="PRJ-DEV")
-        ProjectMember.objects.create(project=project, user=user, status="active")
+        role, _ = Role.objects.get_or_create(role_name="Procurement Viewer Test")
+        RolePermission.objects.get_or_create(role=role, permission_codename="view_procurement")
+        member = ProjectMember.objects.create(project=project, user=user, status="active")
+        ProjectMemberRole.objects.create(member=member, role=role)
         block = Block.objects.create(project=project, block_code="BLK-02", block_name="Block 2", budget=50000.0, created_by=user)
         material = Material.objects.create(
             project=project,
@@ -131,10 +140,27 @@ class TestProcurementReportViews:
         assert item["deviation_qty"] == 20.0
         assert pytest.approx(item["deviation_percent"], 0.1) == 20.0
 
+    def test_report_view_denies_access_without_permission(self):
+        user = User.objects.create(username="noperm_user", full_name="No Perm User")
+        project = Project.objects.create(project_name="No Perm Project", project_code="PRJ-NOPERM")
+        ProjectMember.objects.create(project=project, user=user, status="active")
+
+        rf = APIRequestFactory()
+        req = rf.get(f"/api/v1/projects/{project.id}/reports/procurement-status/")
+        force_authenticate(req, user=user)
+
+        view = ProcurementStatusReportView.as_view()
+        response = view(req, project_pk=str(project.id))
+
+        assert response.status_code == 403
+
     def test_audit_trail_report_view_structure(self):
         user = User.objects.create(username="audit_user", full_name="Audit User")
         project = Project.objects.create(project_name="Audit Project", project_code="PRJ-AUD")
-        ProjectMember.objects.create(project=project, user=user, status="active")
+        role, _ = Role.objects.get_or_create(role_name="Procurement Viewer Test")
+        RolePermission.objects.get_or_create(role=role, permission_codename="view_procurement")
+        member = ProjectMember.objects.create(project=project, user=user, status="active")
+        ProjectMemberRole.objects.create(member=member, role=role)
         block = Block.objects.create(project=project, block_code="BLK-03", block_name="Block 3", created_by=user)
         req_header = RequisitionHeader.objects.create(
             project=project,
