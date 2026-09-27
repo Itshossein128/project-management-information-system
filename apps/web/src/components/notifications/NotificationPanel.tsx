@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Check, CheckCheck, X } from "lucide-react";
+import { Check, CheckCheck, Loader2, X } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
 import type {
@@ -51,9 +51,14 @@ export function NotificationPanel({
             type="button"
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
+            aria-busy={markAllRead.isPending}
             className="inline-flex items-center gap-1 rounded-sm text-xs text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
           >
-            <CheckCheck className="size-3.5" aria-hidden />
+            {markAllRead.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden />
+            ) : (
+              <CheckCheck className="size-3.5" aria-hidden />
+            )}
             {t("notifications.markAllRead")}
           </button>
           <button
@@ -121,12 +126,18 @@ export function NotificationPanel({
                 {!n.is_read ? (
                   <button
                     type="button"
-                    className="shrink-0 px-3 text-muted-foreground hover:bg-muted/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="shrink-0 px-3 text-muted-foreground hover:bg-muted/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
                     aria-label={t("notifications.markAsRead")}
                     title={t("notifications.markAsRead")}
+                    disabled={markRead.isPending && markRead.variables === n.id}
+                    aria-busy={markRead.isPending && markRead.variables === n.id}
                     onClick={() => markRead.mutate(n.id)}
                   >
-                    <Check className="size-3.5" aria-hidden />
+                    {markRead.isPending && markRead.variables === n.id ? (
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                    ) : (
+                      <Check className="size-3.5" aria-hidden />
+                    )}
                   </button>
                 ) : null}
               </li>
