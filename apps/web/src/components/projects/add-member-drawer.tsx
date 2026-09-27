@@ -16,10 +16,6 @@ import {
   groupPermissionsByModule,
   PERMISSION_MODULE_ORDER,
 } from "@/app/lib/api/roles";
-import {
-  formatRoleDescription,
-  formatRoleLabel,
-} from "@/app/lib/role-labels";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { Input } from "@/components/form";
@@ -184,13 +180,7 @@ export function AddMemberDrawer({
 
       <div className="space-y-2">
         <Label>{t("projectMembers.rolesRequired")} *</Label>
-        {roles.map((r) => {
-          const description = formatRoleDescription(
-            r.role_name,
-            r.description,
-            t,
-          );
-          return (
+        {roles.map((r) => (
           <label key={r.id} className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
@@ -198,18 +188,11 @@ export function AddMemberDrawer({
               onChange={() => toggleRole(r.id)}
             />
             <span>
-              <span className="font-medium">
-                {formatRoleLabel(r.role_name, t)}
-              </span>
-              {description ? (
-                <span className="block text-muted-foreground">
-                  {description}
-                </span>
-              ) : null}
+              <span className="font-medium">{r.role_name}</span>
+              {r.description ? <span className="block text-muted-foreground">{r.description}</span> : null}
             </span>
           </label>
-          );
-        })}
+        ))}
       </div>
 
       {has("manage_members") && editMember && permData && (

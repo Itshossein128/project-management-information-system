@@ -62,8 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   });
 
-  // Stay in loading while a stored session is validated — avoids flashing protected UI with dead tokens.
-  const [isLoading, setIsLoading] = React.useState(() => hasStoredSession());
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const completeSession = React.useCallback((data: AuthApiResponse) => {
     const raw = data.user as AuthUser & { groups?: string[] };
@@ -146,33 +145,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   React.useEffect(() => {
-    if (!hasStoredSession()) {
-      setIsLoading(false);
-      return;
+    if (getStoredAccessToken() && !user) {
+      void restoreSession();
     }
-    let cancelled = false;
-    void (async () => {
-      try {
-        await restoreSession();
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [restoreSession]);
+  }, [restoreSession, user]);
 
   React.useEffect(() => {
     // api-client clearAuth() wipes storage without going through logout(); keep React state in sync.
-    // Sync immediately in case a 401 cleared storage before this effect subscribed.
-    const syncFromStorage = () => {
+    return subscribeAuthStorage(() => {
       if (!hasStoredSession()) {
         setUser(null);
       }
-    };
-    syncFromStorage();
-    return subscribeAuthStorage(syncFromStorage);
+    });
   }, []);
 
   const value: AuthContextValue = {

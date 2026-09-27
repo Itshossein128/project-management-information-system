@@ -95,20 +95,6 @@ export function clearAuth(): void {
   clearStoredAuth();
 }
 
-const PUBLIC_AUTH_PATHS = ["/login", "/register", "/forgot-password", "/reset-password"];
-
-/** Wipe session and send the user to login when refresh can no longer recover. */
-function handleUnauthorizedSession(): void {
-  clearAuth();
-  if (typeof window === "undefined") return;
-  const { pathname, search } = window.location;
-  if (PUBLIC_AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
-    return;
-  }
-  const redirectTo = encodeURIComponent(`${pathname}${search}`);
-  window.location.replace(`/login?redirectTo=${redirectTo}`);
-}
-
 export async function apiFetch(
   path: string,
   options: RequestInit = {},
@@ -128,15 +114,12 @@ export async function apiFetch(
       ...(options.headers as Record<string, string>),
     },
   });
-  if (res.status === 401 && !path.includes("/auth/login")) {
-    if (!retried) {
-      const newAccess = await refreshAccessToken();
-      if (newAccess) {
-        return apiFetch(path, options, true);
-      }
+  if (res.status === 401 && !retried && !path.includes("/auth/login")) {
+    const newAccess = await refreshAccessToken();
+    if (newAccess) {
+      return apiFetch(path, options, true);
     }
-    // Refresh failed, or a fresh access token still got 401 — session is unusable.
-    handleUnauthorizedSession();
+    clearAuth();
   }
   return res;
 }

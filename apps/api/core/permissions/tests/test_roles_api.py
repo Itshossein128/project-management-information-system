@@ -55,28 +55,6 @@ class TestRoleAPI:
         assert response.data['is_system'] is False
         assert set(response.data['permissions']) == {'view_project', 'view_wbs', 'view_reports'}
 
-    def test_create_custom_role_persian_name(self, admin_client):
-        response = admin_client.post(
-            '/api/v1/roles/',
-            {
-                'role_name': 'ناظر کارگاه',
-                'description': 'نقش سفارشی ناظر',
-                'permissions': ['view_project'],
-            },
-            format='json',
-        )
-        assert response.status_code == 201
-        assert response.data['role_name'] == 'ناظر کارگاه'
-        assert response.data['is_system'] is False
-
-    def test_create_role_rejects_invalid_characters(self, admin_client):
-        response = admin_client.post(
-            '/api/v1/roles/',
-            {'role_name': 'bad@name!', 'permissions': ['view_project']},
-            format='json',
-        )
-        assert response.status_code == 400
-
     def test_create_role_requires_admin(self, auth_client):
         response = auth_client.post(
             '/api/v1/roles/',

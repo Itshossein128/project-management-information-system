@@ -1,7 +1,6 @@
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/form";
-import { formatRoleLabels } from "@/app/lib/role-labels";
 import { cn } from "@/app/lib/utils";
 import { useShellStore } from "@/app/store/shellStore";
 import { Menu } from "lucide-react";
@@ -80,7 +79,7 @@ export function AppShellHeader({ className }: AppShellHeaderProps) {
             {displayName}
             {user?.roles?.length ? (
               <span className="ms-1 hidden text-xs lg:inline">
-                ({formatRoleLabels(user.roles, t)})
+                ({user.roles.join(", ")})
               </span>
             ) : null}
           </span>

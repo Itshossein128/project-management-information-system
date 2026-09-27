@@ -598,20 +598,8 @@ class SystemRolesListView(APIView):
         tags=['Authentication'],
     )
     def get(self, request):
-        labels = {
-            'admin': _('Admin'),
-            'hr': _('HR'),
-            'manager': _('Manager'),
-            'visitor': _('Visitor'),
-            'engineer': _('Engineer'),
-            'accountant': _('Accountant'),
-            'business-setup': _('Business setup'),
-        }
         data = [
-            {
-                'name': g.name,
-                'label': str(labels.get(g.name, g.name.replace('-', ' ').title())),
-            }
+            {'name': g.name, 'label': g.name.replace('-', ' ').title()}
             for g in Group.objects.all().order_by('name')
         ]
-        return Response(localize_api_payload(data))
+        return Response(data)
