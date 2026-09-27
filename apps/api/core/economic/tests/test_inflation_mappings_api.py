@@ -58,3 +58,13 @@ class TestInflationMappingsAPI:
         )
         assert patch.status_code == status.HTTP_200_OK
         assert float(patch.data['weight']) == pytest.approx(0.5)
+
+    def test_create_forbidden_without_edit_permission(self, api_client, member, project):
+        api_client.force_authenticate(user=member.user)
+        url = BASE.format(project_id=project.id)
+        resp = api_client.post(
+            url,
+            {'cost_category': 'forbidden', 'index_name': 'CPI', 'weight': '1.0'},
+            format='json',
+        )
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
