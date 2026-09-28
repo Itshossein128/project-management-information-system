@@ -71,7 +71,8 @@ def apply_template_to_project(
 
     return {
         'wbs_nodes_created': len(wbs_map),
-        'activities_created': sum(n.activities.count() for n in template_nodes),
+        # ⚡ Bolt: Use python iteration over prefetched activities collection to avoid N+1 queries from .count()
+        'activities_created': sum(len(n.activities.all()) for n in template_nodes),
         'roles_applied': roles_added,
     }
 
