@@ -53,6 +53,7 @@ export function GridToolbar({
         <Input
           id={`input-gridSearch-${name}`}
           name={`gridSearch-${name}`}
+          aria-label={searchPlaceholder}
           className="w-full sm:max-w-xs"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
