@@ -1,6 +1,5 @@
 import { useAuth } from "@/app/contexts/auth-context";
 import { cn } from "@/app/lib/utils";
-import { isRTL } from "@/app/lib/i18n";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "../hooks/useNavigation";
 import { SidebarItem } from "./components/sidebarItem";
@@ -23,8 +22,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     <aside
       id="container-mainSidebar"
       className={cn(
-        "flex h-dvh min-h-dvh flex-col border-sidebar-border bg-sidebar text-sidebar-foreground lg:shadow-[var(--shadow-sm)]",
-        isRTL() ? "border-l" : "border-r",
+        "flex h-dvh min-h-dvh flex-col border-sidebar-border border-e bg-sidebar text-sidebar-foreground lg:shadow-[var(--shadow-sm)]",
         className,
       )}
     >

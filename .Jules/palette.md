@@ -45,3 +45,7 @@ Replaced a custom built flex-box alert pattern in `QueryErrorState` with the sta
 ## 2024-05-18 - Keyboard Accessibility in Interactive Elements
 **Learning:** Added `peer` to visually hidden inputs to allow styling sibling elements on focus.
 **Action:** When wrapping native inputs, use `peer` and `peer-focus-visible` to maintain keyboard accessibility.
+
+## 2026-07-25 - [Sidebar Popover Positioning and Modal Lock]
+**Learning:** When positioning Radix/Shadcn Popover components for hover-triggered flyouts on sidebars in LTR/RTL layouts, using `side={isRTL() ? "left" : "right"}` ensures flyouts open into the visible viewport rather than off-screen. Additionally, setting `modal={false}` on non-modal popovers prevents unwanted focus and scroll trapping on the page.
+**Action:** Always set `side={isRTL() ? "left" : "right"}` for sidebar popovers and `modal={false}` on hover-triggered popover flyouts.

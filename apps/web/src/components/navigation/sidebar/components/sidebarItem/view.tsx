@@ -141,7 +141,7 @@ export const SidebarItem = ({
     const parentHighlighted = active || childActive;
     return (
       <div id={`container-sidebarItem-${name}`} className="px-2 pb-1">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
           <PopoverTrigger asChild>
             <div
               className="flex items-stretch gap-0.5"
@@ -178,6 +178,7 @@ export const SidebarItem = ({
             onClick={() => (open ? setOpen(false) : openFlyout())}
           >
             <ChevronDown
+              aria-hidden="true"
               className={cn(
                 "size-4 transition-transform duration-200",
                 open && "-rotate-90",
@@ -191,7 +192,7 @@ export const SidebarItem = ({
             aria-label={label}
             onMouseEnter={cancelClose}
             onMouseLeave={scheduleClose}
-            side={isRTL() ? "right" : "left"}
+            side={isRTL() ? "left" : "right"}
             align="start"
             sideOffset={12}
             className="z-[70] flex w-56 flex-col overflow-y-auto rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-[var(--shadow-lg)]"
