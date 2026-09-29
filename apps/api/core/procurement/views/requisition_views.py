@@ -79,6 +79,16 @@ class RequisitionHeaderViewSet(viewsets.ModelViewSet):
     Editing is only allowed in DRAFT status.
     """
 
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    view_permission = 'view_procurement'
+    edit_permission = 'edit_procurement'
+
+    @property
+    def required_permission(self):
+        if self.action in ('list', 'retrieve'):
+            return self.view_permission
+        return self.edit_permission
+
     def get_serializer_class(self):
         if self.action == 'create':
             return RequisitionHeaderCreateSerializer
