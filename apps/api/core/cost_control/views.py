@@ -247,7 +247,8 @@ class SupplierViewSet(CostScopedViewSet):
 
 
 class GlobalSupplierListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_suppliers'
 
     @extend_schema(summary='Global supplier list', tags=['Cost control'])
     def get(self, request):

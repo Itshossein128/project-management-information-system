@@ -247,6 +247,11 @@ class TestCostControlPermissions:
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_global_supplier_list_permission_enforcement(self, api_client, member):
+        api_client.force_authenticate(user=member.user)
+        response = api_client.get('/api/v1/suppliers/')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_auto_allocate_by_hours(self, auth_client, costs_base, cost_pool, project, user, activity):
         from decimal import Decimal
         from field_reports.models import DailyReport, DailyReportEquipment, ReportStatus
