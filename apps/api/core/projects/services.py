@@ -1,11 +1,14 @@
 """Project creation and membership business rules."""
+import logging
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
 from projects.models import Project
+from events.publisher import EventPublisher
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def attach_creator_as_member(*, project: Project, creator: User) -> ProjectMember:
@@ -37,6 +40,14 @@ def create_project_with_creator(*, creator: User, **project_fields) -> Project:
     from procurement.services.workshop_block_service import ensure_workshop_block
 
     ensure_workshop_block(project, created_by=creator)
+    try:
+        EventPublisher().publish(
+            'schedule.updated',
+            {'project_id': str(project.id), 'action': 'created'},
+            project_id=str(project.id),
+        )
+    except Exception:
+        logger.exception('Failed to publish schedule.updated for project %s', project.id)
     return project
 
 

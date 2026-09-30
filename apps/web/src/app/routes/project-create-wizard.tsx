@@ -12,7 +12,6 @@ import {
   type ProjectTemplateListItem,
 } from "@/app/lib/api/templates";
 import { fetchRoles, lookupUsers, type Role, type UserLookupResult } from "@/app/lib/api/members";
-import { formatRoleLabel } from "@/app/lib/role-labels";
 import { PATHS } from "@/app/routeVars";
 import { TemplateWBSPreviewTree } from "@/components/templates/template-wbs-preview-tree";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
@@ -407,7 +406,7 @@ export default function ProjectCreateWizardPage() {
               <option value="">نقش عضو</option>
               {roles.map((r: Role) => (
                 <option key={r.id} value={r.id}>
-                  {formatRoleLabel(r.role_name, t)}
+                  {r.role_name}
                 </option>
               ))}
             </select>
@@ -418,10 +417,7 @@ export default function ProjectCreateWizardPage() {
               {members.map((m, i) => (
                 <li key={i} className="rounded border border-border px-3 py-2">
                   {m.user?.full_name ?? m.email} —{" "}
-                  {(() => {
-                    const roleName = roles.find((r) => r.id === m.roleId)?.role_name;
-                    return roleName ? formatRoleLabel(roleName, t) : null;
-                  })()}
+                  {roles.find((r) => r.id === m.roleId)?.role_name}
                 </li>
               ))}
             </ul>

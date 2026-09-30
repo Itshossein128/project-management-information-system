@@ -1,5 +1,4 @@
 """REST CRUD for blueprint projects."""
-import logging
 
 from django.db.models import Count, Q
 from rest_framework import status, viewsets
@@ -9,7 +8,6 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from authentication.permissions import IsBusinessSetup
-from events.publisher import EventPublisher
 from master_data.models import MemberStatus, ProjectMember
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Project
@@ -21,8 +19,6 @@ from projects.serializers import (
 )
 from projects.services import create_project_with_creator
 from business_meta.services import create_project_from_template, get_available_templates
-
-logger = logging.getLogger(__name__)
 
 
 @extend_schema_view(
@@ -85,14 +81,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
             **serializer.validated_data,
         )
         serializer.instance = project
-        try:
-            EventPublisher().publish(
-                'schedule.updated',
-                {'project_id': str(project.id), 'action': 'created'},
-                project_id=str(project.id),
-            )
-        except Exception:
-            logger.exception('Failed to publish schedule.updated for project %s', project.id)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

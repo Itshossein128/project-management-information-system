@@ -10,7 +10,6 @@ import {
   type Role,
 } from "@/app/lib/api/members";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
-import { formatRoleLabel } from "@/app/lib/role-labels";
 import { PATHS } from "@/app/routeVars";
 import { AddMemberDrawer } from "@/components/projects/add-member-drawer";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +73,7 @@ export default function ProjectMembersPage() {
         return (
           <div className='flex flex-wrap gap-1'>
             {shown.map((r) => (
-              <Badge key={r} variant='info' label={formatRoleLabel(r, t)} />
+              <Badge key={r} variant='info' label={r} />
             ))}
             {extra > 0 ? <Badge variant='neutral' label={`+${extra}`} /> : null}
           </div>
