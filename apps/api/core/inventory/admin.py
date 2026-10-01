@@ -43,10 +43,24 @@ class DepartmentActivityRecordAdmin(admin.ModelAdmin):
         'location',
         'activity_description',
         'contractor',
+        'material_type',
+        'quantity_in',
+        'quantity_out',
+        'consumption_location',
+        'supplier',
         'unit',
         'created_at',
     ]
     list_filter = ['project', 'department', 'unit']
-    search_fields = ['location', 'activity_description', 'contractor', 'unit', 'description']
+    search_fields = [
+        'location',
+        'activity_description',
+        'contractor',
+        'material_type',
+        'consumption_location',
+        'supplier',
+        'unit',
+        'description',
+    ]
     date_hierarchy = 'date'
     ordering = ['-date', '-created_at']

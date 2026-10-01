@@ -3,7 +3,7 @@ import type {
   DepartmentActivityRecord,
   DepartmentSlug,
 } from "@/app/lib/api-types";
-import { departmentUsesUnit } from "@/app/lib/api-types";
+import { departmentUsesUnit, isWarehouseDepartment } from "@/app/lib/api-types";
 import { apiBlob, apiUploadFile } from "@/app/lib/api-client";
 import { Button, Input, JalaliDateRangePicker, type DateRangeValue } from "@/components/form";
 import { DataTable, useGridState } from "@/components/grid";
@@ -43,6 +43,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const dept = findDepartmentBySlug(slug);
   const department = slug as DepartmentSlug;
   const showsUnit = departmentUsesUnit(department);
+  const isWarehouse = isWarehouseDepartment(department);
 
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
 
@@ -51,6 +52,9 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const [activityFilter, setActivityFilter] = useState("");
   const [contractorFilter, setContractorFilter] = useState("");
   const [unitFilter, setUnitFilter] = useState("");
+  const [materialTypeFilter, setMaterialTypeFilter] = useState("");
+  const [consumptionLocationFilter, setConsumptionLocationFilter] = useState("");
+  const [supplierFilter, setSupplierFilter] = useState("");
 
   const ordering = grid.query.sorting[0]
     ? `${grid.query.sorting[0].desc ? "-" : ""}${grid.query.sorting[0].id}`
@@ -66,10 +70,25 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       ordering,
       date_from: dateRange.from || undefined,
       date_to: dateRange.to || undefined,
-      location: locationFilter.trim() ? locationFilter.trim() : undefined,
-      activity_description: activityFilter.trim() ? activityFilter.trim() : undefined,
-      contractor: contractorFilter.trim() ? contractorFilter.trim() : undefined,
+      location:
+        !isWarehouse && locationFilter.trim() ? locationFilter.trim() : undefined,
+      activity_description:
+        !isWarehouse && activityFilter.trim() ? activityFilter.trim() : undefined,
+      contractor:
+        !isWarehouse && contractorFilter.trim()
+          ? contractorFilter.trim()
+          : undefined,
       unit: showsUnit && unitFilter.trim() ? unitFilter.trim() : undefined,
+      material_type:
+        isWarehouse && materialTypeFilter.trim()
+          ? materialTypeFilter.trim()
+          : undefined,
+      consumption_location:
+        isWarehouse && consumptionLocationFilter.trim()
+          ? consumptionLocationFilter.trim()
+          : undefined,
+      supplier:
+        isWarehouse && supplierFilter.trim() ? supplierFilter.trim() : undefined,
     },
     isAuthenticated && Boolean(businessId),
   );
@@ -92,10 +111,18 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     sp.set("department", department);
     if (dateRange.from) sp.set("date_from", dateRange.from);
     if (dateRange.to) sp.set("date_to", dateRange.to);
-    if (locationFilter.trim()) sp.set("location", locationFilter.trim());
-    if (activityFilter.trim()) sp.set("activity_description", activityFilter.trim());
-    if (contractorFilter.trim()) sp.set("contractor", contractorFilter.trim());
+    if (!isWarehouse && locationFilter.trim()) sp.set("location", locationFilter.trim());
+    if (!isWarehouse && activityFilter.trim())
+      sp.set("activity_description", activityFilter.trim());
+    if (!isWarehouse && contractorFilter.trim())
+      sp.set("contractor", contractorFilter.trim());
     if (showsUnit && unitFilter.trim()) sp.set("unit", unitFilter.trim());
+    if (isWarehouse && materialTypeFilter.trim())
+      sp.set("material_type", materialTypeFilter.trim());
+    if (isWarehouse && consumptionLocationFilter.trim())
+      sp.set("consumption_location", consumptionLocationFilter.trim());
+    if (isWarehouse && supplierFilter.trim())
+      sp.set("supplier", supplierFilter.trim());
     if (grid.debouncedSearch?.trim()) sp.set("search", grid.debouncedSearch.trim());
     if (ordering) sp.set("ordering", ordering);
     return sp;
@@ -103,11 +130,15 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     department,
     dateRange.from,
     dateRange.to,
+    isWarehouse,
     locationFilter,
     activityFilter,
     contractorFilter,
     showsUnit,
     unitFilter,
+    materialTypeFilter,
+    consumptionLocationFilter,
+    supplierFilter,
     grid.debouncedSearch,
     ordering,
   ]);
@@ -231,6 +262,92 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     : slug;
 
   const columns = useMemo<ColumnDef<DepartmentActivityRecord>[]>(() => {
+    if (isWarehouse) {
+      return [
+        {
+          id: "date",
+          header: t("businessDepartment.activityLog.columns.date"),
+          accessorKey: "date",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityDate-${row.index}`}>
+              {row.original.date || "—"}
+            </span>
+          ),
+        },
+        {
+          id: "material_type",
+          header: t("businessDepartment.activityLog.columns.materialType"),
+          accessorKey: "material_type",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityMaterialType-${row.index}`}>
+              {row.original.material_type || "—"}
+            </span>
+          ),
+        },
+        {
+          id: "quantity_in",
+          header: t("businessDepartment.activityLog.columns.quantityIn"),
+          accessorKey: "quantity_in",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityQuantityIn-${row.index}`}>
+              {row.original.quantity_in ?? "—"}
+            </span>
+          ),
+        },
+        {
+          id: "unit",
+          header: t("businessDepartment.activityLog.columns.unit"),
+          accessorKey: "unit",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityUnit-${row.index}`}>
+              {row.original.unit || "—"}
+            </span>
+          ),
+        },
+        {
+          id: "quantity_out",
+          header: t("businessDepartment.activityLog.columns.quantityOut"),
+          accessorKey: "quantity_out",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityQuantityOut-${row.index}`}>
+              {row.original.quantity_out ?? "—"}
+            </span>
+          ),
+        },
+        {
+          id: "consumption_location",
+          header: t("businessDepartment.activityLog.columns.consumptionLocation"),
+          accessorKey: "consumption_location",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityConsumptionLocation-${row.index}`}>
+              {row.original.consumption_location || "—"}
+            </span>
+          ),
+        },
+        {
+          id: "supplier",
+          header: t("businessDepartment.activityLog.columns.supplier"),
+          accessorKey: "supplier",
+          cell: ({ row }) => (
+            <span id={`text-departmentActivitySupplier-${row.index}`}>
+              {row.original.supplier || "—"}
+            </span>
+          ),
+        },
+        {
+          id: "description",
+          header: t("businessDepartment.activityLog.columns.description"),
+          accessorKey: "description",
+          enableSorting: false,
+          cell: ({ row }) => (
+            <span id={`text-departmentActivityDescription-${row.index}`}>
+              {row.original.description?.trim() ? row.original.description : "—"}
+            </span>
+          ),
+        },
+      ];
+    }
+
     const cols: ColumnDef<DepartmentActivityRecord>[] = [
       {
         id: "date",
@@ -301,7 +418,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     });
 
     return cols;
-  }, [showsUnit, t]);
+  }, [isWarehouse, showsUnit, t]);
 
   return (
     <div className="page-shell" id="container-businessDepartment">
@@ -429,36 +546,85 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   />
                 </div>
 
-                <Input
-                  id="input-departmentActivityFilterLocation"
-                  name="departmentActivityFilterLocation"
-                  value={locationFilter}
-                  onChange={(e) => {
-                    setLocationFilter(e.target.value);
-                    grid.resetPage();
-                  }}
-                  placeholder={t("businessDepartment.activityLog.filters.location")}
-                />
-                <Input
-                  id="input-departmentActivityFilterActivityDescription"
-                  name="departmentActivityFilterActivityDescription"
-                  value={activityFilter}
-                  onChange={(e) => {
-                    setActivityFilter(e.target.value);
-                    grid.resetPage();
-                  }}
-                  placeholder={t("businessDepartment.activityLog.filters.activityDescription")}
-                />
-                <Input
-                  id="input-departmentActivityFilterContractor"
-                  name="departmentActivityFilterContractor"
-                  value={contractorFilter}
-                  onChange={(e) => {
-                    setContractorFilter(e.target.value);
-                    grid.resetPage();
-                  }}
-                  placeholder={t("businessDepartment.activityLog.filters.contractor")}
-                />
+                {isWarehouse ? (
+                  <>
+                    <Input
+                      id="input-departmentActivityFilterMaterialType"
+                      name="departmentActivityFilterMaterialType"
+                      value={materialTypeFilter}
+                      onChange={(e) => {
+                        setMaterialTypeFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.materialType",
+                      )}
+                    />
+                    <Input
+                      id="input-departmentActivityFilterConsumptionLocation"
+                      name="departmentActivityFilterConsumptionLocation"
+                      value={consumptionLocationFilter}
+                      onChange={(e) => {
+                        setConsumptionLocationFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.consumptionLocation",
+                      )}
+                    />
+                    <Input
+                      id="input-departmentActivityFilterSupplier"
+                      name="departmentActivityFilterSupplier"
+                      value={supplierFilter}
+                      onChange={(e) => {
+                        setSupplierFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.supplier",
+                      )}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Input
+                      id="input-departmentActivityFilterLocation"
+                      name="departmentActivityFilterLocation"
+                      value={locationFilter}
+                      onChange={(e) => {
+                        setLocationFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.location",
+                      )}
+                    />
+                    <Input
+                      id="input-departmentActivityFilterActivityDescription"
+                      name="departmentActivityFilterActivityDescription"
+                      value={activityFilter}
+                      onChange={(e) => {
+                        setActivityFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.activityDescription",
+                      )}
+                    />
+                    <Input
+                      id="input-departmentActivityFilterContractor"
+                      name="departmentActivityFilterContractor"
+                      value={contractorFilter}
+                      onChange={(e) => {
+                        setContractorFilter(e.target.value);
+                        grid.resetPage();
+                      }}
+                      placeholder={t(
+                        "businessDepartment.activityLog.filters.contractor",
+                      )}
+                    />
+                  </>
+                )}
                 {showsUnit ? (
                   <Input
                     id="input-departmentActivityFilterUnit"

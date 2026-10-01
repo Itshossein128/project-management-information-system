@@ -71,6 +71,11 @@ def department_uses_unit(department: str) -> bool:
     return department != Department.SECURITY
 
 
+def is_warehouse_department(department: str) -> bool:
+    """Warehouse activity logs use material-movement fields instead of the generic set."""
+    return department == Department.WAREHOUSE
+
+
 class DepartmentActivityRecord(TimeStampedModel):
     project = models.ForeignKey(
         Project,
@@ -79,11 +84,16 @@ class DepartmentActivityRecord(TimeStampedModel):
     )
     department = models.CharField(max_length=32, choices=Department.choices, db_index=True)
     date = models.DateField()
-    location = models.CharField(max_length=255)
-    activity_description = models.CharField(max_length=500)
-    contractor = models.CharField(max_length=255)
+    location = models.CharField(max_length=255, blank=True, default='')
+    activity_description = models.CharField(max_length=500, blank=True, default='')
+    contractor = models.CharField(max_length=255, blank=True, default='')
     unit = models.CharField(max_length=64, blank=True, default='')
     description = models.TextField(blank=True, default='')
+    material_type = models.CharField(max_length=255, blank=True, default='')
+    quantity_in = models.DecimalField(max_digits=14, decimal_places=3, default=0)
+    quantity_out = models.DecimalField(max_digits=14, decimal_places=3, default=0)
+    consumption_location = models.CharField(max_length=255, blank=True, default='')
+    supplier = models.CharField(max_length=255, blank=True, default='')
 
     class Meta:
         ordering = ['-date', '-created_at']
@@ -99,4 +109,8 @@ class DepartmentActivityRecord(TimeStampedModel):
         ]
 
     def __str__(self) -> str:
-        return f'{self.project.project_code}/{self.department}: {self.activity_description[:40]} ({self.date})'
+        if is_warehouse_department(self.department):
+            label = (self.material_type or self.description or 'warehouse').strip()[:40]
+        else:
+            label = (self.activity_description or self.description or self.department).strip()[:40]
+        return f'{self.project.project_code}/{self.department}: {label} ({self.date})'
