@@ -4,6 +4,7 @@ from .models import (
     Category,
     SpaceMaterialRequest,
     DepartmentActivityRecord,
+    department_uses_unit,
 )
 
 
@@ -15,7 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ItemSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
-    
+
     class Meta:
         model = Item
         fields = ['id', 'name', 'quantity', 'category', 'category_name']
@@ -65,3 +66,26 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'project_id', 'created_at', 'updated_at']
+        extra_kwargs = {
+            'unit': {'required': False, 'allow_blank': True},
+        }
+
+    def validate(self, attrs):
+        department = attrs.get('department')
+        if department is None and self.instance is not None:
+            department = self.instance.department
+
+        unit = attrs.get(
+            'unit',
+            getattr(self.instance, 'unit', '') if self.instance else '',
+        )
+        unit_text = '' if unit is None else str(unit).strip()
+
+        if not department_uses_unit(department or ''):
+            attrs['unit'] = ''
+        elif not unit_text:
+            raise serializers.ValidationError({'unit': 'This field is required.'})
+        else:
+            attrs['unit'] = unit_text[:64]
+
+        return attrs

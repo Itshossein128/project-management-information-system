@@ -99,6 +99,37 @@ class ActivityViewSet(viewsets.ModelViewSet):
         instance.soft_delete(user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(summary='Restore soft-deleted activity', tags=['Activities'])
+    @action(detail=True, methods=['post'], url_path='restore')
+    def restore(self, request, project_pk=None, activity_id=None):
+        instance = get_object_or_404(
+            Activity.all_objects,
+            pk=activity_id,
+            project_id=project_pk,
+        )
+        if not instance.is_deleted:
+            raise ConflictError('فعالیت حذف نشده است')
+        if (
+            Activity.objects.filter(
+                project_id=project_pk,
+                activity_code=instance.activity_code,
+            )
+            .exclude(pk=instance.pk)
+            .exists()
+        ):
+            raise ConflictError('کد فعالیت تکراری است و بازگردانی ممکن نیست')
+
+        instance.is_deleted = False
+        instance.deleted_at = None
+        instance.updated_by = request.user
+        instance.save(
+            update_fields=['is_deleted', 'deleted_at', 'updated_by', 'updated_at'],
+        )
+        output = ActivityDetailSerializer(
+            base_activity_queryset(project_pk).get(pk=instance.pk),
+        )
+        return Response(output.data)
+
     @extend_schema(summary='Activity weight summary', tags=['Activities'])
     @action(detail=False, methods=['get'], url_path='weight-summary')
     def weight_summary(self, request, project_pk=None):

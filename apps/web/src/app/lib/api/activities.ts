@@ -149,6 +149,35 @@ export function deleteActivity(projectId: string, activityId: string) {
   });
 }
 
+export function restoreActivity(projectId: string, activityId: string) {
+  return apiJson<Activity>(
+    `/${PATHS.API_PROJECTS}/${projectId}/activities/${activityId}/restore/`,
+    { method: "POST" },
+  );
+}
+
+/** Build a create/update payload from a fetched activity (for undo). */
+export function activityToPayload(activity: Activity): ActivityPayload {
+  return {
+    activity_code: activity.activity_code,
+    activity_name: activity.activity_name,
+    wbs_id: activity.wbs_id,
+    unit_id: activity.unit_id,
+    total_quantity: activity.total_quantity,
+    weight:
+      activity.weight != null && activity.weight !== ""
+        ? parseFloat(activity.weight)
+        : null,
+    planned_start: activity.planned_start,
+    planned_finish: activity.planned_finish,
+    actual_start: activity.actual_start,
+    actual_finish: activity.actual_finish,
+    responsible_id: activity.responsible_id,
+    status: activity.status,
+    description: activity.description ?? "",
+  };
+}
+
 export function fetchWeightSummary(projectId: string) {
   return apiJson<WeightSummary>(`/${PATHS.API_PROJECTS}/${projectId}/activities/weight-summary/`);
 }
@@ -168,10 +197,15 @@ export function createActivityRelation(
     lag_days: number;
   },
 ) {
-  return apiJson<{ relation_id: string }>(
-    `/${PATHS.API_PROJECTS}/${projectId}/activities/${activityId}/relations/`,
-    { method: "POST", body: JSON.stringify(payload) },
-  );
+  return apiJson<{
+    relation_id: string;
+    activity_id: string;
+    relation_type: RelationType;
+    lag_days: number;
+  }>(`/${PATHS.API_PROJECTS}/${projectId}/activities/${activityId}/relations/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export function deleteActivityRelation(projectId: string, activityId: string, relationId: string) {

@@ -151,7 +151,7 @@ class DepartmentActivityIOTests(TestCase):
 
     def test_export_activities_to_xlsx(self):
         records = [self.record1]
-        xlsx_bytes = export_activities_to_xlsx(records)
+        xlsx_bytes = export_activities_to_xlsx(records, department=Department.BUILDINGS)
         self.assertIsInstance(xlsx_bytes, bytes)
         self.assertTrue(len(xlsx_bytes) > 0)
 
@@ -164,6 +164,29 @@ class DepartmentActivityIOTests(TestCase):
         self.assertEqual(len(rows), 2)
         self.assertEqual(rows[0], ('date', 'location', 'activity_description', 'contractor', 'unit', 'description'))
         self.assertEqual(rows[1], ('2023-01-01', 'Location A', 'Activity A', 'Contractor A', 'm2', 'Desc A'))
+
+    def test_export_activities_to_xlsx_security_omits_unit(self):
+        record = DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.SECURITY,
+            date=date(2023, 1, 5),
+            location='Gate',
+            activity_description='Patrol',
+            contractor='SecCo',
+            unit='',
+            description='Night shift',
+        )
+        xlsx_bytes = export_activities_to_xlsx([record], department=Department.SECURITY)
+        wb = load_workbook(io.BytesIO(xlsx_bytes))
+        rows = list(wb.active.iter_rows(values_only=True))
+        self.assertEqual(
+            rows[0],
+            ('date', 'location', 'activity_description', 'contractor', 'description'),
+        )
+        self.assertEqual(
+            rows[1],
+            ('2023-01-05', 'Gate', 'Patrol', 'SecCo', 'Night shift'),
+        )
 
     def test_map_header_row(self):
         header_row = ('تاریخ', 'موقعیت', 'Activity Description', 'پیمانکار', 'Unit', 'توضیحات', 'Unknown')
@@ -221,6 +244,24 @@ class DepartmentActivityIOTests(TestCase):
         self.assertEqual(created, 0)
         self.assertEqual(len(errors), 1)
         self.assertIn('_sheet', errors[0]['errors'])
+
+    def test_import_activities_from_xlsx_security_without_unit_column(self):
+        rows = [
+            ('date', 'location', 'activity_description', 'contractor', 'description'),
+            ('2023-01-04', 'Gate', 'Patrol', 'SecCo', 'Ok'),
+        ]
+        xlsx_bytes = self._create_xlsx_bytes(rows)
+
+        created, errors = import_activities_from_xlsx(
+            self.project, Department.SECURITY, xlsx_bytes
+        )
+        self.assertEqual(created, 1)
+        self.assertEqual(len(errors), 0)
+        record = DepartmentActivityRecord.objects.get(
+            project=self.project, date=date(2023, 1, 4)
+        )
+        self.assertEqual(record.department, Department.SECURITY)
+        self.assertEqual(record.unit, '')
 
     def test_import_activities_from_xlsx_validation_errors(self):
         rows = [
@@ -465,3 +506,46 @@ class ViewsTests(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(DepartmentActivityRecord.objects.filter(project=self.project).count(), 2)
+
+    def test_department_activity_record_create_requires_unit(self):
+        url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        data = {
+            'department': Department.BUILDINGS,
+            'date': '2023-02-02',
+            'location': 'Roof',
+            'activity_description': 'Waterproofing',
+            'contractor': 'BuildCo',
+            'unit': '',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('unit', response.data.get('error', {}).get('details', {}))
+
+    def test_department_activity_record_create_security_without_unit(self):
+        url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        data = {
+            'department': Department.SECURITY,
+            'date': '2023-02-03',
+            'location': 'Gate',
+            'activity_description': 'Night patrol',
+            'contractor': 'SecCo',
+            'description': 'All clear',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        record = DepartmentActivityRecord.objects.get(id=response.data['id'])
+        self.assertEqual(record.unit, '')
+
+    def test_department_activity_record_create_security_clears_unit(self):
+        url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        data = {
+            'department': Department.SECURITY,
+            'date': '2023-02-04',
+            'location': 'Gate',
+            'activity_description': 'Day patrol',
+            'contractor': 'SecCo',
+            'unit': 'm',
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['unit'], '')

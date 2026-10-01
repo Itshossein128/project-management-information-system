@@ -49,7 +49,11 @@ export interface ActivityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   activity: Activity | null;
-  onSaved: () => void;
+  onSaved: (result: {
+    mode: "create" | "update";
+    activity: Activity;
+    previous: Activity | null;
+  }) => void;
   onError: (message: string) => void;
 }
 
@@ -171,12 +175,14 @@ export function ActivityDrawer({
     setSaving(true);
     try {
       if (isEdit && activity) {
-        await updateActivity(projectId, activity.activity_id, payload);
+        const updated = await updateActivity(projectId, activity.activity_id, payload);
+        await refetchWeight();
+        onSaved({ mode: "update", activity: updated, previous: activity });
       } else {
-        await createActivity(projectId, payload);
+        const created = await createActivity(projectId, payload);
+        await refetchWeight();
+        onSaved({ mode: "create", activity: created, previous: null });
       }
-      await refetchWeight();
-      onSaved();
     } catch (e) {
       onError(e instanceof Error ? e.message : "خطا در ذخیره فعالیت");
     } finally {

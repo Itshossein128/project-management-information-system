@@ -21,6 +21,7 @@ from schedule.views import (
 
 activity_list = ActivityViewSet.as_view({'get': 'list', 'post': 'create'})
 activity_detail = ActivityViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+activity_restore = ActivityViewSet.as_view({'post': 'restore'})
 activity_weight_summary = ActivityViewSet.as_view({'get': 'weight_summary'})
 activity_network = ActivityViewSet.as_view({'get': 'network'})
 activity_relations = ActivityViewSet.as_view({'post': 'relations'})
@@ -31,6 +32,7 @@ urlpatterns = [
     path('activities/weight-summary/', activity_weight_summary, name='activity-weight-summary'),
     path('activities/network/', activity_network, name='activity-network'),
     path('activities/<uuid:activity_id>/', activity_detail, name='activity-detail'),
+    path('activities/<uuid:activity_id>/restore/', activity_restore, name='activity-restore'),
     path('activities/<uuid:activity_id>/relations/', activity_relations, name='activity-relations'),
     path(
         'activities/<uuid:activity_id>/relations/<uuid:relation_id>/',

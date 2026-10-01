@@ -89,6 +89,38 @@ class TestWBSServices:
         assert root.wbs_code == '1'
         assert child.wbs_code == '1.1'
 
+    def test_propagate_renumbers_gapped_root_codes_without_unique_collision(self, project):
+        """Regression: roots at 2..N must renumber to 1..N-1 without IntegrityError."""
+        from projects.models import WBS
+        from wbs.services import propagate_project_wbs_codes
+
+        # Bypass create_wbs_node (which always propagates) to seed gapped codes like MSP import.
+        roots = []
+        for code in ('2', '3', '4'):
+            if not roots:
+                node = WBS.add_root(project_id=project.id, wbs_code=code, wbs_name=f'Root {code}')
+            else:
+                node = roots[-1].add_sibling(
+                    'sorted-sibling',
+                    project_id=project.id,
+                    wbs_code=code,
+                    wbs_name=f'Root {code}',
+                )
+            roots.append(node)
+
+        child = roots[0].add_child(
+            project_id=project.id,
+            wbs_code='2.1',
+            wbs_name='Child',
+        )
+
+        propagate_project_wbs_codes(project.id)
+
+        for node in (*roots, child):
+            node.refresh_from_db()
+        assert [r.wbs_code for r in roots] == ['1', '2', '3']
+        assert child.wbs_code == '1.1'
+
     def test_build_tree_queryset(self, project):
         create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root 1')
         create_wbs_node(project_id=project.id, wbs_code='2', wbs_name='Root 2')

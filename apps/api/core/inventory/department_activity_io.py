@@ -17,9 +17,9 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 
 from business_meta.models import Project
 
-from .models import Department, DepartmentActivityRecord
+from .models import Department, DepartmentActivityRecord, department_uses_unit
 
-EXPORT_HEADERS = [
+EXPORT_HEADERS_WITH_UNIT = [
     'date',
     'location',
     'activity_description',
@@ -27,6 +27,17 @@ EXPORT_HEADERS = [
     'unit',
     'description',
 ]
+
+EXPORT_HEADERS_WITHOUT_UNIT = [
+    'date',
+    'location',
+    'activity_description',
+    'contractor',
+    'description',
+]
+
+# Backwards-compatible alias used by tests / callers that expect the full header set.
+EXPORT_HEADERS = EXPORT_HEADERS_WITH_UNIT
 
 HEADER_ALIASES: dict[str, list[str]] = {
     'date': ['date', 'تاریخ', 'Date'],
@@ -43,21 +54,41 @@ HEADER_ALIASES: dict[str, list[str]] = {
 }
 
 
-def export_activities_to_xlsx(records: list[DepartmentActivityRecord]) -> bytes:
+def export_headers_for_department(department: str) -> list[str]:
+    if department_uses_unit(department):
+        return list(EXPORT_HEADERS_WITH_UNIT)
+    return list(EXPORT_HEADERS_WITHOUT_UNIT)
+
+
+def export_activities_to_xlsx(
+    records: list[DepartmentActivityRecord],
+    *,
+    department: str | None = None,
+) -> bytes:
+    include_unit = True
+    if department is not None:
+        include_unit = department_uses_unit(department)
+    elif records:
+        include_unit = department_uses_unit(records[0].department)
+
+    headers = (
+        EXPORT_HEADERS_WITH_UNIT if include_unit else EXPORT_HEADERS_WITHOUT_UNIT
+    )
+
     wb = Workbook(write_only=True)
     ws = wb.create_sheet(title='Activity log')
-    ws.append(EXPORT_HEADERS)
+    ws.append(headers)
     for record in records:
-        ws.append(
-            [
-                record.date.isoformat() if record.date else '',
-                record.location,
-                record.activity_description,
-                record.contractor,
-                record.unit,
-                record.description or '',
-            ]
-        )
+        row = [
+            record.date.isoformat() if record.date else '',
+            record.location,
+            record.activity_description,
+            record.contractor,
+        ]
+        if include_unit:
+            row.append(record.unit)
+        row.append(record.description or '')
+        ws.append(row)
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
@@ -99,6 +130,13 @@ def _parse_date_value(raw: Any) -> date | None:
     return None
 
 
+def _required_import_fields(department: str) -> set[str]:
+    required = {'date', 'location', 'activity_description', 'contractor'}
+    if department_uses_unit(department):
+        required.add('unit')
+    return required
+
+
 def import_activities_from_xlsx(
     business: Project,
     department: str,
@@ -106,6 +144,8 @@ def import_activities_from_xlsx(
 ) -> tuple[int, list[dict]]:
     created = 0
     errors: list[dict] = []
+    uses_unit = department_uses_unit(department)
+    expected_headers = export_headers_for_department(department)
 
     wb = load_workbook(io.BytesIO(file_bytes), read_only=True, data_only=True)
     ws = wb.active
@@ -118,7 +158,7 @@ def import_activities_from_xlsx(
         return 0, [{'row': 0, 'errors': {'_sheet': 'Empty sheet.'}}]
 
     col_to_field = _map_header_row(header_row)
-    required = {'date', 'location', 'activity_description', 'contractor', 'unit'}
+    required = _required_import_fields(department)
     if not required.issubset(set(col_to_field.values())):
         return 0, [
             {
@@ -126,7 +166,7 @@ def import_activities_from_xlsx(
                 'errors': {
                     '_sheet': (
                         'Missing required columns. Expected headers: '
-                        + ', '.join(EXPORT_HEADERS)
+                        + ', '.join(expected_headers)
                     ),
                 },
             }
@@ -150,7 +190,17 @@ def import_activities_from_xlsx(
         if not activity_date:
             row_errors['date'] = 'Valid date is required (YYYY-MM-DD).'
 
-        for field in ('location', 'activity_description', 'contractor', 'unit'):
+        required_value_fields = (
+            'location',
+            'activity_description',
+            'contractor',
+        )
+        if uses_unit:
+            required_value_fields = (
+                *required_value_fields,
+                'unit',
+            )
+        for field in required_value_fields:
             val = values.get(field)
             if val is None or str(val).strip() == '':
                 row_errors[field] = 'This field is required.'
@@ -161,6 +211,11 @@ def import_activities_from_xlsx(
 
         description = values.get('description')
         description_text = '' if description is None else str(description).strip()
+        unit_text = (
+            ''
+            if not uses_unit
+            else str(values['unit']).strip()[:64]
+        )
 
         try:
             DepartmentActivityRecord.objects.create(
@@ -170,7 +225,7 @@ def import_activities_from_xlsx(
                 location=str(values['location']).strip()[:255],
                 activity_description=str(values['activity_description']).strip()[:500],
                 contractor=str(values['contractor']).strip()[:255],
-                unit=str(values['unit']).strip()[:64],
+                unit=unit_text,
                 description=description_text,
             )
             created += 1
@@ -191,6 +246,7 @@ def generate_activity_report_pdf(
     date_to: date,
     records: list[DepartmentActivityRecord],
 ) -> bytes:
+    include_unit = department_uses_unit(department)
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf,
@@ -216,32 +272,30 @@ def generate_activity_report_pdf(
     if not records:
         story.append(Paragraph('No activity records in this period.', styles['Normal']))
     else:
-        table_data = [
-            [
-                'Date',
-                'Location',
-                'Activity',
-                'Contractor',
-                'Unit',
-                'Description',
-            ]
-        ]
+        header = ['Date', 'Location', 'Activity', 'Contractor']
+        if include_unit:
+            header.append('Unit')
+        header.append('Description')
+        table_data = [header]
         for record in records:
-            table_data.append(
-                [
-                    record.date.isoformat(),
-                    record.location,
-                    record.activity_description,
-                    record.contractor,
-                    record.unit,
-                    (record.description or '')[:200],
-                ]
-            )
+            row = [
+                record.date.isoformat(),
+                record.location,
+                record.activity_description,
+                record.contractor,
+            ]
+            if include_unit:
+                row.append(record.unit)
+            row.append((record.description or '')[:200])
+            table_data.append(row)
 
+        col_widths = (
+            [70, 90, 140, 90, 50, 160] if include_unit else [70, 100, 160, 100, 180]
+        )
         table = Table(
             table_data,
             repeatRows=1,
-            colWidths=[70, 90, 140, 90, 50, 160],
+            colWidths=col_widths,
         )
         table.setStyle(
             TableStyle(

@@ -60,6 +60,8 @@
     "pending": "در انتظار",
     "completed": "تکمیل‌شده",
     "suspended": "معلق",
+    "undo": "بازگردانی",
+    "undoSuccess": "تغییر بازگردانده شد",
     "brandName": "Velora",
     "brandShort": "V"
   },
@@ -98,6 +100,12 @@
     "sticky": {
       "lockField": "قفل کردن مقدار فیلد",
       "unlockField": "باز کردن قفل مقدار فیلد"
+    },
+    "creatableSelect": {
+      "add": "افزودن",
+      "addPlaceholder": "مقدار سفارشی",
+      "searchPlaceholder": "جستجو یا تایپ برای افزودن…",
+      "noResults": "موردی یافت نشد"
     }
   },
   "grid": {
@@ -200,6 +208,9 @@
         "activityDescription": "شرح فعالیت",
         "contractor": "پیمانکار",
         "unit": "واحد",
+        "unitPlaceholder": "انتخاب واحد",
+        "unitCustomPlaceholder": "واحد سفارشی",
+        "unitAdd": "افزودن واحد",
         "description": "توضیحات"
       },
       "importExcel": "ورود از اکسل",
@@ -399,6 +410,13 @@
     "addChild": "افزودن فرزند",
     "deleteDisabled": "ابتدا فرزندان را حذف کنید",
     "delete": "حذف",
+    "deleteHasChildren": "نمی‌توان گره WBS دارای فرزند را حذف کرد.",
+    "deleteHasActivities": "نمی‌توان گره WBS دارای فعالیت را حذف کرد.",
+    "created": "گره WBS ایجاد شد",
+    "updated": "گره WBS به‌روزرسانی شد",
+    "deleted": "گره WBS حذف شد",
+    "moved": "گره WBS جابه‌جا شد",
+    "moveUndoRootUnsupported": "بازگردانی جابه‌جایی به ریشه پشتیبانی نمی‌شود",
     "code": "کد WBS",
     "name": "نام",
     "save": "ذخیره",

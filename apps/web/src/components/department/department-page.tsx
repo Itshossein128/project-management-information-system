@@ -1,5 +1,9 @@
 import { useDepartmentActivityRecordsQuery } from "@/app/hooks/queries";
-import type { DepartmentActivityRecord, DepartmentSlug } from "@/app/lib/api-types";
+import type {
+  DepartmentActivityRecord,
+  DepartmentSlug,
+} from "@/app/lib/api-types";
+import { departmentUsesUnit } from "@/app/lib/api-types";
 import { apiBlob, apiUploadFile } from "@/app/lib/api-client";
 import { Button, Input, JalaliDateRangePicker, type DateRangeValue } from "@/components/form";
 import { DataTable, useGridState } from "@/components/grid";
@@ -38,6 +42,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
 
   const dept = findDepartmentBySlug(slug);
   const department = slug as DepartmentSlug;
+  const showsUnit = departmentUsesUnit(department);
 
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
 
@@ -64,7 +69,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       location: locationFilter.trim() ? locationFilter.trim() : undefined,
       activity_description: activityFilter.trim() ? activityFilter.trim() : undefined,
       contractor: contractorFilter.trim() ? contractorFilter.trim() : undefined,
-      unit: unitFilter.trim() ? unitFilter.trim() : undefined,
+      unit: showsUnit && unitFilter.trim() ? unitFilter.trim() : undefined,
     },
     isAuthenticated && Boolean(businessId),
   );
@@ -90,7 +95,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     if (locationFilter.trim()) sp.set("location", locationFilter.trim());
     if (activityFilter.trim()) sp.set("activity_description", activityFilter.trim());
     if (contractorFilter.trim()) sp.set("contractor", contractorFilter.trim());
-    if (unitFilter.trim()) sp.set("unit", unitFilter.trim());
+    if (showsUnit && unitFilter.trim()) sp.set("unit", unitFilter.trim());
     if (grid.debouncedSearch?.trim()) sp.set("search", grid.debouncedSearch.trim());
     if (ordering) sp.set("ordering", ordering);
     return sp;
@@ -101,6 +106,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     locationFilter,
     activityFilter,
     contractorFilter,
+    showsUnit,
     unitFilter,
     grid.debouncedSearch,
     ordering,
@@ -225,7 +231,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     : slug;
 
   const columns = useMemo<ColumnDef<DepartmentActivityRecord>[]>(() => {
-    return [
+    const cols: ColumnDef<DepartmentActivityRecord>[] = [
       {
         id: "date",
         header: t("businessDepartment.activityLog.columns.date"),
@@ -267,7 +273,10 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
           </span>
         ),
       },
-      {
+    ];
+
+    if (showsUnit) {
+      cols.push({
         id: "unit",
         header: t("businessDepartment.activityLog.columns.unit"),
         accessorKey: "unit",
@@ -276,20 +285,23 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
             {row.original.unit || "—"}
           </span>
         ),
-      },
-      {
-        id: "description",
-        header: t("businessDepartment.activityLog.columns.description"),
-        accessorKey: "description",
-        enableSorting: false,
-        cell: ({ row }) => (
-          <span id={`text-departmentActivityDescription-${row.index}`}>
-            {row.original.description?.trim() ? row.original.description : "—"}
-          </span>
-        ),
-      },
-    ];
-  }, [t]);
+      });
+    }
+
+    cols.push({
+      id: "description",
+      header: t("businessDepartment.activityLog.columns.description"),
+      accessorKey: "description",
+      enableSorting: false,
+      cell: ({ row }) => (
+        <span id={`text-departmentActivityDescription-${row.index}`}>
+          {row.original.description?.trim() ? row.original.description : "—"}
+        </span>
+      ),
+    });
+
+    return cols;
+  }, [showsUnit, t]);
 
   return (
     <div className="page-shell" id="container-businessDepartment">
@@ -447,16 +459,18 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   }}
                   placeholder={t("businessDepartment.activityLog.filters.contractor")}
                 />
-                <Input
-                  id="input-departmentActivityFilterUnit"
-                  name="departmentActivityFilterUnit"
-                  value={unitFilter}
-                  onChange={(e) => {
-                    setUnitFilter(e.target.value);
-                    grid.resetPage();
-                  }}
-                  placeholder={t("businessDepartment.activityLog.filters.unit")}
-                />
+                {showsUnit ? (
+                  <Input
+                    id="input-departmentActivityFilterUnit"
+                    name="departmentActivityFilterUnit"
+                    value={unitFilter}
+                    onChange={(e) => {
+                      setUnitFilter(e.target.value);
+                      grid.resetPage();
+                    }}
+                    placeholder={t("businessDepartment.activityLog.filters.unit")}
+                  />
+                ) : null}
               </div>
             }
             toolbarRightSlot={

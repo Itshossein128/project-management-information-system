@@ -679,3 +679,13 @@ button {
   right: auto;
   left: 0;
 }
+
+@keyframes toast-undo-countdown {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    /* 2π × ((22 − 2.5) / 2) ≈ 61.261 */
+    stroke-dashoffset: 61.261;
+  }
+}

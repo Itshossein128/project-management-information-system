@@ -12,6 +12,10 @@ export { TextArea } from "./TextArea";
 export { Checkbox, type CheckboxProps } from "./Checkbox";
 export { ToggleSwitch, type ToggleSwitchProps } from "./ToggleSwitch";
 export { Select } from "./Select";
+export {
+  CreatableSelect,
+  type CreatableSelectProps,
+} from "./CreatableSelect";
 export { JalaliDatePicker, type JalaliDatePickerProps } from "./JalaliDatePicker";
 export {
   JalaliDateRangePicker,

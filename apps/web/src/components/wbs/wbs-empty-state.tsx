@@ -1,9 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { createWBSNode } from "@/app/lib/api/wbs";
+import { useTranslation } from "react-i18next";
+import { createWBSNode, deleteWBSNode } from "@/app/lib/api/wbs";
 import { Input, Label } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+
+const UNDO_DURATION_MS = 10_000;
 
 interface WbsEmptyStateProps {
   projectId: string;
@@ -11,6 +14,7 @@ interface WbsEmptyStateProps {
 }
 
 export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
   const [code, setCode] = useState("1");
@@ -22,9 +26,23 @@ export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
         wbs_code: code.trim(),
         wbs_name: name.trim(),
       }),
-    onSuccess: () => {
+    onSuccess: (created) => {
       void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
       onCreated();
+      toast.success(t("wbs.created"), {
+        duration: UNDO_DURATION_MS,
+        action: {
+          label: t("common.undo"),
+          onClick: () => {
+            void deleteWBSNode(projectId, created.wbs_id)
+              .then(() => {
+                void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
+                toast.success(t("common.undoSuccess"));
+              })
+              .catch((err: Error) => toast.error(err.message));
+          },
+        },
+      });
     },
     onError: (err: Error) => toast.error(err.message),
   });

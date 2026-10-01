@@ -66,6 +66,11 @@ class Department(models.TextChoices):
     ELECTRICAL = 'electrical', 'برق'
 
 
+def department_uses_unit(department: str) -> bool:
+    """Security activity logs do not use a measurement unit."""
+    return department != Department.SECURITY
+
+
 class DepartmentActivityRecord(TimeStampedModel):
     project = models.ForeignKey(
         Project,
@@ -77,7 +82,7 @@ class DepartmentActivityRecord(TimeStampedModel):
     location = models.CharField(max_length=255)
     activity_description = models.CharField(max_length=500)
     contractor = models.CharField(max_length=255)
-    unit = models.CharField(max_length=64)
+    unit = models.CharField(max_length=64, blank=True, default='')
     description = models.TextField(blank=True, default='')
 
     class Meta:

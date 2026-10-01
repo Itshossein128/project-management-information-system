@@ -56,6 +56,11 @@ export type DepartmentSlug =
   | "warehouse"
   | "electrical";
 
+/** Security activity logs do not use a measurement unit. */
+export function departmentUsesUnit(department: DepartmentSlug): boolean {
+  return department !== "security";
+}
+
 export interface DepartmentActivityRecord {
   id: Id;
   project_id: Id;
@@ -65,6 +70,7 @@ export interface DepartmentActivityRecord {
   location: string;
   activity_description: string;
   contractor: string;
+  /** Empty for security department. */
   unit: string;
   description: string;
   created_at: string;

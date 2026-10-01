@@ -60,6 +60,8 @@
     "pending": "Pending",
     "completed": "Completed",
     "suspended": "Suspended",
+    "undo": "Undo",
+    "undoSuccess": "Change undone",
     "brandName": "Velora",
     "brandShort": "V"
   },
@@ -98,6 +100,12 @@
     "sticky": {
       "lockField": "Lock field value",
       "unlockField": "Unlock field value"
+    },
+    "creatableSelect": {
+      "add": "Add",
+      "addPlaceholder": "Custom value",
+      "searchPlaceholder": "Search or type to add…",
+      "noResults": "No matches"
     }
   },
   "grid": {
@@ -200,6 +208,9 @@
         "activityDescription": "Activity",
         "contractor": "Contractor",
         "unit": "Unit",
+        "unitPlaceholder": "Select unit",
+        "unitCustomPlaceholder": "Custom unit",
+        "unitAdd": "Add unit",
         "description": "Notes"
       },
       "importExcel": "Import Excel",
@@ -399,6 +410,13 @@
     "addChild": "Add child",
     "deleteDisabled": "Remove children first",
     "delete": "Delete",
+    "deleteHasChildren": "Cannot delete a WBS node that has children.",
+    "deleteHasActivities": "Cannot delete a WBS node that has activities attached.",
+    "created": "WBS node created",
+    "updated": "WBS node updated",
+    "deleted": "WBS node deleted",
+    "moved": "WBS node moved",
+    "moveUndoRootUnsupported": "Undo move to root is not supported",
     "code": "WBS code",
     "name": "Name",
     "save": "Save",

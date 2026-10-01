@@ -74,6 +74,17 @@ class TestActivitiesAPI:
         assert Activity.objects.filter(pk=act.id).count() == 0
         assert Activity.all_objects.filter(pk=act.id, is_deleted=True).exists()
 
+    def test_restore_soft_deleted_activity(self, auth_client, project, user):
+        wbs, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
+        act = _create_activity(project, wbs, user)
+        auth_client.delete(f'/api/v1/projects/{project.id}/activities/{act.id}/')
+        response = auth_client.post(
+            f'/api/v1/projects/{project.id}/activities/{act.id}/restore/',
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['activity_code'] == 'A1'
+        assert Activity.objects.filter(pk=act.id, is_deleted=False).exists()
+
     def test_network_endpoint(self, auth_client, project, user):
         wbs, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
         _create_activity(project, wbs, user)

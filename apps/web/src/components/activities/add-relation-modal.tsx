@@ -24,7 +24,7 @@ export interface AddRelationModalProps {
   anchor: Activity;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (result: { relationId: string; anchorId: string }) => void;
 }
 
 export function AddRelationModal({
@@ -71,8 +71,11 @@ export function AddRelationModal({
         relation_type: relationType,
         lag_days: parseInt(lagDays, 10) || 0,
       }),
-    onSuccess: () => {
-      onSuccess();
+    onSuccess: (data) => {
+      onSuccess({
+        relationId: data.relation_id,
+        anchorId: anchor.activity_id,
+      });
       onClose();
     },
     onError: (err: Error) => setInlineError(err.message),

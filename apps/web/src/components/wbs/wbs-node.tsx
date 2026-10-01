@@ -16,17 +16,30 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 const INDENT_PX = 24;
+const UNDO_DURATION_MS = 10_000;
 
 interface WBSNodeRowProps {
   node: WBSNode;
   projectId: string;
+  parentId?: string | null;
   depth?: number;
   canEdit?: boolean;
+}
+
+function parseWeight(value: string | null | undefined): number | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return Number.isNaN(n) ? null : n;
+}
+
+function uniqueTempCode(): string {
+  return `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
 export function WBSNodeRow({
   node,
   projectId,
+  parentId = null,
   depth = 0,
   canEdit = true,
 }: WBSNodeRowProps) {
@@ -43,18 +56,42 @@ export function WBSNodeRow({
   const hasChildren = node.children.length > 0;
   const level = node.depth > 0 ? node.depth - 1 : depth;
   const indent = level * INDENT_PX;
+  const defaultChildCode = `${node.wbs_code}.${node.children.length + 1}`;
 
   const invalidate = () =>
     void qc.invalidateQueries({ queryKey: ["wbs", projectId] });
+
+  const offerUndo = (message: string, run: () => Promise<void>) => {
+    toast.success(message, {
+      duration: UNDO_DURATION_MS,
+      action: {
+        label: t("common.undo"),
+        onClick: () => {
+          void run()
+            .then(() => {
+              invalidate();
+              toast.success(t("common.undoSuccess"));
+            })
+            .catch((err: Error) => toast.error(err.message));
+        },
+      },
+    });
+  };
 
   const updateMutation = useMutation({
     mutationFn: (payload: {
       wbs_name?: string;
       weight_physical?: number | null;
     }) => updateWBSNode(projectId, node.wbs_id, payload),
-    onSuccess: () => {
+    onSuccess: (_data, payload) => {
       invalidate();
       setEditing(false);
+      const previousName = node.wbs_name;
+      if (payload.wbs_name != null && payload.wbs_name !== previousName) {
+        offerUndo(t("wbs.updated"), async () => {
+          await updateWBSNode(projectId, node.wbs_id, { wbs_name: previousName });
+        });
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -63,23 +100,67 @@ export function WBSNodeRow({
     mutationFn: () =>
       createWBSNode(projectId, {
         parent_id: node.wbs_id,
-        wbs_code: childCode,
+        wbs_code: childCode || defaultChildCode,
         wbs_name: childName,
       }),
-    onSuccess: () => {
+    onSuccess: (created) => {
       invalidate();
       setAddingChild(false);
       setChildCode("");
       setChildName("");
       setExpanded(true);
+      offerUndo(t("wbs.created"), async () => {
+        await deleteWBSNode(projectId, created.wbs_id);
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteWBSNode(projectId, node.wbs_id),
-    onSuccess: invalidate,
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: () => {
+      const snapshot = {
+        parent_id: parentId,
+        wbs_code: node.wbs_code,
+        wbs_name: node.wbs_name,
+        weight_physical: parseWeight(node.weight_physical),
+        weight_financial: parseWeight(node.weight_financial),
+        description: node.description ?? "",
+      };
+      invalidate();
+      offerUndo(t("wbs.deleted"), async () => {
+        try {
+          await createWBSNode(projectId, {
+            parent_id: snapshot.parent_id,
+            wbs_code: snapshot.wbs_code,
+            wbs_name: snapshot.wbs_name,
+            weight_physical: snapshot.weight_physical,
+            weight_financial: snapshot.weight_financial,
+            description: snapshot.description,
+          });
+        } catch {
+          // Codes may have been renumbered after delete; recreate with a temp code.
+          await createWBSNode(projectId, {
+            parent_id: snapshot.parent_id,
+            wbs_code: uniqueTempCode(),
+            wbs_name: snapshot.wbs_name,
+            weight_physical: snapshot.weight_physical,
+            weight_financial: snapshot.weight_financial,
+            description: snapshot.description,
+          });
+        }
+      });
+    },
+    onError: (e: Error) => {
+      const msg = e.message;
+      if (msg.includes("activities attached")) {
+        toast.error(t("wbs.deleteHasActivities"));
+      } else if (msg.includes("has children")) {
+        toast.error(t("wbs.deleteHasChildren"));
+      } else {
+        toast.error(msg);
+      }
+    },
   });
 
   const weightPct =
@@ -103,6 +184,7 @@ export function WBSNodeRow({
         draggable={canEdit}
         onDragStart={(e) => {
           e.dataTransfer.setData("text/wbs-id", node.wbs_id);
+          e.dataTransfer.setData("text/wbs-parent-id", parentId ?? "");
           e.dataTransfer.effectAllowed = "move";
         }}
         onDragOver={(e) => {
@@ -114,12 +196,26 @@ export function WBSNodeRow({
           if (!canEdit) return;
           e.preventDefault();
           const draggedId = e.dataTransfer.getData("text/wbs-id");
+          const previousParentId = e.dataTransfer.getData("text/wbs-parent-id") || null;
           if (!draggedId || draggedId === node.wbs_id) return;
           void moveWBSNode(projectId, draggedId, {
             new_parent_id: node.wbs_id,
             position: "sorted_child",
           })
-            .then(() => invalidate())
+            .then(() => {
+              invalidate();
+              offerUndo(t("wbs.moved"), async () => {
+                if (previousParentId) {
+                  await moveWBSNode(projectId, draggedId, {
+                    new_parent_id: previousParentId,
+                    position: "sorted_child",
+                  });
+                } else {
+                  // Root move undo is not supported without a root-target API.
+                  throw new Error(t("wbs.moveUndoRootUnsupported"));
+                }
+              });
+            })
             .catch((err: Error) => toast.error(err.message));
         }}
         >
@@ -145,13 +241,27 @@ export function WBSNodeRow({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") updateMutation.mutate({ wbs_name: name });
+              if (e.key === "Enter") {
+                if (name.trim() && name !== node.wbs_name) {
+                  updateMutation.mutate({ wbs_name: name });
+                } else {
+                  setEditing(false);
+                  setName(node.wbs_name);
+                }
+              }
               if (e.key === "Escape") {
                 setEditing(false);
                 setName(node.wbs_name);
               }
             }}
-            onBlur={() => updateMutation.mutate({ wbs_name: name })}
+            onBlur={() => {
+              if (name.trim() && name !== node.wbs_name) {
+                updateMutation.mutate({ wbs_name: name });
+              } else {
+                setEditing(false);
+                setName(node.wbs_name);
+              }
+            }}
             autoFocus
           />
         ) : (
@@ -194,7 +304,10 @@ export function WBSNodeRow({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  onClick={() => setAddingChild(true)}
+                  onClick={() => {
+                    setChildCode(defaultChildCode);
+                    setAddingChild(true);
+                  }}
                   aria-label={t("wbs.addChild")}
                 >
                   <Plus className="size-4" />
@@ -232,8 +345,8 @@ export function WBSNodeRow({
             >
               <Input
                 placeholder={t("wbs.code")}
-                value={childCode}
-                onChange={(e) => setChildCode(e.target.value)}
+                value={childCode || defaultChildCode}
+                disabled
                 className="h-8 w-24"
               />
               <Input
@@ -265,6 +378,7 @@ export function WBSNodeRow({
               key={child.wbs_id}
               node={child}
               projectId={projectId}
+              parentId={node.wbs_id}
               depth={depth + 1}
               canEdit={canEdit}
             />

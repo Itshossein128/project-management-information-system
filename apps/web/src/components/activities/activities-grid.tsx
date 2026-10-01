@@ -1,20 +1,31 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   Clock,
   GitBranchPlus,
   LayoutGrid,
+  Loader2,
   Network,
   Pencil,
   Scale,
   Search,
   Trash2,
+  Undo2,
 } from "lucide-react";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
+  activityToPayload,
   deleteActivity,
+  deleteActivityRelation,
   fetchActivities,
   fetchActivity,
   fetchWeightSummary,
+  restoreActivity,
+  updateActivity,
   type Activity,
   type ActivityStatus,
 } from "@/app/lib/api/activities";
@@ -34,6 +45,20 @@ import { Button } from "@/components/ui/sprint-button";
 import { Checkbox, Field, Input, Select } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/app/lib/utils";
+
+const PAGE_SIZE = 50;
+
+function getScrollParent(el: HTMLElement | null): Element | null {
+  let node = el?.parentElement ?? null;
+  while (node) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay") {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
 
 const STATUS_LABELS: Record<ActivityStatus, { label: string; variant: "neutral" | "info" | "warning" | "success" }> = {
   not_started: { label: "شروع نشده", variant: "neutral" },
@@ -58,7 +83,6 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
   const canEdit = has("edit_activities");
 
   const [viewMode, setViewMode] = useState<"table" | "network">("table");
-  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ActivityStatus | "">("");
   const [wbsFilter, setWbsFilter] = useState("");
@@ -70,10 +94,57 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
   const [relationAnchor, setRelationAnchor] = useState<Activity | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Activity | null>(null);
   const [weightModalOpen, setWeightModalOpen] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
+  const [undoing, setUndoing] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const undoActionRef = useRef<(() => Promise<void>) | null>(null);
+  const undoingRef = useRef(false);
 
-  const listParams = {
-    page,
-    per_page: 50,
+  const invalidateActivityQueries = () => {
+    void qc.invalidateQueries({ queryKey: ["activities", projectId] });
+    void qc.invalidateQueries({ queryKey: ["activity", projectId] });
+    void qc.invalidateQueries({ queryKey: ["activity-weight-summary", projectId] });
+    void qc.invalidateQueries({ queryKey: ["activity-network", projectId] });
+  };
+
+  const clearUndo = () => {
+    undoActionRef.current = null;
+    setCanUndo(false);
+  };
+
+  const performUndo = async () => {
+    const run = undoActionRef.current;
+    if (!run || undoingRef.current) return;
+    undoingRef.current = true;
+    clearUndo();
+    setUndoing(true);
+    try {
+      await run();
+      invalidateActivityQueries();
+      toast.success("تغییر بازگردانده شد");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "بازگردانی ممکن نشد");
+    } finally {
+      undoingRef.current = false;
+      setUndoing(false);
+    }
+  };
+
+  const offerUndo = (message: string, run: () => Promise<void>) => {
+    undoActionRef.current = run;
+    setCanUndo(true);
+    toast.success(message, {
+      action: {
+        label: "بازگردانی",
+        onClick: () => {
+          void performUndo();
+        },
+      },
+    });
+  };
+
+  const listFilters = {
+    per_page: PAGE_SIZE,
     search: search || undefined,
     status: statusFilter || undefined,
     wbs_id: wbsFilter || undefined,
@@ -81,11 +152,43 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     is_overdue: overdueOnly || undefined,
   };
 
-  const { data, isLoading, isFetching, isError, refetch } = useQuery({
-    queryKey: ["activities", projectId, listParams],
-    queryFn: () => fetchActivities(projectId, listParams),
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["activities", projectId, listFilters],
+    queryFn: ({ pageParam }) =>
+      fetchActivities(projectId, { ...listFilters, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.next) return undefined;
+      return allPages.length + 1;
+    },
     enabled: viewMode === "table",
   });
+
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el || viewMode !== "table") return;
+
+    const root = getScrollParent(el);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { root, rootMargin: "240px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [viewMode, hasNextPage, isFetchingNextPage, fetchNextPage, data?.pages.length]);
 
   const { data: expandedDetail } = useQuery({
     queryKey: ["activity", projectId, expandedId],
@@ -110,18 +213,20 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteActivity(projectId, id),
-    onSuccess: () => {
-      toast.success("فعالیت حذف شد");
+    mutationFn: (act: Activity) => deleteActivity(projectId, act.activity_id),
+    onSuccess: (_data, act) => {
       setDeleteTarget(null);
-      void qc.invalidateQueries({ queryKey: ["activities", projectId] });
+      invalidateActivityQueries();
+      offerUndo("فعالیت حذف شد", async () => {
+        await restoreActivity(projectId, act.activity_id);
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const activities = data?.results ?? [];
-  const totalCount = data?.count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / 50));
+  const activities = data?.pages.flatMap((page) => page.results) ?? [];
+  const totalCount = data?.pages[0]?.count ?? 0;
+  const isFilterFetching = isFetching && !isFetchingNextPage && !isLoading;
 
   function openCreate() {
     setEditActivity(null);
@@ -163,10 +268,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                       className="w-48 ps-8"
                       placeholder="جستجو…"
                       value={search}
-                      onChange={(e) => {
-                        setSearch(e.target.value);
-                        setPage(1);
-                      }}
+                      onChange={(e) => setSearch(e.target.value)}
                     />
                   </div>
                 )}
@@ -177,7 +279,6 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                 value={wbsFilter || "all"}
                 onChange={(e) => {
                   setWbsFilter(e.target.value === "all" ? "" : e.target.value);
-                  setPage(1);
                 }}
                 options={[
                   { value: "all", label: "همه WBS" },
@@ -198,7 +299,6 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                       ? ""
                       : (e.target.value as ActivityStatus),
                   );
-                  setPage(1);
                 }}
                 options={[
                   { value: "all", label: "همه وضعیت‌ها" },
@@ -217,7 +317,6 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   setResponsibleFilter(
                     e.target.value === "all" ? "" : e.target.value,
                   );
-                  setPage(1);
                 }}
                 options={[
                   { value: "all", label: "همه مسئولین" },
@@ -238,7 +337,6 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   setOverdueOnly(
                     Boolean((e.target as unknown as { value: boolean }).value),
                   );
-                  setPage(1);
                 }}
                 fieldClassName="pb-2"
               />
@@ -269,9 +367,9 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
             <Scale className="size-4" />
             وزن‌سنجی
           </Button>
-          {canEdit ? (
+          {/* {canEdit ? (
             <Button size="sm" onClick={openCreate}>افزودن فعالیت</Button>
-          ) : null}
+          ) : null} */}
         </div>
       </div>
 
@@ -286,33 +384,35 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           title="فعالیتی یافت نشد"
           description="فعالیت جدیدی اضافه کنید یا فیلترها را تغییر دهید."
           action={
-            canEdit ? (
-              <Button variant="primary" onClick={openCreate}>
-                افزودن فعالیت
-              </Button>
-            ) : null
+            // canEdit ? (
+            //   <Button variant="primary" onClick={openCreate}>
+            //     افزودن فعالیت
+            //   </Button>
+            // ) : null
+            null
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full min-w-[960px] text-sm">
-            <thead className="bg-muted/50 text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-start font-medium">کد</th>
-                <th className="px-3 py-2 text-start font-medium">نام فعالیت</th>
-                <th className="px-3 py-2 text-start font-medium">WBS</th>
-                <th className="px-3 py-2 text-start font-medium">واحد</th>
-                <th className="px-3 py-2 text-start font-medium">مقدار کل</th>
-                <th className="px-3 py-2 text-start font-medium">وزن</th>
-                <th className="px-3 py-2 text-start font-medium">شروع برنامه</th>
-                <th className="px-3 py-2 text-start font-medium">پایان برنامه</th>
-                <th className="px-3 py-2 text-start font-medium">مدت</th>
-                <th className="px-3 py-2 text-start font-medium">مسئول</th>
-                <th className="px-3 py-2 text-start font-medium">وضعیت</th>
-                <th className="px-3 py-2 text-start font-medium">عملیات</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div className="rounded-lg border border-border">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[960px] text-sm">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 text-start font-medium">کد</th>
+                  <th className="px-3 py-2 text-start font-medium">نام فعالیت</th>
+                  <th className="px-3 py-2 text-start font-medium">WBS</th>
+                  <th className="px-3 py-2 text-start font-medium">واحد</th>
+                  <th className="px-3 py-2 text-start font-medium">مقدار کل</th>
+                  <th className="px-3 py-2 text-start font-medium">وزن</th>
+                  <th className="px-3 py-2 text-start font-medium">شروع برنامه</th>
+                  <th className="px-3 py-2 text-start font-medium">پایان برنامه</th>
+                  <th className="px-3 py-2 text-start font-medium">مدت</th>
+                  <th className="px-3 py-2 text-start font-medium">مسئول</th>
+                  <th className="px-3 py-2 text-start font-medium">وضعیت</th>
+                  <th className="px-3 py-2 text-start font-medium">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
               {activities.map((act) => {
                 const st = STATUS_LABELS[act.status];
                 const expanded = expandedId === act.activity_id;
@@ -324,7 +424,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                     <tr
                       className={cn(
                         "border-t border-border hover:bg-muted/30 cursor-pointer",
-                        isFetching && "opacity-70",
+                        isFilterFetching && "opacity-70",
                       )}
                       onClick={() => setExpandedId(expanded ? null : act.activity_id)}
                     >
@@ -440,14 +540,29 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   </Fragment>
                 );
               })}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
           <div className="flex items-center justify-between border-t border-border px-3 py-2 text-sm text-muted-foreground">
-            <span>صفحه {page} از {totalPages} ({totalCount} مورد)</span>
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>قبلی</Button>
-              <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>بعدی</Button>
-            </div>
+            <span>
+              {activities.length} از {totalCount} مورد
+            </span>
+          </div>
+          <div
+            ref={loadMoreRef}
+            className="flex min-h-8 items-center justify-center border-t border-border py-3 text-sm text-muted-foreground"
+            aria-hidden={!hasNextPage && !isFetchingNextPage}
+          >
+            {isFetchingNextPage ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                در حال بارگذاری…
+              </span>
+            ) : hasNextPage ? (
+              "اسکرول برای بارگذاری بیشتر"
+            ) : activities.length > 0 ? (
+              "همه موارد بارگذاری شد"
+            ) : null}
           </div>
         </div>
       )}
@@ -457,11 +572,27 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
         isOpen={drawerOpen}
         onClose={() => { setDrawerOpen(false); setEditActivity(null); }}
         activity={editActivity}
-        onSaved={() => {
-          toast.success(editActivity ? "فعالیت به‌روزرسانی شد" : "فعالیت ایجاد شد");
+        onSaved={({ mode, activity: saved, previous }) => {
           setDrawerOpen(false);
           setEditActivity(null);
-          void qc.invalidateQueries({ queryKey: ["activities", projectId] });
+          invalidateActivityQueries();
+          if (mode === "create") {
+            offerUndo("فعالیت ایجاد شد", async () => {
+              await deleteActivity(projectId, saved.activity_id);
+            });
+            return;
+          }
+          if (previous) {
+            offerUndo("فعالیت به‌روزرسانی شد", async () => {
+              await updateActivity(
+                projectId,
+                previous.activity_id,
+                activityToPayload(previous),
+              );
+            });
+          } else {
+            toast.success("فعالیت به‌روزرسانی شد");
+          }
         }}
         onError={(msg) => toast.error(msg)}
       />
@@ -472,9 +603,11 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           anchor={relationAnchor}
           isOpen={Boolean(relationAnchor)}
           onClose={() => setRelationAnchor(null)}
-          onSuccess={() => {
-            toast.success("ارتباط ثبت شد");
-            void qc.invalidateQueries({ queryKey: ["activities", projectId] });
+          onSuccess={({ relationId, anchorId }) => {
+            invalidateActivityQueries();
+            offerUndo("ارتباط ثبت شد", async () => {
+              await deleteActivityRelation(projectId, anchorId, relationId);
+            });
           }}
         />
       ) : null}
@@ -491,7 +624,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           <Button
             variant="danger"
             disabled={deleteMutation.isPending}
-            onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.activity_id)}
+            onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
           >
             حذف
           </Button>

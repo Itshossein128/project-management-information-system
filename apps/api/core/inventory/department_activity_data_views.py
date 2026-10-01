@@ -87,7 +87,7 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             return department
 
         qs = get_department_activity_queryset(project_pk, request.query_params)
-        xlsx_bytes = export_activities_to_xlsx(list(qs))
+        xlsx_bytes = export_activities_to_xlsx(list(qs), department=department)
         filename = f'{department}_activity_export.xlsx'
         response = HttpResponse(
             xlsx_bytes,

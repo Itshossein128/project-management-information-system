@@ -4,8 +4,11 @@ import type {
   DepartmentActivityRecordPayload,
   DepartmentSlug,
 } from "@/app/lib/api-types";
+import { departmentUsesUnit } from "@/app/lib/api-types";
+import { CONSTRUCTION_UNIT_OPTIONS } from "@/app/lib/construction-units";
 import {
   Button,
+  CreatableSelect,
   Field,
   Input,
   JalaliDatePicker,
@@ -72,12 +75,15 @@ export function DepartmentActivityRecordModal({
       : t("form.sticky.lockField"),
   });
 
+  const showsUnit = departmentUsesUnit(department);
+
   const payload = useMemo<DepartmentActivityRecordPayload>(
     () => ({
       department,
       ...form,
+      unit: showsUnit ? form.unit : "",
     }),
-    [department, form],
+    [department, form, showsUnit],
   );
 
   const canSubmit =
@@ -85,7 +91,7 @@ export function DepartmentActivityRecordModal({
     payload.location.trim() !== "" &&
     payload.activity_description.trim() !== "" &&
     payload.contractor.trim() !== "" &&
-    payload.unit.trim() !== "";
+    (!showsUnit || payload.unit.trim() !== "");
 
   return (
     <Modal
@@ -142,27 +148,30 @@ export function DepartmentActivityRecordModal({
             />
           </div>
 
-          <div
-            id="container-departmentActivityUnit"
-            className="sm:col-span-1"
-          >
-            <Field
-              name="departmentActivityUnit"
-              label={t("businessDepartment.activityLog.fields.unit")}
-              htmlFor="input-departmentActivityUnit"
-              {...stickyFieldProps("unit")}
+          {showsUnit ? (
+            <div
+              id="container-departmentActivityUnit"
+              className="sm:col-span-1"
             >
-              {() => (
-                <Input
-                  id="input-departmentActivityUnit"
-                  name="departmentActivityUnit"
-                  value={form.unit}
-                  onChange={(e) => setField("unit", e.target.value)}
-                  required
-                />
-              )}
-            </Field>
-          </div>
+              <CreatableSelect
+                id="input-departmentActivityUnit"
+                name="departmentActivityUnit"
+                label={t("businessDepartment.activityLog.fields.unit")}
+                value={form.unit}
+                onChange={(next) => setField("unit", next)}
+                options={CONSTRUCTION_UNIT_OPTIONS}
+                placeholder={t(
+                  "businessDepartment.activityLog.fields.unitPlaceholder",
+                )}
+                addPlaceholder={t(
+                  "businessDepartment.activityLog.fields.unitCustomPlaceholder",
+                )}
+                addLabel={t("businessDepartment.activityLog.fields.unitAdd")}
+                required
+                {...stickyFieldProps("unit")}
+              />
+            </div>
+          ) : null}
 
           <div
             id="container-departmentActivityLocation"

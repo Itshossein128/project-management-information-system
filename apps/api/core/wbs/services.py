@@ -167,6 +167,9 @@ def propagate_project_wbs_codes(project_id) -> None:
     Recomputes and normalizes the hierarchical wbs_code (e.g., 1, 1.1, 1.1.2) for all nodes
     in a project based on their structural tree order (path).
     This is typically called after nodes are moved or structurally modified.
+
+    Uses a two-phase bulk update so intermediate renumbers cannot violate the
+    (project, wbs_code) unique constraint (PostgreSQL checks UNIQUE per row).
     """
     # ⚡ Bolt: Iterative single-query traversal instead of recursive N+1 query pattern
     qs = WBS.objects.filter(project_id=project_id).order_by('path')
@@ -200,12 +203,20 @@ def propagate_project_wbs_codes(project_id) -> None:
         level_codes[depth] = code
 
         if node.wbs_code != code:
-            node.wbs_code = code
-            updates.append(node)
+            updates.append((node, code))
 
-    if updates:
-        # ⚡ Bolt: Bulk update efficiently updates DB in a single roundtrip
-        WBS.objects.bulk_update(updates, ['wbs_code'], batch_size=1000)
+    if not updates:
+        return
+
+    # Phase 1: move colliding codes to short unique temps (max_length=30).
+    for node, _final in updates:
+        node.wbs_code = f'_{node.pk.hex[:29]}'
+    WBS.objects.bulk_update([node for node, _ in updates], ['wbs_code'], batch_size=1000)
+
+    # Phase 2: assign final hierarchical codes.
+    for node, final_code in updates:
+        node.wbs_code = final_code
+    WBS.objects.bulk_update([node for node, _ in updates], ['wbs_code'], batch_size=1000)
 
 
 @transaction.atomic
