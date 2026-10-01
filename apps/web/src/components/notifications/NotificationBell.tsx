@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useUnreadCount } from "@/app/hooks/useNotifications";
 import { NotificationPanel } from "./NotificationPanel";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function NotificationBell() {
   const { t } = useTranslation();
@@ -22,28 +23,32 @@ export function NotificationBell() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          data-tour="notification-bell"
-          aria-label={bellLabel}
-          title={bellLabel}
-          className={cn(
-            "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-            open && "bg-muted",
-          )}
-        >
-          <Bell className="size-4" aria-hidden="true" />
-          {unread > 0 ? (
-            <span
-              aria-hidden="true"
-              className="absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-background bg-danger-500 px-1 text-[10px] font-semibold leading-none text-white"
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              data-tour="notification-bell"
+              aria-label={bellLabel}
+              className={cn(
+                "relative inline-flex size-9 items-center justify-center rounded-md border border-border bg-transparent hover:bg-muted outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+                open && "bg-muted",
+              )}
             >
-              {unread > 99 ? "99+" : unread}
-            </span>
-          ) : null}
-        </button>
-      </PopoverTrigger>
+              <Bell className="size-4" aria-hidden="true" />
+              {unread > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-background bg-danger-500 px-1 text-[10px] font-semibold leading-none text-white"
+                >
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              ) : null}
+            </button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>{bellLabel}</TooltipContent>
+      </Tooltip>
       <PopoverContent className="w-80 sm:w-96 p-0 overflow-hidden" align="end">
         <NotificationPanel onClose={() => setOpen(false)} />
       </PopoverContent>
