@@ -216,7 +216,9 @@ class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewS
         description=(
             'Grid endpoint for listing per-department activity records inside a business. '
             'Supports a `department` filter (required for department pages) plus search and '
-            'simple field filters. `date_from` and `date_to` are inclusive bounds (YYYY-MM-DD).'
+            'simple field filters. `date_from` and `date_to` are inclusive bounds (YYYY-MM-DD). '
+            'Warehouse adds filters `material_type`, `consumption_location`, `supplier` and '
+            'ordering on warehouse quantity/material fields.'
         ),
         parameters=[
             OpenApiParameter(
@@ -231,17 +233,26 @@ class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewS
             OpenApiParameter(name='activity_description', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='contractor', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='unit', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='material_type', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='consumption_location', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='supplier', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(
                 name='search',
                 type=OpenApiTypes.STR,
                 required=False,
-                description='Free-text search across location, activity_description, contractor, unit.',
+                description=(
+                    'Free-text search across location, activity_description, contractor, unit, '
+                    'and warehouse fields material_type, consumption_location, supplier, description.'
+                ),
             ),
             OpenApiParameter(
                 name='ordering',
                 type=OpenApiTypes.STR,
                 required=False,
-                description='Field to order by, prefix with `-` for desc. E.g. `-date`, `location`, `activity_description`.',
+                description=(
+                    'Field to order by, prefix with `-` for desc. E.g. `-date`, `location`, '
+                    '`material_type`, `quantity_in`, `quantity_out`.'
+                ),
             ),
             OpenApiParameter(name='page', type=OpenApiTypes.INT, required=False),
             OpenApiParameter(
@@ -255,7 +266,14 @@ class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewS
     ),
     create=extend_schema(
         summary='Create department activity record',
-        description='Form endpoint to create a new activity record under a business.',
+        description=(
+            'Create a department activity record. Payload shape depends on `department`:\n\n'
+            '- **warehouse**: require `date`, `material_type`, `unit`, `consumption_location`, '
+            '`supplier`; `quantity_in`/`quantity_out` ≥ 0 with at least one > 0; optional '
+            '`description`. Generic fields `location`/`activity_description`/`contractor` are cleared.\n'
+            '- **other departments**: require `date`, `location`, `activity_description`, '
+            '`contractor` (+ `unit` except security). Warehouse-only fields are cleared to empty/0.'
+        ),
         tags=['Project activity records'],
     ),
     retrieve=extend_schema(summary='Get department activity record', tags=['Project activity records']),
@@ -268,7 +286,8 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
     Project-scoped CRUD for `DepartmentActivityRecord`.
 
     Frontend per-department pages call this endpoint with `?department=<slug>`
-    so the same model serves all six department grids.
+    so the same model serves all six department grids. Warehouse uses material-movement
+    fields; other departments keep the generic activity-log schema.
     """
     queryset = DepartmentActivityRecord.objects.all()
     serializer_class = DepartmentActivityRecordSerializer
@@ -290,6 +309,16 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
         '-contractor',
         'unit',
         '-unit',
+        'material_type',
+        '-material_type',
+        'quantity_in',
+        '-quantity_in',
+        'quantity_out',
+        '-quantity_out',
+        'consumption_location',
+        '-consumption_location',
+        'supplier',
+        '-supplier',
     }
 
     def get_permissions(self):

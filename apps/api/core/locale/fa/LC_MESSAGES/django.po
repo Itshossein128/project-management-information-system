@@ -118,3 +118,21 @@ msgstr "حسابدار"
 
 msgid "Business setup"
 msgstr "راه‌اندازی کسب‌وکار"
+
+msgid "Ensure this field has no more than 255 characters."
+msgstr "این فیلد نباید بیش از ۲۵۵ نویسه باشد."
+
+msgid "Ensure this field has no more than 64 characters."
+msgstr "این فیلد نباید بیش از ۶۴ نویسه باشد."
+
+msgid "Ensure this field has no more than 500 characters."
+msgstr "این فیلد نباید بیش از ۵۰۰ نویسه باشد."
+
+msgid "Enter a valid number."
+msgstr "یک عدد معتبر وارد کنید."
+
+msgid "Quantity must be greater than or equal to zero."
+msgstr "مقدار باید بزرگ‌تر یا مساوی صفر باشد."
+
+msgid "At least one of quantity_in or quantity_out must be greater than zero."
+msgstr "حداقل یکی از مقادیر ورودی یا خروجی باید بزرگ‌تر از صفر باشد."

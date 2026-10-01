@@ -549,3 +549,601 @@ class ViewsTests(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['unit'], '')
+
+
+from decimal import Decimal
+from django.db import connection
+from .models import department_uses_unit, is_warehouse_department
+from .department_activity_io import export_headers_for_department
+
+
+class WarehouseHelperAndModelTests(TestCase):
+    """T003–T004: warehouse helper + schema field assertions."""
+
+    def test_is_warehouse_department(self):
+        self.assertTrue(is_warehouse_department(Department.WAREHOUSE))
+        self.assertTrue(is_warehouse_department('warehouse'))
+        for dept in (
+            Department.BUILDINGS,
+            Department.MECHANICAL,
+            Department.SECURITY,
+            Department.MACHINERY,
+            Department.ELECTRICAL,
+        ):
+            self.assertFalse(is_warehouse_department(dept))
+
+    def test_warehouse_uses_unit(self):
+        self.assertTrue(department_uses_unit(Department.WAREHOUSE))
+
+    def test_warehouse_model_fields_exist_with_constraints(self):
+        field_names = {f.name for f in DepartmentActivityRecord._meta.get_fields()}
+        for name in (
+            'material_type',
+            'quantity_in',
+            'quantity_out',
+            'consumption_location',
+            'supplier',
+        ):
+            self.assertIn(name, field_names)
+
+        material_type = DepartmentActivityRecord._meta.get_field('material_type')
+        self.assertEqual(material_type.max_length, 255)
+        self.assertTrue(material_type.blank)
+        self.assertEqual(material_type.default, '')
+
+        quantity_in = DepartmentActivityRecord._meta.get_field('quantity_in')
+        self.assertEqual(quantity_in.max_digits, 14)
+        self.assertEqual(quantity_in.decimal_places, 3)
+        self.assertEqual(quantity_in.default, 0)
+
+        quantity_out = DepartmentActivityRecord._meta.get_field('quantity_out')
+        self.assertEqual(quantity_out.max_digits, 14)
+        self.assertEqual(quantity_out.decimal_places, 3)
+        self.assertEqual(quantity_out.default, 0)
+
+        consumption_location = DepartmentActivityRecord._meta.get_field('consumption_location')
+        self.assertEqual(consumption_location.max_length, 255)
+        self.assertTrue(consumption_location.blank)
+        self.assertEqual(consumption_location.default, '')
+
+        supplier = DepartmentActivityRecord._meta.get_field('supplier')
+        self.assertEqual(supplier.max_length, 255)
+        self.assertTrue(supplier.blank)
+        self.assertEqual(supplier.default, '')
+
+        for name in ('location', 'activity_description', 'contractor'):
+            self.assertTrue(DepartmentActivityRecord._meta.get_field(name).blank)
+
+    def test_warehouse_columns_exist_in_db(self):
+        table = DepartmentActivityRecord._meta.db_table
+        with connection.cursor() as cursor:
+            columns = {
+                col.name
+                for col in connection.introspection.get_table_description(cursor, table)
+            }
+        for name in (
+            'material_type',
+            'quantity_in',
+            'quantity_out',
+            'consumption_location',
+            'supplier',
+        ):
+            self.assertIn(name, columns)
+
+
+class WarehouseCreateAPITests(TestCase):
+    """T011–T013, T028–T029: warehouse create validation + non-warehouse regression."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='warehouse_user', password='password', mobile='09120000001'
+        )
+        self.user.is_superuser = True
+        self.user.save()
+        self.project = Project.objects.create(
+            project_code='WH1',
+            project_name='Warehouse Project',
+            employer='Emp',
+            start_date=date.today(),
+        )
+        from master_data.models import ProjectMemberRole
+
+        self.role, _ = Role.objects.get_or_create(role_name='project_manager')
+        self.member = ProjectMember.objects.create(project=self.project, user=self.user)
+        ProjectMemberRole.objects.create(member=self.member, role=self.role)
+        self.client.force_authenticate(user=self.user)
+        self.url = reverse(
+            'project-department-activity-record-list',
+            kwargs={'project_pk': self.project.id},
+        )
+
+    def _warehouse_payload(self, **overrides):
+        data = {
+            'department': Department.WAREHOUSE,
+            'date': '2026-10-01',
+            'material_type': 'سیمان',
+            'quantity_in': '10.000',
+            'unit': 'ton',
+            'quantity_out': '2.500',
+            'consumption_location': 'بلوک A',
+            'supplier': 'شرکت تامین',
+            'description': 'optional note',
+        }
+        data.update(overrides)
+        return data
+
+    def test_warehouse_create_happy_path(self):
+        response = self.client.post(self.url, self._warehouse_payload())
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['material_type'], 'سیمان')
+        self.assertEqual(Decimal(str(response.data['quantity_in'])), Decimal('10.000'))
+        self.assertEqual(Decimal(str(response.data['quantity_out'])), Decimal('2.500'))
+        self.assertEqual(response.data['unit'], 'ton')
+        self.assertEqual(response.data['consumption_location'], 'بلوک A')
+        self.assertEqual(response.data['supplier'], 'شرکت تامین')
+        self.assertEqual(response.data['description'], 'optional note')
+        record = DepartmentActivityRecord.objects.get(id=response.data['id'])
+        self.assertEqual(record.material_type, 'سیمان')
+        self.assertEqual(record.location, '')
+        self.assertEqual(record.activity_description, '')
+        self.assertEqual(record.contractor, '')
+
+    def test_warehouse_create_allows_inbound_only(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='5', quantity_out='0'),
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Decimal(str(response.data['quantity_out'])), Decimal('0'))
+
+    def test_warehouse_create_allows_outbound_only(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='0', quantity_out='3.5'),
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_warehouse_create_rejects_both_quantities_zero(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='0', quantity_out='0'),
+        )
+        self.assertEqual(response.status_code, 400)
+        details = response.data.get('error', {}).get('details', {})
+        self.assertTrue(
+            'quantity_in' in details
+            or 'quantity_out' in details
+            or 'non_field_errors' in details
+        )
+
+    def test_warehouse_create_rejects_negative_quantities(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='-1', quantity_out='2'),
+        )
+        self.assertEqual(response.status_code, 400)
+        details = response.data.get('error', {}).get('details', {})
+        self.assertIn('quantity_in', details)
+
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='1', quantity_out='-0.1'),
+        )
+        self.assertEqual(response.status_code, 400)
+        details = response.data.get('error', {}).get('details', {})
+        self.assertIn('quantity_out', details)
+
+    def test_warehouse_create_rejects_missing_required_fields(self):
+        for field in (
+            'material_type',
+            'unit',
+            'consumption_location',
+            'supplier',
+            'date',
+        ):
+            payload = self._warehouse_payload()
+            payload[field] = ''
+            response = self.client.post(self.url, payload)
+            self.assertEqual(response.status_code, 400, msg=f'expected 400 for empty {field}')
+            details = response.data.get('error', {}).get('details', {})
+            self.assertIn(field, details, msg=f'expected field error for {field}: {details}')
+
+    def test_warehouse_create_rejects_over_length_fields(self):
+        cases = (
+            ('material_type', 'x' * 256),
+            ('consumption_location', 'y' * 256),
+            ('supplier', 'z' * 256),
+            ('unit', 'u' * 65),
+        )
+        for field, value in cases:
+            payload = self._warehouse_payload(**{field: value})
+            response = self.client.post(self.url, payload)
+            self.assertEqual(
+                response.status_code,
+                400,
+                msg=f'expected 400 for over-length {field}',
+            )
+            details = response.data.get('error', {}).get('details', {})
+            self.assertIn(
+                field,
+                details,
+                msg=f'expected field error for over-length {field}: {details}',
+            )
+
+    def test_warehouse_quantity_validation_message_localizes_to_fa(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(quantity_in='0', quantity_out='0'),
+            HTTP_ACCEPT_LANGUAGE='fa',
+        )
+        self.assertEqual(response.status_code, 400)
+        details = response.data.get('error', {}).get('details', {})
+        quantity_in_error = details.get('quantity_in', '')
+        if isinstance(quantity_in_error, list):
+            quantity_in_error = quantity_in_error[0]
+        self.assertIn('ورودی', str(quantity_in_error))
+
+    def test_warehouse_create_clears_generic_fields(self):
+        response = self.client.post(
+            self.url,
+            self._warehouse_payload(
+                location='should clear',
+                activity_description='should clear',
+                contractor='should clear',
+            ),
+        )
+        self.assertEqual(response.status_code, 201)
+        record = DepartmentActivityRecord.objects.get(id=response.data['id'])
+        self.assertEqual(record.location, '')
+        self.assertEqual(record.activity_description, '')
+        self.assertEqual(record.contractor, '')
+        self.assertEqual(response.data['location'], '')
+        self.assertEqual(response.data['activity_description'], '')
+        self.assertEqual(response.data['contractor'], '')
+
+    def test_non_warehouse_create_still_requires_generic_fields(self):
+        response = self.client.post(
+            self.url,
+            {
+                'department': Department.BUILDINGS,
+                'date': '2026-10-01',
+                'location': '',
+                'activity_description': 'Pouring',
+                'contractor': 'Acme',
+                'unit': 'm3',
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        details = response.data.get('error', {}).get('details', {})
+        self.assertIn('location', details)
+
+    def test_non_warehouse_create_clears_warehouse_fields(self):
+        response = self.client.post(
+            self.url,
+            {
+                'department': Department.BUILDINGS,
+                'date': '2026-10-01',
+                'location': 'Site A',
+                'activity_description': 'Pouring',
+                'contractor': 'Acme',
+                'unit': 'm3',
+                'material_type': 'should clear',
+                'quantity_in': '9',
+                'quantity_out': '8',
+                'consumption_location': 'should clear',
+                'supplier': 'should clear',
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        record = DepartmentActivityRecord.objects.get(id=response.data['id'])
+        self.assertEqual(record.material_type, '')
+        self.assertEqual(record.quantity_in, Decimal('0'))
+        self.assertEqual(record.quantity_out, Decimal('0'))
+        self.assertEqual(record.consumption_location, '')
+        self.assertEqual(record.supplier, '')
+
+    def test_security_without_unit_still_works(self):
+        response = self.client.post(
+            self.url,
+            {
+                'department': Department.SECURITY,
+                'date': '2026-10-01',
+                'location': 'Gate',
+                'activity_description': 'Patrol',
+                'contractor': 'SecCo',
+                'description': 'ok',
+            },
+        )
+        self.assertEqual(response.status_code, 201)
+        record = DepartmentActivityRecord.objects.get(id=response.data['id'])
+        self.assertEqual(record.unit, '')
+        self.assertEqual(record.material_type, '')
+
+
+class WarehouseListFilterAPITests(TestCase):
+    """T020–T021: warehouse list filters, search, ordering, response fields."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='warehouse_list_user', password='password', mobile='09120000002'
+        )
+        self.user.is_superuser = True
+        self.user.save()
+        self.project = Project.objects.create(
+            project_code='WH2',
+            project_name='Warehouse List',
+            employer='Emp',
+            start_date=date.today(),
+        )
+        from master_data.models import ProjectMemberRole
+
+        self.role, _ = Role.objects.get_or_create(role_name='project_manager')
+        self.member = ProjectMember.objects.create(project=self.project, user=self.user)
+        ProjectMemberRole.objects.create(member=self.member, role=self.role)
+        self.client.force_authenticate(user=self.user)
+
+        self.r1 = DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 1),
+            material_type='Cement',
+            quantity_in=Decimal('10'),
+            quantity_out=Decimal('2'),
+            unit='ton',
+            consumption_location='Block A',
+            supplier='Supplier X',
+            description='note1',
+            location='',
+            activity_description='',
+            contractor='',
+        )
+        self.r2 = DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 2),
+            material_type='Steel',
+            quantity_in=Decimal('0'),
+            quantity_out=Decimal('5'),
+            unit='kg',
+            consumption_location='Block B',
+            supplier='Supplier Y',
+            description='note2',
+            location='',
+            activity_description='',
+            contractor='',
+        )
+
+    def test_queryset_warehouse_text_filters(self):
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'material_type': 'Cement'},
+        )
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first(), self.r1)
+
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'consumption_location': 'Block B'},
+        )
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first(), self.r2)
+
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'supplier': 'Supplier X'},
+        )
+        self.assertEqual(qs.count(), 1)
+
+    def test_queryset_warehouse_search(self):
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'search': 'Steel'},
+        )
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first(), self.r2)
+
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'search': 'Supplier Y'},
+        )
+        self.assertEqual(qs.count(), 1)
+
+    def test_queryset_warehouse_ordering(self):
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'ordering': 'material_type'},
+        )
+        self.assertEqual(list(qs), [self.r1, self.r2])
+
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'ordering': '-quantity_out'},
+        )
+        self.assertEqual(list(qs), [self.r2, self.r1])
+
+        qs = get_department_activity_queryset(
+            self.project.id,
+            {'department': Department.WAREHOUSE, 'ordering': 'quantity_in'},
+        )
+        self.assertEqual(list(qs), [self.r2, self.r1])
+
+    def test_list_api_includes_warehouse_fields(self):
+        url = reverse(
+            'project-department-activity-record-list',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url, {'department': Department.WAREHOUSE})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 2)
+        row = next(r for r in response.data['results'] if r['id'] == self.r1.id)
+        self.assertEqual(row['material_type'], 'Cement')
+        self.assertEqual(Decimal(str(row['quantity_in'])), Decimal('10'))
+        self.assertEqual(Decimal(str(row['quantity_out'])), Decimal('2'))
+        self.assertEqual(row['consumption_location'], 'Block A')
+        self.assertEqual(row['supplier'], 'Supplier X')
+
+
+class WarehouseIOTests(TestCase):
+    """T034–T036: warehouse Excel export/import and PDF smoke."""
+
+    def setUp(self):
+        self.project = Project.objects.create(
+            project_code='WH3',
+            project_name='Warehouse IO',
+            employer='Emp',
+            start_date=date.today(),
+        )
+        self.record = DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 1),
+            material_type='Cement',
+            quantity_in=Decimal('10.000'),
+            quantity_out=Decimal('2.500'),
+            unit='ton',
+            consumption_location='Block A',
+            supplier='Supplier X',
+            description='Note',
+            location='',
+            activity_description='',
+            contractor='',
+        )
+
+    def _create_xlsx_bytes(self, rows):
+        wb = Workbook()
+        ws = wb.active
+        for row in rows:
+            ws.append(row)
+        buf = io.BytesIO()
+        wb.save(buf)
+        return buf.getvalue()
+
+    def test_export_headers_for_warehouse(self):
+        self.assertEqual(
+            export_headers_for_department(Department.WAREHOUSE),
+            [
+                'date',
+                'material_type',
+                'quantity_in',
+                'unit',
+                'quantity_out',
+                'consumption_location',
+                'supplier',
+                'description',
+            ],
+        )
+
+    def test_export_warehouse_xlsx_headers_and_rows(self):
+        xlsx_bytes = export_activities_to_xlsx(
+            [self.record], department=Department.WAREHOUSE
+        )
+        wb = load_workbook(io.BytesIO(xlsx_bytes))
+        rows = list(wb.active.iter_rows(values_only=True))
+        self.assertEqual(
+            rows[0],
+            (
+                'date',
+                'material_type',
+                'quantity_in',
+                'unit',
+                'quantity_out',
+                'consumption_location',
+                'supplier',
+                'description',
+            ),
+        )
+        self.assertEqual(rows[1][0], '2026-10-01')
+        self.assertEqual(rows[1][1], 'Cement')
+        self.assertEqual(str(rows[1][2]), '10.000')
+        self.assertEqual(rows[1][3], 'ton')
+        self.assertEqual(str(rows[1][4]), '2.500')
+        self.assertEqual(rows[1][5], 'Block A')
+        self.assertEqual(rows[1][6], 'Supplier X')
+        self.assertEqual(rows[1][7], 'Note')
+
+    def test_import_warehouse_happy_path(self):
+        rows = [
+            (
+                'date',
+                'material_type',
+                'quantity_in',
+                'unit',
+                'quantity_out',
+                'consumption_location',
+                'supplier',
+                'description',
+            ),
+            ('2026-10-05', 'Sand', '3', 'm3', '1', 'Yard', 'Supplier Z', 'ok'),
+        ]
+        created, errors = import_activities_from_xlsx(
+            self.project, Department.WAREHOUSE, self._create_xlsx_bytes(rows)
+        )
+        self.assertEqual(created, 1)
+        self.assertEqual(len(errors), 0)
+        record = DepartmentActivityRecord.objects.get(
+            project=self.project, date=date(2026, 10, 5)
+        )
+        self.assertEqual(record.material_type, 'Sand')
+        self.assertEqual(record.quantity_in, Decimal('3'))
+        self.assertEqual(record.quantity_out, Decimal('1'))
+        self.assertEqual(record.consumption_location, 'Yard')
+        self.assertEqual(record.supplier, 'Supplier Z')
+        self.assertEqual(record.location, '')
+        self.assertEqual(record.activity_description, '')
+        self.assertEqual(record.contractor, '')
+
+    def test_import_warehouse_missing_columns(self):
+        rows = [
+            ('date', 'material_type', 'unit'),
+            ('2026-10-05', 'Sand', 'm3'),
+        ]
+        created, errors = import_activities_from_xlsx(
+            self.project, Department.WAREHOUSE, self._create_xlsx_bytes(rows)
+        )
+        self.assertEqual(created, 0)
+        self.assertEqual(len(errors), 1)
+        self.assertIn('_sheet', errors[0]['errors'])
+
+    def test_import_warehouse_both_quantities_zero(self):
+        rows = [
+            (
+                'date',
+                'material_type',
+                'quantity_in',
+                'unit',
+                'quantity_out',
+                'consumption_location',
+                'supplier',
+                'description',
+            ),
+            ('2026-10-06', 'Sand', '0', 'm3', '0', 'Yard', 'Supplier Z', ''),
+        ]
+        created, errors = import_activities_from_xlsx(
+            self.project, Department.WAREHOUSE, self._create_xlsx_bytes(rows)
+        )
+        self.assertEqual(created, 0)
+        self.assertEqual(len(errors), 1)
+        err = errors[0]['errors']
+        self.assertTrue(
+            'quantity_in' in err or 'quantity_out' in err or 'non_field_errors' in err
+        )
+
+    def test_warehouse_pdf_uses_warehouse_columns(self):
+        pdf_bytes = generate_activity_report_pdf(
+            business=self.project,
+            department=Department.WAREHOUSE,
+            department_label=department_display_label(Department.WAREHOUSE),
+            period_label='Daily report',
+            date_from=date(2026, 10, 1),
+            date_to=date(2026, 10, 1),
+            records=[self.record],
+        )
+        self.assertTrue(pdf_bytes.startswith(b'%PDF-'))
+        self.assertIn(b'Material type', pdf_bytes)
+        self.assertIn(b'Consumption location', pdf_bytes)
+        self.assertIn(b'Supplier', pdf_bytes)
+        self.assertIn(b'Cement', pdf_bytes)
+        self.assertNotIn(b'Contractor', pdf_bytes)
+        self.assertNotIn(b'Activity', pdf_bytes)

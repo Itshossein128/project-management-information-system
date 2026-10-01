@@ -227,6 +227,10 @@ function buildDepartmentActivityRecordsSearch(
     sp.set("activity_description", params.activity_description);
   if (params.contractor) sp.set("contractor", params.contractor);
   if (params.unit) sp.set("unit", params.unit);
+  if (params.material_type) sp.set("material_type", params.material_type);
+  if (params.consumption_location)
+    sp.set("consumption_location", params.consumption_location);
+  if (params.supplier) sp.set("supplier", params.supplier);
   return sp.toString();
 }
 

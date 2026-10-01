@@ -193,14 +193,22 @@
         "activityDescription": "Activity",
         "contractor": "Contractor",
         "unit": "Unit",
-        "description": "Description"
+        "description": "Description",
+        "materialType": "Material type",
+        "quantityIn": "Inbound",
+        "quantityOut": "Outbound",
+        "consumptionLocation": "Consumption location",
+        "supplier": "Supplier"
       },
       "filters": {
         "dateRange": "Date range",
         "location": "Location",
         "activityDescription": "Activity",
         "contractor": "Contractor",
-        "unit": "Unit"
+        "unit": "Unit",
+        "materialType": "Material type",
+        "consumptionLocation": "Consumption location",
+        "supplier": "Supplier"
       },
       "fields": {
         "date": "Date",
@@ -211,8 +219,14 @@
         "unitPlaceholder": "Select unit",
         "unitCustomPlaceholder": "Custom unit",
         "unitAdd": "Add unit",
-        "description": "Notes"
+        "description": "Notes",
+        "materialType": "Material type",
+        "quantityIn": "Inbound",
+        "quantityOut": "Outbound",
+        "consumptionLocation": "Consumption location",
+        "supplier": "Supplier"
       },
+      "validationQuantityRequired": "Enter at least one inbound or outbound quantity greater than zero.",
       "importExcel": "Import Excel",
       "exportExcel": "Export Excel",
       "importing": "Importing…",

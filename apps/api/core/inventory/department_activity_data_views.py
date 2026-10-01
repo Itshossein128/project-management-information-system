@@ -62,7 +62,9 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
         summary='Export department activity records to Excel',
         description=(
             'Download activity rows as .xlsx. Requires `department`. '
-            'Supports the same optional filters as the list endpoint.'
+            'Supports the same optional filters as the list endpoint. '
+            'Warehouse exports headers: date, material_type, quantity_in, unit, '
+            'quantity_out, consumption_location, supplier, description.'
         ),
         parameters=[
             OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True),
@@ -72,6 +74,9 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             OpenApiParameter(name='activity_description', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='contractor', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='unit', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='material_type', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='consumption_location', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='supplier', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='search', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='ordering', type=OpenApiTypes.STR, required=False),
         ],
@@ -102,7 +107,11 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
 
     @extend_schema(
         summary='Import department activity records from Excel',
-        description='Upload .xlsx with activity columns. Requires `department` query parameter.',
+        description=(
+            'Upload .xlsx with activity columns. Requires `department` query parameter. '
+            'Warehouse required columns: date, material_type, quantity_in, unit, quantity_out, '
+            'consumption_location, supplier (description optional). Persian/English aliases accepted.'
+        ),
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Project activity records'],
     )
@@ -179,7 +188,10 @@ class DepartmentActivityDailyReportView(_DepartmentActivityReportView):
 
     @extend_schema(
         summary='Download daily department activity PDF',
-        description='PDF for the previous calendar day for the given department.',
+        description=(
+            'PDF for the previous calendar day for the given department. '
+            'Warehouse columns: Date | Material type | In | Unit | Out | Consumption location | Supplier | Description.'
+        ),
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Project activity records'],
     )
@@ -193,7 +205,10 @@ class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
 
     @extend_schema(
         summary='Download weekly department activity PDF',
-        description='PDF for the rolling last 7 days (including today) for the given department.',
+        description=(
+            'PDF for the rolling last 7 days (including today) for the given department. '
+            'Warehouse columns: Date | Material type | In | Unit | Out | Consumption location | Supplier | Description.'
+        ),
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Project activity records'],
     )
