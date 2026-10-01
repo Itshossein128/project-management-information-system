@@ -22,13 +22,31 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
                 critical_ids.add(ba.activity_id)
 
     activities = Activity.objects.filter(project_id=project_id, is_deleted=False).select_related('wbs', 'responsible')
+
+    # ⚡ Bolt: Bulk fetch dependencies for all project activities in a single query to eliminate N+1 calls
+    deps_map: dict[str, list[str]] = {}
+    for rel in ActivityRelation.objects.filter(
+        successor__project_id=project_id,
+        successor__is_deleted=False,
+        is_deleted=False,
+    ).select_related('predecessor'):
+        if rel.predecessor_id and rel.predecessor.activity_code:
+            deps_map.setdefault(rel.successor_id, []).append(rel.predecessor.activity_code)
+
+    # ⚡ Bolt: Bulk fetch progress records ordered by report_date ascending so that the latest record overwrites earlier ones in progress_map
+    progress_map = {}
+    for p in ActivityProgress.objects.filter(
+        activity__project_id=project_id,
+        activity__is_deleted=False,
+    ).order_by('report_date'):
+        progress_map[p.activity_id] = p
+
     tasks = []
     for act in activities:
         ba = baseline_map.get(act.id)
-        deps = ActivityRelation.objects.filter(successor=act, is_deleted=False).select_related('predecessor')
-        dep_codes = [d.predecessor.activity_code for d in deps if d.predecessor_id]
+        dep_codes = deps_map.get(act.id, [])
 
-        prog = ActivityProgress.objects.filter(activity=act).order_by('-report_date').first()
+        prog = progress_map.get(act.id)
         progress_pct = int(float(prog.actual_progress or 0) * 100) if prog else 0
 
         tasks.append({
