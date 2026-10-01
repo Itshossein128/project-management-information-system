@@ -119,13 +119,12 @@ def precalculate_risk_flags(subs: list[Subcontractor]) -> dict:
 
     latest_progresses_by_activity = {}
     if activity_ids:
-        latest_progresses = (
-            ActivityProgress.objects.filter(activity_id__in=activity_ids)
-            .order_by('activity_id', '-report_date')
-            .distinct('activity_id')
-        )
-        for prog in latest_progresses:
-            latest_progresses_by_activity[prog.activity_id] = prog
+        progresses = ActivityProgress.objects.filter(
+            activity_id__in=activity_ids
+        ).order_by('activity_id', '-report_date')
+        for prog in progresses:
+            if prog.activity_id not in latest_progresses_by_activity:
+                latest_progresses_by_activity[prog.activity_id] = prog
 
     risk_map = {}
     for sub in subs:
@@ -141,14 +140,17 @@ def compute_risk_flag(sub: Subcontractor) -> tuple[bool, list[str]]:
 
 
 def score_trend(sub: Subcontractor) -> str:
-    scores = list(
-        sub.scores.filter(is_deleted=False, overall_score__isnull=False)
-        .order_by('-score_date')[:3]
-    )
-    if len(scores) < 2:
+    # ⚡ Bolt: Iterate over prefetched collection in Python to avoid N+1 queries from .filter()
+    valid_scores = [
+        s for s in sub.scores.all()
+        if not s.is_deleted and s.overall_score is not None
+    ]
+    valid_scores.sort(key=lambda x: x.score_date, reverse=True)
+    recent = valid_scores[:3]
+    if len(recent) < 2:
         return 'stable'
-    newest = float(scores[0].overall_score)
-    oldest = float(scores[-1].overall_score)
+    newest = float(recent[0].overall_score)
+    oldest = float(recent[-1].overall_score)
     if newest > oldest + 0.2:
         return 'improving'
     if newest < oldest - 0.2:
@@ -157,9 +159,11 @@ def score_trend(sub: Subcontractor) -> str:
 
 
 def average_overall_score(sub: Subcontractor) -> float | None:
-    from django.db.models import Avg
-
-    result = sub.scores.filter(is_deleted=False, overall_score__isnull=False).aggregate(
-        avg=Avg('overall_score')
-    )
-    return float(result['avg']) if result['avg'] is not None else None
+    # ⚡ Bolt: Iterate over prefetched collection in Python to avoid N+1 queries from .aggregate()
+    scores = [
+        float(s.overall_score) for s in sub.scores.all()
+        if not s.is_deleted and s.overall_score is not None
+    ]
+    if not scores:
+        return None
+    return sum(scores) / len(scores)
