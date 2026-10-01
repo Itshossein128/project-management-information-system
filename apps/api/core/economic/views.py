@@ -127,10 +127,12 @@ class SensitivityView(APIView):
 
 
 class InflationMappingListCreateView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        return super().get_permissions()
 
     @property
     def required_permission(self):
