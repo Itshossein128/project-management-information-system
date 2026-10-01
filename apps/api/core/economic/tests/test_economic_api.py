@@ -131,3 +131,19 @@ class TestSnapshotRefreshAPI:
         resp = auth_client.get(url)
         assert resp.status_code == status.HTTP_200_OK
         assert float(resp.data['actual_cost']) == pytest.approx(1000.0)
+
+
+@pytest.mark.django_db
+class TestInflationIndexUpsertAPI:
+    def test_non_staff_forbidden(self, auth_client):
+        url = '/api/v1/inflation-indices/CPI/2024-01-01/'
+        resp = auth_client.put(url, {'index_value': 120}, format='json')
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_staff_allowed(self, auth_client, user):
+        user.is_staff = True
+        user.save()
+        url = '/api/v1/inflation-indices/CPI/2024-01-01/'
+        resp = auth_client.put(url, {'index_value': 120, 'source': 'Test'}, format='json')
+        assert resp.status_code == status.HTTP_200_OK
+        assert resp.data['index_value'] == 120.0

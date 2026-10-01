@@ -270,6 +270,15 @@ export function DataTable<TData>({
                   <th
                     key={header.id}
                     id={`text-columnHeader-${name}-${header.id}`}
+                    aria-sort={
+                      header.column.getIsSorted() === "asc"
+                        ? "ascending"
+                        : header.column.getIsSorted() === "desc"
+                          ? "descending"
+                          : header.column.getCanSort()
+                            ? "none"
+                            : undefined
+                    }
                     className="px-3 py-2 text-start text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-4 sm:py-3"
                   >
                     {header.isPlaceholder ? null : header.column.getCanSort() ? (

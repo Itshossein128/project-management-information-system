@@ -156,18 +156,30 @@ def auto_populate_ipc(ipc_id):
     ipc = IPC.objects.get(pk=ipc_id)
     contract = ipc.contract
 
-    for item in contract.items.filter(is_deleted=False):
-        previous_ipcs = IPC.objects.filter(
+    # ⚡ Bolt: Bulk fetch previous approved/paid IPCs and pre-aggregate previous quantities by contract item ID to prevent N+1 queries.
+    previous_ipc_ids = list(
+        IPC.objects.filter(
             contract=contract,
             ipc_number__lt=ipc.ipc_number,
             status__in=[IPCStatus.APPROVED, IPCStatus.PAID],
             is_deleted=False,
+        ).values_list('id', flat=True)
+    )
+
+    prev_qty_map = {}
+    if previous_ipc_ids:
+        prev_totals = (
+            IPCItem.objects.filter(
+                ipc_id__in=previous_ipc_ids,
+                is_deleted=False,
+            )
+            .values('contract_item_id')
+            .annotate(total=Sum('qty_current'))
         )
-        qty_previous = IPCItem.objects.filter(
-            ipc__in=previous_ipcs,
-            contract_item=item,
-            is_deleted=False,
-        ).aggregate(total=Sum('qty_current'))['total'] or Decimal('0')
+        prev_qty_map = {row['contract_item_id']: row['total'] for row in prev_totals}
+
+    for item in contract.items.filter(is_deleted=False).select_related('unit', 'activity'):
+        qty_previous = prev_qty_map.get(item.id, Decimal('0')) or Decimal('0')
 
         qty_current = Decimal('0')
         if item.activity_id and ipc.period_start and ipc.period_end:

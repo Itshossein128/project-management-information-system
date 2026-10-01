@@ -4,7 +4,7 @@ from celery.result import AsyncResult
 from django.db import models
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -127,10 +127,12 @@ class SensitivityView(APIView):
 
 
 class InflationMappingListCreateView(APIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        return super().get_permissions()
 
     @property
     def required_permission(self):
@@ -223,12 +225,9 @@ class LatestSimulationView(APIView):
 
 
 class InflationIndexUpsertView(APIView):
-    permission_classes = [IsAuthenticated]
-    required_permission = 'edit_project'
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def put(self, request, name=None, index_date=None):
-        if not request.user.is_staff and not request.user.is_superuser:
-            return Response({'detail': 'Admin only'}, status=403)
         parsed_date = parse_jalali_or_gregorian(index_date)
         obj, _ = InflationIndex.objects.update_or_create(
             index_name=name,

@@ -26,6 +26,16 @@ _ALLOWED_ORDERING_FIELDS = {
     '-contractor',
     'unit',
     '-unit',
+    'material_type',
+    '-material_type',
+    'quantity_in',
+    '-quantity_in',
+    'quantity_out',
+    '-quantity_out',
+    'consumption_location',
+    '-consumption_location',
+    'supplier',
+    '-supplier',
 }
 
 
@@ -55,6 +65,9 @@ def get_department_activity_queryset(
     activity_description = query_params.get('activity_description')
     contractor = query_params.get('contractor')
     unit = query_params.get('unit')
+    material_type = query_params.get('material_type')
+    consumption_location = query_params.get('consumption_location')
+    supplier = query_params.get('supplier')
 
     if location:
         qs = qs.filter(location__icontains=location)
@@ -64,6 +77,12 @@ def get_department_activity_queryset(
         qs = qs.filter(contractor__icontains=contractor)
     if unit:
         qs = qs.filter(unit__icontains=unit)
+    if material_type:
+        qs = qs.filter(material_type__icontains=material_type)
+    if consumption_location:
+        qs = qs.filter(consumption_location__icontains=consumption_location)
+    if supplier:
+        qs = qs.filter(supplier__icontains=supplier)
 
     search = query_params.get('search')
     if search:
@@ -72,6 +91,10 @@ def get_department_activity_queryset(
             | Q(activity_description__icontains=search)
             | Q(contractor__icontains=search)
             | Q(unit__icontains=search)
+            | Q(material_type__icontains=search)
+            | Q(consumption_location__icontains=search)
+            | Q(supplier__icontains=search)
+            | Q(description__icontains=search)
         )
 
     ordering = query_params.get('ordering')

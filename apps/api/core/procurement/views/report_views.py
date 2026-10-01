@@ -1,9 +1,10 @@
 """Report views: liquidity dashboard, material deviation, audit trail, procurement status."""
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from projects.mixins import PROJECT_MEMBER_PERMISSIONS
+from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Project
 
 
@@ -12,7 +13,8 @@ class LiquidityDashboardView(APIView):
     Requisitions on hold due to missing budget & block liquidity status.
     GET /api/v1/projects/{pid}/reports/liquidity/
     """
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None):
         from django.db.models import Sum
@@ -83,7 +85,8 @@ class MaterialDeviationReportView(APIView):
     Requested vs purchased vs consumed per material per block with deviation calculation.
     GET /api/v1/projects/{pid}/reports/material-deviation/
     """
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None):
         from django.db.models import Sum
@@ -176,7 +179,8 @@ class AuditTrailReportView(APIView):
     Full approval audit trail for all requisitions in a project.
     GET /api/v1/projects/{pid}/reports/audit-trail/
     """
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None):
         from procurement.models import ApprovalAction, ApprovalLog
@@ -237,7 +241,8 @@ class ProcurementStatusReportView(APIView):
     Items assigned to each procurement officer and purchase progress.
     GET /api/v1/projects/{pid}/reports/procurement-status/
     """
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None):
         from django.db.models import Count, Sum

@@ -193,14 +193,22 @@
         "activityDescription": "شرح فعالیت",
         "contractor": "پیمانکار",
         "unit": "واحد",
-        "description": "توضیحات"
+        "description": "توضیحات",
+        "materialType": "نوع مصالح",
+        "quantityIn": "ورودی",
+        "quantityOut": "خروجی",
+        "consumptionLocation": "محل مصرف",
+        "supplier": "تامین‌کننده"
       },
       "filters": {
         "dateRange": "بازه تاریخ",
         "location": "موقعیت",
         "activityDescription": "شرح فعالیت",
         "contractor": "پیمانکار",
-        "unit": "واحد"
+        "unit": "واحد",
+        "materialType": "نوع مصالح",
+        "consumptionLocation": "محل مصرف",
+        "supplier": "تامین‌کننده"
       },
       "fields": {
         "date": "تاریخ",
@@ -211,8 +219,14 @@
         "unitPlaceholder": "انتخاب واحد",
         "unitCustomPlaceholder": "واحد سفارشی",
         "unitAdd": "افزودن واحد",
-        "description": "توضیحات"
+        "description": "توضیحات",
+        "materialType": "نوع مصالح",
+        "quantityIn": "ورودی",
+        "quantityOut": "خروجی",
+        "consumptionLocation": "محل مصرف",
+        "supplier": "تامین‌کننده"
       },
+      "validationQuantityRequired": "حداقل یکی از مقادیر ورودی یا خروجی باید بزرگ‌تر از صفر باشد.",
       "importExcel": "ورود از اکسل",
       "exportExcel": "خروجی اکسل",
       "importing": "در حال ورود…",

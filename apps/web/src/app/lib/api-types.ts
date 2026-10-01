@@ -61,6 +61,11 @@ export function departmentUsesUnit(department: DepartmentSlug): boolean {
   return department !== "security";
 }
 
+/** Warehouse activity logs use material-movement fields instead of the generic set. */
+export function isWarehouseDepartment(department: DepartmentSlug): boolean {
+  return department === "warehouse";
+}
+
 export interface DepartmentActivityRecord {
   id: Id;
   project_id: Id;
@@ -73,6 +78,11 @@ export interface DepartmentActivityRecord {
   /** Empty for security department. */
   unit: string;
   description: string;
+  material_type: string;
+  quantity_in: string | number;
+  quantity_out: string | number;
+  consumption_location: string;
+  supplier: string;
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +99,9 @@ export interface DepartmentActivityRecordListParams {
   activity_description?: string;
   contractor?: string;
   unit?: string;
+  material_type?: string;
+  consumption_location?: string;
+  supplier?: string;
 }
 
 export type DepartmentActivityRecordPayload = Pick<
@@ -100,5 +113,10 @@ export type DepartmentActivityRecordPayload = Pick<
   | "contractor"
   | "unit"
   | "description"
+  | "material_type"
+  | "quantity_in"
+  | "quantity_out"
+  | "consumption_location"
+  | "supplier"
 >;
 
