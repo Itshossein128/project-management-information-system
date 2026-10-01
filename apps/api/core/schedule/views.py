@@ -99,7 +99,8 @@ class BaseImportStartView(APIView):
         return Response({'task_id': str(job.id), 'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
 
 class BaseImportStatusView(APIView):
-    permission_classes = [IsAuthenticated, IsProjectMember]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_wbs'
     job_model = None
 
     def get(self, request, project_pk=None, task_id=None):
