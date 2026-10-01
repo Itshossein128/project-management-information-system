@@ -40,3 +40,8 @@
 ## 2024-05-24 - Missing Authentication in ViewSets\n\nFound that `ItemViewSet` in `apps/api/core/inventory/views.py` was missing `permission_classes`, potentially exposing all inventory CRUD and import/export endpoints. Added `permission_classes = [IsAuthenticated]` to secure it.
 - Discovered missing HasProjectPermission/permission_classes on multiple project-scoped APIViews across multiple apps (procurement, economic, etc).
 Added missing authentication and permission checks to RequisitionItemHoldView to prevent unauthorized users from putting requisition items on hold.
+
+## 2026-07-26 - Add HasProjectPermission to Procurement Report Views
+**Vulnerability:** Procurement report views in `apps/api/core/procurement/views/report_views.py` used `PROJECT_MEMBER_PERMISSIONS` (`[IsAuthenticated, IsProjectMember]`), which allowed any active project member to access sensitive procurement metrics, liquidity dashboards, material deviation, and audit logs without possessing the `view_procurement` permission.
+**Learning:** Checking project membership (`IsProjectMember`) verifies that a user belongs to a project, but does not enforce role-based access control (RBAC). Project-scoped endpoints must explicitly enforce `HasProjectPermission` along with a defined `required_permission` (e.g. `'view_procurement'`) to prevent horizontal privilege escalation.
+**Prevention:** Always add `HasProjectPermission` to `permission_classes` on project-scoped `APIView` classes and set `required_permission = '<codename>'`.
