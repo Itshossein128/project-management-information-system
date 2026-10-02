@@ -141,6 +141,16 @@ class BlockStockView(APIView):
 
 class InternalTransferViewSet(viewsets.ModelViewSet):
     """CRUD for inter-block material transfers."""
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    view_permission = 'view_procurement'
+    edit_permission = 'edit_procurement'
+
+    @property
+    def required_permission(self):
+        if self.action in ('list', 'retrieve'):
+            return self.view_permission
+        return self.edit_permission
+
     serializer_class = InternalTransferSerializer
     http_method_names = ['get', 'post', 'head', 'options']  # read + create only
 

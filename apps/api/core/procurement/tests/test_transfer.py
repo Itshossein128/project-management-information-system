@@ -229,3 +229,25 @@ class TestTransferService:
         assert target_alloc.allocated_qty == Decimal('150.0000')
         assert target_alloc.received_qty == Decimal('150.0000')
 
+
+@pytest.mark.django_db
+class TestTransferViewSetRBAC:
+    def test_transfer_list_unauthenticated_returns_401(self):
+        from rest_framework.test import APIClient
+        client = APIClient()
+        project = Project.objects.create(project_name="P1", project_code="P1")
+        res = client.get(f"/api/v1/projects/{project.id}/transfers/")
+        if res.status_code == 404:
+            res = client.get(f"/api/projects/{project.id}/transfers/")
+        assert res.status_code == 401
+
+    def test_transfer_list_non_member_returns_403(self):
+        from rest_framework.test import APIClient
+        client = APIClient()
+        user = User.objects.create_user(username="non_member", password="pass")
+        project = Project.objects.create(project_name="P2", project_code="P2")
+        client.force_authenticate(user=user)
+        res = client.get(f"/api/v1/projects/{project.id}/transfers/")
+        if res.status_code == 404:
+            res = client.get(f"/api/projects/{project.id}/transfers/")
+        assert res.status_code == 403
