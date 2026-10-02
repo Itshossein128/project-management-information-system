@@ -302,16 +302,21 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
         summary = self._get_last_action_summary(obj)
         return summary['action_display'] if summary else None
 
-    def get_next_approver_role(self, obj):
+    def _get_next_approver(self, obj):
+        # ⚡ Bolt: Cache next approver result on object to avoid redundant workflow computations per row
+        if hasattr(obj, '_cached_next_approver'):
+            return obj._cached_next_approver
         from procurement.services.workflow_timeline_service import get_next_approver
 
-        approver = get_next_approver(obj)
+        obj._cached_next_approver = get_next_approver(obj)
+        return obj._cached_next_approver
+
+    def get_next_approver_role(self, obj):
+        approver = self._get_next_approver(obj)
         return approver['role'] if approver else None
 
     def get_next_approver_role_label(self, obj):
-        from procurement.services.workflow_timeline_service import get_next_approver
-
-        approver = get_next_approver(obj)
+        approver = self._get_next_approver(obj)
         return approver['role_label'] if approver else None
 
     def get_workflow_progress(self, obj):
