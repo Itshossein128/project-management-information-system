@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role, RolePermission
 from procurement.models import Block, RequisitionHeader, RequisitionScope, RequisitionStatus
 from procurement.permissions import ProcurementStepPermission, has_procurement_step_role
 from procurement.services.approval_engine import get_required_role
@@ -273,7 +273,14 @@ class TestWorkshopDraftPermissions:
         res = client.get(url)
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-        # Authenticated project member returns 200
+        # Authenticated project member without view_procurement permission returns 403
         client.force_authenticate(user=data['user_supervisor'])
         res = client.get(url)
-        assert res.status_code == status.HTTP_200_OK, res.data
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant view_procurement permission via member role/override -> returns 200
+        role = Role.objects.get(role_name='workshop_supervisor')
+        RolePermission.objects.get_or_create(role=role, permission_codename='view_procurement')
+
+        res_granted = client.get(url)
+        assert res_granted.status_code == status.HTTP_200_OK, res_granted.data
