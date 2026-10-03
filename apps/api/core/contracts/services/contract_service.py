@@ -12,6 +12,14 @@ FK_ITEM_FIELDS = {
 }
 
 
+def compute_contract_defaults(validated_data: dict) -> dict:
+    """Compute default derived fields for a new contract before saving."""
+    kwargs = {}
+    if validated_data.get('adjusted_amount') is None:
+        kwargs['adjusted_amount'] = validated_data.get('original_amount')
+    return kwargs
+
+
 def _resolve_fk_fields(payload: dict) -> dict:
     """
     Convert UUID strings in FK fields to model instances for ORM create/update.
