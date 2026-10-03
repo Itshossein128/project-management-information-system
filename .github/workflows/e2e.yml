@@ -54,3 +54,5 @@ jobs:
           CI: "true"
           CELERY_TASK_ALWAYS_EAGER: "true"
           AUDIT_LOG_ASYNC: "false"
+          DATABASE_URL: sqlite:///:memory:
+          SECRET_KEY: ci-test-secret
