@@ -65,18 +65,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      minio:
-        image: quay.io/minio/minio:latest
-        env:
-          MINIO_ROOT_USER: ipcas
-          MINIO_ROOT_PASSWORD: ipcas-secret
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       DATABASE_URL: postgres://ipcas:ipcas@localhost:5432/ipcas_test
       SECRET_KEY: ci-test-secret
