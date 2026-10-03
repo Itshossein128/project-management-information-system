@@ -65,18 +65,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: ipcas
-          MINIO_ROOT_PASSWORD: ipcas-secret
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       DATABASE_URL: postgres://ipcas:ipcas@localhost:5432/ipcas_test
       SECRET_KEY: ci-test-secret
@@ -96,7 +84,9 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: apps/api/requirements.txt
-      - run: pip install -r apps/api/requirements.txt -r apps/api/requirements-dev.txt
+      - run: |
+          pip install "numpy<2"
+          pip install --use-deprecated=legacy-resolver -r apps/api/requirements.txt -r apps/api/requirements-dev.txt
       - run: python manage.py check
         working-directory: apps/api/core
       - run: python manage.py migrate --noinput

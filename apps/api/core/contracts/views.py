@@ -28,7 +28,7 @@ from contracts.serializers import (
     IPCItemSerializer,
     IPCListSerializer,
 )
-from contracts.services.contract_service import bulk_upsert_contract_items, approve_change_order, reject_change_order, create_change_order
+from contracts.services.contract_service import bulk_upsert_contract_items, approve_change_order, reject_change_order, create_change_order, compute_contract_defaults
 from contracts.services.ipc_service import (
     create_ipc,
     update_ipc,
@@ -98,18 +98,15 @@ class ContractViewSet(ContractScopedViewSet):
         instance = self.get_object()
         return Response(ContractDetailSerializer(instance).data)
 
+    def perform_create(self, serializer):
+        kwargs = compute_contract_defaults(serializer.validated_data)
+        super().perform_create(serializer, **kwargs)
+
     def create(self, request, *args, **kwargs):
         serializer = ContractWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        contract = serializer.save(
-            project_id=self.get_project_id(),
-            created_by=request.user,
-            updated_by=request.user,
-        )
-        if contract.adjusted_amount is None:
-            contract.adjusted_amount = contract.original_amount
-            contract.save(update_fields=['adjusted_amount'])
-        return Response(ContractDetailSerializer(contract).data, status=201)
+        self.perform_create(serializer)
+        return Response(ContractDetailSerializer(serializer.instance).data, status=201)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()

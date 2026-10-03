@@ -19,6 +19,32 @@ jobs:
   playwright:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ipcas
+          POSTGRES_PASSWORD: ipcas
+          POSTGRES_DB: ipcas_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ipcas -d ipcas_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: ipcas
+          RABBITMQ_DEFAULT_PASS: ipcas
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v7
 
@@ -40,6 +66,13 @@ jobs:
       - name: Build web app
         run: pnpm --filter web build
 
+      - name: Setup API dependencies
+        run: |
+          cd apps/api
+          python3 -m venv .venv
+          .venv/bin/pip install "numpy<2"
+          .venv/bin/pip install --use-deprecated=legacy-resolver -r requirements.txt -r requirements-dev.txt
+
       - name: Run Playwright smoke tests
         run: >
           pnpm --filter web exec playwright test
@@ -54,3 +87,5 @@ jobs:
           CI: "true"
           CELERY_TASK_ALWAYS_EAGER: "true"
           AUDIT_LOG_ASYNC: "false"
+          DATABASE_URL: postgres://ipcas:ipcas@localhost:5432/ipcas_test
+          SECRET_KEY: ci-test-secret
