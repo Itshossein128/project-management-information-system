@@ -84,7 +84,9 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: apps/api/requirements.txt
-      - run: pip install --use-deprecated=legacy-resolver -r apps/api/requirements.txt -r apps/api/requirements-dev.txt
+      - run: |
+          pip install "numpy<2"
+          pip install --use-deprecated=legacy-resolver -r apps/api/requirements.txt -r apps/api/requirements-dev.txt
       - run: python manage.py check
         working-directory: apps/api/core
       - run: python manage.py migrate --noinput

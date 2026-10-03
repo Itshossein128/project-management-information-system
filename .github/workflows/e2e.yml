@@ -70,6 +70,7 @@ jobs:
         run: |
           cd apps/api
           python3 -m venv .venv
+          .venv/bin/pip install "numpy<2"
           .venv/bin/pip install --use-deprecated=legacy-resolver -r requirements.txt -r requirements-dev.txt
 
       - name: Run Playwright smoke tests
