@@ -11,6 +11,7 @@ from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
 from risk.models import BarrierStatus, EventType, RiskEvent
 from risk.serializers import BarrierCreateSerializer, BarrierSerializer, RiskEventSerializer
+from risk.services.barrier_service import validate_barrier_resolution
 from risk.services.matrix_service import build_risk_matrix
 
 
@@ -63,19 +64,10 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         """Enforce the BARRIER event_type when creating a new barrier log."""
         super().perform_create(serializer, event_type=EventType.BARRIER)
 
-    def partial_update(self, request, *args, **kwargs):
+    def perform_update(self, serializer):
         """Ensure a resolved date is provided if the barrier log's status is changed to resolved."""
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        if serializer.validated_data.get('status') == BarrierStatus.RESOLVED:
-            if not serializer.validated_data.get('resolved_date') and not instance.resolved_date:
-                return Response(
-                    {'error': {'message': 'برای وضعیت رفع شده، تاریخ رفع الزامی است.'}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        validate_barrier_resolution(serializer.instance, serializer.validated_data)
+        super().perform_update(serializer)
 
 
 @extend_schema_view(
