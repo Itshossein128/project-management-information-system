@@ -41,6 +41,7 @@ jobs:
         run: pnpm --filter web build
 
       - name: Setup env
+        working-directory: apps/web
         run: cp .env.example .env
 
       - name: Run Playwright smoke tests

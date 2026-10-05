@@ -66,10 +66,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       minio:
-        image: minio/minio:latest
+        image: bitnami/minio:latest
         env:
-          MINIO_ROOT_USER: ipcas
-          MINIO_ROOT_PASSWORD: ipcas-secret
+          MINIO_DEFAULT_ACCESS_KEY: ipcas
+          MINIO_DEFAULT_SECRET_KEY: ipcas-secret
         ports:
           - 9000:9000
         options: >-
