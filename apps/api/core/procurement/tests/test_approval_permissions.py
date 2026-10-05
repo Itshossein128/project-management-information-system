@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role, RolePermission
 from procurement.models import Block, RequisitionHeader, RequisitionScope, RequisitionStatus
 from procurement.permissions import ProcurementStepPermission, has_procurement_step_role
 from procurement.services.approval_engine import get_required_role
@@ -100,6 +100,8 @@ class TestProcurementStepRBACViews:
 
         role_eng, _ = Role.objects.get_or_create(role_name='block_engineer')
         role_tech, _ = Role.objects.get_or_create(role_name='technical_office')
+        RolePermission.objects.get_or_create(role=role_eng, permission_codename='edit_procurement')
+        RolePermission.objects.get_or_create(role=role_tech, permission_codename='edit_procurement')
 
         m_eng = ProjectMember.objects.create(project=project, user=user_eng, status=MemberStatus.ACTIVE)
         ProjectMemberRole.objects.create(member=m_eng, role=role_eng)
@@ -136,6 +138,20 @@ class TestProcurementStepRBACViews:
             # Fallback if v1 prefix differs in test router
             url = f"/api/projects/{data['project'].id}/requisitions/{data['requisition'].id}/submit/"
             response = client.post(url, {}, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_submit_draft_denied_without_edit_procurement_permission(self, setup_data):
+        client = APIClient()
+        data = setup_data
+        # Remove edit_procurement permission from role_eng
+        RolePermission.objects.filter(permission_codename='edit_procurement').delete()
+
+        client.force_authenticate(user=data['user_eng'])
+        url = f"/api/v1/projects/{data['project'].id}/requisitions/{data['requisition'].id}/submit/"
+        response = client.post(url, {'comments': 'Submitting draft'}, format='json')
+        if response.status_code == 404:
+            url = f"/api/projects/{data['project'].id}/requisitions/{data['requisition'].id}/submit/"
+            response = client.post(url, {'comments': 'Submitting draft'}, format='json')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_submit_draft_allowed_with_role(self, setup_data):
@@ -191,6 +207,8 @@ class TestWorkshopDraftPermissions:
 
         role_supervisor, _ = Role.objects.get_or_create(role_name='workshop_supervisor')
         role_engineer, _ = Role.objects.get_or_create(role_name='block_engineer')
+        RolePermission.objects.get_or_create(role=role_supervisor, permission_codename='edit_procurement')
+        RolePermission.objects.get_or_create(role=role_engineer, permission_codename='edit_procurement')
 
         m_super = ProjectMember.objects.create(
             project=project, user=user_supervisor, status=MemberStatus.ACTIVE,

@@ -127,6 +127,8 @@ class TestWorkshopRequisitions:
             password='pass',
         )
         role, _ = Role.objects.get_or_create(role_name='workshop_supervisor')
+        from master_data.models import RolePermission
+        RolePermission.objects.get_or_create(role=role, permission_codename='edit_procurement')
         member = ProjectMember.objects.create(
             project=project,
             user=supervisor,

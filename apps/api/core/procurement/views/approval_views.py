@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from permissions.project import IsProjectMember
+from permissions.project import HasProjectPermission, IsProjectMember
 from procurement.models import ApprovalLog, RequisitionHeader
 from procurement.permissions import ProcurementStepPermission
 from procurement.serializers import ApprovalActionSerializer, ApprovalLogSerializer, RequisitionHeaderSerializer
@@ -13,7 +13,8 @@ from procurement.serializers import ApprovalActionSerializer, ApprovalLogSeriali
 class _BaseApprovalActionView(APIView):
     """Base class for approval action views."""
 
-    permission_classes = [IsAuthenticated, ProcurementStepPermission]
+    permission_classes = [IsAuthenticated, HasProjectPermission, ProcurementStepPermission]
+    required_permission = 'edit_procurement'
     action: str = ''
 
     def post(self, request, project_pk=None, pk=None):
