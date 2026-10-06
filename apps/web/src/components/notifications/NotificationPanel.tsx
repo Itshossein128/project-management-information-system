@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Check, CheckCheck, Loader2, X } from "lucide-react";
 import { cn } from "@/app/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
 import type {
   AppNotification,
@@ -61,15 +62,19 @@ export function NotificationPanel({
             )}
             {t("notifications.markAllRead")}
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("common.close")}
-            title={t("common.close")}
-            className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <X className="size-4" aria-hidden />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={t("common.close")}
+                className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <X className="size-4" aria-hidden />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{t("common.close")}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -124,21 +129,25 @@ export function NotificationPanel({
                   </span>
                 </button>
                 {!n.is_read ? (
-                  <button
-                    type="button"
-                    className="shrink-0 px-3 text-muted-foreground hover:bg-muted/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
-                    aria-label={t("notifications.markAsRead")}
-                    title={t("notifications.markAsRead")}
-                    disabled={markRead.isPending && markRead.variables === n.id}
-                    aria-busy={markRead.isPending && markRead.variables === n.id}
-                    onClick={() => markRead.mutate(n.id)}
-                  >
-                    {markRead.isPending && markRead.variables === n.id ? (
-                      <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                    ) : (
-                      <Check className="size-3.5" aria-hidden />
-                    )}
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        className="shrink-0 px-3 text-muted-foreground hover:bg-muted/50 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
+                        aria-label={t("notifications.markAsRead")}
+                        disabled={markRead.isPending && markRead.variables === n.id}
+                        aria-busy={markRead.isPending && markRead.variables === n.id}
+                        onClick={() => markRead.mutate(n.id)}
+                      >
+                        {markRead.isPending && markRead.variables === n.id ? (
+                          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                        ) : (
+                          <Check className="size-3.5" aria-hidden />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("notifications.markAsRead")}</TooltipContent>
+                  </Tooltip>
                 ) : null}
               </li>
             ))}
