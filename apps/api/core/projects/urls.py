@@ -100,6 +100,7 @@ urlpatterns = [
     path('<uuid:project_pk>/', include('wbs.urls')),
     path('<uuid:project_pk>/', include('schedule.urls')),
     path('<uuid:project_pk>/', include('field_reports.urls')),
+    path('<uuid:project_pk>/', include('concrete_operations.urls')),
     path('<uuid:project_pk>/', include('risk.urls')),
     path('<uuid:project_pk>/', include('hr.urls')),
     path('<uuid:project_pk>/', include('sub_reports.urls')),
