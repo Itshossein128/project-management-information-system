@@ -1,6 +1,7 @@
 import { HelpCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProductTourButtonProps {
   onClick: () => void;
@@ -16,19 +17,25 @@ export function ProductTourButton({
   size = "sm",
 }: ProductTourButtonProps) {
   const { t } = useTranslation();
+  const tourTitle = t("tour.buttonTitle", { defaultValue: "راهنمای صفحه / Product Tour" });
 
   return (
-    <Button
-      type="button"
-      variant={variant}
-      size={size}
-      onClick={onClick}
-      className={`gap-1.5 text-xs font-medium ${className}`}
-      data-testid="product-tour-button"
-      title={t("tour.buttonTitle", { defaultValue: "راهنمای صفحه / Product Tour" })}
-    >
-      <HelpCircle className="size-3.5 text-brand-600 dark:text-brand-400" />
-      <span>{t("tour.buttonLabel", { defaultValue: "راهنما / Tour" })}</span>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant={variant}
+          size={size}
+          onClick={onClick}
+          className={`gap-1.5 text-xs font-medium ${className}`}
+          data-testid="product-tour-button"
+          aria-label={tourTitle}
+        >
+          <HelpCircle className="size-3.5 text-brand-600 dark:text-brand-400" />
+          <span>{t("tour.buttonLabel", { defaultValue: "راهنما / Tour" })}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tourTitle}</TooltipContent>
+    </Tooltip>
   );
 }
