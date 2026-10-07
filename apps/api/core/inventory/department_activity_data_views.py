@@ -14,6 +14,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from business_meta.models import Project
 from common.validators import validate_xlsx_upload
 from business_meta.permissions import CanViewBusinessAssignments, IsHrOrAdminOrReadOnly, IsVisitorReadOnly
+from permissions.project import HasProjectPermission, IsProjectMember
 
 from .department_activity_io import (
     department_display_label,
@@ -32,10 +33,13 @@ from .models import DepartmentActivityRecord
 class _DepartmentActivityDataBase(APIView):
     permission_classes = [
         IsAuthenticated,
+        IsProjectMember,
+        HasProjectPermission,
         CanViewBusinessAssignments,
         IsVisitorReadOnly,
         IsHrOrAdminOrReadOnly,
     ]
+    required_permission = 'view_reports'
 
     def _get_business(self, project_pk: int) -> Project | None:
         try:
