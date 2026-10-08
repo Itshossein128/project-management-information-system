@@ -102,3 +102,141 @@ class LeaveRequest(AuditSoftDeleteModel):
     class Meta:
         db_table = 'leave_requests'
         ordering = ['-leave_date']
+
+
+class ResourceAllocationStatus(models.TextChoices):
+    PLANNED = 'planned', 'Planned'
+    ACTIVE = 'active', 'Active'
+    COMPLETED = 'completed', 'Completed'
+    CANCELLED = 'cancelled', 'Cancelled'
+
+
+class ResourceAllocation(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='resource_allocations',
+    )
+    person = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='resource_allocations',
+    )
+    wbs = models.ForeignKey(
+        'projects.WBS',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='resource_allocations',
+    )
+    activity = models.ForeignKey(
+        'projects.Activity',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='resource_allocations',
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    role = models.CharField(max_length=120)
+    capacity_percent = models.DecimalField(max_digits=8, decimal_places=2)
+    capacity_hours = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    work_location = models.CharField(max_length=200, blank=True, default='')
+    supervisor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supervised_resource_allocations',
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=ResourceAllocationStatus.choices,
+        default=ResourceAllocationStatus.PLANNED,
+    )
+    has_capacity_exception = models.BooleanField(default=False)
+    capacity_exception = models.ForeignKey(
+        'hr.CapacityException',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='allocations',
+    )
+
+    class Meta:
+        db_table = 'resource_allocations'
+        ordering = ['-start_date']
+
+
+class CapacityExceptionStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+
+
+class CapacityException(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='capacity_exceptions',
+    )
+    person = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='capacity_exceptions',
+    )
+    allocation = models.ForeignKey(
+        ResourceAllocation,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='linked_exceptions',
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.TextField(blank=True, default='')
+    status = models.CharField(
+        max_length=20,
+        choices=CapacityExceptionStatus.choices,
+        default=CapacityExceptionStatus.DRAFT,
+    )
+    requested_capacity_percent = models.DecimalField(max_digits=8, decimal_places=2)
+    overlapping_snapshot = models.JSONField(default=dict, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='decided_capacity_exceptions',
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'capacity_exceptions'
+        ordering = ['-created_at']
+
+
+class ApprovedLaborRate(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='approved_labor_rates',
+    )
+    person = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_labor_rates',
+    )
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    currency = models.CharField(max_length=3, default='IRR')
+    effective_from = models.DateField()
+    effective_to = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'approved_labor_rates'
+        ordering = ['-effective_from']

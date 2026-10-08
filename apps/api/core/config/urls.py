@@ -18,6 +18,8 @@ urlpatterns = [
     path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
     path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),
     path('api/v1/notifications/', include('notifications.urls')),
+    path('api/v1/', include('master_data.urls')),
+    path('api/v1/portfolio/', include('projects.portfolio_urls')),
     *cost_global_urlpatterns,
     *economic_global_urlpatterns,
     path('api/relations/', include('business_meta.relations_urls')),

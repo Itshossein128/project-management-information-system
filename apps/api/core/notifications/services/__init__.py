@@ -1,3 +1,4 @@
+from notifications.services.creation import create_notification
 from notifications.services.delivery import (
     ConsoleSmsBackend,
     configured_channels,
@@ -8,6 +9,7 @@ from notifications.services.delivery import (
 __all__ = [
     'ConsoleSmsBackend',
     'configured_channels',
+    'create_notification',
     'deliver_alert_notifications',
     'get_sms_backend',
 ]

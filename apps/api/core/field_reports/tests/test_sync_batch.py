@@ -111,10 +111,53 @@ class TestSyncBatch:
             },
         ]
         response = auth_client.post(sync_url, payload, format='json')
-        assert response.data['summary']['created'] == 1
-        child_errors = response.data['results'][0]['child_errors']
+        assert response.data['summary']['created'] == 0
+        assert response.data['summary']['errors'] == 1
+        result = response.data['results'][0]
+        assert result['status'] == 'error'
+        child_errors = result['child_errors']
         assert child_errors
         assert child_errors[0]['section'] == 'activities'
+        assert not DailyReport.objects.filter(local_id='child-err').exists()
+
+    def test_invalid_child_replace_preserves_existing_rows(
+        self, auth_client, sync_url, project, user,
+    ):
+        from field_reports.models import DailyReportActivity
+
+        existing = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-16',
+            status=ReportStatus.DRAFT,
+            local_id='preserve-1',
+            created_by=user,
+            updated_by=user,
+        )
+        DailyReportActivity.objects.create(
+            report=existing,
+            activity_description='کار موجود',
+            shift='shift_1',
+        )
+        payload = [
+            {
+                'local_id': 'preserve-1',
+                'report_date': '2024-09-16',
+                'weather_condition': 'rainy',
+                'activities': [{'shift': 'shift_2'}],  # missing activity_description
+            },
+        ]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['errors'] == 1
+        assert response.data['summary']['merged'] == 0
+        result = response.data['results'][0]
+        assert result['status'] == 'error'
+        assert result['child_errors'][0]['section'] == 'activities'
+
+        existing.refresh_from_db()
+        assert existing.activities.count() == 1
+        assert existing.activities.first().activity_description == 'کار موجود'
+        # Header must not partially apply when child replace fails.
+        assert existing.weather_condition != 'rainy'
 
     def test_resync_same_payload_no_duplicate_children(self, auth_client, sync_url, project, user):
         existing = DailyReport.objects.create(

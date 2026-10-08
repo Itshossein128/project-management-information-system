@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+from treebeard.mp_tree import MP_Node
 
-from common.models import AuditSoftDeleteModel
+from common.models import AuditSoftDeleteModel, TimeStampedModel, UUIDModel
 
 
 class CostCategory(models.TextChoices):
@@ -68,6 +70,142 @@ class CostPool(AuditSoftDeleteModel):
         super().save(*args, **kwargs)
 
 
+class CostBreakdownNode(UUIDModel, TimeStampedModel, MP_Node):
+    """CBS hierarchy — distinct from WBS."""
+
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='cbs_nodes',
+    )
+    cbs_code = models.CharField(max_length=30)
+    cbs_name = models.CharField(max_length=200)
+    cost_type = models.CharField(max_length=40, choices=CostCategory.choices, blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+
+    node_order_by = ['cbs_code']
+
+    class Meta:
+        db_table = 'cbs_nodes'
+        unique_together = [['project', 'cbs_code']]
+
+    def soft_delete(self, user=None):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.cbs_code = f'd_{self.pk.hex[:28]}'
+        update_fields = ['is_deleted', 'deleted_at', 'cbs_code']
+        if user is not None:
+            self.updated_by = user
+            update_fields.append('updated_by')
+        self.save(update_fields=update_fields)
+
+    def __str__(self):
+        return f'{self.cbs_code} — {self.cbs_name}'
+
+
+class CommitmentStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    APPROVED = 'approved', 'Approved'
+    CLOSED = 'closed', 'Closed'
+    CANCELLED = 'cancelled', 'Cancelled'
+
+
+class Commitment(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='commitments')
+    commitment_number = models.CharField(max_length=60)
+    counterparty = models.CharField(max_length=200, blank=True, default='')
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    currency = models.CharField(max_length=3, default='IRR')
+    fx_rate = models.DecimalField(max_digits=18, decimal_places=6, null=True, blank=True)
+    commitment_date = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
+    wbs = models.ForeignKey(
+        'projects.WBS',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='commitments',
+    )
+    cbs = models.ForeignKey(
+        CostBreakdownNode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='commitments',
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CommitmentStatus.choices,
+        default=CommitmentStatus.DRAFT,
+    )
+    description = models.TextField(blank=True, default='')
+    document_ref = models.CharField(max_length=80, blank=True, default='')
+
+    class Meta:
+        db_table = 'commitments'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'commitment_number'],
+                condition=models.Q(is_deleted=False),
+                name='uniq_active_commitment_number',
+            ),
+        ]
+
+
+class PaymentStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    POSTED = 'posted', 'Posted'
+    VOID = 'void', 'Void'
+
+
+class Payment(AuditSoftDeleteModel):
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='payments')
+    commitment = models.ForeignKey(
+        Commitment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='payments',
+    )
+    actual_cost = models.ForeignKey(
+        'cost_control.ActualCost',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='payments',
+    )
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    currency = models.CharField(max_length=3, default='IRR')
+    fx_rate = models.DecimalField(max_digits=18, decimal_places=6, null=True, blank=True)
+    paid_at = models.DateField()
+    document_ref = models.CharField(max_length=80, blank=True, default='')
+    status = models.CharField(
+        max_length=20,
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.POSTED,
+    )
+
+    class Meta:
+        db_table = 'cost_payments'
+        ordering = ['-paid_at']
+
+
 class Budget(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='budgets')
     activity = models.ForeignKey(
@@ -79,6 +217,13 @@ class Budget(AuditSoftDeleteModel):
     )
     wbs = models.ForeignKey(
         'projects.WBS',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budgets',
+    )
+    cbs = models.ForeignKey(
+        CostBreakdownNode,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -117,6 +262,20 @@ class ActualCost(AuditSoftDeleteModel):
     )
     wbs = models.ForeignKey(
         'projects.WBS',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actual_costs',
+    )
+    cbs = models.ForeignKey(
+        CostBreakdownNode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actual_costs',
+    )
+    commitment = models.ForeignKey(
+        Commitment,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

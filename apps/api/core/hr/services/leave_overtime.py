@@ -1,5 +1,6 @@
 from rest_framework.exceptions import ValidationError
-from hr.models import LeaveType, LeaveStatus, OvertimeStatus
+
+from hr.models import LeaveStatus, LeaveType, OvertimeStatus
 
 
 def check_overtime_draft_status(overtime_request):

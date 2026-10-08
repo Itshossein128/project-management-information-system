@@ -4,16 +4,27 @@ import { useParams, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
 import {
+  asList,
+  fetchOrganizationUnits,
+} from "@/app/lib/api/central-data";
+import {
   fetchProject,
   updateProject,
   deleteProject,
   type CreateProjectPayload,
+  type ProjectCurrency,
 } from "@/app/lib/api/projects";
+import {
+  createFiscalLock,
+  listCapabilities,
+  listFiscalLocks,
+  updateCapability,
+} from "@/app/lib/api/project-core";
 import { PATHS } from "@/app/routeVars";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
-import { Input, Label } from "@/components/form";
+import { Input, Label, Select, ToggleSwitch } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -33,7 +44,36 @@ function ProjectSettingsContent() {
     enabled: Boolean(id),
   });
 
+  const {
+    data: capabilities = [],
+    isLoading: capsLoading,
+  } = useQuery({
+    queryKey: ["project-capabilities", id],
+    queryFn: () => listCapabilities(id),
+    enabled: Boolean(id),
+  });
+
+  const {
+    data: fiscalLocks = [],
+    isLoading: locksLoading,
+  } = useQuery({
+    queryKey: ["project-fiscal-locks", id],
+    queryFn: () => listFiscalLocks(id),
+    enabled: Boolean(id),
+  });
+
+  const { data: orgUnitsRaw } = useQuery({
+    queryKey: ["organization-units"],
+    queryFn: fetchOrganizationUnits,
+  });
+  const orgUnits = asList(orgUnitsRaw ?? []);
+
   const [form, setForm] = useState<Partial<CreateProjectPayload>>({});
+  const [lockForm, setLockForm] = useState({
+    period_start: "",
+    period_end: "",
+    reason: "",
+  });
 
   const saveMutation = useMutation({
     mutationFn: (payload: Partial<CreateProjectPayload>) =>
@@ -52,6 +92,36 @@ function ProjectSettingsContent() {
       toast.success(t("projectSettings.deleteSuccess", "پروژه با موفقیت حذف شد"));
       void qc.invalidateQueries({ queryKey: ["projects"] });
       navigate(`/${PATHS.PROJECT}`);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const capabilityMutation = useMutation({
+    mutationFn: ({
+      capabilityKey,
+      enabled,
+    }: {
+      capabilityKey: string;
+      enabled: boolean;
+    }) =>
+      updateCapability(id, capabilityKey, {
+        enabled,
+        mode: enabled ? "optional" : "disabled",
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["project-capabilities", id] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const lockMutation = useMutation({
+    mutationFn: () => createFiscalLock(id, lockForm),
+    onSuccess: () => {
+      toast.success(
+        t("projectSettings.fiscalLockCreated", "دوره مالی قفل شد"),
+      );
+      setLockForm({ period_start: "", period_end: "", reason: "" });
+      void qc.invalidateQueries({ queryKey: ["project-fiscal-locks", id] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -79,10 +149,11 @@ function ProjectSettingsContent() {
       form.planned_finish_date ?? project.planned_finish_date ?? "",
     contract_amount:
       form.contract_amount ?? project.contract_amount ?? "",
+    currency: (form.currency ?? project.currency ?? "IRR") as ProjectCurrency,
+    owning_unit: form.owning_unit ?? project.owning_unit ?? "",
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-
     e.preventDefault();
     if (!canEdit) return;
     saveMutation.mutate({
@@ -95,6 +166,8 @@ function ProjectSettingsContent() {
       start_date: values.start_date || undefined,
       planned_finish_date: values.planned_finish_date || undefined,
       contract_amount: values.contract_amount || undefined,
+      currency: values.currency,
+      owning_unit: values.owning_unit || null,
     });
   };
 
@@ -198,6 +271,49 @@ function ProjectSettingsContent() {
             }
           />
         </div>
+        <Select
+          name='currency'
+          id='input-currency'
+          label={t("projectSettings.currency", "واحد پول")}
+          value={values.currency}
+          disabled={!canEdit}
+          options={[
+            {
+              value: "IRR",
+              label: t("projectSettings.currencyIrr", "ریال (IRR)"),
+            },
+            {
+              value: "IRT",
+              label: t("projectSettings.currencyIrt", "تومان (IRT)"),
+            },
+          ]}
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              currency: e.target.value as ProjectCurrency,
+            }))
+          }
+        />
+        <Select
+          name='owning_unit'
+          id='input-owning-unit'
+          label={t("centralData.owningUnit", "واحد سازمانی مالک")}
+          value={values.owning_unit ?? ""}
+          disabled={!canEdit}
+          options={[
+            { value: "", label: "—" },
+            ...orgUnits.map((u) => ({
+              value: u.id,
+              label: `${u.code} — ${u.name}`,
+            })),
+          ]}
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              owning_unit: e.target.value || null,
+            }))
+          }
+        />
 
         {canEdit ? (
           <div className='flex items-center justify-between border-t pt-4'>
@@ -226,6 +342,139 @@ function ProjectSettingsContent() {
           </div>
         ) : null}
       </form>
+
+      <section className='mx-auto mt-10 max-w-2xl space-y-3 border-t pt-8'>
+        <h2 className='text-base font-semibold'>
+          {t("projectSettings.capabilities", "قابلیت‌ها")}
+        </h2>
+        <p className='text-sm text-muted-foreground'>
+          {t(
+            "projectSettings.capabilitiesHint",
+            "غیرفعال‌سازی یک قابلیت، تاریخچه را حذف نمی‌کند؛ فقط ایجاد/ویرایش جدید را مسدود می‌کند.",
+          )}
+        </p>
+        {capsLoading ? (
+          <p className='text-sm text-muted-foreground'>{t("common.loading")}</p>
+        ) : capabilities.length === 0 ? (
+          <p className='text-sm text-muted-foreground'>
+            {t("projectSettings.capabilitiesEmpty", "قابلیتی تعریف نشده است")}
+          </p>
+        ) : (
+          <ul className='space-y-2'>
+            {capabilities.map((cap) => (
+              <li
+                key={cap.capability_key}
+                className='flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2'
+              >
+                <span className='text-sm'>{cap.capability_key}</span>
+                <ToggleSwitch
+                  name={`cap-${cap.capability_key}`}
+                  checked={cap.enabled}
+                  disabled={!canEdit || capabilityMutation.isPending}
+                  onChange={(e) => {
+                    capabilityMutation.mutate({
+                      capabilityKey: cap.capability_key,
+                      enabled: Boolean(e.target.checked),
+                    });
+                  }}
+                  label={
+                    cap.enabled
+                      ? t("common.enabled", "فعال")
+                      : t("common.disabled", "غیرفعال")
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className='mx-auto mt-10 max-w-2xl space-y-3 border-t pt-8'>
+        <h2 className='text-base font-semibold'>
+          {t("projectSettings.fiscalLock", "قفل دوره مالی")}
+        </h2>
+        {locksLoading ? (
+          <p className='text-sm text-muted-foreground'>{t("common.loading")}</p>
+        ) : fiscalLocks.length > 0 ? (
+          <ul className='mb-4 space-y-1 text-sm text-muted-foreground'>
+            {fiscalLocks.map((lock) => (
+              <li key={lock.id}>
+                {lock.period_start} → {lock.period_end}
+                {lock.reason ? ` — ${lock.reason}` : ""}
+                {lock.is_active === false
+                  ? ` (${t("common.inactive", "غیرفعال")})`
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {canEdit ? (
+          <form
+            className='space-y-3'
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!lockForm.period_start || !lockForm.period_end || !lockForm.reason.trim()) {
+                toast.error(
+                  t(
+                    "projectSettings.fiscalLockRequired",
+                    "تاریخ شروع، پایان و دلیل الزامی است",
+                  ),
+                );
+                return;
+              }
+              lockMutation.mutate();
+            }}
+          >
+            <div className='grid gap-3 sm:grid-cols-2'>
+              <div>
+                <Label htmlFor='input-periodStart'>
+                  {t("projectSettings.periodStart", "شروع دوره")}
+                </Label>
+                <Input
+                  id='input-periodStart'
+                  type='date'
+                  value={lockForm.period_start}
+                  onChange={(e) =>
+                    setLockForm((f) => ({ ...f, period_start: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor='input-periodEnd'>
+                  {t("projectSettings.periodEnd", "پایان دوره")}
+                </Label>
+                <Input
+                  id='input-periodEnd'
+                  type='date'
+                  value={lockForm.period_end}
+                  onChange={(e) =>
+                    setLockForm((f) => ({ ...f, period_end: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor='input-lockReason'>
+                {t("projectSettings.lockReason", "دلیل")}
+              </Label>
+              <Input
+                id='input-lockReason'
+                value={lockForm.reason}
+                onChange={(e) =>
+                  setLockForm((f) => ({ ...f, reason: e.target.value }))
+                }
+                required
+              />
+            </div>
+            <Button type='submit' loading={lockMutation.isPending}>
+              {t("projectSettings.createFiscalLock", "قفل کردن دوره")}
+            </Button>
+          </form>
+        ) : null}
+      </section>
     </>
   );
 }

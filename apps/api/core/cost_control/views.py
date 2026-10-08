@@ -124,6 +124,31 @@ class ActualCostViewSet(CostScopedViewSet):
 
     AUTO_COST_MSG = 'این هزینه به صورت خودکار از گزارش روزانه ایجاد شده و قابل ویرایش مستقیم نیست'
 
+    def perform_create(self, serializer, **kwargs):
+        from projects.fiscal_service import (
+            assert_fiscal_writable,
+            duplicate_document_warnings,
+            require_warning_ack,
+        )
+        from projects.models import Project
+
+        project = Project.objects.get(pk=self.get_project_id())
+        cost_date = serializer.validated_data.get('cost_date')
+        assert_fiscal_writable(
+            project,
+            cost_date,
+            corrective=bool(self.request.data.get('corrective')),
+            correction_reason=self.request.data.get('correction_reason', ''),
+        )
+        warnings = duplicate_document_warnings(
+            ActualCost,
+            project,
+            'invoice_number',
+            serializer.validated_data.get('invoice_number', ''),
+        )
+        require_warning_ack(warnings, bool(self.request.data.get('acknowledge_warnings')))
+        super().perform_create(serializer, **kwargs)
+
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
         for param in ('activity_id', 'wbs_id', 'cost_category', 'cost_type', 'supplier_id'):

@@ -11,7 +11,9 @@ from django.db.models.functions import TruncMonth
 import jdatetime
 
 from contracts.models import Contract, ContractStatus
+from common.money import sum_amounts
 from cost_control.models import ActualCost, Budget, CostCategory
+from projects.models import Project
 from cost_control.services.variance_service import get_budget_vs_actual
 
 
@@ -79,10 +81,19 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
         or 0
     )
 
+    project = Project.objects.filter(pk=project_id).only('currency').first()
+    currency = getattr(project, 'currency', None) or 'IRR'
+    # Ensure homogeneous project-currency aggregation (all rows share project currency).
+    _ = sum_amounts(
+        [{'amount': total_actual, 'currency': currency}],
+        target_currency=currency,
+    )
+
     return {
         'total_budget': float(total_budget),
         'total_actual': float(total_actual),
         'total_committed': float(total_committed),
+        'currency': currency,
         'budget_consumption_pct': round(consumption, 2) if consumption is not None else None,
         'by_category': by_category,
         'by_wbs': get_budget_vs_actual(project_id, group_by='wbs', as_of_date=as_of_date),

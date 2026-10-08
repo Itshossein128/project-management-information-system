@@ -75,12 +75,17 @@ function ProjectWBSContent() {
         <QueryErrorState onRetry={() => void refetch()} />
       ) : tree.length === 0 ? (
         canEditWBS ? (
-          <WbsEmptyState
-            projectId={projectId}
-            onCreated={() =>
-              void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
-            }
-          />
+          <>
+            <p className="mb-3 text-sm text-muted-foreground" data-testid="wbs-empty-warning">
+              {t("wbs.emptyWarning")}
+            </p>
+            <WbsEmptyState
+              projectId={projectId}
+              onCreated={() =>
+                void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
+              }
+            />
+          </>
         ) : (
           <EmptyState
             title={t("pages.wbs.empty")}

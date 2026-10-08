@@ -9,6 +9,14 @@ export type NotificationType =
   | "report_rejected"
   | "generic";
 
+export interface NotificationResponsibleUser {
+  id?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+}
+
 export interface AppNotification {
   id: string;
   project: string | null;
@@ -20,6 +28,9 @@ export interface AppNotification {
   is_read: boolean;
   read_at: string | null;
   created_at: string;
+  /** Optional — present when backend ships actionable notifications */
+  responsible_user?: NotificationResponsibleUser | string | null;
+  due_at?: string | null;
 }
 
 export function fetchNotifications(params?: {

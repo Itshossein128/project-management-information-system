@@ -20,6 +20,16 @@ def _get_project_id(request, view) -> str | None:
     return None
 
 
+def member_has_codename(user, project_id, codename: str) -> bool:
+    """True if user has project-scoped permission codename (roles + overrides)."""
+    if _is_global_admin(user):
+        return True
+    member = _get_active_member(user, project_id)
+    if member is None:
+        return False
+    return member.has_permission(codename)
+
+
 def _get_active_member(user, project_id):
     if not user or not user.is_authenticated or not project_id:
         return None

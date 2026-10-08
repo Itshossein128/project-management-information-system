@@ -1,9 +1,18 @@
 """Cost control serializers."""
 
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
-from cost_control.models import ActualCost, Budget, CostPool
+from cost_control.models import (
+    ActualCost,
+    Budget,
+    Commitment,
+    CostBreakdownNode,
+    CostPool,
+    Payment,
+)
 from resources.models import Supplier
 
 
@@ -42,6 +51,7 @@ class BudgetSerializer(serializers.ModelSerializer):
             'id',
             'wbs',
             'activity',
+            'cbs',
             'wbs_code',
             'wbs_name',
             'activity_code',
@@ -84,6 +94,8 @@ class ActualCostSerializer(serializers.ModelSerializer):
             'id',
             'activity',
             'wbs',
+            'cbs',
+            'commitment',
             'wbs_code',
             'activity_code',
             'cost_date',
@@ -142,3 +154,74 @@ class CostPoolAllocationItemSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=18, decimal_places=2)
     allocation_method = serializers.CharField(required=False, allow_blank=True, default='')
     confidence_level = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+class CostBreakdownNodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CostBreakdownNode
+        fields = [
+            'id',
+            'cbs_code',
+            'cbs_name',
+            'cost_type',
+            'description',
+            'depth',
+            'is_deleted',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'depth', 'is_deleted', 'created_at']
+
+
+class CommitmentSerializer(serializers.ModelSerializer):
+    commitment_date = JalaliDateField()
+    due_date = JalaliDateField(required=False, allow_null=True)
+    remaining = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Commitment
+        fields = [
+            'id',
+            'commitment_number',
+            'counterparty',
+            'amount',
+            'currency',
+            'fx_rate',
+            'commitment_date',
+            'due_date',
+            'wbs',
+            'cbs',
+            'status',
+            'description',
+            'document_ref',
+            'remaining',
+        ]
+        read_only_fields = ['id', 'status', 'remaining']
+
+    def get_remaining(self, obj):
+        from cost_control.cbs_services import posted_payments_total
+
+        return float(Decimal(obj.amount) - posted_payments_total(obj))
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    paid_at = JalaliDateField()
+    commitment = serializers.PrimaryKeyRelatedField(
+        queryset=Commitment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'commitment',
+            'actual_cost',
+            'amount',
+            'currency',
+            'fx_rate',
+            'paid_at',
+            'document_ref',
+            'status',
+        ]
+        read_only_fields = ['id', 'status']

@@ -102,6 +102,14 @@ class RiskEventViewSet(ProjectScopedViewSet):
     edit_permission = 'edit_reports'
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
+    def perform_create(self, serializer, **kwargs):
+        from projects.capability_service import assert_capability_enabled
+        from projects.models import Project
+
+        project = Project.objects.get(pk=self.get_project_id())
+        assert_capability_enabled(project, 'risk')
+        super().perform_create(serializer, **kwargs)
+
     def get_serializer_context(self):
         """Inject the currently resolved project_id into the serializer context."""
         ctx = super().get_serializer_context()

@@ -2,6 +2,8 @@ import { apiJson } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
 import type { ListResponse } from "@/app/lib/api-types";
 
+export type ProjectCurrency = "IRR" | "IRT";
+
 export interface ProjectListItem {
   project_id: string;
   project_code: string;
@@ -12,6 +14,7 @@ export interface ProjectListItem {
   planned_finish_date: string | null;
   contract_amount: string | null;
   member_count: number;
+  currency?: ProjectCurrency;
 }
 
 export interface ProjectDetail extends ProjectListItem {
@@ -20,6 +23,7 @@ export interface ProjectDetail extends ProjectListItem {
   project_manager: string | null;
   location: string;
   contract_type: string;
+  owning_unit?: string | null;
   cut_off_date: string | null;
   created_at: string;
   updated_at: string;
@@ -36,6 +40,8 @@ export interface CreateProjectPayload {
   start_date: string;
   planned_finish_date?: string;
   contract_amount?: string;
+  currency?: ProjectCurrency;
+  owning_unit?: string | null;
 }
 
 export function fetchProjects() {

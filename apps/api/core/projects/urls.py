@@ -3,6 +3,13 @@ from django.urls import path, include
 from projects.views import ProjectViewSet
 from projects.kpi_views import ProjectHealthView, ProjectKpisView
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
+from projects.core_principle_views import (
+    FiscalPeriodLockDeactivateView,
+    FiscalPeriodLockListCreateView,
+    ProjectCapabilityDetailView,
+    ProjectCapabilityListView,
+)
+from projects.stakeholder_views import StakeholderViewSet
 from project_templates.views import SaveProjectAsTemplateView
 from business_meta.views import (
     TableDefinitionViewSet,
@@ -41,6 +48,11 @@ member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
 member_detail = ProjectMemberViewSet.as_view({'patch': 'partial_update'})
 member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions', 'delete': 'permissions'})
 
+stakeholder_list = StakeholderViewSet.as_view({'get': 'list', 'post': 'create'})
+stakeholder_detail = StakeholderViewSet.as_view(
+    {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}
+)
+
 # --- Project URLs ---
 urlpatterns = [
     # Project CRUD
@@ -68,6 +80,14 @@ urlpatterns = [
         name='project-member-permissions',
     ),
 
+    # Stakeholders (FR-DATA)
+    path('<uuid:project_pk>/stakeholders/', stakeholder_list, name='project-stakeholder-list'),
+    path(
+        '<uuid:project_pk>/stakeholders/<uuid:pk>/',
+        stakeholder_detail,
+        name='project-stakeholder-detail',
+    ),
+
     # Project Dynamic Tables (Business Meta)
     path('<uuid:project_pk>/tables/', table_list, name='tabledefinition-list'),
     path('<uuid:project_pk>/tables/<int:pk>/', table_detail, name='tabledefinition-detail'),
@@ -93,6 +113,28 @@ urlpatterns = [
     # Unified KPIs / health (Sprint 13 / K-02)
     path('<uuid:project_pk>/kpis/', ProjectKpisView.as_view(), name='project-kpis'),
     path('<uuid:project_pk>/health/', ProjectHealthView.as_view(), name='project-health'),
+
+    # Core principles: capabilities + fiscal locks
+    path(
+        '<uuid:project_pk>/capabilities/',
+        ProjectCapabilityListView.as_view(),
+        name='project-capabilities',
+    ),
+    path(
+        '<uuid:project_pk>/capabilities/<str:capability_key>/',
+        ProjectCapabilityDetailView.as_view(),
+        name='project-capability-detail',
+    ),
+    path(
+        '<uuid:project_pk>/fiscal-period-locks/',
+        FiscalPeriodLockListCreateView.as_view(),
+        name='project-fiscal-locks',
+    ),
+    path(
+        '<uuid:project_pk>/fiscal-period-locks/<uuid:lock_id>/deactivate/',
+        FiscalPeriodLockDeactivateView.as_view(),
+        name='project-fiscal-lock-deactivate',
+    ),
 
     # --- Nested Apps ---
     # These apps have endpoints nested under a specific project context

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import Gantt from "frappe-gantt";
@@ -7,14 +7,22 @@ import "frappe-gantt/dist/frappe-gantt.css";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import { fetchActivity } from "@/app/lib/api/activities";
 import { downloadGanttPdf, fetchGantt, type GanttTask } from "@/app/lib/api/gantt";
+import {
+  approveLockBaseline,
+  createBaseline,
+  fetchBaselines,
+} from "@/app/lib/api/schedule";
 import { PATHS } from "@/app/routeVars";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
-import { Checkbox, Select } from "@/components/form";
+import { Checkbox, Input, Select } from "@/components/form";
 import { AccessDenied, EmptyState, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ChangeRequestPanel } from "@/components/schedule/ChangeRequestPanel";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
+import { useToast } from "@/components/ui/toast";
+import { WbsEmptyBanner } from "@/components/wbs/wbs-empty-banner";
 
 function daysBetween(start: string | null, end: string | null): number | null {
   if (!start || !end) return null;
@@ -30,11 +38,20 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
 
   return (
     <div className="overflow-x-auto rounded-lg border" data-testid="gantt-baseline-compare">
-      <h3 className="border-b bg-muted/50 px-4 py-2 text-sm font-medium">مقایسه برنامه جاری با خط مبنا</h3>
+      <h3 className="border-b bg-muted/50 px-4 py-2 text-sm font-medium">
+        {t("schedule.baselineCompareTitle")}
+      </h3>
       <table className="w-full min-w-[800px] text-sm">
         <thead className="bg-muted/30">
           <tr>
-            {["فعالیت", "شروع برنامه", "پایان برنامه", "شروع مبنا", "پایان مبنا", "انحراف (روز)"].map((h) => (
+            {[
+              t("schedule.colActivity"),
+              t("schedule.colPlannedStart"),
+              t("schedule.colPlannedFinish"),
+              t("schedule.colBaselineStart"),
+              t("schedule.colBaselineFinish"),
+              t("schedule.colVarianceDays"),
+            ].map((h) => (
               <th key={h} className="px-3 py-2 text-start">
                 {h}
               </th>
@@ -74,6 +91,9 @@ function GanttContent() {
   const { projectId, project, isLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_activities");
+  const canEdit = has("edit_activities");
+  const toast = useToast();
+  const qc = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const ganttRef = useRef<Gantt | null>(null);
 
@@ -82,6 +102,7 @@ function GanttContent() {
   const [showBaselineCompare, setShowBaselineCompare] = useState(true);
   const [baselineId, setBaselineId] = useState("");
   const [selectedTask, setSelectedTask] = useState<GanttTask | null>(null);
+  const [snapshotName, setSnapshotName] = useState("");
 
   const {
     data,
@@ -92,6 +113,37 @@ function GanttContent() {
     queryKey: ["gantt", projectId, baselineId],
     queryFn: () => fetchGantt(projectId, baselineId || undefined),
     enabled: canView,
+  });
+
+  const { data: baselines = [] } = useQuery({
+    queryKey: ["baselines", projectId],
+    queryFn: () => fetchBaselines(projectId),
+    enabled: canView,
+  });
+
+  const approveLockMut = useMutation({
+    mutationFn: (id: string) => approveLockBaseline(projectId, id),
+    onSuccess: () => {
+      toast.success(t("schedule.approveLockSuccess"));
+      void qc.invalidateQueries({ queryKey: ["baselines", projectId] });
+      void qc.invalidateQueries({ queryKey: ["gantt", projectId] });
+    },
+    onError: (e: Error) =>
+      toast.error(e.message || t("schedule.approveLockError")),
+  });
+
+  const createSnapshotMut = useMutation({
+    mutationFn: () =>
+      createBaseline(projectId, {
+        version_name: snapshotName.trim() || undefined,
+      }),
+    onSuccess: () => {
+      toast.success(t("common.success"));
+      setSnapshotName("");
+      void qc.invalidateQueries({ queryKey: ["baselines", projectId] });
+      void qc.invalidateQueries({ queryKey: ["gantt", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const { data: selectedActivity } = useQuery({
@@ -172,29 +224,31 @@ function GanttContent() {
     <div className="space-y-4">
       <Breadcrumb
         items={[
-          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          { label: t("nav.sidebarProjects"), href: `/${PATHS.PROJECT}` },
           {
             label: project.project_name,
             href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
           },
-          { label: "گانت" },
+          { label: t("pages.gantt.title") },
         ]}
       />
       <PageHeader title={t("pages.gantt.title")} subtitle={project.project_name} />
 
+      <WbsEmptyBanner projectId={projectId} />
+
       <div className="flex flex-wrap items-end gap-3">
         <Select
           name="gantt_baseline"
-          label="خط مبنا"
+          label={t("schedule.baseline")}
           value={baselineId || "current"}
           onChange={(e) =>
             setBaselineId(e.target.value === "current" ? "" : e.target.value)
           }
           options={[
-            { value: "current", label: "خط مبنای جاری" },
+            { value: "current", label: t("schedule.baselineCurrent") },
             ...(data?.baselines ?? []).map((b) => ({
               value: b.id,
-              label: `${b.name}${b.is_current ? " (جاری)" : ""}`,
+              label: `${b.name}${b.is_current ? ` (${t("schedule.current")})` : ""}${b.is_locked ? ` [${t("schedule.baselineLocked")}]` : ""}`,
             })),
           ]}
           fieldClassName="min-w-[12rem]"
@@ -206,13 +260,7 @@ function GanttContent() {
             size="sm"
             onClick={() => setViewMode(mode)}
           >
-            {mode === "Day"
-              ? "روز"
-              : mode === "Week"
-                ? "هفته"
-                : mode === "Month"
-                  ? "ماه"
-                  : "سال"}
+            {t(`schedule.viewMode.${mode}`)}
           </Button>
         ))}
         <Button
@@ -220,11 +268,11 @@ function GanttContent() {
           size="sm"
           onClick={() => ganttRef.current?.scroll_current?.()}
         >
-          امروز
+          {t("schedule.today")}
         </Button>
         <Checkbox
           name="critical_only"
-          label="فقط مسیر بحرانی"
+          label={t("schedule.criticalOnly")}
           checked={criticalOnly}
           onChange={(e) =>
             setCriticalOnly(
@@ -235,7 +283,7 @@ function GanttContent() {
         />
         <Checkbox
           name="show_baseline_compare"
-          label="جدول مقایسه مبنا"
+          label={t("schedule.baselineCompare")}
           checked={showBaselineCompare}
           onChange={(e) =>
             setShowBaselineCompare(
@@ -245,13 +293,83 @@ function GanttContent() {
           fieldClassName="pb-2"
         />
         <Button variant="secondary" size="sm" onClick={() => void exportPdf()}>
-          خروجی PDF
+          {t("schedule.exportPdf")}
         </Button>
       </div>
 
       {data?.baseline_name ? (
-        <p className="text-sm text-muted-foreground">خط مبنا: {data.baseline_name}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("schedule.baseline")}: {data.baseline_name}
+        </p>
       ) : null}
+
+      {data?.critical_path && !data.critical_path.valid ? (
+        <div
+          className="rounded-md border border-warning-500/40 bg-warning-500/10 px-3 py-2 text-sm text-warning-800 dark:text-warning-300"
+          role="status"
+          data-testid="gantt-critical-path-invalid"
+        >
+          {t("schedule.criticalPathNotValid")}
+        </div>
+      ) : null}
+
+      <section className="space-y-3 rounded-lg border p-4" data-testid="baseline-lock-panel">
+        <h2 className="text-base font-medium">{t("schedule.baseline")}</h2>
+        {baselines.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("common.empty")}</p>
+        ) : (
+          <ul className="divide-y rounded-md border text-sm">
+            {baselines.map((b) => (
+              <li
+                key={b.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2"
+              >
+                <div>
+                  <span className="font-medium">
+                    {b.version_name || b.id.slice(0, 8)}
+                  </span>
+                  {b.is_current ? (
+                    <span className="ms-2 text-xs text-muted-foreground">(جاری)</span>
+                  ) : null}
+                  <span className="ms-2 text-xs text-muted-foreground">
+                    {b.is_locked
+                      ? t("schedule.baselineLocked")
+                      : t("schedule.baselineUnlocked")}
+                  </span>
+                </div>
+                {canEdit && !b.is_locked ? (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    disabled={approveLockMut.isPending}
+                    onClick={() => approveLockMut.mutate(b.id)}
+                  >
+                    {t("schedule.approveLock")}
+                  </Button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+        {canEdit ? (
+          <div className="flex flex-wrap items-end gap-2">
+            <Input
+              placeholder={t("schedule.createSnapshot")}
+              value={snapshotName}
+              onChange={(e) => setSnapshotName(e.target.value)}
+              className="max-w-xs"
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={createSnapshotMut.isPending}
+              onClick={() => createSnapshotMut.mutate()}
+            >
+              {t("schedule.createSnapshot")}
+            </Button>
+          </div>
+        ) : null}
+      </section>
 
       {chartTasks.length === 0 ? (
         <EmptyState
@@ -268,6 +386,8 @@ function GanttContent() {
       {showBaselineCompare && chartTasks.length > 0 ? (
         <BaselineComparisonTable tasks={chartTasks} />
       ) : null}
+
+      <ChangeRequestPanel projectId={projectId} canEdit={canEdit} />
 
       <style>{`
         .bar-critical .bar { fill: var(--palette-danger-600) !important; }

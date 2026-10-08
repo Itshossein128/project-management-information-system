@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
 
-from common.models import UUIDModel
+from common.models import TimeStampedModel, UUIDModel
 
 slug_validator = RegexValidator(
     regex=r'^[a-z][a-z0-9_]*$',
@@ -19,6 +19,67 @@ class Unit(UUIDModel):
 
     def __str__(self):
         return self.unit_name
+
+
+class OrgUnitStatus(models.TextChoices):
+    ACTIVE = 'active', 'Active'
+    INACTIVE = 'inactive', 'Inactive'
+
+
+class OrganizationUnit(UUIDModel, TimeStampedModel):
+    """Organization Breakdown Structure (OBS) node — org-wide, no project_id."""
+
+    code = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=200)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='children',
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=OrgUnitStatus.choices,
+        default=OrgUnitStatus.ACTIVE,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+
+    class Meta:
+        db_table = 'organization_units'
+        ordering = ['code']
+
+    def __str__(self):
+        return f'{self.code} — {self.name}'
+
+
+class ManagedContractType(UUIDModel, TimeStampedModel):
+    """Manageable contract-type catalog (org-wide reference)."""
+
+    code = models.CharField(max_length=40, unique=True)
+    name_fa = models.CharField(max_length=120)
+    name_en = models.CharField(max_length=120, blank=True, default='')
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'managed_contract_types'
+        ordering = ['code']
+
+    def __str__(self):
+        return self.code
 
 
 class Permission(UUIDModel):

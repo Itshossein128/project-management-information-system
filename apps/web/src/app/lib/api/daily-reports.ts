@@ -27,12 +27,16 @@ export interface DailyReportListItem {
   report_id: string;
   report_date: string;
   day_of_week: string;
+  work_front?: string;
   site_status: SiteStatus;
   site_status_label: string;
   weather_condition: WeatherCondition | null;
   weather_condition_label: string | null;
   status: ReportStatus;
   status_label: string;
+  is_locked?: boolean;
+  is_current?: boolean;
+  version_number?: number;
   prepared_by_name: string | null;
   approved_by_name: string | null;
   activity_count: number;
@@ -58,6 +62,8 @@ export interface ActivityRow {
   quantity_measured: boolean;
   unit: string | null;
   execution_percentage: string | null;
+  responsible_user?: string | null;
+  responsible_name?: string;
   notes: string;
   photo_file: string | null;
 }
@@ -73,6 +79,7 @@ export interface LaborRow {
   total_count: number;
   work_hours?: number | null;
   overtime_hours?: number | null;
+  absence_count?: number | null;
 }
 
 export interface EquipmentRow {
@@ -100,7 +107,8 @@ export interface MaterialRow {
   quantity: string;
   unit_cost: string | null;
   unit: string;
-  transaction_type: "receipt" | "issue" | "waste";
+  transaction_type: "receipt" | "issue" | "waste" | "return";
+  consumption_location?: string;
   activity_ref: string | null;
   notes: string;
 }
@@ -128,9 +136,19 @@ export interface LaborCampRow {
 
 export interface IncidentRow {
   id: string;
-  incident_type: "safety" | "quality" | "environmental" | "stoppage" | "visitor";
+  incident_type:
+    | "safety"
+    | "quality"
+    | "environmental"
+    | "stoppage"
+    | "visitor"
+    | "site_instruction"
+    | "barrier";
   description: string;
   corrective_action: string;
+  follow_up_owner_user?: string | null;
+  follow_up_owner_name?: string;
+  due_date?: string | null;
 }
 
 export interface DailyReportDetail {
@@ -138,6 +156,8 @@ export interface DailyReportDetail {
   report_date: string;
   day_of_week: string;
   shift: ReportShift;
+  work_front?: string;
+  location_notes?: string;
   weather_condition: WeatherCondition | null;
   weather_condition_label: string | null;
   temp_max: string | null;
@@ -147,6 +167,12 @@ export interface DailyReportDetail {
   general_notes: string;
   status: ReportStatus;
   status_label: string;
+  is_locked?: boolean;
+  status_label_key?: string;
+  lineage_id?: string;
+  version_number?: number;
+  supersedes?: string | null;
+  is_current?: boolean;
   prepared_by_name: string | null;
   submitted_by_name: string | null;
   reviewed_by_name: string | null;
@@ -166,17 +192,29 @@ export interface DailyReportDetail {
   concrete_logs: ConcreteRow[];
   labor_camp: LaborCampRow[];
   incidents: IncidentRow[];
+  submit_warnings?: string[];
 }
 
 export interface HeaderPayload {
   report_date: string;
   shift?: ReportShift;
+  work_front?: string;
+  location_notes?: string;
   weather_condition?: WeatherCondition | null;
   temp_max?: string | number | null;
   temp_min?: string | number | null;
   site_status?: SiteStatus;
   general_notes?: string;
   local_id?: string | null;
+}
+
+export interface CorrectionRequest {
+  id: string;
+  source_report_id: string;
+  result_report_id: string | null;
+  reason: string;
+  status: string;
+  requested_at: string | null;
 }
 
 export interface JobTitle {
@@ -361,11 +399,41 @@ export const STATUS_BADGE: Record<ReportStatus, "neutral" | "info" | "warning" |
 
 export const STATUS_LABELS: Record<ReportStatus, string> = {
   draft: "پیش‌نویس",
-  submitted: "ارسال شده",
+  submitted: "تأیید سرپرست / ارسال‌شده",
   under_review: "در حال بررسی",
-  approved: "تأیید شده",
+  approved: "قفل‌شده",
   rejected: "رد شده",
 };
+
+export function openCorrectionRequest(projectId: string, reportId: string, reason: string) {
+  return apiJson<CorrectionRequest>(`${base(projectId)}/${reportId}/correction-requests/`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export function fetchReportVersions(projectId: string, reportId: string) {
+  return apiJson<
+    Array<{
+      report_id: string;
+      version_number: number;
+      is_current: boolean;
+      status: ReportStatus;
+      is_locked: boolean;
+    }>
+  >(`${base(projectId)}/${reportId}/versions/`);
+}
+
+export function fetchMaterialReconciliation(projectId: string, reportId: string) {
+  return apiJson<{
+    items: Array<{
+      material_entry_id: string;
+      status: "match" | "mismatch" | "insufficient_data";
+      consumed_qty: string;
+      available_balance: string | null;
+    }>;
+  }>(`${base(projectId)}/${reportId}/materials/reconciliation/`);
+}
 
 export const WEATHER_META: Record<WeatherCondition, { label: string; icon: string }> = {
   sunny: { label: "آفتابی", icon: "☀️" },

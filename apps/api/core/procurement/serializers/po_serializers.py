@@ -29,6 +29,11 @@ class InternalTransferSerializer(serializers.ModelSerializer):
     target_block_code = serializers.CharField(source='target_block.block_code', read_only=True)
     material_name = serializers.CharField(source='material.material_name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    quantity = serializers.DecimalField(
+        max_digits=18,
+        decimal_places=4,
+        min_value=Decimal('0.0001'),
+    )
 
     class Meta:
         model = InternalTransfer
@@ -44,11 +49,32 @@ class InternalTransferSerializer(serializers.ModelSerializer):
             'status_display', 'created_at', 'updated_at',
         ]
 
+    def _project_id(self):
+        view = self.context.get('view')
+        if view is not None and hasattr(view, 'get_project_id'):
+            return str(view.get_project_id())
+        request = self.context.get('request')
+        if request is not None and getattr(request, 'project_id', None) is not None:
+            return str(request.project_id)
+        raise serializers.ValidationError('Project context is required.')
+
     def validate(self, attrs):
-        if attrs.get('source_block') == attrs.get('target_block'):
-            raise serializers.ValidationError(
-                {'target_block': 'Source and target blocks must be different.'}
-            )
+        project_id = self._project_id()
+        source = attrs.get('source_block', getattr(self.instance, 'source_block', None))
+        target = attrs.get('target_block', getattr(self.instance, 'target_block', None))
+        material = attrs.get('material', getattr(self.instance, 'material', None))
+
+        errors = {}
+        if source is not None and str(source.project_id) != project_id:
+            errors['source_block'] = 'Source block must belong to this project.'
+        if target is not None and str(target.project_id) != project_id:
+            errors['target_block'] = 'Target block must belong to this project.'
+        elif source is not None and target is not None and source == target:
+            errors['target_block'] = 'Source and target blocks must be different.'
+        if material is not None and str(material.project_id) != project_id:
+            errors['material'] = 'Material must belong to this project.'
+        if errors:
+            raise serializers.ValidationError(errors)
         return attrs
 
 

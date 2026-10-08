@@ -8,6 +8,7 @@ import {
 } from "@/app/contexts/project-context";
 import { fetchIPC, formatFaAmount } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
+import { IPCCollectionsPanel } from "@/components/contracts/IPCCollectionsPanel";
 import { IPCDeductionsTable } from "@/components/contracts/IPCDeductionsTable";
 import { IPCLineItemsTable } from "@/components/contracts/IPCLineItemsTable";
 import { IPCWorkflowBar } from "@/components/contracts/IPCWorkflowBar";
@@ -120,6 +121,12 @@ function IPCDetailContent() {
           onUpdated={refresh}
         />
       </section>
+
+      <IPCCollectionsPanel
+        projectId={projectId}
+        ipcId={ipcId}
+        canEdit={canEditIpc}
+      />
     </div>
   );
 }

@@ -23,12 +23,22 @@ export interface GanttBaseline {
   id: string;
   name: string;
   is_current: boolean;
+  is_locked?: boolean;
+}
+
+export interface GanttCriticalPath {
+  valid: boolean;
+  reason_codes: string[];
+  message_key: string;
+  critical_activity_ids: string[];
+  near_critical_activity_ids: string[];
 }
 
 export interface GanttData {
   tasks: GanttTask[];
   baseline_name: string;
   baselines?: GanttBaseline[];
+  critical_path?: GanttCriticalPath;
   project_start: string | null;
   project_end: string | null;
 }

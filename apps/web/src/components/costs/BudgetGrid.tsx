@@ -16,6 +16,7 @@ import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { WbsPackageMetaWarning } from "@/components/wbs/wbs-package-meta-warning";
 
 type GridMode = "wbs" | "activity";
 
@@ -51,7 +52,6 @@ export function BudgetGrid({
   const { data: wbsFlat = [], isLoading: wbsLoading, isError: wbsError, refetch: refetchWbs } = useQuery({
     queryKey: ["wbs-flat", projectId],
     queryFn: () => fetchWBSFlat(projectId),
-    enabled: mode === "wbs",
   });
 
   const { data: activitiesData, isLoading: actLoading, isError: actError, refetch: refetchActs } = useQuery({
@@ -158,8 +158,8 @@ export function BudgetGrid({
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const isLoading = budgetsLoading || (mode === "wbs" ? wbsLoading : actLoading);
-  const isError = budgetsError || (mode === "wbs" ? wbsError : actError);
+  const isLoading = budgetsLoading || wbsLoading || (mode === "activity" && actLoading);
+  const isError = budgetsError || wbsError || (mode === "activity" && actError);
   const hasEdits = Object.keys(edits).length > 0;
 
   if (isLoading) {
@@ -177,6 +177,13 @@ export function BudgetGrid({
     );
   }
 
+  const packageMetaNodes =
+    mode === "wbs"
+      ? wbsFlat
+      : wbsFlat.filter((w) =>
+          (activitiesData?.results ?? []).some((a) => a.wbs_id === w.wbs_id),
+        );
+
   return (
     <div className="space-y-4" data-testid="budget-grid">
       {budgetData?.warning ? (
@@ -184,6 +191,8 @@ export function BudgetGrid({
           {budgetData.warning}
         </p>
       ) : null}
+
+      <WbsPackageMetaWarning nodes={packageMetaNodes} testId="budget-wbs-meta-warning" />
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex gap-2">

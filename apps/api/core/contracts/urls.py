@@ -1,5 +1,6 @@
 from django.urls import path
 
+from contracts.collection_views import IPCCollectionDetailView, IPCCollectionListCreateView
 from contracts.views import (
     ChangeOrderApproveView,
     ChangeOrderDetailView,
@@ -55,4 +56,14 @@ urlpatterns = [
     path('ipcs/<uuid:pk>/pay/', IPCPayView.as_view(), name='ipc-pay'),
     path('ipcs/<uuid:pk>/reject/', IPCRejectView.as_view(), name='ipc-reject'),
     path('ipcs/<uuid:pk>/pdf/', IPCPdfView.as_view(), name='ipc-pdf'),
+    path(
+        'ipcs/<uuid:pk>/collections/',
+        IPCCollectionListCreateView.as_view(),
+        name='ipc-collection-list',
+    ),
+    path(
+        'ipcs/<uuid:pk>/collections/<uuid:collection_id>/',
+        IPCCollectionDetailView.as_view(),
+        name='ipc-collection-detail',
+    ),
 ]

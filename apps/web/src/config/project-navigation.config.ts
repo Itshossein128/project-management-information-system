@@ -32,6 +32,11 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           path: `${base}/schedule/${PATHS.PROJECT_GANTT}`,
         },
         {
+          label: "Schedule status",
+          labelI18nKey: "nav.scheduleStatus",
+          path: `${base}/schedule/${PATHS.PROJECT_SCHEDULE_STATUS}`,
+        },
+        {
           label: "Progress",
           labelI18nKey: "nav.projectProgress",
           path: `${base}/${PATHS.PROJECT_PROGRESS}`,
@@ -139,7 +144,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "users" as IconName,
       path: `${base}/${PATHS.PROJECT_EQUIPMENT_UTILIZATION}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!equipment-utilization|equipment-log|labor-productivity|personnel-summary|manpower|labor-camp|leave-requests|overtime-requests)`,
+      activePathExclude: `${base}/(?!equipment-utilization|equipment-log|labor-productivity|personnel-summary|manpower|labor-camp|leave-requests|overtime-requests|resource-allocations)`,
       children: [
         {
           label: "Equipment utilization",
@@ -170,6 +175,11 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Labor camp",
           labelI18nKey: "nav.projectLaborCamp",
           path: `${base}/${PATHS.PROJECT_LABOR_CAMP}`,
+        },
+        {
+          label: "Allocations",
+          labelI18nKey: "nav.projectAllocations",
+          path: `${base}/${PATHS.PROJECT_ALLOCATIONS}`,
         },
         {
           label: "Leave",

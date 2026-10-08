@@ -16,6 +16,30 @@ class ProjectStatus(models.TextChoices):
     HANDED_OVER = 'handed_over', 'Handed over'
 
 
+class ProjectCurrency(models.TextChoices):
+    IRR = 'IRR', 'Rial'
+    IRT = 'IRT', 'Toman'
+
+
+class CapabilityMode(models.TextChoices):
+    REQUIRED = 'required', 'Required'
+    OPTIONAL = 'optional', 'Optional'
+    DISABLED = 'disabled', 'Disabled'
+
+
+# Seed catalog for per-project capability toggles (FR-CORE-012).
+CAPABILITY_CATALOG = (
+    'risk',
+    'economic',
+    'procurement',
+    'cash_flow',
+    'documents',
+    'alerts',
+    'subcontractors',
+    'hr',
+)
+
+
 class Project(UUIDModel, TimeStampedModel):
     project_code = models.CharField(max_length=30, unique=True)
     project_name = models.CharField(max_length=200)
@@ -34,6 +58,11 @@ class Project(UUIDModel, TimeStampedModel):
     planned_finish_date = models.DateField(null=True, blank=True)
     contract_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     contract_type = models.CharField(max_length=60, blank=True, default='')
+    currency = models.CharField(
+        max_length=3,
+        choices=ProjectCurrency.choices,
+        default=ProjectCurrency.IRR,
+    )
     status = models.CharField(
         max_length=30,
         choices=ProjectStatus.choices,
@@ -45,6 +74,13 @@ class Project(UUIDModel, TimeStampedModel):
         blank=True,
         default=None,
         help_text='Maximum WBS depth for this project. Null means unlimited.',
+    )
+    owning_unit = models.ForeignKey(
+        'master_data.OrganizationUnit',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='owned_projects',
     )
 
     class Meta:
@@ -63,13 +99,49 @@ class Project(UUIDModel, TimeStampedModel):
         return self.project_code
 
 
-class WBS(UUIDModel, MP_Node):
+class WBSStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    ACTIVE = 'active', 'Active'
+    COMPLETED = 'completed', 'Completed'
+    ON_HOLD = 'on_hold', 'On hold'
+
+
+class WBS(UUIDModel, TimeStampedModel, MP_Node):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='wbs_nodes')
     wbs_code = models.CharField(max_length=30)
     wbs_name = models.CharField(max_length=200)
     weight_physical = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     weight_financial = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     description = models.TextField(blank=True, default='')
+    responsible = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='responsible_wbs_nodes',
+    )
+    acceptance_criteria = models.TextField(blank=True, default='')
+    status = models.CharField(
+        max_length=20,
+        choices=WBSStatus.choices,
+        default=WBSStatus.ACTIVE,
+    )
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
 
     node_order_by = ['wbs_code']
 
@@ -81,6 +153,80 @@ class WBS(UUIDModel, MP_Node):
 
     def __str__(self):
         return f'{self.wbs_code} — {self.wbs_name}'
+
+    def soft_delete(self, user=None):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        # Free unique (project, wbs_code) while retaining the row.
+        self.wbs_code = f'd_{self.pk.hex[:28]}'
+        update_fields = ['is_deleted', 'deleted_at', 'wbs_code']
+        if user is not None:
+            self.updated_by = user
+            update_fields.append('updated_by')
+        self.save(update_fields=update_fields)
+
+
+class ProjectCapabilitySetting(UUIDModel, TimeStampedModel):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='capability_settings')
+    capability_key = models.CharField(max_length=64)
+    enabled = models.BooleanField(default=True)
+    mode = models.CharField(
+        max_length=20,
+        choices=CapabilityMode.choices,
+        default=CapabilityMode.OPTIONAL,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='+',
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+
+    class Meta:
+        db_table = 'project_capability_settings'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'capability_key'],
+                name='uniq_project_capability_key',
+            ),
+        ]
+
+    @property
+    def is_effectively_disabled(self) -> bool:
+        return (not self.enabled) or self.mode == CapabilityMode.DISABLED
+
+
+class FiscalPeriodLock(UUIDModel, TimeStampedModel):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='fiscal_period_locks')
+    period_start = models.DateField()
+    period_end = models.DateField()
+    closed_at = models.DateTimeField()
+    closed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='fiscal_locks_closed',
+    )
+    reason = models.TextField()
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'fiscal_period_locks'
+        ordering = ['-period_end', '-closed_at']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        if self.period_end < self.period_start:
+            raise ValidationError({'period_end': 'period_end must be >= period_start'})
+        if not self.reason or len(self.reason.strip()) < 3:
+            raise ValidationError({'reason': 'reason must be at least 3 characters'})
+
 
 
 class ActivityStatus(models.TextChoices):
@@ -108,6 +254,17 @@ class Activity(AuditSoftDeleteModel):
     planned_finish = models.DateField(null=True, blank=True)
     actual_start = models.DateField(null=True, blank=True)
     actual_finish = models.DateField(null=True, blank=True)
+    duration_days = models.IntegerField(null=True, blank=True)
+    is_milestone = models.BooleanField(default=False)
+    forecast_start = models.DateField(null=True, blank=True)
+    forecast_finish = models.DateField(null=True, blank=True)
+    working_calendar = models.ForeignKey(
+        'schedule.WorkingCalendar',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='activities',
+    )
     responsible = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -184,3 +341,40 @@ class ActivityRelation(AuditSoftDeleteModel):
 
     def __str__(self):
         return f'{self.predecessor_id} -> {self.successor_id} ({self.relation_type})'
+
+
+class StakeholderStatus(models.TextChoices):
+    ACTIVE = 'active', 'Active'
+    INACTIVE = 'inactive', 'Inactive'
+
+
+class Stakeholder(AuditSoftDeleteModel):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='stakeholders')
+    name = models.CharField(max_length=200)
+    organization_name = models.CharField(max_length=200, blank=True, default='')
+    role = models.CharField(max_length=120, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    phone = models.CharField(max_length=40, blank=True, default='')
+    influence = models.PositiveSmallIntegerField(null=True, blank=True)
+    interest = models.PositiveSmallIntegerField(null=True, blank=True)
+    communication_need = models.TextField(blank=True, default='')
+    status = models.CharField(
+        max_length=20,
+        choices=StakeholderStatus.choices,
+        default=StakeholderStatus.ACTIVE,
+    )
+
+    class Meta:
+        db_table = 'stakeholders'
+        ordering = ['name']
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+
+        for field in ('influence', 'interest'):
+            value = getattr(self, field)
+            if value is not None and not (1 <= int(value) <= 5):
+                raise ValidationError({field: 'Must be between 1 and 5'})
+
+    def __str__(self):
+        return self.name

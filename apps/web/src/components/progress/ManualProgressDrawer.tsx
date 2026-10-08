@@ -1,13 +1,16 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { fetchActivities } from "@/app/lib/api/activities";
 import { postManualProgress } from "@/app/lib/api/progress";
+import { fetchWBSFlat } from "@/app/lib/api/wbs";
 import { Field, Input, Select, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { isIncompleteWorkPackage } from "@/components/wbs/wbs-package-meta-warning";
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -24,6 +27,7 @@ export function ManualProgressDrawer({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [activityId, setActivityId] = useState("");
   const [reportDate, setReportDate] = useState(todayIso());
@@ -43,6 +47,12 @@ export function ManualProgressDrawer({
   const { data: activitiesData, isLoading } = useQuery({
     queryKey: ["activities", projectId, "manual-progress"],
     queryFn: () => fetchActivities(projectId, { page: 1, per_page: 200 }),
+    enabled: open,
+  });
+
+  const { data: wbsFlat = [] } = useQuery({
+    queryKey: ["wbs-flat", projectId],
+    queryFn: () => fetchWBSFlat(projectId),
     enabled: open,
   });
 
@@ -66,6 +76,13 @@ export function ManualProgressDrawer({
   });
 
   const activities = activitiesData?.results ?? [];
+  const selectedActivity = activities.find((a) => a.activity_id === activityId);
+  const selectedWbs = selectedActivity
+    ? wbsFlat.find((w) => w.wbs_id === selectedActivity.wbs_id)
+    : undefined;
+  const showPackageMetaWarn = Boolean(
+    selectedWbs && isIncompleteWorkPackage(selectedWbs),
+  );
   const progressNum = actualProgress === "" ? NaN : Number(actualProgress);
   const progressOutOfRange =
     actualProgress !== "" &&
@@ -121,6 +138,15 @@ export function ManualProgressDrawer({
             }))}
           />
         )}
+
+        {showPackageMetaWarn ? (
+          <p
+            className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:border-warning-800 dark:bg-warning-950/40 dark:text-warning-100"
+            data-testid="progress-wbs-meta-warning"
+          >
+            {t("wbs.packageMetaSingle")}
+          </p>
+        ) : null}
 
         <JalaliDatePicker
           name="manual_progress_date"

@@ -1,10 +1,138 @@
 from django.conf import settings
 from django.db import models, transaction
 
-from common.models import TimeStampedModel, UUIDModel
+from common.models import AuditSoftDeleteModel, TimeStampedModel, UUIDModel
 
 
-class BaselineSchedule(UUIDModel):
+class WorkingCalendar(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='working_calendars',
+    )
+    name = models.CharField(max_length=120)
+    is_default = models.BooleanField(default=False)
+    work_monday = models.BooleanField(default=True)
+    work_tuesday = models.BooleanField(default=True)
+    work_wednesday = models.BooleanField(default=True)
+    work_thursday = models.BooleanField(default=True)
+    work_friday = models.BooleanField(default=True)
+    work_saturday = models.BooleanField(default=False)
+    work_sunday = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'working_calendars'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class CalendarException(AuditSoftDeleteModel):
+    calendar = models.ForeignKey(
+        WorkingCalendar,
+        on_delete=models.CASCADE,
+        related_name='exceptions',
+    )
+    exception_date = models.DateField()
+    is_working = models.BooleanField(default=False)
+    name = models.CharField(max_length=120, blank=True, default='')
+
+    class Meta:
+        db_table = 'calendar_exceptions'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['calendar', 'exception_date'],
+                condition=models.Q(is_deleted=False),
+                name='unique_active_calendar_exception_date',
+            ),
+        ]
+        ordering = ['exception_date']
+
+    def __str__(self):
+        return f'{self.exception_date} ({self.calendar_id})'
+
+
+class ScheduleChangeRequestStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+
+
+class ScheduleChangeRequest(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='schedule_change_requests',
+    )
+    base_baseline = models.ForeignKey(
+        'schedule.BaselineSchedule',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='change_requests_as_base',
+    )
+    reason = models.TextField(blank=True, default='')
+    milestone_impact = models.TextField(blank=True, default='')
+    cost_impact = models.TextField(blank=True, default='')
+    contract_impact = models.TextField(blank=True, default='')
+    status = models.CharField(
+        max_length=20,
+        choices=ScheduleChangeRequestStatus.choices,
+        default=ScheduleChangeRequestStatus.DRAFT,
+    )
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='schedule_change_requests_decided',
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_notes = models.TextField(blank=True, default='')
+    resulting_baseline = models.ForeignKey(
+        'schedule.BaselineSchedule',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='change_requests_resulting',
+    )
+
+    class Meta:
+        db_table = 'schedule_change_requests'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'SCR {self.id} ({self.status})'
+
+
+class ScheduleChangeItem(UUIDModel):
+    change_request = models.ForeignKey(
+        ScheduleChangeRequest,
+        on_delete=models.CASCADE,
+        related_name='items',
+    )
+    activity = models.ForeignKey(
+        'projects.Activity',
+        on_delete=models.CASCADE,
+        related_name='schedule_change_items',
+    )
+    proposed_planned_start = models.DateField(null=True, blank=True)
+    proposed_planned_finish = models.DateField(null=True, blank=True)
+    proposed_duration_days = models.IntegerField(null=True, blank=True)
+    proposed_forecast_start = models.DateField(null=True, blank=True)
+    proposed_forecast_finish = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'schedule_change_items'
+
+
+class BaselineSchedule(AuditSoftDeleteModel):
+    """Approved/locked baseline versions. Soft-delete only — never hard-delete history."""
+
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='baselines')
     version_name = models.CharField(max_length=60, blank=True, default='')
     approved_at = models.DateField(null=True, blank=True)
@@ -16,6 +144,22 @@ class BaselineSchedule(UUIDModel):
         related_name='approved_baselines',
     )
     is_current = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default=False)
+    locked_at = models.DateTimeField(null=True, blank=True)
+    locked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='locked_baselines',
+    )
+    source_change_request = models.ForeignKey(
+        'schedule.ScheduleChangeRequest',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='produced_baselines',
+    )
 
     class Meta:
         db_table = 'baseline_schedules'
@@ -24,7 +168,7 @@ class BaselineSchedule(UUIDModel):
         becoming_current = False
         if self.pk:
             try:
-                old = BaselineSchedule.objects.get(pk=self.pk)
+                old = BaselineSchedule.all_objects.get(pk=self.pk)
                 becoming_current = self.is_current and not old.is_current
             except BaselineSchedule.DoesNotExist:
                 becoming_current = self.is_current
@@ -46,8 +190,14 @@ class BaselineSchedule(UUIDModel):
 
             compute_baseline_progress.delay(str(self.pk))
 
+    def delete(self, using=None, keep_parents=False):
+        """Hard delete is forbidden; always soft-delete to preserve history (FR-009)."""
+        self.soft_delete()
+
 
 class BaselineActivity(UUIDModel):
+    """Snapshot row owned by a baseline. Retained while baseline exists (incl. soft-deleted parent)."""
+
     baseline = models.ForeignKey(BaselineSchedule, on_delete=models.CASCADE, related_name='baseline_activities')
     activity = models.ForeignKey('projects.Activity', on_delete=models.CASCADE, related_name='baseline_entries')
     planned_start = models.DateField(null=True, blank=True)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
-from projects.models import Project, ProjectStatus
+from projects.models import FiscalPeriodLock, Project, ProjectCapabilitySetting, ProjectStatus
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
@@ -25,6 +25,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
             'start_date',
             'planned_finish_date',
             'contract_amount',
+            'currency',
             'member_count',
         ]
 
@@ -53,9 +54,11 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'planned_finish_date',
             'contract_amount',
             'contract_type',
+            'currency',
             'status',
             'cut_off_date',
             'max_depth',
+            'owning_unit',
             'created_at',
             'updated_at',
         ]
@@ -74,6 +77,7 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             'planned_finish_date',
             'contract_amount',
             'contract_type',
+            'currency',
             'location',
             'start_date',
         ]
@@ -109,8 +113,10 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
             'planned_finish_date',
             'contract_amount',
             'contract_type',
+            'currency',
             'status',
             'cut_off_date',
+            'owning_unit',
         ]
 
     def validate_status(self, value):
@@ -121,3 +127,32 @@ class ProjectUpdateSerializer(serializers.ModelSerializer):
 
 # Backward-compatible alias
 ProjectSerializer = ProjectDetailSerializer
+
+
+class ProjectCapabilitySettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectCapabilitySetting
+        fields = [
+            'capability_key',
+            'enabled',
+            'mode',
+            'updated_at',
+            'updated_by',
+        ]
+        read_only_fields = ['capability_key', 'updated_at', 'updated_by']
+
+
+class FiscalPeriodLockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FiscalPeriodLock
+        fields = [
+            'id',
+            'period_start',
+            'period_end',
+            'reason',
+            'closed_at',
+            'closed_by',
+            'is_active',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'closed_at', 'closed_by', 'is_active', 'created_at']

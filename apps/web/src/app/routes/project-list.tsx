@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FolderKanban } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { fetchPortfolioSummary } from "@/app/lib/api/central-data";
 import { fetchProjects, type ProjectListItem } from "@/app/lib/api/projects";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
@@ -27,6 +28,10 @@ export default function ProjectListPage() {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects"],
     queryFn: fetchProjects,
+  });
+  const { data: portfolio } = useQuery({
+    queryKey: ["portfolio-summary"],
+    queryFn: fetchPortfolioSummary,
   });
 
   const projects = data?.results ?? [];
@@ -93,6 +98,19 @@ export default function ProjectListPage() {
           </Link>
         }
       />
+
+      {portfolio ? (
+        <p className='mb-4 text-sm text-muted-foreground' data-testid='portfolio-summary'>
+          {t("centralData.portfolioCount", "تعداد پروژه‌های قابل مشاهده")}:{" "}
+          {portfolio.totals.project_count}
+          {Object.entries(portfolio.totals_by_currency).map(([cur, bucket]) => (
+            <span key={cur} className='ms-3'>
+              {cur}: {t("centralData.budget", "بودجه")}{" "}
+              {Number(bucket.total_budget).toLocaleString("fa-IR")}
+            </span>
+          ))}
+        </p>
+      ) : null}
 
       {isError ? (
         <QueryErrorState onRetry={() => void refetch()} />

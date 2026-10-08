@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
+import { asList, fetchContractTypes } from "@/app/lib/api/central-data";
 import { createContract } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
 import {
@@ -26,6 +27,14 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
   const { has } = usePermission(projectId);
   const canEdit = has("edit_contracts");
   const [values, setValues] = useState<ContractFormValues>(EMPTY_CONTRACT_FORM);
+  const { data: catalogTypes } = useQuery({
+    queryKey: ["contract-types"],
+    queryFn: fetchContractTypes,
+  });
+  const contractTypeOptions = asList(catalogTypes ?? []).map((ct) => ({
+    value: ct.id,
+    label: ct.name_fa || ct.name_en || ct.code,
+  }));
 
   const save = useMutation({
     mutationFn: () => createContract(projectId, formToContractPayload(values)),
@@ -53,6 +62,7 @@ function ContractFormPage({ mode }: { mode: "create" | "edit" }) {
       <ContractForm
         values={values}
         onChange={(patch) => setValues((prev) => ({ ...prev, ...patch }))}
+        contractTypeOptions={contractTypeOptions}
       />
       <div className="flex gap-2">
         <Button variant="primary" loading={save.isPending} onClick={() => save.mutate()}>

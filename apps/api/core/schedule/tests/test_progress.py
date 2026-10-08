@@ -38,6 +38,8 @@ class TestProgressService:
             project=project,
             version_name='BL1',
             is_current=True,
+            created_by=user,
+            updated_by=user,
         )
         BaselineActivity.objects.create(
             baseline=baseline,

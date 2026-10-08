@@ -24,6 +24,8 @@ class TestGanttService:
             project=project,
             version_name='BL-1',
             is_current=True,
+            created_by=user,
+            updated_by=user,
         )
         BaselineActivity.objects.create(
             baseline=baseline,
@@ -43,6 +45,9 @@ class TestGanttService:
         assert data['project_start'] == '2024-01-01'
         assert data['project_end'] == '2024-01-31'
         assert len(data['tasks']) == 1
+        assert 'critical_path' in data
+        assert isinstance(data['critical_path'], dict)
+        assert 'valid' in data['critical_path']
 
         task = data['tasks'][0]
         assert task['id'] == activity.activity_code
@@ -97,6 +102,8 @@ class TestGanttAPI:
         assert resp.status_code == status.HTTP_200_OK
         assert 'tasks' in resp.data
         assert 'baselines' in resp.data
+        assert 'critical_path' in resp.data
+        assert 'valid' in resp.data['critical_path']
         assert len(resp.data['tasks']) >= 1
 
     def test_gantt_pdf_endpoint(self, auth_client, project, activity):

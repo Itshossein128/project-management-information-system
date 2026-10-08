@@ -7,6 +7,7 @@ import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/ap
 export interface ContractFormValues {
   contract_number: string;
   contract_type: string;
+  contract_type_ref: string;
   counterparty: string;
   start_date: string;
   finish_date: string;
@@ -28,6 +29,7 @@ export interface ContractFormValues {
 export const EMPTY_CONTRACT_FORM: ContractFormValues = {
   contract_number: "",
   contract_type: "main",
+  contract_type_ref: "",
   counterparty: "",
   start_date: "",
   finish_date: "",
@@ -80,10 +82,12 @@ export function ContractForm({
   values,
   onChange,
   disabled,
+  contractTypeOptions,
 }: {
   values: ContractFormValues;
   onChange: (patch: Partial<ContractFormValues>) => void;
   disabled?: boolean;
+  contractTypeOptions?: { value: string; label: string }[];
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -95,6 +99,16 @@ export function ContractForm({
           onChange={(e) => onChange({ contract_number: e.target.value })}
         />
       </FormField>
+      {contractTypeOptions && contractTypeOptions.length > 0 ? (
+        <Select
+          name="contract_type_ref"
+          label="نوع (کاتالوگ)"
+          value={values.contract_type_ref}
+          disabled={disabled}
+          options={[{ value: "", label: "—" }, ...contractTypeOptions]}
+          onChange={(e) => onChange({ contract_type_ref: e.target.value })}
+        />
+      ) : null}
       <Select
         name="contract_type"
         label="نوع"
@@ -263,6 +277,7 @@ export function contractDetailToForm(c: {
   return {
     contract_number: c.contract_number ?? "",
     contract_type: c.contract_type ?? "main",
+    contract_type_ref: (c as { contract_type_ref?: string | null }).contract_type_ref ?? "",
     counterparty: c.counterparty ?? "",
     start_date: c.start_date ?? "",
     finish_date: c.finish_date ?? "",
@@ -289,6 +304,7 @@ export function formToContractPayload(values: ContractFormValues): Record<string
   return {
     contract_number: values.contract_number,
     contract_type: values.contract_type,
+    contract_type_ref: values.contract_type_ref || null,
     counterparty: values.counterparty,
     start_date: values.start_date || null,
     finish_date: values.finish_date || null,

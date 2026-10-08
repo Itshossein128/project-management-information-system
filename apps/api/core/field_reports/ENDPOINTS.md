@@ -19,25 +19,32 @@ Base path: `daily-reports/`
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `daily-reports/` | GET | List reports. Filters: `date_from`, `date_to`, `status`, `prepared_by`. Ordered by `-report_date`. |
-| `daily-reports/` | POST | Create header. **Unique constraint:** one non-deleted report per `(project, report_date, shift)`. Returns `409`-style `ConflictError` on duplicate. |
-| `daily-reports/{pk}/` | GET | Full report with prefetched child rows (activities, labor, equipment, materials, concrete, labor-camp, incidents). |
-| `daily-reports/{pk}/` | PATCH | Update header. Only allowed when status is `draft` or `rejected`. |
+| `daily-reports/` | GET | List reports. Filters: `date_from`, `date_to`, `status`, `prepared_by`, `lineage_id`, `is_current` (default `true` on list). Ordered by `-report_date`. |
+| `daily-reports/` | POST | Create header (`work_front`, `location_notes`, …). **Unique constraint:** one non-deleted **current** report per `(project, report_date, shift)`. Returns `409` `duplicate_current_report` on duplicate. |
+| `daily-reports/{pk}/` | GET | Full report with child rows; includes `is_locked`, `lineage_id`, `version_number`, `is_current`. |
+| `daily-reports/{pk}/` | PATCH | Update header. Only `draft`/`rejected`. Approved → `report_locked`. |
 | `daily-reports/{pk}/` | DELETE | Soft-delete. Only allowed when status is `draft`. |
-| `daily-reports/{pk}/submit/` | POST | Submit for approval. Validates at least one activity, equipment start/end pairs, and labor-camp counts before transition. |
+| `daily-reports/{pk}/submit/` | POST | Submit for approval. Validates activities (unset≠zero), equipment pairs, labor-camp counts. |
 | `daily-reports/{pk}/review/` | POST | Mark `under_review`. Body: optional `notes`. Requires current status `submitted`. |
-| `daily-reports/{pk}/approve/` | POST | Approve. Requires `submitted` or `under_review`. Triggers progress recalculation (Celery / event consumer). |
+| `daily-reports/{pk}/approve/` | POST | Approve (**locks**). Requires `submitted` or `under_review`. Progress recalc + closes open correction for result report. |
 | `daily-reports/{pk}/reject/` | POST | Reject. Body: `reason` (min 10 chars). Requires `submitted` or `under_review`. |
 | `daily-reports/{pk}/pdf/` | GET | Export report as PDF attachment. |
-| `daily-reports/sync-batch/` | POST | Offline batch sync (see below). |
+| `daily-reports/{pk}/versions/` | GET | All versions sharing `lineage_id`. |
+| `daily-reports/{pk}/correction-requests/` | GET/POST | List or open correction (reason ≥ 10 chars) from **approved current**; clones draft version. |
+| `daily-reports/{pk}/materials/reconciliation/` | GET | Advisory consumption vs inventory balance (`match`/`mismatch`/`insufficient_data`). |
+| `correction-requests/{id}/cancel/` | POST | Cancel open correction; restore source as current. |
+| `daily-reports/sync-batch/` | POST | Offline batch sync (see below). Conflicts on approved **current**. |
 
 ### Approval workflow
 
 ```
 draft ──submit──► submitted ──review──► under_review
   ▲                    │                      │
-  │                    └────approve───────────┘──► approved
+  │                    └────approve───────────┘──► approved (locked)
   └────reject (reason ≥ 10 chars)◄── submitted / under_review
+
+approved ──correction-request──► new draft version (is_current) ──► … ──► approved
+prior approved remains readable (is_current=false)
 ```
 
 Rejected reports return to an editable state (`draft`-equivalent for PATCH/child edits).
@@ -48,19 +55,19 @@ Nested under `daily-reports/{report_pk}/`. All child writes require parent statu
 
 | Path suffix | Methods | Notes |
 | :--- | :--- | :--- |
-| `activities/` | GET, POST | Activity progress rows |
+| `activities/` | GET, POST | Includes `responsible_user`/`responsible_name`; `quantity_measured` unset≠zero |
 | `activities/{pk}/` | PATCH, DELETE | Soft-delete |
-| `labor/` | GET, POST | Supports **batch POST** (array body) with upsert keys `(labor_category, job_title)` |
+| `labor/` | GET, POST | Batch upsert; optional `absence_count` (null = not recorded) |
 | `labor/{pk}/` | PATCH, DELETE | |
 | `equipment/` | GET, POST | |
 | `equipment/{pk}/` | PATCH, DELETE | |
-| `materials/` | GET, POST | Includes optional `unit_cost` |
+| `materials/` | GET, POST | Types: `receipt`/`issue`/`waste`/`return`; optional `consumption_location` |
 | `materials/{pk}/` | PATCH, DELETE | |
 | `concrete-logs/` | GET, POST | |
 | `concrete-logs/{pk}/` | PATCH, DELETE | |
 | `labor-camp/` | GET, POST | |
 | `labor-camp/{pk}/` | PATCH, DELETE | |
-| `incidents/` | GET, POST | |
+| `incidents/` | GET, POST | Types include `site_instruction`/`barrier`; `follow_up_owner_*`, `due_date` |
 | `incidents/{pk}/` | PATCH, DELETE | |
 
 ### Offline sync (`sync-batch`)

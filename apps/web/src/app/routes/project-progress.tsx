@@ -22,6 +22,7 @@ import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer
 import { ProgressHistoryTable } from "@/components/progress/ProgressHistoryTable";
 import { SCurveChart } from "@/components/progress/SCurveChart";
 import { Button } from "@/components/ui/sprint-button";
+import { WbsEmptyBanner } from "@/components/wbs/wbs-empty-banner";
 import { fetchEconomicForecast, formatFaAmount } from "@/app/lib/api/economic";
 import { PATHS } from "@/app/routeVars";
 
@@ -151,6 +152,8 @@ function ProgressPageContent() {
           </Button>
         ) : null}
       </div>
+
+      <WbsEmptyBanner projectId={projectId} />
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[260px] flex-1">

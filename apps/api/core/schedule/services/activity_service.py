@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from config.exceptions import ConflictError
 from projects.models import Activity, ActivityStatus, WBS
-from schedule.models import ActivityProgress, BaselineActivity, BaselineSchedule
+from schedule.models import ActivityProgress
 
 
 def get_wbs_descendant_ids(project_id, wbs_id: UUID) -> list[UUID]:
@@ -73,7 +73,7 @@ def filter_activities_queryset(qs: QuerySet, project_id, params) -> QuerySet:
 def base_activity_queryset(project_id):
     return (
         Activity.objects.filter(project_id=project_id)
-        .select_related('wbs', 'responsible', 'unit', 'project')
+        .select_related('wbs', 'responsible', 'unit', 'project', 'working_calendar')
         .annotate(
             predecessor_count=Count(
                 'predecessor_relations',
@@ -141,22 +141,13 @@ def update_activity(activity: Activity, user, **fields) -> Activity:
 
 
 def get_activity_network(project_id) -> dict:
+    from schedule.services.critical_path_validity import evaluate_critical_path_validity
+
     activities = list(
         Activity.objects.filter(project_id=project_id).order_by('activity_code'),
     )
-    current_baseline = BaselineSchedule.objects.filter(
-        project_id=project_id,
-        is_current=True,
-    ).first()
-
-    critical_ids: set = set()
-    if current_baseline:
-        critical_ids = set(
-            BaselineActivity.objects.filter(
-                baseline=current_baseline,
-                is_critical=True,
-            ).values_list('activity_id', flat=True),
-        )
+    validity = evaluate_critical_path_validity(project_id)
+    critical_ids = set(validity.get('critical_activity_ids') or []) if validity.get('valid') else set()
 
     nodes = [
         {
@@ -166,7 +157,7 @@ def get_activity_network(project_id) -> dict:
             'status': act.status,
             'planned_start': act.planned_start.isoformat() if act.planned_start else None,
             'planned_finish': act.planned_finish.isoformat() if act.planned_finish else None,
-            'is_critical': act.id in critical_ids,
+            'is_critical': str(act.id) in critical_ids,
         }
         for act in activities
     ]
@@ -182,7 +173,10 @@ def get_activity_network(project_id) -> dict:
         }
         for rel in ActivityRelation.objects.filter(
             predecessor__project_id=project_id,
+            predecessor__is_deleted=False,
+            successor__is_deleted=False,
+            is_deleted=False,
         ).select_related('predecessor', 'successor')
     ]
 
-    return {'nodes': nodes, 'edges': edges}
+    return {'nodes': nodes, 'edges': edges, 'critical_path': validity}

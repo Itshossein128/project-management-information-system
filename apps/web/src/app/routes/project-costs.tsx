@@ -7,6 +7,7 @@ import { fetchCostSummary, formatFaAmount } from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { ActualCostsTab } from "@/components/costs/ActualCostsTab";
 import { BudgetGrid } from "@/components/costs/BudgetGrid";
+import { CBSCommitmentTab } from "@/components/costs/CBSCommitmentTab";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
 import { VarianceTab } from "@/components/costs/VarianceTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
@@ -16,13 +17,14 @@ import { KPICard } from "@/components/progress/KPICard";
 import { Button } from "@/components/ui/sprint-button";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Tab = "budget" | "actual" | "variance" | "pools";
+type Tab = "budget" | "actual" | "variance" | "pools" | "cbs";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "budget", label: "بودجه" },
   { id: "actual", label: "هزینه‌های واقعی" },
   { id: "variance", label: "واریانس" },
   { id: "pools", label: "استخر هزینه" },
+  { id: "cbs", label: "CBS / تعهد" },
 ];
 
 function CostsContent() {
@@ -126,6 +128,9 @@ function CostsContent() {
         </ShadcnTabsContent>
         <ShadcnTabsContent value="pools" className="mt-0">
           <CostPoolTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="cbs" className="mt-0">
+          <CBSCommitmentTab projectId={projectId} canEdit={canEdit} />
         </ShadcnTabsContent>
       </Tabs>
     </div>

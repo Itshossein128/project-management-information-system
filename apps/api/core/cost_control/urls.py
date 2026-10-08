@@ -1,5 +1,11 @@
 from django.urls import path
 
+from cost_control.cbs_views import (
+    CBSDetailView,
+    CBSListCreateView,
+    CommitmentViewSet,
+    PaymentListCreateView,
+)
 from cost_control.views import (
     ActualCostViewSet,
     BudgetBulkView,
@@ -21,6 +27,9 @@ pool_list = CostPoolViewSet.as_view({'get': 'list', 'post': 'create'})
 pool_detail = CostPoolViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 supplier_list = SupplierViewSet.as_view({'get': 'list', 'post': 'create'})
 supplier_detail = SupplierViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+commitment_list = CommitmentViewSet.as_view({'get': 'list', 'post': 'create'})
+commitment_detail = CommitmentViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+commitment_approve = CommitmentViewSet.as_view({'post': 'approve'})
 
 urlpatterns = [
     path('budgets/', budget_list, name='budget-list'),
@@ -36,6 +45,12 @@ urlpatterns = [
     path('cost-pools/<uuid:pk>/auto-allocate/', CostPoolAutoAllocateView.as_view(), name='cost-pool-auto-allocate'),
     path('suppliers/', supplier_list, name='supplier-list'),
     path('suppliers/<uuid:pk>/', supplier_detail, name='supplier-detail'),
+    path('cbs/', CBSListCreateView.as_view(), name='cbs-list'),
+    path('cbs/<uuid:pk>/', CBSDetailView.as_view(), name='cbs-detail'),
+    path('commitments/', commitment_list, name='commitment-list'),
+    path('commitments/<uuid:pk>/', commitment_detail, name='commitment-detail'),
+    path('commitments/<uuid:pk>/approve/', commitment_approve, name='commitment-approve'),
+    path('payments/', PaymentListCreateView.as_view(), name='payment-list'),
 ]
 
 global_urlpatterns = [

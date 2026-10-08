@@ -12,6 +12,8 @@ import {
 export interface HeaderState {
   report_date: string;
   shift: ReportShift;
+  work_front: string;
+  location_notes: string;
   site_status: SiteStatus;
   weather_condition: WeatherCondition | null;
   temp_max: string;
@@ -23,6 +25,8 @@ export function emptyHeaderState(): HeaderState {
   return {
     report_date: new Date().toISOString().slice(0, 10),
     shift: "full",
+    work_front: "",
+    location_notes: "",
     site_status: "active",
     weather_condition: "sunny",
     temp_max: "",
@@ -35,6 +39,8 @@ export function headerToPayload(state: HeaderState): HeaderPayload {
   return {
     report_date: state.report_date,
     shift: state.shift,
+    work_front: state.work_front,
+    location_notes: state.location_notes,
     site_status: state.site_status,
     weather_condition: state.weather_condition,
     temp_max: state.temp_max === "" ? null : state.temp_max,
@@ -169,6 +175,33 @@ export function ReportHeader({
               onChange={(e) => set("temp_min", e.target.value)}
             />
           </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="report-work-front" className="mb-1 block text-sm text-muted-foreground">
+            محل / جبهه کاری
+          </label>
+          <Input
+            id="report-work-front"
+            name="work_front"
+            value={value.work_front}
+            disabled={readOnly}
+            onChange={(e) => set("work_front", e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="report-location-notes" className="mb-1 block text-sm text-muted-foreground">
+            توضیح محل
+          </label>
+          <Input
+            id="report-location-notes"
+            name="location_notes"
+            value={value.location_notes}
+            disabled={readOnly}
+            onChange={(e) => set("location_notes", e.target.value)}
+          />
         </div>
       </div>
 

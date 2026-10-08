@@ -243,6 +243,8 @@ def execute_p6_import(
         project=project,
         version_name=f'P6 Import — {filename} — {timezone.now().strftime("%Y-%m-%d %H:%M")}',
         is_current=True,
+        created_by=audit_user,
+        updated_by=audit_user,
     )
 
     baseline_activities_to_create = []

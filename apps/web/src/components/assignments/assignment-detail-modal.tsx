@@ -72,6 +72,7 @@ export function AssignmentDetailModal(props: {
                 {a.status ?? "—"}
               </div>
             </div>
+            {Object.prototype.hasOwnProperty.call(a, "wage") ? (
             <div id="container-assignmentDetail-wage">
               <div id="text-assignmentDetailLabel-wage" className="text-xs text-muted-foreground">
                 {t("assignmentDetail.wage")}
@@ -80,6 +81,8 @@ export function AssignmentDetailModal(props: {
                 {a.wage ?? "—"}
               </div>
             </div>
+            ) : null}
+            {Object.prototype.hasOwnProperty.call(a, "weekly_total") ? (
             <div id="container-assignmentDetail-weeklyTotal">
               <div id="text-assignmentDetailLabel-weeklyTotal" className="text-xs text-muted-foreground">
                 {t("assignmentDetail.weeklyTotal")}
@@ -88,6 +91,8 @@ export function AssignmentDetailModal(props: {
                 {a.weekly_total ?? "—"}
               </div>
             </div>
+            ) : null}
+            {Object.prototype.hasOwnProperty.call(a, "monthly_total") ? (
             <div id="container-assignmentDetail-monthlyTotal">
               <div id="text-assignmentDetailLabel-monthlyTotal" className="text-xs text-muted-foreground">
                 {t("assignmentDetail.monthlyTotal")}
@@ -96,6 +101,7 @@ export function AssignmentDetailModal(props: {
                 {a.monthly_total ?? "—"}
               </div>
             </div>
+            ) : null}
             <div id="container-assignmentDetail-tools">
               <div id="text-assignmentDetailLabel-tools" className="text-xs text-muted-foreground">
                 {t("assignmentDetail.tools")}

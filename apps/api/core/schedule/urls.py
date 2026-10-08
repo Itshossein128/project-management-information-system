@@ -1,6 +1,24 @@
 from django.urls import path
 
 from schedule.activity_views import ActivityViewSet
+from schedule.baseline_views import (
+    BaselineActivityDetailView,
+    BaselineApproveLockView,
+    BaselineListCreateView,
+)
+from schedule.calendar_views import (
+    CalendarExceptionDetailView,
+    CalendarExceptionListCreateView,
+    WorkingCalendarDetailView,
+    WorkingCalendarListCreateView,
+)
+from schedule.change_request_views import (
+    ScheduleChangeRequestApproveView,
+    ScheduleChangeRequestDetailView,
+    ScheduleChangeRequestListCreateView,
+    ScheduleChangeRequestRejectView,
+    ScheduleChangeRequestSubmitView,
+)
 from schedule.progress_views import (
     ProjectActivityProgressView,
     ProjectManualProgressView,
@@ -10,6 +28,7 @@ from schedule.progress_views import (
     ProjectSCurveView,
 )
 from schedule.gantt_views import GanttDataView, GanttPdfView
+from schedule.status_views import ScheduleStatusView
 from schedule.views import (
     MspImportPreviewView,
     MspImportStartView,
@@ -39,6 +58,59 @@ urlpatterns = [
         activity_relation_delete,
         name='activity-relation-delete',
     ),
+    path('working-calendars/', WorkingCalendarListCreateView.as_view(), name='working-calendar-list'),
+    path(
+        'working-calendars/<uuid:calendar_id>/',
+        WorkingCalendarDetailView.as_view(),
+        name='working-calendar-detail',
+    ),
+    path(
+        'working-calendars/<uuid:calendar_id>/exceptions/',
+        CalendarExceptionListCreateView.as_view(),
+        name='calendar-exception-list',
+    ),
+    path(
+        'working-calendars/<uuid:calendar_id>/exceptions/<uuid:exception_id>/',
+        CalendarExceptionDetailView.as_view(),
+        name='calendar-exception-detail',
+    ),
+    path('baselines/', BaselineListCreateView.as_view(), name='baseline-list'),
+    path(
+        'baselines/<uuid:baseline_id>/approve-lock/',
+        BaselineApproveLockView.as_view(),
+        name='baseline-approve-lock',
+    ),
+    path(
+        'baselines/<uuid:baseline_id>/activities/<uuid:ba_id>/',
+        BaselineActivityDetailView.as_view(),
+        name='baseline-activity-detail',
+    ),
+    path(
+        'schedule-change-requests/',
+        ScheduleChangeRequestListCreateView.as_view(),
+        name='schedule-change-request-list',
+    ),
+    path(
+        'schedule-change-requests/<uuid:scr_id>/',
+        ScheduleChangeRequestDetailView.as_view(),
+        name='schedule-change-request-detail',
+    ),
+    path(
+        'schedule-change-requests/<uuid:scr_id>/submit/',
+        ScheduleChangeRequestSubmitView.as_view(),
+        name='schedule-change-request-submit',
+    ),
+    path(
+        'schedule-change-requests/<uuid:scr_id>/approve/',
+        ScheduleChangeRequestApproveView.as_view(),
+        name='schedule-change-request-approve',
+    ),
+    path(
+        'schedule-change-requests/<uuid:scr_id>/reject/',
+        ScheduleChangeRequestRejectView.as_view(),
+        name='schedule-change-request-reject',
+    ),
+    path('schedule-status/', ScheduleStatusView.as_view(), name='schedule-status'),
     path('import/msp/preview/', MspImportPreviewView.as_view(), name='msp-import-preview'),
     path('import/msp/', MspImportStartView.as_view(), name='msp-import-start'),
     path('import/msp/status/<uuid:task_id>/', MspImportStatusView.as_view(), name='msp-import-status'),

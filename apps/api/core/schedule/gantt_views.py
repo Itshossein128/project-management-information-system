@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from permissions.project import HasProjectPermission, IsProjectMember
 from schedule.models import BaselineSchedule
+from schedule.services.critical_path_validity import evaluate_critical_path_validity
 from schedule.services.gantt_service import get_gantt_data
 
 
@@ -18,12 +19,20 @@ class GanttDataView(APIView):
         baseline_id = request.query_params.get('baseline_id')
         data = get_gantt_data(project_pk, baseline_id)
         baselines = list(
-            BaselineSchedule.objects.filter(project_id=project_pk).values('id', 'version_name', 'is_current')
+            BaselineSchedule.objects.filter(project_id=project_pk).values(
+                'id', 'version_name', 'is_current', 'is_locked',
+            )
         )
         data['baselines'] = [
-            {'id': str(b['id']), 'name': b['version_name'] or str(b['id']), 'is_current': b['is_current']}
+            {
+                'id': str(b['id']),
+                'name': b['version_name'] or str(b['id']),
+                'is_current': b['is_current'],
+                'is_locked': b['is_locked'],
+            }
             for b in baselines
         ]
+        data['critical_path'] = evaluate_critical_path_validity(project_pk)
         return Response(data)
 
 

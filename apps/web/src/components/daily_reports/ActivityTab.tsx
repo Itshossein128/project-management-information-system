@@ -59,6 +59,7 @@ export function ActivityTab({
     { key: "quantity", header: "مقدار", type: "number", width: "90px" },
     { key: "quantity_measured", header: "اندازه‌گیری شده", type: "checkbox", width: "60px" },
     { key: "unit", header: "واحد", width: "80px" },
+    { key: "responsible_name", header: "مسئول", width: "120px" },
     { key: "photo_file", header: "عکس", type: "photo", width: "90px" },
   ];
 
@@ -99,6 +100,7 @@ export function ActivityTab({
         quantity: null,
         quantity_measured: true,
         unit: "",
+        responsible_name: "",
         photo_file: null,
       })}
       toPayload={(row: GridRow) => ({
@@ -114,6 +116,7 @@ export function ActivityTab({
         quantity: row.quantity_measured ? row.quantity ?? null : null,
         quantity_measured: row.quantity_measured ?? true,
         unit: row.unit ?? "",
+        responsible_name: row.responsible_name ?? "",
         photo_file: row.photo_file ?? null,
       })}
       onChanged={onChanged}

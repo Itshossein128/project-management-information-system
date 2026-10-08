@@ -140,6 +140,17 @@ class ProjectMemberReadSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if request is not None and request.user.is_authenticated:
+            from permissions.project import member_has_codename
+
+            if not member_has_codename(request.user, instance.project_id, 'view_wage'):
+                for key in ('wage', 'wage_type', 'weekly_total', 'monthly_total'):
+                    data.pop(key, None)
+        return data
+
 
 class ProjectMemberWriteSerializer(serializers.ModelSerializer):
     job_position = serializers.PrimaryKeyRelatedField(source='position', queryset=ProjectPosition.objects.all())
@@ -156,6 +167,19 @@ class ProjectMemberWriteSerializer(serializers.ModelSerializer):
         project_pk = self.context.get('project_pk')
         if project_pk is not None:
             self.fields['job_position'].queryset = ProjectPosition.objects.filter(project_id=project_pk)
+
+    def validate(self, attrs):
+        wage_fields = {'wage', 'wage_type', 'weekly_total', 'monthly_total'}
+        if wage_fields.intersection(self.initial_data.keys()):
+            request = self.context.get('request')
+            project_pk = self.context.get('project_pk')
+            if request is not None and project_pk is not None:
+                from permissions.project import member_has_codename
+                from rest_framework.exceptions import PermissionDenied
+
+                if not member_has_codename(request.user, project_pk, 'edit_wage'):
+                    raise PermissionDenied('Wage fields require edit_wage permission.')
+        return super().validate(attrs)
 
 
 class ProjectMemberCreateSerializer(serializers.Serializer):
@@ -185,10 +209,25 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError(list(exc.messages)) from exc
         return value
 
+    def validate(self, attrs):
+        wage_fields = {'wage', 'wage_type', 'weekly_total', 'monthly_total'}
+        if wage_fields.intersection(getattr(self, 'initial_data', {}).keys()):
+            request = self.context.get('request')
+            project_pk = self.context.get('project_pk')
+            if request is not None and project_pk is not None:
+                from permissions.project import member_has_codename
+                from rest_framework.exceptions import PermissionDenied
+
+                if not member_has_codename(request.user, project_pk, 'edit_wage'):
+                    raise PermissionDenied('Wage fields require edit_wage permission.')
+        return attrs
+
     def create(self, validated_data):
         from business_meta.assignment_services import create_assignment_for_user
+        from permissions.project import member_has_codename
 
         project_pk = self.context['project_pk']
+        request = self.context.get('request')
         phone = validated_data['phone_number'].strip()
         full_name = validated_data.get('full_name') or ''
         position = validated_data['job_position']
@@ -202,14 +241,25 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
             user.full_name = full_name
             user.save(update_fields=['full_name'])
 
+        can_edit_wage = (
+            request is not None
+            and member_has_codename(request.user, project_pk, 'edit_wage')
+        )
+        wage = validated_data.get('wage', 0) if can_edit_wage else 0
+        wage_type = (
+            validated_data.get('wage_type', WageType.HOURLY) if can_edit_wage else WageType.HOURLY
+        )
+        weekly_total = validated_data.get('weekly_total', 0) if can_edit_wage else 0
+        monthly_total = validated_data.get('monthly_total', 0) if can_edit_wage else 0
+
         return create_assignment_for_user(
             project_id=project_pk,
             user=user,
             position=position,
-            wage=validated_data.get('wage', 0),
-            wage_type=validated_data.get('wage_type', WageType.HOURLY),
-            weekly_total=validated_data.get('weekly_total', 0),
-            monthly_total=validated_data.get('monthly_total', 0),
+            wage=wage,
+            wage_type=wage_type,
+            weekly_total=weekly_total,
+            monthly_total=monthly_total,
             tools=validated_data.get('tools') or [],
             start_date=validated_data.get('start_date'),
             end_date=validated_data.get('end_date'),

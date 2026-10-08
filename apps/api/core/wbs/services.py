@@ -7,11 +7,15 @@ from projects.models import Activity, Project, WBS
 
 
 class WBSConflictError(Exception):
-    pass
+    def __init__(self, message, code='conflict'):
+        super().__init__(message)
+        self.code = code
 
 
 class WBSValidationError(Exception):
-    pass
+    def __init__(self, message, code='validation_error'):
+        super().__init__(message)
+        self.code = code
 
 
 def get_project_roots(project_id):
@@ -19,7 +23,7 @@ def get_project_roots(project_id):
     Retrieves all root nodes (depth=1) of the WBS tree for a specific project.
     Root nodes have no parent and represent the highest level of the breakdown structure.
     """
-    return WBS.get_root_nodes().filter(project_id=project_id)
+    return WBS.get_root_nodes().filter(project_id=project_id, is_deleted=False)
 
 
 def _sibling_weight_sum(parent, field: str) -> Decimal:
@@ -74,6 +78,24 @@ def check_weight_warnings(parent, project_id, field: str = 'weight_physical') ->
     return warnings
 
 
+def _resolve_responsible_id(project_id, responsible_id):
+    if responsible_id is None:
+        return None
+    from master_data.models import MemberStatus, ProjectMember
+
+    is_active_member = ProjectMember.objects.filter(
+        project_id=project_id,
+        user_id=responsible_id,
+        status=MemberStatus.ACTIVE,
+    ).exists()
+    if not is_active_member:
+        raise WBSValidationError(
+            'responsible must be an active project member.',
+            code='invalid_responsible',
+        )
+    return responsible_id
+
+
 @transaction.atomic
 def create_wbs_node(
     *,
@@ -84,6 +106,10 @@ def create_wbs_node(
     weight_physical=None,
     weight_financial=None,
     description: str = '',
+    responsible=None,
+    acceptance_criteria: str = '',
+    status: str = 'active',
+    created_by=None,
 ) -> tuple[WBS, list[str]]:
     """
     Creates a new WBS node within the tree hierarchy and attaches it to a project.
@@ -91,13 +117,13 @@ def create_wbs_node(
     If parent_id is provided, it's added as a child; otherwise, it's created as a root node.
     """
     wbs_code = wbs_code.strip()
-    if WBS.objects.filter(project_id=project_id, wbs_code=wbs_code).exists():
+    if WBS.objects.filter(project_id=project_id, wbs_code=wbs_code, is_deleted=False).exists():
         raise WBSValidationError('wbs_code must be unique within the project.')
 
     parent = None
     new_depth = 1
     if parent_id:
-        parent = WBS.objects.get(pk=parent_id, project_id=project_id)
+        parent = WBS.objects.get(pk=parent_id, project_id=project_id, is_deleted=False)
         new_depth = parent.depth + 1
 
     project = Project.objects.get(pk=project_id)
@@ -106,25 +132,26 @@ def create_wbs_node(
             f'WBS depth {new_depth} exceeds project maximum of {project.max_depth}.'
         )
 
+    responsible_id = _resolve_responsible_id(project_id, responsible)
+
+    create_kwargs = dict(
+        project_id=project_id,
+        wbs_code=wbs_code,
+        wbs_name=wbs_name,
+        weight_physical=weight_physical,
+        weight_financial=weight_financial,
+        description=description or '',
+        responsible_id=responsible_id,
+        acceptance_criteria=acceptance_criteria or '',
+        status=status or 'active',
+        created_by=created_by,
+        updated_by=created_by,
+    )
     if parent:
-        node = parent.add_child(
-            project_id=project_id,
-            wbs_code=wbs_code,
-            wbs_name=wbs_name,
-            weight_physical=weight_physical,
-            weight_financial=weight_financial,
-            description=description,
-        )
+        node = parent.add_child(**create_kwargs)
         warnings = check_weight_warnings(parent, project_id)
     else:
-        node = WBS.add_root(
-            project_id=project_id,
-            wbs_code=wbs_code,
-            wbs_name=wbs_name,
-            weight_physical=weight_physical,
-            weight_financial=weight_financial,
-            description=description,
-        )
+        node = WBS.add_root(**create_kwargs)
         warnings = check_weight_warnings(None, project_id)
 
     propagate_project_wbs_codes(project_id)
@@ -138,8 +165,16 @@ def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
     any weight warnings based on its siblings. Returns the updated node
     and a list of warnings (if any).
     """
+    if 'responsible' in fields:
+        fields['responsible_id'] = _resolve_responsible_id(node.project_id, fields.pop('responsible'))
     for key, value in fields.items():
-        if value is not None or key in ('weight_physical', 'weight_financial'):
+        if value is not None or key in (
+            'weight_physical',
+            'weight_financial',
+            'acceptance_criteria',
+            'description',
+            'responsible_id',
+        ):
             setattr(node, key, value)
     node.save()
     parent = node.get_parent()
@@ -147,18 +182,56 @@ def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
     return node, warnings
 
 
+def assert_wbs_node_deletable(node: WBS) -> None:
+    """Raise WBSConflictError with stable code if node has blocking dependencies."""
+    if node.get_children().filter(is_deleted=False).exists():
+        raise WBSConflictError(
+            'Cannot delete a WBS node that has children.',
+            code='wbs_has_children',
+        )
+
+    activities = Activity.objects.filter(wbs=node, is_deleted=False)
+    if activities.exists():
+        from schedule.models import ActivityProgress
+
+        if ActivityProgress.objects.filter(activity__in=activities).exists():
+            raise WBSConflictError(
+                'Cannot delete a WBS node that has progress recorded.',
+                code='wbs_has_progress',
+            )
+        raise WBSConflictError(
+            'Cannot delete a WBS node that has activities attached.',
+            code='wbs_has_activities',
+        )
+
+    from cost_control.models import ActualCost, Budget
+
+    if Budget.objects.filter(wbs=node, is_deleted=False).exists() or ActualCost.objects.filter(
+        wbs=node, is_deleted=False
+    ).exists():
+        raise WBSConflictError(
+            'Cannot delete a WBS node linked to cost records.',
+            code='wbs_has_cost',
+        )
+
+    from documents.models import ProjectDocument
+
+    if ProjectDocument.objects.filter(related_wbs=node, is_deleted=False).exists():
+        raise WBSConflictError(
+            'Cannot delete a WBS node linked to documents.',
+            code='wbs_has_documents',
+        )
+
+
 @transaction.atomic
-def delete_wbs_node(node: WBS) -> None:
+def delete_wbs_node(node: WBS, user=None) -> None:
     """
-    Deletes a WBS node provided it has no children or associated activities.
+    Soft-deletes a WBS node when no blocking dependencies exist.
     After successful deletion, it propagates WBS codes for the project.
     """
-    if node.numchild > 0:
-        raise WBSConflictError('Cannot delete a WBS node that has children.')
-    if Activity.objects.filter(wbs=node).exists():
-        raise WBSConflictError('Cannot delete a WBS node that has activities attached.')
+    assert_wbs_node_deletable(node)
     project_id = node.project_id
-    node.delete()
+    node.soft_delete(user=user)
     propagate_project_wbs_codes(project_id)
 
 
@@ -172,7 +245,7 @@ def propagate_project_wbs_codes(project_id) -> None:
     (project, wbs_code) unique constraint (PostgreSQL checks UNIQUE per row).
     """
     # ⚡ Bolt: Iterative single-query traversal instead of recursive N+1 query pattern
-    qs = WBS.objects.filter(project_id=project_id).order_by('path')
+    qs = WBS.objects.filter(project_id=project_id, is_deleted=False).order_by('path')
 
     annotated = WBS.get_annotated_list_qs(qs)
 
@@ -219,6 +292,13 @@ def propagate_project_wbs_codes(project_id) -> None:
     WBS.objects.bulk_update([node for node, _ in updates], ['wbs_code'], batch_size=1000)
 
 
+def _would_create_cycle(node: WBS, new_parent: WBS) -> bool:
+    if new_parent.pk == node.pk:
+        return True
+    # Descendants share path prefix with node in MP_Node trees.
+    return new_parent.path.startswith(node.path)
+
+
 @transaction.atomic
 def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     """
@@ -228,7 +308,7 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     """
     target_parent = None
     if new_parent_id:
-        target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id)
+        target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id, is_deleted=False)
 
     pos = position.replace('-', '_')
 
@@ -247,6 +327,12 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     if target_parent is None:
         raise WBSValidationError(f'new_parent_id is required for {pos} position.')
 
+    if _would_create_cycle(node, target_parent):
+        raise WBSValidationError(
+            'Cannot move a WBS node under itself or its descendant.',
+            code='wbs_cycle',
+        )
+
     node.move(target_parent, pos=pos_map[pos])
 
     propagate_project_wbs_codes(node.project_id)
@@ -258,4 +344,4 @@ def build_tree_queryset(project_id):
     Retrieves the entire WBS tree for a specific project, ordered sequentially
     by its hierarchical path to maintain tree structure.
     """
-    return WBS.objects.filter(project_id=project_id).order_by('path')
+    return WBS.objects.filter(project_id=project_id, is_deleted=False).order_by('path')

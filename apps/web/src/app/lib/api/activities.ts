@@ -24,6 +24,11 @@ export interface Activity {
   planned_finish: string | null;
   actual_start: string | null;
   actual_finish: string | null;
+  forecast_start: string | null;
+  forecast_finish: string | null;
+  duration_days: number | null;
+  is_milestone: boolean;
+  working_calendar_id: string | null;
   planned_duration: number | null;
   actual_duration: number | null;
   is_overdue: boolean;
@@ -60,6 +65,11 @@ export interface ActivityPayload {
   planned_finish?: string | null;
   actual_start?: string | null;
   actual_finish?: string | null;
+  forecast_start?: string | null;
+  forecast_finish?: string | null;
+  duration_days?: number | null;
+  is_milestone?: boolean;
+  working_calendar_id?: string | null;
   responsible_id?: string | null;
   status?: ActivityStatus;
   description?: string;
@@ -92,6 +102,13 @@ export interface NetworkEdge {
 export interface ActivityNetwork {
   nodes: NetworkNode[];
   edges: NetworkEdge[];
+  critical_path?: {
+    valid: boolean;
+    reason_codes: string[];
+    message_key: string | null;
+    critical_activity_ids: string[];
+    near_critical_activity_ids: string[];
+  };
 }
 
 export interface ActivityListParams {
@@ -172,6 +189,11 @@ export function activityToPayload(activity: Activity): ActivityPayload {
     planned_finish: activity.planned_finish,
     actual_start: activity.actual_start,
     actual_finish: activity.actual_finish,
+    forecast_start: activity.forecast_start,
+    forecast_finish: activity.forecast_finish,
+    duration_days: activity.duration_days,
+    is_milestone: activity.is_milestone,
+    working_calendar_id: activity.working_calendar_id,
     responsible_id: activity.responsible_id,
     status: activity.status,
     description: activity.description ?? "",

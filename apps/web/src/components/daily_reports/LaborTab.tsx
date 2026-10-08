@@ -22,6 +22,7 @@ interface Draft {
   shift_3_count: number;
   work_hours: number | "";
   overtime_hours: number | "";
+  absence_count: number | "";
 }
 
 const numInput =
@@ -48,6 +49,7 @@ function rowsForCategory(
       shift_3_count: row?.shift_3_count ?? 0,
       work_hours: row?.work_hours ?? "",
       overtime_hours: row?.overtime_hours ?? "",
+      absence_count: row?.absence_count ?? "",
     };
   });
   // Any remaining existing rows are custom titles.
@@ -61,6 +63,7 @@ function rowsForCategory(
     shift_3_count: row.shift_3_count,
     work_hours: row.work_hours ?? "",
     overtime_hours: row.overtime_hours ?? "",
+    absence_count: row.absence_count ?? "",
   }));
   return [...fixed, ...custom];
 }
@@ -130,6 +133,7 @@ function CategoryPanel({
         shift_3_count: 0,
         work_hours: "",
         overtime_hours: "",
+        absence_count: "",
       },
     ]);
   };
@@ -151,6 +155,7 @@ function CategoryPanel({
         shift_3_count: d.shift_3_count,
         work_hours: d.work_hours === "" ? null : d.work_hours,
         overtime_hours: d.overtime_hours === "" ? null : d.overtime_hours,
+        absence_count: d.absence_count === "" ? null : d.absence_count,
       }));
     if (payload.length === 0) {
       if (!silent) {
@@ -198,6 +203,7 @@ function CategoryPanel({
               <th className="px-2 py-2 text-center font-medium">شیفت ۳</th>
               <th className="px-2 py-2 text-center font-medium">ساعات کار</th>
               <th className="px-2 py-2 text-center font-medium">اضافه‌کار</th>
+              <th className="px-2 py-2 text-center font-medium">غیبت</th>
               <th className="px-2 py-2 text-center font-medium">جمع</th>
             </tr>
           </thead>
@@ -231,12 +237,12 @@ function CategoryPanel({
                       />
                     </td>
                   ))}
-                  {(["work_hours", "overtime_hours"] as const).map((f) => (
+                  {(["work_hours", "overtime_hours", "absence_count"] as const).map((f) => (
                     <td key={f} className="px-2 py-1 text-center">
                       <input
                         type="number"
                         min={0}
-                        step={0.5}
+                        step={f === "absence_count" ? 1 : 0.5}
                         className={numInput}
                         value={d[f]}
                         disabled={readOnly}
@@ -258,7 +264,7 @@ function CategoryPanel({
           <tfoot>
             <tr className="border-t border-border bg-muted/30 font-semibold">
               <td className="px-2 py-2 text-right">جمع کل</td>
-              <td colSpan={5} />
+              <td colSpan={6} />
               <td className="px-2 py-2 text-center">{total}</td>
             </tr>
           </tfoot>
