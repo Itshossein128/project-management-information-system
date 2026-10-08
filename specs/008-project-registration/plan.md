@@ -64,7 +64,7 @@ specs/008-project-registration/
 │   └── commitment-and-baseline-gates.md
 ├── checklists/
 │   └── requirements.md
-└── tasks.md                 # /speckit-tasks
+└── tasks.md                 # this command
 ```
 
 ### Source Code (repository root)

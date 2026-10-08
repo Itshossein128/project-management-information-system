@@ -10,9 +10,13 @@ from common.models import AuditSoftDeleteModel, TimeStampedModel, UUIDModel
 
 
 class ProjectStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    PENDING_APPROVAL = 'pending_approval', 'Pending approval'
     ACTIVE = 'active', 'Active'
     SUSPENDED = 'suspended', 'Suspended'
     COMPLETED = 'completed', 'Completed'
+    ARCHIVED = 'archived', 'Archived'
+    # Legacy synonym retained for migration/read compatibility only.
     HANDED_OVER = 'handed_over', 'Handed over'
 
 
@@ -43,6 +47,9 @@ CAPABILITY_CATALOG = (
 class Project(UUIDModel, TimeStampedModel):
     project_code = models.CharField(max_length=30, unique=True)
     project_name = models.CharField(max_length=200)
+    purpose = models.TextField(blank=True, default='')
+    scope_description = models.TextField(blank=True, default='')
+    main_deliverables = models.TextField(blank=True, default='')
     employer = models.CharField(max_length=120, blank=True, default='')
     contractor = models.CharField(max_length=120, blank=True, default='')
     consultant = models.CharField(max_length=120, blank=True, default='')
@@ -58,6 +65,7 @@ class Project(UUIDModel, TimeStampedModel):
     planned_finish_date = models.DateField(null=True, blank=True)
     contract_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     contract_type = models.CharField(max_length=60, blank=True, default='')
+    contract_number = models.CharField(max_length=60, blank=True, default='')
     currency = models.CharField(
         max_length=3,
         choices=ProjectCurrency.choices,
@@ -66,7 +74,15 @@ class Project(UUIDModel, TimeStampedModel):
     status = models.CharField(
         max_length=30,
         choices=ProjectStatus.choices,
-        default=ProjectStatus.ACTIVE,
+        default=ProjectStatus.DRAFT,
+    )
+    budget_approved_at = models.DateTimeField(null=True, blank=True)
+    budget_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_approved_projects',
     )
     cut_off_date = models.DateField(null=True, blank=True)
     max_depth = models.PositiveIntegerField(
@@ -86,6 +102,9 @@ class Project(UUIDModel, TimeStampedModel):
     class Meta:
         db_table = 'projects'
         ordering = ['project_name']
+        indexes = [
+            models.Index(fields=['status'], name='projects_status_idx'),
+        ]
 
     def __str__(self):
         return self.project_name
@@ -97,6 +116,75 @@ class Project(UUIDModel, TimeStampedModel):
     @property
     def slug(self):
         return self.project_code
+
+
+class ProjectChangeRequestStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+    CANCELLED = 'cancelled', 'Cancelled'
+
+
+PROTECTED_PROJECT_FIELDS = frozenset({
+    'start_date',
+    'planned_finish_date',
+    'contract_amount',
+    'employer',
+    'scope_description',
+})
+
+
+class ProjectKickoffCharter(AuditSoftDeleteModel):
+    project = models.OneToOneField(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='kickoff_charter',
+    )
+    justification = models.TextField(blank=True, default='')
+    success_criteria = models.TextField(blank=True, default='')
+    constraints = models.TextField(blank=True, default='')
+    assumptions = models.TextField(blank=True, default='')
+    key_stakeholders_summary = models.TextField(blank=True, default='')
+    pm_authority = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'project_kickoff_charters'
+
+
+class ProjectChangeRequest(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='change_requests',
+    )
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=ProjectChangeRequestStatus.choices,
+        default=ProjectChangeRequestStatus.DRAFT,
+    )
+    proposed_changes = models.JSONField(default=dict, blank=True)
+    previous_values = models.JSONField(default=dict, blank=True)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='project_change_requests_requested',
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='project_change_requests_decided',
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'project_change_requests'
+        ordering = ['-requested_at']
 
 
 class WBSStatus(models.TextChoices):

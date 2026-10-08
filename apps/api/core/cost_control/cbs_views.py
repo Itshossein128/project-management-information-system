@@ -77,6 +77,14 @@ class CommitmentViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
+    def perform_create(self, serializer, **kwargs):
+        from projects.models import Project
+        from projects.readiness import assert_project_allows_binding_commitment
+
+        project = Project.objects.get(pk=self.get_project_id())
+        assert_project_allows_binding_commitment(project)
+        super().perform_create(serializer, **kwargs)
+
     @extend_schema(summary='Approve commitment', tags=['Central Data'])
     def approve(self, request, project_pk=None, pk=None):
         commitment = self.get_object()

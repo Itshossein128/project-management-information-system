@@ -6,7 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from config.exceptions import ConflictError
-from projects.models import Activity
+from projects.models import Activity, Project
+from projects.readiness import assert_project_allows_definitive_baseline
 from schedule.models import BaselineActivity, BaselineSchedule
 
 
@@ -78,6 +79,9 @@ def soft_delete_baseline(baseline: BaselineSchedule, user=None) -> None:
 def approve_lock_baseline(baseline: BaselineSchedule, user) -> BaselineSchedule:
     if baseline.is_locked:
         raise ConflictError('Baseline is already locked.', code='baseline_already_locked')
+
+    project = Project.objects.get(pk=baseline.project_id)
+    assert_project_allows_definitive_baseline(project)
 
     now = timezone.now()
     BaselineSchedule.objects.filter(

@@ -194,6 +194,8 @@ export function createActualCost(
     supplier?: string | null;
     cost_type?: string;
     confidence_level?: string;
+    corrective?: boolean;
+    correction_reason?: string;
   },
 ) {
   return apiJson<ActualCostRow>(`${base(projectId)}/costs/`, {

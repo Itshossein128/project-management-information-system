@@ -72,6 +72,7 @@ export const ROUTES = {
   PROJECT_SYNC_CONFLICTS: "routes/sync-conflicts.tsx",
   SETTINGS_TEMPLATES: "routes/settings-templates.tsx",
   SETTINGS_ROLES: "routes/settings-roles.tsx",
+  SETTINGS_ORG_REFS: "routes/settings-org-refs.tsx",
   BUSINESS_SETUP_SCHEMA: "routes/business-setup-schema.tsx",
   USERS: "routes/hr/users.tsx",
   BUSINESS_BUILDINGS: "routes/business-buildings.tsx",
@@ -141,6 +142,7 @@ export const PATHS = {
   SETTINGS: "settings",
   SETTINGS_TEMPLATES: "templates",
   SETTINGS_ROLES: "roles",
+  SETTINGS_ORG_REFS: "org-refs",
   PROJECT_NEW: "new",
   /** @deprecated use PROJECT_NEW */
   BUSINESS_CREATE: "new",

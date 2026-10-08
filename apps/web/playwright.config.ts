@@ -24,7 +24,8 @@ export default defineConfig({
     },
     {
       command: 'pnpm dev:api',
-      url: 'http://localhost:8000/api/schema/',
+      // /api/schema/ can 500 when spectacular fails on unrelated serializers; docs is enough for readiness.
+      url: 'http://localhost:8000/api/docs/',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
       cwd: '../../',

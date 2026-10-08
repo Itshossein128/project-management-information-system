@@ -1,7 +1,7 @@
 # Verification: Central Data Model (FR-DATA)
 
 **Feature**: `003-central-data-model`  
-**Date**: 2026-10-07
+**Date**: 2026-10-08
 
 Maps success criteria to automated tests.
 
@@ -21,9 +21,11 @@ Maps success criteria to automated tests.
 
 ## Manual UI smoke
 
-- `/projects` portfolio summary strip
-- Costs → CBS / تعهد tab
-- IPC detail → partial collections
-- Contract create → catalog type select
-- Project settings → owning unit
-- `/projects/:id/stakeholders`
+- [x] `/projects` portfolio summary strip
+- [x] Costs → CBS / تعهد tab (`CBSCommitmentTab`)
+- [x] IPC detail → partial collections (`e2e/tests/contracts-ipc.spec.ts`)
+- [x] Contract create → catalog type select
+- [x] Project settings / create wizard → owning unit (`e2e/tests/project-registration.spec.ts`)
+- [x] `/projects/:id/stakeholders`
+- [x] `/settings/org-refs` create OrganizationUnit + ManagedContractType (`e2e/tests/org-refs-admin.spec.ts`)
+- [x] Create wizard contract-type options come from ManagedContractType catalog (`e2e/tests/org-refs-admin.spec.ts`)

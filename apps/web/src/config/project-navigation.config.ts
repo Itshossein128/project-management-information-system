@@ -1,6 +1,52 @@
 import { PATHS } from "@/app/routeVars";
 import type { IconName } from "@/components/icons";
-import type { NavigationItem } from "@/types/navigation";
+import type { NavigationChildItem, NavigationItem } from "@/types/navigation";
+
+/** Path segment (last URL part) → capability_key for FR-CORE-012 nav hiding. */
+export const NAV_PATH_CAPABILITY: Record<string, string> = {
+  "risk-register": "risk",
+  economic: "economic",
+  procurement: "procurement",
+  "cash-flow": "cash_flow",
+  documents: "documents",
+  alerts: "alerts",
+  subcontractors: "subcontractors",
+  manpower: "hr",
+  "leave-requests": "hr",
+  "overtime-requests": "hr",
+  "labor-camp": "hr",
+  "labor-productivity": "hr",
+  "personnel-summary": "hr",
+  "resource-allocations": "hr",
+};
+
+function pathCapability(path: string): string | undefined {
+  const segment = path.split("/").filter(Boolean).pop() ?? "";
+  return NAV_PATH_CAPABILITY[segment];
+}
+
+export function filterNavByCapabilities(
+  items: NavigationItem[],
+  disabledKeys: Set<string>,
+): NavigationItem[] {
+  if (disabledKeys.size === 0) return items;
+  return items
+    .map((item) => {
+      const children = item.children?.filter((child: NavigationChildItem) => {
+        const key = pathCapability(child.path);
+        return !key || !disabledKeys.has(key);
+      });
+      if (item.children && (!children || children.length === 0)) {
+        return null;
+      }
+      const selfKey = pathCapability(item.path);
+      if (selfKey && disabledKeys.has(selfKey) && !item.children) {
+        return null;
+      }
+      return children ? { ...item, children } : item;
+    })
+    .filter((item): item is NavigationItem => item != null);
+}
 
 export function buildProjectNavItems(projectId: string): NavigationItem[] {
   const base = `/${PATHS.PROJECT}/${projectId}`;
@@ -80,11 +126,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Risk & delay",
           labelI18nKey: "nav.projectRiskRegister",
           path: `${base}/${PATHS.PROJECT_RISK_REGISTER}`,
+          capabilityKey: "risk",
         },
         {
           label: "Alerts",
           labelI18nKey: "nav.projectAlerts",
           path: `${base}/${PATHS.PROJECT_ALERTS}`,
+          capabilityKey: "alerts",
         },
       ],
     },
@@ -105,16 +153,19 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Subcontractors",
           labelI18nKey: "nav.projectSubcontractors",
           path: `${base}/${PATHS.PROJECT_SUBCONTRACTORS}`,
+          capabilityKey: "subcontractors",
         },
         {
           label: "Documents",
           labelI18nKey: "nav.projectDocuments",
           path: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
+          capabilityKey: "documents",
         },
         {
           label: "Cash flow",
           labelI18nKey: "nav.projectCashFlow",
           path: `${base}/${PATHS.PROJECT_CASH_FLOW}`,
+          capabilityKey: "cash_flow",
         },
         {
           label: "Cost control",
@@ -130,11 +181,13 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Procurement",
           labelI18nKey: "nav.projectProcurement",
           path: `${base}/${PATHS.PROJECT_PROCUREMENT}`,
+          capabilityKey: "procurement",
         },
         {
           label: "Economic analysis",
           labelI18nKey: "nav.projectEconomic",
           path: `${base}/${PATHS.PROJECT_ECONOMIC}`,
+          capabilityKey: "economic",
         },
       ],
     },
@@ -165,31 +218,37 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Personnel summary",
           labelI18nKey: "nav.projectPersonnelSummary",
           path: `${base}/${PATHS.PROJECT_PERSONNEL_SUMMARY}`,
+          capabilityKey: "hr",
         },
         {
           label: "Manpower",
           labelI18nKey: "nav.projectManpower",
           path: `${base}/${PATHS.PROJECT_MANPOWER}`,
+          capabilityKey: "hr",
         },
         {
           label: "Labor camp",
           labelI18nKey: "nav.projectLaborCamp",
           path: `${base}/${PATHS.PROJECT_LABOR_CAMP}`,
+          capabilityKey: "hr",
         },
         {
           label: "Allocations",
           labelI18nKey: "nav.projectAllocations",
           path: `${base}/${PATHS.PROJECT_ALLOCATIONS}`,
+          capabilityKey: "hr",
         },
         {
           label: "Leave",
           labelI18nKey: "nav.projectLeave",
           path: `${base}/${PATHS.PROJECT_LEAVE}`,
+          capabilityKey: "hr",
         },
         {
           label: "Overtime",
           labelI18nKey: "nav.projectOvertime",
           path: `${base}/${PATHS.PROJECT_OVERTIME}`,
+          capabilityKey: "hr",
         },
       ],
     },

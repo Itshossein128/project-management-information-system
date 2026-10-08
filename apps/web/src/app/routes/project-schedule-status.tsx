@@ -149,6 +149,20 @@ function ScheduleStatusContent() {
 
       <section className="space-y-2">
         <h2 className="text-base font-medium">{t("pages.scheduleStatus.delays")}</h2>
+        <div
+          className="flex flex-wrap gap-4 text-xs text-muted-foreground"
+          data-testid="near-critical-legend"
+          role="note"
+        >
+          <span>
+            <span aria-hidden="true">★ </span>
+            {t("pages.scheduleStatus.legendCritical")}
+          </span>
+          <span>
+            <span aria-hidden="true">~ </span>
+            {t("pages.scheduleStatus.legendNearCritical")}
+          </span>
+        </div>
         {data.delays.length === 0 ? (
           <EmptyState title={t("pages.scheduleStatus.emptyDelays")} />
         ) : (
@@ -181,7 +195,11 @@ function ScheduleStatusContent() {
                   <tr key={d.activity_id} className="border-t">
                     <td className="px-3 py-2">
                       {d.activity_code}
-                      {d.is_critical ? " ★" : d.is_near_critical ? " ~" : ""}
+                      {d.is_critical
+                        ? ` ★ ${t("pages.scheduleStatus.markerCritical")}`
+                        : d.is_near_critical
+                          ? ` ~ ${t("pages.scheduleStatus.markerNearCritical")}`
+                          : ""}
                     </td>
                     <td className="px-3 py-2">
                       <DateCell value={d.baseline_finish} />

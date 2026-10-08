@@ -43,6 +43,18 @@ export function fetchOrganizationUnits() {
   );
 }
 
+export function createOrganizationUnit(body: {
+  code: string;
+  name: string;
+  parent?: string | null;
+  status?: string;
+}) {
+  return apiJson<OrganizationUnit>(`/v1/organization-units/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
 export interface ManagedContractType {
   id: string;
   code: string;
@@ -55,6 +67,18 @@ export function fetchContractTypes() {
   return apiJson<ManagedContractType[] | { results: ManagedContractType[] }>(
     `/v1/contract-types/`,
   );
+}
+
+export function createContractType(body: {
+  code: string;
+  name_fa: string;
+  name_en?: string;
+  is_active?: boolean;
+}) {
+  return apiJson<ManagedContractType>(`/v1/contract-types/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }
 
 export interface IPCCollectionList {

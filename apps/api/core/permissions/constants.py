@@ -3,6 +3,7 @@
 PERMISSIONS: dict[str, str] = {
     'view_project': 'View project',
     'edit_project': 'Edit project',
+    'approve_project': 'Approve project lifecycle and change requests',
     'manage_members': 'Manage members',
     'view_wbs': 'View WBS',
     'edit_wbs': 'Edit WBS',

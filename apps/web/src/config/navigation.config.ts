@@ -38,4 +38,12 @@ export const mainSidebarNavigation: NavigationItem[] = [
     roles: [ROLES.ADMIN, ROLES.HR],
     activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
   },
+  {
+    label: "Org refs",
+    labelI18nKey: "nav.settingsOrgRefs",
+    icon: "building",
+    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`,
+    roles: [ROLES.ADMIN, ROLES.HR, ROLES.BUSINESS_SETUP],
+    activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`,
+  },
 ];

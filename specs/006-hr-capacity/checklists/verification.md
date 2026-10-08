@@ -25,3 +25,8 @@ cd apps/api/core && set -a && source ../../../.env && set +a
 pnpm exec tsc --noEmit -p apps/web/tsconfig.json
 # → exit 0
 ```
+
+## Spec Kit deferred (out of Specs 01–07 polish plan)
+
+- Per-person attendance / shift ledger (FR-HR-006)
+- Labor-by-contractor grid redesign

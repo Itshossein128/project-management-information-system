@@ -1,6 +1,6 @@
 # Verification evidence: 002-core-domain-principles
 
-**Date**: 2026-10-07
+**Date**: 2026-10-08
 
 ## Automated tests
 
@@ -36,8 +36,10 @@ cd apps/api/core && set -a && source ../../../.env && set +a
 
 ## Manual / UI (optional smoke)
 
-- [ ] Project settings: currency select IRR/IRT
-- [ ] Project settings: capability toggles + fiscal lock form
+- [x] Project settings: currency select IRR/IRT
+- [x] Project settings: capability toggles + fiscal lock form
+- [x] FR-CORE-012: disabled capability hides matching project nav entries (`e2e/tests/core-capabilities-fiscal.spec.ts`)
+- [x] FR-CORE-015: costs actual-create exposes corrective path under fiscal lock (`e2e/tests/core-capabilities-fiscal.spec.ts`)
 - [ ] Notification panel shows owner / due / link when present
 - [ ] FA/EN glossary spot-check on WBS / costs / IPC labels
 

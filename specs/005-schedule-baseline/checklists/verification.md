@@ -35,4 +35,5 @@ cd apps/api/core && set -a && source ../../../.env && set +a
 |----------|--------|
 | pytest (schedule FR-SCH suite) | Done — 28+ cases in FR-SCH modules (full suite 42 with activities/relations) |
 | typecheck / UI | Done — activity drawer, Gantt approve-lock, change requests, schedule status route; `pnpm typecheck` clean |
+| Near-critical legend (FR-SCH-007 polish) | Done — schedule status `data-testid="near-critical-legend"`; `e2e/tests/specs-04-05-07-polish.spec.ts` |
 | MSP/P6 import unlock-then-approve | Documented in `apps/api/core/schedule/ENDPOINTS.md` |

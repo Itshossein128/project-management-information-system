@@ -54,6 +54,8 @@ function AddCostDrawer({
   const [wbsId, setWbsId] = useState("");
   const [activityId, setActivityId] = useState("");
   const [supplierId, setSupplierId] = useState("");
+  const [corrective, setCorrective] = useState(false);
+  const [correctionReason, setCorrectionReason] = useState("");
 
   const { data: wbsFlat = [] } = useQuery({
     queryKey: ["wbs-flat", projectId],
@@ -83,6 +85,9 @@ function AddCostDrawer({
         wbs: wbsId || null,
         activity: activityId || null,
         supplier: supplierId || null,
+        ...(corrective
+          ? { corrective: true, correction_reason: correctionReason }
+          : {}),
       }),
     onSuccess: () => {
       toast.success("هزینه ثبت شد");
@@ -101,7 +106,12 @@ function AddCostDrawer({
         <Button
           variant="primary"
           data-testid="actual-cost-save-btn"
-          disabled={!costDate || !amount || save.isPending}
+          disabled={
+            !costDate ||
+            !amount ||
+            save.isPending ||
+            (corrective && !correctionReason.trim())
+          }
           loading={save.isPending}
           onClick={() => save.mutate()}
         >
@@ -111,6 +121,27 @@ function AddCostDrawer({
     >
       <div className="flex flex-col gap-4" data-testid="actual-cost-drawer">
         <JalaliDatePicker name="cost_date" label="تاریخ هزینه" value={costDate} onChange={setCostDate} />
+        <div className="space-y-2 rounded-md border border-warning-200 bg-warning-50 p-3 dark:border-warning-800 dark:bg-warning-950/30">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              data-testid="actual-cost-corrective"
+              checked={corrective}
+              onChange={(e) => setCorrective(e.target.checked)}
+            />
+            <span>ثبت اصلاحی (دوره مالی قفل)</span>
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span>دلیل اصلاح</span>
+            <input
+              className="rounded-md border border-input bg-background px-3 py-2"
+              data-testid="actual-cost-correction-reason"
+              value={correctionReason}
+              onChange={(e) => setCorrectionReason(e.target.value)}
+              disabled={!corrective}
+            />
+          </label>
+        </div>
         <label className="flex flex-col gap-1 text-sm">
           <span>دسته هزینه</span>
           <select

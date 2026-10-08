@@ -50,6 +50,7 @@ export function WBSNodeRow({
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(node.wbs_name);
+  const [description, setDescription] = useState(node.description ?? "");
   const [acceptance, setAcceptance] = useState(node.acceptance_criteria ?? "");
   const [responsible, setResponsible] = useState(node.responsible ?? "");
   const [status, setStatus] = useState(node.status ?? "active");
@@ -96,6 +97,7 @@ export function WBSNodeRow({
   const updateMutation = useMutation({
     mutationFn: (payload: {
       wbs_name?: string;
+      description?: string;
       weight_physical?: number | null;
       responsible?: string | null;
       acceptance_criteria?: string;
@@ -296,6 +298,14 @@ export function WBSNodeRow({
             </select>
             <Input
               className="h-8 max-w-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t("wbs.description")}
+              aria-label={t("wbs.description")}
+              data-testid={`wbs-description-${node.wbs_code}`}
+            />
+            <Input
+              className="h-8 max-w-sm"
               value={acceptance}
               onChange={(e) => setAcceptance(e.target.value)}
               placeholder={t("wbs.acceptanceCriteria")}
@@ -308,6 +318,7 @@ export function WBSNodeRow({
               onClick={() => {
                 updateMutation.mutate({
                   wbs_name: name.trim() || node.wbs_name,
+                  description,
                   responsible: responsible || null,
                   acceptance_criteria: acceptance,
                   status,
@@ -322,6 +333,7 @@ export function WBSNodeRow({
               onClick={() => {
                 setEditing(false);
                 setName(node.wbs_name);
+                setDescription(node.description ?? "");
                 setAcceptance(node.acceptance_criteria ?? "");
                 setResponsible(node.responsible ?? "");
                 setStatus(node.status ?? "active");
@@ -341,6 +353,15 @@ export function WBSNodeRow({
                 <span className="ms-2 text-xs text-muted-foreground">({node.status})</span>
               ) : null}
             </span>
+            {(node.description ?? "").trim() ? (
+              <span
+                className="max-w-md truncate text-xs text-muted-foreground"
+                title={node.description}
+                data-testid={`wbs-description-view-${node.wbs_code}`}
+              >
+                {t("wbs.description")}: {node.description}
+              </span>
+            ) : null}
             {responsibleLabel ? (
               <span
                 className="text-xs text-muted-foreground"

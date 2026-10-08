@@ -1,6 +1,12 @@
 from django.urls import path, include
 
-from projects.views import ProjectViewSet
+from projects.views import (
+    ProjectChangeRequestActionView,
+    ProjectChangeRequestDetailView,
+    ProjectChangeRequestListCreateView,
+    ProjectKickoffCharterView,
+    ProjectViewSet,
+)
 from projects.kpi_views import ProjectHealthView, ProjectKpisView
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
 from projects.core_principle_views import (
@@ -66,6 +72,39 @@ urlpatterns = [
     path('<uuid:project_pk>/', ProjectViewSet.as_view(
         {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}
     ), name='project-detail'),
+
+    # Lifecycle (FR-PRJ)
+    path('<uuid:project_pk>/submit/', ProjectViewSet.as_view({'post': 'submit'}), name='project-submit'),
+    path('<uuid:project_pk>/approve/', ProjectViewSet.as_view({'post': 'approve'}), name='project-approve'),
+    path('<uuid:project_pk>/reject/', ProjectViewSet.as_view({'post': 'reject'}), name='project-reject'),
+    path('<uuid:project_pk>/suspend/', ProjectViewSet.as_view({'post': 'suspend'}), name='project-suspend'),
+    path('<uuid:project_pk>/resume/', ProjectViewSet.as_view({'post': 'resume'}), name='project-resume'),
+    path('<uuid:project_pk>/complete/', ProjectViewSet.as_view({'post': 'complete'}), name='project-complete'),
+    path('<uuid:project_pk>/archive/', ProjectViewSet.as_view({'post': 'archive'}), name='project-archive'),
+
+    # Kickoff charter
+    path(
+        '<uuid:project_pk>/kickoff-charter/',
+        ProjectKickoffCharterView.as_view(),
+        name='project-kickoff-charter',
+    ),
+
+    # Project change requests
+    path(
+        '<uuid:project_pk>/change-requests/',
+        ProjectChangeRequestListCreateView.as_view(),
+        name='project-change-request-list',
+    ),
+    path(
+        '<uuid:project_pk>/change-requests/<uuid:pk>/',
+        ProjectChangeRequestDetailView.as_view(),
+        name='project-change-request-detail',
+    ),
+    path(
+        '<uuid:project_pk>/change-requests/<uuid:pk>/<str:action_name>/',
+        ProjectChangeRequestActionView.as_view(),
+        name='project-change-request-action',
+    ),
 
     # Project Positions
     path('<uuid:project_pk>/positions/', position_list, name='project-position-list'),

@@ -22,6 +22,8 @@ export interface NavigationChildItem {
   labelI18nKey?: string;
   /** Route segment(s), e.g. `businesses/3/tables`. If it contains `:param`, it is not a direct link. */
   path: string;
+  /** When set, hide this child if the project capability is disabled (FR-CORE-012). */
+  capabilityKey?: string;
 }
 
 export interface NavigationItem {

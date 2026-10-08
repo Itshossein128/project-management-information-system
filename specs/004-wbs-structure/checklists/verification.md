@@ -13,3 +13,7 @@
 ## Soft-delete / force replace
 
 - WBS soft-delete retained; force template replace soft-deletes when safe and refuses on cost/progress/documents.
+
+## UI polish (gap plan)
+
+- [x] Node `description` editable in WBS tree; package-meta warning on WBS page (`e2e/tests/specs-04-05-07-polish.spec.ts`)

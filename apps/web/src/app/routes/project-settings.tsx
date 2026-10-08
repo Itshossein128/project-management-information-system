@@ -24,6 +24,7 @@ import { PATHS } from "@/app/routeVars";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ProjectChangeRequestPanel } from "@/components/projects/ProjectChangeRequestPanel";
 import { Input, Label, Select, ToggleSwitch } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
@@ -136,6 +137,11 @@ function ProjectSettingsContent() {
     return <EmptyState title={t("common.projectNotFound")} />;
   }
 
+  const protectedLocked = ["active", "suspended", "completed", "archived"].includes(
+    project.status,
+  );
+  const isDraftLike = project.status === "draft" || project.status === "pending_approval";
+
   const values = {
     project_name: form.project_name ?? project.project_name,
     project_code: form.project_code ?? project.project_code,
@@ -144,6 +150,10 @@ function ProjectSettingsContent() {
     consultant: form.consultant ?? project.consultant ?? "",
     location: form.location ?? project.location ?? "",
     contract_type: form.contract_type ?? project.contract_type ?? "",
+    contract_number: form.contract_number ?? project.contract_number ?? "",
+    purpose: form.purpose ?? project.purpose ?? "",
+    scope_description: form.scope_description ?? project.scope_description ?? "",
+    main_deliverables: form.main_deliverables ?? project.main_deliverables ?? "",
     start_date: form.start_date ?? project.start_date ?? "",
     planned_finish_date:
       form.planned_finish_date ?? project.planned_finish_date ?? "",
@@ -158,14 +168,22 @@ function ProjectSettingsContent() {
     if (!canEdit) return;
     saveMutation.mutate({
       project_name: values.project_name,
-      employer: values.employer,
+      ...(protectedLocked
+        ? {}
+        : {
+            employer: values.employer,
+            start_date: values.start_date || undefined,
+            planned_finish_date: values.planned_finish_date || undefined,
+            contract_amount: values.contract_amount || undefined,
+            scope_description: values.scope_description || undefined,
+          }),
+      purpose: values.purpose || undefined,
+      main_deliverables: values.main_deliverables || undefined,
+      contract_number: values.contract_number || undefined,
       contractor: values.contractor || undefined,
       consultant: values.consultant || undefined,
       location: values.location || undefined,
       contract_type: values.contract_type || undefined,
-      start_date: values.start_date || undefined,
-      planned_finish_date: values.planned_finish_date || undefined,
-      contract_amount: values.contract_amount || undefined,
       currency: values.currency,
       owning_unit: values.owning_unit || null,
     });
@@ -225,13 +243,130 @@ function ProjectSettingsContent() {
           <Input
             id='input-employer'
             value={values.employer}
-            disabled={!canEdit}
+            disabled={
+              !canEdit ||
+              ["active", "suspended", "completed", "archived"].includes(project.status)
+            }
             onChange={(e) =>
               setForm((f) => ({ ...f, employer: e.target.value }))
             }
             required
           />
+          {protectedLocked ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("project.protectedFieldHint")}
+            </p>
+          ) : null}
         </div>
+        <div>
+          <Label htmlFor="input-purpose">{t("project.purpose", "هدف پروژه")}</Label>
+          <Input
+            id="input-purpose"
+            data-testid="settings-purpose"
+            value={values.purpose}
+            disabled={!canEdit}
+            onChange={(e) => setForm((f) => ({ ...f, purpose: e.target.value }))}
+          />
+        </div>
+        <div>
+          <Label htmlFor="input-scope">{t("project.scope", "شرح محدوده")}</Label>
+          <Input
+            id="input-scope"
+            data-testid="settings-scope"
+            value={values.scope_description}
+            disabled={!canEdit || protectedLocked}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, scope_description: e.target.value }))
+            }
+          />
+          {protectedLocked ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("project.protectedFieldHint")}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <Label htmlFor="input-deliverables">
+            {t("project.deliverables", "خروجی‌های اصلی")}
+          </Label>
+          <Input
+            id="input-deliverables"
+            data-testid="settings-deliverables"
+            value={values.main_deliverables}
+            disabled={!canEdit}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, main_deliverables: e.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <Label htmlFor="input-contract-number">
+            {t("project.contractNumber", "شماره قرارداد")}
+          </Label>
+          <Input
+            id="input-contract-number"
+            data-testid="settings-contract-number"
+            value={values.contract_number}
+            disabled={!canEdit}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, contract_number: e.target.value }))
+            }
+          />
+        </div>
+        <div>
+          <Label htmlFor="input-contract-amount">
+            {t("project.amount", "مبلغ قرارداد")}
+          </Label>
+          <Input
+            id="input-contract-amount"
+            data-testid="settings-contract-amount"
+            value={values.contract_amount}
+            disabled={!canEdit || protectedLocked}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, contract_amount: e.target.value }))
+            }
+          />
+          {protectedLocked ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("project.protectedFieldHint")}
+            </p>
+          ) : null}
+        </div>
+        {isDraftLike ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="input-start-date">{t("project.startDate", "تاریخ شروع")}</Label>
+              <Input
+                id="input-start-date"
+                data-testid="settings-start-date"
+                type="date"
+                value={values.start_date}
+                disabled={!canEdit}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, start_date: e.target.value }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="input-finish-date">
+                {t("project.finish", "تاریخ پایان")}
+              </Label>
+              <Input
+                id="input-finish-date"
+                data-testid="settings-finish-date"
+                type="date"
+                value={values.planned_finish_date}
+                disabled={!canEdit}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    planned_finish_date: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+        ) : null}
         <div>
           <Label htmlFor='input-contractor'>
             {t("projectSettings.contractor", "پیمانکار")}
@@ -342,6 +477,8 @@ function ProjectSettingsContent() {
           </div>
         ) : null}
       </form>
+
+      {protectedLocked ? <ProjectChangeRequestPanel projectId={id} /> : null}
 
       <section className='mx-auto mt-10 max-w-2xl space-y-3 border-t pt-8'>
         <h2 className='text-base font-semibold'>
