@@ -46,3 +46,7 @@
 ## 2024-07-30 - Resolve N+1 queries in Subcontractor API serializers
 **Learning:** Using `.aggregate()` and `.order_by().first()` inside python functions that are subsequently called within `SerializerMethodField`s completely bypasses the `prefetch_related` cache. In `average_overall_score` and `score_trend`, hitting the database manually meant multiple N+1 queries per subcontractor detail request.
 **Action:** When a queryset is already prefetched (e.g., `Prefetch('scores')`), calculate averages and trend sorting directly in Python by iterating over `sub.scores.all()` to take advantage of the prefetched cache and eliminate the extra database queries.
+
+## 2026-07-31 - Optimize payload in SerializerMethodField using .only()
+**Learning:** In DRF `SerializerMethodField` methods that query secondary models with `select_related` (like fetching recent activities with `report`), retrieving all model columns (e.g., large notes or photo file paths) creates unnecessary DB I/O and memory overhead.
+**Action:** Chain `.only()` to explicitly fetch only the required scalar fields and related model foreign keys/fields needed for the API payload response.
