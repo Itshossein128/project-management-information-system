@@ -32,6 +32,22 @@ This module handles the core project management functionality within Velora, inc
 *   **Method:** `GET`
 *   **Description:** Alias of `/kpis/` (dashboard KPI summary).
 
+*   **URL:** `/<project_pk>/kpis/drill/`
+*   **Method:** `GET`
+*   **Description:** Drill-through rows for a KPI `figure_key`. Query: `figure_key`, `as_of`, `approved_only` (default true). Unknown key → 404 `unknown_figure_key`.
+*   **Permission:** `view_dashboard`
+
+*   **URL:** `/<project_pk>/dashboard/pack/`
+*   **Method:** `GET`
+*   **Description:** Role-filtered dashboard pack (`pack_id`, `groups[]` with figures). Query: optional `pack`, `as_of`.
+*   **Permission:** `view_dashboard`
+
+*   **URL:** `/<project_pk>/reports/catalog/`, `/<project_pk>/reports/{report_type}/`, export + export metadata/download paths
+*   **Description:** Standard report catalog, JSON run, immutable export versions (metadata includes `extracted_at` + `filters`).
+*   **Permission:** `view_dashboard` or `view_reports`
+
+**Portfolio (`/api/v1/portfolio/`):** `GET dashboard/` (member projects only), `GET reports/catalog/`, `POST reports/{report_type}/export/`.
+
 ### 2. Project Templates
 *   **URL:** `/templates/`
 *   **Method:** `GET`

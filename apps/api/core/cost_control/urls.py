@@ -16,6 +16,8 @@ from cost_control.cbs_views import (
     CBSDetailView,
     CBSListCreateView,
     CommitmentViewSet,
+    ContractCostRemainingView,
+    LedgerReportView,
     PaymentListCreateView,
 )
 from cost_control.views import (
@@ -35,6 +37,8 @@ budget_list = BudgetViewSet.as_view({'get': 'list', 'post': 'create'})
 budget_detail = BudgetViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 cost_list = ActualCostViewSet.as_view({'get': 'list', 'post': 'create'})
 cost_detail = ActualCostViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
+cost_approve = ActualCostViewSet.as_view({'post': 'approve'})
+cost_void = ActualCostViewSet.as_view({'post': 'void'})
 pool_list = CostPoolViewSet.as_view({'get': 'list', 'post': 'create'})
 pool_detail = CostPoolViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 supplier_list = SupplierViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -88,7 +92,15 @@ urlpatterns = [
     path('costs/', cost_list, name='cost-list'),
     path('costs/variance/', VarianceView.as_view(), name='cost-variance'),
     path('costs/summary/', CostSummaryView.as_view(), name='cost-summary'),
+    path('costs/ledger-report/', LedgerReportView.as_view(), name='cost-ledger-report'),
+    path(
+        'costs/contract-remaining/',
+        ContractCostRemainingView.as_view(),
+        name='cost-contract-remaining',
+    ),
     path('costs/<uuid:pk>/', cost_detail, name='cost-detail'),
+    path('costs/<uuid:pk>/approve/', cost_approve, name='cost-approve'),
+    path('costs/<uuid:pk>/void/', cost_void, name='cost-void'),
     path('cost-pools/', pool_list, name='cost-pool-list'),
     path('cost-pools/<uuid:pk>/', pool_detail, name='cost-pool-detail'),
     path('cost-pools/<uuid:pk>/allocate/', CostPoolAllocateView.as_view(), name='cost-pool-allocate'),

@@ -7,6 +7,7 @@ from rest_framework import status
 
 from cost_control.models import (
     ActualCost,
+    ActualCostStatus,
     Budget,
     BudgetVersion,
     BudgetVersionKind,
@@ -79,6 +80,7 @@ class TestRemainingAndTransfer:
             cost_date='2024-02-01',
             cost_category=CostCategory.LABOR,
             amount=Decimal('20000'),
+            status=ActualCostStatus.APPROVED,
             created_by=user,
             updated_by=user,
         )

@@ -29,6 +29,7 @@ export function CBSCommitmentTab({
   const [cmAmount, setCmAmount] = useState("");
   const [cmDate, setCmDate] = useState("");
   const [cmCbs, setCmCbs] = useState("");
+  const [cmPaymentTerms, setCmPaymentTerms] = useState("");
 
   const cbsQuery = useQuery({
     queryKey: ["cbs", projectId],
@@ -58,6 +59,7 @@ export function CBSCommitmentTab({
         amount: cmAmount,
         commitment_date: cmDate,
         cbs: cmCbs || undefined,
+        payment_terms: cmPaymentTerms || undefined,
       }),
     onSuccess: () => {
       toast.success(t("centralData.commitmentCreated", "تعهد ثبت شد"));
@@ -65,6 +67,7 @@ export function CBSCommitmentTab({
       setCmAmount("");
       setCmDate("");
       setCmCbs("");
+      setCmPaymentTerms("");
       void qc.invalidateQueries({ queryKey: ["commitments", projectId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -112,15 +115,22 @@ export function CBSCommitmentTab({
         <h3 className="font-medium">{t("glossary.commitment")}</h3>
         <ul className="space-y-1 text-sm">
           {commitments.map((c) => (
-            <li key={c.id} className="flex justify-between gap-2">
-              <span>
-                {c.commitment_number} ({c.status})
-              </span>
-              <span>
-                {formatFaAmount(Number(c.amount))} /{" "}
-                {t("centralData.remaining", "مانده")}{" "}
-                {formatFaAmount(Number(c.remaining))}
-              </span>
+            <li key={c.id} className="flex flex-col gap-0.5 text-sm">
+              <div className="flex justify-between gap-2">
+                <span>
+                  {c.commitment_number} ({c.status})
+                </span>
+                <span>
+                  {formatFaAmount(Number(c.amount))} /{" "}
+                  {t("centralData.remaining", "مانده")}{" "}
+                  {formatFaAmount(Number(c.remaining))}
+                </span>
+              </div>
+              {c.payment_terms ? (
+                <span className="text-muted-foreground text-xs">
+                  {t("centralData.paymentTerms", "شرایط پرداخت")}: {c.payment_terms}
+                </span>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -132,6 +142,13 @@ export function CBSCommitmentTab({
             <Input value={cmAmount} onChange={(e) => setCmAmount(e.target.value)} />
             <Label>{t("centralData.date", "تاریخ")}</Label>
             <Input type="date" value={cmDate} onChange={(e) => setCmDate(e.target.value)} />
+            <Label>{t("centralData.paymentTerms", "شرایط پرداخت")}</Label>
+            <textarea
+              className="w-full rounded border px-2 py-2 text-sm"
+              rows={2}
+              value={cmPaymentTerms}
+              onChange={(e) => setCmPaymentTerms(e.target.value)}
+            />
             <Label>{t("glossary.cbs")}</Label>
             <select
               className="w-full rounded border px-2 py-2 text-sm"

@@ -141,6 +141,9 @@ export interface CommitmentRow {
   remaining: number;
   status: string;
   counterparty: string;
+  payment_terms?: string;
+  contract?: string | null;
+  requisition?: string | null;
 }
 
 export function fetchCommitments(projectId: string) {
@@ -159,19 +162,102 @@ export function createCommitment(
   });
 }
 
+export interface PaymentRow {
+  id: string;
+  commitment: string | null;
+  actual_cost: string | null;
+  amount: string;
+  paid_at: string;
+  document_ref: string;
+  status: string;
+  duplicate_exception_reason?: string;
+}
+
+export function fetchPayments(projectId: string) {
+  return apiJson<PaymentRow[]>(`${projectBase(projectId)}/payments/`);
+}
+
+export function createPayment(
+  projectId: string,
+  body: Record<string, unknown>,
+) {
+  return apiJson<PaymentRow>(`${projectBase(projectId)}/payments/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export interface LedgerRow {
+  row_type: "commitment" | "actual" | "payment";
+  id: string;
+  amount: number;
+  document_ref: string;
+  status: string;
+  commitment_id?: string | null;
+}
+
+export function fetchLedgerReport(projectId: string) {
+  return apiJson<{ rows: LedgerRow[] }>(
+    `${projectBase(projectId)}/costs/ledger-report/`,
+  );
+}
+
+export function createCommitmentFromRequisition(
+  projectId: string,
+  requisitionId: string,
+  body: Record<string, unknown>,
+) {
+  return apiJson<CommitmentRow>(
+    `${projectBase(projectId)}/requisitions/${requisitionId}/create-commitment/`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
 export interface StakeholderRow {
   id: string;
   name: string;
   organization_name: string;
   role: string;
+  email: string | null;
+  phone: string | null;
   influence: number | null;
   interest: number | null;
+  communication_need: string;
+  relationship_owner: string | null;
   status: string;
+  contacts_redacted?: boolean;
+}
+
+export interface StakeholderMatrixCell {
+  influence: number;
+  interest: number;
+  stakeholders: Array<{ id: string; name: string }>;
+}
+
+export interface CommunicationPlanRow {
+  id: string;
+  audience: string;
+  message: string;
+  channel_type: string;
+  frequency: string;
+  owner: string | null;
+  stakeholder: string | null;
+  status: string;
+  created_at: string;
 }
 
 export function fetchStakeholders(projectId: string) {
   return apiJson<StakeholderRow[] | { results: StakeholderRow[] }>(
     `${projectBase(projectId)}/stakeholders/`,
+  );
+}
+
+export function fetchStakeholderMatrix(projectId: string) {
+  return apiJson<{ cells: StakeholderMatrixCell[] }>(
+    `${projectBase(projectId)}/stakeholders/matrix/`,
   );
 }
 
@@ -183,6 +269,54 @@ export function createStakeholder(
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function fetchCommunicationPlans(projectId: string) {
+  return apiJson<{ results: CommunicationPlanRow[] }>(
+    `${projectBase(projectId)}/communication-plans/`,
+  );
+}
+
+export function createCommunicationPlan(
+  projectId: string,
+  body: {
+    audience: string;
+    message: string;
+    frequency: string;
+    channel_type?: string;
+    owner?: string | null;
+    stakeholder?: string | null;
+    status?: string;
+  },
+) {
+  return apiJson<CommunicationPlanRow>(
+    `${projectBase(projectId)}/communication-plans/`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function updateCommunicationPlan(
+  projectId: string,
+  planId: string,
+  body: Partial<CommunicationPlanRow>,
+) {
+  return apiJson<CommunicationPlanRow>(
+    `${projectBase(projectId)}/communication-plans/${planId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
+export function deleteCommunicationPlan(projectId: string, planId: string) {
+  return apiJson<void>(
+    `${projectBase(projectId)}/communication-plans/${planId}/`,
+    { method: "DELETE" },
+  );
 }
 
 export function asList<T>(data: T[] | { results: T[] }): T[] {

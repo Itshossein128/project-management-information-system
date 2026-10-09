@@ -109,6 +109,20 @@ export default function ProjectListPage() {
               {Number(bucket.total_budget).toLocaleString("fa-IR")}
             </span>
           ))}
+          <Link
+            className="ms-4 underline"
+            to={`/${PATHS.EXECUTIVE_DASHBOARD}`}
+            data-testid="portfolio-dashboard-link"
+          >
+            {t("dashboard.executiveTitle")}
+          </Link>
+          <Link
+            className="ms-4 underline"
+            to={`/${PATHS.PORTFOLIO_LIQUIDITY}`}
+            data-testid="portfolio-liquidity-link"
+          >
+            {t("pages.portfolioLiquidity.title")}
+          </Link>
         </p>
       ) : null}
 

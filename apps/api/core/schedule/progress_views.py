@@ -16,6 +16,7 @@ from common.jalali import parse_jalali_or_gregorian
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Activity, Project
 from schedule.services.evm_service import compute_evm
+from schedule.services.evm_slice_service import build_evm_by_cbs, build_evm_by_phase
 from schedule.services.measurement_service import ProgressValidationError, record_manual_progress
 from schedule.services.progress_service import (
     get_activity_progress_breakdown,
@@ -118,6 +119,39 @@ class ProjectProgressKpisView(ProgressBaseView):
             cache.delete(key)
         return Response(
             get_cached_or_compute(key, 1800, lambda: compute_evm(project.id, as_of))
+        )
+
+
+class ProjectEvmByPhaseView(ProgressBaseView):
+    @extend_schema(summary='EVM by phase (WBS)', tags=['Progress'])
+    def get(self, request, project_pk):
+        project = self.get_project()
+        as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
+        force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
+        key = cache_key('evm_phase', project.id, as_of.isoformat())
+        if force:
+            cache.delete(key)
+        return Response(
+            get_cached_or_compute(key, 1800, lambda: build_evm_by_phase(project.id, as_of))
+        )
+
+
+class ProjectEvmByCbsView(ProgressBaseView):
+    @extend_schema(summary='EVM by cost center (CBS)', tags=['Progress'])
+    def get(self, request, project_pk):
+        project = self.get_project()
+        as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
+        force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
+        root_id = request.query_params.get('root_id')
+        key = cache_key('evm_cbs', project.id, as_of.isoformat(), root_id or 'all')
+        if force:
+            cache.delete(key)
+        return Response(
+            get_cached_or_compute(
+                key,
+                1800,
+                lambda: build_evm_by_cbs(project.id, as_of, root_id=root_id),
+            )
         )
 
 

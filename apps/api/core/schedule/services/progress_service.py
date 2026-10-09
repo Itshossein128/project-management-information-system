@@ -47,6 +47,8 @@ def invalidate_s_curve_cache(project_id) -> None:
             f's_curve:{project_id}:*',
             f'*kpis:{project_id}:*',
             f'project_kpis:{project_id}:*',
+            f'*evm_phase:{project_id}:*',
+            f'*evm_cbs:{project_id}:*',
         ):
             for key in client.scan_iter(match=pattern):
                 client.delete(key)
@@ -95,6 +97,65 @@ def get_project_progress_on_date(project_id, on_date: date) -> float:
         weighted_sum += float(activity.weight) * actual
 
     return weighted_sum / total_weight
+
+
+def get_approved_progress_on_date(project_id, on_date: date) -> tuple[float | None, bool]:
+    """Weighted average of latest approved_progress ≤ on_date.
+
+    Returns ``(ratio, has_approved_rows)``. When no approved rows exist,
+    ratio is None and has_approved_rows is False (EV unregistered).
+    """
+    activities = Activity.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        weight__isnull=False,
+    )
+    activities_list = list(activities)
+    total_weight = sum(float(a.weight) for a in activities_list)
+    if total_weight == 0:
+        return None, False
+
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity__project_id=project_id,
+            activity__is_deleted=False,
+            activity__weight__isnull=False,
+            report_date__lte=on_date,
+            approved_progress__isnull=False,
+        )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.approved_progress) for p in progresses}
+    if not progress_map:
+        return None, False
+
+    weighted_sum = 0.0
+    for activity in activities_list:
+        approved = progress_map.get(activity.id, 0.0)
+        weighted_sum += float(activity.weight) * approved
+
+    return weighted_sum / total_weight, True
+
+
+def get_approved_progress_for_activities(
+    activity_ids: list,
+    on_date: date,
+) -> tuple[dict, bool]:
+    """Latest approved_progress per activity id ≤ on_date. Returns (map, any_rows)."""
+    if not activity_ids:
+        return {}, False
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity_id__in=activity_ids,
+            report_date__lte=on_date,
+            approved_progress__isnull=False,
+        )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.approved_progress) for p in progresses}
+    return progress_map, bool(progress_map)
 
 
 def get_planned_progress_on_date(project_id, on_date: date) -> float:

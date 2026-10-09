@@ -11,6 +11,7 @@ from common.jalali import parse_jalali_or_gregorian
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.kpi_service import get_project_kpis
 from projects.models import Project
+from projects.services.kpi_drill_service import get_drill_rows
 
 
 class ProjectKpisView(APIView):
@@ -28,6 +29,30 @@ class ProjectKpisView(APIView):
         as_of = parse_jalali_or_gregorian(as_of_raw) if as_of_raw else timezone.localdate()
         force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
         return Response(get_project_kpis(project_pk, as_of, force_refresh=force))
+
+
+class ProjectKpiDrillView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_dashboard'
+
+    @extend_schema(
+        summary='KPI figure drill-through',
+        description='List source rows for a dashboard figure_key (read-only).',
+        tags=['KPIs'],
+    )
+    def get(self, request, project_pk=None):
+        get_object_or_404(Project, pk=project_pk)
+        figure_key = request.query_params.get('figure_key', '')
+        as_of_raw = request.query_params.get('as_of')
+        as_of = parse_jalali_or_gregorian(as_of_raw) if as_of_raw else timezone.localdate()
+        approved_only = request.query_params.get('approved_only', 'true').lower() not in (
+            '0',
+            'false',
+            'no',
+        )
+        return Response(
+            get_drill_rows(project_pk, figure_key, as_of, approved_only=approved_only)
+        )
 
 
 class ProjectHealthView(ProjectKpisView):

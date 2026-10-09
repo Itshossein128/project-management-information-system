@@ -382,6 +382,10 @@ def approve_ipc(ipc, user, *, approved_amount=None, approval_variance_note='', p
     """
     from datetime import timedelta
 
+    from permissions.sod import assert_not_self_final_approve
+
+    assert_not_self_final_approve(ipc.created_by_id, user)
+
     if ipc.status not in (IPCStatus.SUBMITTED, IPCStatus.UNDER_REVIEW):
         raise CodedValidationError(
             detail='Only submitted IPCs can be approved.',

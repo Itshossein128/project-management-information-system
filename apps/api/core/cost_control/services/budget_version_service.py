@@ -154,11 +154,15 @@ def approve_version(
     promote_to_control: bool = False,
     from_change_request: bool = False,
 ) -> BudgetVersion:
+    from permissions.sod import assert_not_self_final_approve
+
     if version.status != BudgetVersionStatus.SUBMITTED:
         raise CodedValidationError(
             {'status': 'Only submitted versions can be approved.'},
             code='invalid_budget_version_status',
         )
+
+    assert_not_self_final_approve(version.created_by_id, user)
 
     become_control = False
     if version.kind == BudgetVersionKind.FINAL_FORECAST:

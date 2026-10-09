@@ -189,6 +189,22 @@ class ActualCostViewSet(CostScopedViewSet):
 
     AUTO_COST_MSG = 'این هزینه به صورت خودکار از گزارش روزانه ایجاد شده و قابل ویرایش مستقیم نیست'
 
+    def _invalidate_progress_evm(self):
+        try:
+            from schedule.services.progress_service import invalidate_progress_caches
+
+            invalidate_progress_caches(self.get_project_id())
+        except Exception:
+            pass
+
+    def post_save(self, instance):
+        super().post_save(instance)
+        self._invalidate_progress_evm()
+
+    def post_delete(self, instance):
+        super().post_delete(instance)
+        self._invalidate_progress_evm()
+
     def perform_create(self, serializer, **kwargs):
         from projects.fiscal_service import (
             assert_fiscal_writable,
@@ -213,6 +229,28 @@ class ActualCostViewSet(CostScopedViewSet):
         )
         require_warning_ack(warnings, bool(self.request.data.get('acknowledge_warnings')))
         super().perform_create(serializer, **kwargs)
+
+    @extend_schema(summary='Approve actual cost', tags=['Cost Control'])
+    def approve(self, request, project_pk=None, pk=None):
+        from cost_control.services.actual_cost_service import approve_actual_cost
+
+        actual = self.get_object()
+        try:
+            approve_actual_cost(actual, request.user)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        return Response(ActualCostSerializer(actual).data)
+
+    @extend_schema(summary='Void approved actual cost', tags=['Cost Control'])
+    def void(self, request, project_pk=None, pk=None):
+        from cost_control.services.actual_cost_service import void_actual_cost
+
+        actual = self.get_object()
+        try:
+            void_actual_cost(actual, user=request.user)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        return Response(ActualCostSerializer(actual).data)
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())

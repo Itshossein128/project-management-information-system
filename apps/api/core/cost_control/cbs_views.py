@@ -77,8 +77,15 @@ class CommitmentViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        try:
+            ctx['project'] = Project.objects.get(pk=self.get_project_id())
+        except Exception:
+            pass
+        return ctx
+
     def perform_create(self, serializer, **kwargs):
-        from projects.models import Project
         from projects.readiness import assert_project_allows_binding_commitment
 
         project = Project.objects.get(pk=self.get_project_id())
@@ -112,19 +119,63 @@ class PaymentListCreateView(APIView):
         ser.is_valid(raise_exception=True)
         data = ser.validated_data
         commitment = data.get('commitment')
+        actual_cost = data.get('actual_cost')
         if commitment is not None and str(commitment.project_id) != str(project_pk):
             return Response({'commitment': 'Must belong to this project.'}, status=400)
+        if actual_cost is not None and str(actual_cost.project_id) != str(project_pk):
+            return Response({'actual_cost': 'Must belong to this project.'}, status=400)
         try:
             payment = create_payment(
                 project=project,
                 commitment=commitment,
+                actual_cost=actual_cost,
                 amount=data['amount'],
                 paid_at=data['paid_at'],
                 user=request.user,
                 currency=data.get('currency', 'IRR'),
                 document_ref=data.get('document_ref', ''),
                 fx_rate=data.get('fx_rate'),
+                acknowledge_duplicate_exception=bool(
+                    data.get('acknowledge_duplicate_exception')
+                ),
+                exception_reason=data.get('exception_reason', ''),
             )
         except ValidationError as exc:
             return Response(exc.detail, status=400)
         return Response(PaymentSerializer(payment).data, status=201)
+
+
+class LedgerReportView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_costs'
+
+    @extend_schema(summary='Cost–commitment–payment ledger report', tags=['Cost Control'])
+    def get(self, request, project_pk=None):
+        from common.jalali import parse_jalali_or_gregorian
+        from cost_control.services.ledger_report_service import build_ledger_report
+
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+        return Response(
+            build_ledger_report(
+                project_pk,
+                date_from=parse_jalali_or_gregorian(date_from) if date_from else None,
+                date_to=parse_jalali_or_gregorian(date_to) if date_to else None,
+                commitment_id=request.query_params.get('commitment_id'),
+                document_ref=request.query_params.get('document_ref'),
+            )
+        )
+
+
+class ContractCostRemainingView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_costs'
+
+    @extend_schema(summary='Contract remaining via cost payments', tags=['Cost Control'])
+    def get(self, request, project_pk=None):
+        from cost_control.services.contract_remaining_service import contract_cost_remaining
+
+        contract_id = request.query_params.get('contract_id')
+        if not contract_id:
+            return Response({'contract_id': 'Required.'}, status=400)
+        return Response(contract_cost_remaining(project_pk, contract_id))

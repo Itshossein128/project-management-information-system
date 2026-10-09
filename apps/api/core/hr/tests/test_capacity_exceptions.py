@@ -42,10 +42,8 @@ def test_exception_approve_then_allocate(auth_client, project, other_user, membe
         kwargs={'project_pk': project.id, 'pk': exc_id},
     )
     approved = auth_client.post(approve_url, {'decision_notes': 'OK'}, format='json')
-    assert approved.status_code == status.HTTP_200_OK
-    assert approved.data['status'] == CapacityExceptionStatus.APPROVED
-    # Same user created and approved → soft SoD warn flag
-    assert approved.data.get('soft_sod_warn') is True
+    assert approved.status_code == status.HTTP_400_BAD_REQUEST
+    assert approved.data.get('code') == 'sod_self_approve'
 
     create = auth_client.post(
         alloc_url,

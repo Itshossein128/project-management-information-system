@@ -19,6 +19,17 @@ from cost_control.models import (
 from cost_control.services.budget_version_service import get_control_version, project_ceiling
 
 
+def _actuals_counting_toward_consumed(project_id):
+    """Only approved actuals consume remaining (draft/void excluded)."""
+    from cost_control.models import ActualCostStatus
+
+    return ActualCost.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        status=ActualCostStatus.APPROVED,
+    )
+
+
 def _heading_key(line: Budget) -> str:
     if line.cbs_id:
         return f'cbs:{line.cbs_id}|{line.cost_category}'
@@ -68,51 +79,54 @@ def remaining_allocatable(project_id, version_id=None) -> dict:
         is_deleted=False,
         status=CommitmentStatus.APPROVED,
     )
-    consumed_qs = ActualCost.objects.filter(project_id=project_id, is_deleted=False)
+    consumed_qs = _actuals_counting_toward_consumed(project_id)
+
+    def _heading_actuals(info: dict):
+        qs = consumed_qs
+        if info['cbs']:
+            qs = qs.filter(cbs_id=info['cbs'])
+        elif info['wbs']:
+            qs = qs.filter(wbs_id=info['wbs'])
+        else:
+            return ActualCost.objects.none()
+        if info['cost_category']:
+            cat_qs = qs.filter(cost_category=info['cost_category'])
+            if cat_qs.exists():
+                return cat_qs
+        return qs
+
+    def _heading_commitments(info: dict):
+        qs = committed_qs
+        if info['cbs']:
+            return qs.filter(cbs_id=info['cbs'])
+        if info['wbs']:
+            return qs.filter(wbs_id=info['wbs'])
+        return Commitment.objects.none()
+
+    def _open_committed(commitments, actuals_for_heading) -> Decimal:
+        """Open commitment = max(0, amount − linked approved actuals on heading)."""
+        total = Decimal('0')
+        linked_by_commitment: dict = {}
+        for row in actuals_for_heading.filter(commitment_id__isnull=False).values(
+            'commitment_id'
+        ).annotate(t=Sum('amount')):
+            linked_by_commitment[row['commitment_id']] = Decimal(row['t'] or 0)
+        for c in commitments:
+            linked = linked_by_commitment.get(c.id, Decimal('0'))
+            total += max(Decimal('0'), Decimal(c.amount) - linked)
+        return total
 
     headings = []
     for key, approved_amt in approved.items():
         info = meta[key]
-        c_filter = {'cost_category': info['cost_category']} if False else {}
-        # Match commitments/actuals by cbs or wbs when present
-        if info['cbs']:
-            committed = (
-                committed_qs.filter(cbs_id=info['cbs']).aggregate(t=Sum('amount'))['t']
-                or Decimal('0')
-            )
-            consumed = (
-                consumed_qs.filter(cbs_id=info['cbs']).aggregate(t=Sum('amount'))['t']
-                or Decimal('0')
-            )
-        elif info['wbs']:
-            committed = (
-                committed_qs.filter(wbs_id=info['wbs']).aggregate(t=Sum('amount'))['t']
-                or Decimal('0')
-            )
-            consumed = (
-                consumed_qs.filter(wbs_id=info['wbs']).aggregate(t=Sum('amount'))['t']
-                or Decimal('0')
-            )
-        else:
+        heading_actuals = _heading_actuals(info)
+        heading_commitments = list(_heading_commitments(info))
+        if not info['cbs'] and not info['wbs']:
             committed = Decimal('0')
             consumed = Decimal('0')
-
-        # Prefer category match when set on actuals
-        if info['cost_category']:
-            if info['cbs']:
-                consumed = (
-                    consumed_qs.filter(
-                        cbs_id=info['cbs'], cost_category=info['cost_category']
-                    ).aggregate(t=Sum('amount'))['t']
-                    or consumed
-                )
-            elif info['wbs']:
-                consumed = (
-                    consumed_qs.filter(
-                        wbs_id=info['wbs'], cost_category=info['cost_category']
-                    ).aggregate(t=Sum('amount'))['t']
-                    or consumed
-                )
+        else:
+            consumed = heading_actuals.aggregate(t=Sum('amount'))['t'] or Decimal('0')
+            committed = _open_committed(heading_commitments, heading_actuals)
 
         raw_remaining = Decimal(approved_amt) - Decimal(committed) - Decimal(consumed)
         overrun = raw_remaining < 0
@@ -132,7 +146,6 @@ def remaining_allocatable(project_id, version_id=None) -> dict:
                 'cbs_missing_warning': info['cbs_missing_warning'],
             }
         )
-        _ = c_filter  # reserved
 
     return {
         'version_id': str(version.id),

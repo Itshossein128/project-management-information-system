@@ -35,6 +35,8 @@ from schedule.period_report_views import (
 )
 from schedule.progress_views import (
     ProjectActivityProgressView,
+    ProjectEvmByCbsView,
+    ProjectEvmByPhaseView,
     ProjectManualProgressView,
     ProjectProgressHistoryView,
     ProjectProgressKpisView,
@@ -165,6 +167,8 @@ urlpatterns = [
     path('progress/s-curve/', ProjectSCurveView.as_view(), name='project-progress-s-curve'),
     path('progress/activities/', ProjectActivityProgressView.as_view(), name='project-progress-activities'),
     path('progress/kpis/', ProjectProgressKpisView.as_view(), name='project-progress-kpis'),
+    path('progress/evm/by-phase/', ProjectEvmByPhaseView.as_view(), name='project-evm-by-phase'),
+    path('progress/evm/by-cbs/', ProjectEvmByCbsView.as_view(), name='project-evm-by-cbs'),
     path('progress/history/', ProjectProgressHistoryView.as_view(), name='project-progress-history'),
     path('progress/manual/', ProjectManualProgressView.as_view(), name='project-progress-manual'),
     path(

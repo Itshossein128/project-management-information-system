@@ -446,6 +446,13 @@ class Stakeholder(AuditSoftDeleteModel):
     influence = models.PositiveSmallIntegerField(null=True, blank=True)
     interest = models.PositiveSmallIntegerField(null=True, blank=True)
     communication_need = models.TextField(blank=True, default='')
+    relationship_owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='owned_stakeholders',
+    )
     status = models.CharField(
         max_length=20,
         choices=StakeholderStatus.choices,
@@ -466,3 +473,70 @@ class Stakeholder(AuditSoftDeleteModel):
 
     def __str__(self):
         return self.name
+
+
+class CommunicationPlanStatus(models.TextChoices):
+    ACTIVE = 'active', 'Active'
+    INACTIVE = 'inactive', 'Inactive'
+
+
+class CommunicationPlan(AuditSoftDeleteModel):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='communication_plans')
+    audience = models.TextField()
+    message = models.TextField()
+    channel_type = models.CharField(max_length=40, blank=True, default='')
+    frequency = models.CharField(max_length=60)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='communication_plans_owned',
+    )
+    stakeholder = models.ForeignKey(
+        Stakeholder,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='communication_plans',
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CommunicationPlanStatus.choices,
+        default=CommunicationPlanStatus.ACTIVE,
+    )
+
+    class Meta:
+        db_table = 'communication_plans'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.audience[:40]} ({self.project_id})'
+
+
+class ReportExportVersion(UUIDModel, TimeStampedModel):
+    """Immutable snapshot metadata for standard report exports (FR-RPT)."""
+
+    report_type = models.CharField(max_length=64)
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='report_exports',
+    )
+    filters = models.JSONField(default=dict, blank=True)
+    extracted_at = models.DateTimeField()
+    extracted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='report_exports',
+    )
+    approved_only = models.BooleanField(default=True)
+    file_url = models.CharField(max_length=500, blank=True, default='')
+    payload_sha256 = models.CharField(max_length=64, blank=True, default='')
+    payload_json = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'report_export_versions'
+        ordering = ['-extracted_at']

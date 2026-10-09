@@ -5,7 +5,13 @@ import { RefreshCw } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
+  evmIndexValue,
+  evmIsNotComputable,
+  evmIsUnregistered,
+  evmMeasureAmount,
   fetchActivityProgress,
+  fetchEvmByCbs,
+  fetchEvmByPhase,
   fetchProgressHistory,
   fetchProgressKpis,
   fetchProgressSnapshot,
@@ -17,6 +23,7 @@ import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/pag
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
+import { EvmCbsTable, EvmPhaseTable } from "@/components/progress/EvmSliceTable";
 import { KPICard } from "@/components/progress/KPICard";
 import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer";
 import { MeasurementEditor } from "@/components/progress/MeasurementEditor";
@@ -69,6 +76,18 @@ function ProgressPageContent() {
     enabled: canView && Boolean(projectId),
   });
 
+  const { data: evmByPhase } = useQuery({
+    queryKey: ["progress-evm-phase", projectId],
+    queryFn: () => fetchEvmByPhase(projectId),
+    enabled: canView && Boolean(projectId),
+  });
+
+  const { data: evmByCbs } = useQuery({
+    queryKey: ["progress-evm-cbs", projectId],
+    queryFn: () => fetchEvmByCbs(projectId),
+    enabled: canView && Boolean(projectId),
+  });
+
   const { data: economicForecast } = useQuery({
     queryKey: ["economic-forecast", projectId],
     queryFn: () => fetchEconomicForecast(projectId),
@@ -109,7 +128,28 @@ function ProgressPageContent() {
   });
 
   const variance = snapshot?.schedule_variance_pct ?? 0;
-  const spi = snapshot?.spi ?? kpis?.spi ?? null;
+  const spi =
+    snapshot?.spi ??
+    evmIndexValue(kpis?.spi, kpis?.spi_legacy) ??
+    null;
+  const cpi = evmIndexValue(kpis?.cpi, kpis?.cpi_legacy);
+  const eac = evmIndexValue(kpis?.eac, kpis?.eac_legacy);
+  const etc = evmIndexValue(kpis?.etc, kpis?.etc_legacy);
+  const vac = evmIndexValue(kpis?.vac, kpis?.vac_legacy);
+  const pvAmount = evmMeasureAmount(kpis?.pv) ?? kpis?.pv_legacy ?? null;
+  const evAmount = evmMeasureAmount(kpis?.ev) ?? kpis?.ev_legacy ?? null;
+  const acAmount = evmMeasureAmount(kpis?.ac) ?? kpis?.ac_legacy ?? null;
+  const notComputableLabel = t("progress.evm.notComputable");
+  const unregisteredLabel = t("progress.evm.unregistered");
+  const fmtMoneyOrStatus = (amount: number | null, unregistered: boolean) => {
+    if (unregistered) return unregisteredLabel;
+    if (amount == null) return notComputableLabel;
+    return formatFaAmount(amount);
+  };
+  const fmtIndexOrStatus = (value: number | null, notComputable: boolean, digits = 2) => {
+    if (notComputable || value == null) return notComputableLabel;
+    return value.toFixed(digits);
+  };
 
   const quickRanges = useMemo(
     () => [
@@ -162,6 +202,21 @@ function ProgressPageContent() {
 
       <WbsEmptyBanner projectId={projectId} />
 
+      {kpis && kpis.validity && kpis.validity !== "valid" ? (
+        <div
+          className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm"
+          data-testid="evm-validity-banner"
+          role="status"
+        >
+          {kpis.warnings?.includes("baseline_not_locked")
+            ? t("progress.evm.baselineNotLocked")
+            : kpis.warnings?.includes("budget_baseline_not_approved") ||
+                kpis.warnings?.includes("budget_baseline_not_control")
+              ? t("progress.evm.budgetBaselineInvalid")
+              : t("progress.evm.partialValidity")}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[260px] flex-1">
           <JalaliDateRangePicker
@@ -186,7 +241,7 @@ function ProgressPageContent() {
       </div>
 
       <div
-        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-7"
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
         data-testid="progress-kpi-grid"
       >
         <KPICard
@@ -203,28 +258,48 @@ function ProgressPageContent() {
           }
         />
         <KPICard
+          title="PV"
+          value={fmtMoneyOrStatus(pvAmount, evmIsUnregistered(kpis?.pv))}
+        />
+        <KPICard
+          title="EV"
+          value={fmtMoneyOrStatus(evAmount, evmIsUnregistered(kpis?.ev))}
+          footer={evmIsUnregistered(kpis?.ev) ? t("progress.evm.evUnregisteredHint") : undefined}
+        />
+        <KPICard
+          title="AC"
+          value={fmtMoneyOrStatus(acAmount, evmIsUnregistered(kpis?.ac))}
+        />
+        <KPICard
           title="SPI (شاخص عملکرد زمانی)"
-          value={spi != null ? spi.toFixed(2) : "—"}
-          footer={spi != null && spi < 1 ? "SPI < 1 یعنی پروژه از برنامه عقب است" : undefined}
+          value={fmtIndexOrStatus(spi, evmIsNotComputable(kpis?.spi) && snapshot?.spi == null)}
+          footer={
+            spi != null && spi < 1 && !evmIsNotComputable(kpis?.spi)
+              ? "SPI < 1 یعنی پروژه از برنامه عقب است"
+              : undefined
+          }
         />
         <KPICard
           title="CPI (شاخص عملکرد هزینه‌ای)"
-          value={kpis?.ac ? (kpis.cpi != null ? kpis.cpi.toFixed(2) : "—") : "—"}
-          footer={!kpis?.ac ? "داده هزینه در دسترس نیست" : undefined}
+          value={fmtIndexOrStatus(cpi, evmIsNotComputable(kpis?.cpi))}
+          footer={evmIsUnregistered(kpis?.ac) ? t("progress.evm.costUnavailable") : undefined}
         />
         <KPICard
           title="EAC (برآورد هزینه تکمیل)"
-          value={kpis?.ac && kpis.eac != null ? kpis.eac.toLocaleString("fa-IR") : "—"}
-          footer={!kpis?.ac ? "داده هزینه در دسترس نیست" : undefined}
+          value={
+            evmIsNotComputable(kpis?.eac) || eac == null
+              ? notComputableLabel
+              : formatFaAmount(eac)
+          }
         />
         <KPICard
           title="ETC (باقی‌مانده تکمیل)"
           value={
             economicForecast?.etc_to_complete != null
               ? formatFaAmount(economicForecast.etc_to_complete)
-              : kpis?.etc != null
-                ? formatFaAmount(kpis.etc)
-                : "—"
+              : evmIsNotComputable(kpis?.etc) || etc == null
+                ? notComputableLabel
+                : formatFaAmount(etc)
           }
           footer={
             <Link
@@ -240,9 +315,9 @@ function ProgressPageContent() {
           value={
             economicForecast?.vac != null
               ? formatFaAmount(economicForecast.vac)
-              : kpis?.vac != null
-                ? formatFaAmount(kpis.vac)
-                : "—"
+              : evmIsNotComputable(kpis?.vac) || vac == null
+                ? notComputableLabel
+                : formatFaAmount(vac)
           }
         />
         <KPICard
@@ -266,6 +341,16 @@ function ProgressPageContent() {
           }
         />
       </div>
+
+      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+        <h2 className="text-lg font-semibold">{t("progress.evm.byPhase")}</h2>
+        <EvmPhaseTable rows={evmByPhase?.phases ?? []} />
+      </section>
+
+      <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+        <h2 className="text-lg font-semibold">{t("progress.evm.byCbs")}</h2>
+        <EvmCbsTable rows={evmByCbs?.nodes ?? []} />
+      </section>
 
       <section
         className="space-y-3 rounded-xl border border-border bg-card p-4"

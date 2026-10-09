@@ -189,11 +189,14 @@ def _apply_ops(version, ops: list, user) -> None:
 
 @transaction.atomic
 def approve_change_request(cr: BudgetChangeRequest, user, decision_notes: str = '') -> BudgetChangeRequest:
+    from permissions.sod import assert_not_self_final_approve
+
     if cr.status != BudgetChangeRequestStatus.SUBMITTED:
         raise CodedValidationError(
             {'status': 'Only submitted change requests can be approved.'},
             code='invalid_change_request_status',
         )
+    assert_not_self_final_approve(cr.created_by_id, user)
     control = get_control_version(cr.project_id)
     if not control or control.id != cr.base_version_id:
         # Still allow if base was control at create; re-clone from base_version

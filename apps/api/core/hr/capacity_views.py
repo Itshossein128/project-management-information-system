@@ -223,10 +223,8 @@ class CapacityExceptionViewSet(HRProjectMixin, ProjectScopedViewSet):
     def approve(self, request, project_pk=None, pk=None):
         exc = self.get_object()
         notes = request.data.get('decision_notes', '')
-        exc, soft_sod_warn = services.approve_exception(exc, request.user, notes)
-        data = CapacityExceptionSerializer(exc).data
-        data['soft_sod_warn'] = soft_sod_warn
-        return Response(data)
+        exc = services.approve_exception(exc, request.user, notes)
+        return Response(CapacityExceptionSerializer(exc).data)
 
     @action(detail=True, methods=['post'], url_path='reject')
     def reject(self, request, project_pk=None, pk=None):

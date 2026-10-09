@@ -7,7 +7,15 @@ from projects.views import (
     ProjectKickoffCharterView,
     ProjectViewSet,
 )
-from projects.kpi_views import ProjectHealthView, ProjectKpisView
+from projects.kpi_views import ProjectHealthView, ProjectKpiDrillView, ProjectKpisView
+from projects.dashboard_views import ProjectDashboardPackView
+from projects.report_views import (
+    ProjectReportCatalogView,
+    ProjectReportExportDetailView,
+    ProjectReportExportDownloadView,
+    ProjectReportExportView,
+    ProjectReportRunView,
+)
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
 from projects.core_principle_views import (
     FiscalPeriodLockDeactivateView,
@@ -15,7 +23,11 @@ from projects.core_principle_views import (
     ProjectCapabilityDetailView,
     ProjectCapabilityListView,
 )
-from projects.stakeholder_views import StakeholderViewSet
+from projects.stakeholder_views import (
+    CommunicationPlanViewSet,
+    StakeholderMatrixView,
+    StakeholderViewSet,
+)
 from project_templates.views import SaveProjectAsTemplateView
 from business_meta.views import (
     TableDefinitionViewSet,
@@ -56,6 +68,11 @@ member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post':
 
 stakeholder_list = StakeholderViewSet.as_view({'get': 'list', 'post': 'create'})
 stakeholder_detail = StakeholderViewSet.as_view(
+    {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}
+)
+
+communication_plan_list = CommunicationPlanViewSet.as_view({'get': 'list', 'post': 'create'})
+communication_plan_detail = CommunicationPlanViewSet.as_view(
     {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'}
 )
 
@@ -126,6 +143,21 @@ urlpatterns = [
         stakeholder_detail,
         name='project-stakeholder-detail',
     ),
+    path(
+        '<uuid:project_pk>/stakeholders/matrix/',
+        StakeholderMatrixView.as_view(),
+        name='project-stakeholder-matrix',
+    ),
+    path(
+        '<uuid:project_pk>/communication-plans/',
+        communication_plan_list,
+        name='project-communication-plan-list',
+    ),
+    path(
+        '<uuid:project_pk>/communication-plans/<uuid:pk>/',
+        communication_plan_detail,
+        name='project-communication-plan-detail',
+    ),
 
     # Project Dynamic Tables (Business Meta)
     path('<uuid:project_pk>/tables/', table_list, name='tabledefinition-list'),
@@ -151,7 +183,38 @@ urlpatterns = [
 
     # Unified KPIs / health (Sprint 13 / K-02)
     path('<uuid:project_pk>/kpis/', ProjectKpisView.as_view(), name='project-kpis'),
+    path('<uuid:project_pk>/kpis/drill/', ProjectKpiDrillView.as_view(), name='project-kpi-drill'),
     path('<uuid:project_pk>/health/', ProjectHealthView.as_view(), name='project-health'),
+    path(
+        '<uuid:project_pk>/dashboard/pack/',
+        ProjectDashboardPackView.as_view(),
+        name='project-dashboard-pack',
+    ),
+    path(
+        '<uuid:project_pk>/reports/catalog/',
+        ProjectReportCatalogView.as_view(),
+        name='project-report-catalog',
+    ),
+    path(
+        '<uuid:project_pk>/reports/<str:report_type>/',
+        ProjectReportRunView.as_view(),
+        name='project-report-run',
+    ),
+    path(
+        '<uuid:project_pk>/reports/<str:report_type>/export/',
+        ProjectReportExportView.as_view(),
+        name='project-report-export',
+    ),
+    path(
+        '<uuid:project_pk>/reports/exports/<uuid:export_id>/',
+        ProjectReportExportDetailView.as_view(),
+        name='project-report-export-detail',
+    ),
+    path(
+        '<uuid:project_pk>/reports/exports/<uuid:export_id>/download/',
+        ProjectReportExportDownloadView.as_view(),
+        name='project-report-export-download',
+    ),
 
     # Core principles: capabilities + fiscal locks
     path(
@@ -191,6 +254,7 @@ urlpatterns = [
     path('<uuid:project_pk>/', include('contracts.urls')),
     path('<uuid:project_pk>/', include('subcontractors.urls')),
     path('<uuid:project_pk>/', include('documents.urls')),
+    path('<uuid:project_pk>/', include('workflow.urls')),
     path('<uuid:project_pk>/', include('alerts.urls')),
     path('<uuid:project_pk>/', include('economic.urls')),
 ]

@@ -61,6 +61,7 @@ from procurement.views import (
     TransferApproveView,
     TransferRejectView,
 )
+from procurement.views.create_commitment_view import CreateCommitmentFromRequisitionView
 
 # Block CRUD
 block_list = BlockViewSet.as_view({'get': 'list', 'post': 'create'})
@@ -95,6 +96,11 @@ urlpatterns = [
     path('requisitions/<uuid:pk>/approval-logs/', ApprovalLogListView.as_view(), name='procurement-req-approval-logs'),
     path('requisitions/<uuid:pk>/assign-items/', AssignItemsView.as_view(), name='procurement-req-assign-items'),
     path('requisitions/<uuid:pk>/partial-approve/', PartialApproveView.as_view(), name='procurement-req-partial-approve'),
+    path(
+        'requisitions/<uuid:pk>/create-commitment/',
+        CreateCommitmentFromRequisitionView.as_view(),
+        name='procurement-req-create-commitment',
+    ),
 
     # ---- Requisition items ----
     path('requisition-items/<uuid:pk>/hold/', RequisitionItemHoldView.as_view(), name='procurement-item-hold'),

@@ -111,9 +111,18 @@ Local dev: set `CELERY_TASK_ALWAYS_EAGER=true` to run imports inline without a C
 | `progress/` | GET | `as_of` (Jalali or Gregorian) | Weighted progress snapshot for the project. |
 | `progress/s-curve/` | GET | `date_from`, `date_to`, `interval` (`daily`\|`weekly`\|`monthly`), `force_refresh` | S-curve time series. May include `warning` when data is sparse. |
 | `progress/activities/` | GET | `as_of`, `wbs_id`, `status`, `is_behind` | Per-activity breakdown with planned vs actual. |
-| `progress/kpis/` | GET | `as_of`, `force_refresh` | EVM KPIs (SPI, CPI, EAC, VAC). Cached 30 min. |
+| `progress/kpis/` | GET | `as_of`, `force_refresh` | EVM KPIs with structured PV/EV/AC + indices (`computable` / `not_computable`), baseline `validity` / `warnings`, and `*_legacy` numerics. EV uses approved progress. Cached 30 min. |
+| `progress/evm/by-phase/` | GET | `as_of`, `force_refresh` | EVM slices by phase (WBS / phase budget lines) with project totals. |
+| `progress/evm/by-cbs/` | GET | `as_of`, `force_refresh`, `root_id` | EVM slices by CBS node; optional subtree root. |
 | `progress/history/` | GET | — | Progress history keyed by approved daily reports. |
 | `progress/manual/` | POST | — | Manual progress entry (see below). |
+
+### EVM status semantics
+
+- Measure `status`: `registered` \| `unregistered` \| `incomplete`. Unregistered → `amount` is null (not a misleading zero).
+- Index `status`: `computable` \| `not_computable`. Not computable → `value` is null.
+- Warning codes include `baseline_not_locked`, `budget_baseline_not_approved`, `mixed_currency`.
+- `meta.eac_method` is `bac_over_cpi`; `meta.ev_basis` is `approved_progress`.
 
 ### Manual progress entry
 

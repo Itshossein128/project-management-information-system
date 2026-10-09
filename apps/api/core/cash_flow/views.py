@@ -2,16 +2,37 @@
 
 from datetime import date
 
-from django.utils import timezone
-from rest_framework import status, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
-from cash_flow.models import CashFlowForecast, CashTransaction
-from cash_flow.serializers import CashFlowForecastSerializer, CashTransactionSerializer
+from cash_flow.models import (
+    AllocationSimulation,
+    CashFlowForecast,
+    CashTransaction,
+    LiquidityAllocationCycle,
+)
+from cash_flow.serializers import (
+    CashFlowForecastSerializer,
+    CashTransactionSerializer,
+    LiquidityCycleSerializer,
+    PriorityScoreSerializer,
+)
+from cash_flow.services.allocation_service import (
+    compare_simulation,
+    create_cycle,
+    create_decision,
+    decision_to_dict,
+    generate_proposal,
+    get_priority_score,
+    save_simulation,
+    score_to_dict,
+    upsert_priority_score,
+)
 from cash_flow.services.cashflow_service import (
     get_cash_flow_summary,
     get_forecast_with_actuals,
@@ -19,9 +40,13 @@ from cash_flow.services.cashflow_service import (
     get_receivables_payables,
     get_transaction_summary,
 )
+from cash_flow.services.net_need_service import suggested_net_need
+from cash_flow.services.portfolio_report_service import build_portfolio_report
+from cash_flow.services.projection_service import build_projected_series
 from common.cache_helpers import cache_key, get_cached_or_compute, params_fingerprint
 from common.jalali import parse_jalali_or_gregorian
 from common.viewsets import ProjectScopedViewSet
+from config.exceptions import CodedValidationError
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
@@ -170,3 +195,136 @@ class ReceivablesView(APIView):
     @extend_schema(summary='Receivables and payables summary', tags=['Cash flow'])
     def get(self, request, project_pk=None):
         return Response(get_receivables_payables(project_pk))
+
+
+class ProjectionView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_cashflow'
+
+    @extend_schema(summary='Domain-fed projected cash series', tags=['Cash flow'])
+    def get(self, request, project_pk=None):
+        from_m = request.query_params.get('from') or date.today().strftime('%Y-%m')
+        to_m = request.query_params.get('to') or from_m
+        return Response(build_projected_series(project_pk, from_m, to_m))
+
+
+class SuggestedNeedView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_cashflow'
+
+    @extend_schema(summary='Suggested net cash need (FR-CASH-004)', tags=['Cash flow'])
+    def get(self, request, project_pk=None):
+        from_m = request.query_params.get('from') or date.today().strftime('%Y-%m')
+        to_m = request.query_params.get('to') or from_m
+        return Response(suggested_net_need(project_pk, from_m, to_m))
+
+
+class PriorityScoreView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    def get_permissions(self):
+        if self.request.method == 'PUT':
+            self.required_permission = 'edit_cashflow'
+        else:
+            self.required_permission = 'view_cashflow'
+        return super().get_permissions()
+
+    @extend_schema(summary='Get project priority score', tags=['Cash flow'])
+    def get(self, request, project_pk=None):
+        score = get_priority_score(project_pk)
+        if score is None:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(score_to_dict(score))
+
+    @extend_schema(summary='Upsert project priority score', tags=['Cash flow'])
+    def put(self, request, project_pk=None):
+        ser = PriorityScoreSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        try:
+            score = upsert_priority_score(project_pk, ser.validated_data, request.user)
+        except CodedValidationError as exc:
+            return Response({'detail': str(exc.detail), 'code': exc.default_code}, status=400)
+        return Response(score_to_dict(score))
+
+
+class PortfolioCycleListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='List liquidity allocation cycles', tags=['Cash flow portfolio'])
+    def get(self, request):
+        qs = LiquidityAllocationCycle.objects.filter(is_deleted=False).order_by('-created_at')
+        return Response({'results': LiquidityCycleSerializer(qs, many=True).data})
+
+    @extend_schema(summary='Create liquidity allocation cycle', tags=['Cash flow portfolio'])
+    def post(self, request):
+        ser = LiquidityCycleSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        cycle = create_cycle(request.user, ser.validated_data)
+        return Response(LiquidityCycleSerializer(cycle).data, status=status.HTTP_201_CREATED)
+
+
+class PortfolioProposeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Generate allocation proposal', tags=['Cash flow portfolio'])
+    def post(self, request, cycle_id=None):
+        cycle = get_object_or_404(LiquidityAllocationCycle, pk=cycle_id, is_deleted=False)
+        return Response(generate_proposal(cycle, request.user))
+
+
+class PortfolioDecisionCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Record allocation decision', tags=['Cash flow portfolio'])
+    def post(self, request, cycle_id=None):
+        cycle = get_object_or_404(LiquidityAllocationCycle, pk=cycle_id, is_deleted=False)
+        try:
+            decision = create_decision(cycle, request.user, request.data)
+        except CodedValidationError as exc:
+            return Response(
+                {'detail': exc.detail, 'code': exc.default_code},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(decision_to_dict(decision), status=status.HTTP_201_CREATED)
+
+
+class PortfolioSimulationCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Save allocation simulation', tags=['Cash flow portfolio'])
+    def post(self, request, cycle_id=None):
+        cycle = get_object_or_404(LiquidityAllocationCycle, pk=cycle_id, is_deleted=False)
+        name = request.data.get('name') or 'simulation'
+        lines = request.data.get('lines') or []
+        sim = save_simulation(cycle, request.user, name, lines)
+        return Response(
+            {'id': str(sim.id), 'name': sim.name, 'payload': sim.payload},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class PortfolioSimulationCompareView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Compare simulation to latest proposal', tags=['Cash flow portfolio'])
+    def get(self, request, cycle_id=None, sim_id=None):
+        sim = get_object_or_404(
+            AllocationSimulation,
+            pk=sim_id,
+            cycle_id=cycle_id,
+            is_deleted=False,
+        )
+        return Response(compare_simulation(sim))
+
+
+class PortfolioReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Portfolio cash / need / allocation report', tags=['Cash flow portfolio'])
+    def get(self, request):
+        from_m = request.query_params.get('from') or date.today().strftime('%Y-%m')
+        to_m = request.query_params.get('to') or from_m
+        cycle_id = request.query_params.get('cycle_id')
+        return Response(
+            build_portfolio_report(request.user, from_m, to_m, cycle_id=cycle_id)
+        )

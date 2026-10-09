@@ -57,6 +57,23 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "dashboard" as IconName,
       path: `${base}/${PATHS.PROJECT_OVERVIEW}`,
       activePathPrefix: `${base}/${PATHS.PROJECT_OVERVIEW}`,
+      children: [
+        {
+          label: "Overview",
+          labelI18nKey: "nav.projectOverview",
+          path: `${base}/${PATHS.PROJECT_OVERVIEW}`,
+        },
+        {
+          label: "Role dashboard",
+          labelI18nKey: "nav.projectDashboard",
+          path: `${base}/${PATHS.PROJECT_DASHBOARD}`,
+        },
+        {
+          label: "Standard reports",
+          labelI18nKey: "nav.projectStandardReports",
+          path: `${base}/${PATHS.PROJECT_STANDARD_REPORTS}`,
+        },
+      ],
     },
     {
       label: "Planning",
@@ -100,7 +117,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "clipboard" as IconName,
       path: `${base}/${PATHS.PROJECT_DAILY_REPORTS}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!daily-reports|sync-conflicts|weather|barriers|risk-register|alerts)`,
+      activePathExclude: `${base}/(?!daily-reports|sync-conflicts|weather|barriers|risk-register|quality-hse|alerts)`,
       children: [
         {
           label: "Daily reports",
@@ -129,6 +146,12 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           capabilityKey: "risk",
         },
         {
+          label: "Quality & HSE",
+          labelI18nKey: "nav.projectQualityHse",
+          path: `${base}/${PATHS.PROJECT_QUALITY_HSE}`,
+          capabilityKey: "risk",
+        },
+        {
           label: "Alerts",
           labelI18nKey: "nav.projectAlerts",
           path: `${base}/${PATHS.PROJECT_ALERTS}`,
@@ -142,7 +165,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "business" as IconName,
       path: `${base}/${PATHS.PROJECT_CONTRACTS}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!contracts|subcontractors|documents|cash-flow|costs|material-balance|procurement|economic)`,
+      activePathExclude: `${base}/(?!contracts|subcontractors|documents|decisions-workflow|cash-flow|costs|material-balance|procurement|economic)`,
       children: [
         {
           label: "Contracts",
@@ -159,6 +182,12 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Documents",
           labelI18nKey: "nav.projectDocuments",
           path: `${base}/${PATHS.PROJECT_DOCUMENTS}`,
+          capabilityKey: "documents",
+        },
+        {
+          label: "Decisions & workflow",
+          labelI18nKey: "nav.projectDecisionsWorkflow",
+          path: `${base}/${PATHS.PROJECT_DECISIONS_WORKFLOW}`,
           capabilityKey: "documents",
         },
         {

@@ -15,6 +15,7 @@ export const LanguageSwitcher = () => {
         if (val) setLanguage(val as "en" | "fa");
       }}
       aria-label={t("language.select")}
+      dir="ltr"
       className="bg-muted p-1 rounded-md"
     >
       {(["en", "fa"] as const).map((lang) => (

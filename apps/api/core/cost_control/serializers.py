@@ -229,6 +229,7 @@ class BudgetTransferCreateSerializer(serializers.Serializer):
 
 class ActualCostSerializer(serializers.ModelSerializer):
     cost_date = JalaliDateField()
+    registered_at = JalaliDateField(required=False, allow_null=True)
     amount_display = serializers.SerializerMethodField()
     supplier_name = serializers.CharField(source='supplier.supplier_name', read_only=True, default=None)
     is_auto_created = serializers.SerializerMethodField()
@@ -246,11 +247,14 @@ class ActualCostSerializer(serializers.ModelSerializer):
             'wbs_code',
             'activity_code',
             'cost_date',
+            'registered_at',
+            'status',
             'cost_category',
             'amount',
             'amount_display',
             'description',
             'invoice_number',
+            'document_ref',
             'supplier',
             'supplier_name',
             'cost_type',
@@ -259,8 +263,9 @@ class ActualCostSerializer(serializers.ModelSerializer):
             'cost_pool',
             'daily_report',
             'is_auto_created',
+            'approved_by',
         ]
-        read_only_fields = ['id', 'daily_report', 'is_auto_created']
+        read_only_fields = ['id', 'daily_report', 'is_auto_created', 'status', 'approved_by']
 
     def get_amount_display(self, obj):
         return _format_amount(obj.amount)
@@ -337,6 +342,9 @@ class CommitmentSerializer(serializers.ModelSerializer):
             'due_date',
             'wbs',
             'cbs',
+            'contract',
+            'requisition',
+            'payment_terms',
             'status',
             'description',
             'document_ref',
@@ -349,6 +357,19 @@ class CommitmentSerializer(serializers.ModelSerializer):
 
         return float(Decimal(obj.amount) - posted_payments_total(obj))
 
+    def validate_requisition(self, value):
+        if value is None:
+            return value
+        from cost_control.services.commitment_origin_service import (
+            assert_requisition_approved_for_commitment,
+        )
+
+        project = self.context.get('project')
+        project_id = project.id if project is not None else getattr(value, 'project_id', None)
+        if project_id is not None:
+            assert_requisition_approved_for_commitment(value, project_id)
+        return value
+
 
 class PaymentSerializer(serializers.ModelSerializer):
     paid_at = JalaliDateField()
@@ -357,6 +378,8 @@ class PaymentSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    acknowledge_duplicate_exception = serializers.BooleanField(required=False, default=False, write_only=True)
+    exception_reason = serializers.CharField(required=False, allow_blank=True, default='', write_only=True)
 
     class Meta:
         model = Payment
@@ -370,5 +393,14 @@ class PaymentSerializer(serializers.ModelSerializer):
             'paid_at',
             'document_ref',
             'status',
+            'duplicate_exception_reason',
+            'duplicate_exception_by',
+            'acknowledge_duplicate_exception',
+            'exception_reason',
         ]
-        read_only_fields = ['id', 'status']
+        read_only_fields = [
+            'id',
+            'status',
+            'duplicate_exception_reason',
+            'duplicate_exception_by',
+        ]

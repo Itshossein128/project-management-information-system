@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'cash_flow',
     'subcontractors',
     'documents',
+    'workflow',
     'economic',
     'risk',
     'alerts',

@@ -66,6 +66,19 @@ def update_capability_setting(project, capability_key: str, *, enabled=None, mod
     return setting
 
 
+def capability_enabled(project, capability_key: str) -> bool:
+    """Return False when the capability is explicitly disabled for the project."""
+    if capability_key not in CAPABILITY_CATALOG:
+        return True
+    setting = ProjectCapabilitySetting.objects.filter(
+        project=project,
+        capability_key=capability_key,
+    ).first()
+    if setting is None:
+        return True
+    return not setting.is_effectively_disabled
+
+
 def assert_capability_enabled(project, capability_key: str) -> None:
     """Raise PermissionDenied with capability_disabled when toggled off."""
     if capability_key not in CAPABILITY_CATALOG:

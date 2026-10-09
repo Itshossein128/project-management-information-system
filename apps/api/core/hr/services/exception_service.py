@@ -61,18 +61,20 @@ def submit_exception(exc: CapacityException, user) -> CapacityException:
     return exc
 
 
-def approve_exception(exc: CapacityException, user, decision_notes: str = '') -> tuple[CapacityException, bool]:
-    """Approve exception. Returns (exception, soft_sod_warn) when approver == creator."""
+def approve_exception(exc: CapacityException, user, decision_notes: str = '') -> CapacityException:
+    """Approve exception (hard SoD — creator cannot final-approve)."""
+    from permissions.sod import assert_not_self_final_approve
+
     if exc.status != CapacityExceptionStatus.SUBMITTED:
         raise CodedValidationError(detail='Only submitted exceptions can be approved.', code='invalid_status_transition')
-    soft_sod_warn = bool(exc.created_by_id and exc.created_by_id == getattr(user, 'id', None))
+    assert_not_self_final_approve(exc.created_by_id, user)
     exc.status = CapacityExceptionStatus.APPROVED
     exc.decided_by = user
     exc.decided_at = timezone.now()
     exc.decision_notes = decision_notes or ''
     exc.updated_by = user
     exc.save()
-    return exc, soft_sod_warn
+    return exc
 
 
 def reject_exception(exc: CapacityException, user, decision_notes: str = '') -> CapacityException:

@@ -16,6 +16,7 @@ import { BudgetGrid } from "@/components/costs/BudgetGrid";
 import { BudgetLineEditor } from "@/components/costs/BudgetLineEditor";
 import { BudgetVersionsPanel } from "@/components/costs/BudgetVersionsPanel";
 import { CBSCommitmentTab } from "@/components/costs/CBSCommitmentTab";
+import { CostPaymentsLedgerPanel } from "@/components/costs/CostPaymentsLedgerPanel";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
 import { RemainingAllocatablePanel } from "@/components/costs/RemainingAllocatablePanel";
 import { VarianceTab } from "@/components/costs/VarianceTab";
@@ -25,7 +26,7 @@ import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Tab = "budget" | "actual" | "variance" | "pools" | "cbs";
+type Tab = "budget" | "actual" | "variance" | "pools" | "cbs" | "payments";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "budget", label: "بودجه" },
@@ -33,6 +34,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "variance", label: "واریانس" },
   { id: "pools", label: "استخر هزینه" },
   { id: "cbs", label: "CBS / تعهد" },
+  { id: "payments", label: "پرداخت / دفتر" },
 ];
 
 function CostsContent() {
@@ -198,6 +200,9 @@ function CostsContent() {
         </ShadcnTabsContent>
         <ShadcnTabsContent value="cbs" className="mt-0">
           <CBSCommitmentTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="payments" className="mt-0">
+          <CostPaymentsLedgerPanel projectId={projectId} canEdit={canEdit} />
         </ShadcnTabsContent>
       </Tabs>
     </div>

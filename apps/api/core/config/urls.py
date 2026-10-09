@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+from cash_flow.urls import global_urlpatterns as cash_flow_global_urlpatterns
 from cost_control.urls import global_urlpatterns as cost_global_urlpatterns
 from economic.urls import global_urlpatterns as economic_global_urlpatterns
 from projects.member_views import UserLookupView
@@ -22,6 +23,7 @@ urlpatterns = [
     path('api/v1/portfolio/', include('projects.portfolio_urls')),
     *cost_global_urlpatterns,
     *economic_global_urlpatterns,
+    *cash_flow_global_urlpatterns,
     path('api/relations/', include('business_meta.relations_urls')),
     path('api/', include('inventory.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

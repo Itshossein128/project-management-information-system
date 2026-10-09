@@ -74,7 +74,20 @@ def posted_payments_total(commitment: Commitment) -> Decimal:
     return Decimal(total)
 
 
-def create_payment(*, project, commitment=None, actual_cost=None, amount, paid_at, user, currency='IRR', document_ref='', fx_rate=None):
+def create_payment(
+    *,
+    project,
+    commitment=None,
+    actual_cost=None,
+    amount,
+    paid_at,
+    user,
+    currency='IRR',
+    document_ref='',
+    fx_rate=None,
+    acknowledge_duplicate_exception=False,
+    exception_reason='',
+):
     amount = Decimal(amount)
     if amount <= 0:
         raise ValidationError({'amount': 'Must be greater than zero'})
@@ -86,6 +99,24 @@ def create_payment(*, project, commitment=None, actual_cost=None, amount, paid_a
                     'message': 'Payment would exceed commitment amount.',
                 }
             )
+    doc = (document_ref or '').strip()
+    exception_reason = (exception_reason or '').strip()
+    if doc:
+        dup_exists = Payment.objects.filter(
+            project_id=project.id,
+            document_ref=doc,
+            status=PaymentStatus.POSTED,
+            is_deleted=False,
+        ).exists()
+        if dup_exists and not (
+            acknowledge_duplicate_exception and exception_reason
+        ):
+            raise ValidationError(
+                {
+                    'code': 'duplicate_payment_document',
+                    'message': 'A posted payment with this document already exists.',
+                }
+            )
     return Payment.objects.create(
         project=project,
         commitment=commitment,
@@ -94,8 +125,10 @@ def create_payment(*, project, commitment=None, actual_cost=None, amount, paid_a
         currency=currency or 'IRR',
         fx_rate=fx_rate,
         paid_at=paid_at,
-        document_ref=document_ref or '',
+        document_ref=doc,
         status=PaymentStatus.POSTED,
+        duplicate_exception_reason=exception_reason if acknowledge_duplicate_exception else '',
+        duplicate_exception_by=user if (acknowledge_duplicate_exception and exception_reason) else None,
         created_by=user,
         updated_by=user,
     )

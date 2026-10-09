@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from config.exceptions import CodedValidationError, ConflictError
+from permissions.sod import assert_not_self_final_approve
 from projects.lifecycle_service import assert_not_archived_mutable
 from projects.models import (
     PROTECTED_PROJECT_FIELDS,
@@ -160,6 +161,7 @@ def submit_change_request(cr: ProjectChangeRequest, user) -> ProjectChangeReques
 @transaction.atomic
 def approve_change_request(cr: ProjectChangeRequest, user, decision_notes: str = '') -> ProjectChangeRequest:
     assert_not_archived_mutable(cr.project, user)
+    assert_not_self_final_approve(cr.requested_by_id, user)
     if cr.status != ProjectChangeRequestStatus.SUBMITTED:
         raise CodedValidationError(
             {'detail': 'Only submitted change requests can be approved.'},

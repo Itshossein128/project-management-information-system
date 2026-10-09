@@ -22,6 +22,7 @@ import {
   type ApprovalLog,
 } from "~/lib/api/procurement";
 import { fetchMembers } from "@/app/lib/api/members";
+import { createCommitmentFromRequisition } from "@/app/lib/api/central-data";
 import { PATHS } from "~/routeVars";
 import { useToast } from "@/components/ui/toast";
 import { Drawer } from "@/components/ui/drawer";
@@ -250,6 +251,28 @@ function ProcurementDetailContent() {
     onSuccess: () => {
       toast.success(t("pages.procurement.approval.holdSuccess"));
       void qc.invalidateQueries({ queryKey: ["requisition", projectId, reqId] });
+    },
+    onError: (e: Error) => toast.error(e.message || t("common.error")),
+  });
+
+  const createCommitmentMut = useMutation({
+    mutationFn: () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const amount =
+        req?.items?.reduce(
+          (sum, item) => sum + Number(item.approved_qty ?? item.requested_qty ?? 0),
+          0,
+        ) || 1;
+      return createCommitmentFromRequisition(projectId, reqId!, {
+        commitment_number: `CM-${req?.requisition_number ?? reqId}`,
+        amount: String(amount),
+        commitment_date: today,
+        payment_terms: t("centralData.paymentTerms", "Payment terms"),
+        counterparty: "",
+      });
+    },
+    onSuccess: () => {
+      toast.success(t("centralData.commitmentCreated", "تعهد ثبت شد"));
     },
     onError: (e: Error) => toast.error(e.message || t("common.error")),
   });
@@ -496,6 +519,16 @@ function ProcurementDetailContent() {
             <Button variant="destructive" onClick={() => setActionDrawer('reject')}>رد (Reject)</Button>
           </>
         )}
+        {req.status === "approved" ? (
+          <Button
+            variant="default"
+            onClick={() => createCommitmentMut.mutate()}
+            disabled={createCommitmentMut.isPending}
+            data-tour="create-commitment"
+          >
+            {t("centralData.createCommitmentFromReq", "ایجاد تعهد")}
+          </Button>
+        ) : null}
       </div>
 
       <Drawer

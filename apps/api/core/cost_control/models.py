@@ -149,11 +149,26 @@ class Commitment(AuditSoftDeleteModel):
         blank=True,
         related_name='commitments',
     )
+    contract = models.ForeignKey(
+        'contracts.Contract',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='cost_commitments',
+    )
+    requisition = models.ForeignKey(
+        'procurement.RequisitionHeader',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='commitments',
+    )
     status = models.CharField(
         max_length=20,
         choices=CommitmentStatus.choices,
         default=CommitmentStatus.DRAFT,
     )
+    payment_terms = models.TextField(blank=True, default='')
     description = models.TextField(blank=True, default='')
     document_ref = models.CharField(max_length=80, blank=True, default='')
 
@@ -199,6 +214,14 @@ class Payment(AuditSoftDeleteModel):
         max_length=20,
         choices=PaymentStatus.choices,
         default=PaymentStatus.POSTED,
+    )
+    duplicate_exception_reason = models.TextField(blank=True, default='')
+    duplicate_exception_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='payment_duplicate_exceptions',
     )
 
     class Meta:
@@ -460,6 +483,12 @@ class BudgetTransfer(AuditSoftDeleteModel):
         ordering = ['-created_at']
 
 
+class ActualCostStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    APPROVED = 'approved', 'Approved'
+    VOID = 'void', 'Void'
+
+
 class ActualCost(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='actual_costs')
     activity = models.ForeignKey(
@@ -490,11 +519,18 @@ class ActualCost(AuditSoftDeleteModel):
         blank=True,
         related_name='actual_costs',
     )
-    cost_date = models.DateField()
+    cost_date = models.DateField()  # occurrence date
+    registered_at = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=ActualCostStatus.choices,
+        default=ActualCostStatus.DRAFT,
+    )
     cost_category = models.CharField(max_length=40, choices=CostCategory.choices, blank=True, default='')
     amount = models.DecimalField(max_digits=18, decimal_places=2)
     description = models.TextField(blank=True, default='')
     invoice_number = models.CharField(max_length=60, blank=True, default='')
+    document_ref = models.CharField(max_length=80, blank=True, default='')
     supplier = models.ForeignKey(
         'resources.Supplier',
         on_delete=models.SET_NULL,
@@ -536,4 +572,6 @@ class ActualCost(AuditSoftDeleteModel):
     def save(self, *args, **kwargs):
         if self.activity_id and not self.wbs_id:
             self.wbs_id = self.activity.wbs_id
+        if self.registered_at is None:
+            self.registered_at = timezone.localdate()
         super().save(*args, **kwargs)
