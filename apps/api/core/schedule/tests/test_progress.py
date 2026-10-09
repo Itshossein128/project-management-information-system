@@ -95,7 +95,7 @@ class TestProgressService:
         assert evm['ac'] == 0
         assert evm['cpi'] is None
 
-    def test_manual_progress_source(self, project, user, activity, auth_client):
+    def test_manual_progress_source(self, project, user, activity, auth_client, approved_measurement):
         activity.weight = 1.0
         activity.save(update_fields=['weight'])
         url = f'/api/v1/projects/{project.id}/progress/manual/'
@@ -213,7 +213,7 @@ class TestProgressService:
             assert row['planned_pct'] == pytest.approx(round(planned * 100, 2))
             assert row['actual_pct'] == pytest.approx(round(actual * 100, 2))
 
-    def test_recalc_invalidates_cache(self, project, user, activity, monkeypatch):
+    def test_recalc_invalidates_cache(self, project, user, activity, approved_measurement, monkeypatch):
         activity.weight = 1.0
         activity.total_quantity = 100
         activity.save(update_fields=['weight', 'total_quantity'])

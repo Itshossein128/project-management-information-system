@@ -132,6 +132,29 @@ def activity(db, project, wbs, user):
 
 
 @pytest.fixture
+def unit(db):
+    from master_data.models import Unit
+
+    return Unit.objects.create(unit_name='Cubic meter', unit_symbol='m3')
+
+
+@pytest.fixture
+def approved_measurement(db, activity, unit, user):
+    """Quantity-method measurement definition approved for ``activity`` (total 100)."""
+    from schedule.services.measurement_service import approve_definition, get_or_create_definition, update_draft
+
+    definition = get_or_create_definition(activity, user)
+    update_draft(
+        definition,
+        {'method': 'quantity', 'total_quantity': 100, 'unit_id': str(unit.id)},
+        user,
+    )
+    approve_definition(definition, user)
+    definition.refresh_from_db()
+    return definition
+
+
+@pytest.fixture
 def api_client():
     from rest_framework.test import APIClient
 

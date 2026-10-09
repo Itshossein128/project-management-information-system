@@ -10,7 +10,7 @@ This document describes the API endpoints provided by the `contracts` app within
 
 ### `POST /contracts/`
 *   **Purpose**: Creates a new contract within the project.
-*   **Behavior**: Accepts contract details (e.g., contract number, counterparty, contract type, amounts, deduction percentages).
+*   **Behavior**: Accepts contract details (e.g., contract number, counterparty, contract type, amounts, deduction percentages, **`payment_terms`** free text).
 
 ### `GET /contracts/<uuid:pk>/`
 *   **Purpose**: Retrieves detailed information about a specific contract.
@@ -56,9 +56,14 @@ This document describes the API endpoints provided by the `contracts` app within
 *   **Purpose**: Creates a new draft IPC.
 *   **Behavior**: Initializes a payment request for a contract (`contract_id`, optional `period_start`, `period_end`, `notes`). Triggers async populate + deduction calculation (falls back to sync when Celery is unavailable).
 
+### `GET /ipcs/receivables-report/`
+*   **Purpose**: Overdue and near-due receivables for approved IPCs with remaining receivable &gt; 0.
+*   **Query**: `near_due_days` (default 7), optional `contract_id`.
+*   **Behavior**: Returns `summary` counts/amounts and `items` with `band` = `overdue` | `near_due`. Requires `view_contracts`.
+
 ### `GET /ipcs/<uuid:pk>/`
 *   **Purpose**: Retrieves details of a specific IPC.
-*   **Behavior**: Includes line items, deductions (automatic and manual), calculated amounts (`gross_amount`, `net_amount`, `deductions_total`, `net_amount_computed`), and current status.
+*   **Behavior**: Includes line items, deductions, amounts (`gross_amount`, **`submitted_amount`**, **`approved_amount`**, `approval_variance_note`, `net_amount`, collections), and current status.
 
 ### `PATCH /ipcs/<uuid:pk>/`
 *   **Purpose**: Partially updates a draft IPC.
@@ -66,7 +71,7 @@ This document describes the API endpoints provided by the `contracts` app within
 
 ### `POST /ipcs/<uuid:pk>/populate/`
 *   **Purpose**: Populates IPC line items from contract BoQ and activity progress for the IPC period.
-*   **Behavior**: Runs `auto_populate_ipc` then `apply_deductions`. Returns the updated IPC detail.
+*   **Behavior**: Runs `auto_populate_ipc` then `apply_deductions`. **Draft only** — after submit, returns `ipc_locked_after_submit` so `gross_amount` cannot be rewritten.
 
 ### `PATCH /ipcs/<uuid:pk>/items/<uuid:itemid>/`
 *   **Purpose**: Updates a specific line item within a draft IPC.
@@ -86,11 +91,16 @@ This document describes the API endpoints provided by the `contracts` app within
 
 ### `POST /ipcs/<uuid:pk>/submit/`
 *   **Purpose**: Submits a draft IPC for review.
-*   **Behavior**: Changes status from `draft` to `submitted`. Publishes `ipc.submitted` to the event bus.
+*   **Behavior**: Requires `gross_amount` &gt; 0. Freezes **`submitted_amount`** from gross, status → `submitted`. Publishes `ipc.submitted`.
 
 ### `POST /ipcs/<uuid:pk>/approve/`
 *   **Purpose**: Approves a submitted IPC.
-*   **Behavior**: Changes status to `approved`, sets `approval_date`, and default `planned_payment_date` (+30 days) if not set. Requires `approve_ipcs`.
+*   **Body (optional)**: `approved_amount` (≤ submitted), `approval_variance_note` (required if reduced), `planned_payment_date`.
+*   **Behavior**: Sets **`approved_amount`**, recalculates deductions/net against approved, status → `approved`, default due date +30 days if unset. Codes: `approved_exceeds_submitted`, `approval_variance_note_required`. Requires `approve_ipcs`.
+
+### `POST /ipcs/<uuid:pk>/collections/`
+*   **Purpose**: Record a partial cash collection.
+*   **Behavior**: Only on **approved** IPCs. Never changes status, submitted/approved/gross/net amounts. Full collection does **not** auto-mark paid.
 
 ### `POST /ipcs/<uuid:pk>/pay/`
 *   **Purpose**: Marks an approved IPC as paid.

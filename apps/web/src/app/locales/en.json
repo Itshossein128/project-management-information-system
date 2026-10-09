@@ -932,7 +932,26 @@
       "title": "Alerts"
     },
     "contracts": {
-      "title": "Contracts"
+      "title": "Contracts",
+      "receivablesTab": "Receivables",
+      "receivablesTitle": "Overdue & near-due receivables",
+      "receivablesHint": "Approved IPCs with remaining receivable, past due or due within 7 days.",
+      "overdue": "Overdue",
+      "nearDue": "Near due",
+      "noOpenReceivables": "No open overdue or near-due receivables.",
+      "ipc": "IPC",
+      "contract": "Contract",
+      "remaining": "Remaining",
+      "dueDate": "Due date",
+      "band": "Band",
+      "paymentTerms": "Payment terms",
+      "submittedAmount": "Submitted",
+      "approvedAmount": "Approved",
+      "netAmount": "Net",
+      "varianceNote": "Variance note (required if approved is less than submitted)",
+      "approveFinal": "Confirm approval",
+      "plannedCollectionDate": "Collection due date",
+      "varianceExplanation": "Amount variance explanation: "
     },
     "contractNew": {
       "title": "New contract"
@@ -952,7 +971,29 @@
       "title": "Cash flow"
     },
     "costs": {
-      "title": "Cost control"
+      "title": "Cost control",
+      "accessDeniedDescription": "Your role cannot view costs.",
+      "budgetVersions": "Budget versions",
+      "newInitialVersion": "New initial version",
+      "noBudgetVersions": "No budget versions yet.",
+      "budgetVersionCreated": "Budget version created",
+      "budgetChangeRequests": "Budget change requests",
+      "budgetChangeHint": "Approved budget changes only via a request with reason, amount, project impact, and approval.",
+      "budgetCrCreated": "Budget change request created",
+      "crReason": "Reason (min 10 characters)",
+      "crImpact": "Impact on project outcome",
+      "crNewAmount": "Proposed amount for control line",
+      "remainingTitle": "Remaining allocatable",
+      "remainingHint": "Remaining = approved − committed − consumed. Intra-budget transfers keep the project ceiling.",
+      "noRemaining": "No control approved budget to compute remaining.",
+      "transferTitle": "Intra-budget transfer",
+      "transferAmount": "Amount",
+      "transferDone": "Transfer recorded",
+      "addMultiLevelLine": "Add multi-level line",
+      "lineCreated": "Budget line added",
+      "newVersion": "New version",
+      "compareTitle": "Compare versions",
+      "compareDone": "Compare complete"
     },
     "materialBalance": {
       "title": "Material balance"
@@ -1419,5 +1460,54 @@
     "match": "Match",
     "mismatch": "Mismatch",
     "insufficientData": "Insufficient data"
+  },
+  "progress": {
+    "errors": {
+      "exceeds100": "Progress over 100% is rejected unless an approved quantity change exists.",
+      "measurementNotApproved": "Approve the activity measurement method (total/unit or milestones) before recording progress."
+    },
+    "photoNotApproval": "Photos are evidence only and do not count as technical approval of progress.",
+    "period": "Period",
+    "cumulative": "Cumulative",
+    "planned": "Planned",
+    "approved": "Approved",
+    "measurement": {
+      "title": "Measurement method",
+      "method": "Method",
+      "quantity": "Quantity-based",
+      "milestones": "Weighted milestones",
+      "evidence": "Evidence-backed percent",
+      "totalQuantity": "Total quantity",
+      "saveDraft": "Save draft",
+      "approve": "Approve basis",
+      "changeAndApprove": "Change & approve",
+      "changeReason": "Reason for method change",
+      "defaultChangeReason": "Method update",
+      "status": "Status",
+      "saved": "Measurement draft saved",
+      "approved": "Measurement approved",
+      "loadHint": "Define or load measurement for this activity."
+    }
+  },
+  "progressReports": {
+    "title": "Weekly & monthly reports",
+    "generateWeekly": "Generate weekly",
+    "generateMonthly": "Generate monthly",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "empty": "No period reports yet.",
+    "generated": "Report generated",
+    "section": "Section",
+    "value": "Value",
+    "source": "Source",
+    "updated": "Last updated",
+    "notRecorded": "Not recorded",
+    "approved": "approved",
+    "override": "Override",
+    "overrideTitle": "Override figure (audit trail required)",
+    "newValue": "New value",
+    "reasonRequired": "Reason (required)",
+    "overrideSaved": "Override saved",
+    "manualSaved": "Manual progress saved"
   }
 }

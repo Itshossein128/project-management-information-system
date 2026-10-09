@@ -19,6 +19,20 @@ from schedule.change_request_views import (
     ScheduleChangeRequestRejectView,
     ScheduleChangeRequestSubmitView,
 )
+from schedule.measurement_views import (
+    ActivityMeasurementApproveView,
+    ActivityMeasurementChangeView,
+    ActivityMeasurementView,
+    ActivityQuantityChangeApproveView,
+    ActivityQuantityChangeListCreateView,
+    ProgressTechnicalApproveView,
+)
+from schedule.period_report_views import (
+    ProgressReportDetailView,
+    ProgressReportFigureOverrideView,
+    ProgressReportFigureView,
+    ProgressReportListCreateView,
+)
 from schedule.progress_views import (
     ProjectActivityProgressView,
     ProjectManualProgressView,
@@ -57,6 +71,36 @@ urlpatterns = [
         'activities/<uuid:activity_id>/relations/<uuid:relation_id>/',
         activity_relation_delete,
         name='activity-relation-delete',
+    ),
+    path(
+        'activities/<uuid:activity_id>/measurement/',
+        ActivityMeasurementView.as_view(),
+        name='activity-measurement',
+    ),
+    path(
+        'activities/<uuid:activity_id>/measurement/approve/',
+        ActivityMeasurementApproveView.as_view(),
+        name='activity-measurement-approve',
+    ),
+    path(
+        'activities/<uuid:activity_id>/measurement/change/',
+        ActivityMeasurementChangeView.as_view(),
+        name='activity-measurement-change',
+    ),
+    path(
+        'activities/<uuid:activity_id>/quantity-changes/',
+        ActivityQuantityChangeListCreateView.as_view(),
+        name='activity-quantity-change-list',
+    ),
+    path(
+        'activities/<uuid:activity_id>/quantity-changes/<uuid:change_id>/approve/',
+        ActivityQuantityChangeApproveView.as_view(),
+        name='activity-quantity-change-approve',
+    ),
+    path(
+        'quantity-changes/<uuid:change_id>/approve/',
+        ActivityQuantityChangeApproveView.as_view(),
+        name='quantity-change-approve',
     ),
     path('working-calendars/', WorkingCalendarListCreateView.as_view(), name='working-calendar-list'),
     path(
@@ -123,6 +167,27 @@ urlpatterns = [
     path('progress/kpis/', ProjectProgressKpisView.as_view(), name='project-progress-kpis'),
     path('progress/history/', ProjectProgressHistoryView.as_view(), name='project-progress-history'),
     path('progress/manual/', ProjectManualProgressView.as_view(), name='project-progress-manual'),
+    path(
+        'progress/<uuid:activity_id>/technical-approve/',
+        ProgressTechnicalApproveView.as_view(),
+        name='project-progress-technical-approve',
+    ),
+    path('progress-reports/', ProgressReportListCreateView.as_view(), name='progress-report-list'),
+    path(
+        'progress-reports/figures/<uuid:figure_id>/',
+        ProgressReportFigureView.as_view(),
+        name='progress-report-figure',
+    ),
+    path(
+        'progress-reports/figures/<uuid:figure_id>/overrides/',
+        ProgressReportFigureOverrideView.as_view(),
+        name='progress-report-figure-override',
+    ),
+    path(
+        'progress-reports/<uuid:report_id>/',
+        ProgressReportDetailView.as_view(),
+        name='progress-report-detail',
+    ),
     path('gantt/', GanttDataView.as_view(), name='project-gantt'),
     path('gantt/pdf/', GanttPdfView.as_view(), name='project-gantt-pdf'),
 ]

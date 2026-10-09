@@ -39,6 +39,9 @@ class IPCCollectionListCreateView(APIView):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
         before_gross = ipc.gross_amount
         before_net = ipc.net_amount
+        before_status = ipc.status
+        before_submitted = ipc.submitted_amount
+        before_approved = ipc.approved_amount
         serializer = IPCCollectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -55,6 +58,9 @@ class IPCCollectionListCreateView(APIView):
         ipc.refresh_from_db()
         assert ipc.gross_amount == before_gross
         assert ipc.net_amount == before_net
+        assert ipc.status == before_status
+        assert ipc.submitted_amount == before_submitted
+        assert ipc.approved_amount == before_approved
         return Response(IPCCollectionSerializer(row).data, status=status.HTTP_201_CREATED)
 
 

@@ -16,13 +16,36 @@ def recalculate_activity_progress(report_id):
     Idempotent via ``ActivityProgress.update_or_create``.
     """
     from field_reports.models import DailyReport, DailyReportActivity, ReportStatus
-    from schedule.models import ActivityProgress
+    from schedule.models import ActivityProgress, MeasurementMethod
+    from schedule.services.measurement_service import (
+        ProgressValidationError,
+        compute_quantity_progress,
+        get_current_approved_version,
+        record_progress,
+    )
 
     report = DailyReport.objects.get(id=report_id)
 
     linked_rows = report.activities.filter(is_deleted=False, activity_ref__isnull=False)
+    applied = 0
+    skipped: list[dict] = []
+    seen_activity_ids = set()
     for row in linked_rows:
         activity = row.activity_ref
+        if activity.id in seen_activity_ids:
+            continue
+        seen_activity_ids.add(activity.id)
+
+        version = get_current_approved_version(activity)
+        if version is None or version.method != MeasurementMethod.QUANTITY:
+            reason = 'measurement_not_approved' if version is None else 'method_not_quantity'
+            logger.info(
+                'Skipping progress recalculation for activity %s (report %s): %s',
+                activity.id, report_id, reason,
+            )
+            skipped.append({'activity_id': str(activity.id), 'code': reason})
+            continue
+
         cumulative = (
             DailyReportActivity.objects.filter(
                 report__project=report.project,
@@ -35,20 +58,28 @@ def recalculate_activity_progress(report_id):
             or 0
         )
 
-        progress_pct = 0
-        if activity.total_quantity and activity.total_quantity > 0:
-            progress_pct = min(float(cumulative) / float(activity.total_quantity), 1.0)
+        try:
+            progress_pct = compute_quantity_progress(activity, cumulative, version)
+        except ProgressValidationError as exc:
+            # Do not clamp: >100% (or an incomplete basis) is never written as success.
+            logger.warning(
+                'Progress recalculation rejected for activity %s (report %s): %s',
+                activity.id, report_id, exc.code,
+            )
+            skipped.append({'activity_id': str(activity.id), 'code': exc.code})
+            continue
 
-        ActivityProgress.objects.update_or_create(
-            activity=activity,
-            report_date=report.report_date,
-            defaults={
-                'actual_progress': progress_pct,
-                'cumulative_quantity': cumulative,
-                'updated_by': report.approved_by,
-                'source': ActivityProgress.ProgressSource.DAILY_REPORT,
-            },
+        record_progress(
+            activity,
+            report.report_date,
+            progress_pct,
+            report.approved_by,
+            source=ActivityProgress.ProgressSource.DAILY_REPORT,
+            cumulative_quantity=cumulative,
+            version=version,
+            approve=True,
         )
+        applied += 1
 
     from schedule.services.progress_service import invalidate_s_curve_cache
 
@@ -61,7 +92,12 @@ def recalculate_activity_progress(report_id):
         invalidate_project_caches(report.project_id)
     except Exception:
         pass
-    return {'report_id': str(report_id), 'activities': linked_rows.count()}
+    return {
+        'report_id': str(report_id),
+        'activities': linked_rows.count(),
+        'applied': applied,
+        'skipped': skipped,
+    }
 
 
 def _auto_create_costs_from_report(report):

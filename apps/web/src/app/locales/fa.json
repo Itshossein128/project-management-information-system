@@ -932,7 +932,26 @@
       "title": "هشدارها"
     },
     "contracts": {
-      "title": "قراردادها"
+      "title": "قراردادها",
+      "receivablesTab": "مطالبات",
+      "receivablesTitle": "مطالبات معوق و نزدیک سررسید",
+      "receivablesHint": "صورت‌وضعیت‌های تأییدشده با مانده وصول‌نشده، سررسید گذشته یا تا ۷ روز آینده.",
+      "overdue": "معوق",
+      "nearDue": "نزدیک سررسید",
+      "noOpenReceivables": "مطلب معوق یا نزدیک سررسیدی وجود ندارد.",
+      "ipc": "صورت‌وضعیت",
+      "contract": "قرارداد",
+      "remaining": "مانده",
+      "dueDate": "سررسید",
+      "band": "وضعیت",
+      "paymentTerms": "شرایط پرداخت",
+      "submittedAmount": "اعلامی",
+      "approvedAmount": "تأییدشده",
+      "netAmount": "خالص",
+      "varianceNote": "توضیح اختلاف (در صورت کاهش نسبت به مبلغ اعلامی)",
+      "approveFinal": "تأیید نهایی",
+      "plannedCollectionDate": "سررسید وصول",
+      "varianceExplanation": "توضیح اختلاف مبلغ: "
     },
     "contractNew": {
       "title": "قرارداد جدید"
@@ -952,7 +971,29 @@
       "title": "جریان نقدی"
     },
     "costs": {
-      "title": "کنترل هزینه"
+      "title": "کنترل هزینه",
+      "accessDeniedDescription": "نقش شما مجوز مشاهده هزینه‌ها را ندارد.",
+      "budgetVersions": "نسخه‌های بودجه",
+      "newInitialVersion": "نسخه اولیه جدید",
+      "noBudgetVersions": "هنوز نسخه‌ای ثبت نشده است.",
+      "budgetVersionCreated": "نسخه بودجه ایجاد شد",
+      "budgetChangeRequests": "درخواست تغییر بودجه",
+      "budgetChangeHint": "تغییر بودجه مصوب فقط از مسیر درخواست با علت، مبلغ، تأثیر پروژه و تصویب مجاز است.",
+      "budgetCrCreated": "درخواست تغییر بودجه ایجاد شد",
+      "crReason": "علت (حداقل ۱۰ کاراکتر)",
+      "crImpact": "تأثیر بر نتیجه پروژه",
+      "crNewAmount": "مبلغ پیشنهادی ردیف کنترل",
+      "remainingTitle": "مانده قابل تخصیص",
+      "remainingHint": "مانده = مصوب − تعهدشده − مصرف‌شده. جابه‌جایی درون بودجه با حفظ سقف پروژه.",
+      "noRemaining": "بودجه مصوب کنترلی برای محاسبه مانده یافت نشد.",
+      "transferTitle": "جابه‌جایی درون بودجه",
+      "transferAmount": "مبلغ",
+      "transferDone": "جابه‌جایی ثبت شد",
+      "addMultiLevelLine": "افزودن ردیف چندسطحی",
+      "lineCreated": "ردیف بودجه اضافه شد",
+      "newVersion": "نسخه جدید",
+      "compareTitle": "مقایسه نسخه‌ها",
+      "compareDone": "مقایسه انجام شد"
     },
     "materialBalance": {
       "title": "بالانس مصالح"
@@ -1419,5 +1460,54 @@
     "match": "مطابق",
     "mismatch": "مغایرت",
     "insufficientData": "داده ناکافی"
+  },
+  "progress": {
+    "errors": {
+      "exceeds100": "درصد بالاتر از ۱۰۰ بدون تغییر مقدار مصوب رد می‌شود.",
+      "measurementNotApproved": "قبل از ثبت پیشرفت، روش اندازه‌گیری فعالیت (مقدار کل/واحد یا نقاط عطف) را تأیید کنید."
+    },
+    "photoNotApproval": "عکس فقط به‌عنوان شاهد است و جایگزین تأیید فنی پیشرفت نیست.",
+    "period": "دوره‌ای",
+    "cumulative": "تجمعی",
+    "planned": "برنامه‌ای",
+    "approved": "تأییدشده",
+    "measurement": {
+      "title": "روش اندازه‌گیری",
+      "method": "روش",
+      "quantity": "مقدارمحور",
+      "milestones": "نقاط عطف وزنی",
+      "evidence": "درصد با شواهد",
+      "totalQuantity": "مقدار کل",
+      "saveDraft": "ذخیره پیش‌نویس",
+      "approve": "تأیید مبنا",
+      "changeAndApprove": "تغییر و تأیید",
+      "changeReason": "دلیل تغییر روش",
+      "defaultChangeReason": "به‌روزرسانی روش",
+      "status": "وضعیت",
+      "saved": "پیش‌نویس روش ذخیره شد",
+      "approved": "روش اندازه‌گیری تأیید شد",
+      "loadHint": "روش اندازه‌گیری این فعالیت را تعریف کنید."
+    }
+  },
+  "progressReports": {
+    "title": "گزارش‌های هفتگی و ماهانه",
+    "generateWeekly": "تولید گزارش هفتگی",
+    "generateMonthly": "تولید گزارش ماهانه",
+    "weekly": "هفتگی",
+    "monthly": "ماهانه",
+    "empty": "هنوز گزارش دوره‌ای تولید نشده است.",
+    "generated": "گزارش تولید شد",
+    "section": "بخش",
+    "value": "مقدار",
+    "source": "منبع",
+    "updated": "آخرین به‌روزرسانی",
+    "notRecorded": "ثبت‌نشده",
+    "approved": "تأییدشده",
+    "override": "اصلاح با ردپا",
+    "overrideTitle": "اصلاح رقم (ثبت دلیل الزامی است)",
+    "newValue": "مقدار جدید",
+    "reasonRequired": "دلیل (الزامی)",
+    "overrideSaved": "اصلاح ثبت شد",
+    "manualSaved": "پیشرفت دستی ثبت شد"
   }
 }

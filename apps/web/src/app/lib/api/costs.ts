@@ -30,8 +30,12 @@ export function costCategoryLabel(cat: string) {
 
 export interface BudgetRow {
   id: string;
+  version?: string | null;
+  level?: string;
   wbs: string | null;
   activity: string | null;
+  cbs?: string | null;
+  contract?: string | null;
   wbs_code: string | null;
   wbs_name: string | null;
   activity_code: string | null;
@@ -40,6 +44,66 @@ export interface BudgetRow {
   budget_amount: number;
   budget_amount_display: string;
   notes: string;
+}
+
+export type BudgetVersionKind = "initial" | "approved" | "revised" | "final_forecast";
+export type BudgetVersionStatus = "draft" | "submitted" | "approved" | "rejected";
+
+export interface BudgetVersion {
+  id: string;
+  kind: BudgetVersionKind;
+  status: BudgetVersionStatus;
+  version_number: number;
+  name: string;
+  currency: string;
+  notes: string;
+  is_control: boolean;
+  line_count: number;
+  total_amount: number;
+  submitted_at?: string | null;
+  approved_at?: string | null;
+  rejection_reason?: string;
+}
+
+export type BudgetChangeRequestStatus =
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "rejected"
+  | "cancelled";
+
+export interface BudgetChangeRequest {
+  id: string;
+  base_version: string;
+  resulting_version: string | null;
+  reason: string;
+  amount_delta: string | number;
+  project_impact: string;
+  affected_lines: Record<string, unknown>[];
+  status: BudgetChangeRequestStatus;
+  requested_at: string;
+  decision_notes: string;
+}
+
+export interface RemainingHeading {
+  key: string;
+  level: string;
+  wbs: string | null;
+  cbs: string | null;
+  contract: string | null;
+  cost_category: string;
+  approved: number;
+  committed: number;
+  consumed: number;
+  remaining: number;
+  overrun: boolean;
+  cbs_missing_warning: boolean;
+}
+
+export interface RemainingResponse {
+  version_id: string | null;
+  project_ceiling: number;
+  headings: RemainingHeading[];
 }
 
 export interface BudgetListResponse {
@@ -134,12 +198,18 @@ export interface Supplier {
 
 export function fetchBudgets(
   projectId: string,
-  params: { wbs_id?: string; activity_id?: string; cost_category?: string } = {},
+  params: {
+    wbs_id?: string;
+    activity_id?: string;
+    cost_category?: string;
+    version_id?: string;
+  } = {},
 ) {
   const search = new URLSearchParams();
   if (params.wbs_id) search.set("wbs_id", params.wbs_id);
   if (params.activity_id) search.set("activity_id", params.activity_id);
   if (params.cost_category) search.set("cost_category", params.cost_category);
+  if (params.version_id) search.set("version_id", params.version_id);
   const qs = search.toString();
   return apiJson<BudgetListResponse>(`${base(projectId)}/budgets/${qs ? `?${qs}` : ""}`);
 }
@@ -153,10 +223,170 @@ export function postBudgetsBulk(
     budget_amount: number;
     notes?: string;
   }[],
+  versionId?: string | null,
 ) {
-  return apiJson<{ saved: number; summary: BudgetListResponse["summary"]; warning?: string }>(
-    `${base(projectId)}/budgets/bulk/`,
-    { method: "POST", body: JSON.stringify(items) },
+  const body =
+    versionId != null
+      ? { version_id: versionId, items }
+      : items;
+  return apiJson<{
+    saved: number;
+    version_id?: string;
+    summary: BudgetListResponse["summary"];
+    warning?: string;
+  }>(`${base(projectId)}/budgets/bulk/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function fetchBudgetVersions(projectId: string) {
+  return apiJson<BudgetVersion[]>(`${base(projectId)}/budget-versions/`);
+}
+
+export function createBudgetVersion(
+  projectId: string,
+  body: { kind: "initial" | "revised" | "final_forecast"; name?: string; currency?: string },
+) {
+  return apiJson<BudgetVersion>(`${base(projectId)}/budget-versions/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function submitBudgetVersion(projectId: string, versionId: string) {
+  return apiJson<BudgetVersion>(`${base(projectId)}/budget-versions/${versionId}/submit/`, {
+    method: "POST",
+    body: "{}",
+  });
+}
+
+export function approveBudgetVersion(
+  projectId: string,
+  versionId: string,
+  promoteToControl = false,
+) {
+  return apiJson<BudgetVersion>(`${base(projectId)}/budget-versions/${versionId}/approve/`, {
+    method: "POST",
+    body: JSON.stringify({ promote_to_control: promoteToControl }),
+  });
+}
+
+export function rejectBudgetVersion(projectId: string, versionId: string, reason = "") {
+  return apiJson<BudgetVersion>(`${base(projectId)}/budget-versions/${versionId}/reject/`, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export type BudgetLineLevel =
+  | "project"
+  | "phase"
+  | "contract"
+  | "wbs"
+  | "cbs"
+  | "activity";
+
+export function createBudgetVersionLine(
+  projectId: string,
+  versionId: string,
+  body: {
+    level: BudgetLineLevel;
+    cost_category: CostCategory;
+    budget_amount: number | string;
+    wbs?: string | null;
+    activity?: string | null;
+    cbs?: string | null;
+    contract?: string | null;
+    period_start?: string | null;
+    period_end?: string | null;
+    notes?: string;
+  },
+) {
+  return apiJson<BudgetRow>(`${base(projectId)}/budget-versions/${versionId}/lines/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export interface BudgetCompareResponse {
+  left_id: string;
+  right_id: string;
+  fx_rate: number;
+  diffs: {
+    key: string;
+    left_amount: number;
+    right_amount: number;
+    right_amount_converted: number;
+    delta: number;
+  }[];
+}
+
+export function compareBudgetVersions(
+  projectId: string,
+  left: string,
+  right: string,
+  fxRate?: string | number,
+) {
+  const search = new URLSearchParams({ left, right });
+  if (fxRate != null && fxRate !== "") search.set("fx_rate", String(fxRate));
+  return apiJson<BudgetCompareResponse>(
+    `${base(projectId)}/budget-versions/compare/?${search.toString()}`,
+  );
+}
+
+export function fetchBudgetChangeRequests(projectId: string) {
+  return apiJson<BudgetChangeRequest[]>(`${base(projectId)}/budget-change-requests/`);
+}
+
+export function createBudgetChangeRequest(
+  projectId: string,
+  body: {
+    reason: string;
+    project_impact: string;
+    amount_delta?: number | string;
+    affected_lines: Record<string, unknown>[];
+  },
+) {
+  return apiJson<BudgetChangeRequest>(`${base(projectId)}/budget-change-requests/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function submitBudgetChangeRequest(projectId: string, id: string) {
+  return apiJson<BudgetChangeRequest>(
+    `${base(projectId)}/budget-change-requests/${id}/submit/`,
+    { method: "POST", body: "{}" },
+  );
+}
+
+export function approveBudgetChangeRequest(projectId: string, id: string, notes = "") {
+  return apiJson<BudgetChangeRequest>(
+    `${base(projectId)}/budget-change-requests/${id}/approve/`,
+    { method: "POST", body: JSON.stringify({ decision_notes: notes }) },
+  );
+}
+
+export function rejectBudgetChangeRequest(projectId: string, id: string, notes = "") {
+  return apiJson<BudgetChangeRequest>(
+    `${base(projectId)}/budget-change-requests/${id}/reject/`,
+    { method: "POST", body: JSON.stringify({ decision_notes: notes }) },
+  );
+}
+
+export function fetchBudgetRemaining(projectId: string, versionId?: string) {
+  const qs = versionId ? `?version_id=${versionId}` : "";
+  return apiJson<RemainingResponse>(`${base(projectId)}/budgets/remaining/${qs}`);
+}
+
+export function postBudgetTransfer(
+  projectId: string,
+  body: { from_line_id: string; to_line_id: string; amount: number | string; note?: string },
+) {
+  return apiJson<{ transfer: { id: string }; from_line: BudgetRow; to_line: BudgetRow }>(
+    `${base(projectId)}/budgets/transfers/`,
+    { method: "POST", body: JSON.stringify(body) },
   );
 }
 
@@ -284,8 +514,11 @@ export function autoAllocateCostPool(
   });
 }
 
-export function fetchSuppliers(projectId: string) {
-  return apiJson<Supplier[]>(`${base(projectId)}/suppliers/`);
+export async function fetchSuppliers(projectId: string) {
+  const data = await apiJson<Supplier[] | { results: Supplier[] }>(
+    `${base(projectId)}/suppliers/`,
+  );
+  return Array.isArray(data) ? data : (data.results ?? []);
 }
 
 export function fetchGlobalSuppliers(q?: string) {

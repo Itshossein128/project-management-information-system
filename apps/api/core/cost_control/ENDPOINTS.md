@@ -20,12 +20,42 @@ All CRUD viewsets extend `ProjectScopedViewSet` (`common/viewsets.py`) for tenan
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `budgets/` | GET | List budgets. Filters: `wbs_id`, `activity_id`, `cost_category`. Response includes `summary` rollup and optional `warning` when WBS totals exceed limits. |
-| `budgets/` | POST | Create single budget line. |
-| `budgets/bulk/` | POST | Bulk upsert array of `{wbs, activity, cost_category, budget_amount, notes}`. Returns `{saved, summary, warning?}`. |
+| `budgets/` | GET | List budgets. Filters: `wbs_id`, `activity_id`, `cost_category`, `version_id`. Defaults to control version when present. Response includes `summary` rollup and optional `warning` when WBS totals exceed limits. |
+| `budgets/` | POST | Create single budget line on a draft version (`version` / working draft). Non-draft → `budget_version_locked`. |
+| `budgets/bulk/` | POST | Bulk upsert array **or** `{version_id, items:[…]}`. Returns `{saved, version_id, summary, warning?}`. |
 | `budgets/{pk}/` | GET | Budget detail. |
-| `budgets/{pk}/` | PATCH | Partial update. |
-| `budgets/{pk}/` | DELETE | Soft-delete. |
+| `budgets/{pk}/` | PATCH | Partial update (draft version only). |
+| `budgets/{pk}/` | DELETE | Soft-delete (draft version only). |
+| `budgets/remaining/` | GET | Remaining allocatable by heading (`approved − committed − consumed`). Query: `version_id` (default control). |
+| `budgets/transfers/` | POST | Net-zero transfer on control version: `{from_line_id, to_line_id, amount, note?}`. |
+
+Permissions: reads `view_costs`; writes `edit_costs`; version/CR approve/reject `approve_costs`.
+
+## Budget versions
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `budget-versions/` | GET | List versions (kind, status, `is_control`, totals). |
+| `budget-versions/` | POST | Create draft: `{kind: initial\|revised\|final_forecast, name?, currency?, notes?}`. |
+| `budget-versions/compare/` | GET | Compare two versions: `left`, `right`, optional `fx_rate` (required if currencies differ → `fx_rate_required`). |
+| `budget-versions/{id}/` | GET, PATCH | Detail; patch name/notes while draft. |
+| `budget-versions/{id}/lines/` | GET, POST | List/create lines for a version (levels: project/phase/contract/wbs/cbs/activity + optional period). |
+| `budget-versions/{id}/submit/` | POST | draft → submitted (≥1 line). |
+| `budget-versions/{id}/approve/` | POST | submitted → approved. Body optional `{promote_to_control}` for `final_forecast`. Replacing an existing control without a change request → `budget_change_request_required`. |
+| `budget-versions/{id}/reject/` | POST | submitted → rejected (`reason?`). |
+
+## Budget change requests
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `budget-change-requests/` | GET, POST | List / create (`reason`, `project_impact`, `amount_delta`, `affected_lines`). |
+| `budget-change-requests/{id}/` | GET, PATCH | Detail / update while draft. |
+| `budget-change-requests/{id}/submit/` | POST | draft → submitted. |
+| `budget-change-requests/{id}/approve/` | POST | Clone control → new revised control with ops applied. |
+| `budget-change-requests/{id}/reject/` | POST | Reject; baseline unchanged. |
+| `budget-change-requests/{id}/cancel/` | POST | Cancel open CR. |
+
+Errors of note: `budget_version_locked`, `budget_change_request_required`, `project_ceiling_exceeded`, `no_control_budget`, `change_request_already_open`.
 
 ## Actual costs
 

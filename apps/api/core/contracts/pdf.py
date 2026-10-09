@@ -30,12 +30,19 @@ def render_ipc_pdf(ipc) -> bytes:
             f'{gregorian_to_jalali(ipc.period_start) or "—"} '
             f'تا {gregorian_to_jalali(ipc.period_end) or "—"}'
         )
+    def _amt(value):
+        if value is None:
+            return '—'
+        return f'{float(value):,.0f}'
+
     meta = [
         [_fa('قرارداد'), _fa(contract.contract_number or '—')],
         [_fa('طرف مقابل'), _fa(contract.counterparty or '—')],
         [_fa('دوره'), _fa(period_label)],
-        [_fa('مبلغ ناخالص'), _fa(f'{float(ipc.gross_amount or 0):,.0f}')],
-        [_fa('مبلغ خالص'), _fa(f'{float(ipc.net_amount or 0):,.0f}')],
+        [_fa('مبلغ ناخالص'), _fa(_amt(ipc.gross_amount))],
+        [_fa('مبلغ اعلامی'), _fa(_amt(ipc.submitted_amount))],
+        [_fa('مبلغ تأییدشده'), _fa(_amt(ipc.approved_amount))],
+        [_fa('مبلغ خالص'), _fa(_amt(ipc.net_amount))],
         [_fa('وضعیت'), _fa(ipc.status)],
     ]
     t = Table(meta, colWidths=[120, 360])

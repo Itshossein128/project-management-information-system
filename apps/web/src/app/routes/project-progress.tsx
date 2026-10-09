@@ -19,6 +19,8 @@ import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ActivityProgressTable } from "@/components/progress/ActivityProgressTable";
 import { KPICard } from "@/components/progress/KPICard";
 import { ManualProgressDrawer } from "@/components/progress/ManualProgressDrawer";
+import { MeasurementEditor } from "@/components/progress/MeasurementEditor";
+import { PeriodReportsPanel } from "@/components/progress/PeriodReportsPanel";
 import { ProgressHistoryTable } from "@/components/progress/ProgressHistoryTable";
 import { SCurveChart } from "@/components/progress/SCurveChart";
 import { Button } from "@/components/ui/sprint-button";
@@ -90,8 +92,13 @@ function ProgressPageContent() {
   }, [curveFetching, forceRefresh]);
 
   const { data: activityRows = [] } = useQuery({
-    queryKey: ["progress-activities", projectId, behindOnly],
-    queryFn: () => fetchActivityProgress(projectId, { is_behind: behindOnly || undefined }),
+    queryKey: ["progress-activities", projectId, behindOnly, effectiveFrom, effectiveTo],
+    queryFn: () =>
+      fetchActivityProgress(projectId, {
+        is_behind: behindOnly || undefined,
+        period_start: effectiveFrom,
+        period_end: effectiveTo,
+      }),
     enabled: canView && Boolean(projectId),
   });
 
@@ -315,6 +322,10 @@ function ProgressPageContent() {
         </div>
         <ActivityProgressTable projectId={projectId} rows={activityRows} />
       </section>
+
+      {canEdit ? <MeasurementEditor projectId={projectId} /> : null}
+
+      <PeriodReportsPanel projectId={projectId} />
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">تاریخچه گزارش‌های تأیید شده</h2>

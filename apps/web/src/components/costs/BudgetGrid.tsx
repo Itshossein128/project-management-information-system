@@ -34,19 +34,24 @@ function cellKey(rowId: string, cat: CostCategory) {
 export function BudgetGrid({
   projectId,
   canEdit,
+  versionId,
+  locked = false,
 }: {
   projectId: string;
   canEdit: boolean;
+  versionId?: string | null;
+  locked?: boolean;
 }) {
   const toast = useToast();
   const qc = useQueryClient();
   const [mode, setMode] = useState<GridMode>("wbs");
   const [edits, setEdits] = useState<Record<string, number>>({});
   const [editingCell, setEditingCell] = useState<string | null>(null);
+  const editable = canEdit && !locked;
 
   const { data: budgetData, isLoading: budgetsLoading, isError: budgetsError, refetch: refetchBudgets } = useQuery({
-    queryKey: ["budgets", projectId],
-    queryFn: () => fetchBudgets(projectId),
+    queryKey: ["budgets", projectId, versionId ?? "default"],
+    queryFn: () => fetchBudgets(projectId, versionId ? { version_id: versionId } : {}),
   });
 
   const { data: wbsFlat = [], isLoading: wbsLoading, isError: wbsError, refetch: refetchWbs } = useQuery({
@@ -145,13 +150,14 @@ export function BudgetGrid({
           }
         }
       }
-      return postBudgetsBulk(projectId, items);
+      return postBudgetsBulk(projectId, items, versionId);
     },
     onSuccess: (res) => {
       toast.success(`${res.saved} بودجه ذخیره شد`);
       if (res.warning) toast.error(res.warning);
       setEdits({});
       void qc.invalidateQueries({ queryKey: ["budgets", projectId] });
+      void qc.invalidateQueries({ queryKey: ["budget-versions", projectId] });
       void qc.invalidateQueries({ queryKey: ["cost-summary", projectId] });
       void qc.invalidateQueries({ queryKey: ["cost-variance", projectId] });
     },
@@ -194,6 +200,16 @@ export function BudgetGrid({
 
       <WbsPackageMetaWarning nodes={packageMetaNodes} testId="budget-wbs-meta-warning" />
 
+      {locked ? (
+        <p
+          className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground"
+          data-testid="budget-locked-banner"
+        >
+          این نسخه مصوب قفل است. برای تغییر مبلغ از درخواست تغییر بودجه استفاده کنید؛ جابه‌جایی
+          درون‌بودجه‌ای از پنل مانده قابل تخصیص انجام می‌شود.
+        </p>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex gap-2">
           <Button
@@ -217,7 +233,7 @@ export function BudgetGrid({
             فعالیت
           </Button>
         </div>
-        {canEdit && hasEdits ? (
+        {editable && hasEdits ? (
           <Button
             variant="primary"
             size="sm"
@@ -269,7 +285,7 @@ export function BudgetGrid({
                   const isEditing = editingCell === k;
                   return (
                     <td key={cat.value} className="px-1 py-1 text-center">
-                      {canEdit && isEditing ? (
+                      {editable && isEditing ? (
                         <input
                           autoFocus
                           className="w-24 rounded border px-1 py-0.5 text-center text-xs"
@@ -292,8 +308,8 @@ export function BudgetGrid({
                           type="button"
                           className="w-full rounded px-1 py-0.5 hover:bg-muted/60 disabled:cursor-default"
                           data-testid={`budget-cell-${row.code}-${cat.value}`}
-                          disabled={!canEdit}
-                          onClick={() => canEdit && setEditingCell(k)}
+                          disabled={!editable}
+                          onClick={() => editable && setEditingCell(k)}
                         >
                           {amount ? formatFaAmount(amount) : "—"}
                         </button>

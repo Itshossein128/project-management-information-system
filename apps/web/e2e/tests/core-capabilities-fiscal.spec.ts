@@ -31,19 +31,11 @@ async function openNavSection(page: Page, sectionLabel: string | RegExp) {
     .click();
 }
 
-function openMenu(page: Page) {
-  return page.getByRole("menu");
-}
-
-function navMenuLink(page: Page, href: string) {
-  return openMenu(page).locator(`a[role="menuitem"][href="${href}"]`);
-}
-
 async function expectMenuHrefs(
   page: Page,
   opts: { include: string[]; exclude: string[] },
 ) {
-  const menu = openMenu(page);
+  const menu = page.getByRole("menu");
   await expect(menu).toBeVisible({ timeout: 10_000 });
   const hrefs = await menu.locator('a[role="menuitem"]').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute("href") ?? ""),
@@ -76,7 +68,6 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
       exclude: [],
     });
 
-    // Disable via settings UI (toggle already present)
     await page.goto(`${base}/settings`);
     await expect(page.getByText("risk").first()).toBeVisible({ timeout: 15_000 });
     const riskToggle = page.locator("#toggle-cap-risk");
@@ -118,7 +109,6 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
       reason: "E2E lock covering today",
     });
 
-    // Ordinary create without corrective is blocked by API (pytest covers this).
     const projectId = base.split("/").pop();
     const blocked = await page.request.post(
       `http://127.0.0.1:8000/api/v1/projects/${projectId}/costs/`,
@@ -146,14 +136,16 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
     });
     await page.getByTestId("costs-tab-actual").click();
     await expect(page.getByTestId("actual-costs-tab")).toBeVisible();
-
     await page.getByTestId("actual-cost-add-btn").first().click();
-    await expect(page.getByTestId("actual-cost-drawer")).toBeVisible();
+    const drawer = page.getByTestId("actual-cost-drawer");
+    await expect(drawer).toBeVisible();
 
-    // UI path: drawer exposes corrective flag + reason (Jalali date create is flaky in e2e).
-    await expect(page.getByTestId("actual-cost-corrective")).toBeVisible({
-      timeout: 10_000,
+    // Lock-gated corrective path: checkbox + reason both rendered (reason enabled).
+    await expect(drawer.getByTestId("actual-cost-corrective-section")).toBeVisible({
+      timeout: 15_000,
     });
-    await expect(page.getByTestId("actual-cost-correction-reason")).toBeVisible();
+    await expect(drawer.getByTestId("actual-cost-corrective")).toBeVisible();
+    await expect(drawer.getByTestId("actual-cost-correction-reason")).toBeVisible();
+    await expect(drawer.getByTestId("actual-cost-correction-reason")).toBeEnabled();
   });
 });

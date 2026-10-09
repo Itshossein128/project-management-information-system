@@ -66,8 +66,11 @@ def test_manual_deduction_api(finance_client, project, ipc):
 
 
 def test_submit_publishes_event(finance_client, project, ipc):
+    ipc.gross_amount = Decimal('100000')
+    ipc.save(update_fields=['gross_amount'])
     url = f'{BASE.format(project_id=project.id)}/ipcs/{ipc.id}/submit/'
     with patch('contracts.services.ipc_service._publish_ipc_submitted') as mock_publish:
         resp = finance_client.post(url)
     assert resp.status_code == 200
     mock_publish.assert_called_once()
+    assert Decimal(resp.data['submitted_amount']) == Decimal('100000')

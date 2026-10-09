@@ -80,7 +80,7 @@ export default function Login() {
         <div className='absolute -bottom-24 -start-24 h-80 w-80 rounded-full bg-safety-500/25 blur-3xl' />
         <div className='absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/60' />
       </div>
-      <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
+      <div className='absolute left-3 top-3 z-10 sm:left-4 sm:top-4'>
         <AppPreferencesBar />
       </div>
       <Card className='animate-scale-in w-full max-w-md border-border/50 shadow-[var(--shadow-xl)] backdrop-blur-sm'>

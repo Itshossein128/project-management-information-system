@@ -131,11 +131,66 @@ Required body fields:
 
 Optional: `cumulative_quantity`, `notes`.
 
-- `actual_progress` accepts `0–1` or `0–100` (values &gt; 1 are divided by 100).
-- Creates/updates `ActivityProgress` with `source=manual`.
+- `actual_progress` accepts `0–1` or `0–100` (values &gt; 1 are divided by 100). **Values above 100% are rejected (`progress_exceeds_100`), never clamped.**
+- Requires an approved measurement definition (`measurement_not_approved` otherwise).
+- Creates/updates `ActivityProgress` with `source=manual`, sets `measurement_version`, `period_progress` (delta vs previous cumulative) and cumulative `actual_progress`. Does **not** set `approved_progress`.
 - Invalidates S-curve cache for the project.
 
 Progress from approved daily reports uses `source=daily_report` and is recalculated on report approval.
+
+## Physical progress & periodic reports (FR-PRG, spec 009)
+
+### Measurement methods
+
+| Endpoint | Method | Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `activities/{id}/measurement/` | GET | `view_activities` or `view_dashboard` | Current definition + version list (creates a draft on first read). |
+| `activities/{id}/measurement/` | PATCH/PUT | `edit_activities` | Edit draft basis (`method`, `total_quantity`, `unit_id`, `milestones[{name,weight}]`, `evidence_rules`). Approved definitions must use `change/`. |
+| `activities/{id}/measurement/approve/` | POST | `approve_reports` | Validates basis, creates `ActivityMeasurementVersion`. Body `{reason}` (required from version 2). |
+| `activities/{id}/measurement/change/` | POST | `edit_activities` | Body: new basis + required `reason`. Definition returns to `draft`; the previous `current_version` stays valid for progress writes until re-approval. |
+| `activities/{id}/quantity-changes/` | GET/POST | `view_dashboard` / `edit_activities` | List / create draft `{new_total, reason, previous_total?}`. |
+| `activities/{id}/quantity-changes/{change_id}/approve/` (also `quantity-changes/{change_id}/approve/`) | POST | `approve_reports` | Approves change; raises `Activity.total_quantity`; allows >100% of the old total up to the new total. |
+
+Weighted milestone weights must sum to 1 (±0.01). Quantity method needs `total_quantity` > 0 and a unit; evidence method needs `evidence_rules`.
+
+### Four-way progress
+
+- `GET progress/activities/?as_of=&period_start=&period_end=` rows now include `period_progress_pct`, `cumulative_progress_pct` (= `actual_progress_pct`), `planned_progress_pct`, `approved_progress_pct`, `measurement_method`, `measurement_version_id`, `measurement_status` (`draft` / `approved` / `not_defined`), `wbs_id`, `wbs_code`, `period_start`, `period_end`. Period defaults to the Monday–Sunday week containing `as_of`.
+- `POST progress/{activity_id}/technical-approve/` (`approve_reports`) — copies the latest (or `report_date`) recorded cumulative into `approved_progress`. `{"basis": "photo"}` is rejected (`photo_not_technical_approval`); `evidence_refs` is stored only.
+- Approved daily reports (`recalculate_activity_progress`) write `approved_progress` + `measurement_version`; activities without an approved quantity measurement, or whose cumulative quantity exceeds the approved total, are skipped and logged (no clamped write).
+
+### Weekly / monthly period reports
+
+| Endpoint | Method | Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `progress-reports/` | GET | `view_dashboard` | List (`kind`, `include_superseded`). |
+| `progress-reports/` | POST | `view_dashboard` (membership) | Generate `{kind: weekly|monthly, period_start, period_end}`; supersedes prior same-period report. |
+| `progress-reports/{id}/` | GET | `view_dashboard` | Report with figures (provenance: `source_type`, `source_id`, `source_path`, `source_approved`, `last_updated_at`). |
+| `progress-reports/figures/{figure_id}/` | PATCH/PUT | `edit_activities` | Always rejected: `figure_immutable`. |
+| `progress-reports/figures/{figure_id}/overrides/` | POST | `edit_activities` | `{new_value, reason}`; stores `PeriodReportFigureOverride` and updates value. |
+
+Weekly sections: `progress_summary`, `critical_activities`, `next_week_plan`, `barriers`, `decisions_required`. Monthly: `progress_summary`, `baseline_variance`, `cost`, `commitments`, `ipc`, `risks`, `next_month_forecast`. Missing data → `value=null`, `value_status=not_recorded`.
+
+### Error codes
+
+Errors use `{"error": {"code": "...", "message": "..."}}`.
+
+| Code | HTTP | When |
+| :--- | :--- | :--- |
+| `measurement_not_approved` | 400 | Progress write/approve without an approved measurement version |
+| `incomplete_measurement_basis` | 400 | Approve or write with missing total/unit, bad milestone weights, or missing evidence rules |
+| `progress_exceeds_100` | 400 | Cumulative progress > 100% without a covering approved quantity change |
+| `method_change_reason_required` | 400 | Change/approve of version ≥ 2 without reason |
+| `measurement_already_approved` | 409 | Approve with nothing pending |
+| `measurement_locked` | 400 | PATCH on an approved definition (use `change/`) |
+| `photo_not_technical_approval` | 400 | Technical approve based on photo only |
+| `progress_not_found` | 400 | Technical approve with no recorded progress |
+| `quantity_change_reason_required` / `invalid_quantity_change` / `quantity_change_not_draft` | 400 | Quantity change validation |
+| `figure_immutable` | 400 | Direct figure PATCH/PUT |
+| `override_reason_required` / `override_value_required` | 400 | Override missing reason / value |
+| `invalid_period` | 400 | Bad `kind` or period dates |
+
+**Breaking change:** clients that relied on clamping to 100% now receive `400 progress_exceeds_100`; existing activities need an approved measurement before manual progress can be recorded.
 
 ## Gantt (Sprint 9)
 

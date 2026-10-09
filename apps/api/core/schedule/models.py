@@ -237,10 +237,266 @@ class ActivityProgress(UUIDModel):
         blank=True,
         related_name='activity_progress_updates',
     )
+    # FR-PRG four-way progress: actual_progress is the cumulative recorded value.
+    period_progress = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    approved_progress = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    measurement_version = models.ForeignKey(
+        'schedule.ActivityMeasurementVersion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='progress_entries',
+    )
+    technical_approved_at = models.DateTimeField(null=True, blank=True)
+    technical_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='technically_approved_progress',
+    )
+    evidence_refs = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = 'activity_progress'
         unique_together = [['activity', 'report_date']]
+
+
+class MeasurementMethod(models.TextChoices):
+    QUANTITY = 'quantity', 'Quantity'
+    WEIGHTED_MILESTONES = 'weighted_milestones', 'Weighted milestones'
+    EVIDENCE_PERCENT = 'evidence_percent', 'Evidence percent'
+
+
+class MeasurementStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    APPROVED = 'approved', 'Approved'
+
+
+class ActivityMeasurementDefinition(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='measurement_definitions',
+    )
+    activity = models.OneToOneField(
+        'projects.Activity',
+        on_delete=models.CASCADE,
+        related_name='measurement_definition',
+    )
+    method = models.CharField(
+        max_length=30,
+        choices=MeasurementMethod.choices,
+        default=MeasurementMethod.QUANTITY,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=MeasurementStatus.choices,
+        default=MeasurementStatus.DRAFT,
+    )
+    total_quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    unit = models.ForeignKey(
+        'master_data.Unit',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='measurement_definitions',
+    )
+    milestones = models.JSONField(default=list, blank=True)
+    evidence_rules = models.TextField(blank=True, default='')
+    pending_change_reason = models.TextField(blank=True, default='')
+    current_version = models.ForeignKey(
+        'schedule.ActivityMeasurementVersion',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_measurement_definitions',
+    )
+
+    class Meta:
+        db_table = 'activity_measurement_definitions'
+
+    def __str__(self):
+        return f'{self.activity_id}:{self.method}:{self.status}'
+
+
+class ActivityMeasurementVersion(UUIDModel):
+    definition = models.ForeignKey(
+        ActivityMeasurementDefinition,
+        on_delete=models.CASCADE,
+        related_name='versions',
+    )
+    version_number = models.PositiveIntegerField()
+    method = models.CharField(max_length=30, choices=MeasurementMethod.choices)
+    basis_snapshot = models.JSONField(default=dict, blank=True)
+    change_reason = models.TextField(blank=True, default='')
+    approved_at = models.DateTimeField()
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_measurement_versions',
+    )
+
+    class Meta:
+        db_table = 'activity_measurement_versions'
+        ordering = ['version_number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['definition', 'version_number'],
+                name='uniq_measurement_version_number',
+            ),
+        ]
+
+
+class ActivityQuantityChangeStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+
+
+class ActivityQuantityChange(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='activity_quantity_changes',
+    )
+    activity = models.ForeignKey(
+        'projects.Activity',
+        on_delete=models.CASCADE,
+        related_name='quantity_changes',
+    )
+    previous_total = models.DecimalField(max_digits=18, decimal_places=4)
+    new_total = models.DecimalField(max_digits=18, decimal_places=4)
+    status = models.CharField(
+        max_length=20,
+        choices=ActivityQuantityChangeStatus.choices,
+        default=ActivityQuantityChangeStatus.DRAFT,
+    )
+    reason = models.TextField(blank=True, default='')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_quantity_changes',
+    )
+
+    class Meta:
+        db_table = 'activity_quantity_changes'
+        ordering = ['-created_at']
+
+
+class PeriodReportKind(models.TextChoices):
+    WEEKLY = 'weekly', 'Weekly'
+    MONTHLY = 'monthly', 'Monthly'
+
+
+class PeriodReportStatus(models.TextChoices):
+    GENERATED = 'generated', 'Generated'
+    SUPERSEDED = 'superseded', 'Superseded'
+
+
+class ProjectPeriodReport(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='period_reports',
+    )
+    kind = models.CharField(max_length=20, choices=PeriodReportKind.choices)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    status = models.CharField(
+        max_length=20,
+        choices=PeriodReportStatus.choices,
+        default=PeriodReportStatus.GENERATED,
+    )
+    generated_at = models.DateTimeField()
+    generated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='generated_period_reports',
+    )
+    superseded_by = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supersedes',
+    )
+    title = models.CharField(max_length=200, blank=True, default='')
+
+    class Meta:
+        db_table = 'project_period_reports'
+        ordering = ['-period_start', '-generated_at']
+        indexes = [
+            models.Index(fields=['project', 'kind', 'period_start', 'period_end'], name='ppr_project_kind_period_idx'),
+        ]
+
+    def __str__(self):
+        return self.title or f'{self.kind} {self.period_start}..{self.period_end}'
+
+
+class FigureValueStatus(models.TextChoices):
+    RECORDED = 'recorded', 'Recorded'
+    NOT_RECORDED = 'not_recorded', 'Not recorded'
+
+
+class PeriodReportFigure(UUIDModel):
+    report = models.ForeignKey(
+        ProjectPeriodReport,
+        on_delete=models.CASCADE,
+        related_name='figures',
+    )
+    section = models.CharField(max_length=60)
+    label_key = models.CharField(max_length=120)
+    value = models.JSONField(null=True, blank=True)
+    value_status = models.CharField(
+        max_length=20,
+        choices=FigureValueStatus.choices,
+        default=FigureValueStatus.NOT_RECORDED,
+    )
+    source_type = models.CharField(max_length=40, blank=True, default='')
+    source_id = models.UUIDField(null=True, blank=True)
+    source_path = models.CharField(max_length=255, blank=True, default='')
+    source_approved = models.BooleanField(default=False)
+    last_updated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'period_report_figures'
+        ordering = ['section']
+
+
+class PeriodReportFigureOverride(UUIDModel, TimeStampedModel):
+    figure = models.ForeignKey(
+        PeriodReportFigure,
+        on_delete=models.CASCADE,
+        related_name='overrides',
+    )
+    old_value = models.JSONField(null=True, blank=True)
+    new_value = models.JSONField(null=True, blank=True)
+    reason = models.TextField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='period_figure_overrides',
+    )
+
+    class Meta:
+        db_table = 'period_report_figure_overrides'
+        ordering = ['-created_at']
 
 
 class MspImportStatus(models.TextChoices):

@@ -21,12 +21,13 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
     if as_of_date is None:
         as_of_date = date.today()
 
-    total_budget = (
-        Budget.objects.filter(project_id=project_id, is_deleted=False).aggregate(
-            total=Sum('budget_amount')
-        )['total']
-        or 0
-    )
+    from cost_control.services.budget_version_service import get_control_version
+
+    control = get_control_version(project_id)
+    budget_qs = Budget.objects.filter(project_id=project_id, is_deleted=False)
+    if control:
+        budget_qs = budget_qs.filter(version_id=control.id)
+    total_budget = budget_qs.aggregate(total=Sum('budget_amount'))['total'] or 0
     total_actual = (
         ActualCost.objects.filter(
             project_id=project_id,
@@ -39,9 +40,7 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
     by_category: dict = {}
     for cat, _label in CostCategory.choices:
         b = (
-            Budget.objects.filter(
-                project_id=project_id, is_deleted=False, cost_category=cat
-            ).aggregate(total=Sum('budget_amount'))['total']
+            budget_qs.filter(cost_category=cat).aggregate(total=Sum('budget_amount'))['total']
             or 0
         )
         a = (

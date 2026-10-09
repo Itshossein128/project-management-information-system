@@ -2,7 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchActivities } from "@/app/lib/api/activities";
-import { postManualProgress } from "@/app/lib/api/progress";
+import {
+  fetchActivityMeasurement,
+  postManualProgress,
+} from "@/app/lib/api/progress";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
 import { Field, Input, Select, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
@@ -10,6 +13,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { MeasurementEditor } from "@/components/progress/MeasurementEditor";
 import { isIncompleteWorkPackage } from "@/components/wbs/wbs-package-meta-warning";
 
 function todayIso() {
@@ -56,6 +60,13 @@ export function ManualProgressDrawer({
     enabled: open,
   });
 
+  const { data: measurement } = useQuery({
+    queryKey: ["activity-measurement", projectId, activityId],
+    queryFn: () => fetchActivityMeasurement(projectId, activityId),
+    enabled: open && Boolean(activityId),
+    retry: false,
+  });
+
   const saveMutation = useMutation({
     mutationFn: () =>
       postManualProgress(projectId, {
@@ -68,11 +79,20 @@ export function ManualProgressDrawer({
         notes,
       }),
     onSuccess: () => {
-      toast.success("پیشرفت دستی ثبت شد");
+      toast.success(t("progressReports.manualSaved", { defaultValue: "پیشرفت دستی ثبت شد" }));
       onSaved();
       onClose();
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => {
+      const msg = err.message;
+      if (msg.includes("progress_exceeds_100") || msg.includes("100")) {
+        toast.error(t("progress.errors.exceeds100"));
+      } else if (msg.includes("measurement_not_approved")) {
+        toast.error(t("progress.errors.measurementNotApproved"));
+      } else {
+        toast.error(msg);
+      }
+    },
   });
 
   const activities = activitiesData?.results ?? [];
@@ -147,6 +167,19 @@ export function ManualProgressDrawer({
             {t("wbs.packageMetaSingle")}
           </p>
         ) : null}
+
+        {activityId ? <MeasurementEditor projectId={projectId} activityId={activityId} /> : null}
+
+        {activityId && measurement && measurement.status !== "approved" ? (
+          <p
+            className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:border-warning-800 dark:bg-warning-950/40 dark:text-warning-100"
+            data-testid="measurement-not-approved-warning"
+          >
+            {t("progress.errors.measurementNotApproved")}
+          </p>
+        ) : null}
+
+        <p className="text-xs text-muted-foreground">{t("progress.photoNotApproval")}</p>
 
         <JalaliDatePicker
           name="manual_progress_date"

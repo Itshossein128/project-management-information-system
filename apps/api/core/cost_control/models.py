@@ -206,8 +206,109 @@ class Payment(AuditSoftDeleteModel):
         ordering = ['-paid_at']
 
 
+class BudgetVersionKind(models.TextChoices):
+    INITIAL = 'initial', 'Initial'
+    APPROVED = 'approved', 'Approved'
+    REVISED = 'revised', 'Revised'
+    FINAL_FORECAST = 'final_forecast', 'Final forecast'
+
+
+class BudgetVersionStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+
+
+class BudgetLineLevel(models.TextChoices):
+    PROJECT = 'project', 'Project'
+    PHASE = 'phase', 'Phase'
+    CONTRACT = 'contract', 'Contract'
+    WBS = 'wbs', 'WBS package'
+    CBS = 'cbs', 'CBS'
+    ACTIVITY = 'activity', 'Activity'
+
+
+class BudgetChangeRequestStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    REJECTED = 'rejected', 'Rejected'
+    CANCELLED = 'cancelled', 'Cancelled'
+
+
+class BudgetVersion(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='budget_versions',
+    )
+    kind = models.CharField(max_length=20, choices=BudgetVersionKind.choices)
+    status = models.CharField(
+        max_length=20,
+        choices=BudgetVersionStatus.choices,
+        default=BudgetVersionStatus.DRAFT,
+    )
+    version_number = models.PositiveIntegerField()
+    name = models.CharField(max_length=200, blank=True, default='')
+    currency = models.CharField(max_length=3, default='IRR')
+    notes = models.TextField(blank=True, default='')
+    is_control = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_versions_submitted',
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_versions_approved',
+    )
+    rejected_at = models.DateTimeField(null=True, blank=True)
+    rejected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_versions_rejected',
+    )
+    rejection_reason = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'budget_versions'
+        ordering = ['-version_number']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'version_number'],
+                condition=models.Q(is_deleted=False),
+                name='uniq_active_budget_version_number',
+            ),
+        ]
+
+    def __str__(self):
+        return f'v{self.version_number} {self.kind} ({self.status})'
+
+
 class Budget(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='budgets')
+    version = models.ForeignKey(
+        BudgetVersion,
+        on_delete=models.CASCADE,
+        related_name='lines',
+        null=True,
+        blank=True,
+    )
+    level = models.CharField(
+        max_length=20,
+        choices=BudgetLineLevel.choices,
+        default=BudgetLineLevel.WBS,
+    )
     activity = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,
@@ -229,18 +330,40 @@ class Budget(AuditSoftDeleteModel):
         blank=True,
         related_name='budgets',
     )
+    contract = models.ForeignKey(
+        'contracts.Contract',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_lines',
+    )
     cost_category = models.CharField(max_length=40, choices=CostCategory.choices)
     budget_amount = models.DecimalField(max_digits=18, decimal_places=2)
+    period_start = models.DateField(null=True, blank=True)
+    period_end = models.DateField(null=True, blank=True)
+    currency = models.CharField(max_length=3, blank=True, default='')
     notes = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'budgets'
         indexes = [
             models.Index(fields=['project', 'cost_category'], name='budget_project_cat_idx'),
+            models.Index(fields=['version', 'cost_category'], name='budget_version_cat_idx'),
         ]
 
     def clean(self):
-        if not self.wbs_id and not self.activity_id:
+        level = self.level or BudgetLineLevel.WBS
+        if level == BudgetLineLevel.PROJECT:
+            return
+        if level == BudgetLineLevel.CONTRACT and not self.contract_id:
+            raise ValidationError({'contract': 'contract is required for contract-level budget lines.'})
+        if level in (BudgetLineLevel.PHASE, BudgetLineLevel.WBS) and not self.wbs_id:
+            raise ValidationError({'wbs': 'wbs is required for this budget level.'})
+        if level == BudgetLineLevel.CBS and not self.cbs_id:
+            raise ValidationError({'cbs': 'cbs is required for cbs-level budget lines.'})
+        if level == BudgetLineLevel.ACTIVITY and not self.activity_id:
+            raise ValidationError({'activity': 'activity is required for activity-level budget lines.'})
+        if level == BudgetLineLevel.WBS and not self.wbs_id and not self.activity_id:
             raise ValidationError('At least one of wbs or activity must be set.')
         if self.activity_id and not self.wbs_id:
             self.wbs_id = self.activity.wbs_id
@@ -248,7 +371,93 @@ class Budget(AuditSoftDeleteModel):
     def save(self, *args, **kwargs):
         if self.activity_id and not self.wbs_id:
             self.wbs_id = self.activity.wbs_id
+        if not self.level:
+            if self.activity_id:
+                self.level = BudgetLineLevel.ACTIVITY
+            elif self.cbs_id and not self.wbs_id:
+                self.level = BudgetLineLevel.CBS
+            elif self.contract_id and not self.wbs_id:
+                self.level = BudgetLineLevel.CONTRACT
+            else:
+                self.level = BudgetLineLevel.WBS
         super().save(*args, **kwargs)
+
+
+class BudgetChangeRequest(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='budget_change_requests',
+    )
+    base_version = models.ForeignKey(
+        BudgetVersion,
+        on_delete=models.PROTECT,
+        related_name='change_requests_from',
+    )
+    resulting_version = models.ForeignKey(
+        BudgetVersion,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='change_requests_result',
+    )
+    reason = models.TextField()
+    amount_delta = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    project_impact = models.TextField()
+    affected_lines = models.JSONField(default=list, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=BudgetChangeRequestStatus.choices,
+        default=BudgetChangeRequestStatus.DRAFT,
+    )
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='budget_change_requests_requested',
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='budget_change_requests_decided',
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'budget_change_requests'
+        ordering = ['-requested_at']
+
+
+class BudgetTransfer(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='budget_transfers',
+    )
+    version = models.ForeignKey(
+        BudgetVersion,
+        on_delete=models.CASCADE,
+        related_name='transfers',
+    )
+    from_line = models.ForeignKey(
+        Budget,
+        on_delete=models.PROTECT,
+        related_name='transfers_from',
+    )
+    to_line = models.ForeignKey(
+        Budget,
+        on_delete=models.PROTECT,
+        related_name='transfers_to',
+    )
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    note = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'budget_transfers'
+        ordering = ['-created_at']
 
 
 class ActualCost(AuditSoftDeleteModel):

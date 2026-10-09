@@ -40,9 +40,12 @@ export function ActivityProgressTable({
               "نام فعالیت",
               "WBS",
               "وزن",
+              "دوره‌ای٪",
+              "تجمعی٪",
               "برنامه٪",
-              "واقعی٪",
+              "تأییدشده٪",
               "انحراف",
+              "روش",
               "مقدار کل",
               "مقدار انجام شده",
               "واحد",
@@ -73,15 +76,25 @@ export function ActivityProgressTable({
                 <td className="px-3 py-2">
                   {row.weight != null ? `${(row.weight * 100).toFixed(2)}٪` : "—"}
                 </td>
-                <td className="px-3 py-2">{row.planned_progress_pct.toFixed(1)}٪</td>
-                <td className="px-3 py-2">
+                <td className="px-3 py-2" data-testid={`period-pct-${row.activity_code}`}>
+                  {(row.period_progress_pct ?? 0).toFixed(1)}٪
+                </td>
+                <td className="px-3 py-2" data-testid={`cumulative-pct-${row.activity_code}`}>
                   <div className="flex min-w-[120px] flex-col gap-1">
-                    <span>{row.actual_progress_pct.toFixed(1)}٪</span>
+                    <span>
+                      {(row.cumulative_progress_pct ?? row.actual_progress_pct).toFixed(1)}٪
+                    </span>
                     <MiniProgressBar
                       plannedPct={row.planned_progress_pct}
-                      actualPct={row.actual_progress_pct}
+                      actualPct={row.cumulative_progress_pct ?? row.actual_progress_pct}
                     />
                   </div>
+                </td>
+                <td className="px-3 py-2" data-testid={`planned-pct-${row.activity_code}`}>
+                  {row.planned_progress_pct.toFixed(1)}٪
+                </td>
+                <td className="px-3 py-2" data-testid={`approved-pct-${row.activity_code}`}>
+                  {(row.approved_progress_pct ?? 0).toFixed(1)}٪
                 </td>
                 <td
                   className={cn(
@@ -91,6 +104,12 @@ export function ActivityProgressTable({
                 >
                   {row.variance_pct > 0 ? "+" : ""}
                   {row.variance_pct.toFixed(1)}٪
+                </td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">
+                  {row.measurement_status === "not_defined"
+                    ? "—"
+                    : row.measurement_method ?? "—"}
+                  {row.measurement_status === "draft" ? " (draft)" : ""}
                 </td>
                 <td className="px-3 py-2">{row.total_quantity ?? "—"}</td>
                 <td className="px-3 py-2">{row.cumulative_quantity ?? "—"}</td>

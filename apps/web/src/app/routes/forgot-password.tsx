@@ -54,7 +54,7 @@ export default function ForgotPassword() {
   if (sent) {
     return (
       <div className='flex min-h-svh items-center justify-center p-4'>
-        <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
+        <div className='absolute left-3 top-3 z-10 sm:left-4 sm:top-4'>
           <AppPreferencesBar />
         </div>
         <Card className='w-full max-w-sm'>
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
 
   return (
     <div className='flex min-h-svh items-center justify-center p-4'>
-      <div className='absolute end-3 top-3 z-10 sm:end-4 sm:top-4'>
+      <div className='absolute left-3 top-3 z-10 sm:left-4 sm:top-4'>
         <AppPreferencesBar />
       </div>
       <Card className='w-full max-w-sm'>

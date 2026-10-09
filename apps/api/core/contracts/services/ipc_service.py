@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
 
+from config.exceptions import CodedValidationError
 from contracts.models import ContractType, ContractItem, IPC, IPCDeduction, IPCItem, IPCStatus
 from cash_flow.models import CashTransaction, CashTransactionType, InflowCategory, OutflowCategory
 from schedule.models import ActivityProgress
@@ -17,6 +18,13 @@ from schedule.models import ActivityProgress
 logger = logging.getLogger(__name__)
 
 MANUAL_DEDUCTION_TYPES = frozenset({'material_price_diff', 'other'})
+
+
+def ipc_deduction_base(ipc: IPC) -> Decimal:
+    """Gross base for deductions: approved amount when set, else working gross."""
+    if ipc.approved_amount is not None:
+        return Decimal(ipc.approved_amount)
+    return Decimal(ipc.gross_amount or 0)
 
 
 def _invalidate(project_id):
@@ -152,8 +160,14 @@ def auto_populate_ipc(ipc_id):
     the schedule of values (SoV) defined in its parent contract.
     It links each IPC item to a contract item, carrying over the cumulative quantities
     from the previous IPC to serve as the baseline for the current period's claim.
+    Only allowed while draft — freezes gross after submit.
     """
     ipc = IPC.objects.get(pk=ipc_id)
+    if ipc.status != IPCStatus.DRAFT:
+        raise CodedValidationError(
+            detail='IPC can only be populated while draft.',
+            code='ipc_locked_after_submit',
+        )
     contract = ipc.contract
 
     # ⚡ Bolt: Bulk fetch previous approved/paid IPCs and pre-aggregate previous quantities by contract item ID to prevent N+1 queries.
@@ -239,9 +253,8 @@ def apply_deductions(ipc_id):
     """
     ipc = IPC.objects.get(pk=ipc_id)
     contract = ipc.contract
-    gross = float(ipc.gross_amount or 0)
+    gross = float(ipc_deduction_base(ipc))
 
-    from django.utils import timezone
     auto_types = ('retention', 'tax', 'insurance', 'advance_recovery')
     IPCDeduction.objects.filter(ipc=ipc, deduction_type__in=auto_types, is_deleted=False).update(
         is_deleted=True, deleted_at=timezone.now()
@@ -336,12 +349,24 @@ def next_change_number(contract_id) -> int:
 def submit_ipc(ipc, user):
     """
     Submits a draft IPC for approval.
-    Transitions status to SUBMITTED, sets the submitted date, and publishes a domain event.
+    Freezes submitted_amount from gross_amount, transitions to SUBMITTED, publishes event.
     """
     if ipc.status != IPCStatus.DRAFT:
-        raise ValueError('Only draft IPCs can be submitted.')
+        raise CodedValidationError(
+            detail='Only draft IPCs can be submitted.',
+            code='ipc_not_submittable',
+        )
+    gross = Decimal(ipc.gross_amount or 0)
+    if gross <= 0:
+        raise CodedValidationError(
+            detail='IPC gross amount must be greater than zero to submit.',
+            code='ipc_gross_required',
+        )
     ipc.status = IPCStatus.SUBMITTED
     ipc.submitted_date = date.today()
+    ipc.submitted_amount = gross
+    ipc.approved_amount = None
+    ipc.approval_variance_note = ''
     ipc.rejection_reason = ''
     ipc.updated_by = user
     ipc.save()
@@ -350,19 +375,53 @@ def submit_ipc(ipc, user):
 
 
 @transaction.atomic
-def approve_ipc(ipc, user):
+def approve_ipc(ipc, user, *, approved_amount=None, approval_variance_note='', planned_payment_date=None):
     """
-    Approves a submitted IPC.
-    Transitions status to APPROVED, sets the approval date, and assigns a default
-    planned payment date (+30 days) if none was provided.
+    Approves a submitted IPC with distinct approved_amount (≤ submitted_amount).
+    Recalculates deductions/net against approved amount. Does not record collections.
     """
     from datetime import timedelta
+
+    if ipc.status not in (IPCStatus.SUBMITTED, IPCStatus.UNDER_REVIEW):
+        raise CodedValidationError(
+            detail='Only submitted IPCs can be approved.',
+            code='ipc_not_approvable',
+        )
+    submitted = Decimal(ipc.submitted_amount if ipc.submitted_amount is not None else ipc.gross_amount or 0)
+    if approved_amount is None:
+        approved = submitted
+    else:
+        approved = Decimal(str(approved_amount))
+    if approved < 0:
+        raise CodedValidationError(
+            detail='Approved amount cannot be negative.',
+            code='approved_amount_invalid',
+        )
+    if approved > submitted:
+        raise CodedValidationError(
+            detail='Approved amount cannot exceed submitted amount.',
+            code='approved_exceeds_submitted',
+        )
+    note = (approval_variance_note or '').strip()
+    if approved < submitted and not note:
+        raise CodedValidationError(
+            detail='approval_variance_note is required when approved amount is less than submitted.',
+            code='approval_variance_note_required',
+        )
+
     ipc.status = IPCStatus.APPROVED
     ipc.approval_date = date.today()
-    if not ipc.planned_payment_date:
+    ipc.submitted_amount = submitted
+    ipc.approved_amount = approved
+    ipc.approval_variance_note = note
+    if planned_payment_date is not None:
+        ipc.planned_payment_date = planned_payment_date
+    elif not ipc.planned_payment_date:
         ipc.planned_payment_date = date.today() + timedelta(days=30)
     ipc.updated_by = user
     ipc.save()
+    apply_deductions(ipc.id)
+    ipc.refresh_from_db()
     return ipc
 
 
@@ -384,10 +443,15 @@ def pay_ipc(ipc, user, payment_date):
 def reject_ipc(ipc, user, reason):
     """
     Rejects an IPC, reverting its status back to DRAFT.
-    Records the reason for rejection to inform the preparer.
+    Clears submitted/approved snapshots so amounts can be edited again.
     """
     ipc.status = IPCStatus.DRAFT
     ipc.rejection_reason = reason
+    ipc.submitted_amount = None
+    ipc.approved_amount = None
+    ipc.approval_variance_note = ''
+    ipc.submitted_date = None
+    ipc.approval_date = None
     ipc.updated_by = user
     ipc.save()
     return ipc
@@ -400,6 +464,11 @@ def update_ipc_item(ipc, item, qty_current, user):
     Recalculates the item's cumulative quantities, amounts, and triggers
     a full recalculation of the IPC's gross amount and deductions.
     """
+    if ipc.status != IPCStatus.DRAFT:
+        raise CodedValidationError(
+            detail='IPC line items can only be edited while draft.',
+            code='ipc_locked_after_submit',
+        )
     qty_current = Decimal(str(qty_current))
     item.qty_current = qty_current
     item.qty_cumulative = Decimal(str(item.qty_previous or 0)) + qty_current
