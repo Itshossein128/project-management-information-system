@@ -49,6 +49,9 @@ export function Badge({ variant, label, className, ...props }: BadgeProps) {
 }
 
 export const projectStatusBadge: Record<string, BadgeProps["variant"]> = {
+  draft: "neutral",
+  pending_approval: "warning",
+  archived: "neutral",
   active: "success",
   suspended: "warning",
   completed: "info",
@@ -57,17 +60,23 @@ export const projectStatusBadge: Record<string, BadgeProps["variant"]> = {
 
 /** i18n keys for project status codes — use with `t(projectStatusI18nKey[status])`. */
 export const projectStatusI18nKey: Record<string, string> = {
+  draft: "status.draft",
+  pending_approval: "status.pendingApproval",
   active: "status.active",
   suspended: "status.suspended",
   completed: "status.completed",
+  archived: "status.archived",
   handed_over: "status.handed_over",
 };
 
 /** @deprecated Prefer `projectStatusI18nKey` + `t()` for bilingual UI. */
 export const projectStatusLabels: Record<string, string> = {
+  draft: "پیش‌نویس",
+  pending_approval: "در انتظار تصویب",
   active: "فعال",
   suspended: "معلق",
   completed: "تکمیل‌شده",
+  archived: "بایگانی",
   handed_over: "تحویل‌شده",
 };
 

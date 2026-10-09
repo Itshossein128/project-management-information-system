@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderOpen, Mail, Users } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useParams } from "react-router";
 import {
   ProjectProvider,
@@ -12,13 +12,20 @@ import {
   CORR_STATUS_LABELS,
   CORR_TYPE_LABELS,
   createCorrespondence,
+  createMeeting,
+  createMeetingAction,
+  DOC_STATUS_LABELS,
   DOC_TYPE_LABELS,
   fetchCorrespondence,
   fetchDocuments,
+  fetchMeetingActions,
   fetchMeetings,
+  fetchOpenMeetingActions,
   MEETING_TYPE_LABELS,
   respondCorrespondence,
+  updateMeetingAction,
   uploadDocument,
+  uploadDocumentRevision,
 } from "@/app/lib/api/documents";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
@@ -51,7 +58,21 @@ function DocumentsContent() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("archive");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [overdueOnly, setOverdueOnly] = useState(false);
+  const [revisionDocId, setRevisionDocId] = useState<string | null>(null);
+  const [revisionLabel, setRevisionLabel] = useState("");
+  const [revisionFile, setRevisionFile] = useState<File | null>(null);
+  const [meetingOpen, setMeetingOpen] = useState(false);
+  const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(null);
+  const [meetingForm, setMeetingForm] = useState({
+    meeting_date: "",
+    meeting_type: "weekly_progress",
+    topic: "",
+    location: "",
+  });
+  const [actionDesc, setActionDesc] = useState("");
+  const [corrContractId, setCorrContractId] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [corrOpen, setCorrOpen] = useState(false);
   const [uploadForm, setUploadForm] = useState({
@@ -78,9 +99,26 @@ function DocumentsContent() {
     isError: dError,
     refetch: refetchDocs,
   } = useQuery({
-    queryKey: ["documents", projectId, search],
-    queryFn: () => fetchDocuments(projectId, search ? { search } : {}),
+    queryKey: ["documents", projectId, search, statusFilter],
+    queryFn: () => {
+      const params: Record<string, string> = {};
+      if (search) params.search = search;
+      if (statusFilter) params.status = statusFilter;
+      return fetchDocuments(projectId, params);
+    },
     enabled: canViewDocs && tab === "archive",
+  });
+
+  const { data: openActions, isLoading: openActionsLoading } = useQuery({
+    queryKey: ["meeting-actions-open", projectId],
+    queryFn: () => fetchOpenMeetingActions(projectId),
+    enabled: canViewDocs && tab === "meetings",
+  });
+
+  const { data: meetingActions, isLoading: actionsLoading } = useQuery({
+    queryKey: ["meeting-actions", projectId, expandedMeetingId],
+    queryFn: () => fetchMeetingActions(projectId, expandedMeetingId!),
+    enabled: canViewDocs && tab === "meetings" && Boolean(expandedMeetingId),
   });
 
   const {
@@ -123,6 +161,49 @@ function DocumentsContent() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const revisionMut = useMutation({
+    mutationFn: () => {
+      const fd = new FormData();
+      fd.append("revision_label", revisionLabel);
+      if (revisionFile) fd.append("file", revisionFile);
+      return uploadDocumentRevision(projectId, revisionDocId!, fd);
+    },
+    onSuccess: () => {
+      toast.success(t("collab.revisionUploaded", "Revision uploaded"));
+      setRevisionDocId(null);
+      setRevisionLabel("");
+      setRevisionFile(null);
+      void qc.invalidateQueries({ queryKey: ["documents", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const meetingMut = useMutation({
+    mutationFn: () => createMeeting(projectId, meetingForm),
+    onSuccess: () => {
+      toast.success(t("collab.meetingCreated", "Meeting saved"));
+      setMeetingOpen(false);
+      void qc.invalidateQueries({ queryKey: ["meetings", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const actionMut = useMutation({
+    mutationFn: () =>
+      createMeetingAction(projectId, expandedMeetingId!, {
+        description: actionDesc,
+      }),
+    onSuccess: () => {
+      toast.success(t("collab.actionCreated", "Action item saved"));
+      setActionDesc("");
+      void qc.invalidateQueries({
+        queryKey: ["meeting-actions", projectId, expandedMeetingId],
+      });
+      void qc.invalidateQueries({ queryKey: ["meeting-actions-open", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const corrMut = useMutation({
     mutationFn: () =>
       createCorrespondence(projectId, {
@@ -132,6 +213,7 @@ function DocumentsContent() {
         to_party: corrForm.to_party,
         corr_date: corrForm.corr_date,
         response_due_date: corrForm.response_due_date || null,
+        related_contract: corrContractId || null,
       }),
     onSuccess: () => {
       toast.success("مکاتبه ثبت شد");
@@ -157,6 +239,8 @@ function DocumentsContent() {
   const docRows = docs?.results ?? [];
   const corrRows = corr?.results ?? [];
   const meetingRows = meetings?.results ?? [];
+  const openActionRows = openActions?.results ?? [];
+  const nestedActionRows = meetingActions?.results ?? [];
   const openCount = corrRows.filter((c) => c.status === "open").length;
   const overdueCount = corrRows.filter(
     (c) =>
@@ -197,17 +281,36 @@ function DocumentsContent() {
         </div>
 
         <ShadcnTabsContent value="archive" className="space-y-4 mt-0">
-          <Field name="doc_search" label="جستجو" htmlFor="doc-search">
-            {() => (
-              <Input
-                id="doc-search"
-                className="max-w-md"
-                placeholder="جستجو در عنوان، کد، برچسب..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            )}
-          </Field>
+          <div className="flex flex-wrap gap-4">
+            <Field name="doc_search" label="جستجو" htmlFor="doc-search">
+              {() => (
+                <Input
+                  id="doc-search"
+                  className="max-w-md"
+                  placeholder="جستجو در عنوان، کد، برچسب..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              )}
+            </Field>
+            <Field name="doc_status" label={t("common.status", "Status")} htmlFor="doc-status">
+              {() => (
+                <select
+                  id="doc-status"
+                  className="rounded border px-2 py-1 text-sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="">{t("common.all", "All")}</option>
+                  {Object.entries(DOC_STATUS_LABELS).map(([k, v]) => (
+                    <option key={k} value={k}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Field>
+          </div>
           {dloading ? (
             <LoadingSkeleton rows={4} />
           ) : dError ? (
@@ -230,6 +333,7 @@ function DocumentsContent() {
                   <p className="font-medium">{d.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {DOC_TYPE_LABELS[d.doc_type] ?? d.doc_type}
+                    {d.status ? ` · ${DOC_STATUS_LABELS[d.status] ?? d.status}` : ""}
                   </p>
                   {d.revision ? (
                     <span className="mt-1 inline-block rounded bg-muted px-2 py-0.5 text-xs">
@@ -239,16 +343,30 @@ function DocumentsContent() {
                   <p className="mt-2 text-xs text-muted-foreground">
                     {formatDisplayDate(d.revision_date)}
                   </p>
-                  {d.file_url ? (
-                    <a
-                      href={d.file_url}
-                      className="mt-2 inline-block text-sm text-primary underline"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      دانلود
-                    </a>
-                  ) : null}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {d.file_url ? (
+                      <a
+                        href={d.file_url}
+                        className="text-sm text-primary underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        دانلود
+                      </a>
+                    ) : null}
+                    {canUpload ? (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setRevisionDocId(d.id);
+                          setRevisionLabel(d.revision || "A");
+                        }}
+                      >
+                        {t("collab.uploadRevision", "Upload revision")}
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>
@@ -349,7 +467,53 @@ function DocumentsContent() {
           )}
         </ShadcnTabsContent>
 
-        <ShadcnTabsContent value="meetings" className="mt-0">
+        <ShadcnTabsContent value="meetings" className="mt-0 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {canUpload ? (
+              <Button size="sm" onClick={() => setMeetingOpen(true)}>
+                {t("collab.newMeeting", "New meeting")}
+              </Button>
+            ) : null}
+          </div>
+          <section className="space-y-2">
+            <h3 className="text-sm font-medium">{t("collab.openActions", "Open meeting actions")}</h3>
+            {openActionsLoading ? (
+              <LoadingSkeleton rows={2} />
+            ) : openActionRows.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("collab.noOpenActions", "No open actions.")}</p>
+            ) : (
+              <ul className="divide-y rounded border text-sm">
+                {openActionRows.map((a) => (
+                  <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                    <span>{a.description}</span>
+                    <div className="flex items-center gap-2">
+                      {a.is_overdue ? (
+                        <span className="text-xs text-danger-600">{t("collab.overdue", "Overdue")}</span>
+                      ) : null}
+                      {canUpload ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            updateMeetingAction(projectId, a.id, { status: "done" })
+                              .then(() => {
+                                toast.success(t("collab.actionDone", "Marked done"));
+                                void qc.invalidateQueries({
+                                  queryKey: ["meeting-actions-open", projectId],
+                                });
+                              })
+                              .catch((e: Error) => toast.error(e.message))
+                          }
+                        >
+                          {t("collab.markDone", "Mark done")}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
           {mloading ? (
             <LoadingSkeleton rows={6} />
           ) : mError ? (
@@ -365,7 +529,7 @@ function DocumentsContent() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    {["تاریخ", "نوع", "مکان", "مصوبات"].map((h) => (
+                    {["تاریخ", "نوع", "موضوع", "مکان", "مصوبات", ""].map((h) => (
                       <th key={h} className="px-3 py-2 text-start">
                         {h}
                       </th>
@@ -374,14 +538,71 @@ function DocumentsContent() {
                 </thead>
                 <tbody>
                   {meetingRows.map((m) => (
-                    <tr key={m.id} className="border-t">
-                      <td className="px-3 py-2">{formatDisplayDate(m.meeting_date)}</td>
-                      <td className="px-3 py-2">
-                        {MEETING_TYPE_LABELS[m.meeting_type] ?? m.meeting_type}
-                      </td>
-                      <td className="px-3 py-2">{m.location || "—"}</td>
-                      <td className="max-w-md truncate px-3 py-2">{m.decisions}</td>
-                    </tr>
+                    <Fragment key={m.id}>
+                      <tr className="border-t">
+                        <td className="px-3 py-2">{formatDisplayDate(m.meeting_date)}</td>
+                        <td className="px-3 py-2">
+                          {MEETING_TYPE_LABELS[m.meeting_type] ?? m.meeting_type}
+                        </td>
+                        <td className="px-3 py-2">{m.topic || "—"}</td>
+                        <td className="px-3 py-2">{m.location || "—"}</td>
+                        <td className="max-w-md truncate px-3 py-2">{m.decisions}</td>
+                        <td className="px-3 py-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() =>
+                              setExpandedMeetingId(expandedMeetingId === m.id ? null : m.id)
+                            }
+                          >
+                            {t("collab.actions", "Actions")}
+                          </Button>
+                        </td>
+                      </tr>
+                      {expandedMeetingId === m.id ? (
+                        <tr key={`${m.id}-actions`} className="border-t bg-muted/20">
+                          <td colSpan={6} className="px-3 py-3">
+                            {actionsLoading ? (
+                              <LoadingSkeleton rows={2} />
+                            ) : (
+                              <div className="space-y-2">
+                                <ul className="text-sm">
+                                  {nestedActionRows.map((a) => (
+                                    <li key={a.id} className="py-1">
+                                      {a.description}{" "}
+                                      <span className="text-muted-foreground">({a.status})</span>
+                                    </li>
+                                  ))}
+                                  {nestedActionRows.length === 0 ? (
+                                    <li className="text-muted-foreground">
+                                      {t("collab.noMeetingActions", "No action items.")}
+                                    </li>
+                                  ) : null}
+                                </ul>
+                                {canUpload ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    <Input
+                                      className="max-w-md"
+                                      placeholder={t("collab.actionDescription", "Action description")}
+                                      value={actionDesc}
+                                      onChange={(e) => setActionDesc(e.target.value)}
+                                    />
+                                    <Button
+                                      size="sm"
+                                      loading={actionMut.isPending}
+                                      disabled={!actionDesc}
+                                      onClick={() => actionMut.mutate()}
+                                    >
+                                      {t("common.add", "Add")}
+                                    </Button>
+                                  </div>
+                                ) : null}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
                   ))}
                 </tbody>
               </table>
@@ -429,6 +650,80 @@ function DocumentsContent() {
             onChange={(e) =>
               setUploadForm((f) => ({ ...f, file: e.target.files?.[0] ?? null }))
             }
+          />
+        </div>
+      </Drawer>
+
+      <Drawer
+        isOpen={revisionDocId != null}
+        onClose={() => setRevisionDocId(null)}
+        title={t("collab.uploadRevision", "Upload revision")}
+        footer={
+          <Button
+            onClick={() => revisionMut.mutate()}
+            loading={revisionMut.isPending}
+            disabled={!revisionLabel}
+          >
+            {t("common.save", "Save")}
+          </Button>
+        }
+      >
+        <div className="space-y-3 p-4">
+          <Input
+            placeholder={t("collab.revisionLabel", "Revision label")}
+            value={revisionLabel}
+            onChange={(e) => setRevisionLabel(e.target.value)}
+          />
+          <input
+            type="file"
+            onChange={(e) => setRevisionFile(e.target.files?.[0] ?? null)}
+          />
+        </div>
+      </Drawer>
+
+      <Drawer
+        isOpen={meetingOpen}
+        onClose={() => setMeetingOpen(false)}
+        title={t("collab.newMeeting", "New meeting")}
+        footer={
+          <Button
+            onClick={() => meetingMut.mutate()}
+            loading={meetingMut.isPending}
+            disabled={!meetingForm.meeting_date}
+          >
+            {t("common.save", "Save")}
+          </Button>
+        }
+      >
+        <div className="space-y-3 p-4">
+          <JalaliDatePicker
+            name="meeting_date"
+            label={t("common.date", "Date")}
+            value={meetingForm.meeting_date}
+            onChange={(v) => setMeetingForm((f) => ({ ...f, meeting_date: v }))}
+          />
+          <select
+            className="w-full rounded border px-2 py-1"
+            value={meetingForm.meeting_type}
+            onChange={(e) =>
+              setMeetingForm((f) => ({ ...f, meeting_type: e.target.value }))
+            }
+          >
+            {Object.entries(MEETING_TYPE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <Input
+            placeholder={t("collab.meetingTopic", "Topic")}
+            value={meetingForm.topic}
+            onChange={(e) => setMeetingForm((f) => ({ ...f, topic: e.target.value }))}
+          />
+          <Input
+            placeholder={t("collab.meetingLocation", "Location")}
+            value={meetingForm.location}
+            onChange={(e) => setMeetingForm((f) => ({ ...f, location: e.target.value }))}
           />
         </div>
       </Drawer>
@@ -484,6 +779,11 @@ function DocumentsContent() {
             label="موعد پاسخ"
             value={corrForm.response_due_date}
             onChange={(v) => setCorrForm((f) => ({ ...f, response_due_date: v }))}
+          />
+          <Input
+            placeholder={t("collab.relatedContractId", "Related contract ID (optional)")}
+            value={corrContractId}
+            onChange={(e) => setCorrContractId(e.target.value)}
           />
         </div>
       </Drawer>

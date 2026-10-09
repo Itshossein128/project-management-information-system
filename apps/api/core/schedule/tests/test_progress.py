@@ -38,6 +38,8 @@ class TestProgressService:
             project=project,
             version_name='BL1',
             is_current=True,
+            created_by=user,
+            updated_by=user,
         )
         BaselineActivity.objects.create(
             baseline=baseline,
@@ -90,10 +92,11 @@ class TestProgressService:
         activity.save(update_fields=['weight'])
         evm = compute_evm(project.id, timezone.localdate())
         assert evm['bac'] == 0
-        assert evm['ac'] == 0
-        assert evm['cpi'] is None
+        assert evm['ac']['status'] == 'unregistered'
+        assert evm['cpi']['status'] == 'not_computable'
+        assert evm['cpi_legacy'] is None
 
-    def test_manual_progress_source(self, project, user, activity, auth_client):
+    def test_manual_progress_source(self, project, user, activity, auth_client, approved_measurement):
         activity.weight = 1.0
         activity.save(update_fields=['weight'])
         url = f'/api/v1/projects/{project.id}/progress/manual/'
@@ -162,6 +165,10 @@ class TestProgressService:
             def scan_iter(self, match=None):
                 if match and match.startswith('s_curve:'):
                     yield f's_curve:{project.id}:2024-01-01:2024-12-31:daily'
+                elif match and 'evm_phase:' in match:
+                    yield f':1:evm_phase:{project.id}:2024-10-01'
+                elif match and 'evm_cbs:' in match:
+                    yield f':1:evm_cbs:{project.id}:2024-10-01:all'
                 elif match and 'kpis:' in match:
                     yield f':1:kpis:{project.id}:2024-10-01'
                 return
@@ -177,6 +184,40 @@ class TestProgressService:
         invalidate_s_curve_cache(project.id)
         assert any(k.startswith('s_curve:') for k in deleted)
         assert any('kpis:' in k for k in deleted)
+        assert any('evm_phase:' in k for k in deleted)
+        assert any('evm_cbs:' in k for k in deleted)
+
+    def test_actual_cost_approve_invalidates_progress_caches(self, project, user, monkeypatch):
+        from cost_control.models import ActualCost, ActualCostStatus, CostCategory
+        from cost_control.services.actual_cost_service import approve_actual_cost
+        from datetime import date
+
+        calls = []
+
+        def fake_invalidate(project_id):
+            calls.append(project_id)
+
+        monkeypatch.setattr(
+            'schedule.services.progress_service.invalidate_progress_caches',
+            fake_invalidate,
+        )
+        actual = ActualCost.objects.create(
+            project=project,
+            amount=1000,
+            cost_date=date(2024, 10, 1),
+            status=ActualCostStatus.DRAFT,
+            cost_category=CostCategory.LABOR,
+            created_by=user,
+            updated_by=user,
+        )
+        # approve requires wbs or cbs
+        from schedule.tests.evm_fixtures import make_cbs
+
+        cbs = make_cbs(project, user)
+        actual.cbs = cbs
+        actual.save(update_fields=['cbs', 'updated_at'])
+        approve_actual_cost(actual, user)
+        assert project.id in calls
 
     def test_progress_history_matches_helpers(self, project, user, activity):
         activity.weight = 1.0
@@ -211,7 +252,7 @@ class TestProgressService:
             assert row['planned_pct'] == pytest.approx(round(planned * 100, 2))
             assert row['actual_pct'] == pytest.approx(round(actual * 100, 2))
 
-    def test_recalc_invalidates_cache(self, project, user, activity, monkeypatch):
+    def test_recalc_invalidates_cache(self, project, user, activity, approved_measurement, monkeypatch):
         activity.weight = 1.0
         activity.total_quantity = 100
         activity.save(update_fields=['weight', 'total_quantity'])

@@ -99,7 +99,10 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
     ]
 
     weather = report.get_weather_condition_display() if report.weather_condition else '—'
+    status_label = 'قفل‌شده' if report.status == 'approved' else report.get_status_display()
     header_rows = [
+        [_fa('وضعیت گزارش'), _fa(status_label)],
+        [_fa('محل / جبهه'), _fa(report.work_front or '—')],
         [_fa('وضعیت کارگاه'), _fa(report.get_site_status_display())],
         [_fa('وضعیت جوی'), _fa(weather)],
         [_fa('حداکثر دما'), _fa(report.temp_max if report.temp_max is not None else '—')],
@@ -112,29 +115,32 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
 
     story += _section(
         'فعالیت‌های اجرایی',
-        ['شرح فعالیت', 'شیفت', 'پیمانکار', 'نفر', 'مقدار', 'واحد'],
+        ['شرح فعالیت', 'شیفت', 'مسئول', 'نفر', 'مقدار', 'واحد'],
         [
             [
-                r.activity_description, r.get_shift_display(), r.subcontractor_name,
+                r.activity_description, r.get_shift_display(),
+                r.responsible_name or '—',
                 r.headcount if r.headcount is not None else '—',
                 r.quantity if r.quantity is not None else '—', r.unit or '—',
             ]
             for r in report.activities.filter(is_deleted=False)
         ],
-        head_style, normal, font, [150, 45, 90, 40, 60, 50],
+        head_style, normal, font, [140, 45, 80, 40, 60, 50],
     )
 
     story += _section(
         'نیروی انسانی',
-        ['دسته', 'عنوان شغلی', 'شیفت ۱', 'شیفت ۲', 'شیفت ۳', 'جمع'],
+        ['دسته', 'عنوان شغلی', 'شیفت ۱', 'شیفت ۲', 'شیفت ۳', 'غیبت', 'جمع'],
         [
             [
                 r.get_labor_category_display(), r.custom_title or r.job_title,
-                r.shift_1_count, r.shift_2_count, r.shift_3_count, r.total_count,
+                r.shift_1_count, r.shift_2_count, r.shift_3_count,
+                r.absence_count if r.absence_count is not None else '—',
+                r.total_count,
             ]
             for r in report.labor_entries.filter(is_deleted=False)
         ],
-        head_style, normal, font, [70, 150, 50, 50, 50, 50],
+        head_style, normal, font, [60, 120, 40, 40, 40, 40, 40],
     )
 
     story += _section(
@@ -153,12 +159,18 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
 
     story += _section(
         'مصالح',
-        ['شرح مصالح', 'نوع', 'مقدار', 'واحد'],
+        ['شرح مصالح', 'نوع', 'مقدار', 'واحد', 'محل مصرف'],
         [
-            [r.material_description, r.get_transaction_type_display(), r.quantity, r.unit]
+            [
+                r.material_description,
+                r.get_transaction_type_display(),
+                r.quantity,
+                r.unit,
+                r.consumption_location or '—',
+            ]
             for r in report.material_entries.filter(is_deleted=False)
         ],
-        head_style, normal, font, [200, 90, 80, 60],
+        head_style, normal, font, [150, 70, 55, 45, 90],
     )
 
     story += _section(
@@ -173,12 +185,18 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
 
     story += _section(
         'حوادث و موانع',
-        ['نوع', 'شرح', 'اقدام اصلاحی'],
+        ['نوع', 'شرح', 'مسئول پیگیری', 'موعد', 'اقدام اصلاحی'],
         [
-            [r.get_incident_type_display(), r.description, r.corrective_action]
+            [
+                r.get_incident_type_display(),
+                r.description,
+                r.follow_up_owner_name or '—',
+                r.due_date.isoformat() if r.due_date else '—',
+                r.corrective_action or '—',
+            ]
             for r in report.incidents.filter(is_deleted=False)
         ],
-        head_style, normal, font, [90, 220, 180],
+        head_style, normal, font, [70, 140, 80, 55, 100],
     )
 
     if report.general_notes:

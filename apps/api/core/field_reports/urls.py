@@ -3,6 +3,7 @@ from django.urls import path
 from field_reports.daily_report_views import (
     DailyReportActivityViewSet,
     DailyReportConcreteLogViewSet,
+    DailyReportCorrectionCancelView,
     DailyReportEquipmentViewSet,
     DailyReportIncidentViewSet,
     DailyReportLaborCampViewSet,
@@ -11,6 +12,7 @@ from field_reports.daily_report_views import (
     DailyReportViewSet,
     LaborJobTitleListView,
 )
+from field_reports.navigation_views import DailyReportNavigationView
 from field_reports.standalone_forms_views import (
     EquipmentLogSummaryView,
     EquipmentLogViewSet,
@@ -45,6 +47,9 @@ report_review = DailyReportViewSet.as_view({'post': 'review'})
 report_approve = DailyReportViewSet.as_view({'post': 'approve'})
 report_reject = DailyReportViewSet.as_view({'post': 'reject'})
 report_pdf = DailyReportViewSet.as_view({'get': 'pdf'})
+report_versions = DailyReportViewSet.as_view({'get': 'versions'})
+report_corrections = DailyReportViewSet.as_view({'get': 'correction_requests', 'post': 'correction_requests'})
+report_materials_reconciliation = DailyReportViewSet.as_view({'get': 'materials_reconciliation'})
 
 
 def _child(viewset):
@@ -110,11 +115,32 @@ urlpatterns = [
     path(f'{DR}/', report_list, name='daily-report-list'),
     path(f'{DR}/sync-batch/', report_sync_batch, name='daily-report-sync-batch'),
     path(f'{DR}/<uuid:pk>/', report_detail, name='daily-report-detail'),
+    path(
+        f'{DR}/<uuid:pk>/navigation/',
+        DailyReportNavigationView.as_view(),
+        name='daily-report-navigation',
+    ),
     path(f'{DR}/<uuid:pk>/submit/', report_submit, name='daily-report-submit'),
     path(f'{DR}/<uuid:pk>/review/', report_review, name='daily-report-review'),
     path(f'{DR}/<uuid:pk>/approve/', report_approve, name='daily-report-approve'),
     path(f'{DR}/<uuid:pk>/reject/', report_reject, name='daily-report-reject'),
     path(f'{DR}/<uuid:pk>/pdf/', report_pdf, name='daily-report-pdf'),
+    path(f'{DR}/<uuid:pk>/versions/', report_versions, name='daily-report-versions'),
+    path(
+        f'{DR}/<uuid:pk>/correction-requests/',
+        report_corrections,
+        name='daily-report-corrections',
+    ),
+    path(
+        f'{DR}/<uuid:pk>/materials/reconciliation/',
+        report_materials_reconciliation,
+        name='daily-report-materials-reconciliation',
+    ),
+    path(
+        'correction-requests/<uuid:correction_id>/cancel/',
+        DailyReportCorrectionCancelView.as_view(),
+        name='daily-report-correction-cancel',
+    ),
 
     path(f'{DR}/{RID}/activities/', activity_list, name='daily-report-activities'),
     path(f'{DR}/{RID}/activities/<uuid:pk>/', activity_detail, name='daily-report-activity-detail'),

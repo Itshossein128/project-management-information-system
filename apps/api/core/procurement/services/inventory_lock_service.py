@@ -7,7 +7,6 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from procurement.models import (
-    Block,
     InventoryAllocation,
     RequisitionItem,
     ItemStatus,
@@ -19,6 +18,11 @@ class HardStopError(ValidationError):
     pass
 
 
+def _require_positive_qty(qty: Decimal, field: str = 'quantity') -> None:
+    if qty is None or qty <= 0:
+        raise HardStopError({field: 'Quantity must be greater than zero'})
+
+
 @transaction.atomic
 def record_grn(
     requisition_item: RequisitionItem,
@@ -26,34 +30,43 @@ def record_grn(
     user,
 ) -> InventoryAllocation:
     """GRN: record goods receipt and tag to MR + Block."""
-    block = requisition_item.header.block
-    mr_tag = f'{requisition_item.header.requisition_number}-{block.block_code}'
+    _require_positive_qty(received_qty, 'received_qty')
 
-    allocation, created = InventoryAllocation.objects.get_or_create(
-        requisition_item=requisition_item,
-        block=block,
-        material=requisition_item.material,
-        defaults={
-            'allocated_qty': requisition_item.approved_qty or requisition_item.requested_qty,
-            'mr_tag': mr_tag,
-            'created_by': user,
-            'updated_by': user,
-        },
+    item = RequisitionItem.objects.select_for_update().get(pk=requisition_item.pk)
+    block = item.header.block
+    mr_tag = f'{item.header.requisition_number}-{block.block_code}'
+
+    allocation = (
+        InventoryAllocation.objects.select_for_update()
+        .filter(
+            requisition_item=item,
+            block=block,
+            material=item.material,
+        )
+        .order_by('id')
+        .first()
     )
 
-    if not created:
+    if allocation is None:
+        allocation = InventoryAllocation.objects.create(
+            requisition_item=item,
+            block=block,
+            material=item.material,
+            allocated_qty=item.approved_qty or item.requested_qty,
+            received_qty=received_qty,
+            mr_tag=mr_tag,
+            created_by=user,
+            updated_by=user,
+        )
+    else:
+        allocation.received_qty = (allocation.received_qty or Decimal('0')) + received_qty
         allocation.updated_by = user
+        allocation.save(update_fields=['received_qty', 'updated_by', 'updated_at'])
 
-    allocation.received_qty = (allocation.received_qty or Decimal('0')) + received_qty
-    allocation.save(update_fields=['received_qty', 'updated_by', 'updated_at'])
-
-    # Update item purchased_qty
-    requisition_item.purchased_qty = (
-        requisition_item.purchased_qty or Decimal('0')
-    ) + received_qty
-    requisition_item.status = ItemStatus.DELIVERED
-    requisition_item.updated_by = user
-    requisition_item.save(update_fields=['purchased_qty', 'status', 'updated_by', 'updated_at'])
+    item.purchased_qty = (item.purchased_qty or Decimal('0')) + received_qty
+    item.status = ItemStatus.DELIVERED
+    item.updated_by = user
+    item.save(update_fields=['purchased_qty', 'status', 'updated_by', 'updated_at'])
 
     return allocation
 
@@ -65,26 +78,30 @@ def issue_stock(
     user,
 ) -> InventoryAllocation:
     """Hard Stop: issue stock against a specific MR allocation only."""
-    available = allocation.received_qty - allocation.issued_qty
+    _require_positive_qty(issue_qty, 'issue_qty')
+
+    locked = InventoryAllocation.objects.select_for_update().get(pk=allocation.pk)
+    available = locked.received_qty - locked.issued_qty
     if issue_qty > available:
         raise HardStopError(
             {
                 'detail': (
                     f'صدور حواله ({issue_qty}) بیشتر از موجودی رسیدشده '
                     f'برای این MR ({available}) است — '
-                    f'تگ: {allocation.mr_tag}'
+                    f'تگ: {locked.mr_tag}'
                 )
             }
         )
-    allocation.issued_qty += issue_qty
-    allocation.updated_by = user
-    allocation.save(update_fields=['issued_qty', 'updated_by', 'updated_at'])
-    return allocation
+    locked.issued_qty += issue_qty
+    locked.updated_by = user
+    locked.save(update_fields=['issued_qty', 'updated_by', 'updated_at'])
+    return locked
 
 
-def get_block_stock(block: Block) -> list[dict]:
+def get_block_stock(block) -> list[dict]:
     """Return allocated/received/issued quantities for a block, grouped by material."""
     from django.db.models import Sum
+
     return list(
         InventoryAllocation.objects.filter(
             block=block,

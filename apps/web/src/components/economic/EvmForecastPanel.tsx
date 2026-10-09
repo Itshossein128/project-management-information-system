@@ -1,6 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { fetchCashFlowReal, fetchEconomicForecast, fetchWorkingCapital, formatFaAmount } from "@/app/lib/api/economic";
-import { fetchProgressKpis } from "@/app/lib/api/progress";
+import {
+  evmIndexValue,
+  evmIsNotComputable,
+  fetchProgressKpis,
+} from "@/app/lib/api/progress";
 import { KPICard } from "@/components/progress/KPICard";
 import { LoadingSkeleton } from "@/components/layout/page-header";
 import {
@@ -18,6 +23,8 @@ import {
 import { chartColor } from "@/design/tokens";
 
 export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?: string }) {
+  const { t } = useTranslation();
+  const notComputable = t("progress.evm.notComputable");
   const colors = {
     workingCapital: chartColor("danger"),
     nominalOutflow: chartColor("accent"),
@@ -47,15 +54,52 @@ export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?
 
   if (fLoading || wcLoading || cfLoading) return <LoadingSkeleton rows={8} />;
 
+  const spi =
+    forecast?.spi ??
+    evmIndexValue(kpis?.spi, kpis?.spi_legacy) ??
+    null;
+  const cpi =
+    forecast?.cpi ??
+    evmIndexValue(kpis?.cpi, kpis?.cpi_legacy) ??
+    null;
+  const eacNominal =
+    forecast?.eac_nominal ??
+    evmIndexValue(kpis?.eac, kpis?.eac_legacy) ??
+    null;
+  const etc =
+    forecast?.etc_to_complete ??
+    evmIndexValue(kpis?.etc, kpis?.etc_legacy) ??
+    null;
+  const vac =
+    forecast?.vac ??
+    evmIndexValue(kpis?.vac, kpis?.vac_legacy) ??
+    null;
+
+  const spiNotComputable = spi == null || evmIsNotComputable(kpis?.spi);
+  const cpiNotComputable = cpi == null || evmIsNotComputable(kpis?.cpi);
+  const eacNotComputable = eacNominal == null || evmIsNotComputable(kpis?.eac);
+  const etcNotComputable = etc == null || evmIsNotComputable(kpis?.etc);
+  const vacNotComputable = vac == null || evmIsNotComputable(kpis?.vac);
+
   return (
     <div className="space-y-6" data-testid="economic-forecast">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KPICard title="BAC" value={formatFaAmount(Number(forecast?.bac ?? kpis?.bac ?? 0))} />
-        <KPICard title="SPI" value={forecast?.spi != null ? forecast.spi.toFixed(2) : "—"} />
-        <KPICard title="CPI" value={forecast?.cpi != null ? forecast.cpi.toFixed(2) : "—"} />
+        <KPICard
+          title="SPI"
+          value={spiNotComputable || spi == null ? notComputable : spi.toFixed(2)}
+        />
+        <KPICard
+          title="CPI"
+          value={cpiNotComputable || cpi == null ? notComputable : cpi.toFixed(2)}
+        />
         <KPICard
           title="EAC (اسمی)"
-          value={forecast?.eac_nominal != null ? formatFaAmount(forecast.eac_nominal) : "—"}
+          value={
+            eacNotComputable || eacNominal == null
+              ? notComputable
+              : formatFaAmount(eacNominal)
+          }
         />
         <KPICard
           title="EAC (تعدیل تورم)"
@@ -67,12 +111,19 @@ export function EvmForecastPanel({ projectId, asOf }: { projectId: string; asOf?
         />
         <KPICard
           title="ETC"
-          value={forecast?.etc_to_complete != null ? formatFaAmount(forecast.etc_to_complete) : "—"}
+          value={etcNotComputable || etc == null ? notComputable : formatFaAmount(etc)}
         />
-        <KPICard title="VAC" value={forecast?.vac != null ? formatFaAmount(forecast.vac) : "—"} />
+        <KPICard
+          title="VAC"
+          value={vacNotComputable || vac == null ? notComputable : formatFaAmount(vac)}
+        />
         <KPICard
           title="ضریب تورم"
-          value={forecast?.inflation_factor != null ? forecast.inflation_factor.toFixed(2) : "—"}
+          value={
+            forecast?.inflation_factor != null
+              ? forecast.inflation_factor.toFixed(2)
+              : "—"
+          }
         />
       </div>
 

@@ -8,7 +8,8 @@
 import type { ROLES } from "@/config/roles";
 
 export interface AuthUser {
-  id: number;
+  /** Backend User PK is UUID (string). */
+  id: string;
   phone_number: string;
   first_name: string;
   last_name: string;

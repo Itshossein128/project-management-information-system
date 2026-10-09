@@ -1,6 +1,5 @@
 import { useLanguageStore } from "src/app/store/languageStore";
 import { useTranslation } from "react-i18next";
-import { cn } from "src/app/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export const LanguageSwitcher = () => {
@@ -16,6 +15,7 @@ export const LanguageSwitcher = () => {
         if (val) setLanguage(val as "en" | "fa");
       }}
       aria-label={t("language.select")}
+      dir="ltr"
       className="bg-muted p-1 rounded-md"
     >
       {(["en", "fa"] as const).map((lang) => (
@@ -25,7 +25,7 @@ export const LanguageSwitcher = () => {
           value={lang}
           aria-label={lang === "en" ? t("language.english") : t("language.persian")}
           title={lang === "en" ? t("language.english") : t("language.persian")}
-          className="uppercase data-[state=on]:bg-background data-[state=on]:shadow-sm rounded-sm px-3 py-1.5 h-auto text-xs font-medium"
+          className="uppercase text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:hover:text-foreground data-[state=on]:shadow-sm rounded-sm px-3 py-1.5 h-auto text-xs font-medium"
         >
           {lang}
         </ToggleGroupItem>

@@ -11,7 +11,9 @@ from django.db.models.functions import TruncMonth
 import jdatetime
 
 from contracts.models import Contract, ContractStatus
+from common.money import sum_amounts
 from cost_control.models import ActualCost, Budget, CostCategory
+from projects.models import Project
 from cost_control.services.variance_service import get_budget_vs_actual
 
 
@@ -19,12 +21,13 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
     if as_of_date is None:
         as_of_date = date.today()
 
-    total_budget = (
-        Budget.objects.filter(project_id=project_id, is_deleted=False).aggregate(
-            total=Sum('budget_amount')
-        )['total']
-        or 0
-    )
+    from cost_control.services.budget_version_service import get_control_version
+
+    control = get_control_version(project_id)
+    budget_qs = Budget.objects.filter(project_id=project_id, is_deleted=False)
+    if control:
+        budget_qs = budget_qs.filter(version_id=control.id)
+    total_budget = budget_qs.aggregate(total=Sum('budget_amount'))['total'] or 0
     total_actual = (
         ActualCost.objects.filter(
             project_id=project_id,
@@ -37,9 +40,7 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
     by_category: dict = {}
     for cat, _label in CostCategory.choices:
         b = (
-            Budget.objects.filter(
-                project_id=project_id, is_deleted=False, cost_category=cat
-            ).aggregate(total=Sum('budget_amount'))['total']
+            budget_qs.filter(cost_category=cat).aggregate(total=Sum('budget_amount'))['total']
             or 0
         )
         a = (
@@ -79,10 +80,19 @@ def cost_summary(project_id, as_of_date: date | None = None) -> dict:
         or 0
     )
 
+    project = Project.objects.filter(pk=project_id).only('currency').first()
+    currency = getattr(project, 'currency', None) or 'IRR'
+    # Ensure homogeneous project-currency aggregation (all rows share project currency).
+    _ = sum_amounts(
+        [{'amount': total_actual, 'currency': currency}],
+        target_currency=currency,
+    )
+
     return {
         'total_budget': float(total_budget),
         'total_actual': float(total_actual),
         'total_committed': float(total_committed),
+        'currency': currency,
         'budget_consumption_pct': round(consumption, 2) if consumption is not None else None,
         'by_category': by_category,
         'by_wbs': get_budget_vs_actual(project_id, group_by='wbs', as_of_date=as_of_date),

@@ -139,6 +139,17 @@ def allocate_cost_pool(pool: CostPool, allocations: list[dict], user) -> CostPoo
     if total_requested > remaining:
         raise AllocationExceededError('Sum of allocations exceeds remaining pool amount.')
 
+    from cost_control.services.budget_change_service import (
+        assert_within_project_ceiling,
+        current_spent_against_budget,
+    )
+
+    # FR-006: new actuals from pool allocation must not push spent past control ceiling.
+    assert_within_project_ceiling(
+        pool.project_id,
+        current_spent_against_budget(pool.project_id) + total_requested,
+    )
+
     for item in allocations:
         ActualCost.objects.create(
             project=pool.project,

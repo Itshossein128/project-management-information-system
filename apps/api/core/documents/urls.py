@@ -4,7 +4,10 @@ from documents.views import (
     CorrespondenceRespondView,
     CorrespondenceViewSet,
     DocumentRevisionUploadView,
+    MeetingActionDetailView,
+    MeetingActionNestedView,
     MeetingMinutesViewSet,
+    OpenMeetingActionsView,
     ProjectDocumentViewSet,
 )
 
@@ -23,6 +26,10 @@ meeting_list = MeetingMinutesViewSet.as_view({'get': 'list', 'post': 'create'})
 # View actions for retrieving, partially updating, or deleting a specific meeting minute entry
 meeting_detail = MeetingMinutesViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'})
 
+meeting_action_list = MeetingActionNestedView.as_view({'get': 'list', 'post': 'create'})
+meeting_action_patch = MeetingActionDetailView.as_view({'patch': 'partial_update'})
+open_meeting_actions = OpenMeetingActionsView.as_view({'get': 'list'})
+
 # URL routing patterns for the documents app. These define the endpoints for accessing and managing
 # documents, revisions, correspondences, and meeting minutes within a project context.
 urlpatterns = [
@@ -34,4 +41,19 @@ urlpatterns = [
     path('correspondence/<uuid:pk>/respond/', CorrespondenceRespondView.as_view(), name='correspondence-respond'),
     path('meetings/', meeting_list, name='meeting-list'),
     path('meetings/<uuid:pk>/', meeting_detail, name='meeting-detail'),
+    path(
+        'meetings/<uuid:meeting_pk>/actions/',
+        meeting_action_list,
+        name='meeting-action-list',
+    ),
+    path(
+        'meeting-actions/open/',
+        open_meeting_actions,
+        name='meeting-action-open',
+    ),
+    path(
+        'meeting-actions/<uuid:pk>/',
+        meeting_action_patch,
+        name='meeting-action-detail',
+    ),
 ]

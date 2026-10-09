@@ -24,7 +24,9 @@ def dr_base(project):
 
 @pytest.mark.django_db
 class TestApprovalProgressE2E:
-    def test_approve_updates_activity_progress(self, auth_client, dr_base, project, user, activity):
+    def test_approve_updates_activity_progress(
+        self, auth_client, dr_base, project, user, activity, approved_measurement,
+    ):
         report = DailyReport.objects.create(
             project=project,
             report_date='2024-11-01',

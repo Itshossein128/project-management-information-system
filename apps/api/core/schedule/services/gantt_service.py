@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from projects.models import Activity, ActivityRelation
 from schedule.models import ActivityProgress, BaselineActivity, BaselineSchedule
+from schedule.services.critical_path_validity import evaluate_critical_path_validity
 
 
 def get_gantt_data(project_id, baseline_id=None) -> dict:
@@ -13,12 +14,13 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
     if not baseline:
         baseline = BaselineSchedule.objects.filter(project_id=project_id, is_current=True).first()
 
+    validity = evaluate_critical_path_validity(project_id)
     critical_ids = set()
     baseline_map = {}
     if baseline:
         for ba in BaselineActivity.objects.filter(baseline=baseline).select_related('activity'):
             baseline_map[ba.activity_id] = ba
-            if ba.is_critical:
+            if validity['valid'] and ba.is_critical:
                 critical_ids.add(ba.activity_id)
 
     activities = Activity.objects.filter(project_id=project_id, is_deleted=False).select_related('wbs', 'responsible')
@@ -71,4 +73,5 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
         'baseline_name': baseline.version_name if baseline else '',
         'project_start': min(dates) if dates else None,
         'project_end': max(dates) if dates else None,
+        'critical_path': validity,
     }

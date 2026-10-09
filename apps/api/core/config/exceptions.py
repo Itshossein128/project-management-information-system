@@ -20,6 +20,19 @@ class ConflictError(APIException):
     default_code = 'conflict'
     default_detail = _lazy('Conflict.')
 
+    def __init__(self, detail=None, code=None):
+        if code is not None:
+            self.default_code = code
+        super().__init__(detail=detail, code=code)
+
+
+class CodedValidationError(ValidationError):
+    """ValidationError that preserves a stable machine-readable code."""
+
+    def __init__(self, detail=None, code='validation_error'):
+        self.default_code = code
+        super().__init__(detail=detail, code=code)
+
 
 def _extract_message(data) -> str:
     if isinstance(data, dict):
@@ -42,6 +55,25 @@ def _extract_message(data) -> str:
     return str(data)
 
 
+def _collect_detail_codes(detail) -> list[str]:
+    """Walk DRF error detail trees for ErrorDetail.code values."""
+    codes: list[str] = []
+    if detail is None:
+        return codes
+    code = getattr(detail, 'code', None)
+    if code is not None:
+        codes.append(str(code))
+    if isinstance(detail, dict):
+        if 'code' in detail and isinstance(detail['code'], str):
+            codes.append(detail['code'])
+        for value in detail.values():
+            codes.extend(_collect_detail_codes(value))
+    elif isinstance(detail, (list, tuple)):
+        for item in detail:
+            codes.extend(_collect_detail_codes(item))
+    return codes
+
+
 def _error_code(exc) -> str:
     if isinstance(exc, PermissionDenied):
         return 'permission_denied'
@@ -51,12 +83,21 @@ def _error_code(exc) -> str:
         return 'authentication_failed'
     if isinstance(exc, NotFound):
         return 'not_found'
-    if isinstance(exc, ValidationError):
-        return 'validation_error'
     if isinstance(exc, Throttled):
         return 'throttled'
     if isinstance(exc, ConflictError):
-        return 'conflict'
+        code = getattr(exc, 'default_code', None)
+        return str(code) if code else 'conflict'
+    if isinstance(exc, ValidationError):
+        code = getattr(exc, 'default_code', None)
+        if code and code not in ('invalid', 'validation_error'):
+            return str(code)
+        # DRF re-wraps serializer ValidationError and resets default_code to
+        # 'invalid'; prefer stable codes attached to ErrorDetail leaves.
+        for candidate in _collect_detail_codes(getattr(exc, 'detail', None)):
+            if candidate not in ('invalid', 'validation_error', 'null', 'blank', 'required'):
+                return candidate
+        return 'validation_error'
     code = getattr(exc, 'default_code', None)
     return str(code) if code else 'error'
 

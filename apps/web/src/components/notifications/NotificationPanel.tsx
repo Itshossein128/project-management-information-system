@@ -32,6 +32,16 @@ export function NotificationPanel({
   const { data, isLoading } = useNotificationList(true);
   const { markRead, markAllRead } = useNotificationActions();
 
+  const responsibleLabel = (n: AppNotification): string | null => {
+    const u = n.responsible_user;
+    if (!u) return null;
+    if (typeof u === "string") return u;
+    const name =
+      u.full_name?.trim() ||
+      [u.first_name, u.last_name].filter(Boolean).join(" ").trim();
+    return name || u.phone_number || null;
+  };
+
   const handleClick = (n: AppNotification) => {
     if (!n.is_read) markRead.mutate(n.id);
     if (n.link) {
@@ -84,7 +94,9 @@ export function NotificationPanel({
           </p>
         ) : (
           <ul className="divide-y divide-border">
-            {data.map((n) => (
+            {data.map((n) => {
+              const owner = responsibleLabel(n);
+              return (
               <li key={n.id} className="flex items-stretch gap-0">
                 <button
                   type="button"
@@ -97,7 +109,7 @@ export function NotificationPanel({
                   <span
                     className={cn(
                       "mt-1.5 size-2 shrink-0 rounded-full",
-                      n.link.includes("/procurement/req/")
+                      n.link?.includes("/procurement/req/")
                         ? "bg-danger-500"
                         : TYPE_ACCENT[n.notification_type],
                       n.is_read && "opacity-30",
@@ -116,6 +128,22 @@ export function NotificationPanel({
                     {n.message ? (
                       <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                         {n.message}
+                      </span>
+                    ) : null}
+                    {owner ? (
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                        {t("notifications.responsible", "مسئول")}: {owner}
+                      </span>
+                    ) : null}
+                    {n.due_at ? (
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                        {t("notifications.dueAt", "سررسید")}:{" "}
+                        {formatDisplayDateTime(n.due_at)}
+                      </span>
+                    ) : null}
+                    {n.link ? (
+                      <span className="mt-0.5 block truncate text-xs text-primary">
+                        {t("notifications.openLink", "مشاهده")}
                       </span>
                     ) : null}
                     <span className="mt-1 block text-[11px] text-muted-foreground">
@@ -141,7 +169,8 @@ export function NotificationPanel({
                   </button>
                 ) : null}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>

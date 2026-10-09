@@ -175,6 +175,193 @@ export function fetchReceivables(projectId: string) {
   return apiJson<ReceivablesSummary>(`${base(projectId)}/receivables/`);
 }
 
+export interface ProjectionMonth {
+  month: string;
+  projected_inflow: number;
+  projected_outflow: number;
+  net_need: number;
+  inflow_status: "registered" | "unregistered";
+  outflow_status: string;
+}
+
+export interface ProjectionResponse {
+  series: "projected";
+  months: ProjectionMonth[];
+  actual_months: Array<{
+    month: string;
+    actual_inflow: number;
+    actual_outflow: number;
+    net: number;
+  }>;
+  manual_forecast_months: Array<{
+    month: string;
+    expected_inflow: number;
+    expected_outflow: number;
+    net: number;
+  }>;
+}
+
+export interface SuggestedNeedResponse {
+  period_start: string;
+  period_end: string;
+  due_commitments: number;
+  essential_costs: number;
+  certain_planned_receipts: number;
+  suggested_net_need: number;
+}
+
+export interface PriorityScore {
+  urgency: number;
+  return_score: number;
+  recovery_speed: number;
+  risk: number;
+  composite: number;
+  notes: string;
+}
+
+export interface LiquidityCycle {
+  id: string;
+  name: string;
+  period_start: string;
+  period_end: string;
+  available_liquidity: string;
+  currency: string;
+  status: string;
+}
+
+export interface ProposalResponse {
+  id: string;
+  lines: Array<{
+    project_id: string;
+    suggested_amount: number;
+    rank: number;
+    composite_snapshot: number;
+    need_snapshot: number;
+  }>;
+  message: string | null;
+  warnings: { incomplete_score_projects: string[] };
+}
+
+export interface PortfolioReport {
+  projects: Array<{
+    project_id: string;
+    project_name: string;
+    projected_inflow: number;
+    projected_outflow: number;
+    net_need: number;
+    suggested_net_need: number;
+    composite: number | null;
+    inflow_status: string;
+  }>;
+  allocations: Array<{
+    cycle_id: string;
+    decision_id: string;
+    project_id: string;
+    amount: number;
+    owner_id: string;
+    rationale: string;
+  }>;
+  totals: {
+    projected_inflow: number;
+    projected_outflow: number;
+    net_need: number;
+    allocated: number;
+  };
+}
+
+export function fetchProjection(projectId: string, from: string, to: string) {
+  const qs = new URLSearchParams({ from, to });
+  return apiJson<ProjectionResponse>(`${base(projectId)}/projection/?${qs}`);
+}
+
+export function fetchSuggestedNeed(projectId: string, from: string, to: string) {
+  const qs = new URLSearchParams({ from, to });
+  return apiJson<SuggestedNeedResponse>(`${base(projectId)}/suggested-need/?${qs}`);
+}
+
+export function fetchPriorityScore(projectId: string) {
+  return apiJson<PriorityScore>(`${base(projectId)}/priority-score/`);
+}
+
+export function putPriorityScore(projectId: string, body: Omit<PriorityScore, "composite">) {
+  return apiJson<PriorityScore>(`${base(projectId)}/priority-score/`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function createLiquidityCycle(body: {
+  name: string;
+  period_start: string;
+  period_end: string;
+  available_liquidity: number | string;
+  currency?: string;
+}) {
+  return apiJson<LiquidityCycle>(`/v1/cash-flow/portfolio/cycles/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function listLiquidityCycles() {
+  return apiJson<{ results: LiquidityCycle[] }>(`/v1/cash-flow/portfolio/cycles/`);
+}
+
+export function proposeAllocation(cycleId: string) {
+  return apiJson<ProposalResponse>(`/v1/cash-flow/portfolio/cycles/${cycleId}/propose/`, {
+    method: "POST",
+  });
+}
+
+export function createAllocationDecision(
+  cycleId: string,
+  body: {
+    owner_id: string;
+    rationale: string;
+    acknowledge_overlap?: boolean;
+    lines: Array<{
+      project_id: string;
+      amount: number;
+      period_start: string;
+      period_end: string;
+      schedule_impact?: string;
+      cost_impact?: string;
+    }>;
+  },
+) {
+  return apiJson(`/v1/cash-flow/portfolio/cycles/${cycleId}/decisions/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function saveAllocationSimulation(
+  cycleId: string,
+  body: { name: string; lines: Array<{ project_id: string; amount: number }> },
+) {
+  return apiJson<{ id: string; name: string }>(
+    `/v1/cash-flow/portfolio/cycles/${cycleId}/simulations/`,
+    { method: "POST", body: JSON.stringify(body) },
+  );
+}
+
+export function compareAllocationSimulation(cycleId: string, simId: string) {
+  return apiJson<{
+    diffs: Array<{
+      project_id: string;
+      simulation_amount: number;
+      proposal_amount: number;
+      diff: number;
+    }>;
+  }>(`/v1/cash-flow/portfolio/cycles/${cycleId}/simulations/${simId}/compare/`);
+}
+
+export function fetchPortfolioCashReport(from: string, to: string, cycleId?: string) {
+  const qs = new URLSearchParams({ from, to });
+  if (cycleId) qs.set("cycle_id", cycleId);
+  return apiJson<PortfolioReport>(`/v1/cash-flow/portfolio/report/?${qs}`);
+}
+
 /** Format month ISO as YYYY-MM for forecast PUT */
 export function monthIsoToKey(iso: string) {
   return iso.slice(0, 7);

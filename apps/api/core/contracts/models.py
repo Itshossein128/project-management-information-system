@@ -22,6 +22,13 @@ class Contract(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='contracts')
     contract_number = models.CharField(max_length=60, blank=True, default='')
     contract_type = models.CharField(max_length=40, choices=ContractType.choices, blank=True, default='')
+    contract_type_ref = models.ForeignKey(
+        'master_data.ManagedContractType',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='contracts',
+    )
     counterparty = models.CharField(max_length=120, blank=True, default='')
     start_date = models.DateField(null=True, blank=True)
     finish_date = models.DateField(null=True, blank=True)
@@ -35,6 +42,7 @@ class Contract(AuditSoftDeleteModel):
     performance_guarantee_expiry = models.DateField(null=True, blank=True)
     advance_guarantee_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     advance_guarantee_expiry = models.DateField(null=True, blank=True)
+    payment_terms = models.TextField(blank=True, default='')
     status = models.CharField(max_length=20, choices=ContractStatus.choices, default=ContractStatus.DRAFT)
     file_url = models.CharField(max_length=500, blank=True, default='')
     notes = models.TextField(blank=True, default='')
@@ -123,6 +131,9 @@ class IPC(AuditSoftDeleteModel):
     planned_payment_date = models.DateField(null=True, blank=True)
     actual_payment_date = models.DateField(null=True, blank=True)
     gross_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    submitted_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    approved_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
+    approval_variance_note = models.TextField(blank=True, default='')
     net_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=20, choices=IPCStatus.choices, default=IPCStatus.DRAFT)
     rejection_reason = models.TextField(blank=True, default='')
@@ -172,3 +183,19 @@ class IPCDeduction(AuditSoftDeleteModel):
 
     class Meta:
         db_table = 'ipc_deductions'
+
+
+class IPCCollection(AuditSoftDeleteModel):
+    """Partial receipt/collection row for an IPC — never mutates IPC amounts."""
+
+    ipc = models.ForeignKey(IPC, on_delete=models.CASCADE, related_name='collections')
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    currency = models.CharField(max_length=3, default='IRR')
+    fx_rate = models.DecimalField(max_digits=18, decimal_places=6, null=True, blank=True)
+    collected_at = models.DateField()
+    reference = models.CharField(max_length=80, blank=True, default='')
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'ipc_collections'
+        ordering = ['collected_at', 'created_at']

@@ -24,7 +24,13 @@ from cost_control.serializers import (
     CostPoolSerializer,
     SupplierSerializer,
 )
-from cost_control.services.budget_service import bulk_upsert_budgets, budget_summary, check_wbs_overrun
+from cost_control.services.budget_service import (
+    assert_line_mutable,
+    bulk_upsert_budgets,
+    budget_summary,
+    check_wbs_overrun,
+)
+from cost_control.services.budget_version_service import ensure_working_draft
 from cost_control.services.cost_pool_service import (
     AllocationExceededError,
     allocate_cost_pool,
@@ -57,11 +63,20 @@ class CostScopedViewSet(ProjectScopedViewSet):
 
 
 class BudgetViewSet(CostScopedViewSet):
-    queryset = Budget.objects.select_related('wbs', 'activity')
+    queryset = Budget.objects.select_related('wbs', 'activity', 'version')
     serializer_class = BudgetSerializer
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
+        version_id = request.query_params.get('version_id')
+        if version_id:
+            qs = qs.filter(version_id=version_id)
+        else:
+            from cost_control.services.budget_version_service import get_control_version
+
+            control = get_control_version(self.get_project_id())
+            if control:
+                qs = qs.filter(version_id=control.id)
         for param, field in (
             ('wbs_id', 'wbs_id'),
             ('activity_id', 'activity_id'),
@@ -71,12 +86,34 @@ class BudgetViewSet(CostScopedViewSet):
             if val:
                 qs = qs.filter(**{field: val})
         serializer = self.get_serializer(qs, many=True)
-        summary = budget_summary(self.get_project_id())
-        warning = check_wbs_overrun(self.get_project_id())
+        summary = budget_summary(self.get_project_id(), version_id=version_id)
+        warning = check_wbs_overrun(self.get_project_id(), version_id=version_id)
         payload = {'results': serializer.data, 'summary': summary}
         if warning:
             payload['warning'] = warning
         return Response(payload)
+
+    def perform_create(self, serializer, **kwargs):
+        version_id = self.request.data.get('version') or self.request.data.get('version_id')
+        if version_id:
+            from cost_control.models import BudgetVersion
+
+            version = BudgetVersion.objects.get(
+                pk=version_id, project_id=self.get_project_id(), is_deleted=False
+            )
+            from cost_control.services.budget_version_service import assert_version_editable
+
+            assert_version_editable(version)
+        else:
+            version = ensure_working_draft(self.get_project_id(), self.request.user)
+        serializer.save(
+            project_id=self.get_project_id(),
+            version=version,
+            created_by=self.request.user,
+            updated_by=self.request.user,
+            **kwargs,
+        )
+        self.post_save(serializer.instance)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -88,6 +125,18 @@ class BudgetViewSet(CostScopedViewSet):
             return Response({**data, 'warning': warning}, status=status.HTTP_201_CREATED)
         return Response(data, status=status.HTTP_201_CREATED)
 
+    def perform_update(self, serializer):
+        assert_line_mutable(serializer.instance)
+        serializer.save(updated_by=self.request.user)
+        self.post_save(serializer.instance)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        assert_line_mutable(instance)
+        instance.soft_delete(user=request.user)
+        self.post_delete(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class BudgetBulkView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
@@ -95,24 +144,40 @@ class BudgetBulkView(APIView):
 
     @extend_schema(summary='Bulk upsert budgets', tags=['Cost control'])
     def post(self, request, project_pk=None):
-        items = BudgetBulkItemSerializer(data=request.data, many=True)
+        payload = request.data
+        version_id = None
+        if isinstance(payload, dict) and not isinstance(payload, list):
+            version_id = payload.get('version_id') or payload.get('version')
+            items_data = payload.get('items') or payload.get('lines') or []
+        else:
+            items_data = payload
+        items = BudgetBulkItemSerializer(data=items_data, many=True)
         items.is_valid(raise_exception=True)
         entries = [
             {
                 'wbs_id': row.get('wbs'),
                 'activity_id': row.get('activity'),
+                'cbs_id': row.get('cbs'),
+                'contract_id': row.get('contract'),
+                'level': row.get('level'),
                 'cost_category': row['cost_category'],
                 'budget_amount': row['budget_amount'],
                 'notes': row.get('notes', ''),
+                'period_start': row.get('period_start'),
+                'period_end': row.get('period_end'),
             }
             for row in items.validated_data
         ]
-        saved, warning = bulk_upsert_budgets(project_pk, entries, request.user)
+        saved, warning = bulk_upsert_budgets(
+            project_pk, entries, request.user, version_id=version_id
+        )
         _invalidate_cost_caches(project_pk)
+        vid = saved[0].version_id if saved else version_id
         return Response(
             {
                 'saved': len(saved),
-                'summary': budget_summary(project_pk),
+                'version_id': str(vid) if vid else None,
+                'summary': budget_summary(project_pk, version_id=vid),
                 **({'warning': warning} if warning else {}),
             }
         )
@@ -123,6 +188,69 @@ class ActualCostViewSet(CostScopedViewSet):
     serializer_class = ActualCostSerializer
 
     AUTO_COST_MSG = 'این هزینه به صورت خودکار از گزارش روزانه ایجاد شده و قابل ویرایش مستقیم نیست'
+
+    def _invalidate_progress_evm(self):
+        try:
+            from schedule.services.progress_service import invalidate_progress_caches
+
+            invalidate_progress_caches(self.get_project_id())
+        except Exception:
+            pass
+
+    def post_save(self, instance):
+        super().post_save(instance)
+        self._invalidate_progress_evm()
+
+    def post_delete(self, instance):
+        super().post_delete(instance)
+        self._invalidate_progress_evm()
+
+    def perform_create(self, serializer, **kwargs):
+        from projects.fiscal_service import (
+            assert_fiscal_writable,
+            duplicate_document_warnings,
+            require_warning_ack,
+        )
+        from projects.models import Project
+
+        project = Project.objects.get(pk=self.get_project_id())
+        cost_date = serializer.validated_data.get('cost_date')
+        assert_fiscal_writable(
+            project,
+            cost_date,
+            corrective=bool(self.request.data.get('corrective')),
+            correction_reason=self.request.data.get('correction_reason', ''),
+        )
+        warnings = duplicate_document_warnings(
+            ActualCost,
+            project,
+            'invoice_number',
+            serializer.validated_data.get('invoice_number', ''),
+        )
+        require_warning_ack(warnings, bool(self.request.data.get('acknowledge_warnings')))
+        super().perform_create(serializer, **kwargs)
+
+    @extend_schema(summary='Approve actual cost', tags=['Cost Control'])
+    def approve(self, request, project_pk=None, pk=None):
+        from cost_control.services.actual_cost_service import approve_actual_cost
+
+        actual = self.get_object()
+        try:
+            approve_actual_cost(actual, request.user)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        return Response(ActualCostSerializer(actual).data)
+
+    @extend_schema(summary='Void approved actual cost', tags=['Cost Control'])
+    def void(self, request, project_pk=None, pk=None):
+        from cost_control.services.actual_cost_service import void_actual_cost
+
+        actual = self.get_object()
+        try:
+            void_actual_cost(actual, user=request.user)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        return Response(ActualCostSerializer(actual).data)
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())

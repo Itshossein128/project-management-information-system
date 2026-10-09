@@ -5,7 +5,7 @@ from decimal import Decimal
 
 import pytest
 
-from risk.models import BarrierStatus, EventType, RiskEvent, Severity
+from risk.models import EventType, RiskEvent, RiskStatus, Severity
 from risk.services.matrix_service import PROBABILITY_BUCKETS, _probability_bucket, build_risk_matrix
 
 
@@ -26,13 +26,36 @@ def test_probability_bucket(probability, expected):
 
 @pytest.mark.django_db
 def test_build_risk_matrix_counts_and_excludes(project, user):
+    """Matrix includes open risks only (not barriers/claims/issues/closed)."""
     RiskEvent.objects.create(
         project=project,
         event_type=EventType.RISK,
         description='Open risk',
         probability=Decimal('0.50'),
         severity=Severity.MEDIUM,
-        status=BarrierStatus.OPEN,
+        status=RiskStatus.OPEN,
+        event_date=date.today(),
+        created_by=user,
+        updated_by=user,
+    )
+    RiskEvent.objects.create(
+        project=project,
+        event_type=EventType.RISK,
+        description='Critical open risk',
+        probability=Decimal('0.90'),
+        severity=Severity.CRITICAL,
+        status=RiskStatus.UNDER_REVIEW,
+        event_date=date.today(),
+        created_by=user,
+        updated_by=user,
+    )
+    RiskEvent.objects.create(
+        project=project,
+        event_type=EventType.RISK,
+        description='Level-based risk',
+        probability_level=4,
+        impact_severity_level=3,
+        status=RiskStatus.MITIGATED,
         event_date=date.today(),
         created_by=user,
         updated_by=user,
@@ -40,32 +63,21 @@ def test_build_risk_matrix_counts_and_excludes(project, user):
     RiskEvent.objects.create(
         project=project,
         event_type=EventType.BARRIER,
-        description='Critical barrier',
+        description='Barrier ignored',
         probability=Decimal('0.90'),
         severity=Severity.CRITICAL,
-        status=BarrierStatus.OPEN,
+        status=RiskStatus.OPEN,
         event_date=date.today(),
         created_by=user,
         updated_by=user,
     )
     RiskEvent.objects.create(
         project=project,
-        event_type=EventType.CLAIM,
-        description='High claim',
-        probability=Decimal('0.75'),
-        severity=Severity.HIGH,
-        status=BarrierStatus.OPEN,
-        event_date=date.today(),
-        created_by=user,
-        updated_by=user,
-    )
-    RiskEvent.objects.create(
-        project=project,
-        event_type=EventType.DELAY,
-        description='Resolved delay',
+        event_type=EventType.RISK,
+        description='Closed risk',
         probability=Decimal('0.50'),
         severity=Severity.MEDIUM,
-        status=BarrierStatus.RESOLVED,
+        status=RiskStatus.CLOSED,
         event_date=date.today(),
         resolved_date=date.today(),
         created_by=user,

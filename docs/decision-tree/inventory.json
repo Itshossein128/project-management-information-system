@@ -1,0 +1,3291 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-10-09",
+  "verification": "Current checkout source inspection; no browser/backend runtime validation.",
+  "routes": [
+    {
+      "key": "INDEX",
+      "path": "/",
+      "source": "apps/web/src/app/routes/index.tsx",
+      "node": "login",
+      "scope": "Current"
+    },
+    {
+      "key": "FORGOT_PASSWORD",
+      "path": "/forgot-password",
+      "source": "apps/web/src/app/routes/forgot-password.tsx",
+      "node": "login/navigate-forgot-password",
+      "scope": "Current"
+    },
+    {
+      "key": "HOME",
+      "path": "/home",
+      "source": "apps/web/src/app/routes/home.tsx",
+      "node": "login/submit-valid-credentials",
+      "scope": "Current"
+    },
+    {
+      "key": "HR_HUB",
+      "path": "/hr",
+      "source": "apps/web/src/app/routes/hr/home.tsx",
+      "node": "login/submit-valid-credentials/[navigate-hr-hub]",
+      "scope": "Current"
+    },
+    {
+      "key": "HR_JOB_POSITIONS",
+      "path": "/hr/job-positions",
+      "source": "apps/web/src/app/routes/hr/job-positions.tsx",
+      "node": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-job-positions]",
+      "scope": "Placeholder"
+    },
+    {
+      "key": "USERS",
+      "path": "/hr/users",
+      "source": "apps/web/src/app/routes/hr/users.tsx",
+      "node": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]",
+      "scope": "Current"
+    },
+    {
+      "key": "LOGIN",
+      "path": "/login",
+      "source": "apps/web/src/app/routes/login.tsx",
+      "node": "login",
+      "scope": "Current"
+    },
+    {
+      "key": "PORTFOLIO_LIQUIDITY",
+      "path": "/portfolio/liquidity",
+      "source": "apps/web/src/app/routes/portfolio-liquidity.tsx",
+      "node": "login/submit-valid-credentials/open-portfolio-liquidity",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_LIST",
+      "path": "/projects",
+      "source": "apps/web/src/app/routes/project-list.tsx",
+      "node": "login/submit-valid-credentials",
+      "scope": "Current"
+    },
+    {
+      "key": "BUSINESS",
+      "path": "/projects/:businessId",
+      "source": "apps/web/src/app/routes/business.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_BUILDINGS",
+      "path": "/projects/:businessId/buildings",
+      "source": "apps/web/src/app/routes/business-buildings.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_ELECTRICAL",
+      "path": "/projects/:businessId/electrical",
+      "source": "apps/web/src/app/routes/business-electrical.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_JOB_POSITIONS",
+      "path": "/projects/:businessId/job-positions",
+      "source": "apps/web/src/app/routes/business-job-positions.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_MACHINERY",
+      "path": "/projects/:businessId/machinery",
+      "source": "apps/web/src/app/routes/business-machinery.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_MECHANICAL",
+      "path": "/projects/:businessId/mechanical",
+      "source": "apps/web/src/app/routes/business-mechanical.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_SECURITY",
+      "path": "/projects/:businessId/security",
+      "source": "apps/web/src/app/routes/business-security.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_SETUP_SCHEMA",
+      "path": "/projects/:businessId/setup",
+      "source": "apps/web/src/app/routes/business-setup-schema.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_TABLE",
+      "path": "/projects/:businessId/tables/:tableSlug",
+      "source": "apps/web/src/app/routes/business-table.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_USERS",
+      "path": "/projects/:businessId/users",
+      "source": "apps/web/src/app/routes/business-users.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-legacy-members]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "BUSINESS_WAREHOUSE",
+      "path": "/projects/:businessId/warehouse",
+      "source": "apps/web/src/app/routes/business-warehouse.tsx",
+      "node": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "PROJECT_ACTIVITIES",
+      "path": "/projects/:projectId/activities",
+      "source": "apps/web/src/app/routes/project-activities.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-activities]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_ACTIVITY_LOG",
+      "path": "/projects/:projectId/activity-log",
+      "source": "apps/web/src/app/routes/project-activity-log.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-activity-log]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_ALERTS",
+      "path": "/projects/:projectId/alerts",
+      "source": "apps/web/src/app/routes/project-alerts.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-alerts]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_BARRIERS",
+      "path": "/projects/:projectId/barriers",
+      "source": "apps/web/src/app/routes/project-barriers.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-barriers]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_CASH_FLOW",
+      "path": "/projects/:projectId/cash-flow",
+      "source": "apps/web/src/app/routes/project-cash-flow.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-cash-flow]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_CONCRETE_OPERATIONS",
+      "path": "/projects/:projectId/concrete-operations",
+      "source": "apps/web/src/app/routes/project-concrete-operations.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_CONTRACTS",
+      "path": "/projects/:projectId/contracts",
+      "source": "apps/web/src/app/routes/project-contracts.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-contracts]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_CONTRACT_DETAIL",
+      "path": "/projects/:projectId/contracts/:contractId",
+      "source": "apps/web/src/app/routes/project-contract-detail.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_CONTRACT_NEW",
+      "path": "/projects/:projectId/contracts/new",
+      "source": "apps/web/src/app/routes/project-contract-form.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-contracts]/[create-contract]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_COSTS",
+      "path": "/projects/:projectId/costs",
+      "source": "apps/web/src/app/routes/project-costs.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-costs]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DAILY_REPORTS",
+      "path": "/projects/:projectId/daily-reports",
+      "source": "apps/web/src/app/routes/daily-reports-list.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DAILY_REPORT_EDIT",
+      "path": "/projects/:projectId/daily-reports/:reportId/edit",
+      "source": "apps/web/src/app/routes/daily-report-form-edit.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DAILY_REPORT_VIEW",
+      "path": "/projects/:projectId/daily-reports/:reportId/view",
+      "source": "apps/web/src/app/routes/daily-report-view.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DAILY_REPORT_NEW",
+      "path": "/projects/:projectId/daily-reports/new",
+      "source": "apps/web/src/app/routes/daily-report-form.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DOCUMENTS",
+      "path": "/projects/:projectId/documents",
+      "source": "apps/web/src/app/routes/project-documents.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-documents]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_ECONOMIC",
+      "path": "/projects/:projectId/economic",
+      "source": "apps/web/src/app/routes/project-economic.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-economic]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_EQUIPMENT_LOG",
+      "path": "/projects/:projectId/equipment-log",
+      "source": "apps/web/src/app/routes/project-equipment-log.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-equipment-log]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_EQUIPMENT_UTILIZATION",
+      "path": "/projects/:projectId/equipment-utilization",
+      "source": "apps/web/src/app/routes/project-equipment-utilization.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-equipment-utilization]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_IPC_DETAIL",
+      "path": "/projects/:projectId/ipcs/:ipcId",
+      "source": "apps/web/src/app/routes/project-ipc-detail.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_LABOR_CAMP",
+      "path": "/projects/:projectId/labor-camp",
+      "source": "apps/web/src/app/routes/project-labor-camp.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-labor-camp]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_LABOR_PRODUCTIVITY",
+      "path": "/projects/:projectId/labor-productivity",
+      "source": "apps/web/src/app/routes/project-labor-productivity.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-labor-productivity]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_LEAVE",
+      "path": "/projects/:projectId/leave-requests",
+      "source": "apps/web/src/app/routes/project-leave-requests.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-leave-requests]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_MANPOWER",
+      "path": "/projects/:projectId/manpower",
+      "source": "apps/web/src/app/routes/project-manpower.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-manpower]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_MATERIAL_BALANCE",
+      "path": "/projects/:projectId/material-balance",
+      "source": "apps/web/src/app/routes/project-material-balance.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-material-balance]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_OVERTIME",
+      "path": "/projects/:projectId/overtime-requests",
+      "source": "apps/web/src/app/routes/project-overtime-requests.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_OVERVIEW",
+      "path": "/projects/:projectId/overview",
+      "source": "apps/web/src/app/routes/project-overview.tsx",
+      "node": "login/submit-valid-credentials/select-project",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PERSONNEL_SUMMARY",
+      "path": "/projects/:projectId/personnel-summary",
+      "source": "apps/web/src/app/routes/project-personnel-summary.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-personnel-summary]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT",
+      "path": "/projects/:projectId/procurement",
+      "source": "apps/web/src/app/routes/procurement/procurement-list.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_BLOCKS",
+      "path": "/projects/:projectId/procurement/blocks",
+      "source": "apps/web/src/app/routes/procurement/procurement-blocks.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_INVENTORY",
+      "path": "/projects/:projectId/procurement/inventory",
+      "source": "apps/web/src/app/routes/procurement/procurement-inventory.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_NEW",
+      "path": "/projects/:projectId/procurement/new",
+      "source": "apps/web/src/app/routes/procurement/procurement-new.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_OFFICER",
+      "path": "/projects/:projectId/procurement/officer",
+      "source": "apps/web/src/app/routes/procurement/procurement-officer.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-officer-dashboard]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_REPORTS",
+      "path": "/projects/:projectId/procurement/reports",
+      "source": "apps/web/src/app/routes/procurement/procurement-reports.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-procurement-reports]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_DETAIL",
+      "path": "/projects/:projectId/procurement/req/:reqId",
+      "source": "apps/web/src/app/routes/procurement/procurement-detail.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROCUREMENT_TRANSFERS",
+      "path": "/projects/:projectId/procurement/transfers",
+      "source": "apps/web/src/app/routes/procurement/procurement-transfers.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_PROGRESS",
+      "path": "/projects/:projectId/progress",
+      "source": "apps/web/src/app/routes/project-progress.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-progress]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_ALLOCATIONS",
+      "path": "/projects/:projectId/resource-allocations",
+      "source": "apps/web/src/app/routes/project-resource-allocations.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_RISK_REGISTER",
+      "path": "/projects/:projectId/risk-register",
+      "source": "apps/web/src/app/routes/project-risk-register.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-risk-register]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_GANTT",
+      "path": "/projects/:projectId/schedule/gantt",
+      "source": "apps/web/src/app/routes/project-schedule-gantt.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-gantt]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SCHEDULE_STATUS",
+      "path": "/projects/:projectId/schedule/status",
+      "source": "apps/web/src/app/routes/project-schedule-status.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-schedule-status]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SETTINGS_PAGE",
+      "path": "/projects/:projectId/settings",
+      "source": "apps/web/src/app/routes/project-settings.tsx",
+      "node": "login/submit-valid-credentials/select-project/navigate-project-settings",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_MEMBERS",
+      "path": "/projects/:projectId/settings/members",
+      "source": "apps/web/src/app/routes/project-members.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-project-members]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_STAKEHOLDERS",
+      "path": "/projects/:projectId/stakeholders",
+      "source": "apps/web/src/app/routes/project-stakeholders.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-stakeholders]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SUB_REPORTS",
+      "path": "/projects/:projectId/sub-reports",
+      "source": "apps/web/src/app/routes/project-sub-reports.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-sub-reports]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SUBCONTRACTORS",
+      "path": "/projects/:projectId/subcontractors",
+      "source": "apps/web/src/app/routes/project-subcontractors.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-subcontractors]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SUBCONTRACTOR_DETAIL",
+      "path": "/projects/:projectId/subcontractors/:subId",
+      "source": "apps/web/src/app/routes/project-subcontractor-detail.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_SYNC_CONFLICTS",
+      "path": "/projects/:projectId/sync-conflicts",
+      "source": "apps/web/src/app/routes/sync-conflicts.tsx",
+      "node": "login/submit-valid-credentials/select-project/navigate-sync-conflicts",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_WBS",
+      "path": "/projects/:projectId/wbs",
+      "source": "apps/web/src/app/routes/project-wbs.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-wbs]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_WEATHER",
+      "path": "/projects/:projectId/weather",
+      "source": "apps/web/src/app/routes/project-weather.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-weather]",
+      "scope": "Current"
+    },
+    {
+      "key": "BUSINESS_CREATE",
+      "path": "/projects/new",
+      "source": "apps/web/src/app/routes/project-create-wizard.tsx",
+      "node": "login/submit-valid-credentials/create-project",
+      "scope": "Current"
+    },
+    {
+      "key": "BUSINESS_SETUP",
+      "path": "/projects/setup",
+      "source": "apps/web/src/app/routes/business-setup.tsx",
+      "node": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-business-setup]",
+      "scope": "Legacy"
+    },
+    {
+      "key": "REGISTER",
+      "path": "/register",
+      "source": "apps/web/src/app/routes/register.tsx",
+      "node": "login/navigate-register",
+      "scope": "Current"
+    },
+    {
+      "key": "RESET_PASSWORD",
+      "path": "/reset-password",
+      "source": "apps/web/src/app/routes/reset-password.tsx",
+      "node": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link",
+      "scope": "Current"
+    },
+    {
+      "key": "SETTINGS_ORG_REFS",
+      "path": "/settings/org-refs",
+      "source": "apps/web/src/app/routes/settings-org-refs.tsx",
+      "node": "login/submit-valid-credentials/[navigate-org-refs]",
+      "scope": "Current"
+    },
+    {
+      "key": "SETTINGS_ROLES",
+      "path": "/settings/roles",
+      "source": "apps/web/src/app/routes/settings-roles.tsx",
+      "node": "login/submit-valid-credentials/[navigate-roles]",
+      "scope": "Current"
+    },
+    {
+      "key": "SETTINGS_TEMPLATES",
+      "path": "/settings/templates",
+      "source": "apps/web/src/app/routes/settings-templates.tsx",
+      "node": "login/submit-valid-credentials/[navigate-templates]",
+      "scope": "Current"
+    }
+  ],
+  "nodes": [
+    {
+      "path": "login",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/change-language",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/navigate-forgot-password/change-language",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/navigate-back-to-login",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/change-language",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/navigate-back-to-login",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/submit-mismatched-or-missing-token",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/submit-new-password",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/toggle-password-visibility",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/submit-phone-for-reset/open-reset-link/toggle-theme",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-forgot-password/toggle-theme",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-register",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/navigate-register/change-language",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-register/navigate-back-to-login",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-register/submit-invalid-registration",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/navigate-register/submit-valid-registration",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/navigate-register/toggle-password-visibility",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/navigate-register/toggle-theme",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-invalid-credentials",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-invalid-credentials/navigate-forgot-password",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-invalid-credentials/navigate-register",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-invalid-credentials/retry-with-invalid-credentials",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-invalid-credentials/retry-with-valid-credentials",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-business-setup]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-business-setup]/[edit-legacy-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-business-setup]/open-create-wizard",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-job-positions]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-job-positions]/return-to-hr",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]/[create-user]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]/[create-user]/toggle-password-visibility",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]/[import-users]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]/[inspect-user-assignments]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-hr-hub]/[navigate-hr-users]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-org-refs]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-org-refs]/create-contract-type",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-org-refs]/create-unit",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-roles]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-roles]/[create-role]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-roles]/[delete-role]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-roles]/[save-role-permissions]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-roles]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-templates]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-templates]/create-template",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[navigate-templates]/delete-template",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[create-field]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[create-table]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[delete-field]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[delete-table]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[edit-field]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[navigate-schema-setup]/[edit-table]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]/[export-excel]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]/[import-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-dynamic-table]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-legacy-members]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-legacy-members]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-legacy-members]/inspect-assignment",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]/[create-position]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]/[delete-position]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]/[edit-position]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-project-positions]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-security-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[create-activity-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[daily-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[export-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[import-activity-excel]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[weekly-report]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/change-language",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-cancel-to-project-list",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next/step-2-back-to-basic-info",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next/step-2-fill-dates-and-next",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next/step-2-fill-dates-and-next/create-draft-project",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next/step-2-fill-dates-and-next/search-and-add-team-member",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-fill-basic-info-and-next/step-2-fill-dates-and-next/step-3-back-to-dates",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/create-project/step-1-select-template",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/logout",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-mobile-navigation",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-notifications",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-notifications/[open-notification]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-notifications/mark-all-read",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-notifications/mark-one-read",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/acknowledge-overlap-and-retry",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/create-cycle",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/generate-proposal",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/open-project-cash-flow",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/save-decision",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-portfolio-liquidity/simulate-allocation",
+      "protected": false,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/recover-expired-session",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[approve-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[archive-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[complete-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[create-activity]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[delete-activity]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[edit-activity]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-relations]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-relations]/[add-dependency]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-relations]/[remove-dependency]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]/[add-calendar-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]/[create-calendar]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]/[delete-calendar-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]/[delete-calendar]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/[manage-working-calendars]/[set-default-calendar]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activities]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activity-log]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-activity-log]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/[acknowledge-alert]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/[create-rule]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/[delete-rule]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/[toggle-rule]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-alerts]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-barriers]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-barriers]/[create-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-barriers]/[edit-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-barriers]/[resolve-barrier]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-barriers]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/[adjust-forecast]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/[create-transaction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/[delete-transaction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/[edit-transaction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/[open-projection]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-cash-flow]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/[delete-production-batch]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/[delete-ready-mix-delivery]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/[export-concrete-csv]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/[record-production-batch]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/[record-ready-mix-delivery]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-concrete-operations]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[create-contract]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[create-contract]/[save-contract]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[create-contract]/cancel-contract",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/[approve-change-order]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/[create-change-order]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/[create-ipc]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/[edit-contract]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/[save-boq]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-contract]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[approve-ipc]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[edit-line-items]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[export-ipc-pdf]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[manage-deductions]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[mark-ipc-paid]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[populate-ipc]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[record-collection]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[reject-ipc]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/[submit-ipc]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/[open-ipc]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-contracts]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-actual-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-actual-tab/[record-actual-cost]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-actual-tab/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[approve-version]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[compare-versions]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[create-budget-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[create-budget-change-request]/[approve-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[create-budget-change-request]/[reject-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[create-budget-change-request]/[submit-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[create-version]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[reject-version]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[save-budget-line]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[save-grid-budget]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[submit-version]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/[transfer-budget]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-budget-tab/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-cbs-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-cbs-tab/[create-cbs-node]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-cbs-tab/[create-commitment]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-payments-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-payments-tab/[record-payment]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-pools-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-pools-tab/[allocate-cost-pool]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-pools-tab/[allocate-cost-pool]/[automatic-allocation]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-pools-tab/[allocate-cost-pool]/[manual-allocation]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-pools-tab/[create-cost-pool]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/open-variance-tab",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[attach-photo]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor/add-custom-job-title",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[refresh-material-reconciliation]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[save-report-header]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[delete-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[approve-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities/[attach-photo]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-activities/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-concrete",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-concrete/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-concrete/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-concrete/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-concrete/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-equipment",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-equipment/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-equipment/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-equipment/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-equipment/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-incidents",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-incidents/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-incidents/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-incidents/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-incidents/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor-camp",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor-camp/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor-camp/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor-camp/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor-camp/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-labor/add-custom-job-title",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials/[add-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials/[delete-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials/[edit-row]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials/[refresh-material-reconciliation]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[edit-report-sections]/open-materials/retry-row-sync",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[reject-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[request-correction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[review-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[save-report-header]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[submit-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/inspect-report-versions",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[sync-now]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[approve-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[export-report-pdf]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[reject-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[request-correction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[review-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[submit-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/inspect-report-versions",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/[create-correspondence]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/[download-document]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/[respond-correspondence]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/[upload-document]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/[view-meeting-minutes]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-documents]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-economic]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-economic]/[manage-inflation-mappings]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-economic]/[run-monte-carlo]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-economic]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-economic]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-log]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-log]/[delete-log]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-log]/[record-log]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-log]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-utilization]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-utilization]/[register-equipment]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-equipment-utilization]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[approve-and-lock-baseline]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[create-baseline]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[export-pdf]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[manage-schedule-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[manage-schedule-change-request]/[approve-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[manage-schedule-change-request]/[reject-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/[manage-schedule-change-request]/[submit-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-gantt]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-camp]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-camp]/[delete-camp-group]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-camp]/[record-camp-group]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-camp]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-productivity]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-labor-productivity]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[create-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[manager-approve]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[manager-reject]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[security-approve]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[security-reject]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[submit-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[supervisor-approve]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/[supervisor-reject]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-leave-requests]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-manpower]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-manpower]/[save-day]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-manpower]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-manpower]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]/[create-material-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]/[record-inventory-transaction]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]/open-low-stock-alert",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-material-balance]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[create-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[manager-approve]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[manager-reject]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[submit-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[supervisor-approve]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/[supervisor-reject]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-overtime-requests]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-personnel-summary]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-personnel-summary]/[export-personnel-xlsx]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-personnel-summary]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]/[save-requisition]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]/cancel-requisition",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]/edit-line-items",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[create-requisition]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]/[create-block]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]/[delete-block]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]/[edit-block]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[manage-blocks]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]/[issue-stock]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]/[record-grn]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-block-inventory]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-officer-dashboard]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-officer-dashboard]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-officer-dashboard]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-officer-dashboard]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-procurement-reports]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-procurement-reports]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-procurement-reports]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[approve-requisition]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[assign-officers]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[create-cost-commitment]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[hold-item]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[partially-approve-items]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[reject-requisition]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[return-requisition]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/[submit-requisition]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-requisition]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]/[approve-transfer]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]/[create-transfer]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]/[reject-transfer]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/[open-stock-transfers]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-procurement]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[configure-measurement]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[configure-measurement]/[approve-measurement]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[configure-measurement]/[request-method-change]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[override-report-figure]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[record-manual-progress]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-project-members]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-project-members]/[add-or-invite-member]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-project-members]/[deactivate-member]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-project-members]/[edit-member]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-project-members]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-allocation]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-capacity-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-capacity-exception]/[approve-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-capacity-exception]/[reject-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-capacity-exception]/[submit-exception]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[create-labor-rate]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[delete-allocation]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[edit-person-dossier]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[preview-capacity]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[view-labor-rates-and-estimate]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/[view-person-dossier]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-risk-register]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-risk-register]/[record-risk-event]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-risk-register]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-risk-register]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/[manage-schedule-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/[manage-schedule-change-request]/[approve-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/[manage-schedule-change-request]/[reject-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/[manage-schedule-change-request]/[submit-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-schedule-status]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-stakeholders]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-stakeholders]/[create-stakeholder]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/[create-sub-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/[submit-sub-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[create-subcontractor]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/[create-warning]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/[record-score]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/[resolve-warning]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/export-activities",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/[open-subcontractor]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[add-child-node]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[create-root-node]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[create-root-node]/[undo-root-creation]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[delete-node]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[edit-node]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[import-schedule-file]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[import-schedule-file]/[confirm-import]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[import-schedule-file]/back-or-cancel-import",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/[save-as-template]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-wbs]/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-weather]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-weather]/[create-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-weather]/[delete-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-weather]/[edit-record]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-weather]/filter-and-change-view",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[reject-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[resume-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[save-kickoff-charter]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[submit-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[suspend-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[create-fiscal-lock]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[create-project-change-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[create-project-change-request]/[approve-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[create-project-change-request]/[reject-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[create-project-change-request]/[submit-request]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[delete-project]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[save-settings]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/[toggle-capability]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-project-settings/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/[resolve-conflict]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/[resolve-conflict]/[keep-local]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/[resolve-conflict]/[merge-fields]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/[resolve-conflict]/keep-server",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/discard-failed-item",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/navigate-sync-conflicts/retry-failed-item",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/retry-failed-load",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/toggle-theme",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/toggle-password-visibility",
+      "protected": false,
+      "kind": "local"
+    },
+    {
+      "path": "login/toggle-theme",
+      "protected": false,
+      "kind": "local"
+    }
+  ]
+}

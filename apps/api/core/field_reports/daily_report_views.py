@@ -18,6 +18,7 @@ from field_reports.models import (
     DailyReport,
     DailyReportActivity,
     DailyReportConcreteLog,
+    DailyReportCorrectionRequest,
     DailyReportEquipment,
     DailyReportIncident,
     DailyReportLabor,
@@ -29,6 +30,7 @@ from field_reports.models import LaborJobTitle
 from field_reports.serializers import (
     DailyReportActivitySerializer,
     DailyReportConcreteLogSerializer,
+    DailyReportCorrectionRequestSerializer,
     DailyReportDetailSerializer,
     DailyReportEquipmentSerializer,
     DailyReportHeaderSerializer,
@@ -37,15 +39,23 @@ from field_reports.serializers import (
     DailyReportLaborSerializer,
     DailyReportListSerializer,
     DailyReportMaterialSerializer,
+    DailyReportVersionSerializer,
     LaborJobTitleSerializer,
 )
 from field_reports import services
+from field_reports.services import correction_service
+from field_reports.services.material_reconciliation import reconcile_report_materials
 
 EDITABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
 
 
-def _validate_report_ready_for_submit(report: DailyReport):
+def _validate_report_ready_for_submit(report: DailyReport) -> list[str]:
+    """Return soft warnings. Raises ValidationError for hard failures."""
     errors: list[str] = []
+    warnings: list[str] = []
+
+    if not (report.work_front or '').strip():
+        warnings.append('محل/جبهه کاری خالی است — تکمیل آن توصیه می‌شود')
 
     activities = list(report.activities.filter(is_deleted=False))
     if not activities:
@@ -53,6 +63,8 @@ def _validate_report_ready_for_submit(report: DailyReport):
     for idx, row in enumerate(activities, start=1):
         if row.quantity_measured and row.quantity is None:
             errors.append(f'ردیف فعالیت {idx}: در حالت اندازه‌گیری شده، مقدار باید ثبت شود')
+        if (not row.quantity_measured) and row.quantity is not None:
+            errors.append(f'ردیف فعالیت {idx}: مقدار ثبت‌نشده نباید عدد داشته باشد')
 
     equipment_rows = list(report.equipment_entries.filter(is_deleted=False))
     for idx, row in enumerate(equipment_rows, start=1):
@@ -72,6 +84,7 @@ def _validate_report_ready_for_submit(report: DailyReport):
 
     if errors:
         raise ValidationError({'submit_validation': errors})
+    return warnings
 
 
 @extend_schema_view(
@@ -95,21 +108,29 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     @property
     def required_permission(self):
-        if self.action in ('list', 'retrieve', 'pdf'):
+        if self.action in (
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+        ):
+            return self.view_permission
+        if self.action == 'correction_requests' and self.request.method.upper() == 'GET':
             return self.view_permission
         if self.action in ('review', 'approve', 'reject'):
             return self.approve_permission
         return self.edit_permission
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve', 'pdf'):
+        if self.action in (
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+        ) or (
+            self.action == 'correction_requests' and self.request.method.upper() == 'GET'
+        ):
             return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
         return [IsAuthenticated(), HasProjectPermission()]
 
     # Queries: before optimization=47, after=4 (list with select_related + prefetch_related)
     def get_queryset(self):
         qs = (
-            DailyReport.objects.filter(project_id=self.get_project_id())
+            DailyReport.objects.filter(project_id=self.get_project_id(), is_deleted=False)
             .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by').prefetch_related('activities', 'labor_entries', 'equipment_entries', 'incidents')
         )
         params = self.request.query_params
@@ -125,6 +146,14 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         prepared_by = params.get('prepared_by')
         if prepared_by:
             qs = qs.filter(prepared_by_id=prepared_by)
+        lineage_id = params.get('lineage_id')
+        if lineage_id:
+            qs = qs.filter(lineage_id=lineage_id)
+        is_current = params.get('is_current')
+        if is_current is None and self.action == 'list':
+            qs = qs.filter(is_current=True)
+        elif is_current is not None:
+            qs = qs.filter(is_current=is_current.lower() in ('1', 'true', 'yes'))
         return qs.order_by('-report_date')
 
     def get_serializer_class(self):
@@ -147,10 +176,14 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             report_date=report_date,
             shift=shift,
             is_deleted=False,
+            is_current=True,
         ).exists():
             raise ConflictError(
-                f'گزارش روزانه برای تاریخ {request.data.get("report_date")} '
-                f'و شیفت {shift} قبلاً ثبت شده است',
+                detail=(
+                    f'گزارش روزانه برای تاریخ {request.data.get("report_date")} '
+                    f'و شیفت {shift} قبلاً ثبت شده است'
+                ),
+                code='duplicate_current_report',
             )
         instance = serializer.save(
             project_id=project_id,
@@ -163,6 +196,8 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
+        if instance.status == ReportStatus.APPROVED:
+            raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
         serializer = DailyReportHeaderSerializer(instance, data=request.data, partial=True)
@@ -182,9 +217,12 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     def _submit(self, instance, request):
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
-        _validate_report_ready_for_submit(instance)
+        warnings = _validate_report_ready_for_submit(instance)
         services.submit_report(instance, request.user)
-        return Response(DailyReportDetailSerializer(instance).data)
+        data = DailyReportDetailSerializer(instance).data
+        if warnings:
+            data['submit_warnings'] = warnings
+        return Response(data)
 
     @extend_schema(summary='Mark under review', tags=['Daily Reports'])
     @action(detail=True, methods=['post'])
@@ -239,6 +277,63 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
         return response
 
+    # -- Versions / correction / reconciliation -----------------------------
+
+    @extend_schema(summary='List report versions in lineage', tags=['Daily Reports'])
+    @action(detail=True, methods=['get'], url_path='versions')
+    def versions(self, request, *args, **kwargs):
+        instance = self.get_object()
+        qs = correction_service.list_versions(instance)
+        return Response(DailyReportVersionSerializer(qs, many=True).data)
+
+    @extend_schema(summary='List or open correction requests', tags=['Daily Reports'])
+    @action(detail=True, methods=['get', 'post'], url_path='correction-requests')
+    def correction_requests(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.method.lower() == 'get':
+            lineage_id = instance.lineage_id or instance.id
+            qs = DailyReportCorrectionRequest.objects.filter(
+                project_id=instance.project_id,
+                source_report__lineage_id=lineage_id,
+                is_deleted=False,
+            ).order_by('-requested_at')
+            return Response(DailyReportCorrectionRequestSerializer(qs, many=True).data)
+        correction = correction_service.open_correction(
+            source_report=instance,
+            user=request.user,
+            reason=request.data.get('reason', ''),
+        )
+        return Response(
+            DailyReportCorrectionRequestSerializer(correction).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(summary='Material reconciliation hints', tags=['Daily Reports'])
+    @action(detail=True, methods=['get'], url_path='materials-reconciliation')
+    def materials_reconciliation(self, request, *args, **kwargs):
+        instance = self.get_object()
+        return Response(reconcile_report_materials(instance))
+
+
+class DailyReportCorrectionCancelView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'edit_reports'
+
+    def get_project_id(self):
+        return self.kwargs['project_pk']
+
+    @extend_schema(summary='Cancel open correction request', tags=['Daily Reports'])
+    def post(self, request, *args, **kwargs):
+        correction = DailyReportCorrectionRequest.objects.filter(
+            id=self.kwargs['correction_id'],
+            project_id=self.get_project_id(),
+            is_deleted=False,
+        ).first()
+        if correction is None:
+            raise ValidationError('درخواست اصلاح یافت نشد')
+        correction_service.cancel_correction(correction=correction, user=request.user)
+        return Response(DailyReportCorrectionRequestSerializer(correction).data)
+
 
 # ---------------------------------------------------------------------------
 # Child row viewsets
@@ -281,7 +376,10 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
         return self._report
 
     def _assert_editable(self):
-        if self.get_report().status not in EDITABLE_STATUSES:
+        report = self.get_report()
+        if report.status == ReportStatus.APPROVED:
+            raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
+        if report.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط ردیف‌های گزارش‌های پیش‌نویس یا رد شده قابل تغییر هستند')
 
     def get_queryset(self):

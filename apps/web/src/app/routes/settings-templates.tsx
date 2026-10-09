@@ -85,6 +85,9 @@ export default function SettingsTemplatesPage() {
           </Button>
         }
       />
+      <p className="mb-4 text-sm text-muted-foreground">
+        {t("templates.immutabilityNote")}
+      </p>
 
       {isLoading ? (
         <p className="text-muted-foreground">{t("templates.loading")}</p>

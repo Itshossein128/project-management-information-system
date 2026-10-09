@@ -35,6 +35,14 @@ class Notification(UUIDModel, TimeStampedModel):
     title = models.CharField(max_length=255)
     message = models.TextField(blank=True, default='')
     link = models.CharField(max_length=512, blank=True, default='')
+    responsible_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='owned_notifications',
+    )
+    due_at = models.DateTimeField(null=True, blank=True)
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
 

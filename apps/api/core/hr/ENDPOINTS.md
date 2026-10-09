@@ -1,6 +1,63 @@
 # HR Endpoints
 
-This document outlines the API endpoints defined in the HR application (`apps/api/core/hr/urls.py`). These endpoints are nested under a specific project context (`/api/projects/<project_pk>/hr/`).
+Project-scoped base: `/api/v1/projects/{project_pk}/` (includes leave/OT and HR capacity routes).
+
+## Permission codes
+
+| Codename | Use |
+| :--- | :--- |
+| `view_hr` | Read dossier, allocations, exceptions, rates (amounts redacted without wage) |
+| `edit_hr` | Create/update allocations, dossier, exceptions (draft/submit) |
+| `approve_hr` | Approve/reject capacity exceptions |
+| `view_wage` | See wage/rate amounts on membership and approved rates |
+| `edit_wage` | Write wage fields on membership and approved labor rates |
+
+Leave/overtime continue to use `view_reports` / `edit_reports` / `approve_reports`.
+
+Optional project capability: `hr` (see project capabilities API).
+
+## Person dossier
+
+**Chosen surface (v1):** project-scoped dossier under the project URL only. A separate org-level `/api/v1/users/{user_id}/dossier/` is deferred; use the project route below.
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `people/{user_id}/dossier/` | GET | Person dossier (target must be project member or allocated). Requires `view_hr`, **or** self-read of own dossier without `view_hr`. |
+| `people/{user_id}/dossier/` | PATCH | Update skills, qualifications, org unit, supervisor, status, default capacity. Requires `edit_hr`. |
+
+Capacity exception approve may return `soft_sod_warn: true` when approver is the same user who created the exception (still allowed).
+
+Allocation ≠ project membership ≠ attendance ≠ activity progress.
+
+## Resource allocations
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `resource-allocations/` | GET | List allocations (filters: person_id, wbs_id, activity_id, status, from, to). |
+| `resource-allocations/` | POST | Create allocation; 409 `capacity_conflict` when over capacity without approved exception. |
+| `resource-allocations/{id}/` | GET/PATCH/DELETE | Detail, update, soft-delete. |
+| `resource-allocations/capacity-preview/` | GET | Query: person_id, from, to, capacity_percent — committed/available preview. |
+
+## Capacity exceptions
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `capacity-exceptions/` | GET/POST | List / create (optional `submit: true`). |
+| `capacity-exceptions/{id}/submit/` | POST | Draft → submitted (reason required). |
+| `capacity-exceptions/{id}/approve/` | POST | Submitted → approved (`approve_hr`). |
+| `capacity-exceptions/{id}/reject/` | POST | Submitted → rejected (`approve_hr`). |
+
+Approved exception id may be passed as `capacity_exception_id` on allocation create/update.
+
+## Approved labor rates & estimate
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `approved-labor-rates/` | GET/POST | CRUD band; amounts visible with `view_wage`; write requires `edit_wage`. |
+| `approved-labor-rates/{id}/` | DELETE | Soft-delete rate. |
+| `labor-cost-estimate/` | POST | `{ person_id, approved_hours, as_of? }` — uses approved rate only; `missing_approved_rate` when none. |
+
+Wage on legacy assignment list: `GET /api/v1/users/{user_id}/assignments/` — wage fields omitted without `view_wage` on that project.
 
 ## Overtime Requests
 

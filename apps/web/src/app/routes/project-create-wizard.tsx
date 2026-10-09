@@ -3,7 +3,16 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { addMember } from "@/app/lib/api/members";
-import { createProject, type CreateProjectPayload } from "@/app/lib/api/projects";
+import {
+  asList,
+  fetchContractTypes,
+  fetchOrganizationUnits,
+} from "@/app/lib/api/central-data";
+import {
+  createProject,
+  type CreateProjectPayload,
+  type ProjectCurrency,
+} from "@/app/lib/api/projects";
 import {
   applyProjectTemplate,
   fetchProjectTemplate,
@@ -20,24 +29,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 import { Input } from "@/components/form";
-import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
+import { formatWithCommas, toRawNumericString } from "@/app/lib/utils";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
 import { LayoutTemplate } from "lucide-react";
-
-const CONTRACT_TYPE_KEYS = ["unit_price", "lump_sum", "cost_plus", "EPC"] as const;
-
-const CONTRACT_TYPE_LABELS: Record<(typeof CONTRACT_TYPE_KEYS)[number], string> = {
-  unit_price: "فی واحد",
-  lump_sum: "سرجمع",
-  cost_plus: "Cost Plus",
-  EPC: "EPC",
-};
-
-const CONTRACT_TYPES = CONTRACT_TYPE_KEYS.map((value) => ({
-  value,
-  label: CONTRACT_TYPE_LABELS[value],
-}));
 
 interface DraftMember {
   user?: UserLookupResult;
@@ -67,15 +62,25 @@ export default function ProjectCreateWizardPage() {
     contractor: "",
     consultant: "",
     contract_type: "",
+    contract_number: "",
+    purpose: "",
+    scope_description: "",
+    main_deliverables: "",
     location: "",
     start_date: "",
     planned_finish_date: "",
     contract_amount: "",
+    currency: "IRR",
+    owning_unit: null,
+    project_manager: null,
   });
 
   const [members, setMembers] = useState<DraftMember[]>([]);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<UserLookupResult[]>([]);
+  const [pmSearch, setPmSearch] = useState("");
+  const [pmResults, setPmResults] = useState<UserLookupResult[]>([]);
+  const [pmLabel, setPmLabel] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [selectedRoleId, setSelectedRoleId] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -90,6 +95,16 @@ export default function ProjectCreateWizardPage() {
     queryFn: () => fetchProjectTemplate(selectedTemplateId!),
     enabled: Boolean(selectedTemplateId),
   });
+  const { data: contractTypesRaw } = useQuery({
+    queryKey: ["contract-types"],
+    queryFn: fetchContractTypes,
+  });
+  const contractTypes = asList(contractTypesRaw ?? []);
+  const { data: orgUnitsRaw } = useQuery({
+    queryKey: ["organization-units"],
+    queryFn: fetchOrganizationUnits,
+  });
+  const orgUnits = asList(orgUnitsRaw ?? []);
 
   const durationDays = useMemo(() => {
     if (!form.start_date || !form.planned_finish_date) return null;
@@ -101,7 +116,36 @@ export default function ProjectCreateWizardPage() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const project = await createProject(form);
+      const payload: CreateProjectPayload = {
+        project_code: form.project_code.trim(),
+        project_name: form.project_name.trim(),
+        employer: form.employer.trim(),
+        start_date: form.start_date,
+        ...(form.contractor?.trim() ? { contractor: form.contractor.trim() } : {}),
+        ...(form.consultant?.trim() ? { consultant: form.consultant.trim() } : {}),
+        ...(form.contract_type?.trim() ? { contract_type: form.contract_type.trim() } : {}),
+        ...(form.contract_number?.trim()
+          ? { contract_number: form.contract_number.trim() }
+          : {}),
+        ...(form.purpose?.trim() ? { purpose: form.purpose.trim() } : {}),
+        ...(form.scope_description?.trim()
+          ? { scope_description: form.scope_description.trim() }
+          : {}),
+        ...(form.main_deliverables?.trim()
+          ? { main_deliverables: form.main_deliverables.trim() }
+          : {}),
+        ...(form.location?.trim() ? { location: form.location.trim() } : {}),
+        ...(form.planned_finish_date
+          ? { planned_finish_date: form.planned_finish_date }
+          : {}),
+        ...(form.contract_amount?.trim()
+          ? { contract_amount: form.contract_amount.trim() }
+          : {}),
+        ...(form.currency ? { currency: form.currency } : {}),
+        ...(form.owning_unit ? { owning_unit: form.owning_unit } : {}),
+        ...(form.project_manager ? { project_manager: form.project_manager } : {}),
+      };
+      const project = await createProject(payload);
       for (const m of members) {
         if (m.user) {
           await addMember(project.project_id, { user_id: m.user.user_id, role_ids: [m.roleId] });
@@ -119,7 +163,7 @@ export default function ProjectCreateWizardPage() {
         toast.success(t("projectWizard.wbsLoaded"));
         navigate(`/${PATHS.PROJECT}/${project.project_id}/${PATHS.PROJECT_WBS}`);
       } else {
-        toast.success(t("projectWizard.createSuccess"));
+        toast.success(t("project.draftCreated", t("projectWizard.createSuccess")));
         navigate(`/${PATHS.PROJECT}/${project.project_id}/${PATHS.PROJECT_OVERVIEW}`);
       }
     },
@@ -132,6 +176,12 @@ export default function ProjectCreateWizardPage() {
     if (search.length < 2) return;
     const results = await lookupUsers(search);
     setSearchResults(results);
+  };
+
+  const handlePmSearch = async () => {
+    if (pmSearch.length < 2) return;
+    const results = await lookupUsers(pmSearch);
+    setPmResults(results);
   };
 
   const addSearchedMember = (user: UserLookupResult) => {
@@ -237,8 +287,9 @@ export default function ProjectCreateWizardPage() {
           </div>
 
           <div>
-            <Label>نام پروژه *</Label>
+            <Label htmlFor="wizard-project-name">نام پروژه *</Label>
             <Input
+              id="wizard-project-name"
               value={form.project_name}
               onChange={(e) => {
                 const name = e.target.value;
@@ -251,17 +302,40 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div>
-            <Label>کد پروژه *</Label>
+            <Label htmlFor="wizard-project-code">کد پروژه *</Label>
             <Input
+              id="wizard-project-code"
               value={form.project_code}
               onChange={(e) => setForm((f) => ({ ...f, project_code: e.target.value }))}
             />
           </div>
           <div>
-            <Label>کارفرما *</Label>
+            <Label htmlFor="wizard-employer">کارفرما *</Label>
             <Input
+              id="wizard-employer"
               value={form.employer}
               onChange={(e) => setForm((f) => ({ ...f, employer: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Label>{t("project.purpose", "هدف پروژه")}</Label>
+            <Input
+              value={form.purpose ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, purpose: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Label>{t("project.scope", "شرح محدوده")}</Label>
+            <Input
+              value={form.scope_description ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, scope_description: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Label>{t("project.deliverables", "خروجی‌های اصلی")}</Label>
+            <Input
+              value={form.main_deliverables ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, main_deliverables: e.target.value }))}
             />
           </div>
           <div>
@@ -279,19 +353,104 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div>
+            <Label>{t("project.contractNumber", "شماره قرارداد")}</Label>
+            <Input
+              data-testid="wizard-contract-number"
+              value={form.contract_number ?? ""}
+              onChange={(e) => setForm((f) => ({ ...f, contract_number: e.target.value }))}
+            />
+          </div>
+          <div>
             <Label>نوع قرارداد</Label>
             <select
               className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              data-testid="wizard-contract-type"
               value={form.contract_type}
               onChange={(e) => setForm((f) => ({ ...f, contract_type: e.target.value }))}
             >
               <option value="">—</option>
-              {CONTRACT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
+              {contractTypes.map((ct) => (
+                <option key={ct.id} value={ct.code}>
+                  {ct.code} — {ct.name_fa || ct.name_en}
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <Label>{t("projectSettings.currency", "واحد پول")}</Label>
+            <select
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              data-testid="wizard-currency"
+              value={form.currency ?? "IRR"}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  currency: e.target.value as ProjectCurrency,
+                }))
+              }
+            >
+              <option value="IRR">{t("projectSettings.currencyIrr", "ریال (IRR)")}</option>
+              <option value="IRT">{t("projectSettings.currencyIrt", "تومان (IRT)")}</option>
+            </select>
+          </div>
+          <div>
+            <Label>{t("centralData.owningUnit", "واحد سازمانی مالک")}</Label>
+            <select
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              data-testid="wizard-owning-unit"
+              value={form.owning_unit ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  owning_unit: e.target.value || null,
+                }))
+              }
+            >
+              <option value="">—</option>
+              {orgUnits.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.code} — {u.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2" data-testid="wizard-project-manager">
+            <Label>{t("project.projectManager", "مدیر پروژه")}</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder={t("projectWizard.searchPm", "جستجوی مدیر پروژه")}
+                value={pmSearch}
+                onChange={(e) => setPmSearch(e.target.value)}
+              />
+              <Button type="button" variant="secondary" onClick={handlePmSearch}>
+                {t("common.search", "جستجو")}
+              </Button>
+            </div>
+            {pmLabel ? (
+              <p className="text-sm text-muted-foreground">
+                {t("project.selectedPm", "انتخاب‌شده")}: {pmLabel}
+              </p>
+            ) : null}
+            {pmResults.length > 0 ? (
+              <ul className="rounded-md border border-border">
+                {pmResults.map((u) => (
+                  <li key={u.user_id}>
+                    <button
+                      type="button"
+                      className="w-full px-3 py-2 text-start text-sm hover:bg-muted"
+                      onClick={() => {
+                        setForm((f) => ({ ...f, project_manager: u.user_id }));
+                        setPmLabel(u.full_name || u.email || u.user_id);
+                        setPmResults([]);
+                        setPmSearch("");
+                      }}
+                    >
+                      {u.full_name} — {u.email || u.mobile}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
           <div>
             <Label>موقعیت</Label>

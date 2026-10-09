@@ -67,6 +67,27 @@ class User(UUIDModel, AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    skills = models.JSONField(default=list, blank=True)
+    qualifications = models.JSONField(default=list, blank=True)
+    org_unit = models.ForeignKey(
+        'master_data.OrganizationUnit',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='users',
+    )
+    supervisor = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='supervised_persons',
+    )
+    default_capacity_percent = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=100,
+    )
 
     objects = CustomUserManager()
 

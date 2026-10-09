@@ -9,6 +9,7 @@ from cash_flow.models import (
     CashTransaction,
     CashTransactionType,
     InflowCategory,
+    LiquidityAllocationCycle,
     OutflowCategory,
 )
 from common.serializers import JalaliDateField
@@ -102,3 +103,26 @@ class CashFlowForecastSerializer(serializers.ModelSerializer):
 
     def validate_month(self, value):
         return value.replace(day=1)
+
+
+class PriorityScoreSerializer(serializers.Serializer):
+    urgency = serializers.DecimalField(max_digits=5, decimal_places=2)
+    return_score = serializers.DecimalField(max_digits=5, decimal_places=2)
+    recovery_speed = serializers.DecimalField(max_digits=5, decimal_places=2)
+    risk = serializers.DecimalField(max_digits=5, decimal_places=2)
+    notes = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+class LiquidityCycleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LiquidityAllocationCycle
+        fields = [
+            'id',
+            'name',
+            'period_start',
+            'period_end',
+            'available_liquidity',
+            'currency',
+            'status',
+        ]
+        read_only_fields = ['id', 'status']

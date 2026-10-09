@@ -11,6 +11,7 @@ import "@xyflow/react/dist/style.css";
 import dagre from "@dagrejs/dagre";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   fetchActivityNetwork,
   type ActivityStatus,
@@ -105,6 +106,7 @@ export interface NetworkDiagramViewProps {
 }
 
 export function NetworkDiagramView({ projectId, onNodeClick }: NetworkDiagramViewProps) {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({
     queryKey: ["activity-network", projectId],
     queryFn: () => fetchActivityNetwork(projectId),
@@ -120,24 +122,35 @@ export function NetworkDiagramView({ projectId, onNodeClick }: NetworkDiagramVie
   if (!data?.nodes.length) {
     return (
       <div className="flex min-h-[320px] items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-        فعالیتی برای نمایش شبکه وجود ندارد.
+        {t("schedule.networkEmpty")}
       </div>
     );
   }
 
   return (
-    <div className="h-[min(70vh,640px)] w-full rounded-lg border border-border" dir="ltr">
-      <ReactFlow
-        nodes={flowNodes}
-        edges={flowEdges}
-        nodeTypes={nodeTypes}
-        fitView
-        onNodeClick={(_, node) => onNodeClick(node.id)}
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background />
-        <Controls />
-      </ReactFlow>
+    <div className="space-y-2">
+      {data.critical_path && !data.critical_path.valid ? (
+        <div
+          className="rounded-md border border-warning-500/40 bg-warning-500/10 px-3 py-2 text-sm text-warning-800 dark:text-warning-300"
+          role="status"
+          data-testid="network-critical-path-invalid"
+        >
+          {t("schedule.criticalPathNotValid")}
+        </div>
+      ) : null}
+      <div className="h-[min(70vh,640px)] w-full rounded-lg border border-border" dir="ltr">
+        <ReactFlow
+          nodes={flowNodes}
+          edges={flowEdges}
+          nodeTypes={nodeTypes}
+          fitView
+          onNodeClick={(_, node) => onNodeClick(node.id)}
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background />
+          <Controls />
+        </ReactFlow>
+      </div>
     </div>
   );
 }

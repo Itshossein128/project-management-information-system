@@ -200,12 +200,11 @@ class TestTransferService:
         assert source_alloc.received_qty == Decimal('100.0000')
         assert not InventoryAllocation.objects.filter(block=data['target_block']).exists()
 
-    def test_approve_transfer_clamped_at_zero(self, setup_transfer_data):
+    def test_approve_transfer_rejects_when_exceeds_available(self, setup_transfer_data):
         data = setup_transfer_data
         user = data['user']
         source_alloc = data['source_allocation']
 
-        # Transfer quantity greater than source allocation quantity
         transfer = InternalTransfer.objects.create(
             source_block=data['source_block'],
             target_block=data['target_block'],
@@ -215,17 +214,15 @@ class TestTransferService:
             created_by=user,
         )
 
-        approve_transfer(transfer, user)
+        with pytest.raises(ValidationError):
+            approve_transfer(transfer, user)
 
         source_alloc.refresh_from_db()
-        assert source_alloc.allocated_qty == Decimal('0.0000')
-        assert source_alloc.received_qty == Decimal('0.0000')
-
-        target_alloc = InventoryAllocation.objects.get(
+        assert source_alloc.allocated_qty == Decimal('100.0000')
+        assert source_alloc.received_qty == Decimal('100.0000')
+        assert not InventoryAllocation.objects.filter(
             block=data['target_block'],
             material=data['material'],
             is_deleted=False,
-        )
-        assert target_alloc.allocated_qty == Decimal('150.0000')
-        assert target_alloc.received_qty == Decimal('150.0000')
+        ).exists()
 

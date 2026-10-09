@@ -1,28 +1,40 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
-import { fetchCostSummary, formatFaAmount } from "@/app/lib/api/costs";
+import {
+  fetchBudgetVersions,
+  fetchBudgets,
+  fetchCostSummary,
+  formatFaAmount,
+} from "@/app/lib/api/costs";
 import { PATHS } from "@/app/routeVars";
 import { ActualCostsTab } from "@/components/costs/ActualCostsTab";
+import { BudgetChangeRequestPanel } from "@/components/costs/BudgetChangeRequestPanel";
 import { BudgetGrid } from "@/components/costs/BudgetGrid";
+import { BudgetLineEditor } from "@/components/costs/BudgetLineEditor";
+import { BudgetVersionsPanel } from "@/components/costs/BudgetVersionsPanel";
+import { CBSCommitmentTab } from "@/components/costs/CBSCommitmentTab";
+import { CostPaymentsLedgerPanel } from "@/components/costs/CostPaymentsLedgerPanel";
 import { CostPoolTab } from "@/components/costs/CostPoolTab";
+import { RemainingAllocatablePanel } from "@/components/costs/RemainingAllocatablePanel";
 import { VarianceTab } from "@/components/costs/VarianceTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
-import { Button } from "@/components/ui/sprint-button";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type Tab = "budget" | "actual" | "variance" | "pools";
+type Tab = "budget" | "actual" | "variance" | "pools" | "cbs" | "payments";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "budget", label: "بودجه" },
   { id: "actual", label: "هزینه‌های واقعی" },
   { id: "variance", label: "واریانس" },
   { id: "pools", label: "استخر هزینه" },
+  { id: "cbs", label: "CBS / تعهد" },
+  { id: "payments", label: "پرداخت / دفتر" },
 ];
 
 function CostsContent() {
@@ -32,7 +44,9 @@ function CostsContent() {
   const { has } = usePermission(projectId);
   const canView = has("view_costs");
   const canEdit = has("edit_costs");
+  const canApprove = has("approve_costs") || has("edit_costs");
   const [tab, setTab] = useState<Tab>("budget");
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
 
   const {
     data: summary,
@@ -44,6 +58,33 @@ function CostsContent() {
     queryFn: () => fetchCostSummary(projectId),
     enabled: canView && Boolean(projectId),
   });
+
+  const { data: versions = [] } = useQuery({
+    queryKey: ["budget-versions", projectId],
+    queryFn: () => fetchBudgetVersions(projectId),
+    enabled: canView && Boolean(projectId) && tab === "budget",
+  });
+
+  const activeVersionId = useMemo(() => {
+    if (selectedVersionId) return selectedVersionId;
+    const control = versions.find((v) => v.is_control);
+    if (control) return control.id;
+    const draft = versions.find((v) => v.status === "draft");
+    return draft?.id ?? versions[0]?.id ?? null;
+  }, [selectedVersionId, versions]);
+
+  const activeVersion = versions.find((v) => v.id === activeVersionId) ?? null;
+  const gridLocked = Boolean(
+    activeVersion && activeVersion.status !== "draft",
+  );
+
+  const { data: activeBudgets } = useQuery({
+    queryKey: ["budgets", projectId, activeVersionId ?? "none", "cr-line"],
+    queryFn: () =>
+      fetchBudgets(projectId, activeVersionId ? { version_id: activeVersionId } : {}),
+    enabled: Boolean(activeVersionId) && tab === "budget",
+  });
+  const controlLineId = activeBudgets?.results?.[0]?.id ?? null;
 
   if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
@@ -115,8 +156,38 @@ function CostsContent() {
           ))}
         </TabsList>
 
-        <ShadcnTabsContent value="budget" className="mt-0">
-          <BudgetGrid projectId={projectId} canEdit={canEdit} />
+        <ShadcnTabsContent value="budget" className="mt-0 space-y-8">
+          <BudgetVersionsPanel
+            projectId={projectId}
+            canEdit={canEdit}
+            canApprove={canApprove}
+            selectedVersionId={activeVersionId}
+            onSelectVersion={setSelectedVersionId}
+          />
+          {activeVersionId && !gridLocked ? (
+            <BudgetLineEditor
+              projectId={projectId}
+              versionId={activeVersionId}
+              enabled={canEdit}
+            />
+          ) : null}
+          <BudgetGrid
+            projectId={projectId}
+            canEdit={canEdit}
+            versionId={activeVersionId}
+            locked={gridLocked}
+          />
+          <RemainingAllocatablePanel
+            projectId={projectId}
+            canEdit={canEdit}
+            versionId={activeVersion?.is_control ? activeVersionId : null}
+          />
+          <BudgetChangeRequestPanel
+            projectId={projectId}
+            canEdit={canEdit}
+            canApprove={canApprove}
+            controlLineId={gridLocked ? controlLineId : null}
+          />
         </ShadcnTabsContent>
         <ShadcnTabsContent value="actual" className="mt-0">
           <ActualCostsTab projectId={projectId} canEdit={canEdit} />
@@ -126,6 +197,12 @@ function CostsContent() {
         </ShadcnTabsContent>
         <ShadcnTabsContent value="pools" className="mt-0">
           <CostPoolTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="cbs" className="mt-0">
+          <CBSCommitmentTab projectId={projectId} canEdit={canEdit} />
+        </ShadcnTabsContent>
+        <ShadcnTabsContent value="payments" className="mt-0">
+          <CostPaymentsLedgerPanel projectId={projectId} canEdit={canEdit} />
         </ShadcnTabsContent>
       </Tabs>
     </div>

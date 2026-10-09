@@ -21,6 +21,14 @@ class AccessLevel(models.TextChoices):
     RESTRICTED = 'restricted', 'Restricted'
 
 
+class DocumentStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    IN_REVIEW = 'in_review', 'In review'
+    APPROVED = 'approved', 'Approved'
+    SUPERSEDED = 'superseded', 'Superseded'
+    OBSOLETE = 'obsolete', 'Obsolete'
+
+
 class ProjectDocument(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='documents')
     doc_code = models.CharField(max_length=60, blank=True, default='')
@@ -44,9 +52,28 @@ class ProjectDocument(AuditSoftDeleteModel):
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='uploaded_documents'
     )
+    status = models.CharField(
+        max_length=20,
+        choices=DocumentStatus.choices,
+        default=DocumentStatus.DRAFT,
+    )
+    approver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_documents',
+    )
 
     class Meta:
         db_table = 'project_documents'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'doc_code'],
+                condition=models.Q(doc_code__gt=''),
+                name='uniq_project_document_doc_code_nonempty',
+            ),
+        ]
 
 
 class DocumentRevision(UUIDModel, TimeStampedModel):
@@ -94,6 +121,13 @@ class Correspondence(AuditSoftDeleteModel):
     related_activity = models.ForeignKey(
         'projects.Activity', on_delete=models.SET_NULL, null=True, blank=True, related_name='correspondence'
     )
+    related_contract = models.ForeignKey(
+        'contracts.Contract',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='correspondence',
+    )
     tags = models.CharField(max_length=200, blank=True, default='')
 
     class Meta:
@@ -108,10 +142,16 @@ class MeetingType(models.TextChoices):
     OTHER = 'other', 'Other'
 
 
+class MeetingActionStatus(models.TextChoices):
+    OPEN = 'open', 'Open'
+    DONE = 'done', 'Done'
+
+
 class MeetingMinutes(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='meetings')
     meeting_date = models.DateField()
     meeting_type = models.CharField(max_length=40, choices=MeetingType.choices)
+    topic = models.CharField(max_length=200, blank=True, default='')
     location = models.CharField(max_length=120, blank=True, default='')
     chairperson = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='chaired_meetings'
@@ -125,3 +165,27 @@ class MeetingMinutes(AuditSoftDeleteModel):
 
     class Meta:
         db_table = 'meeting_minutes'
+
+
+class MeetingAction(AuditSoftDeleteModel):
+    meeting = models.ForeignKey(MeetingMinutes, on_delete=models.CASCADE, related_name='actions')
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='meeting_actions')
+    description = models.TextField()
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='meeting_actions_owned',
+    )
+    due_date = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=10,
+        choices=MeetingActionStatus.choices,
+        default=MeetingActionStatus.OPEN,
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'meeting_actions'
+        ordering = ['due_date', 'created_at']

@@ -64,6 +64,8 @@ function headerFromDetail(d: DailyReportDetail): HeaderState {
   return {
     report_date: iso || emptyHeaderState().report_date,
     shift: d.shift,
+    work_front: d.work_front ?? "",
+    location_notes: d.location_notes ?? "",
     site_status: d.site_status,
     weather_condition: d.weather_condition,
     temp_max: d.temp_max ?? "",
@@ -228,8 +230,13 @@ export function DailyReportForm({
       if (action.type === "approve") return approveReport(projectId, reportId);
       return rejectReport(projectId, reportId, action.reason ?? "");
     },
-    onSuccess: () => {
+    onSuccess: (data, action) => {
       toast.success("عملیات انجام شد");
+      if (action.type === "submit" && data?.submit_warnings?.length) {
+        for (const warning of data.submit_warnings) {
+          toast.warning(warning);
+        }
+      }
       refetch();
     },
     onError: (e) => toast.error((e as Error).message),
@@ -277,8 +284,10 @@ export function DailyReportForm({
 
       {report ? (
         <ApprovalStatusBar
+          projectId={projectId}
           report={report}
           canApprove={canApprove}
+          canEdit={has("edit_reports")}
           busy={workflow.isPending}
           onSubmit={() => workflow.mutate({ type: "submit" })}
           onReview={() => workflow.mutate({ type: "review" })}

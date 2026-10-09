@@ -10,15 +10,25 @@ from drf_spectacular.utils import extend_schema
 
 from common.viewsets import ProjectScopedViewSet
 from common.jalali import parse_date_optional, parse_jalali_or_gregorian
-from documents.models import AccessLevel, Correspondence, CorrStatus, MeetingMinutes, ProjectDocument
+from documents.models import (
+    AccessLevel,
+    Correspondence,
+    CorrStatus,
+    MeetingAction,
+    MeetingActionStatus,
+    MeetingMinutes,
+    ProjectDocument,
+)
 from documents.serializers import (
     CorrespondenceSerializer,
+    MeetingActionSerializer,
     MeetingMinutesSerializer,
     ProjectDocumentDetailSerializer,
     ProjectDocumentSerializer,
 )
 from documents.services.correspondence_service import generate_corr_number, respond_to_correspondence
 from documents.services.document_service import create_project_document, create_document_revision
+from documents.services.meeting_action_service import list_open_meeting_actions, mark_meeting_action_done
 from permissions.project import HasProjectPermission
 
 
@@ -43,9 +53,13 @@ class ProjectDocumentViewSet(DocScopedViewSet):
     def get_queryset(self):
         qs = _visible_documents_qs(self.kwargs['project_pk'], self.request.user)
         params = self.request.query_params
-        for key in ('doc_type', 'discipline', 'access_level', 'related_activity', 'related_wbs'):
+        for key in ('doc_type', 'discipline', 'access_level', 'related_activity', 'related_wbs', 'status'):
             if params.get(key):
                 qs = qs.filter(**{key: params[key]})
+        if params.get('date_from'):
+            qs = qs.filter(revision_date__gte=parse_jalali_or_gregorian(params['date_from']))
+        if params.get('date_to'):
+            qs = qs.filter(revision_date__lte=parse_jalali_or_gregorian(params['date_to']))
         if params.get('search'):
             q = params['search']
             qs = qs.filter(Q(title__icontains=q) | Q(doc_code__icontains=q) | Q(tags__icontains=q))
@@ -62,10 +76,15 @@ class ProjectDocumentViewSet(DocScopedViewSet):
 
     @extend_schema(summary='Upload project document', tags=['Documents'])
     def create(self, request, *args, **kwargs):
+        serializer = ProjectDocumentSerializer(
+            data=request.data,
+            context={'project_id': self.kwargs['project_pk']},
+        )
+        serializer.is_valid(raise_exception=True)
         doc = create_project_document(
             project_id=self.kwargs['project_pk'],
             user=request.user,
-            data=request.data,
+            data=serializer.validated_data,
             file_obj=request.FILES.get('file'),
         )
         return Response(ProjectDocumentDetailSerializer(doc).data, status=201)
@@ -115,6 +134,11 @@ class CorrespondenceViewSet(DocScopedViewSet):
     def get_serializer_class(self):
         return CorrespondenceSerializer
 
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['project_pk'] = self.kwargs['project_pk']
+        return ctx
+
     def list(self, request, *args, **kwargs):
         return Response({'results': CorrespondenceSerializer(self.get_queryset(), many=True).data})
 
@@ -157,3 +181,75 @@ class MeetingMinutesViewSet(DocScopedViewSet):
 
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
+
+
+class MeetingActionNestedView(DocScopedViewSet):
+    """GET|POST /meetings/{meeting_id}/actions/"""
+
+    serializer_class = MeetingActionSerializer
+    http_method_names = ['get', 'post', 'head', 'options']
+
+    def get_meeting(self):
+        return get_object_or_404(
+            MeetingMinutes,
+            pk=self.kwargs['meeting_pk'],
+            project_id=self.kwargs['project_pk'],
+            is_deleted=False,
+        )
+
+    def get_queryset(self):
+        meeting = self.get_meeting()
+        return MeetingAction.objects.filter(meeting=meeting, is_deleted=False)
+
+    def list(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        return Response({'results': MeetingActionSerializer(qs, many=True).data})
+
+    def create(self, request, *args, **kwargs):
+        meeting = self.get_meeting()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        action = serializer.save(
+            meeting=meeting,
+            project_id=self.kwargs['project_pk'],
+            created_by=request.user,
+            updated_by=request.user,
+        )
+        return Response(MeetingActionSerializer(action).data, status=201)
+
+
+class MeetingActionDetailView(DocScopedViewSet):
+    """PATCH /meeting-actions/{id}/"""
+
+    serializer_class = MeetingActionSerializer
+    http_method_names = ['patch', 'head', 'options']
+
+    def get_queryset(self):
+        return MeetingAction.objects.filter(
+            project_id=self.kwargs['project_pk'],
+            is_deleted=False,
+        )
+
+    def partial_update(self, request, *args, **kwargs):
+        action = self.get_object()
+        new_status = request.data.get('status')
+        if new_status == MeetingActionStatus.DONE:
+            mark_meeting_action_done(action, request.user)
+            action.refresh_from_db()
+            return Response(MeetingActionSerializer(action).data)
+        serializer = self.get_serializer(action, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(updated_by=request.user)
+        return Response(MeetingActionSerializer(action).data)
+
+
+class OpenMeetingActionsView(DocScopedViewSet):
+    """GET /meeting-actions/open/"""
+
+    serializer_class = MeetingActionSerializer
+    http_method_names = ['get', 'head', 'options']
+
+    def list(self, request, *args, **kwargs):
+        overdue = request.query_params.get('overdue') == 'true'
+        qs = list_open_meeting_actions(self.kwargs['project_pk'], overdue=overdue)
+        return Response({'results': MeetingActionSerializer(qs, many=True).data})

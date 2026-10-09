@@ -6,6 +6,7 @@ from field_reports.models import (
     DailyReport,
     DailyReportActivity,
     DailyReportConcreteLog,
+    DailyReportCorrectionRequest,
     DailyReportEquipment,
     DailyReportIncident,
     DailyReportLabor,
@@ -90,6 +91,12 @@ class LaborJobTitleSerializer(serializers.ModelSerializer):
 
 class DailyReportActivitySerializer(serializers.ModelSerializer):
     activity_code = serializers.CharField(source='activity_ref.activity_code', read_only=True)
+    quantity = serializers.DecimalField(
+        max_digits=18,
+        decimal_places=4,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = DailyReportActivity
@@ -110,10 +117,40 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'quantity_measured',
             'unit',
             'execution_percentage',
+            'responsible_user',
+            'responsible_name',
             'notes',
             'photo_file',
         ]
         read_only_fields = ['id']
+
+    def validate_quantity(self, value):
+        from common.unset import coerce_optional_decimal
+
+        if value == '':
+            return None
+        return coerce_optional_decimal(value) if value is not None else None
+
+    def validate(self, attrs):
+        measured = attrs.get(
+            'quantity_measured',
+            getattr(self.instance, 'quantity_measured', True),
+        )
+        if 'quantity' in attrs:
+            quantity = attrs['quantity']
+        elif self.instance is not None:
+            quantity = self.instance.quantity
+        else:
+            quantity = None
+        touching_qty = ('quantity' in attrs) or ('quantity_measured' in attrs) or (not self.partial)
+        if not measured:
+            attrs['quantity'] = None
+        elif touching_qty and quantity is None:
+            raise serializers.ValidationError({
+                'quantity': 'در حالت اندازه‌گیری‌شده مقدار الزامی است',
+                'code': 'quantity_unset_invalid',
+            })
+        return attrs
 
 
 class DailyReportLaborSerializer(serializers.ModelSerializer):
@@ -133,8 +170,23 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'work_hours',
             'overtime_hours',
             'daily_rate',
+            'absence_count',
         ]
         read_only_fields = ['id', 'total_count']
+        extra_kwargs = {'absence_count': {'required': False, 'allow_null': True}}
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        project_id = getattr(instance, 'project_id', None)
+        if project_id is None and getattr(instance, 'report_id', None):
+            project_id = getattr(instance.report, 'project_id', None)
+        if request is not None and request.user.is_authenticated and project_id is not None:
+            from permissions.project import member_has_codename
+
+            if not member_has_codename(request.user, project_id, 'view_wage'):
+                data.pop('daily_rate', None)
+        return data
 
 
 class BaseEquipmentEntrySerializer(serializers.ModelSerializer):
@@ -167,6 +219,8 @@ class DailyReportEquipmentSerializer(BaseEquipmentEntrySerializer):
 
 
 class DailyReportMaterialSerializer(serializers.ModelSerializer):
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=4)
+
     class Meta:
         model = DailyReportMaterial
         fields = [
@@ -177,10 +231,19 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
             'unit_cost',
             'unit',
             'transaction_type',
+            'consumption_location',
             'activity_ref',
             'notes',
         ]
         read_only_fields = ['id']
+
+    def validate_quantity(self, value):
+        if value is None or value == '':
+            raise serializers.ValidationError(
+                'مقدار مصالح نمی‌تواند خالی باشد',
+                code='quantity_unset_invalid',
+            )
+        return value
 
 
 class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
@@ -219,9 +282,19 @@ class DailyReportLaborCampSerializer(BaseLaborCampEntrySerializer):
 
 
 class DailyReportIncidentSerializer(serializers.ModelSerializer):
+    due_date = JalaliDateField(required=False, allow_null=True)
+
     class Meta:
         model = DailyReportIncident
-        fields = ['id', 'incident_type', 'description', 'corrective_action']
+        fields = [
+            'id',
+            'incident_type',
+            'description',
+            'corrective_action',
+            'follow_up_owner_user',
+            'follow_up_owner_name',
+            'due_date',
+        ]
         read_only_fields = ['id']
 
 
@@ -249,6 +322,8 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
             'report_id',
             'report_date',
             'shift',
+            'work_front',
+            'location_notes',
             'weather_condition',
             'temp_max',
             'temp_min',
@@ -274,11 +349,14 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     day_of_week = serializers.SerializerMethodField()
     weather_condition_label = serializers.SerializerMethodField()
     site_status_label = serializers.CharField(source='get_site_status_display', read_only=True)
-    status_label = serializers.CharField(source='get_status_display', read_only=True)
+    status_label = serializers.SerializerMethodField()
+    is_locked = serializers.BooleanField(read_only=True)
+    status_label_key = serializers.SerializerMethodField()
     prepared_by_name = serializers.SerializerMethodField()
     submitted_by_name = serializers.SerializerMethodField()
     reviewed_by_name = serializers.SerializerMethodField()
     approved_by_name = serializers.SerializerMethodField()
+    supersedes = serializers.UUIDField(source='supersedes_id', read_only=True, allow_null=True)
 
     activities = serializers.SerializerMethodField()
     labor = serializers.SerializerMethodField()
@@ -295,6 +373,8 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'report_date',
             'day_of_week',
             'shift',
+            'work_front',
+            'location_notes',
             'weather_condition',
             'weather_condition_label',
             'temp_max',
@@ -304,6 +384,12 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'general_notes',
             'status',
             'status_label',
+            'is_locked',
+            'status_label_key',
+            'lineage_id',
+            'version_number',
+            'supersedes',
+            'is_current',
             'prepared_by',
             'prepared_by_name',
             'submitted_by',
@@ -328,6 +414,16 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'labor_camp',
             'incidents',
         ]
+
+    def get_status_label(self, obj):
+        if obj.status == 'approved':
+            return 'قفل‌شده'
+        return obj.get_status_display()
+
+    def get_status_label_key(self, obj):
+        if obj.status == 'approved':
+            return 'dailyReport.status.locked'
+        return f'dailyReport.status.{obj.status}'
 
     def get_day_of_week(self, obj):
         return persian_day_of_week(obj.report_date) if obj.report_date else ''
@@ -380,7 +476,8 @@ class DailyReportListSerializer(serializers.ModelSerializer):
     day_of_week = serializers.SerializerMethodField()
     weather_condition_label = serializers.SerializerMethodField()
     site_status_label = serializers.CharField(source='get_site_status_display', read_only=True)
-    status_label = serializers.CharField(source='get_status_display', read_only=True)
+    status_label = serializers.SerializerMethodField()
+    is_locked = serializers.BooleanField(read_only=True)
     prepared_by_name = serializers.SerializerMethodField()
     approved_by_name = serializers.SerializerMethodField()
     activity_count = serializers.SerializerMethodField()
@@ -394,12 +491,16 @@ class DailyReportListSerializer(serializers.ModelSerializer):
             'report_id',
             'report_date',
             'day_of_week',
+            'work_front',
             'site_status',
             'site_status_label',
             'weather_condition',
             'weather_condition_label',
             'status',
             'status_label',
+            'is_locked',
+            'is_current',
+            'version_number',
             'prepared_by_name',
             'approved_by_name',
             'activity_count',
@@ -407,6 +508,11 @@ class DailyReportListSerializer(serializers.ModelSerializer):
             'equipment_count',
             'has_incidents',
         ]
+
+    def get_status_label(self, obj):
+        if obj.status == 'approved':
+            return 'قفل‌شده'
+        return obj.get_status_display()
 
     def get_day_of_week(self, obj):
         return persian_day_of_week(obj.report_date) if obj.report_date else ''
@@ -435,3 +541,45 @@ class DailyReportListSerializer(serializers.ModelSerializer):
 
     def get_has_incidents(self, obj):
         return any(not incident.is_deleted for incident in obj.incidents.all())
+
+
+class DailyReportCorrectionRequestSerializer(serializers.ModelSerializer):
+    source_report_id = serializers.UUIDField(read_only=True)
+    result_report_id = serializers.UUIDField(read_only=True, allow_null=True)
+
+    class Meta:
+        model = DailyReportCorrectionRequest
+        fields = [
+            'id',
+            'source_report_id',
+            'result_report_id',
+            'reason',
+            'status',
+            'requested_by',
+            'requested_at',
+            'decided_by',
+            'decided_at',
+            'decision_notes',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class DailyReportVersionSerializer(serializers.ModelSerializer):
+    report_id = serializers.UUIDField(source='id', read_only=True)
+    report_date = JalaliDateField(read_only=True)
+    is_locked = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = DailyReport
+        fields = [
+            'report_id',
+            'report_date',
+            'shift',
+            'version_number',
+            'is_current',
+            'status',
+            'is_locked',
+            'approved_at',
+            'created_at',
+        ]

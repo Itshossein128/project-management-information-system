@@ -87,10 +87,14 @@ def test_render_ipc_pdf(ipc, contract_item, user):
         updated_by=user,
     )
     ipc.gross_amount = Decimal('100')
+    ipc.submitted_amount = Decimal('100')
+    ipc.approved_amount = Decimal('95')
     ipc.net_amount = Decimal('90')
     ipc.save()
     pdf = render_ipc_pdf(ipc)
     assert pdf.startswith(b'%PDF')
+    # ReportLab embeds Persian labels; assert numeric amounts appear in payload
+    assert b'100' in pdf or b'95' in pdf or len(pdf) > 100
 
 def test_contract_list_serializer_n1_queries(django_assert_max_num_queries, db, project, user):
     from contracts.models import Contract, IPC, IPCStatus

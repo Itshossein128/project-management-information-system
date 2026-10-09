@@ -51,13 +51,33 @@ def viewer_role(db):
 
 @pytest.fixture
 def project(db, user, project_manager_role):
-    return create_project_with_creator(
+    from django.utils import timezone
+
+    from projects.models import ProjectStatus
+
+    project = create_project_with_creator(
         creator=user,
         project_code='PRJ-001',
         project_name='Test Project',
         employer='Employer Co',
         start_date='2024-01-01',
     )
+    # Existing suite expects an operational active project; new API creates drafts.
+    project.status = ProjectStatus.ACTIVE
+    project.scope_description = 'Test scope'
+    if project.contract_amount is None:
+        project.contract_amount = 1
+    project.budget_approved_at = timezone.now()
+    project.save(
+        update_fields=[
+            'status',
+            'scope_description',
+            'contract_amount',
+            'budget_approved_at',
+            'updated_at',
+        ],
+    )
+    return project
 
 
 @pytest.fixture
@@ -109,6 +129,29 @@ def activity(db, project, wbs, user):
         created_by=user,
         updated_by=user,
     )
+
+
+@pytest.fixture
+def unit(db):
+    from master_data.models import Unit
+
+    return Unit.objects.create(unit_name='Cubic meter', unit_symbol='m3')
+
+
+@pytest.fixture
+def approved_measurement(db, activity, unit, user):
+    """Quantity-method measurement definition approved for ``activity`` (total 100)."""
+    from schedule.services.measurement_service import approve_definition, get_or_create_definition, update_draft
+
+    definition = get_or_create_definition(activity, user)
+    update_draft(
+        definition,
+        {'method': 'quantity', 'total_quantity': 100, 'unit_id': str(unit.id)},
+        user,
+    )
+    approve_definition(definition, user)
+    definition.refresh_from_db()
+    return definition
 
 
 @pytest.fixture

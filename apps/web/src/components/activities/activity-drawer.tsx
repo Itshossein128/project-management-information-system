@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   createActivity,
   fetchWeightSummary,
@@ -9,9 +10,10 @@ import {
   type ActivityStatus,
 } from "@/app/lib/api/activities";
 import { fetchMembers } from "@/app/lib/api/members";
+import { fetchWorkingCalendars } from "@/app/lib/api/schedule";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { Input } from "@/components/form";
+import { Checkbox, Input } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
@@ -65,6 +67,7 @@ export function ActivityDrawer({
   onSaved,
   onError,
 }: ActivityDrawerProps) {
+  const { t } = useTranslation();
   const isEdit = Boolean(activity);
 
   const [code, setCode] = useState("");
@@ -77,6 +80,11 @@ export function ActivityDrawer({
   const [plannedFinish, setPlannedFinish] = useState("");
   const [actualStart, setActualStart] = useState("");
   const [actualFinish, setActualFinish] = useState("");
+  const [forecastStart, setForecastStart] = useState("");
+  const [forecastFinish, setForecastFinish] = useState("");
+  const [durationDays, setDurationDays] = useState("");
+  const [isMilestone, setIsMilestone] = useState(false);
+  const [workingCalendarId, setWorkingCalendarId] = useState("");
   const [responsibleId, setResponsibleId] = useState("");
   const [wbsId, setWbsId] = useState("");
   const [status, setStatus] = useState<ActivityStatus>("not_started");
@@ -92,6 +100,12 @@ export function ActivityDrawer({
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
+    enabled: isOpen,
+  });
+
+  const { data: calendars = [] } = useQuery({
+    queryKey: ["working-calendars", projectId],
+    queryFn: () => fetchWorkingCalendars(projectId),
     enabled: isOpen,
   });
 
@@ -114,6 +128,13 @@ export function ActivityDrawer({
       setPlannedFinish(activity.planned_finish ?? "");
       setActualStart(activity.actual_start ?? "");
       setActualFinish(activity.actual_finish ?? "");
+      setForecastStart(activity.forecast_start ?? "");
+      setForecastFinish(activity.forecast_finish ?? "");
+      setDurationDays(
+        activity.duration_days != null ? String(activity.duration_days) : "",
+      );
+      setIsMilestone(Boolean(activity.is_milestone));
+      setWorkingCalendarId(activity.working_calendar_id ?? "");
       setResponsibleId(activity.responsible_id ?? "");
       setWbsId(activity.wbs_id);
       setStatus(activity.status);
@@ -128,6 +149,11 @@ export function ActivityDrawer({
       setPlannedFinish("");
       setActualStart("");
       setActualFinish("");
+      setForecastStart("");
+      setForecastFinish("");
+      setDurationDays("");
+      setIsMilestone(false);
+      setWorkingCalendarId("");
       setResponsibleId("");
       setWbsId(wbsFlat[0]?.wbs_id ?? "");
       setStatus("not_started");
@@ -158,6 +184,10 @@ export function ActivityDrawer({
       onError("کد، نام و WBS الزامی هستند.");
       return;
     }
+    const parsedDuration =
+      durationDays.trim() === ""
+        ? null
+        : Number.parseInt(durationDays, 10);
     const payload: ActivityPayload = {
       activity_code: code.trim(),
       activity_name: name.trim(),
@@ -168,6 +198,13 @@ export function ActivityDrawer({
       planned_finish: plannedFinish || null,
       actual_start: actualStart || null,
       actual_finish: actualFinish || null,
+      forecast_start: forecastStart || null,
+      forecast_finish: forecastFinish || null,
+      duration_days: Number.isNaN(parsedDuration as number)
+        ? null
+        : parsedDuration,
+      is_milestone: isMilestone,
+      working_calendar_id: workingCalendarId || null,
       responsible_id: responsibleId || null,
       status,
       description,
@@ -262,6 +299,43 @@ export function ActivityDrawer({
           </p>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
+              <Label htmlFor="act-duration">{t("schedule.durationDays")}</Label>
+              <Input
+                id="act-duration"
+                type="number"
+                min={0}
+                value={durationDays}
+                onChange={(e) => setDurationDays(e.target.value)}
+                disabled={isMilestone}
+              />
+            </div>
+            <div className="flex items-end pb-2">
+              <Checkbox
+                name="is_milestone"
+                label={t("schedule.isMilestone")}
+                checked={isMilestone}
+                onChange={(e) => {
+                  const checked = Boolean(
+                    (e.target as unknown as { value: boolean }).value,
+                  );
+                  setIsMilestone(checked);
+                  if (checked) setDurationDays("0");
+                }}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>{t("schedule.forecastStart")}</Label>
+              <JalaliDatePicker name="forecast_start" value={forecastStart} onChange={setForecastStart} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("schedule.forecastFinish")}</Label>
+              <JalaliDatePicker name="forecast_finish" value={forecastFinish} onChange={setForecastFinish} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               <Label>شروع واقعی</Label>
               <JalaliDatePicker name="actual_start" value={actualStart} onChange={setActualStart} />
             </div>
@@ -269,6 +343,23 @@ export function ActivityDrawer({
               <Label>پایان واقعی</Label>
               <JalaliDatePicker name="actual_finish" value={actualFinish} onChange={setActualFinish} />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="act-calendar">{t("schedule.workingCalendar")}</Label>
+            <select
+              id="act-calendar"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+              value={workingCalendarId}
+              onChange={(e) => setWorkingCalendarId(e.target.value)}
+            >
+              <option value="">{t("schedule.calendarDefault")}</option>
+              {calendars.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                  {c.is_default ? ` (${t("schedule.calendarDefault")})` : ""}
+                </option>
+              ))}
+            </select>
           </div>
         </section>
 

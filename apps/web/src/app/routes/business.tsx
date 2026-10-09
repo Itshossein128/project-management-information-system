@@ -123,6 +123,10 @@ export default function BusinessPage() {
 
   if (isLoading || !isAuthenticated) return null;
 
+  const showWage = assignments.some(
+    (a) => a != null && Object.prototype.hasOwnProperty.call(a, "wage"),
+  );
+
   const assignmentColumns: ColumnDef<UserBusinessAssignment>[] = [
     {
       id: "user",
@@ -165,16 +169,20 @@ export default function BusinessPage() {
         </span>
       ),
     },
-    {
-      id: "wage",
-      header: t("assignmentDetail.wage"),
-      accessorKey: "wage",
-      cell: ({ row }) => (
-        <span id={`text-assignmentWage-${row.index}`}>
-          {row.original.wage ?? "—"}
-        </span>
-      ),
-    },
+    ...(showWage
+      ? ([
+          {
+            id: "wage",
+            header: t("assignmentDetail.wage"),
+            accessorKey: "wage",
+            cell: ({ row }) => (
+              <span id={`text-assignmentWage-${row.index}`}>
+                {row.original.wage ?? "—"}
+              </span>
+            ),
+          },
+        ] as ColumnDef<UserBusinessAssignment>[])
+      : []),
     {
       id: "actions",
       header: t("common.submit"),

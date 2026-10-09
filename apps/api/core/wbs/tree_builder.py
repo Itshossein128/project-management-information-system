@@ -13,6 +13,9 @@ def node_to_dict(node: WBS) -> dict:
         'weight_physical': node.weight_physical,
         'weight_financial': node.weight_financial,
         'description': node.description,
+        'responsible': str(node.responsible_id) if node.responsible_id else None,
+        'acceptance_criteria': node.acceptance_criteria or '',
+        'status': node.status,
         'depth': node.depth,
         'children': [],
     }
@@ -24,7 +27,7 @@ def build_nested_wbs_tree(project_id) -> list[dict]:
     for a specific project. It uses django-treebeard's get_annotated_list_qs
     to fetch the nodes iteratively without recursive database calls, ensuring optimal performance.
     """
-    qs = WBS.objects.filter(project_id=project_id)
+    qs = WBS.objects.filter(project_id=project_id, is_deleted=False)
     if not qs.exists():
         return []
 

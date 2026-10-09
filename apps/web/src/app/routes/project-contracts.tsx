@@ -11,11 +11,12 @@ import {
 import {
   CONTRACT_TYPE_LABELS,
   fetchContracts,
+  fetchIPCs,
   formatFaAmount,
   IPC_STATUS_LABELS,
 } from "@/app/lib/api/contracts";
-import { fetchIPCs } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
+import { ReceivablesPanel } from "@/components/contracts/ReceivablesPanel";
 import { EmptyState } from "@/components/layout/empty-state";
 import {
   Breadcrumb,
@@ -25,7 +26,7 @@ import {
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
-type Tab = "contracts" | "ipcs";
+type Tab = "contracts" | "ipcs" | "receivables";
 
 function ContractsContent() {
   const { t } = useTranslation();
@@ -137,6 +138,14 @@ function ContractsContent() {
           onClick={() => setTab("ipcs")}
         >
           صدور موقت
+        </Button>
+        <Button
+          role='tab'
+          aria-selected={tab === "receivables"}
+          variant={tab === "receivables" ? "primary" : "secondary"}
+          onClick={() => setTab("receivables")}
+        >
+          {t("pages.contracts.receivablesTab")}
         </Button>
       </div>
 
@@ -265,6 +274,12 @@ function ContractsContent() {
               </tbody>
             </table>
           </div>
+        )
+      ) : null}
+
+      {tab === "receivables" ? (
+        canView ? <ReceivablesPanel projectId={projectId} /> : (
+          <EmptyState title={t("common.accessDenied")} />
         )
       ) : null}
     </div>

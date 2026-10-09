@@ -1,7 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { fetchMembers } from "@/app/lib/api/members";
 import {
   createWBSNode,
   deleteWBSNode,
@@ -49,9 +50,24 @@ export function WBSNodeRow({
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(node.wbs_name);
+  const [description, setDescription] = useState(node.description ?? "");
+  const [acceptance, setAcceptance] = useState(node.acceptance_criteria ?? "");
+  const [responsible, setResponsible] = useState(node.responsible ?? "");
+  const [status, setStatus] = useState(node.status ?? "active");
   const [addingChild, setAddingChild] = useState(false);
   const [childCode, setChildCode] = useState("");
   const [childName, setChildName] = useState("");
+
+  const { data: members = [] } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () => fetchMembers(projectId),
+    enabled: Boolean(projectId),
+  });
+  const activeMembers = members.filter((m) => m.status === "active" && m.user_id);
+  const responsibleLabel =
+    activeMembers.find((m) => m.user_id === node.responsible)?.full_name ||
+    members.find((m) => m.user_id === node.responsible)?.full_name ||
+    (node.responsible ? node.responsible.slice(0, 8) : null);
 
   const hasChildren = node.children.length > 0;
   const level = node.depth > 0 ? node.depth - 1 : depth;
@@ -81,7 +97,11 @@ export function WBSNodeRow({
   const updateMutation = useMutation({
     mutationFn: (payload: {
       wbs_name?: string;
+      description?: string;
       weight_physical?: number | null;
+      responsible?: string | null;
+      acceptance_criteria?: string;
+      status?: "draft" | "active" | "completed" | "on_hold";
     }) => updateWBSNode(projectId, node.wbs_id, payload),
     onSuccess: (_data, payload) => {
       invalidate();
@@ -153,9 +173,15 @@ export function WBSNodeRow({
     },
     onError: (e: Error) => {
       const msg = e.message;
-      if (msg.includes("activities attached")) {
+      if (msg.includes("wbs_has_cost") || msg.includes("cost records")) {
+        toast.error(t("wbs.deleteHasCost"));
+      } else if (msg.includes("wbs_has_progress") || msg.includes("progress recorded")) {
+        toast.error(t("wbs.deleteHasProgress"));
+      } else if (msg.includes("wbs_has_documents") || msg.includes("documents")) {
+        toast.error(t("wbs.deleteHasDocuments"));
+      } else if (msg.includes("activities attached") || msg.includes("wbs_has_activities")) {
         toast.error(t("wbs.deleteHasActivities"));
-      } else if (msg.includes("has children")) {
+      } else if (msg.includes("has children") || msg.includes("wbs_has_children")) {
         toast.error(t("wbs.deleteHasChildren"));
       } else {
         toast.error(msg);
@@ -236,41 +262,124 @@ export function WBSNodeRow({
           <span className="text-xs text-muted-foreground">{node.wbs_code}</span>
 
         {editing && canEdit ? (
-          <Input
-            className="h-8 max-w-xs"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (name.trim() && name !== node.wbs_name) {
-                  updateMutation.mutate({ wbs_name: name });
-                } else {
-                  setEditing(false);
-                  setName(node.wbs_name);
-                }
+          <div className="flex flex-wrap items-center gap-2">
+            <Input
+              className="h-8 max-w-xs"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+            <select
+              className="h-8 rounded border px-2 text-sm"
+              value={status}
+              onChange={(e) =>
+                setStatus(e.target.value as "draft" | "active" | "completed" | "on_hold")
               }
-              if (e.key === "Escape") {
+              aria-label={t("wbs.status")}
+            >
+              <option value="draft">{t("wbs.statusDraft")}</option>
+              <option value="active">{t("wbs.statusActive")}</option>
+              <option value="completed">{t("wbs.statusCompleted")}</option>
+              <option value="on_hold">{t("wbs.statusOnHold")}</option>
+            </select>
+            <select
+              className="h-8 max-w-[12rem] rounded border px-2 text-sm"
+              value={responsible}
+              onChange={(e) => setResponsible(e.target.value)}
+              aria-label={t("wbs.responsible")}
+              data-testid={`wbs-responsible-select-${node.wbs_code}`}
+            >
+              <option value="">{t("wbs.responsibleNone")}</option>
+              {activeMembers.map((m) => (
+                <option key={m.user_id!} value={m.user_id!}>
+                  {m.full_name || m.email || m.user_id}
+                </option>
+              ))}
+            </select>
+            <Input
+              className="h-8 max-w-sm"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t("wbs.description")}
+              aria-label={t("wbs.description")}
+              data-testid={`wbs-description-${node.wbs_code}`}
+            />
+            <Input
+              className="h-8 max-w-sm"
+              value={acceptance}
+              onChange={(e) => setAcceptance(e.target.value)}
+              placeholder={t("wbs.acceptanceCriteria")}
+              aria-label={t("wbs.acceptanceCriteria")}
+            />
+            <Button
+              size="sm"
+              variant="primary"
+              loading={updateMutation.isPending}
+              onClick={() => {
+                updateMutation.mutate({
+                  wbs_name: name.trim() || node.wbs_name,
+                  description,
+                  responsible: responsible || null,
+                  acceptance_criteria: acceptance,
+                  status,
+                });
+              }}
+            >
+              {t("wbs.save")}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => {
                 setEditing(false);
                 setName(node.wbs_name);
-              }
-            }}
-            onBlur={() => {
-              if (name.trim() && name !== node.wbs_name) {
-                updateMutation.mutate({ wbs_name: name });
-              } else {
-                setEditing(false);
-                setName(node.wbs_name);
-              }
-            }}
-            autoFocus
-          />
+                setDescription(node.description ?? "");
+                setAcceptance(node.acceptance_criteria ?? "");
+                setResponsible(node.responsible ?? "");
+                setStatus(node.status ?? "active");
+              }}
+            >
+              {t("wbs.cancel")}
+            </Button>
+          </div>
         ) : (
-          <span
-            className="font-medium"
+          <div
+            className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5"
             onDoubleClick={canEdit ? () => setEditing(true) : undefined}
           >
-            {node.wbs_name}
-          </span>
+            <span className="font-medium">
+              {node.wbs_name}
+              {node.status && node.status !== "active" ? (
+                <span className="ms-2 text-xs text-muted-foreground">({node.status})</span>
+              ) : null}
+            </span>
+            {(node.description ?? "").trim() ? (
+              <span
+                className="max-w-md truncate text-xs text-muted-foreground"
+                title={node.description}
+                data-testid={`wbs-description-view-${node.wbs_code}`}
+              >
+                {t("wbs.description")}: {node.description}
+              </span>
+            ) : null}
+            {responsibleLabel ? (
+              <span
+                className="text-xs text-muted-foreground"
+                data-testid={`wbs-responsible-view-${node.wbs_code}`}
+              >
+                {t("wbs.responsible")}: {responsibleLabel}
+              </span>
+            ) : null}
+            {(node.acceptance_criteria ?? "").trim() ? (
+              <span
+                className="max-w-md truncate text-xs text-muted-foreground"
+                title={node.acceptance_criteria}
+                data-testid={`wbs-acceptance-view-${node.wbs_code}`}
+              >
+                {t("wbs.acceptanceCriteria")}: {node.acceptance_criteria}
+              </span>
+            ) : null}
+          </div>
         )}
 
         {canEdit ? (

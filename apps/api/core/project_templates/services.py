@@ -1,4 +1,9 @@
-"""Apply project templates to live projects."""
+"""Apply project templates to live projects.
+
+Project WBS rows are copy-on-write: editing ProjectTemplateWBS never syncs
+into previously applied project trees. force=True is an explicit replace and
+must not silently rewrite dependent live data.
+"""
 from __future__ import annotations
 
 from django.db import transaction
@@ -6,6 +11,41 @@ from django.db import transaction
 from master_data.models import ProjectMember, ProjectMemberRole, Role
 from projects.models import Activity, Project, WBS
 from project_templates.models import ProjectTemplate, ProjectTemplateWBS
+
+
+class TemplateApplyConflict(ValueError):
+    """Raised when force-replace cannot safely clear existing project WBS."""
+
+    def __init__(self, message, code='template_force_blocked'):
+        super().__init__(message)
+        self.code = code
+
+
+def _project_wbs_has_blocking_dependencies(project: Project) -> str | None:
+    """Return a stable conflict code if force-replace must be refused."""
+    from cost_control.models import ActualCost, Budget
+    from documents.models import ProjectDocument
+    from schedule.models import ActivityProgress
+
+    wbs_ids = list(
+        WBS.objects.filter(project=project, is_deleted=False).values_list('id', flat=True)
+    )
+    if not wbs_ids:
+        return None
+    if Budget.objects.filter(wbs_id__in=wbs_ids, is_deleted=False).exists():
+        return 'wbs_has_cost'
+    if ActualCost.objects.filter(wbs_id__in=wbs_ids, is_deleted=False).exists():
+        return 'wbs_has_cost'
+    if ProjectDocument.objects.filter(related_wbs_id__in=wbs_ids, is_deleted=False).exists():
+        return 'wbs_has_documents'
+    activity_ids = list(
+        Activity.objects.filter(project=project, wbs_id__in=wbs_ids, is_deleted=False).values_list(
+            'id', flat=True
+        )
+    )
+    if activity_ids and ActivityProgress.objects.filter(activity_id__in=activity_ids).exists():
+        return 'wbs_has_progress'
+    return None
 
 
 @transaction.atomic
@@ -16,12 +56,22 @@ def apply_template_to_project(
     force: bool = False,
     user=None,
 ) -> dict:
-    if WBS.objects.filter(project=project).exists() and not force:
+    has_wbs = WBS.objects.filter(project=project, is_deleted=False).exists()
+    if has_wbs and not force:
         raise ValueError('Project already has WBS nodes. Pass force=true to replace.')
 
-    if force:
-        Activity.objects.filter(project=project).delete()
-        WBS.objects.filter(project=project).delete()
+    if force and has_wbs:
+        conflict = _project_wbs_has_blocking_dependencies(project)
+        if conflict:
+            raise TemplateApplyConflict(
+                f'Cannot force-replace template: existing WBS has dependencies ({conflict}).',
+                code=conflict,
+            )
+        # Soft-delete existing tree (no hard delete) when safe.
+        for act in Activity.objects.filter(project=project, is_deleted=False):
+            act.soft_delete(user=user)
+        for node in WBS.objects.filter(project=project, is_deleted=False).order_by('-depth'):
+            node.soft_delete(user=user)
 
     template_nodes = list(
         ProjectTemplateWBS.objects.filter(template=template)

@@ -1,6 +1,8 @@
 import { apiJson } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
 
+export type WBSStatus = "draft" | "active" | "completed" | "on_hold";
+
 export interface WBSNode {
   wbs_id: string;
   wbs_code: string;
@@ -8,6 +10,9 @@ export interface WBSNode {
   weight_physical: string | null;
   weight_financial: string | null;
   description?: string;
+  responsible?: string | null;
+  acceptance_criteria?: string;
+  status?: WBSStatus;
   depth: number;
   children: WBSNode[];
   warnings?: string[];
@@ -20,6 +25,9 @@ export interface WBSFlatNode {
   depth: number;
   weight_physical: string | null;
   weight_financial: string | null;
+  responsible?: string | null;
+  acceptance_criteria?: string;
+  status?: WBSStatus;
 }
 
 export function fetchWBSTree(projectId: string) {
@@ -39,6 +47,9 @@ export function createWBSNode(
     weight_physical?: number | null;
     weight_financial?: number | null;
     description?: string;
+    responsible?: string | null;
+    acceptance_criteria?: string;
+    status?: WBSStatus;
   },
 ) {
   return apiJson<WBSNode>(`/${PATHS.API_PROJECTS}/${projectId}/wbs/`, {
@@ -55,6 +66,9 @@ export function updateWBSNode(
     weight_physical: number | null;
     weight_financial: number | null;
     description: string;
+    responsible: string | null;
+    acceptance_criteria: string;
+    status: WBSStatus;
   }>,
 ) {
   return apiJson<WBSNode>(`/${PATHS.API_PROJECTS}/${projectId}/wbs/${wbsId}/`, {

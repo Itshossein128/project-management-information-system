@@ -8,7 +8,7 @@ Endpoints related to managing project documents.
 
 *   **`GET /documents/`**
     *   **Purpose:** Lists all documents associated with a specific project.
-    *   **Behavior:** Supports filtering by `doc_type`, `discipline`, `access_level`, `related_activity`, `related_wbs`, and searching by `title`, `doc_code`, or `tags`. Only returns documents that are not marked as deleted (`is_deleted=False`).
+    *   **Behavior:** Supports filtering by `doc_type`, `discipline`, `access_level`, `related_activity`, `related_wbs`, `status` (`draft`|`in_review`|`approved`|`superseded`|`obsolete`), `date_from`/`date_to` (on `revision_date`), and searching by `title`, `doc_code`, or `tags`. Only returns documents that are not marked as deleted (`is_deleted=False`). Documents include `status` and `approver`.
 
 *   **`POST /documents/`**
     *   **Purpose:** Creates and uploads a new project document.
@@ -24,7 +24,7 @@ Endpoints related to managing project documents.
 
 *   **`POST /documents/<uuid:pk>/revisions/`**
     *   **Purpose:** Uploads a new revision for an existing document.
-    *   **Behavior:** Handled by `DocumentRevisionUploadView`. Accepts a new file, validates it, uploads to S3, creates a `DocumentRevision` record, and updates the primary `ProjectDocument` record with the new revision details and file URL.
+    *   **Behavior:** Handled by `DocumentRevisionUploadView`. Accepts a new file, validates it, uploads to S3, creates a `DocumentRevision` record, and updates the primary `ProjectDocument` record with the new revision details and file URL. Prior revision rows and their `file_url` values are retained (append-only; no physical delete).
 
 ## Correspondence
 
@@ -73,6 +73,16 @@ Endpoints related to managing meeting minutes for a project.
 *   **`DELETE /meetings/<uuid:pk>/`**
     *   **Purpose:** Deletes a specific meeting minutes record.
     *   **Behavior:** Soft deletes the meeting minutes entry.
+
+### Meeting actions (FR-COL)
+
+*   **`GET|POST /meetings/<uuid:meeting_pk>/actions/`** — list/create structured actions (`description`, `owner`, `due_date`, `status` open|done).
+*   **`PATCH /meeting-actions/<uuid:pk>/`** — update action (e.g. mark `done`).
+*   **`GET /meeting-actions/open/?overdue=true`** — open actions for the project; optional overdue filter.
+
+### Correspondence (FR-COL)
+
+*   Create/update accepts optional `related_contract` (same project required).
 
 ## Upload security
 

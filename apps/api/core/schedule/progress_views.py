@@ -15,8 +15,9 @@ from common.cache_helpers import cache_key, get_cached_or_compute
 from common.jalali import parse_jalali_or_gregorian
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Activity, Project
-from schedule.models import ActivityProgress
 from schedule.services.evm_service import compute_evm
+from schedule.services.evm_slice_service import build_evm_by_cbs, build_evm_by_phase
+from schedule.services.measurement_service import ProgressValidationError, record_manual_progress
 from schedule.services.progress_service import (
     get_activity_progress_breakdown,
     get_progress_history,
@@ -100,6 +101,8 @@ class ProjectActivityProgressView(ProgressBaseView):
             wbs_id=request.query_params.get('wbs_id'),
             status=request.query_params.get('status'),
             is_behind=is_behind,
+            period_start=_parse_date(request.query_params.get('period_start')),
+            period_end=_parse_date(request.query_params.get('period_end')),
         )
         return Response(rows)
 
@@ -116,6 +119,39 @@ class ProjectProgressKpisView(ProgressBaseView):
             cache.delete(key)
         return Response(
             get_cached_or_compute(key, 1800, lambda: compute_evm(project.id, as_of))
+        )
+
+
+class ProjectEvmByPhaseView(ProgressBaseView):
+    @extend_schema(summary='EVM by phase (WBS)', tags=['Progress'])
+    def get(self, request, project_pk):
+        project = self.get_project()
+        as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
+        force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
+        key = cache_key('evm_phase', project.id, as_of.isoformat())
+        if force:
+            cache.delete(key)
+        return Response(
+            get_cached_or_compute(key, 1800, lambda: build_evm_by_phase(project.id, as_of))
+        )
+
+
+class ProjectEvmByCbsView(ProgressBaseView):
+    @extend_schema(summary='EVM by cost center (CBS)', tags=['Progress'])
+    def get(self, request, project_pk):
+        project = self.get_project()
+        as_of = _parse_date(request.query_params.get('as_of'), timezone.localdate())
+        force = request.query_params.get('force_refresh', '').lower() in ('1', 'true', 'yes')
+        root_id = request.query_params.get('root_id')
+        key = cache_key('evm_cbs', project.id, as_of.isoformat(), root_id or 'all')
+        if force:
+            cache.delete(key)
+        return Response(
+            get_cached_or_compute(
+                key,
+                1800,
+                lambda: build_evm_by_cbs(project.id, as_of, root_id=root_id),
+            )
         )
 
 
@@ -148,22 +184,30 @@ class ProjectManualProgressView(ProgressBaseView):
 
         activity = get_object_or_404(Activity, pk=activity_id, project_id=project.id, is_deleted=False)
         report_date = parse_jalali_or_gregorian(report_date_raw)
-        actual_progress = float(actual_progress_raw)
+        try:
+            actual_progress = float(actual_progress_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {'error': {'code': 'invalid_progress', 'message': 'actual_progress نامعتبر است.'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Inputs > 1 are percent values (e.g. 40 → 0.4). No clamping: >100% is rejected.
         if actual_progress > 1:
             actual_progress = actual_progress / 100.0
-        actual_progress = max(0.0, min(actual_progress, 1.0))
 
-        progress, _ = ActivityProgress.objects.update_or_create(
-            activity=activity,
-            report_date=report_date,
-            defaults={
-                'actual_progress': actual_progress,
-                'cumulative_quantity': cumulative_quantity,
-                'source': ActivityProgress.ProgressSource.MANUAL,
-                'notes': notes,
-                'updated_by': request.user,
-            },
-        )
+        evidence_refs = request.data.get('evidence_refs')
+        try:
+            progress = record_manual_progress(
+                activity,
+                report_date,
+                actual_progress,
+                request.user,
+                cumulative_quantity=cumulative_quantity,
+                notes=notes,
+                evidence_refs=evidence_refs if isinstance(evidence_refs, dict) else None,
+            )
+        except ProgressValidationError as exc:
+            return Response(exc.as_response(), status=exc.http_status)
 
         invalidate_s_curve_cache(project.id)
 
@@ -172,5 +216,15 @@ class ProjectManualProgressView(ProgressBaseView):
             'activity_id': str(activity.id),
             'report_date': report_date.strftime('%Y-%m-%d'),
             'actual_progress': float(progress.actual_progress),
+            'cumulative_progress': float(progress.actual_progress),
+            'period_progress': (
+                float(progress.period_progress) if progress.period_progress is not None else None
+            ),
+            'approved_progress': (
+                float(progress.approved_progress) if progress.approved_progress is not None else None
+            ),
+            'measurement_version_id': (
+                str(progress.measurement_version_id) if progress.measurement_version_id else None
+            ),
             'source': progress.source,
         }, status=status.HTTP_201_CREATED)

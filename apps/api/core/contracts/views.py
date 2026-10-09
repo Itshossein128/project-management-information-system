@@ -287,6 +287,27 @@ class IPCSubmitView(APIView):
             return Response({'detail': str(e)}, status=400)
 
 
+class IPCReceivablesReportView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_contracts'
+
+    @extend_schema(summary='Overdue and near-due IPC receivables report', tags=['Contracts'])
+    def get(self, request, project_pk=None):
+        from contracts.services.receivables_service import build_receivables_report
+
+        try:
+            near_due_days = int(request.query_params.get('near_due_days', 7))
+        except (TypeError, ValueError):
+            near_due_days = 7
+        contract_id = request.query_params.get('contract_id') or None
+        report = build_receivables_report(
+            project_id=project_pk,
+            near_due_days=near_due_days,
+            contract_id=contract_id,
+        )
+        return Response(report)
+
+
 class IPCDeductionListView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'edit_ipcs'
@@ -348,9 +369,21 @@ class IPCApproveView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
     required_permission = 'approve_ipcs'
 
+    @extend_schema(summary='Approve IPC with optional approved_amount', tags=['Contracts'])
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        ipc = approve_ipc(ipc, request.user)
+        data = request.data or {}
+        approved_amount = data.get('approved_amount', None)
+        note = data.get('approval_variance_note', '')
+        planned_raw = data.get('planned_payment_date')
+        planned = parse_jalali_or_gregorian(planned_raw) if planned_raw else None
+        ipc = approve_ipc(
+            ipc,
+            request.user,
+            approved_amount=approved_amount,
+            approval_variance_note=note,
+            planned_payment_date=planned,
+        )
         return Response(IPCDetailSerializer(ipc).data)
 
 

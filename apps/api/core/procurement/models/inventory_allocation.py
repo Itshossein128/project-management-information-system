@@ -33,6 +33,24 @@ class InventoryAllocation(AuditSoftDeleteModel):
             models.Index(fields=['block', 'material'], name='alloc_block_material_idx'),
             models.Index(fields=['mr_tag'], name='alloc_mr_tag_idx'),
         ]
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(allocated_qty__gte=0),
+                name='alloc_allocated_qty_gte_0',
+            ),
+            models.CheckConstraint(
+                check=models.Q(received_qty__gte=0),
+                name='alloc_received_qty_gte_0',
+            ),
+            models.CheckConstraint(
+                check=models.Q(issued_qty__gte=0),
+                name='alloc_issued_qty_gte_0',
+            ),
+            models.CheckConstraint(
+                check=models.Q(issued_qty__lte=models.F('received_qty')),
+                name='alloc_issued_lte_received',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.mr_tag} — {self.allocated_qty}'

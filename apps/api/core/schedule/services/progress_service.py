@@ -11,7 +11,7 @@ from django.conf import settings
 
 from field_reports.models import DailyReport, ReportStatus
 from projects.models import Activity, ActivityStatus
-from schedule.models import ActivityProgress
+from schedule.models import ActivityMeasurementDefinition, ActivityProgress
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,8 @@ def invalidate_s_curve_cache(project_id) -> None:
             f's_curve:{project_id}:*',
             f'*kpis:{project_id}:*',
             f'project_kpis:{project_id}:*',
+            f'*evm_phase:{project_id}:*',
+            f'*evm_cbs:{project_id}:*',
         ):
             for key in client.scan_iter(match=pattern):
                 client.delete(key)
@@ -95,6 +97,65 @@ def get_project_progress_on_date(project_id, on_date: date) -> float:
         weighted_sum += float(activity.weight) * actual
 
     return weighted_sum / total_weight
+
+
+def get_approved_progress_on_date(project_id, on_date: date) -> tuple[float | None, bool]:
+    """Weighted average of latest approved_progress ≤ on_date.
+
+    Returns ``(ratio, has_approved_rows)``. When no approved rows exist,
+    ratio is None and has_approved_rows is False (EV unregistered).
+    """
+    activities = Activity.objects.filter(
+        project_id=project_id,
+        is_deleted=False,
+        weight__isnull=False,
+    )
+    activities_list = list(activities)
+    total_weight = sum(float(a.weight) for a in activities_list)
+    if total_weight == 0:
+        return None, False
+
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity__project_id=project_id,
+            activity__is_deleted=False,
+            activity__weight__isnull=False,
+            report_date__lte=on_date,
+            approved_progress__isnull=False,
+        )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.approved_progress) for p in progresses}
+    if not progress_map:
+        return None, False
+
+    weighted_sum = 0.0
+    for activity in activities_list:
+        approved = progress_map.get(activity.id, 0.0)
+        weighted_sum += float(activity.weight) * approved
+
+    return weighted_sum / total_weight, True
+
+
+def get_approved_progress_for_activities(
+    activity_ids: list,
+    on_date: date,
+) -> tuple[dict, bool]:
+    """Latest approved_progress per activity id ≤ on_date. Returns (map, any_rows)."""
+    if not activity_ids:
+        return {}, False
+    progresses = (
+        ActivityProgress.objects.filter(
+            activity_id__in=activity_ids,
+            report_date__lte=on_date,
+            approved_progress__isnull=False,
+        )
+        .order_by('activity_id', '-report_date')
+        .distinct('activity_id')
+    )
+    progress_map = {p.activity_id: float(p.approved_progress) for p in progresses}
+    return progress_map, bool(progress_map)
 
 
 def get_planned_progress_on_date(project_id, on_date: date) -> float:
@@ -319,7 +380,34 @@ def get_progress_snapshot(project_id, as_of: date) -> dict:
     }
 
 
-def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, status=None, is_behind=None):
+def _default_period(as_of: date) -> tuple[date, date]:
+    """Current ISO week (Monday–Sunday) containing ``as_of``."""
+    start = as_of - timedelta(days=as_of.weekday())
+    return start, start + timedelta(days=6)
+
+
+def get_activity_progress_breakdown(
+    project_id,
+    as_of: date,
+    *,
+    wbs_id=None,
+    status=None,
+    is_behind=None,
+    period_start: date | None = None,
+    period_end: date | None = None,
+):
+    """Per-activity four-way progress: period, cumulative (actual), planned, approved.
+
+    ``period_progress_pct`` is the change in cumulative recorded progress inside
+    [period_start, period_end] (defaults to the week containing ``as_of``).
+    """
+    if period_start is None and period_end is None:
+        period_start, period_end = _default_period(as_of)
+    elif period_start is None:
+        period_start = period_end
+    elif period_end is None:
+        period_end = period_start
+
     qs = Activity.objects.filter(
         project_id=project_id,
         is_deleted=False,
@@ -332,17 +420,43 @@ def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, sta
 
     # ⚡ Bolt: Evaluate activities once
     activities_list = list(qs)
+    activity_ids = [a.id for a in activities_list]
 
     # ⚡ Bolt: Fetch latest progress for only the relevant activities in one query
     progresses = (
         ActivityProgress.objects.filter(
-            activity_id__in=[a.id for a in activities_list],
+            activity_id__in=activity_ids,
             report_date__lte=as_of,
         )
         .order_by('activity_id', '-report_date')
         .distinct('activity_id')
     )
     progress_map = {p.activity_id: p for p in progresses}
+
+    # Window + approved values computed in one chronological pass.
+    horizon = max(as_of, period_end)
+    cumulative_before: dict = {}
+    cumulative_end: dict = {}
+    approved_map: dict = {}
+    for row in ActivityProgress.objects.filter(
+        activity_id__in=activity_ids,
+        report_date__lte=horizon,
+    ).order_by('report_date').values(
+        'activity_id', 'report_date', 'actual_progress', 'approved_progress',
+    ):
+        aid = row['activity_id']
+        if row['actual_progress'] is not None:
+            if row['report_date'] < period_start:
+                cumulative_before[aid] = float(row['actual_progress'])
+            if row['report_date'] <= period_end:
+                cumulative_end[aid] = float(row['actual_progress'])
+        if row['approved_progress'] is not None and row['report_date'] <= as_of:
+            approved_map[aid] = float(row['approved_progress'])
+
+    definitions = {
+        d.activity_id: d
+        for d in ActivityMeasurementDefinition.objects.filter(activity_id__in=activity_ids)
+    }
 
     rows = []
     for activity in activities_list:
@@ -354,14 +468,35 @@ def get_activity_progress_breakdown(project_id, as_of: date, *, wbs_id=None, sta
         behind = is_activity_behind(planned, actual)
         if is_behind is not None and behind != is_behind:
             continue
+        period = (
+            cumulative_end[activity.id] - cumulative_before.get(activity.id, 0.0)
+            if activity.id in cumulative_end
+            else 0.0
+        )
+        definition = definitions.get(activity.id)
+        approved = approved_map.get(activity.id, 0.0)
         rows.append({
             'activity_id': str(activity.id),
+            'wbs_id': str(activity.wbs_id) if activity.wbs_id else None,
+            'wbs_code': activity.wbs.wbs_code if activity.wbs_id else '',
             'activity_code': activity.activity_code,
             'activity_name': activity.activity_name,
             'wbs_name': activity.wbs.wbs_name if activity.wbs_id else '',
             'weight': float(activity.weight) if activity.weight is not None else None,
             'planned_progress_pct': round(planned * 100, 2),
             'actual_progress_pct': round(actual * 100, 2),
+            'cumulative_progress_pct': round(actual * 100, 2),
+            'period_progress_pct': round(period * 100, 2),
+            'approved_progress_pct': round(approved * 100, 2),
+            'period_start': period_start.strftime('%Y-%m-%d'),
+            'period_end': period_end.strftime('%Y-%m-%d'),
+            'measurement_method': definition.method if definition else None,
+            'measurement_version_id': (
+                str(definition.current_version_id)
+                if definition and definition.current_version_id
+                else None
+            ),
+            'measurement_status': definition.status if definition else 'not_defined',
             'variance_pct': round(variance * 100, 2),
             'total_quantity': float(activity.total_quantity) if activity.total_quantity else None,
             'cumulative_quantity': (

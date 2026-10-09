@@ -60,6 +60,7 @@ class MaterialTransactionType(models.TextChoices):
     RECEIPT = 'receipt', 'وارده'
     ISSUE = 'issue', 'مصرف شده'
     WASTE = 'waste', 'ضایعات'
+    RETURN = 'return', 'برگشتی'
 
 
 class IncidentType(models.TextChoices):
@@ -68,6 +69,16 @@ class IncidentType(models.TextChoices):
     ENVIRONMENTAL = 'environmental', 'Environmental'
     STOPPAGE = 'stoppage', 'Stoppage'
     VISITOR = 'visitor', 'Visitor'
+    SITE_INSTRUCTION = 'site_instruction', 'Site instruction'
+    BARRIER = 'barrier', 'Barrier'
+
+
+class CorrectionRequestStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    SUBMITTED = 'submitted', 'Submitted'
+    APPROVED = 'approved', 'Approved'
+    CANCELLED = 'cancelled', 'Cancelled'
+    REJECTED = 'rejected', 'Rejected'
 
 
 class ChildRowModel(UUIDModel):
@@ -84,6 +95,8 @@ class DailyReport(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='daily_reports')
     report_date = models.DateField()
     shift = models.CharField(max_length=10, choices=ReportShift.choices, default=ReportShift.FULL)
+    work_front = models.CharField(max_length=120, blank=True, default='')
+    location_notes = models.CharField(max_length=200, blank=True, default='')
     weather_condition = models.CharField(
         max_length=20,
         choices=WeatherCondition.choices,
@@ -130,6 +143,17 @@ class DailyReport(AuditSoftDeleteModel):
     approved_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, default='')
 
+    lineage_id = models.UUIDField(null=True, blank=True, db_index=True)
+    version_number = models.PositiveIntegerField(default=1)
+    supersedes = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='superseded_by_reports',
+    )
+    is_current = models.BooleanField(default=True)
+
     synced_from_offline = models.BooleanField(default=False)
     local_id = models.CharField(max_length=36, null=True, blank=True)
 
@@ -139,10 +163,21 @@ class DailyReport(AuditSoftDeleteModel):
         constraints = [
             models.UniqueConstraint(
                 fields=['project', 'report_date', 'shift'],
-                condition=models.Q(is_deleted=False),
-                name='unique_active_daily_report_per_date_shift',
+                condition=models.Q(is_deleted=False, is_current=True),
+                name='unique_current_daily_report_per_date_shift',
             ),
         ]
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        if creating and self.lineage_id is None:
+            type(self).objects.filter(pk=self.pk).update(lineage_id=self.id)
+            self.lineage_id = self.id
+
+    @property
+    def is_locked(self) -> bool:
+        return self.status == ReportStatus.APPROVED
 
 
 class DailyReportActivity(ChildRowModel):
@@ -173,6 +208,14 @@ class DailyReportActivity(ChildRowModel):
     quantity_measured = models.BooleanField(default=True)
     unit = models.CharField(max_length=40, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    responsible_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_activity_responsibilities',
+    )
+    responsible_name = models.CharField(max_length=120, blank=True, default='')
     notes = models.TextField(blank=True, default='')
     photo_file = models.ForeignKey(
         'storage.StoredFile',
@@ -212,6 +255,7 @@ class DailyReportLabor(ChildRowModel):
     work_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     daily_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    absence_count = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         db_table = 'daily_report_labor'
@@ -294,6 +338,7 @@ class DailyReportMaterial(ChildRowModel):
     unit_cost = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     unit = models.CharField(max_length=40)
     transaction_type = models.CharField(max_length=10, choices=MaterialTransactionType.choices)
+    consumption_location = models.CharField(max_length=120, blank=True, default='')
     activity_ref = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,
@@ -351,9 +396,65 @@ class DailyReportIncident(ChildRowModel):
     incident_type = models.CharField(max_length=40, choices=IncidentType.choices)
     description = models.TextField()
     corrective_action = models.TextField(blank=True, default='')
+    follow_up_owner_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_incident_followups',
+    )
+    follow_up_owner_name = models.CharField(max_length=120, blank=True, default='')
+    due_date = models.DateField(null=True, blank=True)
 
     class Meta:
         db_table = 'daily_report_incidents'
+
+
+class DailyReportCorrectionRequest(AuditSoftDeleteModel):
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='daily_report_correction_requests',
+    )
+    source_report = models.ForeignKey(
+        DailyReport,
+        on_delete=models.CASCADE,
+        related_name='correction_requests_as_source',
+    )
+    result_report = models.ForeignKey(
+        DailyReport,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='correction_requests_as_result',
+    )
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=CorrectionRequestStatus.choices,
+        default=CorrectionRequestStatus.SUBMITTED,
+    )
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_corrections_requested',
+    )
+    requested_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_corrections_decided',
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'daily_report_correction_requests'
+        ordering = ['-requested_at', '-created_at']
 
 
 class LaborJobTitle(UUIDModel):

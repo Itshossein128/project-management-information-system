@@ -3,7 +3,15 @@
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
-from contracts.models import ChangeOrder, Contract, ContractItem, IPC, IPCDeduction, IPCItem
+from contracts.models import (
+    ChangeOrder,
+    Contract,
+    ContractItem,
+    IPC,
+    IPCCollection,
+    IPCDeduction,
+    IPCItem,
+)
 
 
 def _format_amount(value) -> str:
@@ -113,13 +121,13 @@ class ContractDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = [
-            'id', 'contract_number', 'contract_type', 'counterparty',
+            'id', 'contract_number', 'contract_type', 'contract_type_ref', 'counterparty',
             'start_date', 'finish_date', 'original_amount', 'adjusted_amount',
             'effective_amount', 'advance_amount', 'advance_payment_pct',
             'retention_pct', 'insurance_pct', 'tax_pct',
             'performance_guarantee_amount', 'performance_guarantee_expiry',
             'advance_guarantee_amount', 'advance_guarantee_expiry',
-            'status', 'file_url', 'notes', 'items', 'change_orders',
+            'payment_terms', 'status', 'file_url', 'notes', 'items', 'change_orders',
         ]
         read_only_fields = ['id']
 
@@ -139,12 +147,12 @@ class ContractWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contract
         fields = [
-            'contract_number', 'contract_type', 'counterparty',
+            'contract_number', 'contract_type', 'contract_type_ref', 'counterparty',
             'start_date', 'finish_date', 'original_amount', 'adjusted_amount',
             'advance_payment_pct', 'retention_pct', 'insurance_pct', 'tax_pct',
             'performance_guarantee_amount', 'performance_guarantee_expiry',
             'advance_guarantee_amount', 'advance_guarantee_expiry',
-            'status', 'file_url', 'notes',
+            'payment_terms', 'status', 'file_url', 'notes',
         ]
 
 
@@ -184,6 +192,7 @@ class IPCListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'ipc_number', 'contract', 'contract_number',
             'period_start', 'period_end', 'gross_amount', 'gross_amount_display',
+            'submitted_amount', 'approved_amount',
             'net_amount', 'net_amount_display', 'status', 'approval_date',
             'planned_payment_date', 'actual_payment_date', 'days_overdue',
         ]
@@ -207,12 +216,33 @@ class IPCListSerializer(serializers.ModelSerializer):
         return None
 
 
+class IPCCollectionSerializer(serializers.ModelSerializer):
+    collected_at = JalaliDateField()
+
+    class Meta:
+        model = IPCCollection
+        fields = [
+            'id',
+            'amount',
+            'currency',
+            'fx_rate',
+            'collected_at',
+            'reference',
+            'notes',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+
+
 class IPCDetailSerializer(serializers.ModelSerializer):
     period_start = JalaliDateField(required=False, allow_null=True)
     period_end = JalaliDateField(required=False, allow_null=True)
     prepared_date = JalaliDateField(required=False, allow_null=True)
     items = IPCItemSerializer(many=True, read_only=True)
     deductions = IPCDeductionSerializer(many=True, read_only=True)
+    collections = serializers.SerializerMethodField()
+    collections_total = serializers.SerializerMethodField()
+    remaining_receivable = serializers.SerializerMethodField()
     deductions_total = serializers.SerializerMethodField()
     net_amount_computed = serializers.SerializerMethodField()
     contract_number = serializers.CharField(source='contract.contract_number', read_only=True)
@@ -223,10 +253,15 @@ class IPCDetailSerializer(serializers.ModelSerializer):
             'id', 'ipc_number', 'contract', 'contract_number',
             'period_start', 'period_end', 'prepared_date',
             'submitted_date', 'approval_date', 'planned_payment_date', 'actual_payment_date',
-            'gross_amount', 'net_amount', 'status', 'rejection_reason', 'notes',
+            'gross_amount', 'submitted_amount', 'approved_amount', 'approval_variance_note',
+            'net_amount', 'status', 'rejection_reason', 'notes',
             'items', 'deductions', 'deductions_total', 'net_amount_computed',
+            'collections', 'collections_total', 'remaining_receivable',
         ]
-        read_only_fields = ['id', 'ipc_number', 'gross_amount', 'net_amount']
+        read_only_fields = [
+            'id', 'ipc_number', 'gross_amount', 'submitted_amount', 'approved_amount',
+            'approval_variance_note', 'net_amount',
+        ]
 
     def get_deductions_total(self, obj):
         # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries from .filter()
@@ -235,7 +270,22 @@ class IPCDetailSerializer(serializers.ModelSerializer):
 
     def get_net_amount_computed(self, obj):
         deductions = self.get_deductions_total(obj)
-        return float(obj.gross_amount or 0) - deductions
+        base = obj.approved_amount if obj.approved_amount is not None else obj.gross_amount
+        return float(base or 0) - deductions
+
+    def get_collections(self, obj):
+        rows = [c for c in obj.collections.all() if not c.is_deleted]
+        return IPCCollectionSerializer(rows, many=True).data
+
+    def get_collections_total(self, obj):
+        from contracts.collection_service import collections_total
+
+        return float(collections_total(obj))
+
+    def get_remaining_receivable(self, obj):
+        from contracts.collection_service import remaining_receivable
+
+        return float(remaining_receivable(obj))
 
 
 class IPCCreateSerializer(serializers.Serializer):

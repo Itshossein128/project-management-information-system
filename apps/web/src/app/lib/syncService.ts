@@ -239,7 +239,11 @@ async function syncProjectBatch(
     const localId = batchPayloads[i]?.local_id as string;
     const queueIds = batchQueueIds[i] ?? [];
 
-    if (row.status === "created" || row.status === "merged") {
+    const childErrors = Array.isArray(row.child_errors) ? row.child_errors : [];
+    const syncSucceeded =
+      (row.status === "created" || row.status === "merged") && childErrors.length === 0;
+
+    if (syncSucceeded) {
       for (const id of queueIds) {
         await updateQueueItem(id, { status: "synced", server_id: row.server_id });
       }
@@ -292,7 +296,9 @@ async function syncProjectBatch(
         });
       }
       conflicts += Math.max(ids.length, 1);
-    } else if (row.status === "error" || row.status === "skipped") {
+    } else if (row.status === "error" || row.status === "skipped" || !syncSucceeded) {
+      // Partial sync (e.g. non-empty child_errors with created/merged) must not
+      // clear the offline dirty flag — recovery requires a retry.
       for (const id of queueIds) {
         await updateQueueItem(id, {
           status: "failed",

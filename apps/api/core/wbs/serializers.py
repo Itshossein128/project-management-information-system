@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from projects.models import WBS
+from projects.models import WBS, WBSStatus
 
 
 class WBSTreeSerializer(serializers.ModelSerializer):
@@ -8,6 +8,7 @@ class WBSTreeSerializer(serializers.ModelSerializer):
     depth = serializers.IntegerField(read_only=True)
     weight_physical = serializers.DecimalField(max_digits=8, decimal_places=4, coerce_to_string=True, read_only=True)
     weight_financial = serializers.DecimalField(max_digits=8, decimal_places=4, coerce_to_string=True, read_only=True)
+    responsible = serializers.UUIDField(source='responsible_id', read_only=True, allow_null=True)
     children = serializers.SerializerMethodField()
 
     class Meta:
@@ -19,6 +20,9 @@ class WBSTreeSerializer(serializers.ModelSerializer):
             'weight_physical',
             'weight_financial',
             'description',
+            'responsible',
+            'acceptance_criteria',
+            'status',
             'depth',
             'children',
         ]
@@ -32,16 +36,28 @@ class WBSTreeSerializer(serializers.ModelSerializer):
 class WBSFlatSerializer(serializers.ModelSerializer):
     wbs_id = serializers.UUIDField(source='id', read_only=True)
     depth = serializers.IntegerField(read_only=True)
+    project = serializers.UUIDField(source='project_id', read_only=True)
+    responsible = serializers.UUIDField(source='responsible_id', read_only=True, allow_null=True)
 
     class Meta:
         model = WBS
         fields = [
             'wbs_id',
+            'project',
             'wbs_code',
             'wbs_name',
             'depth',
             'weight_physical',
             'weight_financial',
+            'description',
+            'responsible',
+            'acceptance_criteria',
+            'status',
+            'created_by',
+            'updated_by',
+            'created_at',
+            'updated_at',
+            'is_deleted',
         ]
 
 
@@ -52,6 +68,9 @@ class WBSCreateSerializer(serializers.Serializer):
     weight_physical = serializers.DecimalField(max_digits=8, decimal_places=4, required=False, allow_null=True)
     weight_financial = serializers.DecimalField(max_digits=8, decimal_places=4, required=False, allow_null=True)
     description = serializers.CharField(required=False, allow_blank=True, default='')
+    responsible = serializers.UUIDField(required=False, allow_null=True)
+    acceptance_criteria = serializers.CharField(required=False, allow_blank=True, default='')
+    status = serializers.ChoiceField(choices=WBSStatus.choices, required=False, default=WBSStatus.ACTIVE)
 
 
 class WBSUpdateSerializer(serializers.Serializer):
@@ -59,6 +78,9 @@ class WBSUpdateSerializer(serializers.Serializer):
     weight_physical = serializers.DecimalField(max_digits=8, decimal_places=4, required=False, allow_null=True)
     weight_financial = serializers.DecimalField(max_digits=8, decimal_places=4, required=False, allow_null=True)
     description = serializers.CharField(required=False, allow_blank=True)
+    responsible = serializers.UUIDField(required=False, allow_null=True)
+    acceptance_criteria = serializers.CharField(required=False, allow_blank=True)
+    status = serializers.ChoiceField(choices=WBSStatus.choices, required=False)
 
 
 class WBSMoveSerializer(serializers.Serializer):

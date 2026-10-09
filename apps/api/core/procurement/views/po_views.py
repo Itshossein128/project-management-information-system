@@ -141,17 +141,32 @@ class BlockStockView(APIView):
 
 class InternalTransferViewSet(viewsets.ModelViewSet):
     """CRUD for inter-block material transfers."""
+
     serializer_class = InternalTransferSerializer
     http_method_names = ['get', 'post', 'head', 'options']  # read + create only
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    view_permission = 'view_procurement'
+    edit_permission = 'edit_procurement'
+
+    @property
+    def required_permission(self):
+        if self.action in ('list', 'retrieve'):
+            return self.view_permission
+        return self.edit_permission
+
+    def get_project_id(self):
+        return self.kwargs['project_pk']
 
     def get_queryset(self):
-        project_id = self.kwargs.get('project_pk')
-        qs = InternalTransfer.objects.filter(is_deleted=False)
-        if project_id:
-            qs = qs.filter(
+        project_id = self.get_project_id()
+        return (
+            InternalTransfer.objects.filter(
+                is_deleted=False,
                 source_block__project_id=project_id,
+                target_block__project_id=project_id,
             )
-        return qs.select_related('source_block', 'target_block', 'material', 'approved_by')
+            .select_related('source_block', 'target_block', 'material', 'approved_by')
+        )
 
     def perform_create(self, serializer):
         serializer.save(

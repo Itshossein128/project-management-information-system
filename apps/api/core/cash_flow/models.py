@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from common.jalali import parse_jalali_or_gregorian
@@ -104,3 +106,155 @@ class CashFlowForecast(AuditSoftDeleteModel):
             except TypeError:
                 pass
         super().save(*args, **kwargs)
+
+
+class ProjectPriorityScore(AuditSoftDeleteModel):
+    project = models.OneToOneField(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        related_name='cashflow_priority_score',
+    )
+    urgency = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+    return_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+    recovery_speed = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+    risk = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+    )
+    notes = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'cashflow_priority_scores'
+
+    @property
+    def composite(self):
+        from decimal import Decimal
+
+        return (
+            Decimal(self.urgency)
+            + Decimal(self.return_score)
+            + Decimal(self.recovery_speed)
+            + (Decimal('100') - Decimal(self.risk))
+        ) / Decimal('4')
+
+
+class LiquidityCycleStatus(models.TextChoices):
+    DRAFT = 'draft', 'Draft'
+    PROPOSED = 'proposed', 'Proposed'
+    DECIDED = 'decided', 'Decided'
+    CLOSED = 'closed', 'Closed'
+
+
+class LiquidityAllocationCycle(AuditSoftDeleteModel):
+    name = models.CharField(max_length=120)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    available_liquidity = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    currency = models.CharField(max_length=3, default='IRR')
+    status = models.CharField(
+        max_length=20,
+        choices=LiquidityCycleStatus.choices,
+        default=LiquidityCycleStatus.DRAFT,
+    )
+
+    class Meta:
+        db_table = 'liquidity_allocation_cycles'
+
+
+class AllocationProposal(AuditSoftDeleteModel):
+    cycle = models.ForeignKey(
+        LiquidityAllocationCycle,
+        on_delete=models.CASCADE,
+        related_name='proposals',
+    )
+    generated_at = models.DateTimeField(auto_now_add=True)
+    algorithm_note = models.CharField(max_length=200, blank=True, default='equal_weight_greedy')
+
+    class Meta:
+        db_table = 'liquidity_allocation_proposals'
+
+
+class AllocationProposalLine(AuditSoftDeleteModel):
+    proposal = models.ForeignKey(
+        AllocationProposal,
+        on_delete=models.CASCADE,
+        related_name='lines',
+    )
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    suggested_amount = models.DecimalField(max_digits=18, decimal_places=2)
+    rank = models.PositiveIntegerField()
+    composite_snapshot = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    need_snapshot = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+
+    class Meta:
+        db_table = 'liquidity_allocation_proposal_lines'
+        ordering = ['rank']
+
+
+class AllocationDecision(AuditSoftDeleteModel):
+    cycle = models.ForeignKey(
+        LiquidityAllocationCycle,
+        on_delete=models.CASCADE,
+        related_name='decisions',
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='liquidity_decisions_owned',
+    )
+    rationale = models.TextField()
+    decided_at = models.DateTimeField(auto_now_add=True)
+    proposal = models.ForeignKey(
+        AllocationProposal,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='decisions',
+    )
+    acknowledge_overlap = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'liquidity_allocation_decisions'
+
+
+class AllocationDecisionLine(AuditSoftDeleteModel):
+    decision = models.ForeignKey(
+        AllocationDecision,
+        on_delete=models.CASCADE,
+        related_name='lines',
+    )
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    schedule_impact = models.TextField(blank=True, default='')
+    cost_impact = models.TextField(blank=True, default='')
+
+    class Meta:
+        db_table = 'liquidity_allocation_decision_lines'
+
+
+class AllocationSimulation(AuditSoftDeleteModel):
+    cycle = models.ForeignKey(
+        LiquidityAllocationCycle,
+        on_delete=models.CASCADE,
+        related_name='simulations',
+    )
+    name = models.CharField(max_length=120)
+    payload = models.JSONField(default=dict)
+
+    class Meta:
+        db_table = 'liquidity_allocation_simulations'

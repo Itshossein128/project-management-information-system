@@ -27,10 +27,24 @@ def create_project_document(project_id, user, data, file_obj=None) -> ProjectDoc
         file_url=url,
         file_name=name,
         file_size_kb=size_kb,
+        status=data.get('status', 'draft'),
+        approver=data.get('approver'),
         uploaded_by=user,
         created_by=user,
         updated_by=user,
     )
+
+    if url:
+        rev_label = doc.revision or '0'
+        rev_date = doc.revision_date or date.today()
+        DocumentRevision.objects.create(
+            document=doc,
+            revision_label=rev_label,
+            revision_date=rev_date,
+            file_url=url,
+            change_description='',
+            uploaded_by=user,
+        )
 
     if data.get('related_activity'):
         doc.related_activity_id = data['related_activity']
@@ -42,6 +56,27 @@ def create_project_document(project_id, user, data, file_obj=None) -> ProjectDoc
     return doc
 
 
+def _ensure_current_revision_archived(doc: ProjectDocument) -> None:
+    """Append-only: persist the document's current file as a revision row if missing."""
+    if not doc.file_url:
+        return
+    label = doc.revision or '0'
+    if DocumentRevision.objects.filter(
+        document=doc,
+        file_url=doc.file_url,
+        revision_label=label,
+    ).exists():
+        return
+    DocumentRevision.objects.create(
+        document=doc,
+        revision_label=label,
+        revision_date=doc.revision_date or date.today(),
+        file_url=doc.file_url,
+        change_description='',
+        uploaded_by=doc.uploaded_by,
+    )
+
+
 @transaction.atomic
 def create_document_revision(doc: ProjectDocument, user, data, file_obj) -> DocumentRevision:
     validate_document_upload(file_obj)
@@ -49,6 +84,8 @@ def create_document_revision(doc: ProjectDocument, user, data, file_obj) -> Docu
 
     rev_label = data.get('revision_label', doc.revision or 'Rev')
     rev_date = parse_date_optional(data.get('revision_date')) or date.today()
+
+    _ensure_current_revision_archived(doc)
 
     revision = DocumentRevision.objects.create(
         document=doc,

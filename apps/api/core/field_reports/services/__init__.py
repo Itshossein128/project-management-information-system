@@ -64,9 +64,17 @@ def approve_report(report: DailyReport, user) -> DailyReport:
     report.status = ReportStatus.APPROVED
     report.approved_by = user
     report.approved_at = timezone.now()
+    report.is_current = True
     report.updated_by = user
-    report.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_by', 'updated_at'])
+    report.save(
+        update_fields=[
+            'status', 'approved_by', 'approved_at', 'is_current', 'updated_by', 'updated_at',
+        ],
+    )
 
+    from field_reports.services.correction_service import mark_correction_approved_for_report
+
+    mark_correction_approved_for_report(report, user)
     _publish_approved(report)
     _enqueue_progress_recalc(report)
     _notify_approved(report)
@@ -104,6 +112,8 @@ MERGEABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
 HEADER_COMPARE_FIELDS = (
     'report_date',
     'shift',
+    'work_front',
+    'location_notes',
     'weather_condition',
     'temp_min',
     'temp_max',
@@ -193,7 +203,8 @@ def _clear_child_sections(report, section_keys: list[str]) -> None:
         related.all().delete()
 
 
-def _create_children(report, payload, sections: list[str] | None = None) -> list[dict]:
+def _validate_children(payload, sections: list[str] | None = None) -> list[dict]:
+    """Validate nested child rows without writing. Returns structured errors."""
     serializers_map = _child_serializers()
     child_errors = []
     keys = sections if sections is not None else list(CHILD_SERIALIZER_MAP.keys())
@@ -202,19 +213,39 @@ def _create_children(report, payload, sections: list[str] | None = None) -> list
         rows = payload.get(key) or []
         for idx, row in enumerate(rows):
             serializer = serializer_cls(data=row)
-            if serializer.is_valid():
-                serializer.save(report=report)
-            else:
+            if not serializer.is_valid():
                 child_errors.append({'section': key, 'index': idx, 'errors': serializer.errors})
-                logger.warning('sync-batch skipped invalid %s row: %s', key, serializer.errors)
+                logger.warning('sync-batch invalid %s row: %s', key, serializer.errors)
     return child_errors
 
 
+def _save_children(report, payload, sections: list[str] | None = None) -> None:
+    """Persist already-validated child rows."""
+    serializers_map = _child_serializers()
+    keys = sections if sections is not None else list(CHILD_SERIALIZER_MAP.keys())
+    for key in keys:
+        serializer_cls = serializers_map[key]
+        rows = payload.get(key) or []
+        for row in rows:
+            serializer = serializer_cls(data=row)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(report=report)
+
+
 def _replace_children(report, payload) -> list[dict]:
+    """Replace payload child sections atomically: validate fully, then delete+insert.
+
+    Returns child_errors and leaves existing rows untouched when any row is invalid.
+    """
     sections = _child_sections_in_payload(payload)
-    if sections:
-        _clear_child_sections(report, sections)
-    return _create_children(report, payload, sections=sections or None)
+    if not sections:
+        return []
+    errors = _validate_children(payload, sections=sections)
+    if errors:
+        return errors
+    _clear_child_sections(report, sections)
+    _save_children(report, payload, sections=sections)
+    return []
 
 
 def sync_batch(project_id, user, reports: list) -> dict:
@@ -274,7 +305,16 @@ def sync_batch(project_id, user, reports: list) -> dict:
                 report_date=report_date,
                 shift=shift,
                 is_deleted=False,
+                is_current=True,
             ).first()
+        elif not existing.is_current:
+            existing = DailyReport.objects.filter(
+                project_id=project_id,
+                report_date=report_date,
+                shift=shift,
+                is_deleted=False,
+                is_current=True,
+            ).first() or existing
 
         if existing and existing.status == ReportStatus.APPROVED:
             results.append(_conflict_result(
@@ -294,6 +334,24 @@ def sync_batch(project_id, user, reports: list) -> dict:
 
         with transaction.atomic():
             if existing:
+                # Validate children before mutating so a bad replace cannot wipe rows,
+                # and so a failed child sync rolls back any header merge in this block.
+                sections = _child_sections_in_payload(item)
+                if sections:
+                    child_errors = _validate_children(item, sections=sections)
+                    if child_errors:
+                        results.append({
+                            'local_id': local_id,
+                            'status': 'error',
+                            'server_id': str(existing.id),
+                            'conflict_reason': 'ردیف‌های وابسته نامعتبر',
+                            'server_payload': None,
+                            'conflict_fields': [],
+                            'child_errors': child_errors,
+                        })
+                        counts['errors'] += 1
+                        continue
+
                 header_errors = _apply_header_merge(existing, item, user, local_id)
                 if header_errors is not None:
                     results.append({
@@ -309,6 +367,19 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     continue
                 existing.refresh_from_db()
                 child_errors = _replace_children(existing, item)
+                if child_errors:
+                    transaction.set_rollback(True)
+                    results.append({
+                        'local_id': local_id,
+                        'status': 'error',
+                        'server_id': str(existing.id),
+                        'conflict_reason': 'ردیف‌های وابسته نامعتبر',
+                        'server_payload': None,
+                        'conflict_fields': [],
+                        'child_errors': child_errors,
+                    })
+                    counts['errors'] += 1
+                    continue
                 results.append({
                     'local_id': local_id,
                     'status': 'merged',
@@ -316,7 +387,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     'conflict_reason': None,
                     'server_payload': None,
                     'conflict_fields': [],
-                    'child_errors': child_errors,
+                    'child_errors': [],
                 })
                 counts['merged'] += 1
                 resolve_sync_conflict(project_id, local_id=local_id, daily_report_id=existing.id)
@@ -334,6 +405,19 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     })
                     counts['errors'] += 1
                     continue
+                child_errors = _validate_children(item)
+                if child_errors:
+                    results.append({
+                        'local_id': local_id,
+                        'status': 'error',
+                        'server_id': None,
+                        'conflict_reason': 'ردیف‌های وابسته نامعتبر',
+                        'server_payload': None,
+                        'conflict_fields': [],
+                        'child_errors': child_errors,
+                    })
+                    counts['errors'] += 1
+                    continue
                 report = header.save(
                     project_id=project_id,
                     prepared_by=user,
@@ -342,7 +426,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     synced_from_offline=True,
                     local_id=local_id,
                 )
-                child_errors = _create_children(report, item)
+                _save_children(report, item)
                 results.append({
                     'local_id': local_id,
                     'status': 'created',
@@ -350,7 +434,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     'conflict_reason': None,
                     'server_payload': None,
                     'conflict_fields': [],
-                    'child_errors': child_errors,
+                    'child_errors': [],
                 })
                 counts['created'] += 1
                 resolve_sync_conflict(project_id, local_id=local_id, daily_report_id=report.id)

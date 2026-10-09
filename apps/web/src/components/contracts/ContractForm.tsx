@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Input, JalaliDatePicker, Select, TextArea } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { CONTRACT_TYPE_LABELS } from "@/app/lib/api/contracts";
@@ -7,6 +8,7 @@ import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/ap
 export interface ContractFormValues {
   contract_number: string;
   contract_type: string;
+  contract_type_ref: string;
   counterparty: string;
   start_date: string;
   finish_date: string;
@@ -22,12 +24,14 @@ export interface ContractFormValues {
   advance_guarantee_expiry: string;
   status: string;
   file_url: string;
+  payment_terms: string;
   notes: string;
 }
 
 export const EMPTY_CONTRACT_FORM: ContractFormValues = {
   contract_number: "",
   contract_type: "main",
+  contract_type_ref: "",
   counterparty: "",
   start_date: "",
   finish_date: "",
@@ -43,6 +47,7 @@ export const EMPTY_CONTRACT_FORM: ContractFormValues = {
   advance_guarantee_expiry: "",
   status: "active",
   file_url: "",
+  payment_terms: "",
   notes: "",
 };
 
@@ -80,11 +85,14 @@ export function ContractForm({
   values,
   onChange,
   disabled,
+  contractTypeOptions,
 }: {
   values: ContractFormValues;
   onChange: (patch: Partial<ContractFormValues>) => void;
   disabled?: boolean;
+  contractTypeOptions?: { value: string; label: string }[];
 }) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <FormField label="شماره قرارداد">
@@ -95,6 +103,16 @@ export function ContractForm({
           onChange={(e) => onChange({ contract_number: e.target.value })}
         />
       </FormField>
+      {contractTypeOptions && contractTypeOptions.length > 0 ? (
+        <Select
+          name="contract_type_ref"
+          label="نوع (کاتالوگ)"
+          value={values.contract_type_ref}
+          disabled={disabled}
+          options={[{ value: "", label: "—" }, ...contractTypeOptions]}
+          onChange={(e) => onChange({ contract_type_ref: e.target.value })}
+        />
+      ) : null}
       <Select
         name="contract_type"
         label="نوع"
@@ -227,6 +245,15 @@ export function ContractForm({
           onChange={(e) => onChange({ file_url: e.target.value })}
         />
       </FormField>
+      <FormField label={t("pages.contracts.paymentTerms")} className="md:col-span-2">
+        <TextArea
+          name="payment_terms"
+          value={values.payment_terms}
+          disabled={disabled}
+          rows={3}
+          onChange={(e) => onChange({ payment_terms: e.target.value })}
+        />
+      </FormField>
       <FormField label="یادداشت" className="md:col-span-2">
         <TextArea
           name="notes"
@@ -258,11 +285,13 @@ export function contractDetailToForm(c: {
   advance_guarantee_expiry: string | null;
   status: string;
   file_url: string;
+  payment_terms?: string;
   notes: string;
 }): ContractFormValues {
   return {
     contract_number: c.contract_number ?? "",
     contract_type: c.contract_type ?? "main",
+    contract_type_ref: (c as { contract_type_ref?: string | null }).contract_type_ref ?? "",
     counterparty: c.counterparty ?? "",
     start_date: c.start_date ?? "",
     finish_date: c.finish_date ?? "",
@@ -280,6 +309,7 @@ export function contractDetailToForm(c: {
     advance_guarantee_expiry: c.advance_guarantee_expiry ?? "",
     status: c.status ?? "active",
     file_url: c.file_url ?? "",
+    payment_terms: c.payment_terms ?? "",
     notes: c.notes ?? "",
   };
 }
@@ -289,6 +319,7 @@ export function formToContractPayload(values: ContractFormValues): Record<string
   return {
     contract_number: values.contract_number,
     contract_type: values.contract_type,
+    contract_type_ref: values.contract_type_ref || null,
     counterparty: values.counterparty,
     start_date: values.start_date || null,
     finish_date: values.finish_date || null,
@@ -304,6 +335,7 @@ export function formToContractPayload(values: ContractFormValues): Record<string
     advance_guarantee_expiry: values.advance_guarantee_expiry || null,
     status: values.status,
     file_url: values.file_url,
+    payment_terms: values.payment_terms,
     notes: values.notes,
   };
 }

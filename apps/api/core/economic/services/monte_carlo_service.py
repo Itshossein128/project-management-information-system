@@ -12,7 +12,7 @@ from cost_control.models import ActualCost
 from economic.models import SimulationResult
 from economic.services.financing_service import annual_financing_rate
 from economic.services.snapshot_service import generate_snapshot
-from schedule.services.evm_service import compute_evm
+from schedule.services.evm_service import compute_evm, evm_number
 
 DEFAULT_PARAMS = {
     'inflation_rate_mean': 0.30,
@@ -35,7 +35,7 @@ def run_monte_carlo(project_id, iterations=5000, scenario_params=None) -> dict:
         ActualCost.objects.filter(project_id=project_id, is_deleted=False).aggregate(t=Sum('amount'))['t'] or 0
     )
     evm = compute_evm(project_id, date.today())
-    eac = float(evm.get('eac') or base_cost * 1.1)
+    eac = float(evm_number(evm, 'eac') or base_cost * 1.1)
 
     main_contract = Contract.objects.filter(
         project_id=project_id, contract_type=ContractType.MAIN, is_deleted=False

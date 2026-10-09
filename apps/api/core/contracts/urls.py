@@ -1,5 +1,6 @@
 from django.urls import path
 
+from contracts.collection_views import IPCCollectionDetailView, IPCCollectionListCreateView
 from contracts.views import (
     ChangeOrderApproveView,
     ChangeOrderDetailView,
@@ -14,6 +15,7 @@ from contracts.views import (
     IPCPayView,
     IPCPdfView,
     IPCPopulateView,
+    IPCReceivablesReportView,
     IPCRejectView,
     IPCSubmitView,
     IPCViewSet,
@@ -45,6 +47,7 @@ urlpatterns = [
         name='change-order-reject',
     ),
     path('ipcs/', ipc_list, name='ipc-list'),
+    path('ipcs/receivables-report/', IPCReceivablesReportView.as_view(), name='ipc-receivables-report'),
     path('ipcs/<uuid:pk>/', ipc_detail, name='ipc-detail'),
     path('ipcs/<uuid:pk>/populate/', IPCPopulateView.as_view(), name='ipc-populate'),
     path('ipcs/<uuid:pk>/items/<uuid:itemid>/', IPCItemUpdateView.as_view(), name='ipc-item-update'),
@@ -55,4 +58,14 @@ urlpatterns = [
     path('ipcs/<uuid:pk>/pay/', IPCPayView.as_view(), name='ipc-pay'),
     path('ipcs/<uuid:pk>/reject/', IPCRejectView.as_view(), name='ipc-reject'),
     path('ipcs/<uuid:pk>/pdf/', IPCPdfView.as_view(), name='ipc-pdf'),
+    path(
+        'ipcs/<uuid:pk>/collections/',
+        IPCCollectionListCreateView.as_view(),
+        name='ipc-collection-list',
+    ),
+    path(
+        'ipcs/<uuid:pk>/collections/<uuid:collection_id>/',
+        IPCCollectionDetailView.as_view(),
+        name='ipc-collection-detail',
+    ),
 ]

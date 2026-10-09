@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import type { DailyReportDetail } from "@/app/lib/api/daily-reports";
 import { uploadProjectFile } from "@/app/lib/api/files";
+import { fetchMembers } from "@/app/lib/api/members";
 import { generateUUID, savePendingPhoto } from "@/app/lib/offlineDB";
 import { isNetworkError } from "@/app/lib/offlineWrite";
 import type { GridColumn, GridRow } from "./EditableGrid";
@@ -33,6 +35,18 @@ export function ActivityTab({
   activityOptions,
   subcontractorOptions,
 }: DailyTabProps) {
+  const { data: members = [] } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () => fetchMembers(projectId),
+    enabled: Boolean(projectId),
+  });
+  const memberOptions = members
+    .filter((m) => m.status === "active" && m.user_id)
+    .map((m) => ({
+      value: m.user_id!,
+      label: m.full_name || m.email || m.mobile || m.user_id!,
+    }));
+
   const columns: GridColumn[] = [
     {
       key: "activity_description",
@@ -59,6 +73,15 @@ export function ActivityTab({
     { key: "quantity", header: "مقدار", type: "number", width: "90px" },
     { key: "quantity_measured", header: "اندازه‌گیری شده", type: "checkbox", width: "60px" },
     { key: "unit", header: "واحد", width: "80px" },
+    {
+      key: "responsible_user",
+      header: "مسئول",
+      type: "select",
+      options: memberOptions,
+      width: "140px",
+      placeholder: "انتخاب عضو",
+      testId: "activity-responsible-user",
+    },
     { key: "photo_file", header: "عکس", type: "photo", width: "90px" },
   ];
 
@@ -99,6 +122,8 @@ export function ActivityTab({
         quantity: null,
         quantity_measured: true,
         unit: "",
+        responsible_user: null,
+        responsible_name: "",
         photo_file: null,
       })}
       toPayload={(row: GridRow) => ({
@@ -114,6 +139,8 @@ export function ActivityTab({
         quantity: row.quantity_measured ? row.quantity ?? null : null,
         quantity_measured: row.quantity_measured ?? true,
         unit: row.unit ?? "",
+        responsible_user: row.responsible_user || null,
+        responsible_name: row.responsible_name ?? "",
         photo_file: row.photo_file ?? null,
       })}
       onChanged={onChanged}

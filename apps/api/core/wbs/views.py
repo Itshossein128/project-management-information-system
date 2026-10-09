@@ -75,10 +75,20 @@ class WBSViewSet(viewsets.ViewSet):
                 weight_physical=data.get('weight_physical'),
                 weight_financial=data.get('weight_financial'),
                 description=data.get('description', ''),
+                responsible=data.get('responsible'),
+                acceptance_criteria=data.get('acceptance_criteria', ''),
+                status=data.get('status', 'active'),
+                created_by=request.user,
             )
         except WBSValidationError as exc:
             return Response(
-                {'error': {'code': 'validation_error', 'message': str(exc), 'details': {}}},
+                {
+                    'error': {
+                        'code': getattr(exc, 'code', 'validation_error'),
+                        'message': str(exc),
+                        'details': {},
+                    }
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -89,14 +99,20 @@ class WBSViewSet(viewsets.ViewSet):
 
     @extend_schema(summary='Update WBS node', tags=['WBS'])
     def partial_update(self, request, project_pk=None, wbs_id=None):
-        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk)
+        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         serializer = WBSUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         try:
             node, warnings = update_wbs_node(node, **serializer.validated_data)
         except WBSValidationError as exc:
             return Response(
-                {'error': {'code': 'validation_error', 'message': str(exc), 'details': {}}},
+                {
+                    'error': {
+                        'code': getattr(exc, 'code', 'validation_error'),
+                        'message': str(exc),
+                        'details': {},
+                    }
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -107,12 +123,18 @@ class WBSViewSet(viewsets.ViewSet):
 
     @extend_schema(summary='Delete WBS node', tags=['WBS'])
     def destroy(self, request, project_pk=None, wbs_id=None):
-        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk)
+        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         try:
-            delete_wbs_node(node)
+            delete_wbs_node(node, user=request.user)
         except WBSConflictError as exc:
             return Response(
-                {'error': {'code': 'conflict', 'message': str(exc), 'details': {}}},
+                {
+                    'error': {
+                        'code': getattr(exc, 'code', 'conflict'),
+                        'message': str(exc),
+                        'details': {},
+                    }
+                },
                 status=status.HTTP_409_CONFLICT,
             )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -120,7 +142,7 @@ class WBSViewSet(viewsets.ViewSet):
     @extend_schema(summary='Move WBS node', tags=['WBS'])
     @action(detail=True, methods=['post'], url_path='move')
     def move(self, request, project_pk=None, wbs_id=None):
-        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk)
+        node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         serializer = WBSMoveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
@@ -131,7 +153,13 @@ class WBSViewSet(viewsets.ViewSet):
             )
         except WBSValidationError as exc:
             return Response(
-                {'error': {'code': 'validation_error', 'message': str(exc), 'details': {}}},
+                {
+                    'error': {
+                        'code': getattr(exc, 'code', 'validation_error'),
+                        'message': str(exc),
+                        'details': {},
+                    }
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

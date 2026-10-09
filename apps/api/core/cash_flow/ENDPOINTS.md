@@ -1,22 +1,45 @@
 # Cash Flow Endpoints
 
-This document outlines the API endpoints defined in the Cash Flow application (`apps/api/core/cash_flow/urls.py`). These endpoints manage cash transactions, monthly summaries, forecasting, gap analysis, and receivables/payables.
+Project-scoped routes live under `/api/v1/projects/{project_id}/` via `cash_flow/urls.py`.
+Portfolio routes are registered globally under `/api/v1/cash-flow/portfolio/`.
 
 ## Cash Flow Transactions
 
 | Endpoint | Method | Action | Description |
 | :--- | :--- | :--- | :--- |
-| `cash-flow/` | GET | list | Lists cash transactions (inflows/outflows) with filtering options (by date, type, category, forecast flag, counterparty). Includes a summarized block of totals (total inflow/outflow, net balance, category breakdown). |
-| `cash-flow/transactions/` | POST | create | Creates a new cash transaction. Validates and assigns project and user references. Automatically invalidates project cashflow caches upon creation. |
-| `cash-flow/transactions/<uuid:pk>/` | PATCH | partial_update | Partially updates a cash transaction. Invalidates caches upon update. |
-| `cash-flow/transactions/<uuid:pk>/` | DELETE | destroy | Deletes a cash transaction. Invalidates caches upon deletion. |
+| `cash-flow/` | GET | list | Lists cash transactions with summary. |
+| `cash-flow/transactions/` | POST | create | Creates a cash transaction. |
+| `cash-flow/transactions/<uuid:pk>/` | PATCH | partial_update | Updates a transaction. |
+| `cash-flow/transactions/<uuid:pk>/` | DELETE | destroy | Soft-deletes a transaction. |
 
-## Cash Flow Reports & Forecasts
+## Reports & Forecasts
 
-| Endpoint | Method | Action | Description |
+| Endpoint | Method | Permission | Description |
 | :--- | :--- | :--- | :--- |
-| `cash-flow/monthly/` | GET | monthly | Returns an aggregated monthly cash flow summary with cumulative balances. Results are cached and invalidated when transactions are modified. |
-| `cash-flow/forecast/` | GET | list | Provides a list of monthly cash flow forecasts enriched with actual figures from the past for variance comparison. |
-| `cash-flow/forecast/<str:month>/` | PUT | upsert | Inserts or updates the expected monthly forecast (expected inflows/outflows, confidence percentage) for a given month (`YYYY-MM`). |
-| `cash-flow/gap-analysis/` | GET | gap_analysis | Identifies months with projected cash deficits and cumulative negative balances based on the current forecasts. |
-| `cash-flow/receivables/` | GET | receivables | Returns an aggregated summary of expected receivables and payables derived from approved, unpaid IPCs (Interim Payment Certificates) in the contracts module. |
+| `cash-flow/monthly/` | GET | `view_cashflow` | Monthly actual summary. |
+| `cash-flow/forecast/` | GET | `view_cashflow` | Manual forecast vs actuals. |
+| `cash-flow/forecast/<str:month>/` | PUT | `edit_cashflow` | Upsert manual forecast (`YYYY-MM`). |
+| `cash-flow/gap-analysis/` | GET | `view_cashflow` | Gap analysis from manual forecasts. |
+| `cash-flow/receivables/` | GET | `view_cashflow` | Receivables/payables summary. |
+
+## Projection & Net Need (FR-CASH-001–004)
+
+| Endpoint | Method | Permission | Description |
+| :--- | :--- | :--- | :--- |
+| `cash-flow/projection/` | GET | `view_cashflow` | Domain-fed projected series (`from`/`to` = `YYYY-MM`). Keys: `months`, `actual_months`, `manual_forecast_months` (never merged). |
+| `cash-flow/suggested-need/` | GET | `view_cashflow` | FR-004 formula: due commitments + essential costs − certain planned receipts. |
+| `cash-flow/priority-score/` | GET | `view_cashflow` | Current priority score + composite. |
+| `cash-flow/priority-score/` | PUT | `edit_cashflow` | Upsert urgency/return_score/recovery_speed/risk (0–100). |
+
+## Portfolio Liquidity (FR-CASH-005–009)
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/v1/cash-flow/portfolio/cycles/` | GET/POST | List/create allocation cycles (`available_liquidity`, period, currency). |
+| `/api/v1/cash-flow/portfolio/cycles/{id}/propose/` | POST | Greedy proposal by composite; empty + `no_available_liquidity` when pool is 0; incomplete scores in `warnings`. |
+| `/api/v1/cash-flow/portfolio/cycles/{id}/decisions/` | POST | Record decision (`owner_id` + `rationale` required). Overlap without `acknowledge_overlap` → `overlapping_allocation`. |
+| `/api/v1/cash-flow/portfolio/cycles/{id}/simulations/` | POST | Save simulation payload `{name, lines}`. |
+| `/api/v1/cash-flow/portfolio/cycles/{id}/simulations/{sim_id}/compare/` | GET | Diff simulation vs latest proposal. |
+| `/api/v1/cash-flow/portfolio/report/` | GET | Membership-filtered projects + allocations (`from`, `to`, optional `cycle_id`). |
+
+Visibility for portfolio APIs uses active membership + `view_cashflow` (`projects_visible_for_cashflow`).

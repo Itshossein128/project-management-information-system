@@ -27,6 +27,8 @@ import {
 } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ExecutiveKpiPanel } from "@/components/dashboard/ExecutiveKpiPanel";
+import { KickoffCharterPanel } from "@/components/projects/KickoffCharterPanel";
+import { ProjectLifecycleBar } from "@/components/projects/ProjectLifecycleBar";
 
 function OverviewContent() {
   const { t } = useTranslation();
@@ -135,6 +137,8 @@ function OverviewContent() {
         }
       />
 
+      <ProjectLifecycleBar project={project} />
+
       {canViewDashboard ? (
         kpisLoading ? (
           <LoadingSkeleton rows={3} />
@@ -165,6 +169,24 @@ function OverviewContent() {
           </span>
           {project.contractor || "—"}
         </div>
+        {project.purpose ? (
+          <div className="sm:col-span-2" data-testid="overview-purpose">
+            <span className="text-muted-foreground">{t("project.purpose")}: </span>
+            {project.purpose}
+          </div>
+        ) : null}
+        {project.scope_description ? (
+          <div className="sm:col-span-2" data-testid="overview-scope">
+            <span className="text-muted-foreground">{t("project.scope")}: </span>
+            {project.scope_description}
+          </div>
+        ) : null}
+        {project.main_deliverables ? (
+          <div className="sm:col-span-2" data-testid="overview-deliverables">
+            <span className="text-muted-foreground">{t("project.deliverables")}: </span>
+            {project.main_deliverables}
+          </div>
+        ) : null}
         <div>
           <span className='text-muted-foreground'>
             {t("project.startDate")}:{" "}
@@ -180,6 +202,8 @@ function OverviewContent() {
           {project.contract_amount ?? "—"}
         </div>
       </div>
+
+      <KickoffCharterPanel projectId={projectId} />
 
       <h2 className='mb-3 text-lg font-semibold'>{t("project.modules")}</h2>
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>

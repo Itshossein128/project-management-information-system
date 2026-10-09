@@ -3,7 +3,14 @@ import type { Page } from "@playwright/test";
 const API_BASE = "http://127.0.0.1:8000/api";
 
 async function authHeaders(page: Page): Promise<Record<string, string>> {
-  const access = await page.evaluate(() => localStorage.getItem("auth_access_token"));
+  // Prefer storageState-style read; fall back after ensuring a document is loaded.
+  let access = await page
+    .evaluate(() => localStorage.getItem("auth_access_token"))
+    .catch(() => null);
+  if (!access) {
+    await page.goto("/projects", { waitUntil: "domcontentloaded" });
+    access = await page.evaluate(() => localStorage.getItem("auth_access_token"));
+  }
   if (!access) throw new Error("authHeaders requires loginAs first");
   return {
     Authorization: `Bearer ${access}`,
@@ -126,6 +133,103 @@ export async function createBudgetViaApi(
   if (!res.ok()) {
     throw new Error(`createBudgetViaApi failed: ${res.status()} ${await res.text()}`);
   }
+}
+
+/** Submit + approve a draft project so protected-field CR rules apply. */
+export async function activateProjectViaApi(
+  page: Page,
+  projectBasePath: string,
+): Promise<void> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const headers = await authHeaders(page);
+  const patch = await page.request.patch(`${API_BASE}/v1/projects/${projectId}/`, {
+    headers,
+    data: {
+      scope_description: "E2E activation scope",
+      contract_amount: "1000000",
+    },
+  });
+  if (!patch.ok()) {
+    throw new Error(`activateProjectViaApi patch failed: ${patch.status()} ${await patch.text()}`);
+  }
+  const submit = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/submit/`,
+    { headers },
+  );
+  if (!submit.ok()) {
+    throw new Error(`activateProjectViaApi submit failed: ${submit.status()} ${await submit.text()}`);
+  }
+  const approve = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/approve/`,
+    { headers },
+  );
+  if (!approve.ok()) {
+    throw new Error(
+      `activateProjectViaApi approve failed: ${approve.status()} ${await approve.text()}`,
+    );
+  }
+}
+
+/** Disable or enable a project capability via API. */
+export async function updateCapabilityViaApi(
+  page: Page,
+  projectBasePath: string,
+  capabilityKey: string,
+  enabled: boolean,
+): Promise<void> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const res = await page.request.patch(
+    `${API_BASE}/v1/projects/${projectId}/capabilities/${capabilityKey}/`,
+    {
+      headers: await authHeaders(page),
+      data: {
+        enabled,
+        mode: enabled ? "optional" : "disabled",
+      },
+    },
+  );
+  if (!res.ok()) {
+    throw new Error(
+      `updateCapabilityViaApi failed: ${res.status()} ${await res.text()}`,
+    );
+  }
+}
+
+/** Create an active fiscal period lock via API. */
+export async function createFiscalLockViaApi(
+  page: Page,
+  projectBasePath: string,
+  opts: {
+    periodStart?: string;
+    periodEnd?: string;
+    reason?: string;
+  } = {},
+): Promise<string> {
+  const projectId = projectBasePath.split("/").pop();
+  if (!projectId) throw new Error("invalid projectBasePath");
+  const res = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/fiscal-period-locks/`,
+    {
+      headers: await authHeaders(page),
+      data: {
+        period_start: opts.periodStart ?? "2020-01-01",
+        period_end: opts.periodEnd ?? "2030-12-31",
+        reason: opts.reason ?? "E2E fiscal lock",
+      },
+    },
+  );
+  if (!res.ok()) {
+    throw new Error(
+      `createFiscalLockViaApi failed: ${res.status()} ${await res.text()}`,
+    );
+  }
+  const body = (await res.json()) as { id?: string };
+  if (!body.id) {
+    throw new Error(`createFiscalLockViaApi missing id: ${JSON.stringify(body)}`);
+  }
+  return body.id;
 }
 
 /** Create an actual cost via API. Returns cost id. */

@@ -31,6 +31,7 @@ export interface ContractDetail extends ContractRow {
   performance_guarantee_expiry: string | null;
   advance_guarantee_amount: number | null;
   advance_guarantee_expiry: string | null;
+  payment_terms: string;
   file_url: string;
   notes: string;
   items: ContractItemRow[];
@@ -65,12 +66,15 @@ export interface IPCRow {
   period_start: string | null;
   period_end: string | null;
   gross_amount: number;
+  submitted_amount: number | null;
+  approved_amount: number | null;
   net_amount: number | null;
   status: string;
   days_overdue: number | null;
 }
 
 export interface IPCDetail extends IPCRow {
+  approval_variance_note: string;
   items: Array<{
     id: string;
     description: string;
@@ -85,8 +89,37 @@ export interface IPCDetail extends IPCRow {
   deductions: Array<{ id: string; deduction_type: string; amount: number; description: string }>;
   deductions_total: number;
   net_amount_computed: number;
+  collections_total?: number;
+  remaining_receivable?: number;
   notes: string;
   rejection_reason: string;
+}
+
+export interface ReceivablesReport {
+  as_of: string;
+  near_due_days: number;
+  summary: {
+    overdue_count: number;
+    overdue_remaining: string;
+    near_due_count: number;
+    near_due_remaining: string;
+  };
+  items: Array<{
+    ipc_id: string;
+    contract_id: string;
+    contract_number: string;
+    ipc_number: number;
+    status: string;
+    submitted_amount: string | null;
+    approved_amount: string | null;
+    net_amount: string | null;
+    collected_total: string;
+    remaining_receivable: string;
+    planned_payment_date: string;
+    band: "overdue" | "near_due";
+    days_overdue: number | null;
+    days_until_due: number | null;
+  }>;
 }
 
 export const CONTRACT_TYPE_LABELS: Record<string, string> = {
@@ -158,8 +191,32 @@ export function submitIPC(projectId: string, id: string) {
   return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/submit/`, { method: "POST" });
 }
 
-export function approveIPC(projectId: string, id: string) {
-  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/approve/`, { method: "POST" });
+export function approveIPC(
+  projectId: string,
+  id: string,
+  body: {
+    approved_amount?: number | string;
+    approval_variance_note?: string;
+    planned_payment_date?: string;
+  } = {},
+) {
+  return apiJson<IPCDetail>(`${base(projectId)}/ipcs/${id}/approve/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function fetchReceivablesReport(
+  projectId: string,
+  params: { near_due_days?: number; contract_id?: string } = {},
+) {
+  const qs = new URLSearchParams();
+  if (params.near_due_days != null) qs.set("near_due_days", String(params.near_due_days));
+  if (params.contract_id) qs.set("contract_id", params.contract_id);
+  const q = qs.toString();
+  return apiJson<ReceivablesReport>(
+    `${base(projectId)}/ipcs/receivables-report/${q ? `?${q}` : ""}`,
+  );
 }
 
 export function payIPC(projectId: string, id: string, actualPaymentDate?: string) {

@@ -55,7 +55,9 @@ class TestWBSServices:
     def test_delete_wbs_node_success(self, project):
         node, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
         delete_wbs_node(node)
-        assert WBS.objects.filter(id=node.id).count() == 0
+        node.refresh_from_db()
+        assert node.is_deleted is True
+        assert WBS.objects.filter(id=node.id, is_deleted=False).count() == 0
 
     def test_move_wbs_node_invalid_position(self, project):
         node1, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Node 1')

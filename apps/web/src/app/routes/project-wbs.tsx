@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
-import { fetchWBSTree } from "@/app/lib/api/wbs";
+import { fetchWBSTree, type WBSNode } from "@/app/lib/api/wbs";
 import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
 import { WbsEmptyState } from "@/components/wbs/wbs-empty-state";
+import { WbsPackageMetaWarning } from "@/components/wbs/wbs-package-meta-warning";
 import { MspImportWizard } from "@/components/wbs/msp-import-wizard";
 import { SaveAsTemplateModal } from "@/components/templates/save-as-template-modal";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -17,6 +18,12 @@ import {
 } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
+
+function collectLeafPackages(nodes: WBSNode[]): WBSNode[] {
+  return nodes.flatMap((n) =>
+    n.children.length === 0 ? [n] : collectLeafPackages(n.children),
+  );
+}
 
 function ProjectWBSContent() {
   const { t } = useTranslation();
@@ -32,6 +39,8 @@ function ProjectWBSContent() {
     queryKey: ["wbs", projectId],
     queryFn: () => fetchWBSTree(projectId),
   });
+
+  const leafPackages = useMemo(() => collectLeafPackages(tree), [tree]);
 
   return (
     <>
@@ -75,12 +84,17 @@ function ProjectWBSContent() {
         <QueryErrorState onRetry={() => void refetch()} />
       ) : tree.length === 0 ? (
         canEditWBS ? (
-          <WbsEmptyState
-            projectId={projectId}
-            onCreated={() =>
-              void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
-            }
-          />
+          <>
+            <p className="mb-3 text-sm text-muted-foreground" data-testid="wbs-empty-warning">
+              {t("wbs.emptyWarning")}
+            </p>
+            <WbsEmptyState
+              projectId={projectId}
+              onCreated={() =>
+                void qc.invalidateQueries({ queryKey: ["wbs", projectId] })
+              }
+            />
+          </>
         ) : (
           <EmptyState
             title={t("pages.wbs.empty")}
@@ -88,16 +102,19 @@ function ProjectWBSContent() {
           />
         )
       ) : (
-        <div className='overflow-x-auto rounded-lg border border-border'>
-          <div className='min-w-max'>
-            {tree.map((node) => (
-              <WBSNodeRow
-                key={node.wbs_id}
-                node={node}
-                projectId={projectId}
-                canEdit={canEditWBS}
-              />
-            ))}
+        <div className="space-y-3">
+          <WbsPackageMetaWarning nodes={leafPackages} />
+          <div className='overflow-x-auto rounded-lg border border-border'>
+            <div className='min-w-max'>
+              {tree.map((node) => (
+                <WBSNodeRow
+                  key={node.wbs_id}
+                  node={node}
+                  projectId={projectId}
+                  canEdit={canEditWBS}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}

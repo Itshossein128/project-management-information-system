@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const raw = data.user as AuthUser & { groups?: string[] };
     const userWithRoles: AuthUser = {
       ...data.user,
+      id: String(data.user.id),
       roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
     };
     setStoredAuth({ access: data.access, refresh: data.refresh }, userWithRoles);
@@ -125,8 +126,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const restoreSession = React.useCallback(async () => {
     const profile = await restoreSessionFromServer();
     if (profile) {
-      const withRoles = {
+      const withRoles: AuthUser = {
         ...profile,
+        id: String(profile.id),
         roles: normalizeRoles(profile.roles ?? (profile as AuthUser & { groups?: string[] }).groups),
       };
       setUser(withRoles);

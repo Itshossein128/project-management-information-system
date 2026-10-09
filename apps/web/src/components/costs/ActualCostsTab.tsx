@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
 import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";
 import { fetchActivities } from "@/app/lib/api/activities";
@@ -12,7 +12,9 @@ import {
   fetchSuppliers,
   formatFaAmount,
   type CostCategory,
+  type Supplier,
 } from "@/app/lib/api/costs";
+import { listFiscalLocks } from "@/app/lib/api/project-core";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton } from "@/components/layout/page-header";
@@ -20,6 +22,12 @@ import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+
+function asArray<T>(value: T[] | { results?: T[] } | null | undefined): T[] {
+  if (Array.isArray(value)) return value;
+  if (value && Array.isArray(value.results)) return value.results;
+  return [];
+}
 
 function SourceBadge({ isAuto }: { isAuto: boolean }) {
   return (
@@ -33,6 +41,17 @@ function SourceBadge({ isAuto }: { isAuto: boolean }) {
       {isAuto ? "خودکار" : "دستی"}
     </span>
   );
+}
+
+function dateInActiveLock(
+  isoDate: string,
+  locks: { period_start: string; period_end: string; is_active?: boolean }[],
+): boolean {
+  if (!isoDate) return false;
+  return locks.some((lock) => {
+    if (lock.is_active === false) return false;
+    return lock.period_start <= isoDate && isoDate <= lock.period_end;
+  });
 }
 
 function AddCostDrawer({
@@ -54,24 +73,52 @@ function AddCostDrawer({
   const [wbsId, setWbsId] = useState("");
   const [activityId, setActivityId] = useState("");
   const [supplierId, setSupplierId] = useState("");
+  const [corrective, setCorrective] = useState(false);
+  const [correctionReason, setCorrectionReason] = useState("");
 
-  const { data: wbsFlat = [] } = useQuery({
+  const { data: wbsData } = useQuery({
     queryKey: ["wbs-flat", projectId],
     queryFn: () => fetchWBSFlat(projectId),
     enabled: open,
   });
+  const wbsFlat = asArray(wbsData);
 
   const { data: activitiesData } = useQuery({
     queryKey: ["activities", projectId, "cost-drawer"],
     queryFn: () => fetchActivities(projectId, { per_page: 200 }),
     enabled: open,
   });
+  const activities = asArray(activitiesData);
 
-  const { data: suppliers = [] } = useQuery({
+  const { data: suppliersData } = useQuery({
     queryKey: ["suppliers", projectId],
     queryFn: () => fetchSuppliers(projectId),
     enabled: open,
   });
+  const suppliers = asArray<Supplier>(suppliersData);
+
+  const { data: fiscalLocksData } = useQuery({
+    queryKey: ["project-fiscal-locks", projectId],
+    queryFn: () => listFiscalLocks(projectId),
+    // Prefetch even while closed so corrective UI is ready on open.
+    enabled: Boolean(projectId),
+  });
+  const fiscalLocks = asArray(fiscalLocksData);
+
+  const activeLocks = useMemo(
+    () => fiscalLocks.filter((lock) => lock.is_active !== false),
+    [fiscalLocks],
+  );
+  // Show corrective path whenever an active lock exists (date may be unset yet).
+  const showCorrectivePath = activeLocks.length > 0;
+  const lockApplies =
+    activeLocks.length > 0 &&
+    (!costDate || dateInActiveLock(costDate, activeLocks));
+
+  // When a lock forces the corrective path, pre-check and keep reason editable.
+  useEffect(() => {
+    if (lockApplies) setCorrective(true);
+  }, [lockApplies]);
 
   const save = useMutation({
     mutationFn: () =>
@@ -83,6 +130,9 @@ function AddCostDrawer({
         wbs: wbsId || null,
         activity: activityId || null,
         supplier: supplierId || null,
+        ...(corrective
+          ? { corrective: true, correction_reason: correctionReason.trim() }
+          : {}),
       }),
     onSuccess: () => {
       toast.success("هزینه ثبت شد");
@@ -91,6 +141,12 @@ function AddCostDrawer({
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const canSave =
+    Boolean(costDate && amount) &&
+    !save.isPending &&
+    (!corrective || correctionReason.trim().length > 0) &&
+    !(lockApplies && !corrective);
 
   return (
     <Drawer
@@ -101,7 +157,7 @@ function AddCostDrawer({
         <Button
           variant="primary"
           data-testid="actual-cost-save-btn"
-          disabled={!costDate || !amount || save.isPending}
+          disabled={!canSave}
           loading={save.isPending}
           onClick={() => save.mutate()}
         >
@@ -111,6 +167,35 @@ function AddCostDrawer({
     >
       <div className="flex flex-col gap-4" data-testid="actual-cost-drawer">
         <JalaliDatePicker name="cost_date" label="تاریخ هزینه" value={costDate} onChange={setCostDate} />
+        {showCorrectivePath ? (
+          <div
+            className="space-y-2 rounded-md border border-warning-200 bg-warning-50 p-3 dark:border-warning-800 dark:bg-warning-950/30"
+            data-testid="actual-cost-corrective-section"
+          >
+            <p className="text-sm text-muted-foreground">
+              یک قفل دوره مالی فعال است. برای ثبت در دوره قفل‌شده، مسیر اصلاحی را فعال کنید.
+            </p>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                data-testid="actual-cost-corrective"
+                checked={corrective}
+                onChange={(e) => setCorrective(e.target.checked)}
+              />
+              <span>ثبت اصلاحی (دوره مالی قفل)</span>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span>دلیل اصلاح</span>
+              <input
+                className="rounded-md border border-input bg-background px-3 py-2"
+                data-testid="actual-cost-correction-reason"
+                value={correctionReason}
+                onChange={(e) => setCorrectionReason(e.target.value)}
+                required={corrective || lockApplies}
+              />
+            </label>
+          </div>
+        ) : null}
         <label className="flex flex-col gap-1 text-sm">
           <span>دسته هزینه</span>
           <select
@@ -160,7 +245,7 @@ function AddCostDrawer({
             onChange={(e) => setActivityId(e.target.value)}
           >
             <option value="">—</option>
-            {(activitiesData?.results ?? []).map((a) => (
+            {activities.map((a) => (
               <option key={a.activity_id} value={a.activity_id}>
                 {a.activity_code} — {a.activity_name}
               </option>

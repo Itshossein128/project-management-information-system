@@ -16,6 +16,7 @@ import { LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { WbsPackageMetaWarning } from "@/components/wbs/wbs-package-meta-warning";
 
 type GridMode = "wbs" | "activity";
 
@@ -33,25 +34,29 @@ function cellKey(rowId: string, cat: CostCategory) {
 export function BudgetGrid({
   projectId,
   canEdit,
+  versionId,
+  locked = false,
 }: {
   projectId: string;
   canEdit: boolean;
+  versionId?: string | null;
+  locked?: boolean;
 }) {
   const toast = useToast();
   const qc = useQueryClient();
   const [mode, setMode] = useState<GridMode>("wbs");
   const [edits, setEdits] = useState<Record<string, number>>({});
   const [editingCell, setEditingCell] = useState<string | null>(null);
+  const editable = canEdit && !locked;
 
   const { data: budgetData, isLoading: budgetsLoading, isError: budgetsError, refetch: refetchBudgets } = useQuery({
-    queryKey: ["budgets", projectId],
-    queryFn: () => fetchBudgets(projectId),
+    queryKey: ["budgets", projectId, versionId ?? "default"],
+    queryFn: () => fetchBudgets(projectId, versionId ? { version_id: versionId } : {}),
   });
 
   const { data: wbsFlat = [], isLoading: wbsLoading, isError: wbsError, refetch: refetchWbs } = useQuery({
     queryKey: ["wbs-flat", projectId],
     queryFn: () => fetchWBSFlat(projectId),
-    enabled: mode === "wbs",
   });
 
   const { data: activitiesData, isLoading: actLoading, isError: actError, refetch: refetchActs } = useQuery({
@@ -145,21 +150,22 @@ export function BudgetGrid({
           }
         }
       }
-      return postBudgetsBulk(projectId, items);
+      return postBudgetsBulk(projectId, items, versionId);
     },
     onSuccess: (res) => {
       toast.success(`${res.saved} بودجه ذخیره شد`);
       if (res.warning) toast.error(res.warning);
       setEdits({});
       void qc.invalidateQueries({ queryKey: ["budgets", projectId] });
+      void qc.invalidateQueries({ queryKey: ["budget-versions", projectId] });
       void qc.invalidateQueries({ queryKey: ["cost-summary", projectId] });
       void qc.invalidateQueries({ queryKey: ["cost-variance", projectId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const isLoading = budgetsLoading || (mode === "wbs" ? wbsLoading : actLoading);
-  const isError = budgetsError || (mode === "wbs" ? wbsError : actError);
+  const isLoading = budgetsLoading || wbsLoading || (mode === "activity" && actLoading);
+  const isError = budgetsError || wbsError || (mode === "activity" && actError);
   const hasEdits = Object.keys(edits).length > 0;
 
   if (isLoading) {
@@ -177,11 +183,30 @@ export function BudgetGrid({
     );
   }
 
+  const packageMetaNodes =
+    mode === "wbs"
+      ? wbsFlat
+      : wbsFlat.filter((w) =>
+          (activitiesData?.results ?? []).some((a) => a.wbs_id === w.wbs_id),
+        );
+
   return (
     <div className="space-y-4" data-testid="budget-grid">
       {budgetData?.warning ? (
         <p className="rounded-md bg-warning-50 px-3 py-2 text-sm text-warning-900 dark:bg-warning-950/40 dark:text-warning-100">
           {budgetData.warning}
+        </p>
+      ) : null}
+
+      <WbsPackageMetaWarning nodes={packageMetaNodes} testId="budget-wbs-meta-warning" />
+
+      {locked ? (
+        <p
+          className="rounded-md bg-muted/60 px-3 py-2 text-sm text-muted-foreground"
+          data-testid="budget-locked-banner"
+        >
+          این نسخه مصوب قفل است. برای تغییر مبلغ از درخواست تغییر بودجه استفاده کنید؛ جابه‌جایی
+          درون‌بودجه‌ای از پنل مانده قابل تخصیص انجام می‌شود.
         </p>
       ) : null}
 
@@ -208,7 +233,7 @@ export function BudgetGrid({
             فعالیت
           </Button>
         </div>
-        {canEdit && hasEdits ? (
+        {editable && hasEdits ? (
           <Button
             variant="primary"
             size="sm"
@@ -260,7 +285,7 @@ export function BudgetGrid({
                   const isEditing = editingCell === k;
                   return (
                     <td key={cat.value} className="px-1 py-1 text-center">
-                      {canEdit && isEditing ? (
+                      {editable && isEditing ? (
                         <input
                           autoFocus
                           className="w-24 rounded border px-1 py-0.5 text-center text-xs"
@@ -283,8 +308,8 @@ export function BudgetGrid({
                           type="button"
                           className="w-full rounded px-1 py-0.5 hover:bg-muted/60 disabled:cursor-default"
                           data-testid={`budget-cell-${row.code}-${cat.value}`}
-                          disabled={!canEdit}
-                          onClick={() => canEdit && setEditingCell(k)}
+                          disabled={!editable}
+                          onClick={() => editable && setEditingCell(k)}
                         >
                           {amount ? formatFaAmount(amount) : "—"}
                         </button>

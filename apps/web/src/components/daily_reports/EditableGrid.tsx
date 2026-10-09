@@ -34,6 +34,8 @@ export interface GridColumn {
   refKey?: string;
   width?: string;
   placeholder?: string;
+  /** Optional Playwright / a11y test id on the cell control. */
+  testId?: string;
   /** Read-only computed cell. */
   computed?: (row: GridRow) => string | number;
 }
@@ -365,11 +367,10 @@ function renderCell(
         className={inputClass}
         value={(value as string) ?? ""}
         disabled={disabled}
-        onChange={(e) => setCell(row._key, col.key, e.target.value)}
+        data-testid={col.testId}
+        onChange={(e) => setCell(row._key, col.key, e.target.value || null)}
       >
-        <option value="" disabled>
-          —
-        </option>
+        <option value="">{col.placeholder ?? "—"}</option>
         {(col.options ?? []).map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
