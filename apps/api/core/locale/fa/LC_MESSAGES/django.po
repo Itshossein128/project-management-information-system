@@ -136,3 +136,54 @@ msgstr "مقدار باید بزرگ‌تر یا مساوی صفر باشد."
 
 msgid "At least one of quantity_in or quantity_out must be greater than zero."
 msgstr "حداقل یکی از مقادیر ورودی یا خروجی باید بزرگ‌تر از صفر باشد."
+
+msgid "Name cannot be empty."
+msgstr "نام نمی‌تواند خالی باشد."
+
+msgid "Name must be unique within the list."
+msgstr "نام باید در فهرست یکتا باشد."
+
+msgid "Cell cannot be empty."
+msgstr "خانه نمی‌تواند خالی باشد."
+
+msgid "Type must be benefit or cost."
+msgstr "نوع باید سود یا هزینه باشد."
+
+msgid "Weight cannot be empty."
+msgstr "وزن نمی‌تواند خالی باشد."
+
+msgid "Weight must be a finite number."
+msgstr "وزن باید عدد متناهی باشد."
+
+msgid "Weight must be finite."
+msgstr "وزن باید متناهی باشد."
+
+msgid "Weight cannot be negative."
+msgstr "وزن نمی‌تواند منفی باشد."
+
+msgid "Weight sum must be positive."
+msgstr "مجموع وزن‌ها باید مثبت باشد."
+
+msgid "Cost criterion cell cannot be zero."
+msgstr "مقدار معیار هزینه نمی‌تواند صفر باشد."
+
+msgid "Cell must be numeric."
+msgstr "خانه باید عددی باشد."
+
+msgid "Cell must be finite."
+msgstr "خانه باید متناهی باشد."
+
+msgid "Cell cannot be negative."
+msgstr "خانه نمی‌تواند منفی باشد."
+
+msgid "Method is not selected on this case."
+msgstr "این روش روی پرونده انتخاب نشده است."
+
+msgid "Decision runs are immutable."
+msgstr "سابقه‌های اجرا تغییرناپذیرند."
+
+msgid "Title cannot be empty."
+msgstr "عنوان نمی‌تواند خالی باشد."
+
+msgid "Title max length is 200."
+msgstr "حداکثر طول عنوان ۲۰۰ نویسه است."

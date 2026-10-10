@@ -81,7 +81,7 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
       icon: "building" as IconName,
       path: `${base}/${PATHS.PROJECT_WBS}`,
       activePathPrefix: base,
-      activePathExclude: `${base}/(?!wbs|activities|schedule|progress|activity-log)`,
+      activePathExclude: `${base}/(?!wbs|activities|schedule|progress|activity-log|decision-support)`,
       children: [
         { label: "WBS", labelI18nKey: "nav.projectWbs", path: `${base}/${PATHS.PROJECT_WBS}` },
         {
@@ -108,6 +108,11 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Activity bank",
           labelI18nKey: "nav.projectActivityLog",
           path: `${base}/${PATHS.PROJECT_ACTIVITY_LOG}`,
+        },
+        {
+          label: "Decision support",
+          labelI18nKey: "nav.projectDecisionSupport",
+          path: `${base}/${PATHS.PROJECT_DECISION_SUPPORT}`,
         },
       ],
     },

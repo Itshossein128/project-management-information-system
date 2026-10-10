@@ -38,6 +38,8 @@ PERMISSIONS: dict[str, str] = {
     'approve_hr': 'Approve HR capacity exceptions',
     'view_wage': 'View wage and labor rates',
     'edit_wage': 'Edit wage and labor rates',
+    'view_decision_support': 'View decision support',
+    'edit_decision_support': 'Edit decision support',
 }
 
 ALL_PERMISSION_CODENAMES = frozenset(PERMISSIONS.keys())
@@ -56,6 +58,8 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_cashflow',
         'view_contracts',
         'view_hr',
+        'view_decision_support',
+        'edit_decision_support',
     ],
     'site_supervisor': [
         'view_project',
@@ -117,6 +121,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_activities',
         'view_dashboard',
         'view_hr',
+        'view_decision_support',
     ],
     'executive_approver': [
         'view_project',

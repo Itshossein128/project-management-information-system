@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'workflow',
     'economic',
     'risk',
+    'decision_support',
     'alerts',
     'audit',
     'storage',
