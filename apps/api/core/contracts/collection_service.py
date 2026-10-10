@@ -11,6 +11,10 @@ from contracts.models import IPC, IPCCollection, IPCStatus
 
 
 def collections_total(ipc: IPC) -> Decimal:
+    # ⚡ Bolt: Leverage prefetched collections in Python memory if available to prevent extra DB queries
+    if hasattr(ipc, '_prefetched_objects_cache') and 'collections' in ipc._prefetched_objects_cache:
+        total = sum(c.amount for c in ipc.collections.all() if not c.is_deleted)
+        return Decimal(total)
     total = (
         IPCCollection.objects.filter(ipc=ipc, is_deleted=False).aggregate(t=Sum('amount'))['t']
         or 0
