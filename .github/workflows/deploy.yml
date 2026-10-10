@@ -17,6 +17,9 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
+    concurrency:
+      group: production-deployment
+      cancel-in-progress: false
 
     steps:
       - name: Checkout Code
@@ -31,30 +34,50 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE || '' }}
           password: ${{ secrets.SSH_PASSWORD || '' }}
           port: ${{ secrets.SSH_PORT || 22 }}
+          command_timeout: 20m
           script_stop: true
           script: |
             set -e
             echo "==> Navigating to application directory..."
             cd /opt/building-management
+            exec 9>/var/lock/velora-deploy.lock
+            flock -w 300 9
 
-            echo "==> Pulling latest changes from branch..."
+            echo "==> Checking out the exact release..."
             git fetch origin ${{ github.ref_name }}
-            git reset --hard origin/${{ github.ref_name }}
+            git reset --hard ${{ github.sha }}
+            compose=(docker compose -f docker-compose.customer.yml -f docker-compose.production.yml)
+            export VELORA_API_IMAGE=ipcas-api:${{ github.sha }}
+            export VELORA_WEB_IMAGE=ipcas-web:${{ github.sha }}
+            "${compose[@]}" config --quiet
 
-            echo "==> Rebuilding and restarting containers..."
-            docker compose -f docker-compose.customer.yml up --build -d
+            echo "==> Backing up the database and deployment settings..."
+            umask 077
+            backup_dir=/opt/building-management-backups/$(date -u +%Y%m%dT%H%M%SZ)-${{ github.sha }}
+            mkdir -p "$backup_dir"
+            cp .env docker-compose.customer.yml docker-compose.production.yml "$backup_dir/"
+            cp -a infra/traefik "$backup_dir/"
+            "${compose[@]}" exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$backup_dir/database.dump"
+            "${compose[@]}" exec -T postgres pg_restore -l < "$backup_dir/database.dump" > /dev/null
 
-            echo "==> Waiting for API health check..."
-            for i in {1..30}; do
-              if curl -s -f http://127.0.0.1:8000/api/schema/ > /dev/null; then
-                echo "==> Deployment successful! API is healthy."
-                exit 0
-              fi
-              echo "Waiting for API to become healthy ($i/30)..."
-              sleep 3
-            done
+            echo "==> Building the release and applying migrations once..."
+            "${compose[@]}" build api web
+            "${compose[@]}" run --rm --no-deps api python manage.py migrate --noinput
+            "${compose[@]}" run --rm --no-deps api python manage.py setup_event_topology
 
-            echo "==> Health check timed out!"
-            docker compose -f docker-compose.customer.yml ps
-            docker compose -f docker-compose.customer.yml logs --tail=50 api
-            exit 1
+            # Keep subsequent manual starts on the release built by this job.
+            python3 - <<'PY'
+            import os
+            from pathlib import Path
+            path = Path('.env')
+            keys = ('VELORA_API_IMAGE', 'VELORA_WEB_IMAGE')
+            lines = [line for line in path.read_text().splitlines() if line.split('=', 1)[0] not in keys]
+            lines.extend(key + '=' + os.environ[key] for key in keys)
+            path.write_text('\n'.join(lines) + '\n')
+            path.chmod(0o600)
+            PY
+
+            echo "==> Starting and verifying the production services..."
+            "${compose[@]}" up -d --no-build --wait --wait-timeout 120 postgres rabbitmq redis minio api worker celery-worker celery-beat web traefik
+            curl --fail --silent --show-error --max-time 10 http://127.0.0.1/api/health/
+            "${compose[@]}" ps

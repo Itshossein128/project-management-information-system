@@ -17,7 +17,7 @@ x-api-environment: &api-environment
   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID}
   AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY}
   AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-ipcas-files}
-  AWS_S3_USE_SSL: "false"
+  AWS_S3_USE_SSL: ${AWS_S3_USE_SSL:-true}
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/0
 
@@ -83,10 +83,8 @@ services:
     logging: *app-logging
 
   minio:
-    ports:
-      - "9000:9000"
     environment:
-      MINIO_API_CORS_ALLOW_ORIGIN: ${FRONTEND_URL}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${CORS_ALLOWED_ORIGINS}
 
 volumes:
   celery_beat:

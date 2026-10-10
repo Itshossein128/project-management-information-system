@@ -61,6 +61,14 @@ http:
       service: api
       priority: 85
 
+    storage:
+      rule: PathPrefix(`/ipcas-files/`)
+      entryPoints:
+        - web
+        - websecure
+      service: storage
+      priority: 75
+
     web-http:
       rule: PathPrefix(`/`)
       entryPoints:
@@ -90,3 +98,7 @@ http:
       loadBalancer:
         servers:
           - url: http://web:3000
+    storage:
+      loadBalancer:
+        servers:
+          - url: http://minio:9000

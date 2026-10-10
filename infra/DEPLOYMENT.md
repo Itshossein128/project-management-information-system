@@ -9,10 +9,11 @@ Required public settings in `.env`:
 DEBUG=false
 SEED_DEMO_DATA=false
 VITE_API_BASE_URL=/api
-FRONTEND_URL=http://SERVER_IP
-ALLOWED_HOSTS=SERVER_IP,localhost,127.0.0.1,api,traefik
-CORS_ALLOWED_ORIGINS=http://SERVER_IP
-AWS_S3_PUBLIC_ENDPOINT_URL=http://SERVER_IP:9000
+FRONTEND_URL=https://APP_DOMAIN
+ALLOWED_HOSTS=APP_DOMAIN,SERVER_IP,localhost,127.0.0.1,api,traefik
+CORS_ALLOWED_ORIGINS=https://APP_DOMAIN,http://SERVER_IP
+AWS_S3_PUBLIC_ENDPOINT_URL=https://APP_DOMAIN
+AWS_S3_USE_SSL=true
 VELORA_API_IMAGE=ipcas-api:RELEASE
 VELORA_WEB_IMAGE=ipcas-web:RELEASE
 ```
@@ -20,8 +21,10 @@ VELORA_WEB_IMAGE=ipcas-web:RELEASE
 Set strong `SECRET_KEY`, PostgreSQL, RabbitMQ, and S3 credentials separately.
 For existing databases and storage, retain their credentials during an update.
 The S3 endpoint must be reachable from both the API container and the browser:
-the application uploads and downloads files directly using signed URLs. Port
-9000 serves the S3 API; the MinIO management console remains internal.
+the application uploads and downloads files directly using signed URLs. Traefik
+forwards `/ipcas-files/` to MinIO without rewriting the signed path or Host.
+If using a different bucket name, update this router's path prefix too. MinIO's
+S3 API and management console ports remain internal.
 
 From the repository root, after backing up the database, uploads, and `.env`:
 
@@ -39,10 +42,10 @@ API health checks use `/api/health/`, which checks PostgreSQL and Redis. Web
 health checks use `/login`. App logs rotate at 10 MB with three files retained.
 Celery Beat runs scheduled jobs with a persistent schedule file.
 
-The IP deployment uses HTTP. For trusted HTTPS, configure a domain and a valid
-certificate for both the application and its S3 endpoint. The customer Traefik
-configuration contains a legacy domain; do not assume that its bundled
-certificate is trusted or that it covers a server IP.
+The IP fallback uses HTTP. Configure a domain and a valid certificate (or retain
+the existing domain's trusted HTTPS proxy) for the application and signed file
+URLs. The customer Traefik configuration contains a legacy domain; do not assume
+that its bundled certificate is trusted or that it covers a server IP.
 
 Keep release image tags and database backups for rollback. Recreate services
 with the previous image tags and configuration; restore a database backup only
