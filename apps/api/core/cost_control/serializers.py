@@ -353,6 +353,10 @@ class CommitmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'status', 'remaining']
 
     def get_remaining(self, obj):
+        # ⚡ Bolt: Leverage prefetched payments collection in Python memory when available to prevent N+1 queries
+        if hasattr(obj, '_prefetched_objects_cache') and 'payments' in obj._prefetched_objects_cache:
+            posted_total = sum(p.amount for p in obj.payments.all() if not p.is_deleted and p.status == 'posted')
+            return float(Decimal(obj.amount) - Decimal(posted_total))
         from cost_control.cbs_services import posted_payments_total
 
         return float(Decimal(obj.amount) - posted_payments_total(obj))
