@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  Loader2,
   Plus,
   RefreshCw,
   Save,
@@ -95,7 +96,10 @@ function SyncCell({
         title={title}
         aria-label={title}
         onClick={onRetry}
-        className={cn("rounded p-1 hover:bg-muted", className)}
+        className={cn(
+          "rounded p-1 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] hover:bg-muted",
+          className,
+        )}
       >
         <Icon className="size-4" />
       </button>
@@ -269,13 +273,17 @@ export function EditableGrid({
                         disabled={!row._dirty || savingKey === row._key}
                         onClick={() => saveRow(row)}
                         className={cn(
-                          "rounded p-1 hover:bg-muted disabled:opacity-30",
+                          "rounded p-1 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] hover:bg-muted disabled:opacity-30",
                           row._dirty
                             ? "text-success-600"
                             : "text-muted-foreground",
                         )}
                       >
-                        <Save className="size-4" />
+                        {savingKey === row._key ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Save className="size-4" />
+                        )}
                       </button>
                       <button
                         type="button"
@@ -283,7 +291,7 @@ export function EditableGrid({
                         aria-label="حذف"
                         disabled={savingKey === row._key}
                         onClick={() => deleteRow(row)}
-                        className="rounded p-1 text-danger-600 hover:bg-muted disabled:opacity-30"
+                        className="rounded p-1 text-danger-600 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] hover:bg-muted disabled:opacity-30"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -302,7 +310,7 @@ export function EditableGrid({
           type="button"
           onClick={addRow}
           data-testid="grid-add-row-btn"
-          className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/40"
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] hover:bg-muted/40"
         >
           <Plus className="size-4" />
           {addLabel}
