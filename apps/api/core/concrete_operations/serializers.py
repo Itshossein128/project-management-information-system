@@ -22,5 +22,7 @@ class ReadyMixDeliverySerializer(serializers.ModelSerializer):
 
     def get_fields(self):
         fields = super().get_fields()
+        if getattr(self.context.get('view'), 'swagger_fake_view', False):
+            return fields
         fields['supplier'].queryset = Supplier.objects.filter(project_id=self.context['view'].kwargs['project_pk'])
         return fields

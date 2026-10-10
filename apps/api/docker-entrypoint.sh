@@ -41,16 +41,18 @@ PY
   done
 fi
 
-echo "Running migrations..."
-python manage.py migrate --noinput
+if [[ "${SKIP_MIGRATIONS:-}" != "true" ]]; then
+  echo "Running migrations..."
+  python manage.py migrate --noinput --fake-initial
 
-if [[ -n "${RABBITMQ_URL:-}" ]]; then
-  python manage.py setup_event_topology || echo "Warning: RabbitMQ topology setup failed"
-fi
+  if [[ -n "${RABBITMQ_URL:-}" ]]; then
+    python manage.py setup_event_topology || echo "Warning: RabbitMQ topology setup failed"
+  fi
 
-if [[ "${SEED_DEMO_DATA:-}" == "true" ]]; then
-  echo "Seeding demo data..."
-  python manage.py seed_rbac_dev || echo "Warning: demo seed failed"
+  if [[ "${SEED_DEMO_DATA:-}" == "true" ]]; then
+    echo "Seeding demo data..."
+    python manage.py seed_rbac_dev || echo "Warning: demo seed failed"
+  fi
 fi
 
 exec "$@"

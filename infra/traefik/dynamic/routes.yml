@@ -61,10 +61,16 @@ http:
       service: api
       priority: 85
 
-    web:
+    web-http:
       rule: PathPrefix(`/`)
       entryPoints:
         - web
+      service: web
+      priority: 1
+
+    web:
+      rule: PathPrefix(`/`)
+      entryPoints:
         - websecure
       service: web
       priority: 1

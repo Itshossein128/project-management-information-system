@@ -7,8 +7,10 @@ from cost_control.urls import global_urlpatterns as cost_global_urlpatterns
 from economic.urls import global_urlpatterns as economic_global_urlpatterns
 from projects.member_views import UserLookupView
 from projects.role_views import PermissionCatalogView
+from common.health import health
 
 urlpatterns = [
+    path('api/health/', health, name='health'),
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/v1/', include('storage.urls')),

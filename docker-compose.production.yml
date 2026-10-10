@@ -1,0 +1,92 @@
+# Apply after docker-compose.customer.yml, using the server's existing .env.
+# Run migrations explicitly before starting this stack; never seed demo data.
+x-app-logging: &app-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-api-environment: &api-environment
+  DEBUG: "false"
+  SEED_DEMO_DATA: "false"
+  SKIP_MIGRATIONS: "true"
+  FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL to the public application URL}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS explicitly}
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?Set CORS_ALLOWED_ORIGINS explicitly}
+  AWS_S3_ENDPOINT_URL: ${AWS_S3_PUBLIC_ENDPOINT_URL:?Set the browser-accessible S3 endpoint}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY}
+  AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-ipcas-files}
+  AWS_S3_USE_SSL: "false"
+  CELERY_BROKER_URL: redis://redis:6379/0
+  CELERY_RESULT_BACKEND: redis://redis:6379/0
+
+services:
+  api:
+    image: ${VELORA_API_IMAGE:-ipcas-api}
+    environment: *api-environment
+    command: [gunicorn, config.wsgi:application, --bind, "0.0.0.0:8000", --workers, "2", --threads, "2", --timeout, "60", --max-requests, "1000", --max-requests-jitter, "100"]
+    logging: *app-logging
+    healthcheck:
+      test: [CMD-SHELL, "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/', timeout=4)\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    image: ${VELORA_WEB_IMAGE:-ipcas-web}
+    build:
+      args:
+        VITE_API_BASE_URL: /api
+    depends_on:
+      api:
+        condition: service_healthy
+    logging: *app-logging
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/login').then(r => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    image: ${VELORA_API_IMAGE:-ipcas-api}
+    environment: *api-environment
+    depends_on:
+      api:
+        condition: service_healthy
+    logging: *app-logging
+
+  celery-worker:
+    image: ${VELORA_API_IMAGE:-ipcas-api}
+    environment: *api-environment
+    command: [celery, -A, config, worker, -l, info, --concurrency, "2"]
+    depends_on:
+      api:
+        condition: service_healthy
+    logging: *app-logging
+
+  celery-beat:
+    image: ${VELORA_API_IMAGE:-ipcas-api}
+    restart: unless-stopped
+    command: [celery, -A, config, beat, -l, info, --schedule, /var/lib/celery/celerybeat-schedule]
+    environment:
+      <<: *api-environment
+      DATABASE_URL: postgres://${POSTGRES_USER:-ipcas}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ipcas}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY}
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - celery_beat:/var/lib/celery
+    logging: *app-logging
+
+  minio:
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_API_CORS_ALLOW_ORIGIN: ${FRONTEND_URL}
+
+volumes:
+  celery_beat:
