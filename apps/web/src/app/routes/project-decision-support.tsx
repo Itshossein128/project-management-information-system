@@ -17,8 +17,10 @@ import {
   type DecisionRun,
   type SawRankingRow,
   type TopsisRankingRow,
+  type AhpRunResult,
 } from "@/app/lib/api/decision-support";
 import { PATHS } from "@/app/routeVars";
+import { AhpMethodPanel } from "@/components/decision-support/AhpMethodPanel";
 import { ExecutionHistoryList } from "@/components/decision-support/ExecutionHistoryList";
 import { InputSnapshotViewer } from "@/components/decision-support/InputSnapshotViewer";
 import { NamedListEditor } from "@/components/decision-support/NamedListEditor";
@@ -62,10 +64,12 @@ function DecisionSupportContent() {
   const [weights, setWeights] = useState<number[]>([]);
   const [types, setTypes] = useState<CriterionType[]>([]);
   const [matrix, setMatrix] = useState<(number | null)[][]>([]);
+  const [ahpMatrix, setAhpMatrix] = useState<(number | null)[][]>([]);
   const [issues, setIssues] = useState(parseApiValidationIssues(null));
   const [selectedRun, setSelectedRun] = useState<DecisionRun | null>(null);
   const [latestSawRanking, setLatestSawRanking] = useState<SawRankingRow[]>([]);
   const [latestTopsisRanking, setLatestTopsisRanking] = useState<TopsisRankingRow[]>([]);
+  const [latestAhpResult, setLatestAhpResult] = useState<AhpRunResult | null>(null);
 
   const casesQuery = useQuery({
     queryKey: ["decision-cases", projectId],
@@ -85,6 +89,7 @@ function DecisionSupportContent() {
     setIssues([]);
     setLatestSawRanking([]);
     setLatestTopsisRanking([]);
+    setLatestAhpResult(null);
     void getDecisionCase(projectId, caseId).then((c) => {
       setTitle(c.title);
       setMethods([...(c.selected_methods ?? [])]);
@@ -100,6 +105,7 @@ function DecisionSupportContent() {
         ),
       );
       setMatrix([...(c.performance_matrix ?? [])]);
+      setAhpMatrix([...(c.ahp_matrix ?? [])]);
     });
   };
 
@@ -112,10 +118,12 @@ function DecisionSupportContent() {
     setWeights([]);
     setTypes([]);
     setMatrix([]);
+    setAhpMatrix([]);
     setIssues([]);
     setSelectedRun(null);
     setLatestSawRanking([]);
     setLatestTopsisRanking([]);
+    setLatestAhpResult(null);
   };
 
   const saveMutation = useMutation({
@@ -129,6 +137,7 @@ function DecisionSupportContent() {
         weights: alignWeights(n, weights),
         types: alignTypes(n, types),
         performance_matrix: matrix,
+        ahp_matrix: ahpMatrix,
       };
       if (selectedCaseId) {
         return patchDecisionCase(projectId, selectedCaseId, body);
@@ -283,6 +292,17 @@ function DecisionSupportContent() {
             />
           ) : null}
 
+          {selectedCaseId && methods.includes("ahp") ? (
+            <AhpMethodPanel
+              projectId={projectId}
+              caseId={selectedCaseId}
+              criteria={criteria}
+              matrix={ahpMatrix}
+              onMatrixChange={setAhpMatrix}
+              latestResult={latestAhpResult}
+            />
+          ) : null}
+
           {selectedCaseId ? (
             <div className="space-y-3">
               <h2 className="text-sm font-medium">{t("decisionSupport.history")}</h2>
@@ -295,6 +315,8 @@ function DecisionSupportContent() {
                       setLatestSawRanking(run.result.ranking as SawRankingRow[]);
                     } else if (run.method === "topsis" && run.result?.ranking) {
                       setLatestTopsisRanking(run.result.ranking as TopsisRankingRow[]);
+                    } else if (run.method === "ahp" && run.result) {
+                      setLatestAhpResult(run.result as unknown as AhpRunResult);
                     }
                   });
                 }}

@@ -139,7 +139,12 @@ class TestDecisionRuns:
         base = CASES.format(project_id=project.id)
         case = auth_client.post(
             base,
-            {'title': 'Crit', 'selected_methods': ['ahp'], 'criteria': ['c1', 'c2']},
+            {
+                'title': 'Crit',
+                'selected_methods': ['ahp'],
+                'criteria': ['c1', 'c2'],
+                'ahp_matrix': [[1.0, 1.0], [1.0, 1.0]],
+            },
             format='json',
         )
         assert case.status_code == status.HTTP_201_CREATED, case.data

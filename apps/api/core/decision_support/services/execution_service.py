@@ -9,6 +9,7 @@ from django.utils import timezone
 from config.exceptions import CodedValidationError
 
 from decision_support.models import CRITERIA_METHODS, METHOD_IDS, RANKING_METHODS, DecisionCase, DecisionRun
+from decision_support.services.ahp_service import compute_ahp
 from decision_support.services.saw_service import compute_saw
 from decision_support.services.topsis_service import compute_topsis
 from decision_support.services.validators import _issue, raise_issues, validate_criteria_only, validate_ranking_inputs
@@ -82,6 +83,21 @@ def create_run(case: DecisionCase, method: str, user) -> DecisionRun:
             'status': 'ok',
             'engine': 'topsis',
             'ranking': topsis_out['ranking'],
+        }
+    elif method == 'ahp':
+        ahp_out = compute_ahp(
+            case.criteria or [],
+            case.ahp_matrix or [],
+        )
+        snapshot = _snapshot_from_case(case)
+        result = {
+            'status': 'ok',
+            'engine': 'ahp',
+            'weights': ahp_out['weights'],
+            'lambda_max': ahp_out['lambda_max'],
+            'ci': ahp_out['ci'],
+            'cr': ahp_out['cr'],
+            'is_consistent': ahp_out['is_consistent'],
         }
     elif method in RANKING_METHODS:
         # future ranking methods — Phase 1 stub until their engine phases

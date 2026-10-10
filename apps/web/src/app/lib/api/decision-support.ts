@@ -33,7 +33,7 @@ export type DecisionCase = {
   weights: number[];
   types: CriterionType[];
   performance_matrix: (number | null)[][];
-  ahp_matrix: unknown[];
+  ahp_matrix: (number | null)[][];
   dematel_matrix: unknown[];
   ism_matrix: unknown[];
   criteria_count?: number;
@@ -51,10 +51,31 @@ export type DecisionCaseSummary = {
   updated_at: string;
 };
 
+export type AhpWeightRow = {
+  criterion: string;
+  weight: number;
+  rank: number;
+};
+
+export type AhpRunResult = {
+  status: "ok";
+  engine: "ahp";
+  weights: AhpWeightRow[];
+  lambda_max: number;
+  ci: number;
+  cr: number;
+  is_consistent: boolean;
+};
+
 export type DecisionRunResult = {
   status?: string;
   engine?: string | null;
   ranking?: RankingRow[];
+  weights?: AhpWeightRow[];
+  lambda_max?: number;
+  ci?: number;
+  cr?: number;
+  is_consistent?: boolean;
 };
 
 export type DecisionRunSummary = {

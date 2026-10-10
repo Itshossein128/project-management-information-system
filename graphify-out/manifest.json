@@ -1230,8 +1230,8 @@
     "semantic_hash": "4a51e775bc5651cd557133dcbeb5e46a"
   },
   "apps/api/core/config/settings.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0518298,
+    "mtime": 1791660236.6243725,
+    "seen": 1791661967.6415634,
     "ast_hash": "080b6677200990fe177c6f889707fccf",
     "semantic_hash": ""
   },
@@ -2472,8 +2472,8 @@
     "semantic_hash": "3859aa3573b889bb667e81ac063a4f2a"
   },
   "apps/api/core/permissions/constants.py": {
-    "mtime": 1791650715.8668838,
-    "seen": 1791660194.061243,
+    "mtime": 1791660236.639372,
+    "seen": 1791661967.6575758,
     "ast_hash": "1e7a5af272eb99a81fb807c516155f57",
     "semantic_hash": ""
   },
@@ -2772,8 +2772,8 @@
     "semantic_hash": "9414594b3bb8a41deaafbba70128b075"
   },
   "apps/api/core/projects/urls.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0654607,
+    "mtime": 1791660236.643372,
+    "seen": 1791661967.6647587,
     "ast_hash": "d8779cdedfc5fb0efaffd9740d1626bb",
     "semantic_hash": ""
   },
@@ -4026,8 +4026,8 @@
     "semantic_hash": "9a8b0fb2e68e0216ab2a69de403f8804"
   },
   "apps/web/src/app/routeVars.ts": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0739908,
+    "mtime": 1791660236.646372,
+    "seen": 1791661967.6800597,
     "ast_hash": "20247c230c958156fe15e4882f1f60d9",
     "semantic_hash": ""
   },
@@ -4098,8 +4098,8 @@
     "semantic_hash": "cc6c27b3570b84785ea44dc46e9b31e6"
   },
   "apps/web/src/app/routes/business-setup.routes.ts": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0745044,
+    "mtime": 1791660236.647372,
+    "seen": 1791661967.680706,
     "ast_hash": "df141703114f55702586141b938f874b",
     "semantic_hash": ""
   },
@@ -5310,8 +5310,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/config/project-navigation.config.ts": {
-    "mtime": 1791650046.552701,
-    "seen": 1791660194.083664,
+    "mtime": 1791660236.6573718,
+    "seen": 1791661967.6961713,
     "ast_hash": "a68a0d0b57f3bced42d3e25f8ec569c3",
     "semantic_hash": ""
   },
@@ -5364,8 +5364,8 @@
     "semantic_hash": "11ecfcbd6f7344db8ce9e9ae76e70a6c"
   },
   "apps/web/tsconfig.json": {
-    "mtime": 1791653001.1170144,
-    "seen": 1791660194.0841355,
+    "mtime": 1791660236.6573718,
+    "seen": 1791661967.6965597,
     "ast_hash": "0a25de30d9b884be88da837514392bdf",
     "semantic_hash": ""
   },
@@ -8256,158 +8256,158 @@
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/__init__.py": {
-    "mtime": 1791649484.4610615,
-    "seen": 1791660194.0542324,
+    "mtime": 1791660236.6263726,
+    "seen": 1791661967.6468177,
     "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/apps.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0542338,
+    "mtime": 1791660236.6273725,
+    "seen": 1791661967.6468198,
     "ast_hash": "657882ff3e6ef9a4116899708e8cba9d",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/migrations/0001_initial.py": {
-    "mtime": 1791649666.6242404,
-    "seen": 1791660194.0542352,
+    "mtime": 1791660236.6273725,
+    "seen": 1791661967.646822,
     "ast_hash": "6bc5b5f20651a7f375c702c768a0f68e",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/migrations/__init__.py": {
-    "mtime": 1791649484.4610615,
-    "seen": 1791660194.0542364,
+    "mtime": 1791660236.6273725,
+    "seen": 1791661967.6468236,
     "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/models.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0542376,
+    "mtime": 1791660236.6273725,
+    "seen": 1791661967.646825,
     "ast_hash": "89b8421070e87c8e819b61c8773c4fd8",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/serializers.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.054239,
+    "mtime": 1791660236.6283724,
+    "seen": 1791661967.6468263,
     "ast_hash": "ac6258b9ed3afaac98c42de69ffe8227",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/__init__.py": {
-    "mtime": 1791649484.4610615,
-    "seen": 1791660194.05424,
+    "mtime": 1791660236.6283724,
+    "seen": 1791661967.6468277,
     "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/case_service.py": {
-    "mtime": 1791650715.8508842,
-    "seen": 1791660194.054241,
+    "mtime": 1791660236.6283724,
+    "seen": 1791661967.6468322,
     "ast_hash": "6fb06d5e7ebf12dc335c561468d1d0bc",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/execution_service.py": {
-    "mtime": 1791659072.1705816,
-    "seen": 1791660194.0542424,
-    "ast_hash": "f39d69dd6e273dda167e21bf70654eae",
+    "mtime": 1791661230.388471,
+    "seen": 1791661967.6468334,
+    "ast_hash": "9287513c9fde68e26e24e4a3c1a03b24",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/saw_service.py": {
-    "mtime": 1791654978.1056783,
-    "seen": 1791660194.0542433,
+    "mtime": 1791660236.6283724,
+    "seen": 1791661967.6468346,
     "ast_hash": "2331c9ab9512cf31fb891e6132c4170c",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/topsis_service.py": {
-    "mtime": 1791659161.3311985,
-    "seen": 1791660194.0542452,
+    "mtime": 1791660236.6283724,
+    "seen": 1791661967.6468365,
     "ast_hash": "d3fa23be8b530fa02a9b6574b793f06d",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/validators.py": {
-    "mtime": 1791654825.538945,
-    "seen": 1791660194.0542462,
-    "ast_hash": "7268b1be62ef5b748eb7e1de81d21e71",
+    "mtime": 1791661144.263584,
+    "seen": 1791661967.6468375,
+    "ast_hash": "2e75574882a3ffda9b58e5d4aba6f1ed",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/services/weights.py": {
-    "mtime": 1791650715.8438845,
-    "seen": 1791660194.0542476,
+    "mtime": 1791660236.6303723,
+    "seen": 1791661967.6468384,
     "ast_hash": "2d1a58d2dac553ee3e41fca7c5a98970",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/__init__.py": {
-    "mtime": 1791649484.4610615,
-    "seen": 1791660194.054249,
+    "mtime": 1791660236.6303723,
+    "seen": 1791661967.6468396,
     "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_case_api.py": {
-    "mtime": 1791650715.8428845,
-    "seen": 1791660194.05425,
+    "mtime": 1791660236.6313725,
+    "seen": 1791661967.6468434,
     "ast_hash": "0fd548d3694a76e5444782209974f6b9",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_models.py": {
-    "mtime": 1791650715.8638837,
-    "seen": 1791660194.054251,
+    "mtime": 1791660236.6313725,
+    "seen": 1791661967.6468444,
     "ast_hash": "34a5ca5bc6f3567bb3d34a429350ff32",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_no_math_in_views.py": {
-    "mtime": 1791655052.7035363,
-    "seen": 1791660194.0542526,
+    "mtime": 1791660236.6313725,
+    "seen": 1791661967.6468453,
     "ast_hash": "56b30251203897b153568d746e2da432",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_permissions_catalog.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0542536,
+    "mtime": 1791660236.6333723,
+    "seen": 1791661967.646847,
     "ast_hash": "357b25acece4e6122532ab90c9623317",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_runs_immutability.py": {
-    "mtime": 1791654857.545306,
-    "seen": 1791660194.0542545,
-    "ast_hash": "79becdd22d9175246be84ffdfb274334",
+    "mtime": 1791661748.6154368,
+    "seen": 1791661967.6468482,
+    "ast_hash": "84e23365b7a8b1a471e1c2f9f9d4d6b6",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_saw_api.py": {
-    "mtime": 1791654878.663545,
-    "seen": 1791660194.0542557,
+    "mtime": 1791660236.6333723,
+    "seen": 1791661967.6468494,
     "ast_hash": "10919cf57e2cedfd518f2f2263f4f4e8",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_saw_service.py": {
-    "mtime": 1791655215.8924313,
-    "seen": 1791660194.054257,
+    "mtime": 1791660236.6333723,
+    "seen": 1791661967.6468506,
     "ast_hash": "7b8337922c128b9644338271db2b75c7",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_topsis_api.py": {
-    "mtime": 1791659938.003378,
-    "seen": 1791660194.054258,
+    "mtime": 1791660236.6333723,
+    "seen": 1791661967.6468515,
     "ast_hash": "e3c285955e75bc9e2d2b342c29338a20",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_topsis_service.py": {
-    "mtime": 1791659148.6932516,
-    "seen": 1791660194.05426,
+    "mtime": 1791660236.6343722,
+    "seen": 1791661967.646853,
     "ast_hash": "f028b9adbba53909cd5c8379cda7c46d",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/tests/test_validators.py": {
-    "mtime": 1791654860.025334,
-    "seen": 1791660194.0542622,
+    "mtime": 1791660236.6343722,
+    "seen": 1791661967.6468542,
     "ast_hash": "a692f7a154f91ecbc5b0ea82076f025b",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/urls.py": {
-    "mtime": 1791650715.8438845,
-    "seen": 1791660194.054264,
+    "mtime": 1791660236.6363723,
+    "seen": 1791661967.6468554,
     "ast_hash": "41297f4bbbd41c9c71d2f9625bd28d2d",
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/views.py": {
-    "mtime": 1791654848.7322063,
-    "seen": 1791660194.0542662,
+    "mtime": 1791660236.6373723,
+    "seen": 1791661967.6468565,
     "ast_hash": "1880f79addc624a0237a5de9b0af21f9",
     "semantic_hash": ""
   },
@@ -8616,8 +8616,8 @@
     "semantic_hash": ""
   },
   "apps/api/core/master_data/migrations/0013_decision_support_permissions.py": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0605016,
+    "mtime": 1791660236.6383722,
+    "seen": 1791661967.6563582,
     "ast_hash": "92ba93da37ea8665aca2d0b4762afc01",
     "semantic_hash": ""
   },
@@ -9462,9 +9462,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/api/decision-support.ts": {
-    "mtime": 1791658792.19396,
-    "seen": 1791660194.0721617,
-    "ast_hash": "8269e39267df338a8f427dbaee5eca31",
+    "mtime": 1791661060.7136974,
+    "seen": 1791661967.6770403,
+    "ast_hash": "edbb86dcac425fd3fc662b9f9e09b3cb",
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/api/hr-capacity.ts": {
@@ -9534,9 +9534,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/app/routes/project-decision-support.tsx": {
-    "mtime": 1791659369.279377,
-    "seen": 1791660194.0759883,
-    "ast_hash": "5f5720b1c75be1d8d310981f840e6af2",
+    "mtime": 1791661637.5277772,
+    "seen": 1791661967.682809,
+    "ast_hash": "748bb11c61b760610e4faad87be9d547",
     "semantic_hash": ""
   },
   "apps/web/src/app/routes/project-decisions-workflow.tsx": {
@@ -9654,134 +9654,134 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/CriterionTypeToggle.tsx": {
-    "mtime": 1791655043.4794297,
-    "seen": 1791660194.078562,
+    "mtime": 1791660236.647372,
+    "seen": 1791661967.6884024,
     "ast_hash": "a97d047a77ac027c54e2543b899cce42",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/ExecutionHistoryList.tsx": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0785632,
+    "mtime": 1791660236.648372,
+    "seen": 1791661967.6884055,
     "ast_hash": "3d1f68bff2a572b3d209193519229417",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/InputSnapshotViewer.tsx": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.078565,
+    "mtime": 1791660236.648372,
+    "seen": 1791661967.688408,
     "ast_hash": "6d0f9e5d1f13c9a80afe59fd4f33aae9",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/NamedListEditor.test.ts": {
-    "mtime": 1791652476.2140446,
-    "seen": 1791660194.0785666,
+    "mtime": 1791660236.648372,
+    "seen": 1791661967.6884103,
     "ast_hash": "ca6d3a5c4a837ed4d69ec92eaec22379",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/NamedListEditor.tsx": {
-    "mtime": 1791652952.8038237,
-    "seen": 1791660194.0785682,
+    "mtime": 1791660236.6493719,
+    "seen": 1791661967.6884134,
     "ast_hash": "59ae623b15ab665035ff5acb00f0b471",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/RankingResultTable.test.ts": {
-    "mtime": 1791659223.336944,
-    "seen": 1791660194.0785694,
+    "mtime": 1791660236.6493719,
+    "seen": 1791661967.6884153,
     "ast_hash": "3513830a05e3983ed997bf336caa60f7",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/RankingResultTable.tsx": {
-    "mtime": 1791658888.0234525,
-    "seen": 1791660194.0785708,
+    "mtime": 1791660236.6493719,
+    "seen": 1791661967.688417,
     "ast_hash": "5b8e21006036c49d068cdcd6a59a7bbb",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/RectangularMatrixEditor.test.ts": {
-    "mtime": 1791655212.8133953,
-    "seen": 1791660194.0785728,
+    "mtime": 1791660236.6493719,
+    "seen": 1791661967.6884186,
     "ast_hash": "fcc6605261c511a525a31f063b5e0b45",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/RectangularMatrixEditor.tsx": {
-    "mtime": 1791654949.490351,
-    "seen": 1791660194.078574,
+    "mtime": 1791660236.6503718,
+    "seen": 1791661967.6884205,
     "ast_hash": "bbd35709aae12283f5c4536f74859cad",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/RunActionBar.tsx": {
-    "mtime": 1791654960.9084814,
-    "seen": 1791660194.0785751,
+    "mtime": 1791660236.651372,
+    "seen": 1791661967.6884222,
     "ast_hash": "9f644bbef3193dee81a18e73b4368411",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/SawMethodPanel.tsx": {
-    "mtime": 1791655210.9233732,
-    "seen": 1791660194.0785763,
+    "mtime": 1791660236.651372,
+    "seen": 1791661967.6884232,
     "ast_hash": "3c33d5819ad5e8205718282041946198",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/TopsisMethodPanel.tsx": {
-    "mtime": 1791659243.283864,
-    "seen": 1791660194.078578,
+    "mtime": 1791660236.652372,
+    "seen": 1791661967.688428,
     "ast_hash": "ef9b3259ea555ca8dc83907e7e216bea",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/ValidationIssueList.test.ts": {
-    "mtime": 1791652961.275229,
-    "seen": 1791660194.0785801,
+    "mtime": 1791660236.652372,
+    "seen": 1791661967.6884296,
     "ast_hash": "f493ed3d8e47d7d69a458f8c99e445b8",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/ValidationIssueList.tsx": {
-    "mtime": 1791652951.265749,
-    "seen": 1791660194.0785813,
+    "mtime": 1791660236.652372,
+    "seen": 1791661967.6884308,
     "ast_hash": "bb7a7e34a4fb5419ee4063c53c451646",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/WeightVectorEditor.tsx": {
-    "mtime": 1791654940.5922492,
-    "seen": 1791660194.0785823,
+    "mtime": 1791660236.6533718,
+    "seen": 1791661967.6884325,
     "ast_hash": "68c9490f208324a0d5539216092c5a72",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/i18n.keys.test.ts": {
-    "mtime": 1791658840.9036968,
-    "seen": 1791660194.0785832,
-    "ast_hash": "1423a33598b510d0f2e6b956613d4108",
+    "mtime": 1791661122.0408766,
+    "seen": 1791661967.6884348,
+    "ast_hash": "25b21475da2e32895818650edaafb716",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/named-list-rules.ts": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0785847,
+    "mtime": 1791660236.6533718,
+    "seen": 1791661967.6884372,
     "ast_hash": "8b9a520aa3168c9f47b74ac431a084f4",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/no-client-saw-math.test.ts": {
-    "mtime": 1791655029.0522635,
-    "seen": 1791660194.078586,
+    "mtime": 1791660236.6543717,
+    "seen": 1791661967.6884396,
     "ast_hash": "19862418fc97adc5d222e2fd2ad7f381",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/no-client-topsis-math.test.ts": {
-    "mtime": 1791659212.1249895,
-    "seen": 1791660194.0785868,
+    "mtime": 1791660236.6543717,
+    "seen": 1791661967.6884418,
     "ast_hash": "6738dd1575a510d235c009e80506527e",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/ranking-input-rules.ts": {
-    "mtime": 1791655205.4823098,
-    "seen": 1791660194.078588,
+    "mtime": 1791660236.6543717,
+    "seen": 1791661967.6884444,
     "ast_hash": "308d6bde15c97c4944021f5e86e2a8bd",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/ranking-result-rows.ts": {
-    "mtime": 1791658801.0559113,
-    "seen": 1791660194.078589,
+    "mtime": 1791660236.6543717,
+    "seen": 1791661967.6884465,
     "ast_hash": "7feec3bc4b117ed4bdea5d3a306ca0aa",
     "semantic_hash": ""
   },
   "apps/web/src/components/decision-support/validation-issues.ts": {
-    "mtime": 1791654989.7048113,
-    "seen": 1791660194.07859,
+    "mtime": 1791660236.6553717,
+    "seen": 1791661967.6884506,
     "ast_hash": "580151eda80d9644fc1e881155d7d571",
     "semantic_hash": ""
   },
@@ -9888,8 +9888,8 @@
     "semantic_hash": ""
   },
   "apps/api/core/decision_support/ENDPOINTS.md": {
-    "mtime": 1791654851.888242,
-    "seen": 1791660194.0961502,
+    "mtime": 1791660236.6263726,
+    "seen": 1791661967.7120445,
     "ast_hash": "d0940cdf759359ca2019a75f53c75632",
     "semantic_hash": ""
   },
@@ -9906,92 +9906,92 @@
     "semantic_hash": ""
   },
   "docs/decision-support-component-inventory.md": {
-    "mtime": 1791647566.5084004,
-    "seen": 1791660194.097135,
+    "mtime": 1791660236.6583717,
+    "seen": 1791661967.7134666,
     "ast_hash": "5407244f26ce3ae44d1fb6ac37c85f79",
     "semantic_hash": ""
   },
   "docs/decision-support-speckit-prompts.md": {
-    "mtime": 1791648120.5782816,
-    "seen": 1791660194.097137,
+    "mtime": 1791660236.6583717,
+    "seen": 1791661967.7134688,
     "ast_hash": "8219fef77d2254e5706070c4eba7c7ac",
     "semantic_hash": ""
   },
   "docs/decision-support/01-module-scope.md": {
-    "mtime": 1791646295.965671,
-    "seen": 1791660194.097138,
+    "mtime": 1791660236.6593716,
+    "seen": 1791661967.713472,
     "ast_hash": "ae3b6300017cb7f035e77d72d8f9deb7",
     "semantic_hash": ""
   },
   "docs/decision-support/02-decision-inputs.md": {
-    "mtime": 1791646295.9666712,
-    "seen": 1791660194.0971394,
+    "mtime": 1791660236.6593716,
+    "seen": 1791661967.7134748,
     "ast_hash": "f6d798ef020f3460609d49f9e5f4c9ff",
     "semantic_hash": ""
   },
   "docs/decision-support/03-saw.md": {
-    "mtime": 1791646295.9666712,
-    "seen": 1791660194.0971408,
+    "mtime": 1791660236.6613717,
+    "seen": 1791661967.7134774,
     "ast_hash": "0cc7b8c619ed5cf0192531531d1e3a57",
     "semantic_hash": ""
   },
   "docs/decision-support/04-topsis.md": {
-    "mtime": 1791646295.9666712,
-    "seen": 1791660194.0971417,
+    "mtime": 1791660236.6623716,
+    "seen": 1791661967.7134795,
     "ast_hash": "55cec7a2303ee3d4030da104f59fed70",
     "semantic_hash": ""
   },
   "docs/decision-support/05-ahp.md": {
-    "mtime": 1791646398.1309104,
-    "seen": 1791660194.0971427,
+    "mtime": 1791660236.6643715,
+    "seen": 1791661967.7134817,
     "ast_hash": "45ad304176c03fefd4585055af8851a0",
     "semantic_hash": ""
   },
   "docs/decision-support/06-dematel.md": {
-    "mtime": 1791646398.1319103,
-    "seen": 1791660194.0971448,
+    "mtime": 1791660236.6653714,
+    "seen": 1791661967.7134838,
     "ast_hash": "5c3d70e560123ecd2d27f6829f321cab",
     "semantic_hash": ""
   },
   "docs/decision-support/07-ism.md": {
-    "mtime": 1791646398.1319103,
-    "seen": 1791660194.0971475,
+    "mtime": 1791660236.6663716,
+    "seen": 1791661967.7134862,
     "ast_hash": "d890b15dd1c1e9b6bf1f075c7194af79",
     "semantic_hash": ""
   },
   "docs/decision-support/08-execution-records.md": {
-    "mtime": 1791646398.1319103,
-    "seen": 1791660194.0971498,
+    "mtime": 1791660236.6663716,
+    "seen": 1791661967.713488,
     "ast_hash": "c1d013b3aafc5dd93692db3e6ee11cb8",
     "semantic_hash": ""
   },
   "docs/decision-support/09-ranking-reference.md": {
-    "mtime": 1791646568.5438855,
-    "seen": 1791660194.0971518,
+    "mtime": 1791660236.6663716,
+    "seen": 1791661967.7134902,
     "ast_hash": "7167b747a01f4599ba26dfc4487253df",
     "semantic_hash": ""
   },
   "docs/decision-support/10-acceptance-checks.md": {
-    "mtime": 1791646568.2978787,
-    "seen": 1791660194.097154,
+    "mtime": 1791660236.6673715,
+    "seen": 1791661967.713493,
     "ast_hash": "e2b104483717ce6a425d1ed9023f48cf",
     "semantic_hash": ""
   },
   "docs/decision-support/11-source-review.md": {
-    "mtime": 1791646568.2978787,
-    "seen": 1791660194.0971553,
+    "mtime": 1791660236.6693714,
+    "seen": 1791661967.7134945,
     "ast_hash": "321f07ad070d9284b18340d92e574dfe",
     "semantic_hash": ""
   },
   "docs/decision-support/12-references.md": {
-    "mtime": 1791646568.2978787,
-    "seen": 1791660194.097157,
+    "mtime": 1791660236.6693714,
+    "seen": 1791661967.7134967,
     "ast_hash": "918c5f6e637859a47689b676a7ef3318",
     "semantic_hash": ""
   },
   "docs/decision-support/README.md": {
-    "mtime": 1791648123.588353,
-    "seen": 1791660194.0971591,
+    "mtime": 1791660236.6703713,
+    "seen": 1791661967.7134986,
     "ast_hash": "a2cba680a79d00e4a6e227a3c42e0905",
     "semantic_hash": ""
   },
@@ -13404,14 +13404,14 @@
     "semantic_hash": ""
   },
   "graphify-out/converted/document (10)_b9e725d6.md": {
-    "mtime": 1791660142.8748496,
-    "seen": 1791660194.0987594,
+    "mtime": 1791660236.684371,
+    "seen": 1791661967.7570672,
     "ast_hash": "352dbe8ad411a4ec46b92005f7e01413",
     "semantic_hash": ""
   },
   "graphify-out/converted/document (5)_ee210162.md": {
-    "mtime": 1791660143.2218397,
-    "seen": 1791660194.0987613,
+    "mtime": 1791660236.685371,
+    "seen": 1791661967.7570693,
     "ast_hash": "e891b2127d5a37ba7370f9e7a20b7c60",
     "semantic_hash": ""
   },
@@ -14502,177 +14502,297 @@
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/checklists/requirements.md": {
-    "mtime": 1791648700.179184,
-    "seen": 1791660194.0992181,
+    "mtime": 1791660236.9543643,
+    "seen": 1791661967.7688286,
     "ast_hash": "911df86a507a327f6a66830f36c4f00e",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/contracts/decision-cases.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0992188,
+    "mtime": 1791660236.9583642,
+    "seen": 1791661967.768831,
     "ast_hash": "c25f9770a970d026a8fe9e13578ffa66",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/contracts/decision-runs.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.09922,
+    "mtime": 1791660236.960364,
+    "seen": 1791661967.7688327,
     "ast_hash": "97becc8b8f47345b21fcd983fe341f1b",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/contracts/input-validation.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.099221,
+    "mtime": 1791660236.9633641,
+    "seen": 1791661967.768835,
     "ast_hash": "38d5418f654e699fd0134732e7bfda19",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/data-model.md": {
-    "mtime": 1791650715.8448844,
-    "seen": 1791660194.0992222,
+    "mtime": 1791660236.964364,
+    "seen": 1791661967.7688365,
     "ast_hash": "42e8c237f4d58a93f745a50b7473405c",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/plan.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0992234,
+    "mtime": 1791660236.964364,
+    "seen": 1791661967.768838,
     "ast_hash": "04f43641d9784b02afc755a2bae3698c",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/quickstart.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0992246,
+    "mtime": 1791660236.965364,
+    "seen": 1791661967.768839,
     "ast_hash": "2f6c6506ee4877b8db3c5c49a1e88821",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/research.md": {
-    "mtime": 1791650715.8648837,
-    "seen": 1791660194.0992255,
+    "mtime": 1791660236.9673638,
+    "seen": 1791661967.76884,
     "ast_hash": "ff53998f5a686da2f7e0f1327089ad1e",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/spec.md": {
-    "mtime": 1791648686.814822,
-    "seen": 1791660194.0992267,
+    "mtime": 1791660236.9673638,
+    "seen": 1791661967.7688413,
     "ast_hash": "48e80a68c6767f09b9a11b24c2f85ed7",
     "semantic_hash": ""
   },
   "specs/018-decision-case-shell/tasks.md": {
-    "mtime": 1791653009.2343554,
-    "seen": 1791660194.0992277,
+    "mtime": 1791660236.968364,
+    "seen": 1791661967.7688422,
     "ast_hash": "12603b4d1fd98246ec67b71e28460197",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/checklists/requirements.md": {
-    "mtime": 1791654527.430675,
-    "seen": 1791660194.0992289,
+    "mtime": 1791660236.9713638,
+    "seen": 1791661967.768844,
     "ast_hash": "965c73d579973cdf9149a5ad29f657dc",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/contracts/ranking-inputs.md": {
-    "mtime": 1791654670.134217,
-    "seen": 1791660194.09923,
+    "mtime": 1791660236.9793637,
+    "seen": 1791661967.7688446,
     "ast_hash": "7e17dd99d69092cf7b20d332ffd4674c",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/contracts/saw-engine.md": {
-    "mtime": 1791654654.4800456,
-    "seen": 1791660194.0992308,
+    "mtime": 1791660236.9833636,
+    "seen": 1791661967.768846,
     "ast_hash": "88f9455160d76e9de23994b0596da50b",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/contracts/saw-runs.md": {
-    "mtime": 1791654663.1691406,
-    "seen": 1791660194.099232,
+    "mtime": 1791660236.9933634,
+    "seen": 1791661967.7688477,
     "ast_hash": "d959609b3022abb1937776a14ec45e13",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/data-model.md": {
-    "mtime": 1791654645.4259465,
-    "seen": 1791660194.0992327,
+    "mtime": 1791660236.9943633,
+    "seen": 1791661967.7688494,
     "ast_hash": "fd8a9aa14e1ac2d4e42569a59e984e87",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/plan.md": {
-    "mtime": 1791654614.953615,
-    "seen": 1791660194.0992339,
+    "mtime": 1791660236.9943633,
+    "seen": 1791661967.7688513,
     "ast_hash": "631370770e5f20fde6d974c533051c2c",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/quickstart.md": {
-    "mtime": 1791654677.9203024,
-    "seen": 1791660194.0992348,
+    "mtime": 1791660236.9953632,
+    "seen": 1791661967.768853,
     "ast_hash": "ecf9a60b7a232a9b12e66864700612ac",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/research.md": {
-    "mtime": 1791654665.4421656,
-    "seen": 1791660194.0992355,
+    "mtime": 1791660236.9953632,
+    "seen": 1791661967.768854,
     "ast_hash": "1f9977db1aac0a798abbd0670271d294",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/spec.md": {
-    "mtime": 1791654520.0095963,
-    "seen": 1791660194.0992367,
+    "mtime": 1791660236.9953632,
+    "seen": 1791661967.7688556,
     "ast_hash": "330059197c84b1f08a31776e098c19aa",
     "semantic_hash": ""
   },
   "specs/019-decision-saw/tasks.md": {
-    "mtime": 1791655218.7954652,
-    "seen": 1791660194.099238,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.768857,
     "ast_hash": "ad9d3ac83b98ef5418a503aa6c1bdd01",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/checklists/requirements.md": {
-    "mtime": 1791657887.7541063,
-    "seen": 1791660194.099239,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.768859,
     "ast_hash": "9a84dda46db89430a52f948af8d5b35e",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/contracts/topsis-ranking-row.md": {
-    "mtime": 1791658518.907701,
-    "seen": 1791660194.0992405,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688606,
     "ast_hash": "a619984a80882744d72f411c846e020e",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/contracts/topsis-run-result.md": {
-    "mtime": 1791658488.2169316,
-    "seen": 1791660194.0992417,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688622,
     "ast_hash": "352758bc39788e1dd5a206485b7ee4e0",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/data-model.md": {
-    "mtime": 1791658451.6892176,
-    "seen": 1791660194.099243,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688634,
     "ast_hash": "ac97f95b1e9ac3e25486f9494646b433",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/plan.md": {
-    "mtime": 1791658337.3532035,
-    "seen": 1791660194.0992446,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688649,
     "ast_hash": "0c912c46eac594693bcb6935b2d638e1",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/quickstart.md": {
-    "mtime": 1791658578.8632736,
-    "seen": 1791660194.0992458,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688668,
     "ast_hash": "209cee41a960543d788deefd10296bd3",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/research.md": {
-    "mtime": 1791658393.5407007,
-    "seen": 1791660194.0992467,
+    "mtime": 1791660236.9963632,
+    "seen": 1791661967.7688682,
     "ast_hash": "bf957ac8f625808f2562add8d6768961",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/spec.md": {
-    "mtime": 1791657880.588238,
-    "seen": 1791660194.099248,
+    "mtime": 1791660236.997363,
+    "seen": 1791661967.7688699,
     "ast_hash": "c2f81efa4d88b936de5d95069209b83f",
     "semantic_hash": ""
   },
   "specs/020-decision-topsis/tasks.md": {
-    "mtime": 1791660113.9346714,
-    "seen": 1791660194.0992491,
+    "mtime": 1791660236.997363,
+    "seen": 1791661967.7688708,
     "ast_hash": "351191f3400b477169b6f1cf5ce8a7bf",
+    "semantic_hash": ""
+  },
+  "apps/api/core/decision_support/services/ahp_service.py": {
+    "mtime": 1791661214.422675,
+    "seen": 1791661967.64683,
+    "ast_hash": "8802cc67727c77db86a7d6b160ea0b56",
+    "semantic_hash": ""
+  },
+  "apps/api/core/decision_support/tests/test_ahp_api.py": {
+    "mtime": 1791661315.4154015,
+    "seen": 1791661967.6468408,
+    "ast_hash": "01670f78321bc980b4ac8982cb77ebde",
+    "semantic_hash": ""
+  },
+  "apps/api/core/decision_support/tests/test_ahp_service.py": {
+    "mtime": 1791661173.528202,
+    "seen": 1791661967.646842,
+    "ast_hash": "a5625fde2e88478093240068e68163ef",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/AhpMethodPanel.tsx": {
+    "mtime": 1791661577.1822472,
+    "seen": 1791661967.6883934,
+    "ast_hash": "8c13beee99f334d49d615411e91c449f",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/CriteriaWeightTable.test.ts": {
+    "mtime": 1791661362.5948188,
+    "seen": 1791661967.6883972,
+    "ast_hash": "20cab583474f9e2cc0ffb5c8c876df05",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/CriteriaWeightTable.tsx": {
+    "mtime": 1791661400.331358,
+    "seen": 1791661967.6883993,
+    "ast_hash": "8d65756a4ee4484c1db65f086bbb89ff",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/SquareMatrixEditor.test.ts": {
+    "mtime": 1791661342.8550618,
+    "seen": 1791661967.6884243,
+    "ast_hash": "9e1a2bcf3b4947264d090824922959d0",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/SquareMatrixEditor.tsx": {
+    "mtime": 1791661385.6375368,
+    "seen": 1791661967.6884258,
+    "ast_hash": "88d2d806b3fe3337af4ab7bcacc7be9b",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/criteria-weight-rules.ts": {
+    "mtime": 1791661356.7668903,
+    "seen": 1791661967.6884336,
+    "ast_hash": "223100828333d0fd5a6ceb192aa57034",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/no-client-ahp-math.test.ts": {
+    "mtime": 1791661271.4109516,
+    "seen": 1791661967.6884382,
+    "ast_hash": "dc14fb7c1a1f9d391287b8c5581714c0",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/decision-support/square-matrix-rules.ts": {
+    "mtime": 1791661294.176666,
+    "seen": 1791661967.688448,
+    "ast_hash": "8222fa14367f68e3a3f9e68e2a84988e",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/checklists/requirements.md": {
+    "mtime": 1791660862.998501,
+    "seen": 1791661967.768873,
+    "ast_hash": "ae46efefce30a891a1f249ceb69e6978",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/contracts/ahp-pairwise-matrix.md": {
+    "mtime": 1791660986.931713,
+    "seen": 1791661967.7688744,
+    "ast_hash": "4327d58618a829371979039c86ae534d",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/contracts/ahp-run-result.md": {
+    "mtime": 1791660998.901546,
+    "seen": 1791661967.7688758,
+    "ast_hash": "1cf5d64e99e756b526e3982aed0f8b19",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/data-model.md": {
+    "mtime": 1791660960.5510845,
+    "seen": 1791661967.768877,
+    "ast_hash": "ec0badf8782b434e93739f4dfb6e2ded",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/plan.md": {
+    "mtime": 1791660925.6875825,
+    "seen": 1791661967.7688782,
+    "ast_hash": "30220c43f38782cda5b176ebf9828c3c",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/quickstart.md": {
+    "mtime": 1791661014.703327,
+    "seen": 1791661967.7688797,
+    "ast_hash": "d5ae62537e7f4fce97bf022f192ea3a5",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/research.md": {
+    "mtime": 1791660944.5903115,
+    "seen": 1791661967.7688808,
+    "ast_hash": "3c45b59b534373b062a56e032b026b24",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/spec.md": {
+    "mtime": 1791660850.029695,
+    "seen": 1791661967.768882,
+    "ast_hash": "36d9d2ee18f32756c66f3c41ff8bdaed",
+    "semantic_hash": ""
+  },
+  "specs/021-decision-ahp/tasks.md": {
+    "mtime": 1791661681.1723988,
+    "seen": 1791661967.768883,
+    "ast_hash": "66f38d93babf53ea1db3b698a9ca1369",
     "semantic_hash": ""
   }
 }

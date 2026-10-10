@@ -261,3 +261,111 @@ def validate_ranking_inputs(
         'types': cleaned_types,
         'performance_matrix': cleaned_matrix,
     }
+
+
+def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any]:
+    """Validate AHP pairwise comparison matrix and criteria (doc 05, AC02, AC08, AC17, AC18, AC26)."""
+    issues: list[dict[str, str]] = []
+
+    try:
+        crit = validate_names(criteria, 'criteria', require_non_empty=True)
+    except CodedValidationError as exc:
+        detail = exc.detail if isinstance(exc.detail, dict) else {}
+        issues.extend(detail.get('issues', []))
+        crit = []
+
+    n = len(crit)
+    if n > MAX_DIM:
+        issues.append(_issue('dimension_invalid', 'criteria', f'n must be <= {MAX_DIM}.'))
+    if n == 0:
+        issues.append(_issue('dimension_invalid', 'criteria', 'n must be >= 1 for AHP.'))
+
+    if not isinstance(matrix, list):
+        issues.append(_issue('dimension_invalid', 'ahp_matrix', 'ahp_matrix must be a list of rows.'))
+        raise_issues(issues)
+
+    if n > 0 and len(matrix) != n:
+        issues.append(
+            _issue(
+                'dimension_invalid',
+                'ahp_matrix',
+                f'ahp_matrix must have {n} rows to match criteria.',
+            ),
+        )
+
+    cleaned_matrix: list[list[float]] = []
+    for j, row in enumerate(matrix):
+        row_path = f'ahp_matrix.{j}'
+        if not isinstance(row, list):
+            issues.append(_issue('dimension_invalid', row_path, 'Row must be a list.'))
+            continue
+        if n > 0 and len(row) != n:
+            issues.append(
+                _issue(
+                    'dimension_invalid',
+                    row_path,
+                    f'Row must have exactly {n} cells.',
+                ),
+            )
+        cleaned_row: list[float] = []
+        for k, cell in enumerate(row):
+            cell_path = f'ahp_matrix.{j}.{k}'
+            if cell is None or (isinstance(cell, str) and not cell.strip()):
+                issues.append(_issue('cell_empty', cell_path, 'Cell cannot be empty.'))
+                continue
+            if isinstance(cell, str):
+                try:
+                    cf = float(cell)
+                except ValueError:
+                    issues.append(_issue('non_numeric', cell_path, 'Cell must be numeric.'))
+                    continue
+            elif _is_number(cell):
+                cf = float(cell)
+            else:
+                issues.append(_issue('non_numeric', cell_path, 'Cell must be numeric.'))
+                continue
+
+            if _is_non_finite(cf):
+                issues.append(_issue('non_finite', cell_path, 'Cell must be finite.'))
+                continue
+            if cf <= 0:
+                issues.append(_issue('cell_non_positive', cell_path, 'Cell must be strictly positive.'))
+                continue
+            cleaned_row.append(cf)
+        cleaned_matrix.append(cleaned_row)
+
+    # Reciprocal and diagonal checks only if matrix structure is complete
+    if (
+        not issues
+        and n > 0
+        and len(cleaned_matrix) == n
+        and all(len(row) == n for row in cleaned_matrix)
+    ):
+        for j in range(n):
+            if abs(cleaned_matrix[j][j] - 1.0) > 1e-4:
+                issues.append(
+                    _issue(
+                        'ahp_diagonal_invalid',
+                        f'ahp_matrix.{j}.{j}',
+                        'Diagonal element must be 1.0.',
+                    ),
+                )
+        for j in range(n):
+            for k in range(j + 1, n):
+                val_jk = cleaned_matrix[j][k]
+                val_kj = cleaned_matrix[k][j]
+                if abs(val_jk * val_kj - 1.0) >= 1e-4:
+                    issues.append(
+                        _issue(
+                            'ahp_reciprocal_mismatch',
+                            f'ahp_matrix.{k}.{j}',
+                            'Pairwise cells must be reciprocals (a[k,j] = 1 / a[j,k]).',
+                        ),
+                    )
+
+    raise_issues(issues)
+    return {
+        'criteria': crit,
+        'ahp_matrix': cleaned_matrix,
+    }
+
