@@ -16,12 +16,14 @@ import {
   patchDecisionCase,
   type DecisionRun,
   type SawRankingRow,
+  type TopsisRankingRow,
 } from "@/app/lib/api/decision-support";
 import { PATHS } from "@/app/routeVars";
 import { ExecutionHistoryList } from "@/components/decision-support/ExecutionHistoryList";
 import { InputSnapshotViewer } from "@/components/decision-support/InputSnapshotViewer";
 import { NamedListEditor } from "@/components/decision-support/NamedListEditor";
 import { SawMethodPanel } from "@/components/decision-support/SawMethodPanel";
+import { TopsisMethodPanel } from "@/components/decision-support/TopsisMethodPanel";
 import { ValidationIssueList } from "@/components/decision-support/ValidationIssueList";
 import { parseApiValidationIssues } from "@/components/decision-support/validation-issues";
 import { Button } from "@/components/form/Button";
@@ -62,7 +64,8 @@ function DecisionSupportContent() {
   const [matrix, setMatrix] = useState<(number | null)[][]>([]);
   const [issues, setIssues] = useState(parseApiValidationIssues(null));
   const [selectedRun, setSelectedRun] = useState<DecisionRun | null>(null);
-  const [latestRanking, setLatestRanking] = useState<SawRankingRow[]>([]);
+  const [latestSawRanking, setLatestSawRanking] = useState<SawRankingRow[]>([]);
+  const [latestTopsisRanking, setLatestTopsisRanking] = useState<TopsisRankingRow[]>([]);
 
   const casesQuery = useQuery({
     queryKey: ["decision-cases", projectId],
@@ -80,7 +83,8 @@ function DecisionSupportContent() {
     setSelectedCaseId(caseId);
     setSelectedRun(null);
     setIssues([]);
-    setLatestRanking([]);
+    setLatestSawRanking([]);
+    setLatestTopsisRanking([]);
     void getDecisionCase(projectId, caseId).then((c) => {
       setTitle(c.title);
       setMethods([...(c.selected_methods ?? [])]);
@@ -110,7 +114,8 @@ function DecisionSupportContent() {
     setMatrix([]);
     setIssues([]);
     setSelectedRun(null);
-    setLatestRanking([]);
+    setLatestSawRanking([]);
+    setLatestTopsisRanking([]);
   };
 
   const saveMutation = useMutation({
@@ -258,7 +263,23 @@ function DecisionSupportContent() {
               onWeightsChange={setWeights}
               onTypesChange={setTypes}
               onMatrixChange={setMatrix}
-              latestRanking={latestRanking}
+              latestRanking={latestSawRanking}
+            />
+          ) : null}
+
+          {selectedCaseId && methods.includes("topsis") ? (
+            <TopsisMethodPanel
+              projectId={projectId}
+              caseId={selectedCaseId}
+              criteria={criteria}
+              alternatives={alternatives}
+              weights={alignWeights(criteria.length, weights)}
+              types={alignTypes(criteria.length, types)}
+              matrix={matrix}
+              onWeightsChange={setWeights}
+              onTypesChange={setTypes}
+              onMatrixChange={setMatrix}
+              latestRanking={latestTopsisRanking}
             />
           ) : null}
 
@@ -271,7 +292,9 @@ function DecisionSupportContent() {
                   void getDecisionRun(projectId, selectedCaseId, runId).then((run) => {
                     setSelectedRun(run);
                     if (run.method === "saw" && run.result?.ranking) {
-                      setLatestRanking(run.result.ranking);
+                      setLatestSawRanking(run.result.ranking as SawRankingRow[]);
+                    } else if (run.method === "topsis" && run.result?.ranking) {
+                      setLatestTopsisRanking(run.result.ranking as TopsisRankingRow[]);
                     }
                   });
                 }}

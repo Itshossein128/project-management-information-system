@@ -10,6 +10,7 @@ from config.exceptions import CodedValidationError
 
 from decision_support.models import CRITERIA_METHODS, METHOD_IDS, RANKING_METHODS, DecisionCase, DecisionRun
 from decision_support.services.saw_service import compute_saw
+from decision_support.services.topsis_service import compute_topsis
 from decision_support.services.validators import _issue, raise_issues, validate_criteria_only, validate_ranking_inputs
 
 
@@ -68,8 +69,22 @@ def create_run(case: DecisionCase, method: str, user) -> DecisionRun:
             'engine': 'saw',
             'ranking': saw_out['ranking'],
         }
+    elif method == 'topsis':
+        topsis_out = compute_topsis(
+            case.criteria or [],
+            case.alternatives or [],
+            case.weights or [],
+            case.types or [],
+            case.performance_matrix or [],
+        )
+        snapshot = _snapshot_from_case(case, weights_normalized=topsis_out['weights_normalized'])
+        result = {
+            'status': 'ok',
+            'engine': 'topsis',
+            'ranking': topsis_out['ranking'],
+        }
     elif method in RANKING_METHODS:
-        # topsis (and future ranking) — Phase 1 stub until their engine phases
+        # future ranking methods — Phase 1 stub until their engine phases
         validate_ranking_inputs(
             case.criteria or [],
             case.alternatives or [],

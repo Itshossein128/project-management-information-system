@@ -13,6 +13,17 @@ export type SawRankingRow = {
   rank: number;
 };
 
+export type TopsisRankingRow = {
+  option: string;
+  d_best: number;
+  d_worst: number;
+  closeness: number;
+  score: number;
+  rank: number;
+};
+
+export type RankingRow = SawRankingRow | TopsisRankingRow;
+
 export type DecisionCase = {
   id: string;
   title: string;
@@ -43,7 +54,7 @@ export type DecisionCaseSummary = {
 export type DecisionRunResult = {
   status?: string;
   engine?: string | null;
-  ranking?: SawRankingRow[];
+  ranking?: RankingRow[];
 };
 
 export type DecisionRunSummary = {
