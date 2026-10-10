@@ -17,6 +17,7 @@ export const DECISION_SUPPORT_ERROR_CODES = [
   "cost_zero",
   "weight_negative",
   "weights_all_zero",
+  "benefit_column_all_zero",
   "invalid_type",
   "invalid_method",
   "decision_input_invalid",

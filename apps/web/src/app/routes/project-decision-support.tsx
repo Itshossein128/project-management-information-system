@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ProjectProvider, useProject } from "@/app/contexts/project-context";
 import {
   DECISION_METHODS,
+  type CriterionType,
   type DecisionMethod,
   DecisionSupportRequestError,
   createDecisionCase,
@@ -14,11 +15,13 @@ import {
   listDecisionRuns,
   patchDecisionCase,
   type DecisionRun,
+  type SawRankingRow,
 } from "@/app/lib/api/decision-support";
 import { PATHS } from "@/app/routeVars";
 import { ExecutionHistoryList } from "@/components/decision-support/ExecutionHistoryList";
 import { InputSnapshotViewer } from "@/components/decision-support/InputSnapshotViewer";
 import { NamedListEditor } from "@/components/decision-support/NamedListEditor";
+import { SawMethodPanel } from "@/components/decision-support/SawMethodPanel";
 import { ValidationIssueList } from "@/components/decision-support/ValidationIssueList";
 import { parseApiValidationIssues } from "@/components/decision-support/validation-issues";
 import { Button } from "@/components/form/Button";
@@ -33,6 +36,18 @@ import {
 } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 
+function alignWeights(n: number, weights: number[]): number[] {
+  const next = [...weights];
+  while (next.length < n) next.push(1);
+  return next.slice(0, n);
+}
+
+function alignTypes(n: number, types: CriterionType[]): CriterionType[] {
+  const next = [...types];
+  while (next.length < n) next.push("benefit");
+  return next.slice(0, n);
+}
+
 function DecisionSupportContent() {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -42,8 +57,12 @@ function DecisionSupportContent() {
   const [methods, setMethods] = useState<DecisionMethod[]>([]);
   const [criteria, setCriteria] = useState<string[]>([]);
   const [alternatives, setAlternatives] = useState<string[]>([]);
+  const [weights, setWeights] = useState<number[]>([]);
+  const [types, setTypes] = useState<CriterionType[]>([]);
+  const [matrix, setMatrix] = useState<(number | null)[][]>([]);
   const [issues, setIssues] = useState(parseApiValidationIssues(null));
   const [selectedRun, setSelectedRun] = useState<DecisionRun | null>(null);
+  const [latestRanking, setLatestRanking] = useState<SawRankingRow[]>([]);
 
   const casesQuery = useQuery({
     queryKey: ["decision-cases", projectId],
@@ -61,11 +80,22 @@ function DecisionSupportContent() {
     setSelectedCaseId(caseId);
     setSelectedRun(null);
     setIssues([]);
+    setLatestRanking([]);
     void getDecisionCase(projectId, caseId).then((c) => {
       setTitle(c.title);
       setMethods([...(c.selected_methods ?? [])]);
-      setCriteria([...(c.criteria ?? [])]);
-      setAlternatives([...(c.alternatives ?? [])]);
+      const crit = [...(c.criteria ?? [])];
+      const alts = [...(c.alternatives ?? [])];
+      setCriteria(crit);
+      setAlternatives(alts);
+      setWeights(alignWeights(crit.length, (c.weights ?? []).map(Number)));
+      setTypes(
+        alignTypes(
+          crit.length,
+          (c.types ?? []).map((x) => (x === "cost" ? "cost" : "benefit")),
+        ),
+      );
+      setMatrix([...(c.performance_matrix ?? [])]);
     });
   };
 
@@ -75,17 +105,25 @@ function DecisionSupportContent() {
     setMethods([]);
     setCriteria([]);
     setAlternatives([]);
+    setWeights([]);
+    setTypes([]);
+    setMatrix([]);
     setIssues([]);
     setSelectedRun(null);
+    setLatestRanking([]);
   };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      const n = criteria.length;
       const body = {
         title,
         selected_methods: methods,
         criteria,
         alternatives,
+        weights: alignWeights(n, weights),
+        types: alignTypes(n, types),
+        performance_matrix: matrix,
       };
       if (selectedCaseId) {
         return patchDecisionCase(projectId, selectedCaseId, body);
@@ -186,7 +224,11 @@ function DecisionSupportContent() {
           <NamedListEditor
             label={t("decisionSupport.criteria")}
             values={criteria}
-            onChange={setCriteria}
+            onChange={(next) => {
+              setCriteria(next);
+              setWeights(alignWeights(next.length, weights));
+              setTypes(alignTypes(next.length, types));
+            }}
           />
           <NamedListEditor
             label={t("decisionSupport.alternatives")}
@@ -204,13 +246,34 @@ function DecisionSupportContent() {
             {t("decisionSupport.save")}
           </Button>
 
+          {selectedCaseId && methods.includes("saw") ? (
+            <SawMethodPanel
+              projectId={projectId}
+              caseId={selectedCaseId}
+              criteria={criteria}
+              alternatives={alternatives}
+              weights={alignWeights(criteria.length, weights)}
+              types={alignTypes(criteria.length, types)}
+              matrix={matrix}
+              onWeightsChange={setWeights}
+              onTypesChange={setTypes}
+              onMatrixChange={setMatrix}
+              latestRanking={latestRanking}
+            />
+          ) : null}
+
           {selectedCaseId ? (
             <div className="space-y-3">
               <h2 className="text-sm font-medium">{t("decisionSupport.history")}</h2>
               <ExecutionHistoryList
                 runs={runRows}
                 onSelect={(runId) => {
-                  void getDecisionRun(projectId, selectedCaseId, runId).then(setSelectedRun);
+                  void getDecisionRun(projectId, selectedCaseId, runId).then((run) => {
+                    setSelectedRun(run);
+                    if (run.method === "saw" && run.result?.ranking) {
+                      setLatestRanking(run.result.ranking);
+                    }
+                  });
                 }}
               />
               <InputSnapshotViewer run={selectedRun} />

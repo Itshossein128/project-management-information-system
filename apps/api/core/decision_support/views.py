@@ -15,7 +15,7 @@ from decision_support.serializers import (
     DecisionRunSerializer,
 )
 from decision_support.services.case_service import create_case, update_case
-from decision_support.services.execution_service import create_stub_run
+from decision_support.services.execution_service import create_run
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
@@ -50,7 +50,10 @@ class DecisionCaseViewSet(ProjectScopedViewSet):
 
 @extend_schema_view(
     list=extend_schema(summary='List decision runs', tags=['Decision Support']),
-    create=extend_schema(summary='Create stub decision run', tags=['Decision Support']),
+    create=extend_schema(
+        summary='Create decision run (SAW executes; other methods may stub)',
+        tags=['Decision Support'],
+    ),
     retrieve=extend_schema(summary='Get decision run', tags=['Decision Support']),
 )
 class DecisionRunViewSet(viewsets.ViewSet):
@@ -95,7 +98,7 @@ class DecisionRunViewSet(viewsets.ViewSet):
         case = self.get_case()
         ser = DecisionRunCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        run = create_stub_run(case, ser.validated_data['method'], request.user)
+        run = create_run(case, ser.validated_data['method'], request.user)
         return Response(DecisionRunSerializer(run).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, project_pk=None, case_pk=None, pk=None):

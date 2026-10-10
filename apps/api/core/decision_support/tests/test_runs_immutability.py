@@ -29,14 +29,16 @@ class TestDecisionRuns:
         runs_url = f"{base}{case.data['id']}/runs/"
         run = auth_client.post(runs_url, {'method': 'saw'}, format='json')
         assert run.status_code == status.HTTP_201_CREATED, run.data
-        assert run.data['result']['status'] == 'stub'
-        assert run.data['result']['engine'] is None
+        assert run.data['result']['status'] == 'ok'
+        assert run.data['result']['engine'] == 'saw'
+        assert 'ranking' in run.data['result']
         snap = run.data['input_snapshot']
         assert snap['criteria'] == ['تجربه', 'قیمت']
         assert snap['alternatives'] == ['الف', 'ب']
         assert snap['weights'] == [1, 1]
         assert snap['types'] == ['benefit', 'cost']
         assert snap['performance_matrix'] == [[10, 100], [5, 200]]
+        assert 'weights_normalized' in snap
         assert str(run.data['extracted_by']) == str(user.id)
 
 

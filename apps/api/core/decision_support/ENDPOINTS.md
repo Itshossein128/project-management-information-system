@@ -19,11 +19,31 @@ Base: `/api/v1/projects/{project_id}/`
     "message": "…",
     "details": {
       "issues": [
-        { "code": "empty_cell", "path": "performance_matrix.0.1", "message": "Cell cannot be empty." }
+        { "code": "empty_cell", "path": "performance_matrix.0.1", "message": "Cell cannot be empty." },
+        { "code": "benefit_column_all_zero", "path": "criteria.0", "message": "…" }
       ]
     }
   }
 }
 ```
 
-Phase 1 runs store `result: { "status": "stub", "engine": null }` — no SAW/TOPSIS/AHP/DEMATEL/ISM engines.
+## SAW run (Phase 2)
+
+`POST …/runs/` with `{"method":"saw"}` validates ranking inputs, runs pure SAW (never TOPSIS), and appends an immutable run.
+
+**Success `result`** (interim ordinal ranks — O01/O02 remain open as final product policy):
+
+```json
+{
+  "status": "ok",
+  "engine": "saw",
+  "ranking": [
+    { "option": "پیمانکار الف", "score": 1.0, "rank": 1 },
+    { "option": "پیمانکار ب", "score": 0.5, "rank": 2 }
+  ]
+}
+```
+
+**Snapshot** includes live frozen inputs plus `weights_normalized` for audit.
+
+Non-SAW methods may still return Phase 1 stub: `{ "status": "stub", "engine": null }`.

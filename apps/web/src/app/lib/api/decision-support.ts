@@ -5,6 +5,14 @@ export type DecisionMethod = "saw" | "topsis" | "ahp" | "dematel" | "ism";
 
 export const DECISION_METHODS: DecisionMethod[] = ["saw", "topsis", "ahp", "dematel", "ism"];
 
+export type CriterionType = "benefit" | "cost";
+
+export type SawRankingRow = {
+  option: string;
+  score: number;
+  rank: number;
+};
+
 export type DecisionCase = {
   id: string;
   title: string;
@@ -12,7 +20,7 @@ export type DecisionCase = {
   criteria: string[];
   alternatives: string[];
   weights: number[];
-  types: string[];
+  types: CriterionType[];
   performance_matrix: (number | null)[][];
   ahp_matrix: unknown[];
   dematel_matrix: unknown[];
@@ -32,13 +40,19 @@ export type DecisionCaseSummary = {
   updated_at: string;
 };
 
+export type DecisionRunResult = {
+  status?: string;
+  engine?: string | null;
+  ranking?: SawRankingRow[];
+};
+
 export type DecisionRunSummary = {
   id: string;
   method: DecisionMethod;
   extracted_at: string;
   extracted_by: string;
   extracted_by_name?: string;
-  result: { status?: string; engine?: null };
+  result: DecisionRunResult;
 };
 
 export type DecisionRun = DecisionRunSummary & {

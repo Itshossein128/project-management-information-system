@@ -233,6 +233,26 @@ def validate_ranking_inputs(
             cleaned_row.append(cf)
         cleaned_matrix.append(cleaned_row)
 
+    # AC13: all-zero benefit column (even if that criterion's weight is 0)
+    if (
+        not issues
+        and cleaned_matrix
+        and cleaned_types
+        and all(len(row) == len(cleaned_types) for row in cleaned_matrix)
+    ):
+        for j, t in enumerate(cleaned_types):
+            if t != 'benefit':
+                continue
+            col = [row[j] for row in cleaned_matrix]
+            if col and all(v == 0 for v in col):
+                issues.append(
+                    _issue(
+                        'benefit_column_all_zero',
+                        f'criteria.{j}',
+                        'Benefit criterion column cannot be all zeros.',
+                    ),
+                )
+
     raise_issues(issues)
     return {
         'criteria': crit,

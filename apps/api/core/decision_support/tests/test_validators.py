@@ -96,6 +96,19 @@ def test_ac08_empty_and_non_finite():
     assert any(i['code'] == 'non_finite' for i in _issues(ei.value))
 
 
+def test_ac13_benefit_column_all_zero():
+    with pytest.raises(CodedValidationError) as ei:
+        validate_ranking_inputs(
+            ['b', 'c'],
+            ['a1', 'a2'],
+            [0, 1],
+            ['benefit', 'cost'],
+            [[0, 100], [0, 200]],
+        )
+    issues = _issues(ei.value)
+    assert any(i['code'] == 'benefit_column_all_zero' and i['path'] == 'criteria.0' for i in issues)
+
+
 def test_ac09_ac10_ac12():
     with pytest.raises(CodedValidationError) as ei:
         validate_ranking_inputs(['c'], ['a'], [1], ['cost'], [[0]])
