@@ -189,7 +189,9 @@ class TestWorkshopDraftPermissions:
         project = Project.objects.create(project_name='Workshop RBAC', project_code='PRJ-WS')
         workshop_block = ensure_workshop_block(project, created_by=user_creator)
 
+        from master_data.models import RolePermission
         role_supervisor, _ = Role.objects.get_or_create(role_name='workshop_supervisor')
+        RolePermission.objects.get_or_create(role=role_supervisor, permission_codename='view_procurement')
         role_engineer, _ = Role.objects.get_or_create(role_name='block_engineer')
 
         m_super = ProjectMember.objects.create(
