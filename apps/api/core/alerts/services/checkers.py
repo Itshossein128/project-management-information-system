@@ -114,12 +114,23 @@ def _check_low_stock(rule, project_id):
 
 @alert_registry.register('activity_behind_schedule')
 def _check_activity_behind(rule, project_id):
+    # ⚡ Bolt: Batch fetch latest progress per activity in a single query to eliminate N+1 queries inside the loop
     from projects.models import Activity
     from schedule.models import ActivityProgress
 
     threshold_pct = float(rule.threshold or 10) / 100
-    for activity in Activity.objects.filter(project_id=project_id, is_deleted=False):
-        prog = ActivityProgress.objects.filter(activity=activity).order_by('-report_date').first()
+    activities = list(Activity.objects.filter(project_id=project_id, is_deleted=False))
+    if not activities:
+        return
+
+    activity_ids = [act.id for act in activities]
+    progresses = ActivityProgress.objects.filter(
+        activity_id__in=activity_ids
+    ).order_by('report_date')
+    progress_map = {p.activity_id: p for p in progresses}
+
+    for activity in activities:
+        prog = progress_map.get(activity.id)
         if not prog:
             continue
         planned = float(prog.planned_progress or 0)
@@ -201,13 +212,11 @@ def _check_subcontractor_score_low(rule, project_id):
     if not subs:
         return
 
-    # ⚡ Bolt: Fetch all latest scores in a single query to avoid N+1 inside the loop
+    # ⚡ Bolt: Fetch all latest scores in a single query to avoid N+1 inside the loop in a database-agnostic manner
     sub_ids = [sub.id for sub in subs]
-    latest_scores = (
-        SubcontractorPerformanceScore.objects.filter(subcontractor_id__in=sub_ids, is_deleted=False)
-        .order_by('subcontractor_id', '-score_date')
-        .distinct('subcontractor_id')
-    )
+    latest_scores = SubcontractorPerformanceScore.objects.filter(
+        subcontractor_id__in=sub_ids, is_deleted=False
+    ).order_by('score_date')
     score_map = {score.subcontractor_id: score for score in latest_scores}
 
     for sub in subs:
@@ -290,11 +299,10 @@ def _check_critical_path_delay(rule, project_id):
     if not activity_ids:
         return
 
-    progresses = (
-        ActivityProgress.objects.filter(activity_id__in=activity_ids)
-        .order_by('activity_id', '-report_date')
-        .distinct('activity_id')
-    )
+    # ⚡ Bolt: Map latest progress per activity in a database-agnostic manner to prevent N+1 and SQLite unsupported distinct error
+    progresses = ActivityProgress.objects.filter(
+        activity_id__in=activity_ids
+    ).order_by('report_date')
     progress_map = {p.activity_id: p for p in progresses}
 
     for ba in critical:
