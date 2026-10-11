@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from django.db import transaction
 from django.db.models import Sum
 from rest_framework.exceptions import ValidationError
 
@@ -30,11 +31,15 @@ def remaining_receivable(ipc: IPC) -> Decimal:
     return payable_net(ipc) - collections_total(ipc)
 
 
+@transaction.atomic
 def add_collection(*, ipc: IPC, amount, collected_at, user, currency='IRR', fx_rate=None, reference='', notes='') -> IPCCollection:
     """
     Record a partial cash receipt. NEVER changes IPC status, submitted_amount,
     approved_amount, gross_amount, or net_amount. Full collection does NOT auto-mark paid.
     """
+    # Lock the parent before checking status, payable amount, or the aggregate.
+    # Concurrent receipts must see the prior committed receipt, not both total=0.
+    ipc = IPC.objects.select_for_update().get(pk=ipc.pk)
     if ipc.status != IPCStatus.APPROVED:
         raise CodedValidationError(
             detail='Collections are only allowed on approved IPCs.',

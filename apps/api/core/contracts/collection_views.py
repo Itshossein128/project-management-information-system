@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -37,11 +38,6 @@ class IPCCollectionListCreateView(APIView):
     @extend_schema(summary='Add IPC collection', tags=['Central Data'])
     def post(self, request, project_pk=None, pk=None):
         ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
-        before_gross = ipc.gross_amount
-        before_net = ipc.net_amount
-        before_status = ipc.status
-        before_submitted = ipc.submitted_amount
-        before_approved = ipc.approved_amount
         serializer = IPCCollectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -55,12 +51,6 @@ class IPCCollectionListCreateView(APIView):
             reference=data.get('reference', ''),
             notes=data.get('notes', ''),
         )
-        ipc.refresh_from_db()
-        assert ipc.gross_amount == before_gross
-        assert ipc.net_amount == before_net
-        assert ipc.status == before_status
-        assert ipc.submitted_amount == before_submitted
-        assert ipc.approved_amount == before_approved
         return Response(IPCCollectionSerializer(row).data, status=status.HTTP_201_CREATED)
 
 
@@ -69,8 +59,11 @@ class IPCCollectionDetailView(APIView):
     required_permission = 'edit_contracts'
 
     @extend_schema(summary='Soft-delete IPC collection', tags=['Central Data'])
+    @transaction.atomic
     def delete(self, request, project_pk=None, pk=None, collection_id=None):
-        ipc = get_object_or_404(IPC, pk=pk, project_id=project_pk, is_deleted=False)
+        ipc = get_object_or_404(
+            IPC.objects.select_for_update(), pk=pk, project_id=project_pk, is_deleted=False,
+        )
         row = get_object_or_404(IPCCollection, pk=collection_id, ipc=ipc, is_deleted=False)
         row.soft_delete(user=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)

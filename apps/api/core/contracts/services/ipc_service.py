@@ -435,6 +435,16 @@ def pay_ipc(ipc, user, payment_date):
     Marks an approved IPC as paid and records the actual payment date.
     Triggers the creation or update of a corresponding CashTransaction.
     """
+    # Reload under the same lock used by collection writes. A caller may hold an
+    # outdated approved instance, and payment must not bypass current approval.
+    ipc = IPC.objects.select_for_update().get(pk=ipc.pk)
+    if ipc.status not in (IPCStatus.APPROVED, IPCStatus.PAID):
+        raise CodedValidationError(
+            detail='Only approved IPCs can be paid.',
+            code='ipc_not_payable',
+        )
+    # PAID permits the existing repeat-payment/update behavior without creating
+    # another cash transaction; it cannot advance an unapproved IPC.
     ipc.status = IPCStatus.PAID
     ipc.actual_payment_date = payment_date
     ipc.updated_by = user
