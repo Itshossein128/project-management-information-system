@@ -168,7 +168,7 @@ export function ManualProgressDrawer({
           </p>
         ) : null}
 
-        {activityId ? <MeasurementEditor projectId={projectId} activityId={activityId} /> : null}
+        {activityId ? <MeasurementEditor projectId={projectId} /> : null}
 
         {activityId && measurement && measurement.status !== "approved" ? (
           <p

@@ -46,17 +46,17 @@ export function parseApiValidationIssues(payload: unknown): ValidationIssue[] {
 /** Resolve display text from stable code via i18n; fall back to server message. */
 export function localizeIssueMessage(
   issue: Pick<ValidationIssue, "code" | "message">,
-  t: (key: string, defaultValue?: string) => string,
+  t: any,
 ): string {
   const key = `decisionSupport.errors.${issue.code}`;
-  const translated = t(key, "");
+  const translated = t(key, { defaultValue: "" });
   if (translated && translated !== key) return translated;
   return issue.message || t("decisionSupport.invalidName");
 }
 
 export function formatIssueLabel(
   issue: ValidationIssue,
-  t?: (key: string, defaultValue?: string) => string,
+  t?: any,
 ): string {
   const message = t ? localizeIssueMessage(issue, t) : issue.message;
   if (issue.path) return `${issue.path}: ${message}`;
