@@ -38,7 +38,8 @@ export function KickoffCharterPanel({ projectId }: Props) {
   });
 
   const loaded = query.data ?? EMPTY;
-  const values = {
+  const values: KickoffCharter = {
+    id: loaded.id,
     justification: form.justification || loaded.justification,
     success_criteria: form.success_criteria || loaded.success_criteria,
     constraints: form.constraints || loaded.constraints,
@@ -75,7 +76,7 @@ export function KickoffCharterPanel({ projectId }: Props) {
             <textarea
               className="min-h-[64px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
               disabled={!canEdit}
-              value={values[key]}
+              value={values[key as keyof KickoffCharter]}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
             />
           </div>
