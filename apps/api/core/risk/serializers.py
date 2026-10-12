@@ -164,7 +164,11 @@ class RiskEventSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'composite_score', 'created_at', 'updated_at', 'open_actions_count']
 
     def get_open_actions_count(self, obj):
-        return obj.actions.filter(status=RiskActionStatus.OPEN, is_deleted=False).count()
+        # ⚡ Bolt: Iterate over prefetched collection in Python to avoid N+1 queries from .filter()
+        return sum(
+            1 for action in obj.actions.all()
+            if action.status == RiskActionStatus.OPEN and not action.is_deleted
+        )
 
     def validate_probability_level(self, value):
         if value is not None and not (1 <= value <= 5):
