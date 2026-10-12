@@ -5,7 +5,7 @@ import { usePermission } from "@/app/contexts/project-context";
 import { fetchKickoffCharter, saveKickoffCharter, type KickoffCharter } from "@/app/lib/api/projects";
 import { useToast } from "@/components/ui/toast";
 
-const EMPTY: KickoffCharter = {
+const EMPTY: Omit<KickoffCharter, "id"> = {
   justification: "",
   success_criteria: "",
   constraints: "",
@@ -24,7 +24,7 @@ export function KickoffCharterPanel({ projectId }: Props) {
   const queryClient = useQueryClient();
   const { has } = usePermission(projectId);
   const canEdit = has("edit_project");
-  const [form, setForm] = useState<KickoffCharter>(EMPTY);
+  const [form, setForm] = useState<Omit<KickoffCharter, "id">>(EMPTY);
 
   const query = useQuery({
     queryKey: ["kickoff-charter", projectId],
@@ -56,7 +56,7 @@ export function KickoffCharterPanel({ projectId }: Props) {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  const fields: { key: keyof KickoffCharter; label: string }[] = [
+  const fields: { key: keyof Omit<KickoffCharter, "id">; label: string }[] = [
     { key: "justification", label: t("project.charterJustification", "توجیه") },
     { key: "success_criteria", label: t("project.charterSuccess", "معیار موفقیت") },
     { key: "constraints", label: t("project.charterConstraints", "محدودیت‌ها") },
