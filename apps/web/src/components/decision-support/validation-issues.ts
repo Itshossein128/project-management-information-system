@@ -46,7 +46,7 @@ export function parseApiValidationIssues(payload: unknown): ValidationIssue[] {
 /** Resolve display text from stable code via i18n; fall back to server message. */
 export function localizeIssueMessage(
   issue: Pick<ValidationIssue, "code" | "message">,
-  t: any,
+  t: { (key: string, defaultValue?: string): string; (key: string, options?: any): string },
 ): string {
   const key = `decisionSupport.errors.${issue.code}`;
   const translated = t(key, "");
@@ -56,7 +56,7 @@ export function localizeIssueMessage(
 
 export function formatIssueLabel(
   issue: ValidationIssue,
-  t?: any,
+  t?: { (key: string, defaultValue?: string): string; (key: string, options?: any): string },
 ): string {
   const message = t ? localizeIssueMessage(issue, t) : issue.message;
   if (issue.path) return `${issue.path}: ${message}`;
