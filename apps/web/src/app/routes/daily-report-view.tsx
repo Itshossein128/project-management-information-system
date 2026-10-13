@@ -196,6 +196,7 @@ export default function DailyReportViewPage() {
 
       <div className='space-y-5'>
         <ApprovalStatusBar
+          projectId={projectId}
           report={report}
           canApprove={canApprove}
           busy={workflow.isPending}

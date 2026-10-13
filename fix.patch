@@ -1,0 +1,79 @@
+--- apps/web/src/app/routes/daily-report-view.tsx
++++ apps/web/src/app/routes/daily-report-view.tsx
+@@ -196,6 +196,7 @@
+
+       <div className='space-y-5'>
+         <ApprovalStatusBar
++          projectId={projectId}
+           report={report}
+           canApprove={canApprove}
+           busy={workflow.isPending}
+--- apps/web/src/app/routes/project-list.tsx
++++ apps/web/src/app/routes/project-list.tsx
+@@ -29,13 +29,12 @@
+   const { t } = useTranslation();
+   const navigate = useNavigate();
+   const { data, isLoading, isError, refetch } = useQuery({
+     queryKey: ["projects"],
+-    queryFn: fetchProjects,
++    queryFn: () => fetchProjects(),
+   });
+   const { data: portfolio } = useQuery({
+     queryKey: ["portfolio-summary"],
+     queryFn: fetchPortfolioSummary,
+   });
+
+-  const projects = data?.results ?? [];
++  const projects = data?.data?.results ?? [];
+--- apps/web/src/components/decision-support/NamedListEditor.tsx
++++ apps/web/src/components/decision-support/NamedListEditor.tsx
+@@ -23,7 +23,7 @@
+     const first = validateNamedItem(draft, values);
+     if (first) {
+       setLocalError(
+-        localizeIssueMessage({ code: first.code, message: first.message }, t),
++        localizeIssueMessage({ code: first.code, message: first.message }, t as any),
+       );
+       return;
+     }
+--- apps/web/src/components/decision-support/ValidationIssueList.tsx
++++ apps/web/src/components/decision-support/ValidationIssueList.tsx
+@@ -18,7 +18,7 @@
+       <ul className="list-disc space-y-1 ps-5">
+         {issues.map((issue) => (
+           <li key={`${issue.path}-${issue.code}-${issue.message}`}>
+-            {formatIssueLabel(issue, t)}
++            {formatIssueLabel(issue, t as any)}
+           </li>
+         ))}
+       </ul>
+--- apps/web/src/components/progress/ManualProgressDrawer.tsx
++++ apps/web/src/components/progress/ManualProgressDrawer.tsx
+@@ -168,7 +168,7 @@
+           </p>
+         ) : null}
+
+-        {activityId ? <MeasurementEditor projectId={projectId} activityId={activityId} /> : null}
++        {activityId ? <MeasurementEditor projectId={projectId} /> : null}
+
+         {activityId && measurement && measurement.status !== "approved" ? (
+           <p
+--- apps/web/src/components/projects/KickoffCharterPanel.tsx
++++ apps/web/src/components/projects/KickoffCharterPanel.tsx
+@@ -38,7 +38,7 @@
+   });
+
+   const loaded = query.data ?? EMPTY;
+-  const values = {
++  const values: KickoffCharter = {
+     justification: form.justification || loaded.justification,
+     success_criteria: form.success_criteria || loaded.success_criteria,
+     constraints: form.constraints || loaded.constraints,
+--- apps/web/src/components/activities/activities-grid.tsx
++++ apps/web/src/components/activities/activities-grid.tsx
+@@ -16,7 +16,6 @@
+   Search,
+   Trash2,
+-  Undo2,
+   Upload,
+ } from "lucide-react";

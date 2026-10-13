@@ -1,0 +1,18 @@
+--- apps/web/src/app/routes/project-list.tsx
++++ apps/web/src/app/routes/project-list.tsx
+@@ -29,13 +29,12 @@
+   const { t } = useTranslation();
+   const navigate = useNavigate();
+   const { data, isLoading, isError, refetch } = useQuery({
+     queryKey: ["projects"],
+-    queryFn: fetchProjects,
++    queryFn: () => fetchProjects(),
+   });
+   const { data: portfolio } = useQuery({
+     queryKey: ["portfolio-summary"],
+     queryFn: fetchPortfolioSummary,
+   });
+
+-  const projects = data?.results ?? [];
+--- apps/web/src/components/decision-support/NamedListEditor.tsx
++  const projects = data?.data?.results ?? [];

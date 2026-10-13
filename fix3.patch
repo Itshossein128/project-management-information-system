@@ -1,0 +1,10 @@
+--- apps/web/src/app/routes/project-list.tsx
++++ apps/web/src/app/routes/project-list.tsx
+@@ -34,7 +34,7 @@
+     queryFn: fetchPortfolioSummary,
+   });
+
+-  const projects = data?.data?.results ?? data?.results ?? [];
++  const projects = data?.results ?? [];
+
+   const columns = [
