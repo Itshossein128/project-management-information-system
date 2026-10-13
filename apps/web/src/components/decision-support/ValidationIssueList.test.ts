@@ -4,6 +4,7 @@ import {
   formatIssueLabel,
   localizeIssueMessage,
   parseApiValidationIssues,
+  parseApiRequestIssues,
 } from "./validation-issues.ts";
 
 describe("ValidationIssueList parsing", () => {
@@ -33,4 +34,23 @@ describe("ValidationIssueList parsing", () => {
       "Name cannot be empty.",
     );
   });
+});
+
+
+describe("request failure feedback", () => {
+  for (const code of ["permission_denied", "not_found", "throttled", "not_authenticated", "authentication_failed"]) {
+    it("preserves " + code + " as an actionable general issue", () => {
+      assert.deepEqual(parseApiRequestIssues({error:{code,message:"Rejected",details:{detail:"Rejected"}}}),
+        [{code,path:"",message:"Rejected"}]);
+    });
+  }
+  it("preserves locatable domain issues rather than replacing them", () => {
+    const payload={error:{code:"decision_input_invalid",details:{issues:[{code:"cell_empty",path:"ahp_matrix.0.1",message:"Empty"}]}}};
+    assert.deepEqual(parseApiRequestIssues(payload),parseApiValidationIssues(payload));
+  });
+  for (const payload of [null, {}, {error:{code:"unknown"}}, "<html>Server error</html>"]) {
+    it("provides safe generic feedback for " + JSON.stringify(payload), () => {
+      assert.deepEqual(parseApiRequestIssues(payload),[{code:"request_failed",path:"",message:""}]);
+    });
+  }
 });

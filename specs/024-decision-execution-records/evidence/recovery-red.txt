@@ -1,0 +1,50 @@
+✖ actual QueryClient force-fresh unfiltered read keeps checking until settlement (23.045302ms)
+✖ failed malformed and timed-out lookup does not retry or publish late success (80.913355ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.107718
+
+✖ failing tests:
+
+test at apps/web/src/components/decision-support/execution-recovery.test.ts:6:1
+✖ actual QueryClient force-fresh unfiltered read keeps checking until settlement (23.045302ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'checking'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-recovery.test.ts:10:48)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'checking' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at apps/web/src/components/decision-support/execution-recovery.test.ts:13:1
+✖ failed malformed and timed-out lookup does not retry or publish late success (80.913355ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-recovery.test.ts:17:48)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

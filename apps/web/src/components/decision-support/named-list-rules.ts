@@ -52,3 +52,17 @@ export function addNamedItem(names: string[], candidate: string): { next: string
   }
   return { next: [...names, trimmed], issues: [] };
 }
+
+export type NamedListOperation =
+ | {kind:'rename';index:number;name:string}
+ | {kind:'move';from:number;to:number}
+ | {kind:'add';index:number;name:string}
+ | {kind:'remove';index:number};
+export function changeNamedList(values:string[],operation:NamedListOperation):{next:string[];operation:NamedListOperation}{
+ const next=[...values];
+ if(operation.kind==='rename')next[operation.index]=operation.name;
+ else if(operation.kind==='add')next.splice(operation.index,0,operation.name);
+ else if(operation.kind==='remove')next.splice(operation.index,1);
+ else {const [name]=next.splice(operation.from,1);next.splice(operation.to,0,name!);}
+ return {next,operation};
+}

@@ -1,6 +1,7 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { formatWeightDecimal, formatWeightPercent, isConsistent } from "./criteria-weight-rules.ts";
+import { formatWeightDecimal, formatWeightPercent } from "./criteria-weight-rules.ts";
 
 describe("CriteriaWeightTable formatting rules", () => {
   it("formats weights as percentages accurately", () => {
@@ -14,11 +15,10 @@ describe("CriteriaWeightTable formatting rules", () => {
     assert.equal(formatWeightDecimal(0.25), "0.2500");
   });
 
-  it("evaluates consistency correctly based on CR <= 0.10 threshold", () => {
-    assert.equal(isConsistent(0.0), true);
-    assert.equal(isConsistent(0.05), true);
-    assert.equal(isConsistent(0.10), true);
-    assert.equal(isConsistent(0.101), false);
-    assert.equal(isConsistent(0.25), false);
+  it("keeps consistency inference on the server", () => {
+    const helpers = readFileSync(new URL("./criteria-weight-rules.ts", import.meta.url), "utf8");
+    assert.doesNotMatch(helpers, /function isConsistent|cr\s*<=/);
+    const table = readFileSync(new URL("./CriteriaWeightTable.tsx", import.meta.url), "utf8");
+    assert.doesNotMatch(table, /isConsistent = true/);
   });
 });

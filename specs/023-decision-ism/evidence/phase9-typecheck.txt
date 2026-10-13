@@ -1,0 +1,33 @@
+
+> building-management@ typecheck /home/hossein/Desktop/projects/building-management
+> pnpm --filter web typecheck
+
+
+> web@ typecheck /home/hossein/Desktop/projects/building-management/apps/web
+> react-router typegen && tsc
+
+src/app/routes/daily-report-view.tsx(198,10): error TS2741: Property 'projectId' is missing in type '{ report: DailyReportDetail; canApprove: boolean; busy: boolean; onSubmit: () => void; onReview: () => void; onApprove: () => void; onReject: (reason: string) => void; }' but required in type 'Props'.
+src/app/routes/project-list.tsx(30,5): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(options: DefinedInitialDataOptions<unknown, Error, unknown, string[]>, queryClient?: QueryClient | undefined): DefinedUseQueryResult<unknown, Error>', gave the following error.
+    Type '(params?: { status?: string | undefined; } | undefined) => Promise<ListResponse<ProjectListItem>>' is not assignable to type 'QueryFunction<unknown, string[]>'.
+      Types of parameters 'params' and 'context' are incompatible.
+        Type '{ client: QueryClient; queryKey: string[]; signal: AbortSignal; meta: Record<string, unknown> | undefined; pageParam?: unknown; direction?: unknown; }' has no properties in common with type '{ status?: string | undefined; }'.
+  Overload 2 of 3, '(options: UndefinedInitialDataOptions<ListResponse<ProjectListItem>, Error, ListResponse<ProjectListItem>, string[]>, queryClient?: QueryClient | undefined): UseQueryResult<...>', gave the following error.
+    Type '(params?: { status?: string | undefined; } | undefined) => Promise<ListResponse<ProjectListItem>>' is not assignable to type 'unique symbol | QueryFunction<ListResponse<ProjectListItem>, string[], never> | undefined'.
+      Type '(params?: { status?: string | undefined; } | undefined) => Promise<ListResponse<ProjectListItem>>' is not assignable to type 'QueryFunction<ListResponse<ProjectListItem>, string[], never>'.
+        Types of parameters 'params' and 'context' are incompatible.
+          Type '{ client: QueryClient; queryKey: string[]; signal: AbortSignal; meta: Record<string, unknown> | undefined; pageParam?: unknown; direction?: unknown; }' has no properties in common with type '{ status?: string | undefined; }'.
+  Overload 3 of 3, '(options: UseQueryOptions<ListResponse<ProjectListItem>, Error, ListResponse<ProjectListItem>, string[]>, queryClient?: QueryClient | undefined): UseQueryResult<...>', gave the following error.
+    Type '(params?: { status?: string | undefined; } | undefined) => Promise<ListResponse<ProjectListItem>>' is not assignable to type 'unique symbol | QueryFunction<ListResponse<ProjectListItem>, string[], never> | undefined'.
+      Type '(params?: { status?: string | undefined; } | undefined) => Promise<ListResponse<ProjectListItem>>' is not assignable to type 'QueryFunction<ListResponse<ProjectListItem>, string[], never>'.
+        Types of parameters 'params' and 'context' are incompatible.
+          Type '{ client: QueryClient; queryKey: string[]; signal: AbortSignal; meta: Record<string, unknown> | undefined; pageParam?: unknown; direction?: unknown; }' has no properties in common with type '{ status?: string | undefined; }'.
+src/app/routes/project-list.tsx(37,26): error TS2339: Property 'results' does not exist on type '{}'.
+src/components/progress/ManualProgressDrawer.tsx(171,64): error TS2322: Type '{ projectId: string; activityId: string; }' is not assignable to type 'IntrinsicAttributes & { projectId: string; }'.
+  Property 'activityId' does not exist on type 'IntrinsicAttributes & { projectId: string; }'.
+src/components/projects/KickoffCharterPanel.tsx(78,22): error TS7053: Element implicitly has an 'any' type because expression of type 'keyof KickoffCharter' can't be used to index type '{ justification: string; success_criteria: string; constraints: string; assumptions: string; key_stakeholders_summary: string; pm_authority: string; }'.
+  Property 'id' does not exist on type '{ justification: string; success_criteria: string; constraints: string; assumptions: string; key_stakeholders_summary: string; pm_authority: string; }'.
+/home/hossein/Desktop/projects/building-management/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  web@ typecheck: `react-router typegen && tsc`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.

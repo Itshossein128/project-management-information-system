@@ -1,0 +1,24 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 6 tests using 1 worker
+
+  ✓  1 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:645:3 › en delayed mixed method operations and late case release (5.5s)
+  ✓  2 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:645:3 › fa delayed mixed method operations and late case release (5.1s)
+  ✓  3 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1057:3 › en late responses from every method and global save isolate newer case (5.4s)
+  ✓  4 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1057:3 › fa late responses from every method and global save isolate newer case (5.2s)
+  ✓  5 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1244:3 › en convergence pending case reselect and return cannot reacquire (11.7s)
+  ✓  6 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1244:3 › fa convergence pending case reselect and return cannot reacquire (10.8s)
+
+  6 passed (56.1s)

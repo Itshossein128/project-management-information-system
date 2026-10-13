@@ -1,0 +1,74 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+.............................FFFFFFFFFFFFF                               [100%]
+=================================== FAILURES ===================================
+_______________________ test_bad_result_rejected[rows0] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows1] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows2] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows3] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows4] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows5] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows6] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows7] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows8] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+________________________ test_bad_result_rejected[None] ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_bad_result_rejected[rows10] _______________________
+decision_support/reference_tests/test_ranking_reference_harness.py:81: in test_bad_result_rejected
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+___________________________ test_tie_order_is_exact ____________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:86: in test_tie_order_is_exact
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+_______________________ test_absolute_tolerance_boundary _______________________
+decision_support/reference_tests/test_ranking_reference_harness.py:92: in test_absolute_tolerance_boundary
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows0]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows1]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows2]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows3]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows4]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows5]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows6]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows7]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows8]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[None]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows10]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_tie_order_is_exact
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_absolute_tolerance_boundary
+13 failed, 29 passed in 0.37s
+
+exit: 1
+elapsed_seconds: 1.132

@@ -1,0 +1,100 @@
+✔ completed ISM is structurally guarded using frozen names (1.720947ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.451002ms)
+✔ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (141.734823ms)
+✔ valid JSON remains available for independent method and raw draft guards (14.903548ms)
+✔ ISM saved-case metadata is guarded without validating unrelated or raw draft inputs (0.383071ms)
+✔ completed ISM run envelope includes method, frozen binary input and provenance (0.324895ms)
+▶ CriteriaWeightTable formatting rules
+  ✔ formats weights as percentages accurately (0.92879ms)
+  ✔ formats weights as 4-decimal numbers (0.322769ms)
+  ✔ keeps consistency inference on the server (0.725046ms)
+✔ CriteriaWeightTable formatting rules (5.650701ms)
+▶ NamedListEditor rules
+  ✔ rejects 11th name (1.984649ms)
+  ✔ surfaces empty and duplicate (0.67668ms)
+✔ NamedListEditor rules (5.054497ms)
+✔ emits precise optional metadata with surviving criterion operations (2.397932ms)
+▶ RankingResultTable helpers
+  ✔ reads SAW ranking rows (0.689498ms)
+  ✔ reads TOPSIS ranking rows with distances and closeness (0.192916ms)
+  ✔ returns empty for missing ranking (0.827977ms)
+✔ RankingResultTable helpers (2.789512ms)
+▶ ranking input rules
+  ✔ rejects empty matrix cells (never coerce to zero) (1.172011ms)
+  ✔ rejects weight length mismatch and all-zero (0.355967ms)
+  ✔ rejects invalid types and cost zero (0.413621ms)
+  ✔ rejects all-zero benefit column at criteria.j (0.389039ms)
+✔ ranking input rules (3.960913ms)
+▶ SquareMatrixEditor pairwise reciprocal rules
+  ✔ initializes an n x n identity pairwise matrix with 1.0 on diagonal (1.735503ms)
+  ✔ updates reciprocal cell automatically when an off-diagonal cell changes (0.35072ms)
+  ✔ handles decimal or fraction reciprocal accurately (0.206745ms)
+  ✔ does not alter other cells in the matrix (0.17771ms)
+✔ SquareMatrixEditor pairwise reciprocal rules (3.842878ms)
+✔ owns n=1 and clears both directions without mutating input (0.207653ms)
+✔ reconciles by trimmed names, preserves pairs and blanks renamed/new pairs (0.411894ms)
+✔ does not repair malformed retained diagonal judgments during reconciliation (0.180946ms)
+▶ ValidationIssueList parsing
+  ✔ renders path + message from API-shaped issues (1.065786ms)
+  ✔ localizes message via stable code when t provides a translation (0.302391ms)
+✔ ValidationIssueList parsing (2.924673ms)
+▶ request failure feedback
+  ✔ preserves permission_denied as an actionable general issue (1.648809ms)
+  ✔ preserves not_found as an actionable general issue (0.372976ms)
+  ✔ preserves throttled as an actionable general issue (0.268639ms)
+  ✔ preserves not_authenticated as an actionable general issue (0.17021ms)
+  ✔ preserves authentication_failed as an actionable general issue (0.38498ms)
+  ✔ preserves locatable domain issues rather than replacing them (0.572876ms)
+  ✔ provides safe generic feedback for null (2.25144ms)
+  ✔ provides safe generic feedback for {} (0.232295ms)
+  ✔ provides safe generic feedback for {"error":{"code":"unknown"}} (0.12497ms)
+  ✔ provides safe generic feedback for "<html>Server error</html>" (0.103246ms)
+✔ request failure feedback (7.027995ms)
+▶ decision support i18n keys
+  ✔ has required keys in en.json (3.093335ms)
+  ✔ has required keys in fa.json (2.215397ms)
+✔ decision support i18n keys (6.966575ms)
+✔ covers every static AHP UI key and preserves interpolation arguments in both languages (3.158989ms)
+✔ explicit zero diagonal and unanswered cross-pairs (2.380009ms)
+✔ exact options and independent opposite direction (0.589009ms)
+✔ invalid raw hydration is retained, empty legacy initializes only new draft (0.408718ms)
+✔ strict local errors do not compute derived analysis (0.810571ms)
+✔ operation identity remaps both axes without guessing renamed strings (0.667179ms)
+▶ AHP presentation boundary
+  ✔ AhpMethodPanel.tsx exists and contains no weighting or consistency derivation (3.766614ms)
+  ✔ SquareMatrixEditor.tsx exists and contains no weighting or consistency derivation (0.331217ms)
+  ✔ CriteriaWeightTable.tsx exists and contains no weighting or consistency derivation (0.202759ms)
+  ✔ square-matrix-rules.ts exists and contains no weighting or consistency derivation (0.245697ms)
+  ✔ criteria-weight-rules.ts exists and contains no weighting or consistency derivation (0.206296ms)
+  ✔ InputSnapshotViewer.tsx exists and contains no weighting or consistency derivation (0.29369ms)
+  ✔ ../../app/routes/project-decision-support.tsx exists and contains no weighting or consistency derivation (0.455506ms)
+  ✔ ../../app/lib/api/decision-support.ts exists and contains no weighting or consistency derivation (0.207763ms)
+✔ AHP presentation boundary (7.632579ms)
+✔ ISM presentation boundary: IsmMethodPanel.tsx (1.461816ms)
+✔ ISM presentation boundary: BinaryRelationEditor.tsx (0.267114ms)
+✔ ISM presentation boundary: IsmLayerList.tsx (0.190901ms)
+✔ ISM presentation boundary: ism-input-rules.ts (0.19811ms)
+✔ ISM presentation boundary: ism-result-rules.ts (0.365661ms)
+✔ ISM presentation boundary: InputSnapshotViewer.tsx (0.293574ms)
+✔ ISM presentation boundary: ../../app/routes/project-decision-support.tsx (0.468845ms)
+✔ ISM presentation boundary: ../../app/lib/api/decision-support.ts (0.185094ms)
+▶ no client SAW math
+  ✔ SawMethodPanel.tsx does not embed SAW normalize/score loops (1.347387ms)
+  ✔ WeightVectorEditor.tsx does not embed SAW normalize/score loops (0.336668ms)
+  ✔ RectangularMatrixEditor.tsx does not embed SAW normalize/score loops (0.246771ms)
+  ✔ CriterionTypeToggle.tsx does not embed SAW normalize/score loops (0.207583ms)
+  ✔ RankingResultTable.tsx does not embed SAW normalize/score loops (0.387754ms)
+  ✔ RunActionBar.tsx does not embed SAW normalize/score loops (0.313397ms)
+✔ no client SAW math (4.830194ms)
+▶ no client TOPSIS math
+  ✔ TopsisMethodPanel.tsx does not embed TOPSIS scoring/distance math (1.277016ms)
+  ✔ RankingResultTable.tsx does not embed TOPSIS scoring/distance math (0.403218ms)
+✔ no client TOPSIS math (3.241387ms)
+ℹ tests 70
+ℹ suites 11
+ℹ pass 70
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 705.402137

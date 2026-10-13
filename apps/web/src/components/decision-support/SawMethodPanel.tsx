@@ -1,5 +1,6 @@
+import { useDecisionExecution } from "./useDecisionExecution";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DecisionSupportRequestError,
@@ -20,10 +21,13 @@ import {
   validateWeightVector,
   type RankingIssue,
 } from "./ranking-input-rules";
-import { parseApiValidationIssues } from "./validation-issues";
+import { parseApiRequestIssues } from "./validation-issues";
 import { WeightVectorEditor } from "./WeightVectorEditor";
 
 type Props = {
+  disabled?: boolean;
+  beginOperation: () => (() => void) | null;
+  onHistoryRecovered: (caseId: string) => void;
   projectId: string;
   caseId: string;
   criteria: string[];
@@ -38,6 +42,9 @@ type Props = {
 };
 
 export function SawMethodPanel({
+  disabled = false,
+  beginOperation,
+  onHistoryRecovered,
   projectId,
   caseId,
   criteria,
@@ -51,7 +58,13 @@ export function SawMethodPanel({
   latestRanking = [],
 }: Props) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const [issues, setIssues] = useState<RankingIssue[]>([]);
   const [ranking, setRanking] = useState<SawRankingRow[]>(latestRanking);
 
@@ -59,6 +72,10 @@ export function SawMethodPanel({
   useEffect(() => {
     setRanking(latestRanking);
   }, [latestRanking]);
+
+  useEffect(() => {
+    setRanking([]);
+  }, [JSON.stringify([criteria, alternatives, weights, types, matrix])]);
 
   const collectLocalIssues = (): RankingIssue[] => {
     const n = criteria.length;
@@ -70,39 +87,51 @@ export function SawMethodPanel({
     ];
   };
 
-  const runMutation = useMutation({
-    mutationFn: async () => {
-      await patchDecisionCase(projectId, caseId, {
-        weights,
-        types,
-        performance_matrix: matrix,
-        criteria,
-        alternatives,
-      });
-      return createDecisionRun(projectId, caseId, "saw");
-    },
-    onSuccess: (run: DecisionRun) => {
+  const {
+    mutation: runMutation,
+    recovery,
+    clearRecovery,
+  } = useDecisionExecution({
+    projectId,
+    caseId,
+    method: "saw",
+    onHistoryRecovered,
+    onSuccess: (run) => {
       setIssues([]);
-      const rows = run.result?.ranking ?? [];
-      setRanking(rows);
-      void qc.invalidateQueries({ queryKey: ["decision-runs", projectId, caseId] });
+      setRanking(run.result.ranking as SawRankingRow[]);
     },
-    onError: (err: unknown) => {
-      if (err instanceof DecisionSupportRequestError) {
-        setIssues(parseApiValidationIssues(err.payload));
-      } else {
-        setIssues([{ code: "error", path: "", message: String(err) }]);
-      }
+    onError: (err) => {
+      setRanking([]);
+      setIssues(
+        parseApiRequestIssues(
+          err instanceof DecisionSupportRequestError ? err.payload : null,
+        ),
+      );
     },
   });
 
   return (
-    <div className="space-y-4 rounded-md border border-border p-4">
-      <h2 className="text-sm font-medium">{t("decisionSupport.sawPanelTitle")}</h2>
-      <p className="text-xs text-muted-foreground">{t("decisionSupport.sawPanelHint")}</p>
+    <fieldset
+      disabled={disabled || runMutation.isPending}
+      className="min-w-0 space-y-4 rounded-md border border-border p-4"
+    >
+      <h2 className="text-sm font-medium">
+        {t("decisionSupport.sawPanelTitle")}
+      </h2>
+      <p className="text-xs text-muted-foreground">
+        {t("decisionSupport.sawPanelHint")}
+      </p>
 
-      <WeightVectorEditor criteria={criteria} weights={weights} onChange={onWeightsChange} />
-      <CriterionTypeToggle criteria={criteria} types={types} onChange={onTypesChange} />
+      <WeightVectorEditor
+        criteria={criteria}
+        weights={weights}
+        onChange={onWeightsChange}
+      />
+      <CriterionTypeToggle
+        criteria={criteria}
+        types={types}
+        onChange={onTypesChange}
+      />
       <RectangularMatrixEditor
         criteria={criteria}
         alternatives={alternatives}
@@ -110,23 +139,46 @@ export function SawMethodPanel({
         onChange={onMatrixChange}
       />
 
-      <ValidationIssueList issues={issues} />
+      <ValidationIssueList
+        criterionNames={criteria}
+        alternativeNames={alternatives}
+        issues={issues}
+      />
 
+      {recovery && (
+        <p role="status" data-execution-recovery={recovery}>
+          {t(
+            `decisionSupport.${recovery === "checking" ? "executionRecoveryChecking" : recovery === "failed" ? "executionRecoveryFailed" : "executionRecoveryRefreshed"}`,
+          )}
+        </p>
+      )}
       <RunActionBar
+        disabled={disabled}
         methodLabel="SAW"
         pending={runMutation.isPending}
         onValidate={() => setIssues(collectLocalIssues())}
         onRun={() => {
+          setRanking([]);
           const local = collectLocalIssues();
           if (local.length) {
             setIssues(local);
             return;
           }
-          runMutation.mutate();
+          const release = beginOperation();
+          if (!release) return;
+          const payload = structuredClone({
+            weights,
+            types,
+            performance_matrix: matrix,
+            criteria,
+            alternatives,
+          });
+          clearRecovery();
+          runMutation.mutate({ payload, release });
         }}
       />
 
       <RankingResultTable method="saw" ranking={ranking} />
-    </div>
+    </fieldset>
   );
 }

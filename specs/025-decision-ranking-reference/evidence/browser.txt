@@ -1,0 +1,4 @@
+Verified reuse, not a fresh browser execution. Eight real EN/FA observations from 2026-10-13T00:09:46.862Z.
+Full provenance/source matches/artifact hashes: browser-provenance.json.
+Four named categories x two locales: frozen ranking review, independent disagreement/ties/deselection, keyboard viewer/revoked access, named feedback.
+All passed once; traces exist and are nonempty. Fresh 61-test backend pairs presentation with actual computation/persistence/access.

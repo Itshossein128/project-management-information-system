@@ -1,0 +1,21 @@
+{
+  "contract": "specs/025-decision-ranking-reference/contracts/existing-product-boundary.md",
+  "prior_candidates": [
+    {
+      "path": "specs/024-decision-execution-records/completion.json",
+      "exists": false
+    },
+    {
+      "path": "specs/024-decision-execution-records/evidence/browser-report.json",
+      "exists": true
+    }
+  ],
+  "levels": [
+    "source-inspection",
+    "arithmetic",
+    "service/api-persistence",
+    "browser-interaction",
+    "reused-evidence"
+  ],
+  "acceptance": "none yet"
+}

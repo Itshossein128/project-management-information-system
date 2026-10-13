@@ -1,0 +1,20 @@
+{
+  "reference_report_complete": true,
+  "checks": 138,
+  "reference_source_hashes_match": true,
+  "backend": "backend.txt: 61 passed, exit 0",
+  "backend_and_all_prior_product_sources_match_baseline": true,
+  "protected_product_source_count": 1250,
+  "backend_rerun_needed": false,
+  "browser_evidence": "verified reused 8 EN/FA scenarios, not freshly run",
+  "browser_source_comparisons": 1256,
+  "browser_sources_and_traces_match": true,
+  "new_model_ui_locale_dependency_change": false,
+  "schema_type_locale_checks": "not triggered; no relevant changes; old results are not fresh checks",
+  "generated_at": "2026-10-13T05:26:51.933237+00:00",
+  "reference_source_hashes_checked": 99,
+  "backend_revalidated_this_pass": true,
+  "backend_fresh_this_pass": false,
+  "browser_trace_comparisons": 8,
+  "browser_original_named_passes": 8
+}

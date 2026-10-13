@@ -1,0 +1,105 @@
+[WebServer] Watching for file changes with StatReloader
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+[WebServer] System check identified some issues:
+[WebServer] 
+[WebServer] WARNINGS:
+[WebServer] ?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+[WebServer] 
+[WebServer] System check identified 1 issue (0 silenced).
+[WebServer] Error: That port is already in use.
+
+Running 2 tests using 1 worker
+
+  ✘  1 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › en frozen named ranking review leaves current result and live draft unchanged (10.4s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › fa frozen named ranking review leaves current result and live draft unchanged (9.6s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › en frozen named ranking review leaves current result and live draft unchanged 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'Historical run', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'Historical run', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Historical run', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' })
+
+
+      21 |   await page.reload();await page.getByRole('button',{name:s.c.title,exact:true}).click();await expect(page.locator('#ds-title')).toHaveValue(s.c.title);
+      22 |   await page.locator('[data-run-id="'+first.id+'"]').click();
+    > 23 |   const history=page.getByRole('region',{name:s.copy.historicalRun,exact:true});await expect(history.getByRole('table',{name:s.copy.frozenRankingInputs||'Frozen ranking inputs'})).toBeVisible();
+         |                                                                                                                                                                                     ^
+      24 |   await expect(history.getByRole('columnheader',{name:'Cost',exact:true})).toBeVisible();await expect(history.getByRole('cell',{name:'0.4',exact:true})).toBeVisible();
+      25 |   const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await expect(panel.getByRole('cell',{name:'Alpha',exact:true})).toHaveCount(0);
+      26 |   expect(await (await page.request.get(runs+first.id+'/',{headers:s.headers})).json()).toEqual(first);
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:23:181
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-495ca-lt-and-live-draft-unchanged-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-495ca-lt-and-live-draft-unchanged-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-495ca-lt-and-live-draft-unchanged-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-495ca-lt-and-live-draft-unchanged-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › fa frozen named ranking review leaves current result and live draft unchanged 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('region', { name: 'اجرای گذشته', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('region', { name: 'اجرای گذشته', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' }) with timeout 5000ms
+      - waiting for getByRole('region', { name: 'اجرای گذشته', exact: true }).getByRole('table', { name: 'Frozen ranking inputs' })
+
+
+      21 |   await page.reload();await page.getByRole('button',{name:s.c.title,exact:true}).click();await expect(page.locator('#ds-title')).toHaveValue(s.c.title);
+      22 |   await page.locator('[data-run-id="'+first.id+'"]').click();
+    > 23 |   const history=page.getByRole('region',{name:s.copy.historicalRun,exact:true});await expect(history.getByRole('table',{name:s.copy.frozenRankingInputs||'Frozen ranking inputs'})).toBeVisible();
+         |                                                                                                                                                                                     ^
+      24 |   await expect(history.getByRole('columnheader',{name:'Cost',exact:true})).toBeVisible();await expect(history.getByRole('cell',{name:'0.4',exact:true})).toBeVisible();
+      25 |   const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await expect(panel.getByRole('cell',{name:'Alpha',exact:true})).toHaveCount(0);
+      26 |   expect(await (await page.request.get(runs+first.id+'/',{headers:s.headers})).json()).toEqual(first);
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:23:181
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-9d304-lt-and-live-draft-unchanged-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-9d304-lt-and-live-draft-unchanged-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-9d304-lt-and-live-draft-unchanged-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-9d304-lt-and-live-draft-unchanged-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › en frozen named ranking review leaves current result and live draft unchanged 
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:17:2 › fa frozen named ranking review leaves current result and live draft unchanged 

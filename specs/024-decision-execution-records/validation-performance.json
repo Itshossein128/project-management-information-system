@@ -1,0 +1,1389 @@
+{
+  "runs": {
+    "en": {
+      "case_id": "505297cd-bd98-4e31-bded-9fe142fb6a27",
+      "method_counts": {
+        "saw": 20,
+        "topsis": 20,
+        "ahp": 20,
+        "ism": 20,
+        "dematel": 20
+      },
+      "samples": [
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 84.97652800002834,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 98.29617200000212,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 123.78531899995869,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 106.1528110000072,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 129.44531400001142,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 96.97764699999243,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 105.74690399999963,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 101.88310500001535,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 101.91049400001066,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 63.732987999974284,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 79.73407499998575,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 71.49126699997578,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 82.72221400000853,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 93.98168299999088,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 84.96334900002694,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 86.62928799999645,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 93.27802199998405,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 88.49873500003014,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 80.95403199997963,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 118.40859599999385,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 88.31123799999477,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 89.59743699996034,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 72.31846099998802,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 47.606047000037506,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 49.813714000047185,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 50.33184700005222,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 64.66138999996474,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 86.81854299997212,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 86.8627400000114,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 103.24388399999589,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 96.79165000002831,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 97.57803700002842,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 80.78004799998598,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 82.35018000000855,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 83.86063900002046,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 67.37370500003453,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 54.94765699998243,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 77.97792099998333,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 50.67358200001763,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 100.9658000000054,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "ed97b7f9-3fd8-4dda-ac13-4c4c39bde23a",
+          "duration_ms": 121.07405900000595,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "07b0af99-51e9-4eb2-8107-b4a8cd4eaecd",
+          "duration_ms": 94.39135999995051,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "31248245-22f1-40f3-8f3e-a5db932dbcbf",
+          "duration_ms": 141.92448700004024,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "1f40248d-071f-4bea-af23-160a20fedadb",
+          "duration_ms": 99.75433999998495,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "53ac717e-135c-47fb-be01-a24f5e1c3587",
+          "duration_ms": 64.12602600001264,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "65fb6c6e-23de-4203-823e-1a193c8f5d62",
+          "duration_ms": 60.107755000004545,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "530dc88e-3344-453b-97e3-08278d1bbf2c",
+          "duration_ms": 68.12115700001596,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "57b35978-5760-4dae-a831-6d25f22e21d2",
+          "duration_ms": 68.78172100003576,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "4456c6e7-6ac0-4901-a4b9-de330e6a6776",
+          "duration_ms": 81.10358300001826,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "2f10fe0b-7a86-4dd3-9283-a8b4b1747057",
+          "duration_ms": 77.10631100001046,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "ed97b7f9-3fd8-4dda-ac13-4c4c39bde23a",
+          "duration_ms": 55.06240599998273,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "07b0af99-51e9-4eb2-8107-b4a8cd4eaecd",
+          "duration_ms": 86.1741279999842,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "31248245-22f1-40f3-8f3e-a5db932dbcbf",
+          "duration_ms": 94.2300909999758,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "1f40248d-071f-4bea-af23-160a20fedadb",
+          "duration_ms": 102.52743099996587,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "53ac717e-135c-47fb-be01-a24f5e1c3587",
+          "duration_ms": 91.60761599999387,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "65fb6c6e-23de-4203-823e-1a193c8f5d62",
+          "duration_ms": 86.27243999997154,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "530dc88e-3344-453b-97e3-08278d1bbf2c",
+          "duration_ms": 66.66181799996411,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "57b35978-5760-4dae-a831-6d25f22e21d2",
+          "duration_ms": 67.57110199995805,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "4456c6e7-6ac0-4901-a4b9-de330e6a6776",
+          "duration_ms": 54.843716000032146,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "2f10fe0b-7a86-4dd3-9283-a8b4b1747057",
+          "duration_ms": 66.76375499996357,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "ed97b7f9-3fd8-4dda-ac13-4c4c39bde23a",
+          "duration_ms": 55.14583200000925,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "07b0af99-51e9-4eb2-8107-b4a8cd4eaecd",
+          "duration_ms": 66.85054399998626,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "31248245-22f1-40f3-8f3e-a5db932dbcbf",
+          "duration_ms": 69.12763699999778,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "1f40248d-071f-4bea-af23-160a20fedadb",
+          "duration_ms": 64.06502500001807,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "53ac717e-135c-47fb-be01-a24f5e1c3587",
+          "duration_ms": 55.08510899997782,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "65fb6c6e-23de-4203-823e-1a193c8f5d62",
+          "duration_ms": 89.20607900002506,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "530dc88e-3344-453b-97e3-08278d1bbf2c",
+          "duration_ms": 79.00086099997861,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "57b35978-5760-4dae-a831-6d25f22e21d2",
+          "duration_ms": 80.28835499996785,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "4456c6e7-6ac0-4901-a4b9-de330e6a6776",
+          "duration_ms": 85.2272890000022,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "2f10fe0b-7a86-4dd3-9283-a8b4b1747057",
+          "duration_ms": 76.99257099995157,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "ed97b7f9-3fd8-4dda-ac13-4c4c39bde23a",
+          "duration_ms": 68.18440399999963,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "07b0af99-51e9-4eb2-8107-b4a8cd4eaecd",
+          "duration_ms": 63.577754999976605,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "31248245-22f1-40f3-8f3e-a5db932dbcbf",
+          "duration_ms": 66.04587099998025,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "1f40248d-071f-4bea-af23-160a20fedadb",
+          "duration_ms": 78.16758299997309,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "53ac717e-135c-47fb-be01-a24f5e1c3587",
+          "duration_ms": 68.30331300001126,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "65fb6c6e-23de-4203-823e-1a193c8f5d62",
+          "duration_ms": 67.19484800001374,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "530dc88e-3344-453b-97e3-08278d1bbf2c",
+          "duration_ms": 54.02004700002726,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "57b35978-5760-4dae-a831-6d25f22e21d2",
+          "duration_ms": 52.222658000013325,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "4456c6e7-6ac0-4901-a4b9-de330e6a6776",
+          "duration_ms": 79.2496370000299,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "en",
+          "category": "detail",
+          "id": "2f10fe0b-7a86-4dd3-9283-a8b4b1747057",
+          "duration_ms": 93.88786600000458,
+          "network": true,
+          "error": null
+        }
+      ],
+      "environment": {
+        "os": "linux",
+        "release": "6.8.0-146-generic",
+        "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+        "memory_bytes": 16534151168,
+        "node": "v25.2.1",
+        "chromium": "153.0.8010.12",
+        "workers": 1,
+        "api": "local Django runserver --nothreading",
+        "web": "Vite development",
+        "boundary": "user selection to matching readable IDs and stored detail; cached and fresh samples identified by GET observation",
+        "artificial_latency": false,
+        "api_python_django": "3.12.3 4.2.11",
+        "postgres": "psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "redis": "PONG",
+        "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+        "branch": "develop",
+        "postgres_server_version_num": 160015
+      }
+    },
+    "fa": {
+      "case_id": "0d80c601-2999-4194-b25d-93e0074d6316",
+      "method_counts": {
+        "saw": 20,
+        "topsis": 20,
+        "ahp": 20,
+        "ism": 20,
+        "dematel": 20
+      },
+      "samples": [
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 107.03494399995543,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 81.15588000003481,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 97.03550200001337,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 132.11385600001086,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 115.16225499997381,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 132.87117699999362,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 111.13022300001467,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 110.16847599996254,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 102.92589100002078,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 73.80393400002504,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 49.77016800001729,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 68.94828000001144,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 88.66116100002546,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 75.38333199999761,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 64.2802050000173,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 87.51649599999655,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 85.37353700003587,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 77.85071299999254,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 66.87274899997283,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 104.44531700003427,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 93.12272099999245,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 85.88138400000753,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 65.16859399998793,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 72.93067199998768,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 45.330165999999736,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 50.38435800001025,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 52.79088699998101,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 49.361931000021286,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 85.34632499999134,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 101.17858499998692,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 2,
+          "duration_ms": 98.5098579999758,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 3,
+          "duration_ms": 76.98243700002786,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 4,
+          "duration_ms": 84.66367900004843,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 5,
+          "duration_ms": 89.68750500003807,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 6,
+          "duration_ms": 78.34291700000176,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 7,
+          "duration_ms": 81.88723600003868,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 8,
+          "duration_ms": 83.36000099999364,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 9,
+          "duration_ms": 73.52730199997313,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 10,
+          "duration_ms": 62.46385599998757,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "page",
+          "page": 1,
+          "duration_ms": 66.30901500000618,
+          "network": false,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "0002bc0d-a5fe-42af-beaa-509b79891a0c",
+          "duration_ms": 105.82942600001115,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "011b2de6-7367-4b69-b389-90b7f977c3b7",
+          "duration_ms": 100.83601000002818,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "2db88c9b-18b5-4c1a-833a-09558def0ebc",
+          "duration_ms": 100.73757399996975,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "b9b784ef-fbaa-462d-a71b-5c2efab7db1d",
+          "duration_ms": 103.99418199999491,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "e20c8533-f069-4634-94ae-96288ed80b39",
+          "duration_ms": 104.75111299997661,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "4bdeeff8-dff0-44b0-8e47-4bce762edbf1",
+          "duration_ms": 74.53028800000902,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "c1d9a7b0-f954-4a9f-9714-50e97b245b70",
+          "duration_ms": 57.83454199996777,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "7d00355d-42da-45e7-be6a-91b1a9f589e0",
+          "duration_ms": 72.03798999998253,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "5ee93a90-bfe7-43d5-995e-791eeb10a8f2",
+          "duration_ms": 74.44228299998213,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "8d91f3a9-b450-414a-90c6-12b1b3b65f62",
+          "duration_ms": 66.49496899999212,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "0002bc0d-a5fe-42af-beaa-509b79891a0c",
+          "duration_ms": 55.39250999997603,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "011b2de6-7367-4b69-b389-90b7f977c3b7",
+          "duration_ms": 69.47193600004539,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "2db88c9b-18b5-4c1a-833a-09558def0ebc",
+          "duration_ms": 73.6051650000154,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "b9b784ef-fbaa-462d-a71b-5c2efab7db1d",
+          "duration_ms": 82.76792000001296,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "e20c8533-f069-4634-94ae-96288ed80b39",
+          "duration_ms": 89.36744800000452,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "4bdeeff8-dff0-44b0-8e47-4bce762edbf1",
+          "duration_ms": 83.1740839999984,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "c1d9a7b0-f954-4a9f-9714-50e97b245b70",
+          "duration_ms": 114.86089300003368,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "7d00355d-42da-45e7-be6a-91b1a9f589e0",
+          "duration_ms": 76.37051400000928,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "5ee93a90-bfe7-43d5-995e-791eeb10a8f2",
+          "duration_ms": 60.61557399999583,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "8d91f3a9-b450-414a-90c6-12b1b3b65f62",
+          "duration_ms": 71.61754499998642,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "0002bc0d-a5fe-42af-beaa-509b79891a0c",
+          "duration_ms": 56.145762000000104,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "011b2de6-7367-4b69-b389-90b7f977c3b7",
+          "duration_ms": 70.28478200000245,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "2db88c9b-18b5-4c1a-833a-09558def0ebc",
+          "duration_ms": 63.82336199999554,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "b9b784ef-fbaa-462d-a71b-5c2efab7db1d",
+          "duration_ms": 58.476888000033796,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "e20c8533-f069-4634-94ae-96288ed80b39",
+          "duration_ms": 65.15741200000048,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "4bdeeff8-dff0-44b0-8e47-4bce762edbf1",
+          "duration_ms": 66.55743500002427,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "c1d9a7b0-f954-4a9f-9714-50e97b245b70",
+          "duration_ms": 64.79959399998188,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "7d00355d-42da-45e7-be6a-91b1a9f589e0",
+          "duration_ms": 83.45286999997916,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "5ee93a90-bfe7-43d5-995e-791eeb10a8f2",
+          "duration_ms": 86.80805600003805,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "8d91f3a9-b450-414a-90c6-12b1b3b65f62",
+          "duration_ms": 89.26932999998098,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "0002bc0d-a5fe-42af-beaa-509b79891a0c",
+          "duration_ms": 82.99432300002081,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "011b2de6-7367-4b69-b389-90b7f977c3b7",
+          "duration_ms": 73.93489599996246,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "2db88c9b-18b5-4c1a-833a-09558def0ebc",
+          "duration_ms": 73.42132399999537,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "b9b784ef-fbaa-462d-a71b-5c2efab7db1d",
+          "duration_ms": 63.73040399997262,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "e20c8533-f069-4634-94ae-96288ed80b39",
+          "duration_ms": 67.09120800002711,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "4bdeeff8-dff0-44b0-8e47-4bce762edbf1",
+          "duration_ms": 59.794330000004265,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "c1d9a7b0-f954-4a9f-9714-50e97b245b70",
+          "duration_ms": 66.99811600003159,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "7d00355d-42da-45e7-be6a-91b1a9f589e0",
+          "duration_ms": 68.70118099998217,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "5ee93a90-bfe7-43d5-995e-791eeb10a8f2",
+          "duration_ms": 68.20560200000182,
+          "network": true,
+          "error": null
+        },
+        {
+          "locale": "fa",
+          "category": "detail",
+          "id": "8d91f3a9-b450-414a-90c6-12b1b3b65f62",
+          "duration_ms": 81.74090899998555,
+          "network": true,
+          "error": null
+        }
+      ],
+      "environment": {
+        "os": "linux",
+        "release": "6.8.0-146-generic",
+        "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+        "memory_bytes": 16534151168,
+        "node": "v25.2.1",
+        "chromium": "153.0.8010.12",
+        "workers": 1,
+        "api": "local Django runserver --nothreading",
+        "web": "Vite development",
+        "boundary": "user selection to matching readable IDs and stored detail; cached and fresh samples identified by GET observation",
+        "artificial_latency": false,
+        "api_python_django": "3.12.3 4.2.11",
+        "postgres": "psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "redis": "PONG",
+        "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+        "branch": "develop",
+        "postgres_server_version_num": 160015
+      }
+    }
+  },
+  "summary": {
+    "en": {
+      "page": {
+        "samples": 40,
+        "within_2000_ms": 40,
+        "failed_trials": 0,
+        "network_observed": 9,
+        "median_ms": 86.72391549998429,
+        "p95_ms": 118.40859599999385,
+        "p95_definition": "nearest rank"
+      },
+      "detail": {
+        "samples": 40,
+        "within_2000_ms": 40,
+        "failed_trials": 0,
+        "network_observed": 40,
+        "median_ms": 68.95467900001677,
+        "p95_ms": 102.52743099996587,
+        "p95_definition": "nearest rank"
+      }
+    },
+    "fa": {
+      "page": {
+        "samples": 40,
+        "within_2000_ms": 40,
+        "failed_trials": 0,
+        "network_observed": 9,
+        "median_ms": 82.62361850001616,
+        "p95_ms": 115.16225499997381,
+        "p95_definition": "nearest rank"
+      },
+      "detail": {
+        "samples": 40,
+        "within_2000_ms": 40,
+        "failed_trials": 0,
+        "network_observed": 40,
+        "median_ms": 72.72965699998895,
+        "p95_ms": 104.75111299997661,
+        "p95_definition": "nearest rank"
+      }
+    }
+  },
+  "measurement": "Prepared fixed 100 records per locale, 20 of each method; 10 rows per page. Timed only selection to matching readable history page/detail. All trials retained."
+}

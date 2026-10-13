@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+import copy
 from typing import Any
+
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.db.models import JSONField, Value
 
 from decision_support.models import DecisionCase
 from decision_support.services.validators import (
@@ -10,6 +15,8 @@ from decision_support.services.validators import (
     validate_method_ids,
     validate_names,
     validate_ranking_inputs,
+    validate_ahp_draft_numbers,
+    validate_ism_draft_numbers,
     _issue,
 )
 
@@ -45,7 +52,7 @@ def _case_dict(case: DecisionCase) -> dict[str, Any]:
         'performance_matrix': list(case.performance_matrix or []),
         'ahp_matrix': list(case.ahp_matrix or []),
         'dematel_matrix': list(case.dematel_matrix or []),
-        'ism_matrix': list(case.ism_matrix or []),
+        'ism_matrix': copy.deepcopy(case.ism_matrix),
     }
 
 
@@ -70,7 +77,10 @@ def _normalize_case_fields(data: dict[str, Any]) -> dict[str, Any]:
 
     for key in ('weights', 'types', 'performance_matrix', 'ahp_matrix', 'dematel_matrix', 'ism_matrix'):
         val = data.get(key)
-        out[key] = val if val is not None else []
+        out[key] = val if key == 'ism_matrix' or val is not None else []
+
+    validate_ahp_draft_numbers(out["ahp_matrix"])
+    validate_ism_draft_numbers(out['ism_matrix'])
 
     if _ranking_payload_present(out):
         validated = validate_ranking_inputs(
@@ -97,22 +107,42 @@ def create_case(project_id, user, data: dict[str, Any]) -> DecisionCase:
     if 'title' in data:
         payload['title'] = data['title']
     fields = _normalize_case_fields(payload)
-    return DecisionCase.objects.create(
+    # JSON null is a recoverable malformed draft, distinct from SQL NULL.
+    if fields['ism_matrix'] is None:
+        fields['ism_matrix'] = Value(None, output_field=JSONField())
+    case = DecisionCase.objects.create(
         project_id=project_id,
         created_by=user,
         updated_by=user,
         **fields,
     )
+    case.refresh_from_db()
+    return case
 
 
+@transaction.atomic
 def update_case(case: DecisionCase, user, data: dict[str, Any]) -> DecisionCase:
-    merged = _case_dict(case)
-    for key, value in data.items():
-        if key in merged or key == 'title':
-            merged[key] = value
-    fields = _normalize_case_fields(merged)
+    caller = case
+    case = get_object_or_404(DecisionCase.objects.select_for_update(), pk=case.pk, project_id=case.project_id)
+    allowed = {'title', *CASE_JSON_FIELDS}
+    changes = {key: value for key, value in data.items() if key in allowed}
+    # Pairwise draft saves must not normalize/revalidate unrelated ranking drafts.
+    if set(changes) <= {'ahp_matrix'} or set(changes) <= {'ism_matrix'}:
+        if 'ahp_matrix' in changes:
+            validate_ahp_draft_numbers(changes['ahp_matrix'])
+        if 'ism_matrix' in changes:
+            validate_ism_draft_numbers(changes['ism_matrix'])
+        fields = changes
+    else:
+        case.refresh_from_db()
+        merged = {**_case_dict(case), **changes}
+        normalized = _normalize_case_fields(merged)
+        fields = {key: normalized[key] for key in changes}
     for key, value in fields.items():
+        if key == 'ism_matrix' and value is None:
+            value = Value(None, output_field=JSONField())
         setattr(case, key, value)
     case.updated_by = user
-    case.save()
-    return case
+    case.save(update_fields=[*fields, 'updated_by', 'updated_at'])
+    caller.refresh_from_db()
+    return caller

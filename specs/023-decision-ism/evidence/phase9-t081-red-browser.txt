@@ -1,0 +1,190 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 10 tests using 1 worker
+
+  ✘   1 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history filtered success (9.8s)
+  ✓   2 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history filtered failure (5.9s)
+  ✘   3 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history page2 success (8.6s)
+  ✓   4 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history page2 failure (5.3s)
+  ✓   5 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history switch success (3.7s)
+  ✘   6 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history filtered success (8.1s)
+  ✓   7 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history filtered failure (3.8s)
+  ✘   8 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history page2 success (8.6s)
+  ✓   9 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history page2 failure (5.1s)
+  ✓  10 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history switch success (5.1s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history filtered success 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('combobox', { name: 'History method', exact: true })
+    Expected: ""
+    Received: "ism"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: 'History method', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: 'History method', exact: true })
+        14 × locator resolved to <select aria-label="History method" class="rounded border border-border bg-background p-1">…</select>
+           - unexpected value "ism"
+
+
+      1964 |         expect(posts).toBe(1);
+      1965 |         if (scenario.outcome === "success") {
+    > 1966 |           await expect(filter).toHaveValue("");
+           |                                ^
+      1967 |           await expect(
+      1968 |             page.getByText(pageLabel(1, 14), { exact: true }),
+      1969 |           ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1966:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-12647-ry-history-filtered-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-12647-ry-history-filtered-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-12647-ry-history-filtered-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-12647-ry-history-filtered-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history page2 success 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('combobox', { name: 'History method', exact: true })
+    Expected: ""
+    Received: "ism"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: 'History method', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: 'History method', exact: true })
+        14 × locator resolved to <select aria-label="History method" class="rounded border border-border bg-background p-1">…</select>
+           - unexpected value "ism"
+
+
+      1964 |         expect(posts).toBe(1);
+      1965 |         if (scenario.outcome === "success") {
+    > 1966 |           await expect(filter).toHaveValue("");
+           |                                ^
+      1967 |           await expect(
+      1968 |             page.getByText(pageLabel(1, 14), { exact: true }),
+      1969 |           ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1966:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-121d7-overy-history-page2-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-121d7-overy-history-page2-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-121d7-overy-history-page2-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-121d7-overy-history-page2-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history filtered success 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('combobox', { name: 'روش تاریخچه', exact: true })
+    Expected: ""
+    Received: "ism"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: 'روش تاریخچه', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: 'روش تاریخچه', exact: true })
+        14 × locator resolved to <select aria-label="روش تاریخچه" class="rounded border border-border bg-background p-1">…</select>
+           - unexpected value "ism"
+
+
+      1964 |         expect(posts).toBe(1);
+      1965 |         if (scenario.outcome === "success") {
+    > 1966 |           await expect(filter).toHaveValue("");
+           |                                ^
+      1967 |           await expect(
+      1968 |             page.getByText(pageLabel(1, 14), { exact: true }),
+      1969 |           ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1966:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-1ebe0-ry-history-filtered-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-1ebe0-ry-history-filtered-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-1ebe0-ry-history-filtered-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-1ebe0-ry-history-filtered-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history page2 success 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByRole('combobox', { name: 'روش تاریخچه', exact: true })
+    Expected: ""
+    Received: "ism"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByRole('combobox', { name: 'روش تاریخچه', exact: true }) with timeout 5000ms
+      - waiting for getByRole('combobox', { name: 'روش تاریخچه', exact: true })
+        14 × locator resolved to <select aria-label="روش تاریخچه" class="rounded border border-border bg-background p-1">…</select>
+           - unexpected value "ism"
+
+
+      1964 |         expect(posts).toBe(1);
+      1965 |         if (scenario.outcome === "success") {
+    > 1966 |           await expect(filter).toHaveValue("");
+           |                                ^
+      1967 |           await expect(
+      1968 |             page.getByText(pageLabel(1, 14), { exact: true }),
+      1969 |           ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1966:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-56229-overy-history-page2-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-56229-overy-history-page2-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-56229-overy-history-page2-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-56229-overy-history-page2-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history filtered success 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › en convergence visible recovery history page2 success 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history filtered success 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1785:5 › fa convergence visible recovery history page2 success 
+  6 passed (1.4m)

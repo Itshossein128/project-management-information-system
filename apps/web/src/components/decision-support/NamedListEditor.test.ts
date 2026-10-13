@@ -17,3 +17,12 @@ describe("NamedListEditor rules", () => {
     assert.equal(issues[0]?.code, "name_duplicate");
   });
 });
+
+import {changeNamedList} from './named-list-rules.ts';
+it('emits precise optional metadata with surviving criterion operations',()=>{
+ const renamed=changeNamedList(['A','B'],{kind:'rename',index:0,name:'Alpha'});
+ assert.deepEqual(renamed,{next:['Alpha','B'],operation:{kind:'rename',index:0,name:'Alpha'}});
+ assert.deepEqual(changeNamedList(renamed.next,{kind:'move',from:1,to:0}).next,['B','Alpha']);
+ assert.deepEqual(changeNamedList(['A','B'],{kind:'add',index:1,name:'C'}).next,['A','C','B']);
+ assert.deepEqual(changeNamedList(['A','B'],{kind:'remove',index:0}).next,['B']);
+});

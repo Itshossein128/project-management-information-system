@@ -69,3 +69,36 @@ describe("decision support i18n keys", () => {
     });
   }
 });
+
+const uiSources = [
+  "IsmMethodPanel.tsx", "BinaryRelationEditor.tsx", "IsmLayerList.tsx",
+  "AhpMethodPanel.tsx", "SquareMatrixEditor.tsx", "CriteriaWeightTable.tsx",
+  "RunActionBar.tsx", "NamedListEditor.tsx", "ExecutionHistoryList.tsx",
+  "InputSnapshotViewer.tsx", "ValidationIssueList.tsx",
+  "../../app/routes/project-decision-support.tsx",
+].map(file => readFileSync(join(root, "../../components/decision-support", file), "utf8"));
+const allEn = JSON.parse(readFileSync(join(root, "en.json"), "utf8")).decisionSupport;
+const allFa = JSON.parse(readFileSync(join(root, "fa.json"), "utf8")).decisionSupport;
+
+function flatten(obj: Record<string, unknown>, prefix = ""): Record<string, string> {
+  return Object.fromEntries(Object.entries(obj).flatMap(([key, value]) =>
+    typeof value === "string" ? [[prefix + key, value]] :
+    Object.entries(flatten(value as Record<string, unknown>, prefix + key + "."))));
+}
+
+it("covers every static AHP UI key and preserves interpolation arguments in both languages", () => {
+  const english = flatten(allEn);
+  const persian = flatten(allFa);
+  const used = new Set([...uiSources.join("\n").matchAll(/t\(['"]decisionSupport\.([\w.]+)['"]/g)].map(match => match[1]!));
+  for (const key of [
+    "errors.invalid_type", "errors.non_numeric", "errors.non_finite", "errors.cell_empty",
+    "errors.cell_non_positive", "errors.ahp_diagonal_invalid", "errors.ahp_reciprocal_mismatch",
+    "errors.name_empty", "errors.name_duplicate", "errors.ism_relation_invalid", "errors.ism_derivation_failed",
+  ]) used.add(key);
+  for (const key of [...used].filter(key => !key.endsWith("."))) {
+    assert.ok(english[key]?.trim(), "missing English " + key);
+    assert.ok(persian[key]?.trim(), "missing Persian " + key);
+    const parameters = (text: string) => [...text.matchAll(/{{\s*(\w+)\s*}}/g)].map(match => match[1]).sort();
+    assert.deepEqual(parameters(english[key]!), parameters(persian[key]!), "interpolation differs: " + key);
+  }
+});

@@ -1,0 +1,30 @@
+✔ actual QueryClient force-fresh unfiltered read keeps checking until settlement (23.79346ms)
+✔ failed malformed and timed-out lookup does not retry or publish late success (261.862526ms)
+✖ recovery never reuses a history GET started before the execution committed (22.237093ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1407.50016
+
+✖ failing tests:
+
+test at apps/web/src/components/decision-support/execution-recovery.test.ts:71:1
+✖ recovery never reuses a history GET started before the execution committed (22.237093ms)
+  AssertionError [ERR_ASSERTION]: must start one new post-commit read rather than reuse the pre-commit promise
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-recovery.test.ts:76:48)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

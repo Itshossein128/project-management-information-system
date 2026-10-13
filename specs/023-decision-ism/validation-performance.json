@@ -1,0 +1,780 @@
+{
+  "en": {
+    "recordedAt": "2026-10-12T22:08:59.533Z",
+    "environment": {
+      "os": "linux 6.8.0-146-generic",
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "logicalCpus": 8,
+      "memoryBytes": 16534151168,
+      "node": "v25.2.1",
+      "python": "3.12.3",
+      "django": "4.2.11",
+      "postgresServerVersion": 160015,
+      "existingDecisionCases": 625,
+      "existingDecisionRuns": 1693,
+      "browser": "153.0.8010.12",
+      "locale": "en",
+      "workers": 1,
+      "transport": "127.0.0.1 HTTP; no emulated latency or throttling",
+      "warmth": "running Vite development server, Django development server and browser session; fresh result per trial",
+      "scale": "one disposable ISM-only case; 40 append-only runs; at most 10 criteria"
+    },
+    "boundary": "browser PerformanceResourceTiming.startTime for execution POST to browser performance.now after returned-run layer visibility assertion; excludes entry and preparatory PATCH; includes automation visibility polling",
+    "sampleCount": 40,
+    "successfulWithin2000ms": 40,
+    "failedTrials": 0,
+    "medianMs": 101.09999999403954,
+    "p95Ms": 196,
+    "trials": [
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 1,
+        "runId": "a05d00ee-1a31-4728-8d60-503a6c8984cd",
+        "durationMs": 83.8999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 2,
+        "runId": "3ac29a93-209d-459e-b677-4ff322b74ef1",
+        "durationMs": 66.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 3,
+        "runId": "ecf85c6f-1f15-42a3-aa79-951a09515b0d",
+        "durationMs": 67.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 4,
+        "runId": "8e34213e-4fc9-4f9d-b34f-6e72c0e7e23b",
+        "durationMs": 61.1000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 5,
+        "runId": "ffa7e6c2-9139-4740-aa34-59da7ce2b11d",
+        "durationMs": 63.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 6,
+        "runId": "24b6fdc5-6ecf-4dd1-b741-18fb38289661",
+        "durationMs": 55.29999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 7,
+        "runId": "741ec0f8-a10b-415d-9d6d-23b3307e1853",
+        "durationMs": 68.09999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 8,
+        "runId": "33c9d56b-8f9d-4c5f-82af-40628b12f2be",
+        "durationMs": 58.099999994039536,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 9,
+        "runId": "1bd064e1-9ada-45a7-9c1b-fb9492c0b9ae",
+        "durationMs": 62.599999994039536,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 10,
+        "runId": "970ddfb3-51da-4499-a0d3-09ca53b2b45a",
+        "durationMs": 61.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "efb9ae3b-6efd-4703-af51-2ba688be9539",
+        "durationMs": 92.59999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "db61f74d-a5f5-422f-a58f-d7611b9dd338",
+        "durationMs": 150,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "83c66392-6425-4dd3-8655-3135c0b0f0a4",
+        "durationMs": 201.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "b8010176-ac99-403a-b62c-ad85d61816ba",
+        "durationMs": 99.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "ea3783eb-9311-447a-a964-0b17420d6ca8",
+        "durationMs": 105.80000001192093,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "b6fe109c-7870-425c-b131-3a7a7e49b4d4",
+        "durationMs": 129.09999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "104e6d16-2d53-4401-bd0a-c74bd43d16a2",
+        "durationMs": 182.09999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "a9b67322-4773-447e-8cf1-c3b41bdc7822",
+        "durationMs": 96.8999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "5aaa8327-2214-49d7-a35c-bd6d4b35fbc6",
+        "durationMs": 114.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "3eb43b8b-46d8-4368-9ca5-39e9ed102f7d",
+        "durationMs": 100.3999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "440a3f25-965c-4bfc-bdbd-bd7524419e33",
+        "durationMs": 196,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "f2248304-1793-4bd0-a6a4-2cc748250ba3",
+        "durationMs": 110.69999998807907,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "a06a6c9c-adac-4932-b331-5aa24e2679ac",
+        "durationMs": 103.69999998807907,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "e29a08a6-90d1-4cef-be60-502d1426e2c1",
+        "durationMs": 177.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "228a54d4-fda5-4ccc-8c10-5a00cb1e0c9c",
+        "durationMs": 98.59999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "799fdd71-3da9-4ec2-816f-6faf04394214",
+        "durationMs": 89.6000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "2355ce72-cda0-49ef-9340-3d001bbb9b63",
+        "durationMs": 111.40000000596046,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "ac31a07c-d786-4ae6-952d-565b7fe7a556",
+        "durationMs": 152.29999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "788fc1fb-d35f-4a8a-bc0d-66f2110e1b87",
+        "durationMs": 142.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "0cddb949-fb65-4b8b-8601-68489f86cf9a",
+        "durationMs": 121.6000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "2725375c-23ec-4397-ac2f-f530635741a8",
+        "durationMs": 101.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "68d82302-6b28-4477-bb4e-71757e6e12a1",
+        "durationMs": 203.69999998807907,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "4417a25c-b15d-4d7c-a2e6-d05f0d0e2c09",
+        "durationMs": 133.59999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "07429825-b62a-4efa-9061-19308badd677",
+        "durationMs": 99.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "36e970bb-32f1-4c72-8591-26d0b27338da",
+        "durationMs": 93.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "b6cc17b9-84a0-46ed-a4d4-d333a15c19d4",
+        "durationMs": 131.40000000596046,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "f4463f3b-d749-41da-ab45-6ed775be456c",
+        "durationMs": 173.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "d8333aaa-3e56-4b16-a36a-a120afcfcfe4",
+        "durationMs": 96.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "f2315cbb-d345-479f-b47c-a4546cda6058",
+        "durationMs": 105.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "0402874c-6957-4233-9353-7e4dda006b71",
+        "durationMs": 90.29999999701977,
+        "error": null,
+        "within2000ms": true
+      }
+    ]
+  },
+  "fa": {
+    "recordedAt": "2026-10-12T22:09:15.000Z",
+    "environment": {
+      "os": "linux 6.8.0-146-generic",
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "logicalCpus": 8,
+      "memoryBytes": 16534151168,
+      "node": "v25.2.1",
+      "python": "3.12.3",
+      "django": "4.2.11",
+      "postgresServerVersion": 160015,
+      "existingDecisionCases": 626,
+      "existingDecisionRuns": 1733,
+      "browser": "153.0.8010.12",
+      "locale": "fa",
+      "workers": 1,
+      "transport": "127.0.0.1 HTTP; no emulated latency or throttling",
+      "warmth": "running Vite development server, Django development server and browser session; fresh result per trial",
+      "scale": "one disposable ISM-only case; 40 append-only runs; at most 10 criteria"
+    },
+    "boundary": "browser PerformanceResourceTiming.startTime for execution POST to browser performance.now after returned-run layer visibility assertion; excludes entry and preparatory PATCH; includes automation visibility polling",
+    "sampleCount": 40,
+    "successfulWithin2000ms": 40,
+    "failedTrials": 0,
+    "medianMs": 107.80000000447035,
+    "p95Ms": 201.5,
+    "trials": [
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 1,
+        "runId": "f4f2240d-8a7a-483d-b187-bd53fbfd74dc",
+        "durationMs": 71.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 2,
+        "runId": "7ba2a6bc-42d2-4dbb-8301-f041e8176dc7",
+        "durationMs": 62.900000005960464,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 3,
+        "runId": "29c4e202-e8ae-41ca-a27f-f1636c4a0c9b",
+        "durationMs": 71.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 4,
+        "runId": "17acdaa4-1a9d-4970-83a1-88d3481b35d7",
+        "durationMs": 77.90000000596046,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 5,
+        "runId": "32d4b211-715f-4c4f-9c59-013ab8d309d8",
+        "durationMs": 78.6000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 6,
+        "runId": "b3699066-a895-45b9-880b-cb2ee06d2a51",
+        "durationMs": 70.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 7,
+        "runId": "3c1ebd19-465e-4c19-9b4f-cbe88825fd65",
+        "durationMs": 72.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 8,
+        "runId": "243e60f9-404b-46e8-bcdc-596916cb7570",
+        "durationMs": 61.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 9,
+        "runId": "447a62ce-4e78-4240-914b-765aeb6fc4c8",
+        "durationMs": 84.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "single",
+        "criteria": 1,
+        "trial": 10,
+        "runId": "d6f05d69-579d-45b0-830a-14021b2adcae",
+        "durationMs": 70.3999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "9099ac3c-031c-4ffe-ba81-ce9310fdaaa7",
+        "durationMs": 150.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "f28e066b-a419-41d5-8607-46c9c53cbb0d",
+        "durationMs": 124.29999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "101b77d1-e010-4c91-9731-4f13e2369d8f",
+        "durationMs": 201.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "7663b75b-7a1a-4951-b742-c57cc3b1c3f6",
+        "durationMs": 140.40000000596046,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "d7707945-9ec4-464d-8c14-5a9117a1ff76",
+        "durationMs": 120.3999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "9df9d30b-9dc2-4494-98f6-a0b0fe437b71",
+        "durationMs": 115.29999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "1359e36a-a2fb-4c03-9e24-5d263c676baf",
+        "durationMs": 213.19999998807907,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "4b6807df-ebcd-4094-8c65-fdf59d1e5290",
+        "durationMs": 132.19999998807907,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "038606c0-de0d-4744-b016-19ebbdb262d0",
+        "durationMs": 106,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-chain",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "e2645de3-0bee-4920-8710-e9b718c3a17f",
+        "durationMs": 128.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "2f1f93c6-a8b1-4f8f-9b5c-0035fbb2f81f",
+        "durationMs": 159.70000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "ec63fd28-490d-4cf9-9545-fff43f155a74",
+        "durationMs": 115,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "e56fb7d0-5943-4f9e-a11c-371142bf340f",
+        "durationMs": 92.59999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "4f78f1f1-cc80-407a-985d-0303a1a6a008",
+        "durationMs": 133.3999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "8c78a862-5098-4080-9913-036d004770cc",
+        "durationMs": 212.30000001192093,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "06190736-932b-4f05-a069-60285c791136",
+        "durationMs": 102.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "ee8cd869-558e-4a90-a62c-bbe393c141df",
+        "durationMs": 103.8999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "e1442024-272e-4058-91d9-f27ed31cd905",
+        "durationMs": 143.09999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "26454943-3b87-4433-b9b2-445b839390b5",
+        "durationMs": 171,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-branch",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "9cad653b-d3a7-4869-ada8-f44f1728ae0b",
+        "durationMs": 108.80000001192093,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 1,
+        "runId": "017671e9-a326-4c07-8b08-6c580901f200",
+        "durationMs": 94.79999999701977,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 2,
+        "runId": "be7ead60-2008-4bbd-ac3f-3b8f0eaf5bd1",
+        "durationMs": 180.3999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 3,
+        "runId": "497cfa62-9c80-4469-af82-48f763846e88",
+        "durationMs": 105.6000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 4,
+        "runId": "46818701-eb7b-4560-8162-303c3dfaf597",
+        "durationMs": 98.59999999403954,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 5,
+        "runId": "bac47a4a-57ab-4797-b7f9-c7c0d916e79d",
+        "durationMs": 107.90000000596046,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 6,
+        "runId": "52015625-4459-47a4-8cd4-25dd5617eb5a",
+        "durationMs": 165.6000000089407,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 7,
+        "runId": "540c9712-554d-4975-b018-b0f0218b8017",
+        "durationMs": 139.8999999910593,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 8,
+        "runId": "eb97571a-18a8-4891-80a3-d114a8b9085e",
+        "durationMs": 96.5,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 9,
+        "runId": "009854ee-4f20-4274-a453-b3be98f3689e",
+        "durationMs": 99.20000000298023,
+        "error": null,
+        "within2000ms": true
+      },
+      {
+        "network": "ten-dense-cycle",
+        "criteria": 10,
+        "trial": 10,
+        "runId": "9b9875b6-ad9c-4322-8741-690769746640",
+        "durationMs": 107.70000000298023,
+        "error": null,
+        "within2000ms": true
+      }
+    ]
+  }
+}

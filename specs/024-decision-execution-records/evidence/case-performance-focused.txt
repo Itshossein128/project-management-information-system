@@ -1,0 +1,24 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 6 tests using 1 worker
+
+  ✓  1 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:529:3 › saw captured recovery cannot change case B or release its pending save (6.0s)
+  ✓  2 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:529:3 › topsis captured recovery cannot change case B or release its pending save (6.1s)
+  ✓  3 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:529:3 › ahp captured recovery cannot change case B or release its pending save (3.7s)
+  ✓  4 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:529:3 › ism captured recovery cannot change case B or release its pending save (6.3s)
+  ✓  5 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:615:3 › en SC004 fixed 100-record history selection timing (12.6s)
+  ✓  6 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:615:3 › fa SC004 fixed 100-record history selection timing (12.4s)
+
+  6 passed (1.0m)

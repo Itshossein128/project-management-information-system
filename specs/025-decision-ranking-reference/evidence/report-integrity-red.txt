@@ -1,0 +1,19 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q -k tampered_complete_report
+cwd: apps/api/core
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________ test_tampered_complete_report_rejected[remove-check] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:162: in test_tampered_complete_report_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_____________ test_tampered_complete_report_rejected[failed-phase] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:162: in test_tampered_complete_report_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[remove-check]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[failed-phase]
+2 failed, 99 deselected in 0.19s
+
+exit: 1
+elapsed_seconds: 0.948

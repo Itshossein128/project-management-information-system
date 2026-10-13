@@ -1,0 +1,20 @@
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+.............................................................            [100%]
+=============================== warnings summary ===============================
+decision_support/tests/test_ahp_api.py::test_ac02_ac17_ahp_only_run
+  /home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+decision_support/tests/test_ahp_api.py::test_ac02_ac17_ahp_only_run
+  /home/hossein/Desktop/projects/building-management/apps/api/core/inventory/item_services.py:4: DeprecationWarning: 
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+          
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+205 passed, 2 warnings in 43.43s

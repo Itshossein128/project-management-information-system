@@ -1,0 +1,14 @@
+{
+  "catalogs_unchanged": true,
+  "catalogs": {
+    "apps/api/core/locale/fa/LC_MESSAGES/django.po": {
+      "baseline": "8c4897a25eb5d62c1742dd6990f76ebae1da8baa992d396b22b565b4cbf58d87",
+      "current": "8c4897a25eb5d62c1742dd6990f76ebae1da8baa992d396b22b565b4cbf58d87"
+    },
+    "apps/api/core/locale/fa/LC_MESSAGES/django.mo": {
+      "baseline": "0e927150b0e8fae8f77767872d995c0d983a7faecc2d43b98b9affacb17131c3",
+      "current": "0e927150b0e8fae8f77767872d995c0d983a7faecc2d43b98b9affacb17131c3"
+    }
+  },
+  "compilation": "not rerun; no catalog changes"
+}

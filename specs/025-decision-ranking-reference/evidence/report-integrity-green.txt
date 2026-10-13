@@ -1,0 +1,7 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q -k tampered_complete_report
+cwd: apps/api/core
+..                                                                       [100%]
+2 passed, 99 deselected in 0.12s
+
+exit: 0
+elapsed_seconds: 0.889

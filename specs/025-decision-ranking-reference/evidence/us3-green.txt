@@ -1,0 +1,8 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+........................................................................ [ 80%]
+.................                                                        [100%]
+89 passed in 0.74s
+
+exit: 0
+elapsed_seconds: 1.493

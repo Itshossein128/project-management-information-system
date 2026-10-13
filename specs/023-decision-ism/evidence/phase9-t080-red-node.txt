@@ -1,0 +1,28 @@
+✔ completed ISM is structurally guarded using frozen names (1.218156ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.246124ms)
+✖ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (76.028774ms)
+✔ valid JSON remains available for independent method and raw draft guards (16.104201ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 352.601318
+
+✖ failing tests:
+
+test at apps/web/src/app/lib/api/decision-support.test.ts:121:1
+✖ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (76.028774ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/app/lib/api/decision-support.test.ts:124:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

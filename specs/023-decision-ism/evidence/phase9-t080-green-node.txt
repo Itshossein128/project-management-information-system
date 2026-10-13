@@ -1,0 +1,14 @@
+✔ completed ISM is structurally guarded using frozen names (1.053733ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.276302ms)
+✔ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (102.210844ms)
+✔ valid JSON remains available for independent method and raw draft guards (13.286008ms)
+✔ ISM saved-case metadata is guarded without validating unrelated or raw draft inputs (0.252024ms)
+✔ completed ISM run envelope includes method, frozen binary input and provenance (0.270237ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 361.379647

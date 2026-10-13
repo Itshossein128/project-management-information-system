@@ -1,0 +1,19 @@
+import pytest
+
+@pytest.fixture
+def setup_failure():
+    raise RuntimeError("intentional setup failure")
+
+def test_setup(setup_failure):
+    pass
+
+def test_call():
+    assert False, "intentional call failure"
+
+@pytest.fixture
+def teardown_failure():
+    yield
+    raise RuntimeError("intentional teardown failure")
+
+def test_teardown(teardown_failure):
+    pass

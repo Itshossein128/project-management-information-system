@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -7,7 +8,7 @@ from rest_framework.response import Response
 from common.viewsets import ProjectScopedViewSet
 from config.exceptions import CodedValidationError
 from config.pagination import DefaultPageNumberPagination
-from decision_support.models import DecisionCase, DecisionRun
+from decision_support.models import DecisionCase, DecisionRun, METHOD_IDS
 from decision_support.serializers import (
     DecisionCaseListSerializer,
     DecisionCaseSerializer,
@@ -16,6 +17,7 @@ from decision_support.serializers import (
 )
 from decision_support.services.case_service import create_case, update_case
 from decision_support.services.execution_service import create_run
+from decision_support.services.validators import _issue, raise_issues
 from permissions.project import HasProjectPermission, IsProjectMember
 
 
@@ -47,11 +49,20 @@ class DecisionCaseViewSet(ProjectScopedViewSet):
         case = update_case(case, request.user, request.data)
         return Response(DecisionCaseSerializer(case).data)
 
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        instance = get_object_or_404(self.get_queryset().select_for_update(), pk=kwargs['pk'])
+        self.check_object_permissions(request, instance)
+        instance.soft_delete(user=request.user)
+        self.post_delete(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 @extend_schema_view(
     list=extend_schema(summary='List decision runs', tags=['Decision Support']),
     create=extend_schema(
-        summary='Create decision run (SAW executes; other methods may stub)',
+        summary='Create decision run (SAW, TOPSIS, AHP and ISM execute)',
+        description='ISM validates binary direct relations and stores immutable reachability, layers and mutual groups. DEMATEL remains a placeholder.',
         tags=['Decision Support'],
     ),
     retrieve=extend_schema(summary='Get decision run', tags=['Decision Support']),
@@ -82,7 +93,12 @@ class DecisionRunViewSet(viewsets.ViewSet):
 
     def list(self, request, project_pk=None, case_pk=None):
         case = self.get_case()
-        qs = DecisionRun.objects.filter(case=case).select_related('extracted_by')
+        qs = DecisionRun.objects.filter(case=case, project_id=self.get_project_id()).select_related('extracted_by').order_by('-extracted_at', '-id')
+        if 'method' in request.query_params:
+            method = request.query_params['method']
+            if method not in METHOD_IDS:
+                raise_issues([_issue('invalid_method', 'method', 'Unknown decision method.')])
+            qs = qs.filter(method=method)
         paginator = DefaultPageNumberPagination()
         page = paginator.paginate_queryset(qs, request, view=self)
         if page is not None:
@@ -91,7 +107,7 @@ class DecisionRunViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, project_pk=None, case_pk=None, pk=None):
         case = self.get_case()
-        run = get_object_or_404(DecisionRun.objects.filter(case=case), pk=pk)
+        run = get_object_or_404(DecisionRun.objects.filter(case=case, project_id=self.get_project_id()), pk=pk)
         return Response(DecisionRunSerializer(run).data)
 
     def create(self, request, project_pk=None, case_pk=None):
@@ -102,10 +118,16 @@ class DecisionRunViewSet(viewsets.ViewSet):
         return Response(DecisionRunSerializer(run).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, project_pk=None, case_pk=None, pk=None):
+        case = self.get_case()
+        get_object_or_404(DecisionRun.objects.filter(case=case, project_id=self.get_project_id()), pk=pk)
         raise CodedValidationError(detail=_('Decision runs are immutable.'), code='run_immutable')
 
     def update(self, request, project_pk=None, case_pk=None, pk=None):
+        case = self.get_case()
+        get_object_or_404(DecisionRun.objects.filter(case=case, project_id=self.get_project_id()), pk=pk)
         raise CodedValidationError(detail=_('Decision runs are immutable.'), code='run_immutable')
 
     def destroy(self, request, project_pk=None, case_pk=None, pk=None):
+        case = self.get_case()
+        get_object_or_404(DecisionRun.objects.filter(case=case, project_id=self.get_project_id()), pk=pk)
         raise CodedValidationError(detail=_('Decision runs are immutable.'), code='run_immutable')

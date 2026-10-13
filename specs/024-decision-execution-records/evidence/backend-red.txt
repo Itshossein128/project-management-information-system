@@ -1,0 +1,196 @@
+FFF.FFFF.FFFF.FFFF.FFFEEEEEE                                             [100%]
+==================================== ERRORS ====================================
+__________ ERROR at setup of test_actual_postgres_parent_wait[topsis] __________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+___________ ERROR at setup of test_actual_postgres_parent_wait[ahp] ____________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+___________ ERROR at setup of test_actual_postgres_parent_wait[ism] ____________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+_________ ERROR at setup of test_actual_postgres_parent_wait[dematel] __________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+__________ ERROR at setup of test_actual_postgres_parent_wait[patch] ___________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+__________ ERROR at setup of test_actual_postgres_parent_wait[delete] __________
+conftest.py:44: in project_manager_role
+    return Role.objects.get(role_name='project_manager')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:637: in get
+    raise self.model.DoesNotExist(
+E   master_data.models.Role.DoesNotExist: Role matching query does not exist.
+=================================== FAILURES ===================================
+_____________________ test_authoritative_record[input-saw] _____________________
+decision_support/tests/test_execution_records.py:18: in test_authoritative_record
+    assert run.input_snapshot['criteria']==['New cost','New quality']
+E   AssertionError: assert ['Cost', 'Quality'] == ['New cost', 'New quality']
+E     
+E     At index 0 diff: 'Cost' != 'New cost'
+E     Use -v to get more diff
+___________________ test_authoritative_record[input-topsis] ____________________
+decision_support/tests/test_execution_records.py:18: in test_authoritative_record
+    assert run.input_snapshot['criteria']==['New cost','New quality']
+E   AssertionError: assert ['Cost', 'Quality'] == ['New cost', 'New quality']
+E     
+E     At index 0 diff: 'Cost' != 'New cost'
+E     Use -v to get more diff
+_____________________ test_authoritative_record[input-ahp] _____________________
+decision_support/tests/test_execution_records.py:18: in test_authoritative_record
+    assert run.input_snapshot['criteria']==['New cost','New quality']
+E   AssertionError: assert ['Cost', 'Quality'] == ['New cost', 'New quality']
+E     
+E     At index 0 diff: 'Cost' != 'New cost'
+E     Use -v to get more diff
+___________________ test_authoritative_record[input-dematel] ___________________
+decision_support/tests/test_execution_records.py:18: in test_authoritative_record
+    assert run.input_snapshot['criteria']==['New cost','New quality']
+E   AssertionError: assert ['Cost', 'Quality'] == ['New cost', 'New quality']
+E     
+E     At index 0 diff: 'Cost' != 'New cost'
+E     Use -v to get more diff
+___________________ test_authoritative_record[selection-saw] ___________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+_________________ test_authoritative_record[selection-topsis] __________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+___________________ test_authoritative_record[selection-ahp] ___________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+_________________ test_authoritative_record[selection-dematel] _________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+____________________ test_authoritative_record[deleted-saw] ____________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE Http404
+__________________ test_authoritative_record[deleted-topsis] ___________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE Http404
+____________________ test_authoritative_record[deleted-ahp] ____________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE Http404
+__________________ test_authoritative_record[deleted-dematel] __________________
+decision_support/tests/test_execution_records.py:24: in test_authoritative_record
+    with pytest.raises(CodedValidationError if change=='selection' else Http404):create_run(case,method,user)
+E   Failed: DID NOT RAISE Http404
+________ test_distinct_append_full_immutability_and_zero_rejection[saw] ________
+decision_support/tests/test_execution_records.py:39: in test_distinct_append_full_immutability_and_zero_rejection
+    with pytest.raises(CodedValidationError):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+______ test_distinct_append_full_immutability_and_zero_rejection[topsis] _______
+decision_support/tests/test_execution_records.py:39: in test_distinct_append_full_immutability_and_zero_rejection
+    with pytest.raises(CodedValidationError):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+________ test_distinct_append_full_immutability_and_zero_rejection[ahp] ________
+decision_support/tests/test_execution_records.py:39: in test_distinct_append_full_immutability_and_zero_rejection
+    with pytest.raises(CodedValidationError):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+______ test_distinct_append_full_immutability_and_zero_rejection[dematel] ______
+decision_support/tests/test_execution_records.py:39: in test_distinct_append_full_immutability_and_zero_rejection
+    with pytest.raises(CodedValidationError):create_run(case,method,user)
+E   Failed: DID NOT RAISE CodedValidationError
+________________ test_fixed_history_order_and_scoped_pagination ________________
+decision_support/tests/test_execution_records.py:53: in test_fixed_history_order_and_scoped_pagination
+    assert collected==list(reversed(IDS))
+E   AssertionError: assert ['00000000-00...0000007', ...] == ['00000000-00...0000020', ...]
+E     
+E     At index 0 diff: '00000000-0000-0000-0000-000000000002' != '00000000-0000-0000-0000-000000000025'
+E     Use -v to get more diff
+____________________ test_actual_postgres_parent_wait[saw] _____________________
+decision_support/tests/test_execution_records_concurrency.py:43: in test_actual_postgres_parent_wait
+    else:assert shared['value'].input_snapshot['criteria']==['Released cost','Released quality']
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert ['Cost', 'Quality'] == ['Released co...ased quality']
+E     
+E     At index 0 diff: 'Cost' != 'Released cost'
+E     Use -v to get more diff
+=============================== warnings summary ===============================
+decision_support/tests/test_execution_records.py::test_fixed_history_order_and_scoped_pagination
+  /home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+decision_support/tests/test_execution_records.py::test_fixed_history_order_and_scoped_pagination
+  /home/hossein/Desktop/projects/building-management/apps/api/core/inventory/item_services.py:4: DeprecationWarning: 
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+          
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[topsis]
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[ahp]
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[ism]
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[dematel]
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[patch]
+ERROR decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[delete]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[input-saw]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[input-topsis]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[input-ahp]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[input-dematel]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[selection-saw]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[selection-topsis]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[selection-ahp]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[selection-dematel]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[deleted-saw]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[deleted-topsis]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[deleted-ahp]
+FAILED decision_support/tests/test_execution_records.py::test_authoritative_record[deleted-dematel]
+FAILED decision_support/tests/test_execution_records.py::test_distinct_append_full_immutability_and_zero_rejection[saw]
+FAILED decision_support/tests/test_execution_records.py::test_distinct_append_full_immutability_and_zero_rejection[topsis]
+FAILED decision_support/tests/test_execution_records.py::test_distinct_append_full_immutability_and_zero_rejection[ahp]
+FAILED decision_support/tests/test_execution_records.py::test_distinct_append_full_immutability_and_zero_rejection[dematel]
+FAILED decision_support/tests/test_execution_records.py::test_fixed_history_order_and_scoped_pagination
+FAILED decision_support/tests/test_execution_records_concurrency.py::test_actual_postgres_parent_wait[saw]
+18 failed, 4 passed, 2 warnings, 6 errors in 51.52s

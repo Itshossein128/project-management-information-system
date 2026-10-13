@@ -1,51 +1,63 @@
 # Implementation Plan: Decision Support AHP Criteria Weighting (Phase 4)
 
-**Branch**: `021-decision-ahp` | **Date**: 2026-10-10 | **Spec**: [spec.md](./spec.md)
+**Feature / Branch identifier**: `021-decision-ahp` | **Date**: 2026-10-11 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/021-decision-ahp/spec.md`
+**Input**: `specs/021-decision-ahp/spec.md`. Spec Kit setup resolves this feature; the actual Git checkout is `develop` at `c5328c4`. Planning does not switch branches.
 
 ## Summary
 
-Phase 4 delivers an independent AHP criteria-weighting engine via pairwise comparison ($1 \le n \le 10$). AHP executes without requiring alternatives, ranking performance matrices, or SAW/TOPSIS execution (AC02). Running AHP never mutates the case's ranking weights or alternatives (AC04). The engine calculates geometric mean weights, principal eigenvalue $\lambda_{\max}$, Consistency Index $CI$, and Consistency Ratio $CR$ against Saaty's standard Random Index ($RI$) table. Inconsistent comparisons ($CR > 0.10$) trigger a prominent UI advisory alert while preserving audit run records. The frontend introduces `SquareMatrixEditor` in pairwise reciprocal mode, `CriteriaWeightTable`, and `AhpMethodPanel` integrated into the project decision support workspace.
+Complete AHP criteria weighting by correcting the existing implementation. The current tree already contains geometric-mean weighting, CI/CR, the AHP execution branch, pairwise editor, weight table, localized messages, and baseline tests. The spec gap table describes an earlier tree; current source evidence and explicit policy interpretations are recorded in [research.md](research.md).
+
+Remaining work: strict input validation; criteria-order output with independent ordinal ranks; explicit matrix draft state; Saaty fraction entry; correct result lifecycle across cases; method-specific history; and authorization/API/browser verification. AHP remains independent of ranking inputs and appends an immutable API execution record even when CR exceeds 0.10. Existing endpoints and JSON fields suffice; no migration or dependency addition is planned.
 
 ## Technical Context
 
-**Language/Version**: Python 3.11 (backend), TypeScript 5.x / React 18 (frontend)
+**Language/Version**: Python 3.12.3 in the current API environment; TypeScript 5.9.x, React 19.x and React Router 7.12.x from `apps/web/package.json`; Node 25.2.1 locally. Preserve supported project runtimes.
 
-**Primary Dependencies**:
-- Backend: Django 4.2.11, Django REST Framework, `math` stdlib (pure calculation; no NumPy, matching existing services)
-- Frontend: React Router 7, TanStack Query, react-i18next, Tailwind CSS, Lucide icons, Radix UI
+**Primary Dependencies**: Django 4.2.11 compatibility boundary, DRF, drf-spectacular, Python `math`; React Router/Vite, TanStack Query, react-i18next, existing form/table components and Tailwind. No NumPy/SciPy or new test framework.
 
-**Storage**: PostgreSQL 16 on port 5433.
-- `DecisionCase` already contains `ahp_matrix = models.JSONField(default=list, blank=True)`.
-- `DecisionRun` already stores generic `input_snapshot` and `result` (JSONField).
-- No database migrations or schema alterations required.
+**Storage**: Existing PostgreSQL `decision_cases` and `decision_runs` tables and JSON fields. Redis is required for normal development/auth. Use configured `DATABASE_URL`; documented native development PostgreSQL port is 5433. No production database changes during planning.
 
-**Testing**: `pytest` + `pytest-django` (backend); Node test runner (`node --test`) for frontend unit tests in `apps/web/src/components/decision-support/`.
+**Testing**: pytest/pytest-django for numerical, validation, API and authorization checks; Node test runner with TypeScript stripping for pure UI rules/source checks; Playwright with `apps/web/e2e/playwright.config.ts` for actual browser behavior; `pnpm typecheck`.
 
-**Target Platform**: Linux server (Django API on port 8000, Vite dev on 5173).
+**Target Platform**: Linux-hosted API/browser application; English LTR and Persian RTL. Development ports: API 8000, web 5173.
 
-**Project Type**: Monorepo (`apps/api` + `apps/web`).
+**Project Type**: pnpm monorepo web application, backend `apps/api/core`, frontend `apps/web/src`, documented HTTP interfaces.
 
-**Performance Goals**: Instant evaluation ($O(n^2)$ with $n \le 10 \implies < 5\text{ms}$ execution latency).
+**Performance Goals**: O(n²) time/storage for at most ten criteria. SC-001: representative four-criterion interaction under 30 seconds, measured through a user exercise. No measured millisecond engine guarantee is claimed.
 
-**Constraints**:
-- Pure calculation in `ahp_service.py`; zero math formulas in API views or client React.
-- Django pinned to 4.2.11; do not install dev dependencies that upgrade Django.
-- Coded, locatable errors with cell paths (`ahp_matrix.{j}.{k}`).
-- Strict isolation: AHP run leaves ranking inputs (`weights`, `types`, `performance_matrix`) untouched (AC04).
+**Constraints**: FR-005 governs actual numeric inputs, exact diagonal 1 and reciprocal product residual <1e-4. Weighting, matrix-vector calculation, lambda, CI and CR stay in `ahp_service.py`; reciprocal form synchronization and formatting are permitted in the UI. Blank judgments remain null. No automatic weight transfer. Reuse actual `view_decision_support`/`edit_decision_support` permissions. All technical unknowns are resolved in research.
+
+**Scale/Scope**: 1–10 criteria, up to 100 cells, four stories, existing project/case/run interfaces, AHP panel and method history. Alternative pairwise ranking, transfer action, DEMATEL/ISM engines, spreadsheets and permanent closure of governance items O05/O06 remain outside scope.
 
 ## Constitution Check
 
-| Principle | Gate | Assessment |
+Pre-research and post-design assessments apply to the proposed design, not completed implementation proof.
+
+| Principle / constraint | Before research | After Phase 1 design and required evidence |
 |---|---|---|
-| I — AuthZ | AHP run endpoints enforce project permissions | ✅ Reuses `DecisionRunViewSet` and `HasProjectPermission` with `run_decision_method` |
-| II — Data Integrity | No model migration needed; JSONField absorbs payload | ✅ `ahp_matrix` exists on `DecisionCase`; `DecisionRun.result` is JSON |
-| III — Bilingual | AHP panel, CR warning banner, table headers, error codes localized in `en.json` & `fa.json` | ✅ Fully mapped in contracts & data-model |
-| IV — Safe Mutations | AHP runs are append-only; immutable snapshots | ✅ Verified by `test_runs_immutability.py` and `test_ahp_api.py` |
-| V — Minimal Coherent Changes | Reuses case workspace, nav, and history; extracts `SquareMatrixEditor` with pairwise mode | ✅ Cohesive extensions within `decision_support` |
-| VI — Evidence-Based Verification | Verified via pytest (engine + API) and node test runner (frontend math audit) | ✅ Comprehensive test suite planned in quickstart.md |
-| VII — Accessible UX | Keyboard-accessible grid inputs, clear tooltips, bilingual numbers | ✅ Built with accessible form and table patterns |
+| I — Server authorization/isolation | PASS: retain existing membership/RBAC | PASS: project-scoped case and case/project-scoped run queries; negative create/list/detail/filter tests |
+| II — Domain integrity | PASS: existing JSON fields and coherent snapshot | PASS: preserve ranking inputs, independent deep copies, full snapshot/result immutability tests; no migration |
+| III — Bilingual UX | PASS: existing i18n retained | PASS: English/Persian fractions, errors, warnings, history, RTL and persistence browser gates |
+| IV — Safe mutations | PASS: mutable draft and append-only run API | PASS: invalid execution creates no run; inconsistent success retained; `run_immutable` for mutation actions |
+| V — Minimal changes | PASS: reuse engine/components/endpoints | PASS: helper/state repairs, optional list filter; no parallel module/dependency |
+| VI — Evidence-based verification | PASS: planning separated from runtime proof | PASS: numerical/API/RBAC/typecheck/source/browser evidence named in quickstart |
+| VII — Accessible UX | PASS: existing form/table patterns | PASS: explicit blank input, criterion cell labels, associated errors, keyboard and read-only history |
+| Runtime/architecture | PASS: Django 4.2 and pnpm boundaries | PASS: no dependency upgrade/schema alteration/optional integration needed |
+
+**Post-design result**: all design gates pass; no exception required. Implementation and acceptance checks remain to run under [quickstart.md](quickstart.md).
+
+## Phase 0 — Research
+
+Backend/frontend research inspected current source and domain documents. [research.md](research.md) resolves strict types/tolerances, scale behavior, output order/ranks, snapshots, permissions, draft initialization, result lifecycle, history pagination and numerical safety. Existing tests provide only baseline evidence.
+
+## Phase 1 — Design
+
+- [data-model.md](data-model.md): existing entities, validation and draft/run transitions.
+- [contracts/ahp-pairwise-matrix.md](contracts/ahp-pairwise-matrix.md): case/run/history interfaces, permissions, strict inputs and errors.
+- [contracts/ahp-run-result.md](contracts/ahp-run-result.md): run envelope, compatible snapshot, ordering and numerical contract.
+- [contracts/ahp-ui.md](contracts/ahp-ui.md): matrix ownership, entry/history and accessible bilingual behavior.
+- [quickstart.md](quickstart.md): runnable commands and planned acceptance scenarios.
 
 ## Project Structure
 
@@ -53,47 +65,53 @@ Phase 4 delivers an independent AHP criteria-weighting engine via pairwise compa
 
 ```text
 specs/021-decision-ahp/
-├── plan.md              # This file
-├── research.md          # Phase 0 output
-├── data-model.md        # Phase 1 output
-├── quickstart.md        # Phase 1 output
-├── contracts/           # Phase 1 output
+├── spec.md                    # existing input, unchanged
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
 │   ├── ahp-pairwise-matrix.md
-│   └── ahp-run-result.md
-└── tasks.md             # Phase 2 output
+│   ├── ahp-run-result.md
+│   └── ahp-ui.md
+└── tasks.md                   # existing Phase 2 artifact; regenerate separately
 ```
 
-### Source Code
+### Source Code (repository root)
 
 ```text
 apps/api/core/decision_support/
+├── models.py                  # existing schema; no planned change
+├── views.py                   # method-filtered scoped history; descriptions
+├── serializers.py             # existing envelopes/schema descriptions
 ├── services/
-│   ├── ahp_service.py         # NEW — pure AHP engine (geometric mean, lambda_max, CI, CR, Saaty RI)
-│   ├── validators.py          # MODIFY — add validate_ahp_inputs (dimensions, positive, diagonal 1, reciprocal)
-│   └── execution_service.py   # MODIFY — wire AHP engine branch in create_run
+│   ├── validators.py          # strict AHP inputs
+│   ├── ahp_service.py         # ordered results/numerical safety
+│   ├── execution_service.py   # existing snapshot/run orchestration
+│   └── case_service.py        # targeted saves preserve unrelated inputs
 └── tests/
-    ├── test_ahp_service.py    # NEW — unit tests for AC17, AC18, n=1, n=2, validation guards
-    └── test_ahp_api.py        # NEW — integration tests for AC02 (no alts), AC04 (no auto-feed), AC23-24 (immutability)
-
+    ├── test_ahp_service.py
+    ├── test_ahp_api.py
+    └── test_runs_immutability.py
 apps/web/src/
-├── app/lib/api/
-│   └── decision-support.ts            # MODIFY — add AhpWeightRow, AhpRunResult, update DecisionRunResult
-├── components/decision-support/
-│   ├── SquareMatrixEditor.tsx         # NEW — n×n grid with pairwise reciprocal auto-sync & diagonal 1
-│   ├── SquareMatrixEditor.test.ts     # NEW — test reciprocal auto-update and diagonal locking
-│   ├── CriteriaWeightTable.tsx        # NEW — displays criteria weights, % values, ranks, CR status
-│   ├── CriteriaWeightTable.test.ts    # NEW — test weight table formatting and rendering
-│   ├── AhpMethodPanel.tsx             # NEW — panel combining pairwise editor, run button, CR alert, weight table
-│   └── no-client-ahp-math.test.ts     # NEW — verify zero calculation math in React components
-├── app/routes/
-│   └── project-decision-support.tsx   # MODIFY — render AhpMethodPanel when ahp selected
-└── app/locales/
-    ├── en.json                        # MODIFY — add AHP keys, headers, error messages
-    └── fa.json                        # MODIFY — add Persian translations
+├── app/lib/api/decision-support.ts
+├── app/routes/project-decision-support.tsx
+├── app/locales/{en,fa}.json
+└── components/decision-support/
+    ├── AhpMethodPanel.tsx
+    ├── SquareMatrixEditor.tsx
+    ├── square-matrix-rules.ts
+    ├── CriteriaWeightTable.tsx
+    ├── criteria-weight-rules.ts
+    ├── ExecutionHistoryList.tsx
+    ├── InputSnapshotViewer.tsx
+    ├── ValidationIssueList.tsx
+    └── *.test.ts
+apps/web/e2e/tests/decision-ahp.spec.ts # new browser acceptance suite
 ```
+
+**Structure Decision**: extend the existing domain and workspace. Repair pairwise mode without implementing later engines. Existing `tasks.md` reflects older planning and is not completion evidence; regenerate it through the next phase.
 
 ## Complexity Tracking
 
-- No schema migrations.
-- Minimal dependencies: Python standard library `math` only.
-- Frontend component `SquareMatrixEditor` designed to be reused in Phase 5 (DEMATEL) and Phase 6 (ISM).
+No constitution violations or additional abstraction layers. API immutability is not a database-level append-only guarantee. Historic JSON records retain their original values/order.

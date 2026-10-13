@@ -1,0 +1,29 @@
+✔ completed ISM is structurally guarded using frozen names (1.104827ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.243772ms)
+✔ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (98.460172ms)
+✔ valid JSON remains available for independent method and raw draft guards (9.49727ms)
+✔ ISM saved-case metadata is guarded without validating unrelated or raw draft inputs (0.290488ms)
+✔ completed ISM run envelope includes method, frozen binary input and provenance (0.292439ms)
+✖ actual history HTTP boundary rejects malformed envelopes and wrong selected IDs (9.122625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 390.91852
+
+✖ failing tests:
+
+test at apps/web/src/app/lib/api/decision-support.test.ts:229:1
+✖ actual history HTTP boundary rejects malformed envelopes and wrong selected IDs (9.122625ms)
+  TypeError: (0 , api_client_1.apiJson) is not a function
+      at Object.listDecisionRuns (evalmachine.<anonymous>:78:37)
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/app/lib/api/decision-support.test.ts:232:30)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)

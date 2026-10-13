@@ -1,0 +1,40 @@
+generated_at: 2026-10-13T05:17:08.634677+00:00
+command: ['/home/hossein/Desktop/projects/building-management/apps/api/.venv/bin/python', '-m', 'pytest', 'decision_support/reference_tests', '-q', '-k', 'bookkeeping_only']
+cwd: apps/api/core
+
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_________ test_bookkeeping_only_lifecycle_stays_incomplete[no-record] __________
+decision_support/reference_tests/test_ranking_reference_harness.py:223: in test_bookkeeping_only_lifecycle_stays_incomplete
+    assert reported["checks"][0]["status"] == "unrun"
+E   AssertionError: assert 'passed' == 'unrun'
+E     
+E     - unrun
+E     + passed
+________ test_bookkeeping_only_lifecycle_stays_incomplete[empty-events] ________
+decision_support/reference_tests/test_ranking_reference_harness.py:223: in test_bookkeeping_only_lifecycle_stays_incomplete
+    assert reported["checks"][0]["status"] == "unrun"
+E   AssertionError: assert 'passed' == 'unrun'
+E     
+E     - unrun
+E     + passed
+_________ test_bookkeeping_only_lifecycle_stays_incomplete[phase-only] _________
+decision_support/reference_tests/test_ranking_reference_harness.py:223: in test_bookkeeping_only_lifecycle_stays_incomplete
+    assert reported["checks"][0]["status"] == "unrun"
+E   AssertionError: assert 'passed' == 'unrun'
+E     
+E     - unrun
+E     + passed
+________________ test_bookkeeping_only_passing_report_rejected _________________
+decision_support/reference_tests/test_ranking_reference_harness.py:235: in test_bookkeeping_only_passing_report_rejected
+    with pytest.raises(ValueError, match="Invalid passing status"):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bookkeeping_only_lifecycle_stays_incomplete[no-record]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bookkeeping_only_lifecycle_stays_incomplete[empty-events]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bookkeeping_only_lifecycle_stays_incomplete[phase-only]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_bookkeeping_only_passing_report_rejected
+4 failed, 103 deselected in 0.22s
+
+exit: 1
+elapsed_seconds: 1.019

@@ -1,0 +1,20 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q -k partial_report_is_readable
+cwd: apps/api/core
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_partial_report_is_readable ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:184: in test_partial_report_is_readable
+    loaded=read_report(path)
+           ^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/conftest.py:58: in wrapped
+    value=original(*args,**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/ranking_reference_support.py:189: in read_report
+    raise ValueError("Incomplete check")
+E   ValueError: Incomplete check
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_partial_report_is_readable
+1 failed, 102 deselected in 0.19s
+
+exit: 1
+elapsed_seconds: 0.971

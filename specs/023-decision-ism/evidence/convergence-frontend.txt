@@ -1,0 +1,96 @@
+✔ completed ISM is structurally guarded using frozen names (1.50866ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.554466ms)
+▶ CriteriaWeightTable formatting rules
+  ✔ formats weights as percentages accurately (0.935449ms)
+  ✔ formats weights as 4-decimal numbers (0.248098ms)
+  ✔ keeps consistency inference on the server (1.090271ms)
+✔ CriteriaWeightTable formatting rules (4.001942ms)
+▶ NamedListEditor rules
+  ✔ rejects 11th name (1.036716ms)
+  ✔ surfaces empty and duplicate (0.514599ms)
+✔ NamedListEditor rules (3.437425ms)
+✔ emits precise optional metadata with surviving criterion operations (1.072492ms)
+▶ RankingResultTable helpers
+  ✔ reads SAW ranking rows (1.15248ms)
+  ✔ reads TOPSIS ranking rows with distances and closeness (0.384118ms)
+  ✔ returns empty for missing ranking (0.81801ms)
+✔ RankingResultTable helpers (3.888713ms)
+▶ ranking input rules
+  ✔ rejects empty matrix cells (never coerce to zero) (1.212853ms)
+  ✔ rejects weight length mismatch and all-zero (0.517244ms)
+  ✔ rejects invalid types and cost zero (0.327598ms)
+  ✔ rejects all-zero benefit column at criteria.j (0.425093ms)
+✔ ranking input rules (4.11258ms)
+▶ SquareMatrixEditor pairwise reciprocal rules
+  ✔ initializes an n x n identity pairwise matrix with 1.0 on diagonal (1.5806ms)
+  ✔ updates reciprocal cell automatically when an off-diagonal cell changes (0.297906ms)
+  ✔ handles decimal or fraction reciprocal accurately (0.141615ms)
+  ✔ does not alter other cells in the matrix (0.119578ms)
+✔ SquareMatrixEditor pairwise reciprocal rules (3.278738ms)
+✔ owns n=1 and clears both directions without mutating input (0.225327ms)
+✔ reconciles by trimmed names, preserves pairs and blanks renamed/new pairs (0.284265ms)
+✔ does not repair malformed retained diagonal judgments during reconciliation (0.149287ms)
+▶ ValidationIssueList parsing
+  ✔ renders path + message from API-shaped issues (0.881974ms)
+  ✔ localizes message via stable code when t provides a translation (0.362352ms)
+✔ ValidationIssueList parsing (2.66351ms)
+▶ request failure feedback
+  ✔ preserves permission_denied as an actionable general issue (1.117349ms)
+  ✔ preserves not_found as an actionable general issue (0.407826ms)
+  ✔ preserves throttled as an actionable general issue (0.369829ms)
+  ✔ preserves not_authenticated as an actionable general issue (0.246278ms)
+  ✔ preserves authentication_failed as an actionable general issue (0.554666ms)
+  ✔ preserves locatable domain issues rather than replacing them (0.859824ms)
+  ✔ provides safe generic feedback for null (0.168059ms)
+  ✔ provides safe generic feedback for {} (0.123355ms)
+  ✔ provides safe generic feedback for {"error":{"code":"unknown"}} (0.083655ms)
+  ✔ provides safe generic feedback for "<html>Server error</html>" (0.064625ms)
+✔ request failure feedback (6.29969ms)
+▶ decision support i18n keys
+  ✔ has required keys in en.json (1.249008ms)
+  ✔ has required keys in fa.json (1.130729ms)
+✔ decision support i18n keys (3.269234ms)
+✔ covers every static AHP UI key and preserves interpolation arguments in both languages (1.700093ms)
+✔ explicit zero diagonal and unanswered cross-pairs (1.844797ms)
+✔ exact options and independent opposite direction (0.67416ms)
+✔ invalid raw hydration is retained, empty legacy initializes only new draft (0.330703ms)
+✔ strict local errors do not compute derived analysis (0.609094ms)
+✔ operation identity remaps both axes without guessing renamed strings (0.497502ms)
+▶ AHP presentation boundary
+  ✔ AhpMethodPanel.tsx exists and contains no weighting or consistency derivation (1.327308ms)
+  ✔ SquareMatrixEditor.tsx exists and contains no weighting or consistency derivation (0.318973ms)
+  ✔ CriteriaWeightTable.tsx exists and contains no weighting or consistency derivation (0.222349ms)
+  ✔ square-matrix-rules.ts exists and contains no weighting or consistency derivation (0.189864ms)
+  ✔ criteria-weight-rules.ts exists and contains no weighting or consistency derivation (0.173327ms)
+  ✔ InputSnapshotViewer.tsx exists and contains no weighting or consistency derivation (0.158099ms)
+  ✔ ../../app/routes/project-decision-support.tsx exists and contains no weighting or consistency derivation (0.347161ms)
+  ✔ ../../app/lib/api/decision-support.ts exists and contains no weighting or consistency derivation (0.425233ms)
+✔ AHP presentation boundary (5.054775ms)
+✔ ISM presentation boundary: IsmMethodPanel.tsx (1.691944ms)
+✔ ISM presentation boundary: BinaryRelationEditor.tsx (0.250374ms)
+✔ ISM presentation boundary: IsmLayerList.tsx (0.1975ms)
+✔ ISM presentation boundary: ism-input-rules.ts (0.201872ms)
+✔ ISM presentation boundary: ism-result-rules.ts (0.219846ms)
+✔ ISM presentation boundary: InputSnapshotViewer.tsx (0.420189ms)
+✔ ISM presentation boundary: ../../app/routes/project-decision-support.tsx (0.442758ms)
+✔ ISM presentation boundary: ../../app/lib/api/decision-support.ts (0.197581ms)
+▶ no client SAW math
+  ✔ SawMethodPanel.tsx does not embed SAW normalize/score loops (0.986648ms)
+  ✔ WeightVectorEditor.tsx does not embed SAW normalize/score loops (0.197735ms)
+  ✔ RectangularMatrixEditor.tsx does not embed SAW normalize/score loops (0.172396ms)
+  ✔ CriterionTypeToggle.tsx does not embed SAW normalize/score loops (0.191894ms)
+  ✔ RankingResultTable.tsx does not embed SAW normalize/score loops (0.216535ms)
+  ✔ RunActionBar.tsx does not embed SAW normalize/score loops (0.208836ms)
+✔ no client SAW math (3.189302ms)
+▶ no client TOPSIS math
+  ✔ TopsisMethodPanel.tsx does not embed TOPSIS scoring/distance math (1.19316ms)
+  ✔ RankingResultTable.tsx does not embed TOPSIS scoring/distance math (0.281677ms)
+✔ no client TOPSIS math (3.286843ms)
+ℹ tests 66
+ℹ suites 11
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 309.967423

@@ -1,0 +1,161 @@
+generated_at: 2026-10-13T05:19:50.808325+00:00
+command: ['/home/hossein/Desktop/projects/building-management/apps/api/.venv/bin/python', '-m', 'pytest', 'decision_support/reference_tests', '-q', '-k', 'missing_evidence_fields or malformed_evidence_fields or complete_report_with_provenance or partial_report_is_readable']
+cwd: apps/api/core
+
+.FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF.                                         [100%]
+=================================== FAILURES ===================================
+_____________ test_missing_evidence_fields_rejected[generated_at] ______________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+________________ test_missing_evidence_fields_rejected[git_sha] ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_____________ test_missing_evidence_fields_rejected[source_hashes] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+__________ test_missing_evidence_fields_rejected[reference_identity] ___________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_______________ test_missing_evidence_fields_rejected[versions] ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+________________ test_missing_evidence_fields_rejected[command] ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+__________________ test_missing_evidence_fields_rejected[cwd] __________________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_missing_evidence_fields_rejected[evidence_level] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+______ test_missing_evidence_fields_rejected[product_browser_acceptance] _______
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_________ test_missing_evidence_fields_rejected[check_evidence_level] __________
+decision_support/reference_tests/test_ranking_reference_harness.py:262: in test_missing_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+______________ test_malformed_evidence_fields_rejected[bad-date] _______________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_____________ test_malformed_evidence_fields_rejected[naive-date] ______________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[non-utc-date] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_______________ test_malformed_evidence_fields_rejected[bad-sha] _______________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[empty-hashes] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+______________ test_malformed_evidence_fields_rejected[bad-hash] _______________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[outside-source] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[empty-identity] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[bad-identity] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[bad-versions] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[missing-version] ___________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[string-command] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[empty-command] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+______________ test_malformed_evidence_fields_rejected[empty-cwd] ______________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[wrong-run-level] ___________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+__________ test_malformed_evidence_fields_rejected[browser-promotion] __________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+__________ test_malformed_evidence_fields_rejected[null-check-level] ___________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+__________ test_malformed_evidence_fields_rejected[wrong-check-level] __________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___________ test_malformed_evidence_fields_rejected[boolean-schema] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____________ test_malformed_evidence_fields_rejected[boolean-exit] _____________
+decision_support/reference_tests/test_ranking_reference_harness.py:288: in test_malformed_evidence_fields_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[generated_at]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[git_sha]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[source_hashes]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[reference_identity]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[versions]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[command]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[cwd]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[evidence_level]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[product_browser_acceptance]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_evidence_fields_rejected[check_evidence_level]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[bad-date]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[naive-date]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[non-utc-date]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[bad-sha]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[empty-hashes]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[bad-hash]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[outside-source]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[empty-identity]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[bad-identity]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[bad-versions]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[missing-version]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[string-command]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[empty-command]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[empty-cwd]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[wrong-run-level]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[browser-promotion]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[null-check-level]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[wrong-check-level]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[boolean-schema]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_evidence_fields_rejected[boolean-exit]
+30 failed, 2 passed, 106 deselected in 0.44s
+
+exit: 1
+elapsed_seconds: 1.227

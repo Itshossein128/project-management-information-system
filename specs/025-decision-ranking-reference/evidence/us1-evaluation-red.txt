@@ -1,0 +1,16 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+.F..............                                                         [100%]
+=================================== FAILURES ===================================
+______________________ test_published_reference_interface ______________________
+decision_support/reference_tests/test_ranking_reference.py:19: in test_published_reference_interface
+    assert callable(function), "Authenticated reference must be evaluable"
+E   AssertionError: Authenticated reference must be evaluable
+E   assert False
+E    +  where False = callable(None)
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference.py::test_published_reference_interface
+1 failed, 15 passed in 0.09s
+
+exit: 1
+elapsed_seconds: 0.829

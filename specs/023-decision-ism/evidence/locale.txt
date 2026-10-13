@@ -1,0 +1,3 @@
+apps/api/core/locale/fa/LC_MESSAGES/django.po:3: warning: header field 'PO-Revision-Date' missing in header
+apps/api/core/locale/fa/LC_MESSAGES/django.po:3: warning: header field 'Last-Translator' missing in header
+apps/api/core/locale/fa/LC_MESSAGES/django.po:3: warning: header field 'Language-Team' missing in header

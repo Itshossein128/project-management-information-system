@@ -1,0 +1,9 @@
+generated_at: 2026-10-13T05:21:37.318732+00:00
+command: ['/home/hossein/Desktop/projects/building-management/apps/api/.venv/bin/python', '-m', 'pytest', 'decision_support/reference_tests', '-q', '-k', 'test_source_fidelity', '--ranking-reference-report=/home/hossein/Desktop/projects/building-management/specs/025-decision-ranking-reference/evidence/convergence/partial-reference.json']
+cwd: apps/api/core
+
+.                                                                        [100%]
+1 passed, 137 deselected in 0.15s
+
+exit: 0
+elapsed_seconds: 0.936

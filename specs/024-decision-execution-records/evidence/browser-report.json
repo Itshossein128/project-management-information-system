@@ -1,0 +1,5325 @@
+{
+  "config": {
+    "argv": [
+      "/home/hossein/.nvm/versions/node/v25.2.1/bin/node",
+      "/home/hossein/Desktop/projects/building-management/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "apps/web/e2e/playwright.config.ts",
+      "apps/web/e2e/tests/decision-execution-records.spec.ts",
+      "apps/web/e2e/tests/decision-ahp.spec.ts",
+      "apps/web/e2e/tests/decision-ism.spec.ts",
+      "--project",
+      "chromium-desktop",
+      "--trace",
+      "on",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/hossein/Desktop/projects/building-management/apps/web/e2e/playwright.config.ts",
+    "rootDir": "/home/hossein/Desktop/projects/building-management/apps/web/e2e/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/hossein/Desktop/projects/building-management/apps/web/e2e/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/hossein/Desktop/projects/building-management/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-desktop",
+        "name": "chromium-desktop",
+        "testDir": "/home/hossein/Desktop/projects/building-management/apps/web/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "decision-ahp.spec.ts",
+      "file": "decision-ahp.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "en fresh single criterion owns diagonal and runs without ranking",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4706,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:09:57.520Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-fresh-sing-3a53e-al-and-runs-without-ranking-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-c4d794a57218d1c20083",
+          "file": "decision-ahp.spec.ts",
+          "line": 50,
+          "column": 3
+        },
+        {
+          "title": "en blank comparisons require judgment; fractions persist at full precision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5625,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:03.453Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-blank-comp-e2fe5-s-persist-at-full-precision-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-3d9e73070444fc2f2e3f",
+          "file": "decision-ahp.spec.ts",
+          "line": 62,
+          "column": 3
+        },
+        {
+          "title": "fa fresh single criterion owns diagonal and runs without ranking",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4569,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:09.182Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-fresh-sing-ca5c1-al-and-runs-without-ranking-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-816e957b5a5bfbae0285",
+          "file": "decision-ahp.spec.ts",
+          "line": 50,
+          "column": 3
+        },
+        {
+          "title": "fa blank comparisons require judgment; fractions persist at full precision",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5658,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:13.819Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-blank-comp-d4000-s-persist-at-full-precision-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-a1b12cb8d5ec19bbc231",
+          "file": "decision-ahp.spec.ts",
+          "line": 62,
+          "column": 3
+        },
+        {
+          "title": "en criterion identity survives reorder and new/renamed pairs stay blank",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4684,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:19.567Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-criterion--89aa1-ew-renamed-pairs-stay-blank-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-32f514c549a3726d5426",
+          "file": "decision-ahp.spec.ts",
+          "line": 88,
+          "column": 3
+        },
+        {
+          "title": "fa criterion identity survives reorder and new/renamed pairs stay blank",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4789,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:24.316Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-criterion--bb626-ew-renamed-pairs-stay-blank-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-1a3bf012ebba22fadf64",
+          "file": "decision-ahp.spec.ts",
+          "line": 88,
+          "column": 3
+        },
+        {
+          "title": "en consistent 2/3/6 comparisons display named weights and ordinal ranks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4804,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:29.194Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-consistent-9bdcd-d-weights-and-ordinal-ranks-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-4c0732010969708bb8d7",
+          "file": "decision-ahp.spec.ts",
+          "line": 106,
+          "column": 3
+        },
+        {
+          "title": "fa consistent 2/3/6 comparisons display named weights and ordinal ranks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4696,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:34.064Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-consistent-d45dd-d-weights-and-ordinal-ranks-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-568dfb1df0de3e8da2d6",
+          "file": "decision-ahp.spec.ts",
+          "line": 106,
+          "column": 3
+        },
+        {
+          "title": "en inconsistent circular judgments are saved with advisory then revised",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4857,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:38.819Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-inconsiste-64b75--with-advisory-then-revised-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-5f6e0ba3396383526b10",
+          "file": "decision-ahp.spec.ts",
+          "line": 123,
+          "column": 3
+        },
+        {
+          "title": "fa inconsistent circular judgments are saved with advisory then revised",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4860,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:43.750Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-inconsiste-63465--with-advisory-then-revised-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-de2a4240653b2b8ea3fd",
+          "file": "decision-ahp.spec.ts",
+          "line": 123,
+          "column": 3
+        },
+        {
+          "title": "en blank and invalid comparisons link errors to keyboard-focusable cells without a run",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4682,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:48.678Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-blank-and--d2f17-cusable-cells-without-a-run-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-7c81a0ff4bafaf9b237a",
+          "file": "decision-ahp.spec.ts",
+          "line": 142,
+          "column": 3
+        },
+        {
+          "title": "fa blank and invalid comparisons link errors to keyboard-focusable cells without a run",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4574,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:53.423Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-blank-and--b1438-cusable-cells-without-a-run-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-3a17baeb45453478bb78",
+          "file": "decision-ahp.spec.ts",
+          "line": 142,
+          "column": 3
+        },
+        {
+          "title": "en malformed saved diagonal stays visible and invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4470,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:10:58.055Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-malformed--6056a-l-stays-visible-and-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-968a2c8f2185d3df94a3",
+          "file": "decision-ahp.spec.ts",
+          "line": 166,
+          "column": 5
+        },
+        {
+          "title": "en malformed saved reciprocal stays visible and invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4514,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:02.579Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-malformed--21267-l-stays-visible-and-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-4d0ff01b36f477bb0210",
+          "file": "decision-ahp.spec.ts",
+          "line": 166,
+          "column": 5
+        },
+        {
+          "title": "fa malformed saved diagonal stays visible and invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1526,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:07.152Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-malformed--cc8e7-l-stays-visible-and-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-5caac3206a83c859783b",
+          "file": "decision-ahp.spec.ts",
+          "line": 166,
+          "column": 5
+        },
+        {
+          "title": "fa malformed saved reciprocal stays visible and invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1546,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:08.743Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-malformed--09bd7-l-stays-visible-and-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-672e4ccdad94df164e20",
+          "file": "decision-ahp.spec.ts",
+          "line": 166,
+          "column": 5
+        },
+        {
+          "title": "en mixed paginated history is frozen and separate from draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3046,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:10.350Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-mixed-pagi-f069a-zen-and-separate-from-draft-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-55d91fe6f51c2c7ab37f",
+          "file": "decision-ahp.spec.ts",
+          "line": 177,
+          "column": 3
+        },
+        {
+          "title": "en delayed case and history responses cannot replace current case draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2745,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:13.490Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-delayed-ca-febf5--replace-current-case-draft-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-e5e389639a4eabbc6d3e",
+          "file": "decision-ahp.spec.ts",
+          "line": 212,
+          "column": 3
+        },
+        {
+          "title": "fa mixed paginated history is frozen and separate from draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5823,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:16.318Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-mixed-pagi-a7b85-zen-and-separate-from-draft-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-da226f679139c7528082",
+          "file": "decision-ahp.spec.ts",
+          "line": 177,
+          "column": 3
+        },
+        {
+          "title": "fa delayed case and history responses cannot replace current case draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2572,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:22.243Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-delayed-ca-2668f--replace-current-case-draft-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-ecc67f4d6f368fda66d4",
+          "file": "decision-ahp.spec.ts",
+          "line": 212,
+          "column": 3
+        },
+        {
+          "title": "en failed save prevents execution; pending save prevents repeated run",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4703,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:24.894Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-failed-sav-0a917--save-prevents-repeated-run-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-ac57bb08246b722301de",
+          "file": "decision-ahp.spec.ts",
+          "line": 251,
+          "column": 3
+        },
+        {
+          "title": "fa failed save prevents execution; pending save prevents repeated run",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4787,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:29.664Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-failed-sav-2185a--save-prevents-repeated-run-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-3db1ede6dbc986bfb0b0",
+          "file": "decision-ahp.spec.ts",
+          "line": 251,
+          "column": 3
+        },
+        {
+          "title": "en ten-criterion matrix supports keyboard presets and horizontal navigation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4874,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:34.531Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-ten-criter-3b47e-s-and-horizontal-navigation-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-b60a36a7f9097aff5906",
+          "file": "decision-ahp.spec.ts",
+          "line": 286,
+          "column": 3
+        },
+        {
+          "title": "fa ten-criterion matrix supports keyboard presets and horizontal navigation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2070,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:39.474Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-ten-criter-4531d-s-and-horizontal-navigation-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-1ebef5c314e885e9f509",
+          "file": "decision-ahp.spec.ts",
+          "line": 286,
+          "column": 3
+        },
+        {
+          "title": "en historical stub and legacy sorted results retain stored criterion identity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5684,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:41.622Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-historical-4c3e6-n-stored-criterion-identity-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-a204c890a7d52a5799fc",
+          "file": "decision-ahp.spec.ts",
+          "line": 305,
+          "column": 3
+        },
+        {
+          "title": "fa historical stub and legacy sorted results retain stored criterion identity",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2685,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:47.396Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-historical-f5292-n-stored-criterion-identity-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-31dbe842f3c3311f48ad",
+          "file": "decision-ahp.spec.ts",
+          "line": 305,
+          "column": 3
+        },
+        {
+          "title": "en request failures show feedback for save and run and allow recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5740,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:50.153Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-request-fa-124aa--and-run-and-allow-recovery-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-f53f6a32051a0b431f92",
+          "file": "decision-ahp.spec.ts",
+          "line": 339,
+          "column": 3
+        },
+        {
+          "title": "fa request failures show feedback for save and run and allow recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5784,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:11:55.994Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-request-fa-f3527--and-run-and-allow-recovery-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-1dc3fd6460a3a6cf6fb0",
+          "file": "decision-ahp.spec.ts",
+          "line": 339,
+          "column": 3
+        },
+        {
+          "title": "en criterion rename preserves keyboard focus and caret",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5354,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:12.842Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-criterion--c65a9-es-keyboard-focus-and-caret-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-aaf0015f2623abc8e2c4",
+          "file": "decision-ahp.spec.ts",
+          "line": 404,
+          "column": 3
+        },
+        {
+          "title": "fa criterion rename preserves keyboard focus and caret",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5243,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:18.270Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-criterion--98aad-es-keyboard-focus-and-caret-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9f2f4fbf28456f2a56b7-c017638de3a926e733f6",
+          "file": "decision-ahp.spec.ts",
+          "line": 404,
+          "column": 3
+        }
+      ],
+      "suites": [
+        {
+          "title": "en history locale",
+          "file": "decision-ahp.spec.ts",
+          "line": 376,
+          "column": 8,
+          "specs": [
+            {
+              "title": "history timestamps follow application language and switch without changing stored time",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5479,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-13T00:12:01.881Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-en-history-lo-bd8d9-ithout-changing-stored-time-chromium-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2f4fbf28456f2a56b7-297dd25e7872e47a070d",
+              "file": "decision-ahp.spec.ts",
+              "line": 378,
+              "column": 5
+            }
+          ]
+        },
+        {
+          "title": "fa history locale",
+          "file": "decision-ahp.spec.ts",
+          "line": 376,
+          "column": 8,
+          "specs": [
+            {
+              "title": "history timestamps follow application language and switch without changing stored time",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-desktop",
+                  "projectName": "chromium-desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5317,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-13T00:12:07.448Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ahp-fa-history-lo-6648e-ithout-changing-stored-time-chromium-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9f2f4fbf28456f2a56b7-1c270e824a34fe3559e5",
+              "file": "decision-ahp.spec.ts",
+              "line": 378,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "decision-execution-records.spec.ts",
+      "file": "decision-execution-records.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "en clears prior success when ranking input becomes invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2052,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:23.601Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-1951d-nking-input-becomes-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-381d2033f46d22f48da8",
+          "file": "decision-execution-records.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "fa clears prior success when ranking input becomes invalid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2017,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:26.652Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-56a53-nking-input-becomes-invalid-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-1142050c3e52ba91020f",
+          "file": "decision-execution-records.spec.ts",
+          "line": 28,
+          "column": 3
+        },
+        {
+          "title": "en frozen named ranking review leaves current result and live draft unchanged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2668,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:28.740Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-495ca-lt-and-live-draft-unchanged-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-12d3edf26260407ec2ca",
+          "file": "decision-execution-records.spec.ts",
+          "line": 74,
+          "column": 3
+        },
+        {
+          "title": "fa frozen named ranking review leaves current result and live draft unchanged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2516,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:31.488Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-9d304-lt-and-live-draft-unchanged-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-9be8ea6732cf112a2855",
+          "file": "decision-execution-records.spec.ts",
+          "line": 74,
+          "column": 3
+        },
+        {
+          "title": "saw unconfirmed save stops before POST and real committed lost response recovers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2486,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:34.074Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-96222-tted-lost-response-recovers-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-41b82582711c514cd770",
+          "file": "decision-execution-records.spec.ts",
+          "line": 135,
+          "column": 3
+        },
+        {
+          "title": "topsis unconfirmed save stops before POST and real committed lost response recovers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5378,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:36.625Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-6ef74-tted-lost-response-recovers-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-061ef994f67ca7a2a43b",
+          "file": "decision-execution-records.spec.ts",
+          "line": 135,
+          "column": 3
+        },
+        {
+          "title": "ahp unconfirmed save stops before POST and real committed lost response recovers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4929,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:42.080Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-06531-tted-lost-response-recovers-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-59c84a2e9eb9ec551fe4",
+          "file": "decision-execution-records.spec.ts",
+          "line": 135,
+          "column": 3
+        },
+        {
+          "title": "ism unconfirmed save stops before POST and real committed lost response recovers",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2448,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:47.087Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-ff504-tted-lost-response-recovers-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-ef81d7fae7db18f50643",
+          "file": "decision-execution-records.spec.ts",
+          "line": 135,
+          "column": 3
+        },
+        {
+          "title": "en partial legacy and completed DEMATEL fixture review is safe and read-only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3151,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:49.595Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-e0630-eview-is-safe-and-read-only-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-b85892872f4a7eef4a3c",
+          "file": "decision-execution-records.spec.ts",
+          "line": 213,
+          "column": 3
+        },
+        {
+          "title": "en history failure clears previous detail and late page/filter/case reads cannot publish",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3350,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:52.819Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-ecde8-r-case-reads-cannot-publish-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-6693d67ce565fb652131",
+          "file": "decision-execution-records.spec.ts",
+          "line": 267,
+          "column": 3
+        },
+        {
+          "title": "en independent disagreement ties and deselection retain stored results without writes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3255,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:56.255Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-0b81a-ored-results-without-writes-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-56213b1c5214c6756623",
+          "file": "decision-execution-records.spec.ts",
+          "line": 321,
+          "column": 3
+        },
+        {
+          "title": "fa partial legacy and completed DEMATEL fixture review is safe and read-only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3046,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:12:59.592Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-4a912-eview-is-safe-and-read-only-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-d48f650cca7f6a92f8fe",
+          "file": "decision-execution-records.spec.ts",
+          "line": 213,
+          "column": 3
+        },
+        {
+          "title": "fa history failure clears previous detail and late page/filter/case reads cannot publish",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3046,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:02.707Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-901df-r-case-reads-cannot-publish-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-6f37a791aec02a95b9ae",
+          "file": "decision-execution-records.spec.ts",
+          "line": 267,
+          "column": 3
+        },
+        {
+          "title": "fa independent disagreement ties and deselection retain stored results without writes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6143,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:05.833Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-503af-ored-results-without-writes-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-d316cb7614eb215d2f76",
+          "file": "decision-execution-records.spec.ts",
+          "line": 321,
+          "column": 3
+        },
+        {
+          "title": "en saw malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2870,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:12.069Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-dd38e-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-3d0ff228ed61e2c5bbb5",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "en saw committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16151,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:15.051Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-f9736-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-bd89280d0feaeed45b93",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "en topsis malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2807,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:31.299Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-51883-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-36460a2fe898b46b0d12",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "en topsis committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16247,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:34.196Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-c1628-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-d67a0995be1eb4244a93",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "en ahp malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2905,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:50.545Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-464f5-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-45ecd27d0d1bb826b942",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "en ahp committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16050,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:13:53.551Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-df552-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-ac4e56320c77244453d1",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "en ism malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2891,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:09.691Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-5ffbd-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-3e3df2d12b9a8cbbf789",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "en ism committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13234,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:12.668Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-1aedf-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-af501c6c32af53bac91a",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "fa saw malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2877,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:25.992Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-a0399-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-e66b59a7d936059e80ad",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "fa saw committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13769,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:28.949Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-057d2-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-3b564696cfe16840ffc5",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "fa topsis malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2850,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:42.826Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-5b2b6-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-6a9854f1fc9d63457c67",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "fa topsis committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15912,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:14:45.770Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-512d9-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-107ad8812d8494e0bd54",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "fa ahp malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2843,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:01.785Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-3c877-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-68d478d381ca2fcf9ff6",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "fa ahp committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12823,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:04.725Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-46a09-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-f181b94c1d10a20173b4",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "fa ism malformed save variants send zero executions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5758,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:17.628Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-f4983-riants-send-zero-executions-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-0dc13886aa6b236e7363",
+          "file": "decision-execution-records.spec.ts",
+          "line": 389,
+          "column": 5
+        },
+        {
+          "title": "fa ism committed malformed execution held recovery failure timeout and manual retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13228,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:23.474Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-943fb-re-timeout-and-manual-retry-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-3f4cc269afbb372e36f1",
+          "file": "decision-execution-records.spec.ts",
+          "line": 431,
+          "column": 5
+        },
+        {
+          "title": "saw captured recovery cannot change case B or release its pending save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3632,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:36.805Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-ad135-or-release-its-pending-save-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-b22daeed9bfcb8a866ce",
+          "file": "decision-execution-records.spec.ts",
+          "line": 533,
+          "column": 3
+        },
+        {
+          "title": "topsis captured recovery cannot change case B or release its pending save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3858,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:40.532Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-dde9b-or-release-its-pending-save-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-a9e93e2a7eee82fc3043",
+          "file": "decision-execution-records.spec.ts",
+          "line": 533,
+          "column": 3
+        },
+        {
+          "title": "ahp captured recovery cannot change case B or release its pending save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6650,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:44.490Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-6cd43-or-release-its-pending-save-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-82604469564d30b094e6",
+          "file": "decision-execution-records.spec.ts",
+          "line": 533,
+          "column": 3
+        },
+        {
+          "title": "ism captured recovery cannot change case B or release its pending save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3860,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:51.244Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-076b1-or-release-its-pending-save-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-28ae5f74bd25266a3e52",
+          "file": "decision-execution-records.spec.ts",
+          "line": 533,
+          "column": 3
+        },
+        {
+          "title": "en SC004 fixed 100-record history selection timing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11629,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:15:55.196Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-24770-rd-history-selection-timing-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-0a126c403809b92cd903",
+          "file": "decision-execution-records.spec.ts",
+          "line": 619,
+          "column": 3
+        },
+        {
+          "title": "fa SC004 fixed 100-record history selection timing",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11408,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:07.091Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-daa4c-rd-history-selection-timing-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-c3d48c7fc9b09fbb512c",
+          "file": "decision-execution-records.spec.ts",
+          "line": 619,
+          "column": 3
+        },
+        {
+          "title": "en real viewer access keyboard ten axes dates and revoked read",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5784,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:18.752Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-19e8f-axes-dates-and-revoked-read-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-8dfc669fec020547dcbe",
+          "file": "decision-execution-records.spec.ts",
+          "line": 788,
+          "column": 3
+        },
+        {
+          "title": "fa real viewer access keyboard ten axes dates and revoked read",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5832,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:24.662Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-875a8-axes-dates-and-revoked-read-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-c91298fe786f89769726",
+          "file": "decision-execution-records.spec.ts",
+          "line": 788,
+          "column": 3
+        },
+        {
+          "title": "en global save create and PATCH malformed success preserve draft and never execute",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2540,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:30.596Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-ce437-rve-draft-and-never-execute-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-4b60819af493a43382e4",
+          "file": "decision-execution-records.spec.ts",
+          "line": 909,
+          "column": 3
+        },
+        {
+          "title": "en saw malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4707,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:33.237Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-71d92-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-2db5e520958b67d78914",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "en topsis malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4351,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:38.094Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-f20c5-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-1a73d1a66a4d12dd049f",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "en ahp malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4153,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:42.613Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-9d764-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-489f6f6618deccf6602b",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "en ism malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9321,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:46.924Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-36fbc-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-044cef2c94122ca88be4",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "fa global save create and PATCH malformed success preserve draft and never execute",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2529,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:56.472Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-554dc-rve-draft-and-never-execute-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-3b01c08ce0614da73645",
+          "file": "decision-execution-records.spec.ts",
+          "line": 909,
+          "column": 3
+        },
+        {
+          "title": "fa saw malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4281,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:16:59.079Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-82137-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-999aee6622ca8899fe2a",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "fa topsis malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4394,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:03.498Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-d3c06-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-78d99c746f060f43ee09",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "fa ahp malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8292,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:08.054Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-cff57-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-d337098aebacafb7569d",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "fa ism malformed completed responses require recovery and never current success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5016,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:16.549Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-24fa5-y-and-never-current-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-2af81d3fa7061c345efa",
+          "file": "decision-execution-records.spec.ts",
+          "line": 970,
+          "column": 5
+        },
+        {
+          "title": "en named ranking feedback and no-match history are distinct",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4620,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:21.742Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-96240--match-history-are-distinct-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-b917c97327cc46911503",
+          "file": "decision-execution-records.spec.ts",
+          "line": 1039,
+          "column": 3
+        },
+        {
+          "title": "fa named ranking feedback and no-match history are distinct",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1833,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:26.425Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-91b8c--match-history-are-distinct-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-d91ab8c3b812843b771c",
+          "file": "decision-execution-records.spec.ts",
+          "line": 1039,
+          "column": 3
+        },
+        {
+          "title": "en recovery replaces a pre-commit in-flight first-page history read",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3225,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:28.315Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-43e36-ght-first-page-history-read-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-badcab60b6c84ccfb659",
+          "file": "decision-execution-records.spec.ts",
+          "line": 1078,
+          "column": 3
+        },
+        {
+          "title": "fa recovery replaces a pre-commit in-flight first-page history read",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3100,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:31.616Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-execution-records-4a24f-ght-first-page-history-read-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b0c327669297f2600976-bcb9b1a256be2788aeff",
+          "file": "decision-execution-records.spec.ts",
+          "line": 1078,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "decision-ism.spec.ts",
+      "file": "decision-ism.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "foundation serializes existing method saves and global save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1889,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:34.812Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-foundation-se-e5380-ethod-saves-and-global-save-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-3af9a37df81f9ce287d3",
+          "file": "decision-ism.spec.ts",
+          "line": 70,
+          "column": 1
+        },
+        {
+          "title": "foundation view-only presentation disables every mutation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5430,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:37.636Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-foundation-vi-b7c24-ion-disables-every-mutation-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-1154d95de9d8d74bf083",
+          "file": "decision-ism.spec.ts",
+          "line": 113,
+          "column": 1
+        },
+        {
+          "title": "en independent ISM chain, zero and both single diagonals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22473,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:17:43.143Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-independen-586d9-o-and-both-single-diagonals-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-50f4e5a3bd2b30d9dffc",
+          "file": "decision-ism.spec.ts",
+          "line": 148,
+          "column": 3
+        },
+        {
+          "title": "fa independent ISM chain, zero and both single diagonals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 19806,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:05.921Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-independen-8a161-o-and-both-single-diagonals-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-0c8f4768f033ccd059ca",
+          "file": "decision-ism.spec.ts",
+          "line": 148,
+          "column": 3
+        },
+        {
+          "title": "en draft blank correction and criterion operations preserve directed pairs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6299,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:25.965Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-draft-blan-f6e93-ons-preserve-directed-pairs-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-89a25197af6525ddc23b",
+          "file": "decision-ism.spec.ts",
+          "line": 248,
+          "column": 3
+        },
+        {
+          "title": "fa draft blank correction and criterion operations preserve directed pairs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6369,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:32.367Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-draft-blan-7962c-ons-preserve-directed-pairs-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-90ea35e18de14a4f02bd",
+          "file": "decision-ism.spec.ts",
+          "line": 248,
+          "column": 3
+        },
+        {
+          "title": "en invalid drafts and failed requests stay recoverable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4089,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:38.831Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-invalid-dr-3b196-d-requests-stay-recoverable-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-080e71eb85851c330cef",
+          "file": "decision-ism.spec.ts",
+          "line": 354,
+          "column": 3
+        },
+        {
+          "title": "fa invalid drafts and failed requests stay recoverable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3979,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:43.080Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-invalid-dr-33500-d-requests-stay-recoverable-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-d2ddc0e3ff365d88a053",
+          "file": "decision-ism.spec.ts",
+          "line": 354,
+          "column": 3
+        },
+        {
+          "title": "en maximal cycles, interpretation and frozen history",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2590,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:47.202Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-maximal-cy-7ed8c-retation-and-frozen-history-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-796a3b746ea272155340",
+          "file": "decision-ism.spec.ts",
+          "line": 457,
+          "column": 3
+        },
+        {
+          "title": "fa maximal cycles, interpretation and frozen history",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2560,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:49.877Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-maximal-cy-872a6-retation-and-frozen-history-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-49895f6a81444cd10fd6",
+          "file": "decision-ism.spec.ts",
+          "line": 457,
+          "column": 3
+        },
+        {
+          "title": "en keyboard ten criteria and localized frozen provenance",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2653,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:52.516Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-keyboard-t-5c542-localized-frozen-provenance-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-233b3d7b3f7000c46087",
+          "file": "decision-ism.spec.ts",
+          "line": 553,
+          "column": 3
+        },
+        {
+          "title": "en delayed mixed method operations and late case release",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4265,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:55.245Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-delayed-mi-4fb11-tions-and-late-case-release-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-621f82fe2934ef3e9dca",
+          "file": "decision-ism.spec.ts",
+          "line": 645,
+          "column": 3
+        },
+        {
+          "title": "en actual viewer sees frozen results with zero writable controls or bypass runs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3216,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:18:59.628Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-actual-vie-83798-ble-controls-or-bypass-runs-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-cfae741337f9613ff4e2",
+          "file": "decision-ism.spec.ts",
+          "line": 765,
+          "column": 3
+        },
+        {
+          "title": "fa keyboard ten criteria and localized frozen provenance",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5712,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:02.924Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-keyboard-t-9a330-localized-frozen-provenance-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-5853f5eaca2dbd13ddd1",
+          "file": "decision-ism.spec.ts",
+          "line": 553,
+          "column": 3
+        },
+        {
+          "title": "fa delayed mixed method operations and late case release",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4127,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:08.730Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-delayed-mi-fb567-tions-and-late-case-release-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-28e3f92db3292833dfc7",
+          "file": "decision-ism.spec.ts",
+          "line": 645,
+          "column": 3
+        },
+        {
+          "title": "fa actual viewer sees frozen results with zero writable controls or bypass runs",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3038,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:12.967Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-actual-vie-5846e-ble-controls-or-bypass-runs-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-96af8347f06958c97aea",
+          "file": "decision-ism.spec.ts",
+          "line": 765,
+          "column": 3
+        },
+        {
+          "title": "en SC-008 forty real POST to visible layer trials",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12034,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:16.080Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-SC-008-for-8e7fc-OST-to-visible-layer-trials-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-a647db4f987a64b8be16",
+          "file": "decision-ism.spec.ts",
+          "line": 890,
+          "column": 3
+        },
+        {
+          "title": "fa SC-008 forty real POST to visible layer trials",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12008,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:28.670Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-SC-008-for-590b1-OST-to-visible-layer-trials-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-ed7c473dcbb34d064a12",
+          "file": "decision-ism.spec.ts",
+          "line": 890,
+          "column": 3
+        },
+        {
+          "title": "en late responses from every method and global save isolate newer case",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5407,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:41.200Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-late-respo-1729a-bal-save-isolate-newer-case-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-ce00f9b75dfc9bd73038",
+          "file": "decision-ism.spec.ts",
+          "line": 1057,
+          "column": 3
+        },
+        {
+          "title": "en disconnected, longer and multiple cycle groups match frozen server references",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14125,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:19:46.747Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-disconnect-ea0d8-ch-frozen-server-references-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-93b817b50ded3f4f050e",
+          "file": "decision-ism.spec.ts",
+          "line": 1166,
+          "column": 3
+        },
+        {
+          "title": "fa late responses from every method and global save isolate newer case",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5242,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:01.045Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-late-respo-04cfc-bal-save-isolate-newer-case-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-c42aede4b73c4026020f",
+          "file": "decision-ism.spec.ts",
+          "line": 1057,
+          "column": 3
+        },
+        {
+          "title": "fa disconnected, longer and multiple cycle groups match frozen server references",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10683,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:06.408Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-disconnect-dfd60-ch-frozen-server-references-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-d6b6d62d2691107f21f0",
+          "file": "decision-ism.spec.ts",
+          "line": 1166,
+          "column": 3
+        },
+        {
+          "title": "en convergence pending case reselect and return cannot reacquire",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13995,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:17.232Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-4b66e-and-return-cannot-reacquire-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-82254bc77ce288d56022",
+          "file": "decision-ism.spec.ts",
+          "line": 1244,
+          "column": 3
+        },
+        {
+          "title": "fa convergence pending case reselect and return cannot reacquire",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10989,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:31.452Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-7b0f3-and-return-cannot-reacquire-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-4e9fd150214b5ba4babc",
+          "file": "decision-ism.spec.ts",
+          "line": 1244,
+          "column": 3
+        },
+        {
+          "title": "en convergence root JSON null is explicitly reset and corrected",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2000,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:42.652Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-d07db-licitly-reset-and-corrected-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-0985845100e1908919df",
+          "file": "decision-ism.spec.ts",
+          "line": 1361,
+          "column": 3
+        },
+        {
+          "title": "en convergence committed run lost response with history success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3652,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:44.717Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-2c28a-sponse-with-history-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-439ddf98fc574ce33ade",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "en convergence committed run lost response with history failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3214,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:48.470Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-aee2e-sponse-with-history-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-ef53377442425957a365",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "en convergence committed run lost response with history timeout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13348,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:20:51.792Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-82410-sponse-with-history-timeout-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-804112e29fb7450957be",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "fa convergence root JSON null is explicitly reset and corrected",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1890,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:05.232Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-2dcfa-licitly-reset-and-corrected-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-1f47dc853d263833b045",
+          "file": "decision-ism.spec.ts",
+          "line": 1361,
+          "column": 3
+        },
+        {
+          "title": "fa convergence committed run lost response with history success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3277,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:07.196Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-db5b7-sponse-with-history-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-2c3ee40480229af67661",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "fa convergence committed run lost response with history failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3158,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:10.565Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-1f15c-sponse-with-history-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-90180cf2c713031667df",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "fa convergence committed run lost response with history timeout",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13036,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:13.805Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-6cd65-sponse-with-history-timeout-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-242d91552a25b20dd08e",
+          "file": "decision-ism.spec.ts",
+          "line": 1417,
+          "column": 5
+        },
+        {
+          "title": "en convergence malformed successful save response stays guarded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5412,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:26.933Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-9f668-save-response-stays-guarded-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-de4f2ceb5dda18d7a25b",
+          "file": "decision-ism.spec.ts",
+          "line": 1592,
+          "column": 5
+        },
+        {
+          "title": "en convergence malformed successful run response stays guarded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10307,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:32.451Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-1e39e--run-response-stays-guarded-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-305ec452dac1cc4c20a9",
+          "file": "decision-ism.spec.ts",
+          "line": 1592,
+          "column": 5
+        },
+        {
+          "title": "fa convergence malformed successful save response stays guarded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4975,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:42.900Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-4f5e9-save-response-stays-guarded-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-8439cc070fae328608d1",
+          "file": "decision-ism.spec.ts",
+          "line": 1592,
+          "column": 5
+        },
+        {
+          "title": "fa convergence malformed successful run response stays guarded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6329,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:47.969Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-ff0ab--run-response-stays-guarded-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-752546f709c40968fd10",
+          "file": "decision-ism.spec.ts",
+          "line": 1592,
+          "column": 5
+        },
+        {
+          "title": "en convergence visible recovery history filtered success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3565,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:54.409Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-12647-ry-history-filtered-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-a4f483e81a305e00ed32",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "en convergence visible recovery history filtered failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11872,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:21:58.060Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-ca5a9-ry-history-filtered-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-cb7bd469a9cfb5fb70a5",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "en convergence visible recovery history page2 success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3481,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:10.016Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-121d7-overy-history-page2-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-1489e9bfd03b9baf235b",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "en convergence visible recovery history page2 failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3539,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:13.583Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-8c46a-overy-history-page2-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-fb99b33c8851d7db9de3",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "en convergence visible recovery history switch success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3630,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:17.211Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-en-convergenc-d56cd-very-history-switch-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-a509fe9348723a8d92a1",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "fa convergence visible recovery history filtered success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3270,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:20.934Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-1ebe0-ry-history-filtered-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-cb6ad1047e9a5c806147",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "fa convergence visible recovery history filtered failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3253,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:24.285Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-1e99b-ry-history-filtered-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-4c6f5e17facfb4b6260e",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "fa convergence visible recovery history page2 success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3379,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:27.619Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-56229-overy-history-page2-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-ac8f1e0b8167f34f8d86",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "fa convergence visible recovery history page2 failure",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6586,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:31.077Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-e8d57-overy-history-page2-failure-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-27411074aaa6b726efd2",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        },
+        {
+          "title": "fa convergence visible recovery history switch success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium-desktop",
+              "projectName": "chromium-desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3513,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-13T00:22:37.767Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "/home/hossein/Desktop/projects/building-management/apps/web/test-results/decision-ism-fa-convergenc-dd034-very-history-switch-success-chromium-desktop/trace.zip"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "bb002a674d1fc7c84917-8ceee7bc3479ce70edeb",
+          "file": "decision-ism.spec.ts",
+          "line": 1785,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-13T00:09:46.862Z",
+    "duration": 774774.234,
+    "expected": 130,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

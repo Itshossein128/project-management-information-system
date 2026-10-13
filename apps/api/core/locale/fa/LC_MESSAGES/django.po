@@ -187,3 +187,78 @@ msgstr "عنوان نمی‌تواند خالی باشد."
 
 msgid "Title max length is 200."
 msgstr "حداکثر طول عنوان ۲۰۰ نویسه است."
+
+msgid "Criterion must be a string."
+msgstr "معیار باید رشته باشد."
+
+msgid "Cell must be strictly positive."
+msgstr "مقدار خانه باید بزرگ‌تر از صفر باشد."
+
+msgid "Diagonal element must be 1.0."
+msgstr "مقدار قطر اصلی باید دقیقاً ۱ باشد."
+
+msgid "Pairwise cells must be reciprocals (a[k,j] = 1 / a[j,k])."
+msgstr "خانه‌های مقابل باید معکوس یکدیگر باشند."
+
+msgid "AHP calculation must be finite."
+msgstr "نتیجه محاسبه AHP باید متناهی باشد."
+
+msgid "ahp_matrix must have %(n)s rows to match criteria."
+msgstr "ماتریس AHP باید %(n)s سطر مطابق معیارها داشته باشد."
+
+msgid "Row must have exactly %(n)s cells."
+msgstr "سطر باید دقیقاً %(n)s خانه داشته باشد."
+
+msgid "%(field)s must be a list of names."
+msgstr "%(field)s باید فهرستی از نام‌ها باشد."
+
+msgid "%(field)s must have at most %(maximum)s names."
+msgstr "%(field)s باید حداکثر %(maximum)s نام داشته باشد."
+
+msgid "%(field)s must have at least 1 name."
+msgstr "%(field)s باید حداقل یک نام داشته باشد."
+
+msgid "criteria"
+msgstr "معیارها"
+
+msgid "alternatives"
+msgstr "گزینه‌ها"
+
+msgid "n must be <= %(maximum)s."
+msgstr "تعداد معیارها باید حداکثر %(maximum)s باشد."
+
+msgid "n must be >= 1 for AHP."
+msgstr "برای AHP باید حداقل یک معیار تعریف شود."
+
+msgid "ahp_matrix must be a list of rows."
+msgstr "ماتریس AHP باید فهرستی از سطرها باشد."
+
+msgid "Row must be a list."
+msgstr "سطر باید فهرست باشد."
+
+msgid "Unknown method id: %(method)s."
+msgstr "شناسه روش ناشناخته است: %(method)s."
+
+msgid "Unknown decision method."
+msgstr "روش تصمیم‌گیری ناشناخته است."
+
+msgid "Must be a list of method ids."
+msgstr "روش‌ها باید فهرستی از شناسه‌ها باشند."
+
+msgid "AHP matrix must have %(n)s rows and %(n)s cells per row."
+msgstr "ماتریس AHP باید %(n)s سطر و در هر سطر %(n)s خانه داشته باشد."
+
+msgid "Relation must be exactly zero or one."
+msgstr "رابطه باید دقیقاً صفر یا یک باشد."
+
+msgid "Structural analysis could not be completed."
+msgstr "تحلیل ساختاری تکمیل نشد."
+
+msgid "Matrix must be a list of rows."
+msgstr "ماتریس باید فهرستی از سطرها باشد."
+
+msgid "Matrix dimensions must match criteria."
+msgstr "ابعاد ماتریس باید با معیارها مطابقت داشته باشد."
+
+msgid "Row dimensions must match criteria."
+msgstr "ابعاد سطر باید با معیارها مطابقت داشته باشد."

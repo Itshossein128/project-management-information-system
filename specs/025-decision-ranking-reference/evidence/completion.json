@@ -1,0 +1,70 @@
+{
+  "feature": "025-decision-ranking-reference",
+  "branch": "develop",
+  "tasks": {
+    "total": 50,
+    "checked": 50
+  },
+  "verification": {
+    "reference": {
+      "passed": 138,
+      "exit": 0,
+      "cases": {
+        "valid": 12,
+        "invalid": 35,
+        "representation": 7
+      },
+      "evidence": "convergence/t050-green.txt"
+    },
+    "backend": {
+      "passed": 61,
+      "exit": 0,
+      "fresh_this_pass": false,
+      "source_hashes_revalidated": true
+    },
+    "browser": {
+      "verified_reused_scenarios": 8,
+      "fresh_run": false,
+      "source_fingerprints": 1256
+    },
+    "partial_final": {
+      "passed": 1,
+      "unrun": 137,
+      "complete": false
+    },
+    "schema_type_locale": "no relevant changes; not newly run",
+    "main_file_selection": {
+      "passed": 57,
+      "unrun": 81,
+      "complete": false
+    }
+  },
+  "requirements": 14,
+  "success_criteria": 6,
+  "acceptance_scenarios": 16,
+  "runtime_changes": false,
+  "reference_identity": {
+    "docx_sha256": "52946a0ff62205bebf007eda3a6c860d5f010311194c3740316d6a2a2369e282",
+    "source_sha256": "ae0f35b52bb9231d06cc416d1972f248257ec34dbf07fcd8658948ac55b83e26",
+    "block_sha256": "8304307300aba81d18c8669d1e5d2d3ce3578df03498359528ad8ab2e25328db"
+  },
+  "hooks": {
+    "before_implement": "absent",
+    "after_implement": "absent"
+  },
+  "preservation": "convergence/preservation.json",
+  "commit_push_deploy": false,
+  "evidence": "../validation.md",
+  "convergence": {
+    "tasks": [
+      "T049",
+      "T050"
+    ],
+    "red_false_acceptances": {
+      "T049": 4,
+      "T050": 30
+    },
+    "checks_added": 35,
+    "actual_fault_probe": "three failed records, exit 1, incomplete"
+  }
+}

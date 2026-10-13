@@ -1,0 +1,23 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_observation_copies_inputs ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:12: in test_observation_copies_inputs
+    assert inputs == [[1], [2]]
+E   assert [[1, 9], [2]] == [[1], [2]]
+E     
+E     At index 0 diff: [1, 9] != [1]
+E     Use -v to get more diff
+________________________ test_observation_retains_error ________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:20: in test_observation_retains_error
+    observed = observe(fail, [[1]])
+               ^^^^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/ranking_reference_support.py:4: in observe
+    return {"value": function(*inputs)}
+                     ^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/test_ranking_reference_harness.py:19: in fail
+    raise ValueError("deliberate rejection")
+E   ValueError: deliberate rejection
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_copies_inputs
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_retains_error
+2 failed, 1 passed in 0.06s

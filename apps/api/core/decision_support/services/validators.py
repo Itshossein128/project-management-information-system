@@ -15,6 +15,58 @@ MAX_DIM = 10
 VALID_TYPES = frozenset({'benefit', 'cost'})
 
 
+def validate_ism_inputs(criteria: Any, matrix: Any) -> dict[str, Any]:
+    """Strict binary execution boundary, independent of ranking and other methods."""
+    issues = []
+    try:
+        if isinstance(criteria, list):
+            raise_issues([
+                _issue('invalid_type', f'criteria.{i}', 'Criterion must be a string.')
+                for i, name in enumerate(criteria) if not isinstance(name, str)
+            ])
+        names = validate_names(criteria, 'criteria', require_non_empty=True)
+    except CodedValidationError as error:
+        issues.extend(error.detail.get('issues', []))
+        names = []
+    n = len(names)
+    if not isinstance(matrix, list):
+        issues.append(_issue('dimension_invalid', 'ism_matrix', 'Matrix must be a list of rows.'))
+        raise_issues(issues)
+    if len(matrix) != n:
+        issues.append(_issue('dimension_invalid', 'ism_matrix', 'Matrix dimensions must match criteria.'))
+    cleaned = []
+    for i, row in enumerate(matrix):
+        path = f'ism_matrix.{i}'
+        if not isinstance(row, list):
+            issues.append(_issue('dimension_invalid', path, 'Row must be a list.'))
+            continue
+        if len(row) != n:
+            issues.append(_issue('dimension_invalid', path, 'Row dimensions must match criteria.'))
+        output = []
+        for j, value in enumerate(row):
+            cell_path = f'{path}.{j}'
+            if value is None or (isinstance(value, str) and not value.strip()):
+                issues.append(_issue('cell_empty', cell_path, 'Cell cannot be empty.'))
+                continue
+            if not _is_number(value):
+                issues.append(_issue('non_numeric', cell_path, 'Cell must be numeric.'))
+                continue
+            try:
+                finite = math.isfinite(float(value))
+            except OverflowError:
+                finite = False
+            if not finite:
+                issues.append(_issue('non_finite', cell_path, 'Cell must be finite.'))
+                continue
+            if value not in (0, 1):
+                issues.append(_issue('ism_relation_invalid', cell_path, 'Relation must be exactly zero or one.'))
+                continue
+            output.append(int(value))
+        cleaned.append(output)
+    raise_issues(issues)
+    return {'criteria': names, 'ism_matrix': cleaned}
+
+
 def _issue(code: str, path: str, message: str) -> dict[str, str]:
     return {'code': code, 'path': path, 'message': _(message)}
 
@@ -46,7 +98,7 @@ def validate_method_ids(methods: list[Any]) -> list[str]:
         mid = str(raw).strip() if raw is not None else ''
         if mid not in METHOD_IDS:
             issues.append(
-                _issue('invalid_method', f'selected_methods.{i}', f'Unknown method id: {raw!r}.'),
+                _issue('invalid_method', f'selected_methods.{i}', _('Unknown method id: %(method)s.') % {'method': repr(raw)}),
             )
             continue
         if mid not in seen:
@@ -60,11 +112,11 @@ def validate_names(names: list[Any], field: str, *, require_non_empty: bool = Fa
     """Trim, reject empty, exact uniqueness, max 10 (O04 interim)."""
     issues: list[dict[str, str]] = []
     if not isinstance(names, list):
-        raise_issues([_issue('invalid_type', field, f'{field} must be a list of names.')])
+        raise_issues([_issue('invalid_type', field, _('%(field)s must be a list of names.') % {'field': _(field)})])
 
     if len(names) > MAX_DIM:
         issues.append(
-            _issue('dimension_invalid', field, f'{field} must have at most {MAX_DIM} names.'),
+            _issue('dimension_invalid', field, _('%(field)s must have at most %(maximum)s names.') % {'field': _(field), 'maximum': MAX_DIM}),
         )
 
     cleaned: list[str] = []
@@ -85,7 +137,7 @@ def validate_names(names: list[Any], field: str, *, require_non_empty: bool = Fa
         cleaned.append(text)
 
     if require_non_empty and len(cleaned) < 1 and not any(i['code'] == 'dimension_invalid' for i in issues):
-        issues.append(_issue('dimension_invalid', field, f'{field} must have at least 1 name.'))
+        issues.append(_issue('dimension_invalid', field, _('%(field)s must have at least 1 name.') % {'field': _(field)}))
 
     raise_issues(issues)
     return cleaned
@@ -124,7 +176,7 @@ def validate_ranking_inputs(
     m = len(alts)
 
     if n > MAX_DIM:
-        issues.append(_issue('dimension_invalid', 'criteria', f'n must be <= {MAX_DIM}.'))
+        issues.append(_issue('dimension_invalid', 'criteria', _('n must be <= %(maximum)s.') % {'maximum': MAX_DIM}))
     if m > MAX_DIM:
         issues.append(_issue('dimension_invalid', 'alternatives', f'm must be <= {MAX_DIM}.'))
     if n == 0:
@@ -263,11 +315,44 @@ def validate_ranking_inputs(
     }
 
 
+def validate_ahp_draft_numbers(value: Any, *, field: str = 'ahp_matrix') -> None:
+    """Keep incomplete drafts, but reject unrepresentable numbers before JSON storage."""
+    issues = []
+
+    def visit(cell: Any, path: str) -> None:
+        if isinstance(cell, list):
+            for index, child in enumerate(cell):
+                visit(child, f'{path}.{index}')
+        elif isinstance(cell, dict):
+            for key, child in cell.items():
+                visit(child, f'{path}.{key}')
+        elif _is_number(cell):
+            try:
+                finite = math.isfinite(float(cell))
+            except OverflowError:
+                finite = False
+            if not finite:
+                issues.append(_issue('non_finite', path, 'Cell must be finite.'))
+
+    visit(value, field)
+    raise_issues(issues)
+
+
+def validate_ism_draft_numbers(value: Any) -> None:
+    # Root JSON null and null cells are retained drafts; execution validates shape.
+    validate_ahp_draft_numbers(value, field='ism_matrix')
+
+
 def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any]:
     """Validate AHP pairwise comparison matrix and criteria (doc 05, AC02, AC08, AC17, AC18, AC26)."""
     issues: list[dict[str, str]] = []
 
     try:
+        if isinstance(criteria, list):
+            raise_issues([
+                _issue('invalid_type', f'criteria.{index}', 'Criterion must be a string.')
+                for index, value in enumerate(criteria) if not isinstance(value, str)
+            ])
         crit = validate_names(criteria, 'criteria', require_non_empty=True)
     except CodedValidationError as exc:
         detail = exc.detail if isinstance(exc.detail, dict) else {}
@@ -276,7 +361,7 @@ def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any
 
     n = len(crit)
     if n > MAX_DIM:
-        issues.append(_issue('dimension_invalid', 'criteria', f'n must be <= {MAX_DIM}.'))
+        issues.append(_issue('dimension_invalid', 'criteria', _('n must be <= %(maximum)s.') % {'maximum': MAX_DIM}))
     if n == 0:
         issues.append(_issue('dimension_invalid', 'criteria', 'n must be >= 1 for AHP.'))
 
@@ -284,12 +369,15 @@ def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any
         issues.append(_issue('dimension_invalid', 'ahp_matrix', 'ahp_matrix must be a list of rows.'))
         raise_issues(issues)
 
-    if n > 0 and len(matrix) != n:
+    if n > 0 and (
+        len(matrix) != n
+        or any(not isinstance(row, list) or len(row) != n for row in matrix)
+    ):
         issues.append(
             _issue(
                 'dimension_invalid',
                 'ahp_matrix',
-                f'ahp_matrix must have {n} rows to match criteria.',
+                _('AHP matrix must have %(n)s rows and %(n)s cells per row.') % {'n': n},
             ),
         )
 
@@ -304,7 +392,7 @@ def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any
                 _issue(
                     'dimension_invalid',
                     row_path,
-                    f'Row must have exactly {n} cells.',
+                    _('Row must have exactly %(n)s cells.') % {'n': n},
                 ),
             )
         cleaned_row: list[float] = []
@@ -313,16 +401,13 @@ def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any
             if cell is None or (isinstance(cell, str) and not cell.strip()):
                 issues.append(_issue('cell_empty', cell_path, 'Cell cannot be empty.'))
                 continue
-            if isinstance(cell, str):
-                try:
-                    cf = float(cell)
-                except ValueError:
-                    issues.append(_issue('non_numeric', cell_path, 'Cell must be numeric.'))
-                    continue
-            elif _is_number(cell):
-                cf = float(cell)
-            else:
+            if not _is_number(cell):
                 issues.append(_issue('non_numeric', cell_path, 'Cell must be numeric.'))
+                continue
+            try:
+                cf = float(cell)
+            except OverflowError:
+                issues.append(_issue('non_finite', cell_path, 'Cell must be finite.'))
                 continue
 
             if _is_non_finite(cf):
@@ -342,7 +427,7 @@ def validate_ahp_inputs(criteria: list[Any], matrix: list[Any]) -> dict[str, Any
         and all(len(row) == n for row in cleaned_matrix)
     ):
         for j in range(n):
-            if abs(cleaned_matrix[j][j] - 1.0) > 1e-4:
+            if cleaned_matrix[j][j] != 1.0:
                 issues.append(
                     _issue(
                         'ahp_diagonal_invalid',

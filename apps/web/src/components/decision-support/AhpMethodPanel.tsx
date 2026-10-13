@@ -1,8 +1,10 @@
+import { useDecisionExecution } from "./useDecisionExecution";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DecisionSupportRequestError,
+  isAhpRunResult,
   createDecisionRun,
   patchDecisionCase,
   type AhpRunResult,
@@ -13,34 +15,70 @@ import { RunActionBar } from "./RunActionBar";
 import { SquareMatrixEditor } from "./SquareMatrixEditor";
 import { ValidationIssueList } from "./ValidationIssueList";
 import type { RankingIssue } from "./ranking-input-rules";
-import { parseApiValidationIssues } from "./validation-issues";
+import { parseApiRequestIssues } from "./validation-issues";
 
 type Props = {
+  disabled?: boolean;
+  beginOperation: () => (() => void) | null;
+  onHistoryRecovered: (caseId: string) => void;
   projectId: string;
   caseId: string;
   criteria: string[];
   matrix: (number | null)[][];
   onMatrixChange: (m: (number | null)[][]) => void;
   latestResult?: AhpRunResult | null;
+  savedCriteria: string[];
+  onSavedCriteria: (criteria: string[]) => void;
+  onResult: (result: AhpRunResult) => void;
 };
 
 export function AhpMethodPanel({
+  disabled = false,
+  beginOperation,
+  onHistoryRecovered,
   projectId,
   caseId,
   criteria,
   matrix,
   onMatrixChange,
   latestResult = null,
+  savedCriteria,
+  onSavedCriteria,
+  onResult,
 }: Props) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
+  const cellPrefix = useId();
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+  const focusIssue = (issue: RankingIssue) => {
+    const match = /^ahp_matrix\.(\d+)\.(\d+)$/.exec(issue.path);
+    if (match)
+      document
+        .getElementById(cellPrefix + "-" + match[1] + "-" + match[2])
+        ?.focus();
+  };
+  const showIssues = (next: RankingIssue[]) => {
+    setIssues(next);
+    requestAnimationFrame(() => {
+      if (next[0]) focusIssue(next[0]);
+    });
+  };
   const [issues, setIssues] = useState<RankingIssue[]>([]);
   const [result, setResult] = useState<AhpRunResult | null>(latestResult);
 
-  // Sync result when parent selects a history run or clears on case change
+  // Sync the current execution result; historical inspection is separate.
   useEffect(() => {
     setResult(latestResult);
   }, [latestResult]);
+
+  useEffect(() => {
+    setResult(null);
+  }, [criteria, matrix]);
 
   const collectLocalIssues = (): RankingIssue[] => {
     const n = criteria.length;
@@ -55,6 +93,25 @@ export function AhpMethodPanel({
       return localIssues;
     }
 
+    const seen = new Set<string>();
+    criteria.forEach((name, index) => {
+      const text = typeof name === "string" ? name.trim() : "";
+      const code =
+        typeof name !== "string"
+          ? "invalid_type"
+          : !text
+            ? "name_empty"
+            : seen.has(text)
+              ? "name_duplicate"
+              : null;
+      if (code)
+        localIssues.push({
+          code,
+          path: "criteria." + index,
+          message: t("decisionSupport.errors." + code),
+        });
+      seen.add(text);
+    });
     if (!matrix || matrix.length !== n) {
       localIssues.push({
         code: "dimension_invalid",
@@ -85,11 +142,19 @@ export function AhpMethodPanel({
           });
           continue;
         }
-        if (typeof val !== "number" || isNaN(val)) {
+        if (typeof val !== "number") {
           localIssues.push({
             code: "non_numeric",
             path,
             message: t("decisionSupport.errors.non_numeric"),
+          });
+          continue;
+        }
+        if (!Number.isFinite(val)) {
+          localIssues.push({
+            code: "non_finite",
+            path,
+            message: t("decisionSupport.errors.non_finite"),
           });
           continue;
         }
@@ -106,7 +171,7 @@ export function AhpMethodPanel({
 
     if (localIssues.length === 0) {
       for (let i = 0; i < n; i++) {
-        if (Math.abs((matrix[i]?.[i] ?? 0) - 1.0) > 1e-4) {
+        if (matrix[i]?.[i] !== 1) {
           localIssues.push({
             code: "ahp_diagonal_invalid",
             path: `ahp_matrix.${i}.${i}`,
@@ -130,66 +195,104 @@ export function AhpMethodPanel({
     return localIssues;
   };
 
-  const runMutation = useMutation({
-    mutationFn: async () => {
-      await patchDecisionCase(projectId, caseId, {
-        ahp_matrix: matrix,
-        criteria,
-      });
-      return createDecisionRun(projectId, caseId, "ahp");
-    },
-    onSuccess: (run: DecisionRun) => {
+  const {
+    mutation: runMutation,
+    recovery,
+    clearRecovery,
+  } = useDecisionExecution({
+    projectId,
+    caseId,
+    method: "ahp",
+    onHistoryRecovered,
+    onSaved: (saved) => onSavedCriteria(saved.criteria),
+    onSuccess: (run) => {
       setIssues([]);
-      const res = run.result as unknown as AhpRunResult;
-      setResult(res);
-      void qc.invalidateQueries({ queryKey: ["decision-runs", projectId, caseId] });
-    },
-    onError: (err: unknown) => {
-      if (err instanceof DecisionSupportRequestError) {
-        setIssues(parseApiValidationIssues(err.payload));
-      } else {
-        setIssues([{ code: "error", path: "", message: String(err) }]);
+      if (isAhpRunResult(run.result)) {
+        setResult(run.result);
+        onResult(run.result);
       }
+    },
+    onError: (err) => {
+      setResult(null);
+      showIssues(
+        parseApiRequestIssues(
+          err instanceof DecisionSupportRequestError ? err.payload : null,
+        ),
+      );
     },
   });
 
   return (
-    <div className="space-y-4 rounded-md border border-border p-4">
-      <h2 className="text-sm font-medium">{t("decisionSupport.ahpPanelTitle")}</h2>
-      <p className="text-xs text-muted-foreground">{t("decisionSupport.ahpPanelHint")}</p>
+    <fieldset
+      disabled={disabled || runMutation.isPending}
+      className="min-w-0 space-y-4 rounded-md border border-border p-4"
+    >
+      <h2 className="text-sm font-medium">
+        {t("decisionSupport.ahpPanelTitle")}
+      </h2>
+      <p className="text-xs text-muted-foreground">
+        {t("decisionSupport.ahpPanelHint")}
+      </p>
 
       <SquareMatrixEditor
         criteria={criteria}
         matrix={matrix}
         onChange={onMatrixChange}
         mode="pairwise"
+        idPrefix={cellPrefix}
+        issues={issues}
       />
 
-      <ValidationIssueList issues={issues} />
+      <ValidationIssueList
+        criterionNames={criteria}
+        issues={issues}
+        onFocusIssue={focusIssue}
+      />
 
+      {recovery && (
+        <p role="status" data-execution-recovery={recovery}>
+          {t(
+            `decisionSupport.${recovery === "checking" ? "executionRecoveryChecking" : recovery === "failed" ? "executionRecoveryFailed" : "executionRecoveryRefreshed"}`,
+          )}
+        </p>
+      )}
       <RunActionBar
+        disabled={disabled}
         methodLabel="AHP"
         pending={runMutation.isPending}
-        onValidate={() => setIssues(collectLocalIssues())}
+        onValidate={() => showIssues(collectLocalIssues())}
         onRun={() => {
+          setResult(null);
           const local = collectLocalIssues();
           if (local.length) {
-            setIssues(local);
+            showIssues(local);
             return;
           }
-          runMutation.mutate();
+          const release = beginOperation();
+          if (!release) return;
+          const payload = structuredClone({
+            ahp_matrix: matrix,
+            ...(JSON.stringify(criteria.map((name) => name.trim())) !==
+            JSON.stringify(savedCriteria)
+              ? { criteria: criteria.map((name) => name.trim()) }
+              : {}),
+          });
+          clearRecovery();
+          runMutation.mutate({ payload, release });
         }}
       />
 
       {result && (
-        <CriteriaWeightTable
-          weights={result.weights ?? []}
-          cr={result.cr}
-          ci={result.ci}
-          lambdaMax={result.lambda_max}
-          isConsistent={result.is_consistent}
-        />
+        <section aria-label={t("decisionSupport.currentAhpResult")}>
+          <CriteriaWeightTable
+            weights={result.weights ?? []}
+            cr={result.cr}
+            ci={result.ci}
+            lambdaMax={result.lambda_max}
+            isConsistent={result.is_consistent}
+          />
+        </section>
       )}
-    </div>
+    </fieldset>
   );
 }

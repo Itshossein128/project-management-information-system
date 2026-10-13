@@ -1,0 +1,279 @@
+{
+  "reference_checks": 103,
+  "valid_cases": 12,
+  "invalid_cases": 35,
+  "representation_cases": 7,
+  "all_required_pass": true,
+  "case_ledger": [
+    {
+      "id": "published",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "one-by-one",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "rectangular-zero-weight",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "maximum",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "cost-only",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "benefit-zero",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "exact-ties",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "permuted-ties",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "constant-mixed",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "weights-relative",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "weights-scaled",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "disagreement",
+      "classification": "valid",
+      "status": "passed"
+    },
+    {
+      "id": "criteria-empty",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "criteria-too-many",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "criteria-blank",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "criteria-duplicate",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "alternatives-empty",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "alternatives-too-many",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "alternatives-blank",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "alternatives-duplicate",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weights-short",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weights-long",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "types-short",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "types-long",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "rows-short",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "columns-short",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "rows-long",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "columns-long",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-empty",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-null",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-text",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-negative",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-nan",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-infinity",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weight-negative-infinity",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-empty",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-null",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-text",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-negative",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-nan",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-infinity",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cell-negative-infinity",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "invalid-type",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "weights-zero",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "cost-zero",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "benefit-all-zero",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "zero-weight-zero-column",
+      "classification": "invalid",
+      "status": "passed"
+    },
+    {
+      "id": "numeric-text",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "boolean-cell",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "boolean-weight",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "trimmed-duplicate-criteria",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "trimmed-duplicate-alternatives",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "none-name",
+      "classification": "representation",
+      "status": "passed"
+    },
+    {
+      "id": "trimmed-type",
+      "classification": "representation",
+      "status": "passed"
+    }
+  ]
+}

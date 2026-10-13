@@ -1,0 +1,126 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 4 tests using 1 worker
+
+  ✘  1 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › saw unconfirmed save stops before POST and real committed lost response recovers (4.0s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › topsis unconfirmed save stops before POST and real committed lost response recovers (4.0s)
+  ✘  3 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › ahp unconfirmed save stops before POST and real committed lost response recovers (9.4s)
+  ✓  4 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › ism unconfirmed save stops before POST and real committed lost response recovers (4.4s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › saw unconfirmed save stops before POST and real committed lost response recovers 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      32 |   await page.route('**/decision-cases/'+s.c.id+'/runs/',async route=>{if(route.request().method()==='POST')posts++;await route.continue();});
+      33 |   await page.route('**/decision-cases/'+s.c.id+'/',async route=>{if(route.request().method()==='PATCH')await route.fulfill({status:200,contentType:'application/json',body:'null'});else await route.continue();});
+    > 34 |   await button.click();await expect(page.getByRole('button',{name:s.copy.save,exact:true})).toBeEnabled();await page.waitForTimeout(250);expect(posts).toBe(0);
+         |                                                                                                                                                        ^
+      35 |   await page.unroute('**/decision-cases/'+s.c.id+'/');await page.unroute('**/decision-cases/'+s.c.id+'/runs/');
+      36 |   const hold=gate();let id='';let committed=false;
+      37 |   await page.route('**/decision-cases/'+s.c.id+'/runs/**',async route=>{
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:34:152
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-96222-tted-lost-response-recovers-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-96222-tted-lost-response-recovers-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-96222-tted-lost-response-recovers-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-96222-tted-lost-response-recovers-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › topsis unconfirmed save stops before POST and real committed lost response recovers 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      32 |   await page.route('**/decision-cases/'+s.c.id+'/runs/',async route=>{if(route.request().method()==='POST')posts++;await route.continue();});
+      33 |   await page.route('**/decision-cases/'+s.c.id+'/',async route=>{if(route.request().method()==='PATCH')await route.fulfill({status:200,contentType:'application/json',body:'null'});else await route.continue();});
+    > 34 |   await button.click();await expect(page.getByRole('button',{name:s.copy.save,exact:true})).toBeEnabled();await page.waitForTimeout(250);expect(posts).toBe(0);
+         |                                                                                                                                                        ^
+      35 |   await page.unroute('**/decision-cases/'+s.c.id+'/');await page.unroute('**/decision-cases/'+s.c.id+'/runs/');
+      36 |   const hold=gate();let id='';let committed=false;
+      37 |   await page.route('**/decision-cases/'+s.c.id+'/runs/**',async route=>{
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:34:152
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-6ef74-tted-lost-response-recovers-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-6ef74-tted-lost-response-recovers-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-6ef74-tted-lost-response-recovers-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-6ef74-tted-lost-response-recovers-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › ahp unconfirmed save stops before POST and real committed lost response recovers 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByRole('button', { name: 'Save case', exact: true })
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByRole('button', { name: 'Save case', exact: true }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Save case', exact: true })
+        14 × locator resolved to <button type="button" data-slot="button" data-size="default" data-variant="default" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[transform,box-shadow,background-color,border-color,color] duration-200 ease-[cubic-bezier(0.2,0,0,1)] will-change-transform active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visib…>Save case</button>
+           - unexpected value "enabled"
+
+
+      40 |   });
+      41 |   await button.click();await expect.poll(()=>id).not.toBe('');
+    > 42 |   try{await expect(page.getByRole('button',{name:s.copy.save,exact:true})).toBeDisabled();expect(posts).toBe(1);}finally{hold.release();}
+         |                                                                            ^
+      43 |   await expect(page.locator('[data-run-id="'+id+'"]').first()).toBeVisible();await expect(page.getByRole('button',{name:s.copy.save,exact:true})).toBeEnabled();expect(posts).toBe(1);
+      44 |  });
+      45 | }
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:42:76
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-06531-tted-lost-response-recovers-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-06531-tted-lost-response-recovers-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-06531-tted-lost-response-recovers-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-06531-tted-lost-response-recovers-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › saw unconfirmed save stops before POST and real committed lost response recovers 
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › topsis unconfirmed save stops before POST and real committed lost response recovers 
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:30:2 › ahp unconfirmed save stops before POST and real committed lost response recovers 
+  1 passed (38.6s)

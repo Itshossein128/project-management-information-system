@@ -1,0 +1,141 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 2 tests using 1 worker
+
+  ✘  1 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › en named ranking feedback and no-match history are distinct (14.0s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › fa named ranking feedback and no-match history are distinct (14.2s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › en named ranking feedback and no-match history are distinct 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('No runs match this method', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" getByText('No runs match this method', { exact: true }) with timeout 5000ms
+      - waiting for getByText('No runs match this method', { exact: true })
+
+
+      1029 | }
+      1030 | for(const locale of ['en','fa'] as const)test(locale+' named ranking feedback and no-match history are distinct',async({page})=>{
+    > 1031 |  const s=await setup(page,locale);await page.getByRole('combobox',{name:s.copy.historyMethod}).selectOption('dematel');await expect.soft(page.getByText(locale==='en'?'No runs match this method':'اجرایی برای این روش یافت نشد',{exact:true})).toBeVisible();
+           |                                                                                                                                                                                                                                                 ^
+      1032 |  const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await panel.getByRole('spinbutton',{name:s.copy.weights+' Cost',exact:true}).fill('-1');await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByRole('alert')).toContainText('Cost');
+      1033 | });
+      1034 |
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:1031:241
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).getByRole('alert')
+    Expected substring: "Cost"
+    Received string:    "Validation issuesweights.0: Weight cannot be negative."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).getByRole('alert') with timeout 5000ms
+      - waiting for locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).getByRole('alert')
+        14 × locator resolved to <div role="alert" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">…</div>
+           - unexpected value "Validation issuesweights.0: Weight cannot be negative."
+
+
+      1030 | for(const locale of ['en','fa'] as const)test(locale+' named ranking feedback and no-match history are distinct',async({page})=>{
+      1031 |  const s=await setup(page,locale);await page.getByRole('combobox',{name:s.copy.historyMethod}).selectOption('dematel');await expect.soft(page.getByText(locale==='en'?'No runs match this method':'اجرایی برای این روش یافت نشد',{exact:true})).toBeVisible();
+    > 1032 |  const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await panel.getByRole('spinbutton',{name:s.copy.weights+' Cost',exact:true}).fill('-1');await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByRole('alert')).toContainText('Cost');
+           |                                                                                                                                                                                                                                                                                                                                                            ^
+      1033 | });
+      1034 |
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:1032:348
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-96240--match-history-are-distinct-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-96240--match-history-are-distinct-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-96240--match-history-are-distinct-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-96240--match-history-are-distinct-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › fa named ranking feedback and no-match history are distinct 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('اجرایی برای این روش یافت نشد', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "soft toBeVisible" getByText('اجرایی برای این روش یافت نشد', { exact: true }) with timeout 5000ms
+      - waiting for getByText('اجرایی برای این روش یافت نشد', { exact: true })
+
+
+      1029 | }
+      1030 | for(const locale of ['en','fa'] as const)test(locale+' named ranking feedback and no-match history are distinct',async({page})=>{
+    > 1031 |  const s=await setup(page,locale);await page.getByRole('combobox',{name:s.copy.historyMethod}).selectOption('dematel');await expect.soft(page.getByText(locale==='en'?'No runs match this method':'اجرایی برای این روش یافت نشد',{exact:true})).toBeVisible();
+           |                                                                                                                                                                                                                                                 ^
+      1032 |  const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await panel.getByRole('spinbutton',{name:s.copy.weights+' Cost',exact:true}).fill('-1');await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByRole('alert')).toContainText('Cost');
+      1033 | });
+      1034 |
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:1031:241
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).getByRole('alert')
+    Expected substring: "Cost"
+    Received string:    "خطاهای اعتبارسنجیweights.0: وزن نمی‌تواند منفی باشد."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).getByRole('alert') with timeout 5000ms
+      - waiting for locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).getByRole('alert')
+        14 × locator resolved to <div role="alert" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">…</div>
+           - unexpected value "خطاهای اعتبارسنجیweights.0: وزن نمی‌تواند منفی باشد."
+
+
+      1030 | for(const locale of ['en','fa'] as const)test(locale+' named ranking feedback and no-match history are distinct',async({page})=>{
+      1031 |  const s=await setup(page,locale);await page.getByRole('combobox',{name:s.copy.historyMethod}).selectOption('dematel');await expect.soft(page.getByText(locale==='en'?'No runs match this method':'اجرایی برای این روش یافت نشد',{exact:true})).toBeVisible();
+    > 1032 |  const panel=page.locator('fieldset').filter({has:page.getByRole('heading',{name:s.copy.sawPanelTitle,exact:true})});await panel.getByRole('spinbutton',{name:s.copy.weights+' Cost',exact:true}).fill('-1');await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByRole('alert')).toContainText('Cost');
+           |                                                                                                                                                                                                                                                                                                                                                            ^
+      1033 | });
+      1034 |
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:1032:348
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-91b8c--match-history-are-distinct-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-91b8c--match-history-are-distinct-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-91b8c--match-history-are-distinct-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-91b8c--match-history-are-distinct-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › en named ranking feedback and no-match history are distinct 
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:1030:42 › fa named ranking feedback and no-match history are distinct 

@@ -1,0 +1,15 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q -k registry_requires_uncollected_falsifications
+cwd: apps/api/core
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_registry_requires_uncollected_falsifications _______________
+decision_support/reference_tests/test_ranking_reference_harness.py:174: in test_registry_requires_uncollected_falsifications
+    assert any("test_bad_result_rejected" in key for key in config._ranking_required)
+E   assert False
+E    +  where False = any(<generator object test_registry_requires_uncollected_falsifications.<locals>.<genexpr> at 0x760826eeea80>)
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_registry_requires_uncollected_falsifications
+1 failed, 101 deselected in 0.18s
+
+exit: 1
+elapsed_seconds: 0.929

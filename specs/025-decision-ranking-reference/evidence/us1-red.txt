@@ -1,0 +1,64 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+....FFFFFFFFFFF                                                          [100%]
+=================================== FAILURES ===================================
+_________________ test_counterfeit_reference_rejected[message] _________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_________________ test_counterfeit_reference_rejected[comment] _________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_______________ test_counterfeit_reference_rejected[whitespace] ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_________________ test_counterfeit_reference_rejected[missing] _________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+________________ test_counterfeit_reference_rejected[duplicate] ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_________________ test_counterfeit_reference_rejected[source] __________________
+decision_support/reference_tests/test_ranking_reference_harness.py:50: in test_counterfeit_reference_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+___ test_wrong_shape_rejected[import os\ndef rank_options(a,b,c,d,e): pass] ____
+decision_support/reference_tests/test_ranking_reference_harness.py:62: in test_wrong_shape_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_ test_wrong_shape_rejected[from math import isfinite, sqrt\ndef rank_options(a): pass] _
+decision_support/reference_tests/test_ranking_reference_harness.py:62: in test_wrong_shape_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_ test_wrong_shape_rejected[from math import isfinite, sqrt\ndef wrong(a,b,c,d,e): pass] _
+decision_support/reference_tests/test_ranking_reference_harness.py:62: in test_wrong_shape_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_ test_wrong_shape_rejected[from math import isfinite, sqrt\n@decorator\ndef rank_options(criteria, alternatives, weights, types, matrix): pass] _
+decision_support/reference_tests/test_ranking_reference_harness.py:62: in test_wrong_shape_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+_ test_wrong_shape_rejected[from math import isfinite, sqrt\ndef rank_options(criteria, alternatives, weights, types, matrix): pass\nprint('extra')] _
+decision_support/reference_tests/test_ranking_reference_harness.py:62: in test_wrong_shape_rejected
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[message]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[comment]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[whitespace]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[missing]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[duplicate]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[source]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[import os\ndef rank_options(a,b,c,d,e): pass]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\ndef rank_options(a): pass]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\ndef wrong(a,b,c,d,e): pass]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\n@decorator\ndef rank_options(criteria, alternatives, weights, types, matrix): pass]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\ndef rank_options(criteria, alternatives, weights, types, matrix): pass\nprint('extra')]
+11 failed, 4 passed in 0.13s
+
+exit: 1
+elapsed_seconds: 0.855

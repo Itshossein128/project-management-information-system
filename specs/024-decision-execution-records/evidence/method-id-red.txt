@@ -1,0 +1,39 @@
+✔ provenance guards reject fabricated envelopes but retain legacy partial content (0.956878ms)
+✔ strict new completion requires expected method complete frozen inputs and named output (0.589708ms)
+✔ historical sections are independently usable with zero distinct from absence and stored order (0.357835ms)
+✔ draft-compatible metadata never treats unrelated raw method matrices as executable (0.237639ms)
+✔ DEMATEL signed rows/policies are stored review only with dimension and name guards (0.336854ms)
+✔ zero ranking weights remain valid rather than being converted to missing (0.691657ms)
+✔ shared historical classifier retains literal ISM groups and rejects wrong frozen membership (0.510274ms)
+✖ method identifiers must be primitive strings rather than coercible arrays (0.708574ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105.433419
+
+✖ failing tests:
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:173:1
+✖ method identifiers must be primitive strings rather than coercible arrays (0.708574ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:174:9)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

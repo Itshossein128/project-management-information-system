@@ -1,0 +1,35 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+........................................................................ [ 80%]
+............FFFFF                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_wrong_rejection_fails[observation0-reference-None] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:106: in test_wrong_rejection_fails
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+___________ test_wrong_rejection_fails[observation1-reference-None] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:106: in test_wrong_rejection_fails
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+___________ test_wrong_rejection_fails[observation2-product-issue2] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:106: in test_wrong_rejection_fails
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+___________ test_wrong_rejection_fails[observation3-product-issue3] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:106: in test_wrong_rejection_fails
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+___________ test_wrong_rejection_fails[observation4-product-issue4] ____________
+decision_support/reference_tests/test_ranking_reference_harness.py:106: in test_wrong_rejection_fails
+    with pytest.raises(AssertionError):
+E   Failed: DID NOT RAISE AssertionError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation0-reference-None]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation1-reference-None]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation2-product-issue2]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation3-product-issue3]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation4-product-issue4]
+5 failed, 84 passed in 0.83s
+
+exit: 1
+elapsed_seconds: 1.569

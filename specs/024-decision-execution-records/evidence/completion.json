@@ -1,0 +1,97 @@
+{
+  "feature": "024-decision-execution-records",
+  "branch": "develop",
+  "tasks": {
+    "total": 76,
+    "checked": 76,
+    "unchecked": 0
+  },
+  "checklist": {
+    "total": 16,
+    "checked": 16,
+    "byte_preserved": true
+  },
+  "verification": {
+    "backend": {
+      "exit": 0,
+      "passed": 245
+    },
+    "node": {
+      "exit": 0,
+      "passed": 84
+    },
+    "browser": {
+      "exit": 0,
+      "passed": 130,
+      "skipped": 0,
+      "flaky": 0
+    },
+    "typecheck": {
+      "exit": 2,
+      "unchanged_unrelated_errors": 5,
+      "feature_errors": 0
+    },
+    "migrations": {
+      "exit": 0,
+      "changes": 0
+    },
+    "performance": {
+      "samples": 160,
+      "within_2000_ms": 160,
+      "failed_trials": 0
+    }
+  },
+  "hooks": {
+    "extension_file_present": false,
+    "before_implement": "skipped absent",
+    "after_implement": "skipped absent"
+  },
+  "preservation": "preservation.json",
+  "source_sha256": {
+    "apps/api/core/decision_support/ENDPOINTS.md": "6c5dd673f02c51ac7699e2561e7608fa6bd9de99f2f059203291bf5b33228bc7",
+    "apps/api/core/decision_support/services/case_service.py": "362853a8490fba3f86c6a28bad18f3883b6f3b41d5e96dac6a3d84de23aebb5e",
+    "apps/api/core/decision_support/services/execution_service.py": "a92952a28a62ce61eb5238e0d7460fdfae80a3f0641bdb16caf7ae95e1def374",
+    "apps/api/core/decision_support/tests/conftest.py": "2ac76c485542e213bde3d88132868eb83beea1978760434372d7890701fb2817",
+    "apps/api/core/decision_support/tests/execution_records_fixtures.py": "e50ca189893d94be797943e07572bb227454b6a8b0ce7d5c451686cf171a845a",
+    "apps/api/core/decision_support/tests/test_execution_records.py": "cd2ba22c28caf9aac0a3967ec0fd81a1a0d5d57c529ed360ddeac003505b74d3",
+    "apps/api/core/decision_support/tests/test_execution_records_access.py": "c0a8733397e9f7ebe3ac0ee48ad9250c3a53c0c6e503d2808a4ae704891ae979",
+    "apps/api/core/decision_support/tests/test_execution_records_concurrency.py": "90f0df328a1e2218301e8694c2dd70b6d2b53e780c816b51ddc6139b778b814b",
+    "apps/api/core/decision_support/tests/test_runs_immutability.py": "17a36b6b1e331454dcd366f5a613321a905ccc12b863afbf2d4d98e127c85329",
+    "apps/api/core/decision_support/views.py": "ea7420025f667c54dad16695af8a3969bfe741b09b95643eab2cffa131e8b63e",
+    "apps/web/e2e/tests/decision-execution-records.spec.ts": "496abd15be88f6552cb0b8bfe1962f382e40f1fb01e691dd133bcddf4f6a6f7b",
+    "apps/web/e2e/tests/helpers/decision-execution-records.ts": "9f7f065f37e444ef1e58324b8063dd4fd686b65fe53e11b222c1d4c96877415d",
+    "apps/web/src/app/lib/api/decision-support.test.ts": "7809f24ccfb452a615e8bfa7bda981004e1d69a356c6812fd636e9c9e31108e4",
+    "apps/web/src/app/lib/api/decision-support.ts": "7fa80f5974cf7ff74fabbdff2fe2d22e5834beb785ff557cad7340e4f459efc1",
+    "apps/web/src/app/locales/en.json": "c065431236ca7e708aabb78b98c1acfc54d58b7068d10e406efddd0668df64e3",
+    "apps/web/src/app/locales/fa.json": "0d3461c8bdf9dab0ef8617876aa19221721c0c527893ee11b191a9256d51fcd7",
+    "apps/web/src/app/routes/project-decision-support.tsx": "ee0f5c73429ca98b9e20c97b8f6113411d11dcffae427f471cb3bb6e6bdd7653",
+    "apps/web/src/components/decision-support/AhpMethodPanel.tsx": "ec59f46ae6ba8bf610121c91f3656e0b84cd75f6750e9ba56ed3a9df28a881bc",
+    "apps/web/src/components/decision-support/CriteriaMetricsTable.tsx": "ea032056921ffb0da3567dd8156bd4af54bd95d34a79836fdbf8ecc6faca00c6",
+    "apps/web/src/components/decision-support/ExecutionHistoryList.tsx": "15ae95cea4466515b2d5c704d951388b5df9ff7d4a5b1c8bc0d644e1ae999f3b",
+    "apps/web/src/components/decision-support/InputSnapshotViewer.tsx": "fa4bff87251df91fb567fd129caba4299c0849f8e3da411847eeb705cf38c8af",
+    "apps/web/src/components/decision-support/IsmMethodPanel.tsx": "b6a56bd91f60e8e6b0c04caad0ee7d5027511c63d4cc6a81a5e96f749549097e",
+    "apps/web/src/components/decision-support/RankingSnapshotTable.tsx": "8d9bcf750a15dc8a29c3485c1ce06a8b04c9a25d8516ce4ad5a1266acd44445d",
+    "apps/web/src/components/decision-support/SawMethodPanel.tsx": "5f03255de58667c8d979ac507e8ae122de50e1a85b04fd315476ff4cb09af8ee",
+    "apps/web/src/components/decision-support/TopsisMethodPanel.tsx": "a96fb074d601d31e52ffe94ddbf4446d07ad26be14aea5644f554b4862977756",
+    "apps/web/src/components/decision-support/ValidationIssueList.tsx": "4c2f44a21bb534a94818cd9b372c18c006a9d776bc402bc45009b53bb1365d63",
+    "apps/web/src/components/decision-support/execution-record-fixtures.ts": "183a5affbb5cdfe5193eeb57a503bee74f7ac3d34f6378020b5131876e555b52",
+    "apps/web/src/components/decision-support/execution-record-rules.test.ts": "eeaed652ca4761638c92ac0d9ee9297b74037c81d041ed0fa306d8aeb69a5f87",
+    "apps/web/src/components/decision-support/execution-record-rules.ts": "9b9979f68e14f068f35f6f2e4d6b0f959cacc3e512797ee2545f5a14e5cea7af",
+    "apps/web/src/components/decision-support/execution-recovery.test.ts": "ac387e2bbe1a223f83f1b98c00af2089caa1fd79fbe9da5553ca26faeebcbdd9",
+    "apps/web/src/components/decision-support/execution-recovery.ts": "ed4cb1ec4a660729afa9cf0c89a830792fac7697b98408dc3732afc39531320f",
+    "apps/web/src/components/decision-support/useDecisionExecution.ts": "fb2751c3188e83077b722d6fe8c69198f62fb0bd92ece8c885f842852dccfa65"
+  },
+  "scope_limits": [
+    "DEMATEL engine remains stub",
+    "No revision or exactly-once guarantee",
+    "Local automated evidence only; no human or production sign-off"
+  ],
+  "commit_push_deploy": false,
+  "browser_traces": {
+    "count": 130,
+    "all_nonempty": true,
+    "paths": "browser-report.json attachments"
+  },
+  "artifact_links_valid": true,
+  "all_task_ids_checked": true
+}

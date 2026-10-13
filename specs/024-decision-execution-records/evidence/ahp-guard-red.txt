@@ -1,0 +1,30 @@
+✔ completed ISM is structurally guarded using frozen names (1.040888ms)
+✔ frozen groups reject unknown, duplicate, mismatched levels and invalid order (0.224805ms)
+✔ successful HTTP responses with empty, non-JSON or truncated bodies are rejected (102.843287ms)
+✔ valid JSON remains available for independent method and raw draft guards (14.312933ms)
+✔ ISM saved-case metadata is guarded without validating unrelated or raw draft inputs (0.234309ms)
+✔ completed ISM run envelope includes method, frozen binary input and provenance (0.302588ms)
+✔ actual history HTTP boundary rejects malformed envelopes and wrong selected IDs (64.876774ms)
+✖ public AHP completed guard is unknown-safe for malformed scalar rows (7.905372ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 447.916431
+
+✖ failing tests:
+
+test at apps/web/src/app/lib/api/decision-support.test.ts:239:1
+✖ public AHP completed guard is unknown-safe for malformed scalar rows (7.905372ms)
+  TypeError: value?.weights?.map is not a function
+      at Object.isAhpRunResult (evalmachine.<anonymous>:102:81)
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/app/lib/api/decision-support.test.ts:240:121)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)

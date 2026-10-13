@@ -1,0 +1,7 @@
+Python 3.12.3 Django 4.2.11 pytest 9.1.1 DRF 3.17.1
+Django pinned; settings from root .env without logging secrets. Audit synchronous/eager tasks. No installation/reset.
+[pytest]
+DJANGO_SETTINGS_MODULE = config.settings
+python_files = tests.py test_*.py *_tests.py
+pythonpath = .
+addopts = -ra --tb=short

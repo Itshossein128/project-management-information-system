@@ -1,0 +1,19 @@
+{
+  "checkedTasks": 81,
+  "uncheckedTasks": 0,
+  "requirementsChecklist": {
+    "checked": 16,
+    "unchecked": 0,
+    "modified": false
+  },
+  "missingValidationLinks": [],
+  "afterImplementHooks": "extensions.yml absent",
+  "dependencyOrMigrationChanges": false,
+  "typecheckExitCode": 2,
+  "typecheckBaselineErrors": 5,
+  "backendPassed": 205,
+  "frontendPassed": 70,
+  "browserPassed": 78,
+  "timingWithin2000ms": 80,
+  "commitPushDeployment": false
+}

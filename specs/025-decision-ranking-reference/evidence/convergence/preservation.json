@@ -1,0 +1,58 @@
+{
+  "baseline_path": "/tmp/ranking-convergence-4prdnqal/baseline.json",
+  "baseline_files": 2874,
+  "protected_files_byte_preserved": 2861,
+  "intentional_changed": [
+    "apps/api/core/decision_support/reference_tests/conftest.py",
+    "apps/api/core/decision_support/reference_tests/ranking_reference_fixtures.py",
+    "apps/api/core/decision_support/reference_tests/ranking_reference_support.py",
+    "apps/api/core/decision_support/reference_tests/test_ranking_reference.py",
+    "apps/api/core/decision_support/reference_tests/test_ranking_reference_harness.py",
+    "specs/025-decision-ranking-reference/contracts/reference-verification.md",
+    "specs/025-decision-ranking-reference/evidence/completion.json",
+    "specs/025-decision-ranking-reference/evidence/coverage.json",
+    "specs/025-decision-ranking-reference/evidence/final-provenance.json",
+    "specs/025-decision-ranking-reference/evidence/reference-final.txt",
+    "specs/025-decision-ranking-reference/tasks.md",
+    "specs/025-decision-ranking-reference/validation-reference.json",
+    "specs/025-decision-ranking-reference/validation.md"
+  ],
+  "new_files": [
+    "specs/025-decision-ranking-reference/evidence/convergence/main-file-reference.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/main-file-selection.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/partial-reference.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/partial.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/phase-probe-source.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/phase-probe.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/phase-probe.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/preservation.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/previous-completion.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/previous-coverage.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/previous-final-provenance.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/previous-reference-final.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/previous-validation-reference.json",
+    "specs/025-decision-ranking-reference/evidence/convergence/t049-green.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/t049-red.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/t050-green.txt",
+    "specs/025-decision-ranking-reference/evidence/convergence/t050-red.txt"
+  ],
+  "outside_scope": [],
+  "missing": [],
+  "original_reference_source_unchanged": true,
+  "earlier_feature_artifacts_unchanged": true,
+  "checklists_read_only": [
+    {
+      "path": "specs/025-decision-ranking-reference/checklists/requirements.md",
+      "checked": 16
+    }
+  ],
+  "runtime_ui_schema_dependency_locale_sources_unchanged": true,
+  "temporary_probe_removed": true,
+  "touched_text_whitespace_errors": 0,
+  "artifact_review": "Only controlled fixture/probe observations, hashes and safe commands recorded; no environment contents, tokens or production credentials.",
+  "hooks": {
+    "before_implement": "absent",
+    "after_implement": "absent"
+  },
+  "commit_push_deploy": false
+}

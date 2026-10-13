@@ -1,0 +1,4 @@
+Git and API/web Docker ignores inspected; essential runtime/dependency/secrets patterns present.
+No applicable extra config found: 
+Private packages; no npm publish ignore needed.
+Root core cache fixture only; sibling excludes product catalog fixtures.

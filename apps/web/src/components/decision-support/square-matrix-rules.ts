@@ -9,7 +9,7 @@ export function createDefaultPairwiseMatrix(n: number): (number | null)[][] {
   for (let i = 0; i < n; i++) {
     const row: (number | null)[] = [];
     for (let j = 0; j < n; j++) {
-      row.push(1.0);
+      row.push(i === j ? 1 : null);
     }
     matrix.push(row);
   }
@@ -38,9 +38,22 @@ export function updatePairwiseCell(
   // Reciprocal update for opposite cell
   if (value === null || value === undefined) {
     next[col][row] = null;
-  } else if (value > 0) {
+  } else if (Number.isFinite(value) && value > 0) {
     next[col][row] = 1.0 / value;
   }
 
   return next;
+}
+
+/** Retain comparisons only for the same trimmed criterion identities. */
+export function reconcilePairwiseMatrix(
+  previous: string[], next: string[], matrix: (number | null)[][],
+): (number | null)[][] {
+  const indices = previous.map(name => name.trim());
+  return next.map((name, i) => next.map((other, j) => {
+    const oldI = indices.indexOf(name.trim());
+    const oldJ = indices.indexOf(other.trim());
+    if (oldI >= 0 && oldJ >= 0) return matrix[oldI]?.[oldJ] ?? null;
+    return i === j ? 1 : null;
+  }));
 }

@@ -1,0 +1,7250 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-13T04:50:11.453583+00:00",
+  "git_sha": "c5328c4f59b9717113aa9d7448ee116160bcc092",
+  "source_hashes": {
+    "apps/api/core/config/settings.py": "7badc75d612563a38e810583cd60b473d333de2ee2d03a295c29cdf86533e0a2",
+    "apps/api/core/conftest.py": "2af00ac5fba3542a902f798589026a03b412048c91c1b4e4a419362ee3d4e76d",
+    "apps/api/core/decision_support/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/api/core/decision_support/apps.py": "302c4508dcec610081a888d0b46346df598bfa24991721b04ddf24355728330b",
+    "apps/api/core/decision_support/migrations/0001_initial.py": "40fa879ee98da661ab96fc35ede5eb2ffb520529b7e96094aacc04d21f1c0c79",
+    "apps/api/core/decision_support/migrations/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/api/core/decision_support/models.py": "1d0c16df818eb1a858b8a49bf820aa35ce2ef2dd292b78b54116b9a9d72e2c90",
+    "apps/api/core/decision_support/reference_tests/conftest.py": "e37957c8cf10e5ba93f013ee285163c495890989336e2a632deaabf678b7c3d6",
+    "apps/api/core/decision_support/reference_tests/ranking_reference_fixtures.py": "a4dfd7e90af2b1859ce0499e4e907b075c9eda08b3228239b9529258f7fb6ee7",
+    "apps/api/core/decision_support/reference_tests/ranking_reference_support.py": "74441f6c3c8007f00556921b08b00df57da086890d77da04edbc8dffc2eaf43f",
+    "apps/api/core/decision_support/reference_tests/test_evidence_fault_probe.py": "3e25aef2f295c68d23ff9a4e1054c6928228e4e53152f60fa351bd090229c08f",
+    "apps/api/core/decision_support/reference_tests/test_ranking_reference.py": "9197345d49f95acccef510d9d23da70a06149a422a55eee9f61fb9812c20831e",
+    "apps/api/core/decision_support/reference_tests/test_ranking_reference_harness.py": "ad33f7ec1970eb44accb4357c7305367780337e0e277678e0d4b6444ec304423",
+    "apps/api/core/decision_support/serializers.py": "a7790d96d61bbb76278c4c03bcae02d70887177e4e8cf75507dc24c3441f403c",
+    "apps/api/core/decision_support/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/api/core/decision_support/services/ahp_service.py": "c67bded33a1a8f04a3e65215de83b5541c61caed8e2b9d2ccbed9cbd024f8c83",
+    "apps/api/core/decision_support/services/case_service.py": "362853a8490fba3f86c6a28bad18f3883b6f3b41d5e96dac6a3d84de23aebb5e",
+    "apps/api/core/decision_support/services/execution_service.py": "a92952a28a62ce61eb5238e0d7460fdfae80a3f0641bdb16caf7ae95e1def374",
+    "apps/api/core/decision_support/services/ism_service.py": "35d820d282c581e0da421599c2b95e89d48c92382fb0afa0e1ae1f37c784f2f6",
+    "apps/api/core/decision_support/services/saw_service.py": "9042d7dc89a80658722c9c521e3517d2410183ce0bab8bd9879a207c4c07fbbf",
+    "apps/api/core/decision_support/services/topsis_service.py": "861c314681041323159a7633e22d8203c9124ab27b349811a9e8caba7a4be065",
+    "apps/api/core/decision_support/services/validators.py": "47d4d0b12d098a99c5fb63a71e57ff82d648828d47891fc14ecc30f8b53a9988",
+    "apps/api/core/decision_support/services/weights.py": "6910ee4fd2d8667c5dd31094bdd1da7ddfcf15ef5ada680fe1ab18f555a95b3a",
+    "apps/api/core/decision_support/tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "apps/api/core/decision_support/tests/conftest.py": "2ac76c485542e213bde3d88132868eb83beea1978760434372d7890701fb2817",
+    "apps/api/core/decision_support/tests/execution_records_fixtures.py": "e50ca189893d94be797943e07572bb227454b6a8b0ce7d5c451686cf171a845a",
+    "apps/api/core/decision_support/tests/test_ahp_api.py": "8019fcdc2299aa433911ea887a713213a6ca3ef9177059b83354c2c515b80623",
+    "apps/api/core/decision_support/tests/test_ahp_service.py": "77a4758e73df0a360ccb2d73a2937aa9ba080fe22b18d46175461b543363e62c",
+    "apps/api/core/decision_support/tests/test_case_api.py": "1764dbf2bfca8489f315ccf920b79c45de36c1d4f13b5b12aeb7ee8d4851c8bc",
+    "apps/api/core/decision_support/tests/test_execution_records.py": "cd2ba22c28caf9aac0a3967ec0fd81a1a0d5d57c529ed360ddeac003505b74d3",
+    "apps/api/core/decision_support/tests/test_execution_records_access.py": "c0a8733397e9f7ebe3ac0ee48ad9250c3a53c0c6e503d2808a4ae704891ae979",
+    "apps/api/core/decision_support/tests/test_execution_records_concurrency.py": "90f0df328a1e2218301e8694c2dd70b6d2b53e780c816b51ddc6139b778b814b",
+    "apps/api/core/decision_support/tests/test_ism_api.py": "7a065ab191823433043da36631af0fc74900c043b20437102539d84165c9eb55",
+    "apps/api/core/decision_support/tests/test_ism_service.py": "151864a446cb7b5278dffdbdd80086f4a1776db7d2bb5741eccda17560f00932",
+    "apps/api/core/decision_support/tests/test_models.py": "3fd859b1ad2641e41b9955ef952a0a609f4efd39c942843962091dd689fad74b",
+    "apps/api/core/decision_support/tests/test_no_math_in_views.py": "9959e16516d6e912d5c5eea1d9f9a36db919481a92db5bb4f051aa01f2fc1825",
+    "apps/api/core/decision_support/tests/test_permissions_catalog.py": "672f8c45a932b7cf4e00c8a4bd029735365aaa15a33ebb3ce0614850313c6629",
+    "apps/api/core/decision_support/tests/test_runs_immutability.py": "17a36b6b1e331454dcd366f5a613321a905ccc12b863afbf2d4d98e127c85329",
+    "apps/api/core/decision_support/tests/test_saw_api.py": "608450054661fba3cc7f784345676e2b59645265618328141470aa7cce440110",
+    "apps/api/core/decision_support/tests/test_saw_service.py": "bbbb164e10eaf3b386f026302b3cf73fed433565c0898237a45aae9ea65c6070",
+    "apps/api/core/decision_support/tests/test_topsis_api.py": "8cf2ed179370718f99104d970d0f662ee83c17e8b68d0c5a4b9e6ecbae538b5d",
+    "apps/api/core/decision_support/tests/test_topsis_service.py": "0b8435712f7fc15ca0e02dafa41a95e08cc370d97a7cf0819d3e96a586f93727",
+    "apps/api/core/decision_support/tests/test_validators.py": "1832cef2faab77a3ce542367ee9de7128bfeec75af16547ceeaab9a7cda95733",
+    "apps/api/core/decision_support/urls.py": "98fa485bcce235c5c9b8340ea3d757a0d193171ad2f3f22786c0dcf6f74a5a17",
+    "apps/api/core/decision_support/views.py": "ea7420025f667c54dad16695af8a3969bfe741b09b95643eab2cffa131e8b63e",
+    "apps/api/core/pytest.ini": "ba9114650c85379cb6928e4418074efa7a6692bed2c7756be2d1707da3b74e27",
+    "apps/web/e2e/playwright.config.ts": "32d2e5236d9e2e7e1ca98d293ead7a5bcbc7e29faeadc6c3e56e1067f57b07bc",
+    "apps/web/e2e/tests/decision-execution-records.spec.ts": "496abd15be88f6552cb0b8bfe1962f382e40f1fb01e691dd133bcddf4f6a6f7b",
+    "apps/web/e2e/tests/helpers/decision-execution-records.ts": "9f7f065f37e444ef1e58324b8063dd4fd686b65fe53e11b222c1d4c96877415d",
+    "apps/web/src/app/lib/api/decision-support.ts": "7fa80f5974cf7ff74fabbdff2fe2d22e5834beb785ff557cad7340e4f459efc1",
+    "apps/web/src/app/locales/en.json": "c065431236ca7e708aabb78b98c1acfc54d58b7068d10e406efddd0668df64e3",
+    "apps/web/src/app/locales/fa.json": "0d3461c8bdf9dab0ef8617876aa19221721c0c527893ee11b191a9256d51fcd7",
+    "apps/web/src/app/routes/project-decision-support.tsx": "ee0f5c73429ca98b9e20c97b8f6113411d11dcffae427f471cb3bb6e6bdd7653",
+    "apps/web/src/components/decision-support/AhpMethodPanel.tsx": "ec59f46ae6ba8bf610121c91f3656e0b84cd75f6750e9ba56ed3a9df28a881bc",
+    "apps/web/src/components/decision-support/BinaryRelationEditor.tsx": "3d1624e8ff9ce7cfdabfb633837721aa0c3f928247419f468d9c9ed7893c6b04",
+    "apps/web/src/components/decision-support/CriteriaMetricsTable.tsx": "ea032056921ffb0da3567dd8156bd4af54bd95d34a79836fdbf8ecc6faca00c6",
+    "apps/web/src/components/decision-support/CriteriaWeightTable.test.ts": "fd660f94baea5f41e9aa3d68eaa7da2b843dffa8bb199d49ccbe3752c1b06a5b",
+    "apps/web/src/components/decision-support/CriteriaWeightTable.tsx": "3b3c67610cbf24e361c1fc43b388b8b5e53d0daac576db8bf6664f9e0adc3cef",
+    "apps/web/src/components/decision-support/CriterionTypeToggle.tsx": "4bc60caaf99bcd9ebe5604efe3fb041efeca2f24651f56a962632b6539350116",
+    "apps/web/src/components/decision-support/ExecutionHistoryList.tsx": "15ae95cea4466515b2d5c704d951388b5df9ff7d4a5b1c8bc0d644e1ae999f3b",
+    "apps/web/src/components/decision-support/InputSnapshotViewer.tsx": "fa4bff87251df91fb567fd129caba4299c0849f8e3da411847eeb705cf38c8af",
+    "apps/web/src/components/decision-support/IsmLayerList.tsx": "35a7f1679361a47b7d4f5ee4380b07ac2b596c62b0463fefcce11e1fd456fd46",
+    "apps/web/src/components/decision-support/IsmMethodPanel.tsx": "b6a56bd91f60e8e6b0c04caad0ee7d5027511c63d4cc6a81a5e96f749549097e",
+    "apps/web/src/components/decision-support/NamedListEditor.test.ts": "65fafaab9ae746f613a9578412449cfc36744f9ff0d8bd456a7e9ebc45101777",
+    "apps/web/src/components/decision-support/NamedListEditor.tsx": "83b5df4d4157765c4895b1b4a312017d291384f181195d7a49e0add9f293f1d1",
+    "apps/web/src/components/decision-support/RankingResultTable.test.ts": "f05b99c602b732cec4dba488c112c7bab57248c57956cf0d7f824fa94ff752be",
+    "apps/web/src/components/decision-support/RankingResultTable.tsx": "b341d6616383191158a520288c39e727525365fdcfaaf1c7bf8c4799979b6034",
+    "apps/web/src/components/decision-support/RankingSnapshotTable.tsx": "8d9bcf750a15dc8a29c3485c1ce06a8b04c9a25d8516ce4ad5a1266acd44445d",
+    "apps/web/src/components/decision-support/RectangularMatrixEditor.test.ts": "1dcbe933564f3e6486118c9efd5ac5b5e2f105fc59c331a8429cef5bd9171dd1",
+    "apps/web/src/components/decision-support/RectangularMatrixEditor.tsx": "c3d485576c5fb2e48520ff238f862914711efdc2c5da9f431f3c1ca32f098ac4",
+    "apps/web/src/components/decision-support/RunActionBar.tsx": "0ede80b04b5f41a32f204be89ea7c315aef8e7dae76ec708f9c25e1cc563ca48",
+    "apps/web/src/components/decision-support/SawMethodPanel.tsx": "5f03255de58667c8d979ac507e8ae122de50e1a85b04fd315476ff4cb09af8ee",
+    "apps/web/src/components/decision-support/SquareMatrixEditor.test.ts": "54a157cb91ebb1f523e67fbe98527b5616be3a158236b806f5fb51de728ef33c",
+    "apps/web/src/components/decision-support/SquareMatrixEditor.tsx": "545d6aa0076379f06344734259ce01d0a2b1a9e61004c144c41c5b7d6eaca04b",
+    "apps/web/src/components/decision-support/TopsisMethodPanel.tsx": "a96fb074d601d31e52ffe94ddbf4446d07ad26be14aea5644f554b4862977756",
+    "apps/web/src/components/decision-support/ValidationIssueList.test.ts": "92d6607056545e4ab73e73fa0edcb429dfd9d6d89fd08184049bb68b55744add",
+    "apps/web/src/components/decision-support/ValidationIssueList.tsx": "4c2f44a21bb534a94818cd9b372c18c006a9d776bc402bc45009b53bb1365d63",
+    "apps/web/src/components/decision-support/WeightVectorEditor.tsx": "19a43cf17cf5c4a9f300612df8290bedd09e90c036a0333486f873774ae9fb09",
+    "apps/web/src/components/decision-support/criteria-weight-rules.ts": "d0e82e4490f2c09a0eb63ce2496561fe49f9a2f2008836eb64d9626e9d2cc9ea",
+    "apps/web/src/components/decision-support/execution-record-fixtures.ts": "183a5affbb5cdfe5193eeb57a503bee74f7ac3d34f6378020b5131876e555b52",
+    "apps/web/src/components/decision-support/execution-record-rules.test.ts": "eeaed652ca4761638c92ac0d9ee9297b74037c81d041ed0fa306d8aeb69a5f87",
+    "apps/web/src/components/decision-support/execution-record-rules.ts": "9b9979f68e14f068f35f6f2e4d6b0f959cacc3e512797ee2545f5a14e5cea7af",
+    "apps/web/src/components/decision-support/execution-recovery.test.ts": "ac387e2bbe1a223f83f1b98c00af2089caa1fd79fbe9da5553ca26faeebcbdd9",
+    "apps/web/src/components/decision-support/execution-recovery.ts": "ed4cb1ec4a660729afa9cf0c89a830792fac7697b98408dc3732afc39531320f",
+    "apps/web/src/components/decision-support/i18n.keys.test.ts": "fa5c5cd476ffd67229528a6b113785a95c9ef66a669edc841970e41271214168",
+    "apps/web/src/components/decision-support/ism-input-rules.test.ts": "a2cbad7fd551b2e08b73cc6fe9531519d2cc92110db5f6d9d6e60e54432242c0",
+    "apps/web/src/components/decision-support/ism-input-rules.ts": "e1302705192ee7030411d1d478db65293c2e5d51bbc285b1017c231cb2eda35f",
+    "apps/web/src/components/decision-support/ism-result-rules.ts": "4eac267cef54dd15a413086cc406fd9ab31a56ec2acaf242729385780553d9fc",
+    "apps/web/src/components/decision-support/named-list-rules.ts": "91230a9e1f66b57eb4d4583c23f87118b2cd71ae5943ad5c4ed56e52538dfa6b",
+    "apps/web/src/components/decision-support/no-client-ahp-math.test.ts": "aee8bd517f155a0f69d98de09a6f692bc70650382b12e84a3eda486c996ff62c",
+    "apps/web/src/components/decision-support/no-client-ism-math.test.ts": "fcb36d2a1621a4d454e8035e837560db508b8cf2ee89350de6bfe6cc15ed9bab",
+    "apps/web/src/components/decision-support/no-client-saw-math.test.ts": "d695a199017082f9540d3d2a5c143f2fc994be8d62a0c9411ba81c91448e862b",
+    "apps/web/src/components/decision-support/no-client-topsis-math.test.ts": "3ab9019b459770c94b414339aa39bd9e3d29047d8724e680bad9e6ed81eb7b68",
+    "apps/web/src/components/decision-support/ranking-input-rules.ts": "bf221a96d1ce7914d951fb13f6d9ce1c2f57fb64228a178499158139c1dbb1e9",
+    "apps/web/src/components/decision-support/ranking-result-rows.ts": "b6c607ae697fdf0be1f4dd7876358e1886f970abe9cfa22cfede4d60083835e0",
+    "apps/web/src/components/decision-support/square-matrix-rules.ts": "3f84b45417e65183120ef062469ad6f621bce37d91aefcb48e1a79ac7d801a70",
+    "apps/web/src/components/decision-support/useDecisionExecution.ts": "fb2751c3188e83077b722d6fe8c69198f62fb0bd92ece8c885f842852dccfa65",
+    "apps/web/src/components/decision-support/validation-issues.ts": "dff8faf95e3b8f8f1bd21df215d69e165443f0bff5526e4b6b9e77eabdb3a8c1",
+    "docs/decision-support/09-ranking-reference.md": "420264bbf5b769c2dcf10a19fe9723b114972788f87cd1b82013f3507c3e545f",
+    "docs/document (10).docx": "52946a0ff62205bebf007eda3a6c860d5f010311194c3740316d6a2a2369e282"
+  },
+  "reference_identity": {
+    "docx_sha256": "52946a0ff62205bebf007eda3a6c860d5f010311194c3740316d6a2a2369e282",
+    "source_sha256": "ae0f35b52bb9231d06cc416d1972f248257ec34dbf07fcd8658948ac55b83e26",
+    "block_sha256": "8304307300aba81d18c8669d1e5d2d3ce3578df03498359528ad8ab2e25328db"
+  },
+  "versions": {
+    "python": "3.12.3",
+    "django": "4.2.11",
+    "drf": "3.17.1",
+    "pytest": "9.1.1"
+  },
+  "command": [
+    "/home/hossein/Desktop/projects/building-management/apps/api/core/../.venv/bin/python",
+    "-m",
+    "pytest",
+    "decision_support/reference_tests/test_evidence_fault_probe.py",
+    "-q",
+    "--ranking-reference-report=/home/hossein/Desktop/projects/building-management/specs/025-decision-ranking-reference/evidence/phase-probe.json"
+  ],
+  "cwd": "apps/api/core",
+  "evidence_level": "arithmetic",
+  "product_browser_acceptance": false,
+  "exit_status": 1,
+  "required_check_ids": [
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[published]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[one-by-one]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[rectangular-zero-weight]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[maximum]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[cost-only]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[benefit-zero]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[exact-ties]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[permuted-ties]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[constant-mixed]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[weights-relative]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[weights-scaled]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[disagreement]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-empty]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-too-many]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-blank]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-duplicate]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-empty]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-too-many]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-blank]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-duplicate]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-short]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-long]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[types-short]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[types-long]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[rows-short]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[columns-short]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[rows-long]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[columns-long]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-empty]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-null]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-text]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-negative]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-nan]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-infinity]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-negative-infinity]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-empty]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-null]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-text]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-negative]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-nan]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-infinity]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-negative-infinity]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[invalid-type]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-zero]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cost-zero]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[benefit-all-zero]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[zero-weight-zero-column]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[numeric-text]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[boolean-cell]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[boolean-weight]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-duplicate-criteria]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-duplicate-alternatives]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[none-name]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-type]",
+    "decision_support/reference_tests/test_ranking_reference.py::test_source_fidelity",
+    "decision_support/reference_tests/test_ranking_reference.py::test_published_reference_interface",
+    "decision_support/reference_tests/test_ranking_reference.py::test_fixture_invariants",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_copies_inputs",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_retains_error",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_reference_database_is_blocked",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[message]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[comment]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[whitespace]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[missing]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[duplicate]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[source]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[import os\\ndef rank_options(a,b,c,d,e): pass]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(a): pass]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef wrong(a,b,c,d,e): pass]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\n@decorator\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass\\nprint('extra')]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows0]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows1]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows2]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows3]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows4]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows5]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows6]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows7]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows8]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[None]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows10]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_tie_order_is_exact",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_absolute_tolerance_boundary",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation0-reference-None]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation1-reference-None]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation2-product-issue2]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation3-product-issue3]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation4-product-issue4]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[setup]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[call]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[teardown]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded0-phases0]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded1-phases1]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_report_records_expected_observed_and_exit",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_nonfinite_strict_tags",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"checks\":[],\"complete\":true}]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"schema_version\":1,\"checks\":NaN}]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[remove-check]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[failed-phase]",
+    "decision_support/reference_tests/test_ranking_reference_harness.py::test_registry_requires_uncollected_falsifications",
+    "decision_support/reference_tests/test_evidence_fault_probe.py::test_setup",
+    "decision_support/reference_tests/test_evidence_fault_probe.py::test_call",
+    "decision_support/reference_tests/test_evidence_fault_probe.py::test_teardown"
+  ],
+  "checks": [
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[published]",
+      "case": {
+        "id": "published",
+        "classification": "valid",
+        "families": [
+          "mixed",
+          "published"
+        ],
+        "requirements": [
+          "FR-001",
+          "FR-002",
+          "FR-003"
+        ],
+        "story": "US1",
+        "success": [
+          "SC-001",
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1.0,
+            0.5
+          ],
+          "TOPSIS": [
+            1.0,
+            0.0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          "TOPSIS": [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ]
+        },
+        "weights_normalized": [
+          0.5,
+          0.5
+        ]
+      },
+      "expected": {
+        "id": "published",
+        "classification": "valid",
+        "families": [
+          "mixed",
+          "published"
+        ],
+        "requirements": [
+          "FR-001",
+          "FR-002",
+          "FR-003"
+        ],
+        "story": "US1",
+        "success": [
+          "SC-001",
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1.0,
+            0.5
+          ],
+          "TOPSIS": [
+            1.0,
+            0.0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          "TOPSIS": [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ]
+        },
+        "weights_normalized": [
+          0.5,
+          0.5
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[one-by-one]",
+      "case": {
+        "id": "one-by-one",
+        "classification": "valid",
+        "families": [
+          "1x1"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "Only"
+          ],
+          [
+            2
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1
+          ],
+          "TOPSIS": [
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "Only"
+          ],
+          "TOPSIS": [
+            "Only"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "expected": {
+        "id": "one-by-one",
+        "classification": "valid",
+        "families": [
+          "1x1"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "Only"
+          ],
+          [
+            2
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1
+          ],
+          "TOPSIS": [
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "Only"
+          ],
+          "TOPSIS": [
+            "Only"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[rectangular-zero-weight]",
+      "case": {
+        "id": "rectangular-zero-weight",
+        "classification": "valid",
+        "families": [
+          "2x3",
+          "mixed",
+          "zero-weight"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost",
+            "Unused"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            3,
+            0
+          ],
+          [
+            "benefit",
+            "cost",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100,
+              5
+            ],
+            [
+              5,
+              200,
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6,
+          0.0
+        ]
+      },
+      "expected": {
+        "id": "rectangular-zero-weight",
+        "classification": "valid",
+        "families": [
+          "2x3",
+          "mixed",
+          "zero-weight"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost",
+            "Unused"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            3,
+            0
+          ],
+          [
+            "benefit",
+            "cost",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100,
+              5
+            ],
+            [
+              5,
+              200,
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6,
+          0.0
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[maximum]",
+      "case": {
+        "id": "maximum",
+        "classification": "valid",
+        "families": [
+          "10x10",
+          "benefit-only"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "C1",
+            "C2",
+            "C3",
+            "C4",
+            "C5",
+            "C6",
+            "C7",
+            "C8",
+            "C9",
+            "C10"
+          ],
+          [
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7",
+            "A8",
+            "A9",
+            "A10"
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          [
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ],
+            [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            [
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            [
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8
+            ],
+            [
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9
+            ],
+            [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0.1,
+            0.2,
+            0.3,
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9,
+            1.0
+          ],
+          "TOPSIS": [
+            0.0,
+            0.1111111111111111,
+            0.2222222222222222,
+            0.3333333333333333,
+            0.4444444444444444,
+            0.5555555555555556,
+            0.6666666666666666,
+            0.7777777777777778,
+            0.8888888888888888,
+            1.0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A10",
+            "A9",
+            "A8",
+            "A7",
+            "A6",
+            "A5",
+            "A4",
+            "A3",
+            "A2",
+            "A1"
+          ],
+          "TOPSIS": [
+            "A10",
+            "A9",
+            "A8",
+            "A7",
+            "A6",
+            "A5",
+            "A4",
+            "A3",
+            "A2",
+            "A1"
+          ]
+        },
+        "weights_normalized": [
+          0.01818181818181818,
+          0.03636363636363636,
+          0.05454545454545454,
+          0.07272727272727272,
+          0.09090909090909091,
+          0.10909090909090909,
+          0.12727272727272726,
+          0.14545454545454545,
+          0.16363636363636364,
+          0.18181818181818182
+        ]
+      },
+      "expected": {
+        "id": "maximum",
+        "classification": "valid",
+        "families": [
+          "10x10",
+          "benefit-only"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "C1",
+            "C2",
+            "C3",
+            "C4",
+            "C5",
+            "C6",
+            "C7",
+            "C8",
+            "C9",
+            "C10"
+          ],
+          [
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5",
+            "A6",
+            "A7",
+            "A8",
+            "A9",
+            "A10"
+          ],
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          [
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            [
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            [
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4
+            ],
+            [
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5,
+              5
+            ],
+            [
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6,
+              6
+            ],
+            [
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7,
+              7
+            ],
+            [
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8,
+              8
+            ],
+            [
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9,
+              9
+            ],
+            [
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10,
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0.1,
+            0.2,
+            0.3,
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9,
+            1.0
+          ],
+          "TOPSIS": [
+            0.0,
+            0.1111111111111111,
+            0.2222222222222222,
+            0.3333333333333333,
+            0.4444444444444444,
+            0.5555555555555556,
+            0.6666666666666666,
+            0.7777777777777778,
+            0.8888888888888888,
+            1.0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A10",
+            "A9",
+            "A8",
+            "A7",
+            "A6",
+            "A5",
+            "A4",
+            "A3",
+            "A2",
+            "A1"
+          ],
+          "TOPSIS": [
+            "A10",
+            "A9",
+            "A8",
+            "A7",
+            "A6",
+            "A5",
+            "A4",
+            "A3",
+            "A2",
+            "A1"
+          ]
+        },
+        "weights_normalized": [
+          0.01818181818181818,
+          0.03636363636363636,
+          0.05454545454545454,
+          0.07272727272727272,
+          0.09090909090909091,
+          0.10909090909090909,
+          0.12727272727272726,
+          0.14545454545454545,
+          0.16363636363636364,
+          0.18181818181818182
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[cost-only]",
+      "case": {
+        "id": "cost-only",
+        "classification": "valid",
+        "families": [
+          "cost-only"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            1
+          ],
+          [
+            "cost"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              20
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "expected": {
+        "id": "cost-only",
+        "classification": "valid",
+        "families": [
+          "cost-only"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            1
+          ],
+          [
+            "cost"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              20
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[benefit-zero]",
+      "case": {
+        "id": "benefit-zero",
+        "classification": "valid",
+        "families": [
+          "benefit-only",
+          "valid-zero"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              0
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0,
+            1
+          ],
+          "TOPSIS": [
+            0,
+            1
+          ]
+        },
+        "order": {
+          "SAW": [
+            "B",
+            "A"
+          ],
+          "TOPSIS": [
+            "B",
+            "A"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "expected": {
+        "id": "benefit-zero",
+        "classification": "valid",
+        "families": [
+          "benefit-only",
+          "valid-zero"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              0
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0,
+            1
+          ],
+          "TOPSIS": [
+            0,
+            1
+          ]
+        },
+        "order": {
+          "SAW": [
+            "B",
+            "A"
+          ],
+          "TOPSIS": [
+            "B",
+            "A"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[exact-ties]",
+      "case": {
+        "id": "exact-ties",
+        "classification": "valid",
+        "families": [
+          "ties",
+          "bilingual"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "Alpha",
+            "گزینه ب"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "Alpha",
+            "گزینه ب"
+          ],
+          "TOPSIS": [
+            "Alpha",
+            "گزینه ب"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "expected": {
+        "id": "exact-ties",
+        "classification": "valid",
+        "families": [
+          "ties",
+          "bilingual"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "Alpha",
+            "گزینه ب"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "Alpha",
+            "گزینه ب"
+          ],
+          "TOPSIS": [
+            "Alpha",
+            "گزینه ب"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[permuted-ties]",
+      "case": {
+        "id": "permuted-ties",
+        "classification": "valid",
+        "families": [
+          "ties",
+          "permutation"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "گزینه ب",
+            "Alpha"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "گزینه ب",
+            "Alpha"
+          ],
+          "TOPSIS": [
+            "گزینه ب",
+            "Alpha"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ],
+        "companion": "exact-ties"
+      },
+      "expected": {
+        "id": "permuted-ties",
+        "classification": "valid",
+        "families": [
+          "ties",
+          "permutation"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality"
+          ],
+          [
+            "گزینه ب",
+            "Alpha"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              10
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "گزینه ب",
+            "Alpha"
+          ],
+          "TOPSIS": [
+            "گزینه ب",
+            "Alpha"
+          ]
+        },
+        "weights_normalized": [
+          1.0
+        ],
+        "companion": "exact-ties"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[constant-mixed]",
+      "case": {
+        "id": "constant-mixed",
+        "classification": "valid",
+        "families": [
+          "constant-columns"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.6666666666666666,
+          0.3333333333333333
+        ]
+      },
+      "expected": {
+        "id": "constant-mixed",
+        "classification": "valid",
+        "families": [
+          "constant-columns"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            1
+          ],
+          "TOPSIS": [
+            0.5,
+            0.5
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.6666666666666666,
+          0.3333333333333333
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[weights-relative]",
+      "case": {
+        "id": "weights-relative",
+        "classification": "valid",
+        "families": [
+          "scaled-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6
+        ]
+      },
+      "expected": {
+        "id": "weights-relative",
+        "classification": "valid",
+        "families": [
+          "scaled-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[weights-scaled]",
+      "case": {
+        "id": "weights-scaled",
+        "classification": "valid",
+        "families": [
+          "scaled-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            20,
+            30
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6
+        ],
+        "companion": "weights-relative"
+      },
+      "expected": {
+        "id": "weights-scaled",
+        "classification": "valid",
+        "families": [
+          "scaled-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Cost"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            20,
+            30
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            1,
+            0.5
+          ],
+          "TOPSIS": [
+            1,
+            0
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "A",
+            "B"
+          ]
+        },
+        "weights_normalized": [
+          0.4,
+          0.6
+        ],
+        "companion": "weights-relative"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_valid_parity[disagreement]",
+      "case": {
+        "id": "disagreement",
+        "classification": "valid",
+        "families": [
+          "disagreement",
+          "unequal-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Experience"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            21,
+            10
+          ],
+          [
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              1
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0.7419354838709677,
+            0.7290322580645161
+          ],
+          "TOPSIS": [
+            0.4786774825433668,
+            0.5213225174566333
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "B",
+            "A"
+          ]
+        },
+        "weights_normalized": [
+          0.6774193548387096,
+          0.3225806451612903
+        ]
+      },
+      "expected": {
+        "id": "disagreement",
+        "classification": "valid",
+        "families": [
+          "disagreement",
+          "unequal-weights"
+        ],
+        "requirements": [
+          "FR-004",
+          "FR-005",
+          "FR-006",
+          "FR-007"
+        ],
+        "story": "US2",
+        "success": [
+          "SC-002"
+        ],
+        "inputs": [
+          [
+            "Quality",
+            "Experience"
+          ],
+          [
+            "A",
+            "B"
+          ],
+          [
+            21,
+            10
+          ],
+          [
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              1
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        ],
+        "scores": {
+          "SAW": [
+            0.7419354838709677,
+            0.7290322580645161
+          ],
+          "TOPSIS": [
+            0.4786774825433668,
+            0.5213225174566333
+          ]
+        },
+        "order": {
+          "SAW": [
+            "A",
+            "B"
+          ],
+          "TOPSIS": [
+            "B",
+            "A"
+          ]
+        },
+        "weights_normalized": [
+          0.6774193548387096,
+          0.3225806451612903
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-empty]",
+      "case": {
+        "id": "criteria-empty",
+        "classification": "invalid",
+        "families": [
+          "criteria-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "criteria-empty",
+        "classification": "invalid",
+        "families": [
+          "criteria-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-too-many]",
+      "case": {
+        "id": "criteria-too-many",
+        "classification": "invalid",
+        "families": [
+          "criteria-too-many"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Name0",
+            "Name1",
+            "Name2",
+            "Name3",
+            "Name4",
+            "Name5",
+            "Name6",
+            "Name7",
+            "Name8",
+            "Name9",
+            "Name10"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "criteria-too-many",
+        "classification": "invalid",
+        "families": [
+          "criteria-too-many"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Name0",
+            "Name1",
+            "Name2",
+            "Name3",
+            "Name4",
+            "Name5",
+            "Name6",
+            "Name7",
+            "Name8",
+            "Name9",
+            "Name10"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-blank]",
+      "case": {
+        "id": "criteria-blank",
+        "classification": "invalid",
+        "families": [
+          "criteria-blank"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "",
+            "B"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "name_empty"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "criteria-blank",
+        "classification": "invalid",
+        "families": [
+          "criteria-blank"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "",
+            "B"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "name_empty"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[criteria-duplicate]",
+      "case": {
+        "id": "criteria-duplicate",
+        "classification": "invalid",
+        "families": [
+          "criteria-duplicate"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "A",
+            "A"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.1",
+          "code": "name_duplicate"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "criteria-duplicate",
+        "classification": "invalid",
+        "families": [
+          "criteria-duplicate"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "A",
+            "A"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.1",
+          "code": "name_duplicate"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-empty]",
+      "case": {
+        "id": "alternatives-empty",
+        "classification": "invalid",
+        "families": [
+          "alternatives-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "alternatives-empty",
+        "classification": "invalid",
+        "families": [
+          "alternatives-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-too-many]",
+      "case": {
+        "id": "alternatives-too-many",
+        "classification": "invalid",
+        "families": [
+          "alternatives-too-many"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "Name0",
+            "Name1",
+            "Name2",
+            "Name3",
+            "Name4",
+            "Name5",
+            "Name6",
+            "Name7",
+            "Name8",
+            "Name9",
+            "Name10"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "alternatives-too-many",
+        "classification": "invalid",
+        "families": [
+          "alternatives-too-many"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "Name0",
+            "Name1",
+            "Name2",
+            "Name3",
+            "Name4",
+            "Name5",
+            "Name6",
+            "Name7",
+            "Name8",
+            "Name9",
+            "Name10"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives",
+          "code": "dimension_invalid"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-blank]",
+      "case": {
+        "id": "alternatives-blank",
+        "classification": "invalid",
+        "families": [
+          "alternatives-blank"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "",
+            "B"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives.0",
+          "code": "name_empty"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "alternatives-blank",
+        "classification": "invalid",
+        "families": [
+          "alternatives-blank"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "",
+            "B"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives.0",
+          "code": "name_empty"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[alternatives-duplicate]",
+      "case": {
+        "id": "alternatives-duplicate",
+        "classification": "invalid",
+        "families": [
+          "alternatives-duplicate"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "A",
+            "A"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives.1",
+          "code": "name_duplicate"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "alternatives-duplicate",
+        "classification": "invalid",
+        "families": [
+          "alternatives-duplicate"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "A",
+            "A"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "alternatives.1",
+          "code": "name_duplicate"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-short]",
+      "case": {
+        "id": "weights-short",
+        "classification": "invalid",
+        "families": [
+          "weights-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weights-short",
+        "classification": "invalid",
+        "families": [
+          "weights-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-long]",
+      "case": {
+        "id": "weights-long",
+        "classification": "invalid",
+        "families": [
+          "weights-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weights-long",
+        "classification": "invalid",
+        "families": [
+          "weights-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[types-short]",
+      "case": {
+        "id": "types-short",
+        "classification": "invalid",
+        "families": [
+          "types-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "types-short",
+        "classification": "invalid",
+        "families": [
+          "types-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[types-long]",
+      "case": {
+        "id": "types-long",
+        "classification": "invalid",
+        "families": [
+          "types-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "types-long",
+        "classification": "invalid",
+        "families": [
+          "types-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost",
+            "benefit"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[rows-short]",
+      "case": {
+        "id": "rows-short",
+        "classification": "invalid",
+        "families": [
+          "rows-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix",
+          "code": "matrix_shape"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "rows-short",
+        "classification": "invalid",
+        "families": [
+          "rows-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix",
+          "code": "matrix_shape"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[columns-short]",
+      "case": {
+        "id": "columns-short",
+        "classification": "invalid",
+        "families": [
+          "columns-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "columns-short",
+        "classification": "invalid",
+        "families": [
+          "columns-short"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[rows-long]",
+      "case": {
+        "id": "rows-long",
+        "classification": "invalid",
+        "families": [
+          "rows-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ],
+            [
+              10,
+              100
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix",
+          "code": "matrix_shape"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "rows-long",
+        "classification": "invalid",
+        "families": [
+          "rows-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ],
+            [
+              10,
+              100
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix",
+          "code": "matrix_shape"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[columns-long]",
+      "case": {
+        "id": "columns-long",
+        "classification": "invalid",
+        "families": [
+          "columns-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100,
+              1
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "columns-long",
+        "classification": "invalid",
+        "families": [
+          "columns-long"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100,
+              1
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0",
+          "code": "length_mismatch"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-empty]",
+      "case": {
+        "id": "weight-empty",
+        "classification": "invalid",
+        "families": [
+          "weight-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            "",
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-empty",
+        "classification": "invalid",
+        "families": [
+          "weight-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            "",
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-null]",
+      "case": {
+        "id": "weight-null",
+        "classification": "invalid",
+        "families": [
+          "weight-null"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            null,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-null",
+        "classification": "invalid",
+        "families": [
+          "weight-null"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            null,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-text]",
+      "case": {
+        "id": "weight-text",
+        "classification": "invalid",
+        "families": [
+          "weight-text"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            "not numeric",
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-text",
+        "classification": "invalid",
+        "families": [
+          "weight-text"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            "not numeric",
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-negative]",
+      "case": {
+        "id": "weight-negative",
+        "classification": "invalid",
+        "families": [
+          "weight-negative"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            -1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "weight_negative"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-negative",
+        "classification": "invalid",
+        "families": [
+          "weight-negative"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            -1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "weight_negative"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-nan]",
+      "case": {
+        "id": "weight-nan",
+        "classification": "invalid",
+        "families": [
+          "weight-nan"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "NaN"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-nan",
+        "classification": "invalid",
+        "families": [
+          "weight-nan"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "NaN"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-infinity]",
+      "case": {
+        "id": "weight-infinity",
+        "classification": "invalid",
+        "families": [
+          "weight-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "+Infinity"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-infinity",
+        "classification": "invalid",
+        "families": [
+          "weight-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "+Infinity"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weight-negative-infinity]",
+      "case": {
+        "id": "weight-negative-infinity",
+        "classification": "invalid",
+        "families": [
+          "weight-negative-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "-Infinity"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weight-negative-infinity",
+        "classification": "invalid",
+        "families": [
+          "weight-negative-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            {
+              "kind": "non-finite",
+              "value": "-Infinity"
+            },
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-empty]",
+      "case": {
+        "id": "cell-empty",
+        "classification": "invalid",
+        "families": [
+          "cell-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              "",
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "empty_cell"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-empty",
+        "classification": "invalid",
+        "families": [
+          "cell-empty"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              "",
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "empty_cell"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-null]",
+      "case": {
+        "id": "cell-null",
+        "classification": "invalid",
+        "families": [
+          "cell-null"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              null,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "empty_cell"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-null",
+        "classification": "invalid",
+        "families": [
+          "cell-null"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              null,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "empty_cell"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-text]",
+      "case": {
+        "id": "cell-text",
+        "classification": "invalid",
+        "families": [
+          "cell-text"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              "not numeric",
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-text",
+        "classification": "invalid",
+        "families": [
+          "cell-text"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              "not numeric",
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_numeric"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-negative]",
+      "case": {
+        "id": "cell-negative",
+        "classification": "invalid",
+        "families": [
+          "cell-negative"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              -1,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "negative_value"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-negative",
+        "classification": "invalid",
+        "families": [
+          "cell-negative"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              -1,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "negative_value"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-nan]",
+      "case": {
+        "id": "cell-nan",
+        "classification": "invalid",
+        "families": [
+          "cell-nan"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "NaN"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-nan",
+        "classification": "invalid",
+        "families": [
+          "cell-nan"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "NaN"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-infinity]",
+      "case": {
+        "id": "cell-infinity",
+        "classification": "invalid",
+        "families": [
+          "cell-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "+Infinity"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-infinity",
+        "classification": "invalid",
+        "families": [
+          "cell-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "+Infinity"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cell-negative-infinity]",
+      "case": {
+        "id": "cell-negative-infinity",
+        "classification": "invalid",
+        "families": [
+          "cell-negative-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "-Infinity"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cell-negative-infinity",
+        "classification": "invalid",
+        "families": [
+          "cell-negative-infinity"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              {
+                "kind": "non-finite",
+                "value": "-Infinity"
+              },
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.0",
+          "code": "non_finite"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[invalid-type]",
+      "case": {
+        "id": "invalid-type",
+        "classification": "invalid",
+        "families": [
+          "invalid-type"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "wrong",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types.0",
+          "code": "invalid_type"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "invalid-type",
+        "classification": "invalid",
+        "families": [
+          "invalid-type"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "wrong",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "types.0",
+          "code": "invalid_type"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[weights-zero]",
+      "case": {
+        "id": "weights-zero",
+        "classification": "invalid",
+        "families": [
+          "weights-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "weights_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "weights-zero",
+        "classification": "invalid",
+        "families": [
+          "weights-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              100
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "weights",
+          "code": "weights_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[cost-zero]",
+      "case": {
+        "id": "cost-zero",
+        "classification": "invalid",
+        "families": [
+          "cost-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              0
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.1",
+          "code": "cost_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "cost-zero",
+        "classification": "invalid",
+        "families": [
+          "cost-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              10,
+              0
+            ],
+            [
+              5,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "performance_matrix.0.1",
+          "code": "cost_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[benefit-all-zero]",
+      "case": {
+        "id": "benefit-all-zero",
+        "classification": "invalid",
+        "families": [
+          "benefit-all-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              0,
+              100
+            ],
+            [
+              0,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "benefit_column_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "benefit-all-zero",
+        "classification": "invalid",
+        "families": [
+          "benefit-all-zero"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              0,
+              100
+            ],
+            [
+              0,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "benefit_column_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_invalid_rejection[zero-weight-zero-column]",
+      "case": {
+        "id": "zero-weight-zero-column",
+        "classification": "invalid",
+        "families": [
+          "zero-weight-zero-column"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              0,
+              100
+            ],
+            [
+              0,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "benefit_column_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "expected": {
+        "id": "zero-weight-zero-column",
+        "classification": "invalid",
+        "families": [
+          "zero-weight-zero-column"
+        ],
+        "requirements": [
+          "FR-008"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "تجربه",
+            "قیمت"
+          ],
+          [
+            "پیمانکار الف",
+            "پیمانکار ب"
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            "benefit",
+            "cost"
+          ],
+          [
+            [
+              0,
+              100
+            ],
+            [
+              0,
+              200
+            ]
+          ]
+        ],
+        "issue": {
+          "path": "criteria.0",
+          "code": "benefit_column_all_zero"
+        },
+        "reference_errors": [
+          "ValueError",
+          "TypeError"
+        ]
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[numeric-text]",
+      "case": {
+        "id": "numeric-text",
+        "classification": "representation",
+        "families": [
+          "numeric-text"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            "1"
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              "2"
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": true,
+        "issue": null
+      },
+      "expected": {
+        "id": "numeric-text",
+        "classification": "representation",
+        "families": [
+          "numeric-text"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            "1"
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              "2"
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": true,
+        "issue": null
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[boolean-cell]",
+      "case": {
+        "id": "boolean-cell",
+        "classification": "representation",
+        "families": [
+          "boolean-cell"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              true
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "non_numeric",
+          "path": "performance_matrix.0.0"
+        }
+      },
+      "expected": {
+        "id": "boolean-cell",
+        "classification": "representation",
+        "families": [
+          "boolean-cell"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              true
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "non_numeric",
+          "path": "performance_matrix.0.0"
+        }
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[boolean-weight]",
+      "case": {
+        "id": "boolean-weight",
+        "classification": "representation",
+        "families": [
+          "boolean-weight"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            true
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": true,
+        "issue": null
+      },
+      "expected": {
+        "id": "boolean-weight",
+        "classification": "representation",
+        "families": [
+          "boolean-weight"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            true
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": true,
+        "issue": null
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-duplicate-criteria]",
+      "case": {
+        "id": "trimmed-duplicate-criteria",
+        "classification": "representation",
+        "families": [
+          "trimmed-duplicate-criteria"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q",
+            " Q "
+          ],
+          [
+            "A"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              2,
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_duplicate",
+          "path": "criteria.1"
+        }
+      },
+      "expected": {
+        "id": "trimmed-duplicate-criteria",
+        "classification": "representation",
+        "families": [
+          "trimmed-duplicate-criteria"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q",
+            " Q "
+          ],
+          [
+            "A"
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            "benefit",
+            "benefit"
+          ],
+          [
+            [
+              2,
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_duplicate",
+          "path": "criteria.1"
+        }
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-duplicate-alternatives]",
+      "case": {
+        "id": "trimmed-duplicate-alternatives",
+        "classification": "representation",
+        "families": [
+          "trimmed-duplicate-alternatives"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A",
+            " A "
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_duplicate",
+          "path": "alternatives.1"
+        }
+      },
+      "expected": {
+        "id": "trimmed-duplicate-alternatives",
+        "classification": "representation",
+        "families": [
+          "trimmed-duplicate-alternatives"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A",
+            " A "
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_duplicate",
+          "path": "alternatives.1"
+        }
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[none-name]",
+      "case": {
+        "id": "none-name",
+        "classification": "representation",
+        "families": [
+          "none-name"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            null
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_empty",
+          "path": "criteria.0"
+        }
+      },
+      "expected": {
+        "id": "none-name",
+        "classification": "representation",
+        "families": [
+          "none-name"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            null
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            "benefit"
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": true,
+        "product_accepts": false,
+        "issue": {
+          "code": "name_empty",
+          "path": "criteria.0"
+        }
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_representation[trimmed-type]",
+      "case": {
+        "id": "trimmed-type",
+        "classification": "representation",
+        "families": [
+          "trimmed-type"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            " benefit "
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": false,
+        "product_accepts": true,
+        "issue": null
+      },
+      "expected": {
+        "id": "trimmed-type",
+        "classification": "representation",
+        "families": [
+          "trimmed-type"
+        ],
+        "requirements": [
+          "FR-009"
+        ],
+        "story": "US3",
+        "success": [
+          "SC-003"
+        ],
+        "inputs": [
+          [
+            "Q"
+          ],
+          [
+            "A"
+          ],
+          [
+            1
+          ],
+          [
+            " benefit "
+          ],
+          [
+            [
+              2
+            ]
+          ]
+        ],
+        "reference_accepts": false,
+        "product_accepts": true,
+        "issue": null
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_source_fidelity",
+      "expected": {
+        "assertions": "test_source_fidelity"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_published_reference_interface",
+      "expected": {
+        "assertions": "test_published_reference_interface"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference.py::test_fixture_invariants",
+      "expected": {
+        "assertions": "test_fixture_invariants"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_copies_inputs",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_copies_inputs"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_retains_error",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_observation_retains_error"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_reference_database_is_blocked",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_reference_database_is_blocked"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[message]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[message]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[comment]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[comment]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[whitespace]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[whitespace]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[missing]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[missing]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[duplicate]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[duplicate]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[source]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_counterfeit_reference_rejected[source]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[import os\\ndef rank_options(a,b,c,d,e): pass]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[import os\\ndef rank_options(a,b,c,d,e): pass]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(a): pass]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(a): pass]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef wrong(a,b,c,d,e): pass]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef wrong(a,b,c,d,e): pass]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\n@decorator\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\n@decorator\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass\\nprint('extra')]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_shape_rejected[from math import isfinite, sqrt\\ndef rank_options(criteria, alternatives, weights, types, matrix): pass\\nprint('extra')]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows0]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows0]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows1]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows1]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows2]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows2]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows3]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows3]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows4]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows4]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows5]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows5]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows6]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows6]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows7]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows7]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows8]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows8]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[None]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[None]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows10]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_bad_result_rejected[rows10]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tie_order_is_exact",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tie_order_is_exact"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_absolute_tolerance_boundary",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_absolute_tolerance_boundary"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation0-reference-None]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation0-reference-None]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation1-reference-None]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation1-reference-None]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation2-product-issue2]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation2-product-issue2]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation3-product-issue3]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation3-product-issue3]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation4-product-issue4]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_wrong_rejection_fails[observation4-product-issue4]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[setup]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[setup]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[call]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[call]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[teardown]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[teardown]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded0-phases0]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded0-phases0]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded1-phases1]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded1-phases1]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_report_records_expected_observed_and_exit",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_report_records_expected_observed_and_exit"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_nonfinite_strict_tags",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_nonfinite_strict_tags"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"checks\":[],\"complete\":true}]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"checks\":[],\"complete\":true}]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"schema_version\":1,\"checks\":NaN}]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{\"schema_version\":1,\"checks\":NaN}]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[remove-check]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[remove-check]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[failed-phase]",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_tampered_complete_report_rejected[failed-phase]"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_ranking_reference_harness.py::test_registry_requires_uncollected_falsifications",
+      "expected": {
+        "assertions": "decision_support/reference_tests/test_ranking_reference_harness.py::test_registry_requires_uncollected_falsifications"
+      },
+      "evidence_level": "arithmetic",
+      "phases": {},
+      "status": "unrun",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_evidence_fault_probe.py::test_setup",
+      "expected": {
+        "assertions": "test_setup",
+        "inputs": {}
+      },
+      "evidence_level": "arithmetic",
+      "observations": {
+        "helper_events": [],
+        "pytest": {
+          "phase": "teardown",
+          "outcome": "passed",
+          "failure": null
+        }
+      },
+      "phases": {
+        "setup": "failed",
+        "teardown": "passed"
+      },
+      "status": "failed",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_evidence_fault_probe.py::test_call",
+      "expected": {
+        "assertions": "test_call",
+        "inputs": {}
+      },
+      "evidence_level": "arithmetic",
+      "observations": {
+        "helper_events": [],
+        "pytest": {
+          "phase": "teardown",
+          "outcome": "passed",
+          "failure": null
+        }
+      },
+      "phases": {
+        "setup": "passed",
+        "call": "failed",
+        "teardown": "passed"
+      },
+      "status": "failed",
+      "reason": "Failed or incomplete observation/phases"
+    },
+    {
+      "id": "decision_support/reference_tests/test_evidence_fault_probe.py::test_teardown",
+      "expected": {
+        "assertions": "test_teardown",
+        "inputs": {}
+      },
+      "evidence_level": "arithmetic",
+      "observations": {
+        "helper_events": [],
+        "pytest": {
+          "phase": "teardown",
+          "outcome": "failed",
+          "failure": "decision_support/reference_tests/test_evidence_fault_probe.py:10: in broken_teardown\n    raise ValueError(\"deliberate teardown fault\")\nE   ValueError: deliberate teardown fault"
+        }
+      },
+      "phases": {
+        "setup": "passed",
+        "call": "passed",
+        "teardown": "failed"
+      },
+      "status": "failed",
+      "reason": "Failed or incomplete observation/phases"
+    }
+  ],
+  "complete": false
+}

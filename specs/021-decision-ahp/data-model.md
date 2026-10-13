@@ -1,123 +1,70 @@
-# Data Model: Decision Support AHP Criteria Weighting (Phase 4)
+# Data Model: AHP Criteria Weighting
 
-**Branch**: `021-decision-ahp` | **Spec**: [spec.md](./spec.md)
+**Feature**: `021-decision-ahp` | **Date**: 2026-10-11
 
-This document specifies the data shapes, entities, and validation constraints for Phase 4 AHP criteria weighting.
+## DecisionCase — existing mutable dossier
 
----
+Source: `apps/api/core/decision_support/models.py`, `AuditSoftDeleteModel`.
 
-## 1. Entities
-
-### `DecisionCase` (Criteria weighting aspect)
-Already defined in Django model `DecisionCase`:
-```python
-class DecisionCase(AuditSoftDeleteModel):
-    project = models.ForeignKey(...)
-    title = models.CharField(max_length=200)
-    selected_methods = models.JSONField(default=list, blank=True)
-    criteria = models.JSONField(default=list, blank=True)  # list[str], 1..10 unique non-empty names
-    ahp_matrix = models.JSONField(default=list, blank=True)  # list[list[float]], n×n pairwise matrix
-```
-
-#### Constraints on `ahp_matrix`:
-- Type: 2D array of floats `list[list[float]]`.
-- Dimensions: $n \times n$ where $n = \text{len}(criteria)$, $1 \le n \le 10$.
-- Element values: $a_{j,k} > 0$ for all $j, k \in [0, n-1]$.
-- Diagonal: $a_{j,j} == 1.0$ for all $j \in [0, n-1]$.
-- Reciprocal symmetry: $|a_{k,j} \cdot a_{j,k} - 1.0| < 10^{-4}$ for all $j, k$.
-
----
-
-### `DecisionRun` (AHP execution record)
-Already defined in Django model `DecisionRun`:
-```python
-class DecisionRun(UUIDModel, TimeStampedModel):
-    case = models.ForeignKey(DecisionCase, ...)
-    project = models.ForeignKey('projects.Project', ...)
-    method = models.CharField(max_length=32)  # Literal "ahp"
-    input_snapshot = models.JSONField(default=dict)
-    result = models.JSONField(default=dict)
-    extracted_at = models.DateTimeField()
-    extracted_by = models.ForeignKey(settings.AUTH_USER_MODEL, ...)
-```
-
-#### Shape of `input_snapshot`:
-```json
-{
-  "title": "Subcontractor Selection",
-  "criteria": ["Cost", "Quality", "Schedule"],
-  "ahp_matrix": [
-    [1.0, 3.0, 5.0],
-    [0.3333333333, 1.0, 2.0],
-    [0.2, 0.5, 1.0]
-  ],
-  "selected_methods": ["ahp"]
-}
-```
-
-#### Shape of `result`:
-```json
-{
-  "status": "ok",
-  "engine": "ahp",
-  "weights": [
-    {
-      "criterion": "Cost",
-      "weight": 0.63698559,
-      "rank": 1
-    },
-    {
-      "criterion": "Quality",
-      "weight": 0.25828489,
-      "rank": 2
-    },
-    {
-      "criterion": "Schedule",
-      "weight": 0.10472952,
-      "rank": 3
-    }
-  ],
-  "lambda_max": 3.038706,
-  "ci": 0.019353,
-  "cr": 0.033367,
-  "is_consistent": true
-}
-```
-
----
-
-## 2. Validation Issue Codes
-
-The `validate_ahp_inputs(criteria, ahp_matrix)` function raises `CodedValidationError` with `{issues: [...]}`:
-
-| Code | Path | Condition |
+| Field | Stored type / relationship | AHP responsibility |
 |---|---|---|
-| `dimension_invalid` | `ahp_matrix` | Matrix is not a list of $n$ rows or length mismatch with criteria |
-| `dimension_invalid` | `ahp_matrix.{j}` | Row $j$ does not contain exactly $n$ items |
-| `cell_empty` | `ahp_matrix.{j}.{k}` | Cell $(j, k)$ is null or empty string |
-| `cell_not_a_number` | `ahp_matrix.{j}.{k}` | Cell $(j, k)$ is not a number or is boolean |
-| `cell_non_positive` | `ahp_matrix.{j}.{k}` | Cell $(j, k)$ is $\le 0$, negative, NaN, or infinity |
-| `ahp_diagonal_invalid` | `ahp_matrix.{j}.{j}` | Diagonal cell $(j, j) \ne 1.0$ (tolerance $|a_{j,j} - 1.0| > 10^{-4}$) |
-| `ahp_reciprocal_mismatch` | `ahp_matrix.{k}.{j}` | Reciprocal symmetry violated: $|a_{k,j} \cdot a_{j,k} - 1.0| \ge 10^{-4}$ |
+| id | UUID | Case identity |
+| project | FK to Project | Authorized URL project boundary |
+| title | String, max 200 | Existing decision goal |
+| selected_methods | JSON list of stable IDs | Contains `ahp` for run |
+| criteria | Ordered JSON list | Actual trimmed exact-unique strings; 1..10 at execution |
+| ahp_matrix | JSON rows | Mutable draft; strict n×n validation on run |
+| alternatives, weights, types, performance_matrix | Ranking JSON inputs | Not required by AHP execution; never written by it |
+| dematel_matrix, ism_matrix | Existing method inputs | No AHP mutation |
+| created_at, updated_at, created_by, updated_by | Inherited audit fields | Existing save behavior |
 
----
+Drafts may have no criteria, an empty matrix or null comparisons. Saving does not certify runnable input. A matrix-only patch preserves ranking fields; a real criteria change honors cross-method consistency. No case `weights_normalized` field exists.
 
-## 3. Frontend Types (`decision-support.ts`)
+## DecisionRun — existing execution record
 
-```typescript
-export interface AhpWeightRow {
-  criterion: string;
-  weight: number;
-  rank: number;
-}
+Source: `apps/api/core/decision_support/models.py`, `UUIDModel`/`TimeStampedModel`.
 
-export interface AhpRunResult {
-  status: 'ok';
-  engine: 'ahp';
-  weights: AhpWeightRow[];
-  lambda_max: number;
-  ci: number;
-  cr: number;
-  is_consistent: boolean;
-}
-```
+| Field | Type / relationship | Invariant |
+|---|---|---|
+| id | UUID | New for each successful execution |
+| case | FK to DecisionCase, CASCADE | Resolved within URL project |
+| project | FK to Project, CASCADE | Equals case.project; scope queries through both |
+| method | String, max 32 | `ahp` |
+| input_snapshot | JSON object | Independent deep copy of loaded case |
+| result | JSON object | Stored output, never recomputed during inspection |
+| extracted_at | DateTime | Execution timestamp |
+| extracted_by | User FK, PROTECT | Authenticated initiating identity |
+| created_at, updated_at | Inherited timestamps | Existing persistence metadata |
+
+Run PUT/PATCH/DELETE endpoints reject changes with `run_immutable`. Arbitrary ORM/admin/DB writes are outside that API guarantee; no trigger is proposed. Existing cascade deletion policy remains. Historical JSON is preserved.
+
+## Validated input and output
+
+- Criteria: n actual nonempty strings after trim, exact uniqueness, 1≤n≤10.
+- Matrix: n rows of n actual finite positive numbers; exclude bool/string/null; exact diagonal 1; product residual <1e-4. No rounding before validation.
+- Service validates independently of UI and must not mutate input arrays or case.
+- Snapshot retains `title`, `selected_methods`, `criteria`, `alternatives`, `weights`, `types`, `performance_matrix`, `ahp_matrix`, `dematel_matrix`, `ism_matrix`. AHP uses only criteria/matrix and never adds derived AHP values to ranking inputs.
+- Result: `status:'ok'`, `engine:'ahp'`, n `{criterion,weight,rank}` rows, `lambda_max`, `ci`, `cr`, `is_consistent`. New rows follow snapshot criterion order; rank is computed independently. All values finite, weights positive and sum to 1±1e-6. n≤2: CR=0 and true; otherwise CR≤0.10 defines true.
+
+See [input contract](contracts/ahp-pairwise-matrix.md) and [result contract](contracts/ahp-run-result.md) for issues, formulas and fixtures.
+
+## Transient state transitions
+
+| State | Contents / transition |
+|---|---|
+| No case | Panel absent; no retained previous-case result |
+| Draft | Parent-owned criteria/matrix; diagonal 1, unjudged pairs null |
+| Edited | Full-precision inverse sync; blank clears both directions |
+| Criteria changed | Preserve exact-name submatrix; new/renamed pairs blank |
+| Saving/executing | Save changed AHP inputs, then run persisted case; prevent repeated clicks |
+| Invalid | Show issues; no successful run appended |
+| Successful | New immutable API record; refresh history/display result |
+| Inconsistent | Successful run plus advisory warning |
+| Historical | Frozen inputs/result read-only, distinct from draft |
+| Case switched | Clear local state; ignore previous-case late responses |
+
+No AHP-to-ranking transfer transition. PATCH/POST are separate requests; each execution snapshots the persisted case it reads.
+
+## Migration and compatibility
+
+No model/table/constraint migration. Existing data remains untouched; previously permissive drafts may require repair before a new execution. Historical weights keep their stored row order and named identity. Readers tolerate old non-AHP/stub runs while identifying completed AHP results through method/engine.

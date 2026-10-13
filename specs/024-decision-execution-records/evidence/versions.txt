@@ -1,0 +1,9 @@
+{
+  "node": "v25.2.1",
+  "api_python_django": "3.12.3 4.2.11",
+  "postgres": "psql (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "redis": "PONG",
+  "platform": "Linux-6.8.0-146-generic-x86_64-with-glibc2.39",
+  "branch": "develop",
+  "postgres_server_version_num": 160015
+}

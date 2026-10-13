@@ -11,7 +11,3 @@ export function formatWeightDecimal(weight: number, decimals = 4): string {
   if (typeof weight !== "number" || isNaN(weight)) return "0.0000";
   return weight.toFixed(decimals);
 }
-
-export function isConsistent(cr: number): boolean {
-  return typeof cr === "number" && cr <= 0.10;
-}

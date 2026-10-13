@@ -1,0 +1,26 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests/test_evidence_fault_probe.py -q --ranking-reference-report=/home/hossein/Desktop/projects/building-management/specs/025-decision-ranking-reference/evidence/phase-probe.json
+cwd: apps/api/core
+EF.E                                                                     [100%]
+==================================== ERRORS ====================================
+_________________________ ERROR at setup of test_setup _________________________
+decision_support/reference_tests/test_evidence_fault_probe.py:5: in broken_setup
+    raise ValueError("deliberate setup fault")
+E   ValueError: deliberate setup fault
+______________________ ERROR at teardown of test_teardown ______________________
+decision_support/reference_tests/test_evidence_fault_probe.py:10: in broken_teardown
+    raise ValueError("deliberate teardown fault")
+E   ValueError: deliberate teardown fault
+=================================== FAILURES ===================================
+__________________________________ test_call ___________________________________
+decision_support/reference_tests/test_evidence_fault_probe.py:16: in test_call
+    assert False, "deliberate call fault"
+E   AssertionError: deliberate call fault
+E   assert False
+=========================== short test summary info ============================
+ERROR decision_support/reference_tests/test_evidence_fault_probe.py::test_setup
+ERROR decision_support/reference_tests/test_evidence_fault_probe.py::test_teardown
+FAILED decision_support/reference_tests/test_evidence_fault_probe.py::test_call
+1 failed, 1 passed, 2 errors in 0.08s
+
+exit: 1
+elapsed_seconds: 0.813

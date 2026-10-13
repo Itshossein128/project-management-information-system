@@ -3,17 +3,18 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/form/Button";
 import { Input } from "@/components/form/Input";
 import { Label } from "@/components/form/Label";
-import { addNamedItem, canAddNamedItem } from "./named-list-rules";
+import { addNamedItem, canAddNamedItem, changeNamedList, type NamedListOperation } from "./named-list-rules";
 import { localizeIssueMessage } from "./validation-issues";
 
 type Props = {
   label: string;
   values: string[];
-  onChange: (next: string[]) => void;
+  onChange: (next: string[], operation?: NamedListOperation) => void;
   disabled?: boolean;
+  editable?: boolean;
 };
 
-export function NamedListEditor({ label, values, onChange, disabled }: Props) {
+export function NamedListEditor({ label, values, onChange, disabled, editable = false }: Props) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
@@ -29,11 +30,11 @@ export function NamedListEditor({ label, values, onChange, disabled }: Props) {
     }
     setLocalError(null);
     setDraft("");
-    onChange(next);
+    onChange(next, {kind:'add',index:values.length,name:next[values.length]!});
   };
 
   const onRemove = (index: number) => {
-    onChange(values.filter((_, i) => i !== index));
+    const change=changeNamedList(values,{kind:'remove',index}); onChange(change.next,change.operation);
   };
 
   return (
@@ -41,8 +42,16 @@ export function NamedListEditor({ label, values, onChange, disabled }: Props) {
       <Label>{label}</Label>
       <ul className="space-y-1">
         {values.map((name, index) => (
-          <li key={`${name}-${index}`} className="flex items-center gap-2 text-sm">
-            <span className="flex-1 rounded border border-border px-2 py-1">{name}</span>
+          <li key={index} className="flex items-center gap-2 text-sm">
+            {editable ? <>
+              <Input aria-label={t("decisionSupport.criterionName", { index: index + 1 })}
+                value={name} disabled={disabled} onChange={event => {
+                  const change=changeNamedList(values,{kind:'rename',index,name:event.target.value});onChange(change.next,change.operation);
+                }} />
+              <Button type="button" size="sm" variant="ghost" disabled={disabled || index === 0}
+                aria-label={t("decisionSupport.moveCriterionUp", { index: index + 1 })}
+                onClick={() => { const change=changeNamedList(values,{kind:'move',from:index,to:index-1});onChange(change.next,change.operation); }}>↑</Button>
+            </> : <span className="flex-1 rounded border border-border px-2 py-1">{name}</span>}
             <Button
               type="button"
               variant="ghost"

@@ -7,7 +7,7 @@ type Props = {
   cr?: number;
   ci?: number;
   lambdaMax?: number;
-  isConsistent?: boolean;
+  isConsistent: boolean;
 };
 
 export function CriteriaWeightTable({
@@ -15,12 +15,12 @@ export function CriteriaWeightTable({
   cr,
   ci,
   lambdaMax,
-  isConsistent = true,
+  isConsistent,
 }: Props) {
   const { t } = useTranslation();
 
   if (!weights.length) {
-    return <p className="text-sm text-muted-foreground">{t("decisionSupport.resultEmpty")}</p>;
+    return <p className="text-sm text-muted-foreground">{t("decisionSupport.ahpResultEmpty")}</p>;
   }
 
   return (
@@ -72,10 +72,10 @@ export function CriteriaWeightTable({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            <th className="border border-border px-2 py-1 text-start">{t("decisionSupport.colRank")}</th>
-            <th className="border border-border px-2 py-1 text-start">{t("decisionSupport.colCriterion")}</th>
-            <th className="border border-border px-2 py-1 text-start">{t("decisionSupport.colWeight")}</th>
-            <th className="border border-border px-2 py-1 text-start">{t("decisionSupport.colPercent")}</th>
+            <th scope="col" className="border border-border px-2 py-1 text-start">{t("decisionSupport.colRank")}</th>
+            <th scope="col" className="border border-border px-2 py-1 text-start">{t("decisionSupport.colCriterion")}</th>
+            <th scope="col" className="border border-border px-2 py-1 text-start">{t("decisionSupport.colWeight")}</th>
+            <th scope="col" className="border border-border px-2 py-1 text-start">{t("decisionSupport.colPercent")}</th>
           </tr>
         </thead>
         <tbody>

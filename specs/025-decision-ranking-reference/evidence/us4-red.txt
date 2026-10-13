@@ -1,0 +1,82 @@
+command: ../.venv/bin/python -m pytest decision_support/reference_tests -q
+cwd: apps/api/core
+........................................................................ [ 72%]
+.................FFFFFFF.FF                                              [100%]
+=================================== FAILURES ===================================
+_____________________ test_failed_phase_cannot_pass[setup] _____________________
+decision_support/reference_tests/test_ranking_reference_harness.py:118: in test_failed_phase_cannot_pass
+    assert report["checks"][0]["status"] == "failed"
+E   AssertionError: assert 'passed' == 'failed'
+E     
+E     - failed
+E     + passed
+_____________________ test_failed_phase_cannot_pass[call] ______________________
+decision_support/reference_tests/test_ranking_reference_harness.py:118: in test_failed_phase_cannot_pass
+    assert report["checks"][0]["status"] == "failed"
+E   AssertionError: assert 'passed' == 'failed'
+E     
+E     - failed
+E     + passed
+___________________ test_failed_phase_cannot_pass[teardown] ____________________
+decision_support/reference_tests/test_ranking_reference_harness.py:118: in test_failed_phase_cannot_pass
+    assert report["checks"][0]["status"] == "failed"
+E   AssertionError: assert 'passed' == 'failed'
+E     
+E     - failed
+E     + passed
+________ test_missing_observation_or_phase_is_unrun[recorded0-phases0] _________
+decision_support/reference_tests/test_ranking_reference_harness.py:125: in test_missing_observation_or_phase_is_unrun
+    assert all(check["status"] == "unrun" for check in report["checks"])
+E   assert False
+E    +  where False = all(<generator object test_missing_observation_or_phase_is_unrun.<locals>.<genexpr> at 0x7c22741c8e10>)
+________ test_missing_observation_or_phase_is_unrun[recorded1-phases1] _________
+decision_support/reference_tests/test_ranking_reference_harness.py:125: in test_missing_observation_or_phase_is_unrun
+    assert all(check["status"] == "unrun" for check in report["checks"])
+E   assert False
+E    +  where False = all(<generator object test_missing_observation_or_phase_is_unrun.<locals>.<genexpr> at 0x7c22741c9cb0>)
+________________ test_report_records_expected_observed_and_exit ________________
+decision_support/reference_tests/test_ranking_reference_harness.py:132: in test_report_records_expected_observed_and_exit
+    assert report["checks"][0]["expected"] == 2
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'expected'
+__________________________ test_nonfinite_strict_tags __________________________
+decision_support/reference_tests/test_ranking_reference_harness.py:140: in test_nonfinite_strict_tags
+    decoded=json.loads(body,parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/json/__init__.py:359: in loads
+    return cls(**kw).decode(s)
+           ^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/json/decoder.py:337: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.12/json/decoder.py:353: in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/test_ranking_reference_harness.py:140: in <lambda>
+    decoded=json.loads(body,parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+decision_support/reference_tests/test_ranking_reference_harness.py:140: in <genexpr>
+    decoded=json.loads(body,parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+E   ValueError: NaN
+______ test_malformed_report_is_incomplete[{"checks":[],"complete":true}] ______
+decision_support/reference_tests/test_ranking_reference_harness.py:148: in test_malformed_report_is_incomplete
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+____ test_malformed_report_is_incomplete[{"schema_version":1,"checks":NaN}] ____
+decision_support/reference_tests/test_ranking_reference_harness.py:148: in test_malformed_report_is_incomplete
+    with pytest.raises(ValueError):
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[setup]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[call]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_failed_phase_cannot_pass[teardown]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded0-phases0]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_missing_observation_or_phase_is_unrun[recorded1-phases1]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_report_records_expected_observed_and_exit
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_nonfinite_strict_tags
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{"checks":[],"complete":true}]
+FAILED decision_support/reference_tests/test_ranking_reference_harness.py::test_malformed_report_is_incomplete[{"schema_version":1,"checks":NaN}]
+9 failed, 90 passed in 0.87s
+
+exit: 1
+elapsed_seconds: 1.638

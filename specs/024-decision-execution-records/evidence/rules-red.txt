@@ -1,0 +1,101 @@
+✖ provenance guards reject fabricated envelopes but retain legacy partial content (1.371162ms)
+✖ strict new completion requires expected method complete frozen inputs and named output (0.35696ms)
+✖ historical sections are independently usable with zero distinct from absence and stored order (0.967128ms)
+✖ draft-compatible metadata never treats unrelated raw method matrices as executable (0.254127ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 93.107604
+
+✖ failing tests:
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:4:1
+✖ provenance guards reject fabricated envelopes but retain legacy partial content (1.371162ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:5:134)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:10:1
+✖ strict new completion requires expected method complete frozen inputs and named output (0.35696ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:12:352)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:16:1
+✖ historical sections are independently usable with zero distinct from absence and stored order (0.967128ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   'Cost',
+  -   'Quality'
+  - ]
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:17:42)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 'Cost', 'Quality' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:21:1
+✖ draft-compatible metadata never treats unrelated raw method matrices as executable (0.254127ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:24:173)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

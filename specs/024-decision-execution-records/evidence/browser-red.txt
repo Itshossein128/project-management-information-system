@@ -1,0 +1,101 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 2 tests using 1 worker
+
+  ✘  1 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › en clears prior success when ranking input becomes invalid (8.9s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › fa clears prior success when ranking input becomes invalid (8.8s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › en clears prior success when ranking input becomes invalid 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true }) with timeout 5000ms
+      - waiting for locator('fieldset').filter({ has: getByRole('heading', { name: 'SAW ranking', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      10 |   await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByText('Alpha',{exact:true}).last()).toBeVisible();
+      11 |   const result=panel.locator('table').last();await expect(result.getByRole('cell',{name:'Alpha',exact:true})).toBeVisible();
+    > 12 |   await panel.locator('input[type="number"]').first().fill('-1');await expect(result.getByRole('cell',{name:'Alpha',exact:true})).toHaveCount(0);
+         |                                                                                                                                   ^
+      13 |   await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();expect((await (await page.request.get(s.base+s.c.id+'/runs/',{headers:s.headers})).json()).count).toBe(1);
+      14 |  });
+      15 | }
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:12:131
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-1951d-nking-input-becomes-invalid-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-1951d-nking-input-becomes-invalid-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-1951d-nking-input-becomes-invalid-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-1951d-nking-input-becomes-invalid-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › fa clears prior success when ranking input becomes invalid 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true }) with timeout 5000ms
+      - waiting for locator('fieldset').filter({ has: getByRole('heading', { name: 'رتبه‌بندی SAW', exact: true }) }).locator('table').last().getByRole('cell', { name: 'Alpha', exact: true })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      10 |   await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();await expect(panel.getByText('Alpha',{exact:true}).last()).toBeVisible();
+      11 |   const result=panel.locator('table').last();await expect(result.getByRole('cell',{name:'Alpha',exact:true})).toBeVisible();
+    > 12 |   await panel.locator('input[type="number"]').first().fill('-1');await expect(result.getByRole('cell',{name:'Alpha',exact:true})).toHaveCount(0);
+         |                                                                                                                                   ^
+      13 |   await panel.getByRole('button',{name:s.copy.runMethod.replace('{{method}}','SAW'),exact:true}).click();expect((await (await page.request.get(s.base+s.c.id+'/runs/',{headers:s.headers})).json()).count).toBe(1);
+      14 |  });
+      15 | }
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-execution-records.spec.ts:12:131
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-56a53-nking-input-becomes-invalid-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-execution-records-56a53-nking-input-becomes-invalid-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-execution-records-56a53-nking-input-becomes-invalid-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-execution-records-56a53-nking-input-becomes-invalid-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › en clears prior success when ranking input becomes invalid 
+    [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:8:2 › fa clears prior success when ranking input becomes invalid 

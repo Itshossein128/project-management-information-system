@@ -1,0 +1,58 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 130 tests using 1 worker
+
+  ✓    1 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:50:3 › en fresh single criterion owns diagonal and runs without ranking (4.1s)
+  ✓    2 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:62:3 › en blank comparisons require judgment; fractions persist at full precision (5.3s)
+  ✓    3 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:50:3 › fa fresh single criterion owns diagonal and runs without ranking (4.0s)
+  ✓    4 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:62:3 › fa blank comparisons require judgment; fractions persist at full precision (5.2s)
+  ✓    5 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:88:3 › en criterion identity survives reorder and new/renamed pairs stay blank (4.1s)
+  ✓    6 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:88:3 › fa criterion identity survives reorder and new/renamed pairs stay blank (4.0s)
+  ✓    7 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:106:3 › en consistent 2/3/6 comparisons display named weights and ordinal ranks (4.3s)
+  ✓    8 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:106:3 › fa consistent 2/3/6 comparisons display named weights and ordinal ranks (4.3s)
+  ✓    9 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:123:3 › en inconsistent circular judgments are saved with advisory then revised (4.7s)
+  ✓   10 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:123:3 › fa inconsistent circular judgments are saved with advisory then revised (4.3s)
+  ✘   11 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:142:3 › en blank and invalid comparisons link errors to keyboard-focusable cells without a run (30.2s)
+  ✘   12 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:142:3 › fa blank and invalid comparisons link errors to keyboard-focusable cells without a run (30.2s)
+  ✓   13 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › en malformed saved diagonal stays visible and invalid (4.1s)
+  ✓   14 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › en malformed saved reciprocal stays visible and invalid (3.8s)
+  ✓   15 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › fa malformed saved diagonal stays visible and invalid (4.0s)
+  ✓   16 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › fa malformed saved reciprocal stays visible and invalid (4.0s)
+  ✓   17 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:177:3 › en mixed paginated history is frozen and separate from draft (5.5s)
+  ✓   18 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:212:3 › en delayed case and history responses cannot replace current case draft (5.4s)
+  ✓   19 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:177:3 › fa mixed paginated history is frozen and separate from draft (5.0s)
+  ✓   20 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:212:3 › fa delayed case and history responses cannot replace current case draft (4.7s)
+  ✓   21 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:251:3 › en failed save prevents execution; pending save prevents repeated run (2.0s)
+  ✓   22 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:251:3 › fa failed save prevents execution; pending save prevents repeated run (4.2s)
+  ✓   23 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:286:3 › en ten-criterion matrix supports keyboard presets and horizontal navigation (4.4s)
+  ✓   24 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:286:3 › fa ten-criterion matrix supports keyboard presets and horizontal navigation (2.1s)
+  ✓   25 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:305:3 › en historical stub and legacy sorted results retain stored criterion identity (5.2s)
+  ✓   26 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:305:3 › fa historical stub and legacy sorted results retain stored criterion identity (2.6s)
+  ✓   27 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:339:3 › en request failures show feedback for save and run and allow recovery (5.4s)
+  ✓   28 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:339:3 › fa request failures show feedback for save and run and allow recovery (5.2s)
+  ✓   29 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:378:5 › en history locale › history timestamps follow application language and switch without changing stored time (2.6s)
+  ✓   30 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:378:5 › fa history locale › history timestamps follow application language and switch without changing stored time (5.2s)
+  ✓   31 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:404:3 › en criterion rename preserves keyboard focus and caret (2.5s)
+  ✓   32 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:404:3 › fa criterion rename preserves keyboard focus and caret (2.4s)
+  ✓   33 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:28:3 › en clears prior success when ranking input becomes invalid (2.1s)
+  ✓   34 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:28:3 › fa clears prior success when ranking input becomes invalid (4.1s)
+  ✓   35 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:74:3 › en frozen named ranking review leaves current result and live draft unchanged (2.7s)
+  ✓   36 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:74:3 › fa frozen named ranking review leaves current result and live draft unchanged (2.5s)
+  ✓   37 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:135:3 › saw unconfirmed save stops before POST and real committed lost response recovers (4.8s)
+  ✓   38 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:135:3 › topsis unconfirmed save stops before POST and real committed lost response recovers (2.3s)
+  ✓   39 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:135:3 › ahp unconfirmed save stops before POST and real committed lost response recovers (5.0s)
+  ✓   40 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:135:3 › ism unconfirmed save stops before POST and real committed lost response recovers (2.5s)
+  ✓   41 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:213:3 › en partial legacy and completed DEMATEL fixture review is safe and read-only (3.2s)
+  ✓   42 [chromium-desktop] › apps/web/e2e/tests/decision-execution-records.spec.ts:267:3 › en history failure clears previous detail and late page/filter/case reads cannot publish (3.4s)

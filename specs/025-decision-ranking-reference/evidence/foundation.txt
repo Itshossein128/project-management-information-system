@@ -1,0 +1,1 @@
+TDD: foundation-red.txt (2 failed, 1 passed; caller mutation and uncaptured error) -> foundation-green.txt. DB blocker unchanged and passed. No project DB initialization.

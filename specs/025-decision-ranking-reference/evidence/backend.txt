@@ -1,0 +1,23 @@
+command: ../.venv/bin/python -m pytest decision_support/tests/test_saw_service.py decision_support/tests/test_topsis_service.py decision_support/tests/test_validators.py decision_support/tests/test_saw_api.py decision_support/tests/test_topsis_api.py decision_support/tests/test_runs_immutability.py decision_support/tests/test_execution_records.py decision_support/tests/test_execution_records_access.py -q
+cwd: apps/api/core
+.............................................................            [100%]
+=============================== warnings summary ===============================
+decision_support/tests/test_validators.py::test_ac26_api_empty_cell_path
+  /home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+decision_support/tests/test_validators.py::test_ac26_api_empty_cell_path
+  /home/hossein/Desktop/projects/building-management/apps/api/core/inventory/item_services.py:4: DeprecationWarning: 
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+          
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+61 passed, 2 warnings in 61.41s (0:01:01)
+
+exit: 0
+elapsed_seconds: 62.507

@@ -1,0 +1,55 @@
+✔ provenance guards reject fabricated envelopes but retain legacy partial content (0.944933ms)
+✔ strict new completion requires expected method complete frozen inputs and named output (0.719508ms)
+✔ historical sections are independently usable with zero distinct from absence and stored order (0.367889ms)
+✔ draft-compatible metadata never treats unrelated raw method matrices as executable (0.252704ms)
+✔ DEMATEL signed rows/policies are stored review only with dimension and name guards (0.35437ms)
+✔ zero ranking weights remain valid rather than being converted to missing (0.876205ms)
+✔ shared historical classifier retains literal ISM groups and rejects wrong frozen membership (0.516056ms)
+✔ method identifiers must be primitive strings rather than coercible arrays (0.134114ms)
+✖ stored named rows and role identifiers reject coercible non-string values (1.212178ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 8
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 107.659496
+
+✖ failing tests:
+
+test at apps/web/src/components/decision-support/execution-record-rules.test.ts:199:1
+✖ stored named rows and role identifiers reject coercible non-string values (1.212178ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     option: [
+  +       'Alpha'
+  +     ],
+  +     rank: 1,
+  +     score: 0.8
+  +   },
+  +   {
+  +     option: 'Beta',
+  +     rank: 2,
+  +     score: 0.7
+  +   }
+  + ]
+  - null
+  
+      at TestContext.<anonymous> (file:///home/hossein/Desktop/projects/building-management/apps/web/src/components/decision-support/execution-record-rules.test.ts:200:9)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { option: [Array], score: 0.8, rank: 1 }, { option: 'Beta', score: 0.7, rank: 2 } ],
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,182 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 6 tests using 1 worker
+
+  ✓  1 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1361:3 › en convergence root JSON null is explicitly reset and corrected (3.1s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history success (8.9s)
+  ✘  3 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history failure (9.0s)
+  ✓  4 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1361:3 › fa convergence root JSON null is explicitly reset and corrected (3.0s)
+  ✘  5 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history success (7.8s)
+  ✘  6 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history failure (9.2s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history success 
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator: locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true })
+    Expected: enabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeEnabled" locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true }) with timeout 5000ms
+      - waiting for locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true })
+
+
+      1458 |         await page.reload();
+      1459 |         await page.getByRole("button", { name: c.title, exact: true }).click();
+    > 1460 |         await expect(run()).toBeEnabled();
+           |                             ^
+      1461 |         await expect(
+      1462 |           page.locator(`[data-run-id="${initialId}"]`),
+      1463 |         ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1460:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-2c28a-sponse-with-history-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-2c28a-sponse-with-history-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-2c28a-sponse-with-history-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-2c28a-sponse-with-history-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history failure 
+
+    Error: expect(locator).toBeEnabled() failed
+
+    Locator: locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true })
+    Expected: enabled
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeEnabled" locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true }) with timeout 5000ms
+      - waiting for locator('[data-ism-panel]').getByRole('button', { name: 'Run ISM', exact: true })
+
+
+      1458 |         await page.reload();
+      1459 |         await page.getByRole("button", { name: c.title, exact: true }).click();
+    > 1460 |         await expect(run()).toBeEnabled();
+           |                             ^
+      1461 |         await expect(
+      1462 |           page.locator(`[data-run-id="${initialId}"]`),
+      1463 |         ).toBeVisible();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1460:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-aee2e-sponse-with-history-failure-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-aee2e-sponse-with-history-failure-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-aee2e-sponse-with-history-failure-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-aee2e-sponse-with-history-failure-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history success 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('#ds-title')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" locator('#ds-title') with timeout 5000ms
+      - waiting for locator('#ds-title')
+        14 × locator resolved to <input id="ds-title" data-slot="input" value="ISM browser 1791826236764" placeholder="مثلاً انتخاب پیمانکار" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disab…/>
+           - unexpected value "enabled"
+
+
+      1509 |           await expect(page.locator("[data-ism-result]")).toHaveCount(0);
+      1510 |           await expect(page.locator('[data-ism-cell="0-0"]')).toHaveValue("1");
+    > 1511 |           await expect(page.locator("#ds-title")).toBeDisabled();
+           |                                                   ^
+      1512 |           await expect(
+      1513 |             page.getByRole("button", { name: copy.save, exact: true }),
+      1514 |           ).toBeDisabled();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1511:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-db5b7-sponse-with-history-success-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-db5b7-sponse-with-history-success-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-db5b7-sponse-with-history-success-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-db5b7-sponse-with-history-success-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history failure 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('#ds-title')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" locator('#ds-title') with timeout 5000ms
+      - waiting for locator('#ds-title')
+        14 × locator resolved to <input id="ds-title" data-slot="input" value="ISM browser 1791826246220" placeholder="مثلاً انتخاب پیمانکار" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disab…/>
+           - unexpected value "enabled"
+
+
+      1509 |           await expect(page.locator("[data-ism-result]")).toHaveCount(0);
+      1510 |           await expect(page.locator('[data-ism-cell="0-0"]')).toHaveValue("1");
+    > 1511 |           await expect(page.locator("#ds-title")).toBeDisabled();
+           |                                                   ^
+      1512 |           await expect(
+      1513 |             page.getByRole("button", { name: copy.save, exact: true }),
+      1514 |           ).toBeDisabled();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1511:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-1f15c-sponse-with-history-failure-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-1f15c-sponse-with-history-failure-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-1f15c-sponse-with-history-failure-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-1f15c-sponse-with-history-failure-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history success 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › en convergence committed run lost response with history failure 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history success 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1417:5 › fa convergence committed run lost response with history failure 
+  2 passed (57.9s)

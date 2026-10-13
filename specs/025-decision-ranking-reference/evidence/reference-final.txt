@@ -1,0 +1,10 @@
+generated_at: 2026-10-13T05:20:45.862282+00:00
+command: ['/home/hossein/Desktop/projects/building-management/apps/api/.venv/bin/python', '-m', 'pytest', 'decision_support/reference_tests', '-q', '--ranking-reference-report=/home/hossein/Desktop/projects/building-management/specs/025-decision-ranking-reference/validation-reference.json']
+cwd: apps/api/core
+
+........................................................................ [ 52%]
+..................................................................       [100%]
+138 passed in 0.99s
+
+exit: 0
+elapsed_seconds: 1.768

@@ -1,100 +1,85 @@
-# Research & Decisions: Decision Support AHP Criteria Weighting (Phase 4)
+# Research & Decisions: AHP Criteria Weighting
 
-**Branch**: `021-decision-ahp` | **Spec**: [spec.md](./spec.md)
+**Feature**: `021-decision-ahp` | **Date**: 2026-10-11 | **Inspected tree**: `develop`, `c5328c4`
 
-This document records architectural, mathematical, and user experience decisions for Phase 4 AHP criteria weighting.
+Backend/frontend research used the existing Graphify graph for navigation and current source for verification. The truncated graph query located models, engine, validators, views and panels; it is not completeness evidence. All planning unknowns below are resolved. O05/O06 remain interim product policies.
 
----
+## 1. Reuse implemented behavior
 
-## 1. Mathematical Weight Extraction Method
+**Decision**: correct the existing AHP engine, endpoint, fields and components.
 
-### Decision
-Use the **Geometric Mean Method** (Logarithmic Least Squares) to extract normalized weights:
-$$g_j = \left( \prod_{k=1}^n a_{j,k} \right)^{1/n}$$
-$$w_j = \frac{g_j}{\sum_{k=1}^n g_k}$$
+**Rationale**: `apps/api/core/decision_support/services/ahp_service.py` already implements geometric means/RI/CI/CR; `execution_service.py` executes AHP; `models.py` has matrix/snapshot/result fields. `apps/web/src/components/decision-support/{AhpMethodPanel,SquareMatrixEditor,CriteriaWeightTable}.tsx` already exist. The spec gap table/old plan describe an earlier tree.
 
-### Rationale
-- Mandated directly by [05-ahp.md](../../docs/decision-support/05-ahp.md) lines 23–28.
-- Closed-form, exact, non-iterative, and mathematically robust against rank reversal.
-- Does not require iterative numerical eigenvalue approximation solvers or external linear algebra libraries (like NumPy/SciPy), preserving zero-dependency pure Python runtime.
+**Alternatives considered**: another engine/workspace duplicates behavior and violates Constitution V. Spec/tasks are left intact during planning; regenerate tasks separately.
 
-### Alternatives Considered
-- *Power Method / Exact Eigenvector Solver*: Requires matrix power iterations until convergence. Adds unnecessary complexity and floating-point iteration thresholds without practical accuracy improvement for $n \le 10$.
-- *Row Sum Normalization (Arithmetic Mean)*: Less accurate and does not satisfy the reciprocal matrix group property.
+## 2. Numerical semantics and safety
 
----
+**Decision**: retain row geometric means and the spec's mean `(A*w)[j]/w[j]` lambda approximation, fixed interim RI table and warning threshold. Use log-domain geometric means where necessary to avoid product overflow/underflow; guard unrepresentable results with coded validation rather than non-finite JSON/HTTP 500. All engine formulas remain in `ahp_service.py`.
 
-## 2. Inconsistency Index & Ratio ($CI$ and $CR$)
+**Rationale**: `docs/decision-support/05-ahp.md` selects geometric means; the feature spec supplies CI/CR details. The approximation need not equal the exact principal eigenvalue for arbitrary inconsistent matrices. Existing direct multiplication can overflow with extreme finite values. Service/validator imports use existing Django error machinery, but numerical execution performs no DB/HTTP work.
 
-### Decision
-Calculate the principal eigenvalue approximation $\lambda_{\max}$ and Consistency Index $CI$:
-$$v_j = (A \cdot w)_j = \sum_{k=1}^n a_{j,k} \cdot w_k$$
-$$\lambda_{\max} = \frac{1}{n} \sum_{j=1}^n \frac{v_j}{w_j}$$
-$$CI = \begin{cases} 0.0 & \text{if } n \le 1 \\ \max\left(0.0, \frac{\lambda_{\max} - n}{n - 1}\right) & \text{if } n > 1 \end{cases}$$
+**Alternatives considered**: eigenvector/NumPy/SciPy substitutions change the selected method and add dependencies. Avoid unsupported universal rank-reversal or exact-eigenvalue claims.
 
-Use Saaty's standard Random Index ($RI$) table for $n \in [1, 10]$:
-| $n$ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
-|---|---|---|---|---|---|---|---|---|---|---|
-| $RI(n)$ | 0.00 | 0.00 | 0.58 | 0.90 | 1.12 | 1.24 | 1.32 | 1.41 | 1.45 | 1.49 |
+**External reference**: [Saaty, Decision making with the analytic hierarchy process (2008)](https://www.inderscience.com/info/inarticle.php?artid=17590) establishes the pairwise-judgment/inconsistency context. The repository spec, rather than the article abstract, defines this phase's formulas/RI constants.
 
-$$CR = \begin{cases} 0.0 & \text{if } n \le 2 \\ \frac{CI}{RI(n)} & \text{if } n > 2 \end{cases}$$
+## 3. Types, diagonal and tolerance
 
-Consistency threshold: $is\_consistent = (CR \le 0.10)$.
+**Decision**: follow FR-005: actual finite positive numbers excluding booleans/strings; exact diagonal equality to 1; `abs(a[j][k]*a[k][j]-1) < 1e-4`. Require actual string criterion names, trimmed exact uniqueness and 1..10 size. Paths are zero-based.
 
-### Rationale
-- Standard Saaty formulation referenced in operational research literature.
-- Clamping $CI \ge 0$ prevents negative $CI$ due to minute floating-point rounding errors on perfectly consistent matrices.
-- For $n=1$ and $n=2$, $RI=0$, so $CR=0.0$ by definition.
+**Rationale**: `services/validators.py` currently parses numeric strings and tolerates diagonal error. Read-only probes accepted `[["1"]]` and `[[1.00005]]`. Interim spec prose uses inverse-difference tolerance; FR-005 is the explicit acceptance rule. Product residual is symmetric in pair direction. Null/blank string remain `cell_empty`; nonblank strings/bools are `non_numeric`.
 
-### Alternatives Considered
-- *Golden-Wang or Alonso-Lamata RI tables*: Less widespread than Saaty's original baseline; Saaty values are standard in civil engineering and construction management.
+**Alternatives considered**: retain coercion/diagonal epsilon or combine two tolerance rules, causing contradictory acceptance. Tighten AHP validation only; add asymmetric product-boundary and near-diagonal tests.
 
----
+## 4. Scale interpretation
 
-## 3. Inconsistency Handling Policy (Warn vs Block)
+**Decision**: provide Saaty presets 1..9 and reciprocals 1/2..1/9 plus custom finite positive numbers. Values outside [1/9,9] show localized advisory feedback for the pair, not a new hard server cap. Numerical representability is a separate guard.
 
-### Decision
-When $CR > 0.10$:
-- The backend calculation completes successfully and saves the `DecisionRun` with `status: "ok"`, `is_consistent: false`, and the exact $CR$ value.
-- The web UI renders a prominent **advisory warning banner** stating that comparisons are inconsistent ($CR > 0.10$) and suggesting pairwise judgment review.
-- The execution is **not** aborted or discarded.
+**Rationale**: FR-005 specifies positivity/finiteness without a hard maximum; assumptions/edge cases disagree on `(0,10)` versus `(0,10]` and leave reject/warn unspecified. Warning preserves permitted flexibility. A one-sided cap would reject the reciprocal of an otherwise allowed small decimal.
 
-### Rationale
-- Resolves open item O05 as an explicit interim policy.
-- Enables decision-makers to save exploratory or draft comparisons during collaborative sessions without losing input data.
-- Ensures complete audit trails in `DecisionRun` records.
+**Alternatives considered**: exact presets only, cap at 9/10 or cap one triangle. These remove decimal flexibility or break symmetry. Permanent scale governance can be specified separately.
 
-### Alternatives Considered
-- *Hard HTTP 400 rejection on $CR > 0.10$*: Prevents users from seeing derived weights and makes iterative adjustment frustrating, especially in multi-stakeholder workshops.
+## 5. Output order and ordinal ranks
 
----
+**Decision**: new result rows follow frozen criteria order. Compute rank separately by descending weight, stable input-index tie-break; ranks are an ordinal permutation 1..n even with ties. No automatic transfer.
 
-## 4. Pairwise Matrix UX and Reciprocal Synchronization
+**Rationale**: source doc05 requires input order; current service sorts result rows. A reversed-importance probe confirms drift. Historical stored rows retain original order and identify their criteria by name.
 
-### Decision
-Implement `SquareMatrixEditor` in pairwise reciprocal mode:
-- The diagonal cells $a_{j,j}$ are locked to `1.0` (read-only, visually dimmed).
-- The matrix is symmetrical reciprocal: editing $a_{j,k}$ automatically updates $a_{k,j}$ to $1 / a_{j,k}$ in real time (and vice versa).
-- Inputs support Saaty scale integers ($1, 2, \dots, 9$) and reciprocal fractions ($1/2, 1/3, \dots, 1/9$).
-- Backend validation checks $|a_{k,j} \cdot a_{j,k} - 1.0| < 10^{-4}$ to allow standard floating-point representation.
+**Alternatives considered**: keep sorted output or introduce shared competition ranks; both diverge from source/ordinal semantics without need.
 
-### Rationale
-- Resolves open item O06 as an explicit interim UX policy.
-- Drastically reduces cognitive load and data entry effort: users only need to fill $n(n-1)/2$ judgments instead of $n^2$.
+## 6. Persistence, permissions and saves
 
-### Alternatives Considered
-- *Manual two-way entry*: Users must manually calculate and enter fractions for the lower triangle; highly error-prone and violates UX Principle VII.
+**Decision**: reuse existing URLs and membership checks; `view_decision_support` for reads, `edit_decision_support` for saves/runs. Retain full deep-copied snapshot superset. Add optional method filter before run-list pagination. Resolve runs through both authorized case and project. Retain HTTP 400 `run_immutable` for API mutation attempts.
 
----
+**Rationale**: actual permission codes live in `apps/api/core/permissions/constants.py`/`decision_support/views.py`; spec assumption names are absent. Calculation and snapshot use one loaded case instance before one final insert. No additional revision-order requirement exists. Models/DB do not enforce immutability against arbitrary ORM writes.
 
-## 5. Independence and Weight Isolation (AC02, AC04)
+**Alternatives considered**: new permission codes/AHP-only endpoint, removing snapshot fields or claiming DB-level immutability. These change interfaces or overstate evidence. Separate save/run HTTP requests are not a single atomic draft execution; a run records persisted inputs at its own read.
 
-### Decision
-- AHP executes without needing alternatives or performance matrices.
-- Executing AHP generates an immutable `DecisionRun` containing `{weights: [...], lambda_max, ci, cr, is_consistent}`.
-- It does **not** update or mutate `case.weights` or `case.weights_normalized`.
-- Voluntary manual transfer of weights into ranking inputs is reserved for Phase 7 (`ManualWeightTransferAction`).
+**Save decision**: send only changed AHP fields. Matrix-only updates preserve unrelated fields and bypass unrelated ranking revalidation; real shared criteria changes retain established cross-method consistency checks. Use targeted writes from freshly scoped case state rather than replacing unrelated stale fields. Test matrix-only save alongside raw ranking inputs and incomplete ranking drafts.
 
-### Rationale
-- Strict compliance with AC02 and AC04.
-- Prevents accidental side effects on SAW or TOPSIS ranking setups.
+## 7. Matrix and case-result lifecycle
+
+**Decision**: parent owns actual matrix; diagonal 1, unjudged off-diagonal null. Reconcile criteria by trimmed exact name and order, preserve surviving comparisons, leave new/renamed pairs blank. Never silently overwrite saved malformed values as equality. Reset results/errors/history selection on case changes and guard late responses.
+
+**Rationale**: `SquareMatrixEditor.tsx` renders all-ones defaults without updating parent state; n=1 cannot run fresh and the first off-diagonal edit invents other judgments. Route criteria edits do not reconcile AHP matrix. Panel result effect depends only on `latestResult`, so null-to-null case switching can retain the previous case's local result.
+
+**Alternatives considered**: all-ones defaults, resetting every comparison or independent parent/component matrices. These hide missing input, discard judgments or repeat the state mismatch.
+
+## 8. History, accessibility and math boundary
+
+**Decision**: method-selected paginated history; historical input/result read-only and distinct from editable draft. Reuse tables/viewers, add fraction presets, associated cell errors and keyboard access. Localize all AHP copy and verify English/Persian RTL. Consistency display consumes server boolean; client validation/reciprocal synchronization/formatting remain allowed.
+
+**Rationale**: current history is unfiltered; selecting past results can show old weights beside current matrix. Existing helper tests do not verify rendered warnings/state/RTL. Filtering only a mixed-method first page can hide older AHP runs.
+
+**Alternatives considered**: duplicate history components, first-page client filtering or reconstructing CR client-side. Extend existing interfaces instead.
+
+## 9. Verification and current evidence
+
+**Decision**: extend existing pytest/Node suites and add `apps/web/e2e/tests/decision-ahp.spec.ts`. Use app-level Playwright config, which starts API/web; root config does not.
+
+**Rationale**: baseline checks on 2026-10-11 passed 8 engine tests and 12 frontend helper/key/source tests. They do not cover strict types, all size boundaries, output identity, filtered history, case switching or rendered accessibility. Existing source math test skips absent files and uses limited regexes; strengthen missing-target and service-boundary checks. Commands/evidence limits are in [quickstart.md](quickstart.md).
+
+**Alternatives considered**: treating tasks checkboxes, source inspection/typecheck or helper tests as acceptance. Constitution VI requires actual API/browser evidence. No API/DB, browser, migration, production or performance acceptance ran during planning.
+
+## Specification reconciliation
+
+FR-005 governs type/diagonal/tolerance; scale outside standard presets warns; actual permission catalog is retained; source doc05 governs input order. `weights_normalized` is ranking-run snapshot-derived, not a case field; raw `[1,2]` normalizes to `[1/3,2/3]`. Preservation tests compare actual before/after baselines. These are explicit design interpretations; spec/tasks and permanent governance remain unchanged.

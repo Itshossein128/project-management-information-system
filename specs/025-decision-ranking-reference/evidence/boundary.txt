@@ -1,0 +1,3 @@
+No production Python imports of reference_tests/ranking_reference helpers (AST import scan).
+Pure sibling invocation retains pytest-django DB blocker; deliberate cursor attempt was denied. No DB marker/fixture/unblocking or dispatcher import in reference suite.
+Actual numerical/rejection observations assert copied-input equality. Protected application sources and documents compared to baseline. Fresh backend verifies real scope/record protections.

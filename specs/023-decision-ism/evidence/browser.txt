@@ -1,0 +1,72 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 54 tests using 1 worker
+
+  ✓   1 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:50:3 › en fresh single criterion owns diagonal and runs without ranking (3.6s)
+  ✓   2 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:62:3 › en blank comparisons require judgment; fractions persist at full precision (3.8s)
+  ✓   3 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:50:3 › fa fresh single criterion owns diagonal and runs without ranking (2.6s)
+  ✓   4 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:62:3 › fa blank comparisons require judgment; fractions persist at full precision (3.9s)
+  ✓   5 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:88:3 › en criterion identity survives reorder and new/renamed pairs stay blank (3.3s)
+  ✓   6 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:88:3 › fa criterion identity survives reorder and new/renamed pairs stay blank (1.9s)
+  ✓   7 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:106:3 › en consistent 2/3/6 comparisons display named weights and ordinal ranks (2.8s)
+  ✓   8 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:106:3 › fa consistent 2/3/6 comparisons display named weights and ordinal ranks (1.9s)
+  ✓   9 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:123:3 › en inconsistent circular judgments are saved with advisory then revised (3.1s)
+  ✓  10 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:123:3 › fa inconsistent circular judgments are saved with advisory then revised (3.4s)
+  ✓  11 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:142:3 › en blank and invalid comparisons link errors to keyboard-focusable cells without a run (3.2s)
+  ✓  12 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:142:3 › fa blank and invalid comparisons link errors to keyboard-focusable cells without a run (2.6s)
+  ✓  13 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › en malformed saved diagonal stays visible and invalid (3.1s)
+  ✓  14 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › en malformed saved reciprocal stays visible and invalid (1.6s)
+  ✓  15 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › fa malformed saved diagonal stays visible and invalid (2.4s)
+  ✓  16 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:166:5 › fa malformed saved reciprocal stays visible and invalid (2.6s)
+  ✓  17 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:177:3 › en mixed paginated history is frozen and separate from draft (3.1s)
+  ✓  18 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:212:3 › en delayed case and history responses cannot replace current case draft (2.8s)
+  ✓  19 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:177:3 › fa mixed paginated history is frozen and separate from draft (3.9s)
+  ✓  20 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:212:3 › fa delayed case and history responses cannot replace current case draft (3.5s)
+  ✓  21 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:251:3 › en failed save prevents execution; pending save prevents repeated run (2.9s)
+  ✓  22 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:251:3 › fa failed save prevents execution; pending save prevents repeated run (1.8s)
+  ✓  23 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:286:3 › en ten-criterion matrix supports keyboard presets and horizontal navigation (2.2s)
+  ✓  24 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:286:3 › fa ten-criterion matrix supports keyboard presets and horizontal navigation (2.9s)
+  ✓  25 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:305:3 › en historical stub and legacy sorted results retain stored criterion identity (2.8s)
+  ✓  26 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:305:3 › fa historical stub and legacy sorted results retain stored criterion identity (3.6s)
+  ✓  27 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:339:3 › en request failures show feedback for save and run and allow recovery (2.9s)
+  ✓  28 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:339:3 › fa request failures show feedback for save and run and allow recovery (3.9s)
+  ✓  29 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:378:5 › en history locale › history timestamps follow application language and switch without changing stored time (2.5s)
+  ✓  30 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:378:5 › fa history locale › history timestamps follow application language and switch without changing stored time (3.5s)
+  ✓  31 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:404:3 › en criterion rename preserves keyboard focus and caret (3.9s)
+  ✓  32 [chromium-desktop] › apps/web/e2e/tests/decision-ahp.spec.ts:404:3 › fa criterion rename preserves keyboard focus and caret (3.4s)
+  ✓  33 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:70:1 › foundation serializes existing method saves and global save (1.8s)
+  ✓  34 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:113:1 › foundation view-only presentation disables every mutation (2.5s)
+  ✓  35 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:148:3 › en independent ISM chain, zero and both single diagonals (12.6s)
+  ✓  36 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:148:3 › fa independent ISM chain, zero and both single diagonals (13.5s)
+  ✓  37 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:248:3 › en draft blank correction and criterion operations preserve directed pairs (3.4s)
+  ✓  38 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:248:3 › fa draft blank correction and criterion operations preserve directed pairs (3.3s)
+  ✓  39 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:354:3 › en invalid drafts and failed requests stay recoverable (4.0s)
+  ✓  40 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:354:3 › fa invalid drafts and failed requests stay recoverable (3.8s)
+  ✓  41 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:457:3 › en maximal cycles, interpretation and frozen history (2.5s)
+  ✓  42 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:457:3 › fa maximal cycles, interpretation and frozen history (2.4s)
+  ✓  43 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:553:3 › en keyboard ten criteria and localized frozen provenance (2.7s)
+  ✓  44 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:645:3 › en delayed mixed method operations and late case release (4.1s)
+  ✓  45 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:765:3 › en actual viewer sees frozen results with zero writable controls or bypass runs (3.2s)
+  ✓  46 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:553:3 › fa keyboard ten criteria and localized frozen provenance (3.4s)
+  ✓  47 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:645:3 › fa delayed mixed method operations and late case release (4.1s)
+  ✓  48 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:765:3 › fa actual viewer sees frozen results with zero writable controls or bypass runs (4.2s)
+  ✓  49 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:890:3 › en SC-008 forty real POST to visible layer trials (11.8s)
+  ✓  50 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:890:3 › fa SC-008 forty real POST to visible layer trials (12.1s)
+  ✓  51 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1057:3 › en late responses from every method and global save isolate newer case (6.3s)
+  ✓  52 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1166:3 › en disconnected, longer and multiple cycle groups match frozen server references (7.4s)
+  ✓  53 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1057:3 › fa late responses from every method and global save isolate newer case (5.2s)
+  ✓  54 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1166:3 › fa disconnected, longer and multiple cycle groups match frozen server references (7.2s)
+
+  54 passed (3.9m)

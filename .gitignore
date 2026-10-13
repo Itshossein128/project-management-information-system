@@ -1,6 +1,12 @@
 .DS_Store
 .env
 .env.local
+.env.*
+!.env.example
+!.env.*.example
+.pytest_cache/
+coverage/
+*.tmp
 
 # Node
 node_modules/

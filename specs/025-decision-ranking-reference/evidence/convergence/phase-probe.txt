@@ -1,0 +1,28 @@
+generated_at: 2026-10-13T05:23:18.518267+00:00
+command: ['/home/hossein/Desktop/projects/building-management/apps/api/.venv/bin/python', '-m', 'pytest', 'decision_support/reference_tests/test_convergence_phase_probe.py', '-q', '--ranking-reference-report=/home/hossein/Desktop/projects/building-management/specs/025-decision-ranking-reference/evidence/convergence/phase-probe.json']
+cwd: apps/api/core
+
+EF.E                                                                     [100%]
+==================================== ERRORS ====================================
+_________________________ ERROR at setup of test_setup _________________________
+decision_support/reference_tests/test_convergence_phase_probe.py:5: in setup_failure
+    raise RuntimeError("intentional setup failure")
+E   RuntimeError: intentional setup failure
+______________________ ERROR at teardown of test_teardown ______________________
+decision_support/reference_tests/test_convergence_phase_probe.py:16: in teardown_failure
+    raise RuntimeError("intentional teardown failure")
+E   RuntimeError: intentional teardown failure
+=================================== FAILURES ===================================
+__________________________________ test_call ___________________________________
+decision_support/reference_tests/test_convergence_phase_probe.py:11: in test_call
+    assert False, "intentional call failure"
+E   AssertionError: intentional call failure
+E   assert False
+=========================== short test summary info ============================
+ERROR decision_support/reference_tests/test_convergence_phase_probe.py::test_setup
+ERROR decision_support/reference_tests/test_convergence_phase_probe.py::test_teardown
+FAILED decision_support/reference_tests/test_convergence_phase_probe.py::test_call
+1 failed, 1 passed, 2 errors in 0.08s
+
+exit: 1
+elapsed_seconds: 0.832

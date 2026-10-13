@@ -1,0 +1,206 @@
+FFF.F                                                                    [100%]
+=================================== FAILURES ===================================
+________ test_root_json_null_draft_is_preserved_and_recoverable[create] ________
+decision_support/tests/test_ism_api.py:178: in test_root_json_null_draft_is_preserved_and_recoverable
+    assert response.data['ism_matrix'] is None
+E   assert [] is None
+_____ test_root_json_null_draft_is_preserved_and_recoverable[matrix_patch] _____
+../.venv/lib/python3.12/site-packages/django/db/backends/utils.py:89: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/psycopg/cursor.py:117: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.NotNullViolation: null value in column "ism_matrix" of relation "decision_cases" violates not-null constraint
+E   DETAIL:  Failing row contains (100a9f51-c98a-4bd6-b4d8-3774a64b54d7, 2026-10-12 17:27:25.447509+00, 2026-10-12 17:27:25.461228+00, f, null, ISM sample, ["ism"], ["A", "B", "C"], [], [], [], [], [], [], null, 5a19b611-c440-4854-a6ba-aa730e15d7a7, f2a1fa2a-c579-4042-bbc9-f7c677b74786, 5a19b611-c440-4854-a6ba-aa730e15d7a7).
+
+The above exception was the direct cause of the following exception:
+decision_support/tests/test_ism_api.py:176: in test_root_json_null_draft_is_preserved_and_recoverable
+    response = auth_client.patch(base + case_id + '/', changes, format='json')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/test.py:299: in patch
+    response = super().patch(
+../.venv/lib/python3.12/site-packages/rest_framework/test.py:205: in patch
+    return self.generic('PATCH', path, data, content_type, **extra)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/test.py:221: in generic
+    return super().generic(
+../.venv/lib/python3.12/site-packages/django/test/client.py:609: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/test.py:273: in request
+    return super().request(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/test.py:225: in request
+    request = super().request(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/test/client.py:891: in request
+    self.check_exception(response)
+../.venv/lib/python3.12/site-packages/django/test/client.py:738: in check_exception
+    raise exc_value
+../.venv/lib/python3.12/site-packages/django/core/handlers/exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/core/handlers/base.py:197: in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/views/decorators/csrf.py:56: in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/viewsets.py:125: in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/views.py:515: in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/rest_framework/views.py:475: in handle_exception
+    self.raise_uncaught_exception(exc)
+../.venv/lib/python3.12/site-packages/rest_framework/views.py:486: in raise_uncaught_exception
+    raise exc
+../.venv/lib/python3.12/site-packages/rest_framework/views.py:512: in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+decision_support/views.py:48: in partial_update
+    case = update_case(case, request.user, request.data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+decision_support/services/case_service.py:132: in update_case
+    case.save(update_fields=[*fields, 'updated_by', 'updated_at'])
+../.venv/lib/python3.12/site-packages/django/db/models/base.py:814: in save
+    self.save_base(
+../.venv/lib/python3.12/site-packages/django/db/models/base.py:877: in save_base
+    updated = self._save_table(
+../.venv/lib/python3.12/site-packages/django/db/models/base.py:990: in _save_table
+    updated = self._do_update(
+../.venv/lib/python3.12/site-packages/django/db/models/base.py:1054: in _do_update
+    return filtered._update(values) > 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/query.py:1231: in _update
+    return query.get_compiler(self.db).execute_sql(CURSOR)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1984: in execute_sql
+    cursor = super().execute_sql(result_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py:1562: in execute_sql
+    cursor.execute(sql, params)
+../.venv/lib/python3.12/site-packages/django/db/backends/utils.py:67: in execute
+    return self._execute_with_wrappers(
+../.venv/lib/python3.12/site-packages/django/db/backends/utils.py:80: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/django/db/backends/utils.py:84: in _execute
+    with self.db.wrap_database_errors:
+../.venv/lib/python3.12/site-packages/django/db/utils.py:91: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+../.venv/lib/python3.12/site-packages/django/db/backends/utils.py:89: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/psycopg/cursor.py:117: in execute
+    raise ex.with_traceback(None)
+E   django.db.utils.IntegrityError: null value in column "ism_matrix" of relation "decision_cases" violates not-null constraint
+E   DETAIL:  Failing row contains (100a9f51-c98a-4bd6-b4d8-3774a64b54d7, 2026-10-12 17:27:25.447509+00, 2026-10-12 17:27:25.461228+00, f, null, ISM sample, ["ism"], ["A", "B", "C"], [], [], [], [], [], [], null, 5a19b611-c440-4854-a6ba-aa730e15d7a7, f2a1fa2a-c579-4042-bbc9-f7c677b74786, 5a19b611-c440-4854-a6ba-aa730e15d7a7).
+------------------------------ Captured log call -------------------------------
+ERROR    django.request:log.py:241 Internal Server Error: /api/v1/projects/f2a1fa2a-c579-4042-bbc9-f7c677b74786/decision-cases/100a9f51-c98a-4bd6-b4d8-3774a64b54d7/
+Traceback (most recent call last):
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+psycopg.errors.NotNullViolation: null value in column "ism_matrix" of relation "decision_cases" violates not-null constraint
+DETAIL:  Failing row contains (100a9f51-c98a-4bd6-b4d8-3774a64b54d7, 2026-10-12 17:27:25.447509+00, 2026-10-12 17:27:25.461228+00, f, null, ISM sample, ["ism"], ["A", "B", "C"], [], [], [], [], [], [], null, 5a19b611-c440-4854-a6ba-aa730e15d7a7, f2a1fa2a-c579-4042-bbc9-f7c677b74786, 5a19b611-c440-4854-a6ba-aa730e15d7a7).
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 56, in wrapper_view
+    return view_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/rest_framework/viewsets.py", line 125, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/core/decision_support/views.py", line 48, in partial_update
+    case = update_case(case, request.user, request.data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/core/decision_support/services/case_service.py", line 132, in update_case
+    case.save(update_fields=[*fields, 'updated_by', 'updated_at'])
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/base.py", line 814, in save
+    self.save_base(
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/base.py", line 877, in save_base
+    updated = self._save_table(
+              ^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/base.py", line 990, in _save_table
+    updated = self._do_update(
+              ^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/base.py", line 1054, in _do_update
+    return filtered._update(values) > 0
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/query.py", line 1231, in _update
+    return query.get_compiler(self.db).execute_sql(CURSOR)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1984, in execute_sql
+    cursor = super().execute_sql(result_type)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1562, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 67, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 80, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 84, in _execute
+    with self.db.wrap_database_errors:
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/django/db/backends/utils.py", line 89, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/psycopg/cursor.py", line 117, in execute
+    raise ex.with_traceback(None)
+django.db.utils.IntegrityError: null value in column "ism_matrix" of relation "decision_cases" violates not-null constraint
+DETAIL:  Failing row contains (100a9f51-c98a-4bd6-b4d8-3774a64b54d7, 2026-10-12 17:27:25.447509+00, 2026-10-12 17:27:25.461228+00, f, null, ISM sample, ["ism"], ["A", "B", "C"], [], [], [], [], [], [], null, 5a19b611-c440-4854-a6ba-aa730e15d7a7, f2a1fa2a-c579-4042-bbc9-f7c677b74786, 5a19b611-c440-4854-a6ba-aa730e15d7a7).
+_____ test_root_json_null_draft_is_preserved_and_recoverable[shared_patch] _____
+decision_support/tests/test_ism_api.py:178: in test_root_json_null_draft_is_preserved_and_recoverable
+    assert response.data['ism_matrix'] is None
+E   assert [] is None
+__________ test_ahp_execution_retains_root_null_ism_draft_in_snapshot __________
+decision_support/tests/test_ism_api.py:196: in test_ahp_execution_retains_root_null_ism_draft_in_snapshot
+    assert run.data['input_snapshot']['ism_matrix'] is None
+E   assert [] is None
+=============================== warnings summary ===============================
+decision_support/tests/test_ism_api.py::test_root_json_null_draft_is_preserved_and_recoverable[create]
+  /home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+decision_support/tests/test_ism_api.py::test_root_json_null_draft_is_preserved_and_recoverable[create]
+  /home/hossein/Desktop/projects/building-management/apps/api/core/inventory/item_services.py:4: DeprecationWarning: 
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+          
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED decision_support/tests/test_ism_api.py::test_root_json_null_draft_is_preserved_and_recoverable[create]
+FAILED decision_support/tests/test_ism_api.py::test_root_json_null_draft_is_preserved_and_recoverable[matrix_patch]
+FAILED decision_support/tests/test_ism_api.py::test_root_json_null_draft_is_preserved_and_recoverable[shared_patch]
+FAILED decision_support/tests/test_ism_api.py::test_ahp_execution_retains_root_null_ism_draft_in_snapshot
+4 failed, 1 passed, 16 deselected, 2 warnings in 3.62s

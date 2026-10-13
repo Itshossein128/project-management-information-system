@@ -4,12 +4,17 @@ from __future__ import annotations
 
 import copy
 
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from config.exceptions import CodedValidationError
 
 from decision_support.models import CRITERIA_METHODS, METHOD_IDS, RANKING_METHODS, DecisionCase, DecisionRun
 from decision_support.services.ahp_service import compute_ahp
+from decision_support.services.ism_service import compute_ism
 from decision_support.services.saw_service import compute_saw
 from decision_support.services.topsis_service import compute_topsis
 from decision_support.services.validators import _issue, raise_issues, validate_criteria_only, validate_ranking_inputs
@@ -25,7 +30,7 @@ def _snapshot_from_case(case: DecisionCase, *, weights_normalized: list[float] |
         'performance_matrix': case.performance_matrix or [],
         'ahp_matrix': case.ahp_matrix or [],
         'dematel_matrix': case.dematel_matrix or [],
-        'ism_matrix': case.ism_matrix or [],
+        'ism_matrix': case.ism_matrix,
         'selected_methods': case.selected_methods or [],
     }
     if weights_normalized is not None:
@@ -33,12 +38,14 @@ def _snapshot_from_case(case: DecisionCase, *, weights_normalized: list[float] |
     return copy.deepcopy(snap)
 
 
+@transaction.atomic
 def create_run(case: DecisionCase, method: str, user) -> DecisionRun:
-    """Append an immutable run. SAW uses the real engine; other methods remain stub (Phase 1)."""
+    """Lock authoritative persisted input, then append one independent frozen run."""
+    case = get_object_or_404(DecisionCase.objects.select_for_update(), pk=case.pk, project_id=case.project_id)
     method = (method or '').strip()
     if method not in METHOD_IDS:
         raise_issues([
-            _issue('invalid_method', 'method', f'Unknown method id: {method!r}.'),
+            _issue('invalid_method', 'method', _('Unknown method id: %(method)s.') % {'method': repr(method)}),
         ])
 
     selected = list(case.selected_methods or [])
@@ -99,6 +106,10 @@ def create_run(case: DecisionCase, method: str, user) -> DecisionRun:
             'cr': ahp_out['cr'],
             'is_consistent': ahp_out['is_consistent'],
         }
+    elif method == 'ism':
+        output = compute_ism(case.criteria, case.ism_matrix)
+        snapshot = _snapshot_from_case(case)
+        result = {'status': 'ok', 'engine': 'ism', **output}
     elif method in RANKING_METHODS:
         # future ranking methods — Phase 1 stub until their engine phases
         validate_ranking_inputs(
@@ -115,14 +126,14 @@ def create_run(case: DecisionCase, method: str, user) -> DecisionRun:
         snapshot = _snapshot_from_case(case)
         result = {'status': 'stub', 'engine': None}
     else:
-        raise_issues([_issue('invalid_method', 'method', f'Unknown method id: {method!r}.')])
+        raise_issues([_issue('invalid_method', 'method', _('Unknown method id: %(method)s.') % {'method': repr(method)})])
 
     return DecisionRun.objects.create(
         case=case,
         project_id=case.project_id,
         method=method,
         input_snapshot=snapshot,
-        result=result,
+        result=copy.deepcopy(result),
         extracted_at=timezone.now(),
         extracted_by=user,
     )

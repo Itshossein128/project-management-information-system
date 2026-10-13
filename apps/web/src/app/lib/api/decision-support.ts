@@ -1,5 +1,10 @@
+import {isRunEnvelope,isHistoryPage,isHistoricalAhp} from "@/components/decision-support/execution-record-rules";
+export {isSavedCase,isCompletedRun} from "@/components/decision-support/execution-record-rules";
 import { PATHS } from "@/app/routeVars";
 import { apiFetch, apiJson } from "@/app/lib/api-client";
+export { isIsmRunResult, isIsmRunResponse, isIsmSavedCase } from "@/components/decision-support/ism-result-rules";
+export type { IsmRunResult, IsmLayer } from "@/components/decision-support/ism-result-rules";
+import type { IsmRunResult } from "@/components/decision-support/ism-result-rules";
 
 export type DecisionMethod = "saw" | "topsis" | "ahp" | "dematel" | "ism";
 
@@ -35,7 +40,7 @@ export type DecisionCase = {
   performance_matrix: (number | null)[][];
   ahp_matrix: (number | null)[][];
   dematel_matrix: unknown[];
-  ism_matrix: unknown[];
+  ism_matrix: unknown;
   criteria_count?: number;
   alternatives_count?: number;
   created_at?: string;
@@ -67,7 +72,7 @@ export type AhpRunResult = {
   is_consistent: boolean;
 };
 
-export type DecisionRunResult = {
+export type DecisionRunResult = Partial<Omit<IsmRunResult, "status" | "engine">> & {
   status?: string;
   engine?: string | null;
   ranking?: RankingRow[];
@@ -107,20 +112,18 @@ function base(projectId: string) {
 async function jsonOrThrow<T>(path: string, options: RequestInit): Promise<T> {
   const res = await apiFetch(path, options);
   const raw = await res.text();
-  let data: unknown = {};
-  if (raw) {
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      data = {};
-    }
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new DecisionSupportRequestError("Invalid JSON response", null);
   }
   if (!res.ok) {
     const errObj = data as { error?: { message?: string } | string };
     const message =
-      typeof errObj.error === "object" && errObj.error?.message
+      typeof errObj?.error === "object" && errObj?.error?.message
         ? errObj.error.message
-        : typeof errObj.error === "string"
+        : typeof errObj?.error === "string"
           ? errObj.error
           : res.statusText || "Request failed";
     throw new DecisionSupportRequestError(message, data);
@@ -153,14 +156,26 @@ export function patchDecisionCase(projectId: string, caseId: string, body: Parti
   });
 }
 
-export function listDecisionRuns(projectId: string, caseId: string) {
-  return apiJson<{ count: number; results: DecisionRunSummary[] }>(
-    `${base(projectId)}/${caseId}/runs/`,
+export async function listDecisionRuns(
+  projectId: string, caseId: string,
+  options: { method?: DecisionMethod; page?: number; pageSize?: number; signal?: AbortSignal } = {},
+) {
+  const query = new URLSearchParams();
+  if (options.method) query.set("method", options.method);
+  if (options.page) query.set("page", String(options.page));
+  if (options.pageSize) query.set("page_size", String(options.pageSize));
+  const value = await jsonOrThrow<unknown>(
+    `${base(projectId)}/${caseId}/runs/?${query}`,
+    { method: "GET", signal: options.signal },
   );
+  if (!isHistoryPage(value)) throw new DecisionSupportRequestError("Invalid execution history response", null);
+  return value;
 }
 
-export function getDecisionRun(projectId: string, caseId: string, runId: string) {
-  return apiJson<DecisionRun>(`${base(projectId)}/${caseId}/runs/${runId}/`);
+export async function getDecisionRun(projectId: string, caseId: string, runId: string, signal?: AbortSignal) {
+  const value = await jsonOrThrow<unknown>(`${base(projectId)}/${caseId}/runs/${runId}/`, {method:"GET",signal});
+  if (!isRunEnvelope(value,runId)) throw new DecisionSupportRequestError("Invalid execution detail response", null);
+  return value;
 }
 
 export function createDecisionRun(projectId: string, caseId: string, method: DecisionMethod) {
@@ -168,4 +183,11 @@ export function createDecisionRun(projectId: string, caseId: string, method: Dec
     method: "POST",
     body: JSON.stringify({ method }),
   });
+}
+
+/** Accept completed server output only; older stub rows remain inspectable. */
+export function isAhpRunResult(result: unknown): result is AhpRunResult {
+  if (!result || typeof result !== "object" || !Array.isArray((result as AhpRunResult).weights)) return false;
+  const value = result as AhpRunResult;
+  return isHistoricalAhp(value, value.weights.map(row => row && typeof row === "object" ? row.criterion : undefined));
 }

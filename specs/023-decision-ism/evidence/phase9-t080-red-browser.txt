@@ -1,0 +1,183 @@
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Operations to perform:
+  Apply all migrations: admin, alerts, audit, auth, authentication, business_meta, cash_flow, concrete_operations, contenttypes, contracts, cost_control, decision_support, django_celery_results, documents, economic, field_reports, hr, inventory, master_data, notifications, procurement, project_templates, projects, resources, risk, schedule, sessions, storage, sub_reports, subcontractors, token_blacklist, workflow
+Running migrations:
+  No migrations to apply.
+System check identified some issues:
+
+WARNINGS:
+?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported
+Seeded E2E role users and project.
+
+Running 4 tests using 1 worker
+
+  ✘  1 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful save response stays guarded (8.6s)
+  ✘  2 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful run response stays guarded (8.7s)
+  ✘  3 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful save response stays guarded (8.4s)
+  ✘  4 [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful run response stays guarded (8.7s)
+
+
+  1) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful save response stays guarded 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "The request failed. Please try again."
+    Received string:    "Validation issuesYou do not have permission to perform this action."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        12 × locator resolved to <div role="alert" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">…</div>
+           - unexpected value "Validation issuesYou do not have permission to perform this action."
+
+
+      1703 |           try {
+      1704 |             if (phase === "save") {
+    > 1705 |               await expect(page.getByRole("alert")).toContainText(
+           |                                                     ^
+      1706 |                 copy.errors.request_failed,
+      1707 |               );
+      1708 |               expect(posts).toBe(0);
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1705:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-9f668-save-response-stays-guarded-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-9f668-save-response-stays-guarded-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-9f668-save-response-stays-guarded-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-9f668-save-response-stays-guarded-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful run response stays guarded 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('#ds-title')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" locator('#ds-title') with timeout 5000ms
+      - waiting for locator('#ds-title')
+        14 × locator resolved to <input id="ds-title" data-slot="input" value="ISM browser 1791841436673" placeholder="e.g. Contractor selection" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none d…/>
+           - unexpected value "enabled"
+
+
+      1711 |               expect(posts).toBe(1);
+      1712 |               expect(committedId).not.toBe("");
+    > 1713 |               await expect(page.locator("#ds-title")).toBeDisabled();
+           |                                                       ^
+      1714 |               await expect(
+      1715 |                 page.getByRole("button", { name: copy.save, exact: true }),
+      1716 |               ).toBeDisabled();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1713:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-1e39e--run-response-stays-guarded-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-en-convergenc-1e39e--run-response-stays-guarded-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-en-convergenc-1e39e--run-response-stays-guarded-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-en-convergenc-1e39e--run-response-stays-guarded-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful save response stays guarded 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "درخواست ناموفق بود. دوباره تلاش کنید."
+    Received string:    "خطاهای اعتبارسنجیشما اجازه انجام این کار را ندارید."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+        11 × locator resolved to <div role="alert" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">…</div>
+           - unexpected value "خطاهای اعتبارسنجیشما اجازه انجام این کار را ندارید."
+
+
+      1703 |           try {
+      1704 |             if (phase === "save") {
+    > 1705 |               await expect(page.getByRole("alert")).toContainText(
+           |                                                     ^
+      1706 |                 copy.errors.request_failed,
+      1707 |               );
+      1708 |               expect(posts).toBe(0);
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1705:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-4f5e9-save-response-stays-guarded-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-4f5e9-save-response-stays-guarded-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-4f5e9-save-response-stays-guarded-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-4f5e9-save-response-stays-guarded-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful run response stays guarded 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  locator('#ds-title')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" locator('#ds-title') with timeout 5000ms
+      - waiting for locator('#ds-title')
+        14 × locator resolved to <input id="ds-title" data-slot="input" value="ISM browser 1791841457115" placeholder="مثلاً انتخاب پیمانکار" class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disab…/>
+           - unexpected value "enabled"
+
+
+      1711 |               expect(posts).toBe(1);
+      1712 |               expect(committedId).not.toBe("");
+    > 1713 |               await expect(page.locator("#ds-title")).toBeDisabled();
+           |                                                       ^
+      1714 |               await expect(
+      1715 |                 page.getByRole("button", { name: copy.save, exact: true }),
+      1716 |               ).toBeDisabled();
+        at /home/hossein/Desktop/projects/building-management/apps/web/e2e/tests/decision-ism.spec.ts:1713:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-ff0ab--run-response-stays-guarded-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: apps/web/test-results/decision-ism-fa-convergenc-ff0ab--run-response-stays-guarded-chromium-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    apps/web/test-results/decision-ism-fa-convergenc-ff0ab--run-response-stays-guarded-chromium-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace apps/web/test-results/decision-ism-fa-convergenc-ff0ab--run-response-stays-guarded-chromium-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful save response stays guarded 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › en convergence malformed successful run response stays guarded 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful save response stays guarded 
+    [chromium-desktop] › apps/web/e2e/tests/decision-ism.spec.ts:1592:5 › fa convergence malformed successful run response stays guarded 
