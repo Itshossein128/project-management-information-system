@@ -56,6 +56,17 @@ class TestDynamicRowCrud:
         response = api_client.get(rows_url(project, dynamic_table.slug))
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_member_without_view_project_permission_cannot_list(self, api_client, other_user, project, dynamic_table):
+        from master_data.models import MemberStatus, ProjectMember
+        ProjectMember.objects.create(
+            project=project,
+            user=other_user,
+            status=MemberStatus.ACTIVE,
+        )
+        api_client.force_authenticate(user=other_user)
+        response = api_client.get(rows_url(project, dynamic_table.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_create_list_get_update_delete_row(self, auth_client, project, dynamic_table):
         base = rows_url(project, dynamic_table.slug)
 
