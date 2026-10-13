@@ -38,7 +38,7 @@ export function KickoffCharterPanel({ projectId }: Props) {
   });
 
   const loaded = query.data ?? EMPTY;
-  const values = {
+  const values: KickoffCharter = {
     justification: form.justification || loaded.justification,
     success_criteria: form.success_criteria || loaded.success_criteria,
     constraints: form.constraints || loaded.constraints,

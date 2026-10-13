@@ -1,0 +1,18 @@
+--- apps/web/src/app/routes/project-list.tsx
++++ apps/web/src/app/routes/project-list.tsx
+@@ -27,13 +27,13 @@
+   const navigate = useNavigate();
+   const { data, isLoading, isError, refetch } = useQuery({
+     queryKey: ["projects"],
+-    queryFn: fetchProjects,
++    queryFn: () => fetchProjects(),
+   });
+   const { data: portfolio } = useQuery({
+     queryKey: ["portfolio-summary"],
+     queryFn: fetchPortfolioSummary,
+   });
+
+-  const projects = data?.results ?? [];
++  const projects = data?.data?.results ?? data?.results ?? [];
+
+   const columns = [

@@ -18,7 +18,7 @@ export function ValidationIssueList({ issues }: Props) {
       <ul className="list-disc space-y-1 ps-5">
         {issues.map((issue) => (
           <li key={`${issue.path}-${issue.code}-${issue.message}`}>
-            {formatIssueLabel(issue, t)}
+            {formatIssueLabel(issue, t as any)}
           </li>
         ))}
       </ul>

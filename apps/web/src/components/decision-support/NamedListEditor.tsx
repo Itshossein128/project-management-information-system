@@ -23,7 +23,7 @@ export function NamedListEditor({ label, values, onChange, disabled }: Props) {
     if (issues.length) {
       const first = issues[0]!;
       setLocalError(
-        localizeIssueMessage({ code: first.code, message: first.message }, t),
+        localizeIssueMessage({ code: first.code, message: first.message }, t as any),
       );
       return;
     }

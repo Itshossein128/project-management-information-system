@@ -1,0 +1,8 @@
+--- apps/web/src/components/activities/activities-grid.tsx
++++ apps/web/src/components/activities/activities-grid.tsx
+@@ -16,7 +16,6 @@
+   Search,
+   Trash2,
+-  Undo2,
+   Upload,
+ } from "lucide-react";

@@ -27,7 +27,7 @@ export default function ProjectListPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects"],
-    queryFn: fetchProjects,
+    queryFn: () => fetchProjects(),
   });
   const { data: portfolio } = useQuery({
     queryKey: ["portfolio-summary"],
