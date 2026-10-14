@@ -273,7 +273,18 @@ class TestWorkshopDraftPermissions:
         res = client.get(url)
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-        # Authenticated project member returns 200
+        # Authenticated project member without view_procurement permission returns 403
         client.force_authenticate(user=data['user_supervisor'])
+        res = client.get(url)
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+        # Grant view_procurement permission
+        from master_data.models import RolePermission
+        role_view_proc, _ = Role.objects.get_or_create(role_name='view_procurement')
+        RolePermission.objects.get_or_create(role=role_view_proc, permission_codename='view_procurement')
+        m_super = ProjectMember.objects.get(project=data['project'], user=data['user_supervisor'])
+        ProjectMemberRole.objects.create(member=m_super, role=role_view_proc)
+
+        # Authenticated project member with view_procurement permission returns 200
         res = client.get(url)
         assert res.status_code == status.HTTP_200_OK, res.data
