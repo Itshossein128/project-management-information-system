@@ -127,7 +127,7 @@
     "closeSubmenu": "Close submenu",
     "main": "Main",
     "sidebarHome": "Home",
-    "sidebarHr": "HR",
+    "sidebarHr": "Human resources",
     "sidebarProjects": "Projects",
     "projectOverview": "Overview",
     "projectWbs": "WBS",
@@ -147,8 +147,8 @@
     "projectAdmin": "Settings",
     "projectSyncConflicts": "Sync Conflicts",
     "settingsTemplates": "Templates",
-    "settingsRoles": "Roles",
-    "settingsOrgRefs": "Org references",
+    "settingsRoles": "Roles & permissions",
+    "settingsOrgRefs": "Organization references",
     "deptBuildings": "Buildings",
     "deptMechanical": "Mechanical",
     "deptSecurity": "Security",
@@ -181,7 +181,23 @@
     "projects": "Projects",
     "projectDashboard": "Role dashboard",
     "projectStandardReports": "Standard reports",
-    "executiveDashboard": "Portfolio dashboard"
+    "executiveDashboard": "Portfolio dashboard",
+    "section": {
+      "workspace": "Workspace",
+      "project": "Current project",
+      "administration": "Administration"
+    },
+    "workspaceSubtitle": "Project management",
+    "departments": "Departments",
+    "portfolioLiquidity": "Portfolio liquidity",
+    "projectNavigation": "Project navigation",
+    "projectWorkspace": "Project workspace",
+    "projectNavigationError": "Project tools could not be loaded. Try again.",
+    "dataAdministration": "Data administration",
+    "projectSubReports": "Discipline reports",
+    "projectConcreteOperations": "Concrete operations",
+    "projectStakeholders": "Stakeholders & communications",
+    "projectDataTables": "Project data & tables"
   },
   "hr": {
     "capacity": {
@@ -332,7 +348,8 @@
     "backToSignIn": "Back to sign in",
     "checkEmail": "Check your phone",
     "emailSent": "If an account exists for {{email}}, we've sent a password reset code.",
-    "failed": "Request failed. Try again."
+    "failed": "Request failed. Try again.",
+    "enterCode": "Enter reset code"
   },
   "resetPassword": {
     "title": "Set new password",
@@ -343,8 +360,9 @@
     "successTitle": "Password reset",
     "successMessage": "Your password has been updated. You can sign in now.",
     "passwordsMismatch": "Passwords do not match.",
-    "missingToken": "Missing reset token. Use the link from your email.",
-    "failed": "Reset failed."
+    "missingToken": "Enter the reset code sent to your phone.",
+    "failed": "Reset failed.",
+    "codeLabel": "Reset code"
   },
   "home": {
     "pageTitle": "Home | Velora",

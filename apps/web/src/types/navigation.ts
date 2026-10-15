@@ -17,6 +17,8 @@ export type AppRoute = {
 };
 
 export interface NavigationChildItem {
+  /** Hub links must not also match every nested project screen. */
+  activeExact?: boolean;
   label: string;
   /** When set, sidebar uses `t(labelI18nKey)` for the visible child label. */
   labelI18nKey?: string;
@@ -27,6 +29,8 @@ export interface NavigationChildItem {
 }
 
 export interface NavigationItem {
+  /** Separates workspace destinations from project tools and administration. */
+  section?: "workspace" | "project" | "administration";
   label: string;
   /** When set, `Sidebar` uses `t(labelI18nKey)` for the visible label. */
   labelI18nKey?: string;

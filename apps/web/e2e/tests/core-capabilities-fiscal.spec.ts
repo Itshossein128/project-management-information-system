@@ -13,31 +13,18 @@ import {
 } from "../helpers/project";
 
 async function openNavSection(page: Page, sectionLabel: string | RegExp) {
-  const label = page.locator('[id^="text-sidebarLabel-"]', {
-    hasText: sectionLabel,
-  });
-  // Prefer exact project-section labels over global "منابع انسانی".
-  const exact =
-    typeof sectionLabel === "string"
-      ? label.filter({ hasText: new RegExp(`^${sectionLabel}$`) })
-      : label;
-  const item = page.locator('[id^="container-sidebarItem-"]').filter({
-    has: exact.first(),
-  });
-  await expect(item.first()).toBeVisible({ timeout: 15_000 });
-  await item
-    .first()
-    .locator('[id^="button-sidebarExpand-"]')
-    .click();
+  const trigger = page.locator("#nav-projectNavigation").getByRole("button", { name: sectionLabel, exact: true });
+  await expect(trigger).toBeVisible({ timeout: 15_000 });
+  if (await trigger.getAttribute("aria-expanded") !== "true") await trigger.click();
 }
 
-async function expectMenuHrefs(
+async function expectNavHrefs(
   page: Page,
   opts: { include: string[]; exclude: string[] },
 ) {
-  const menu = page.getByRole("menu");
-  await expect(menu).toBeVisible({ timeout: 10_000 });
-  const hrefs = await menu.locator('a[role="menuitem"]').evaluateAll((nodes) =>
+  const nav = page.getByRole("dialog");
+  await expect(nav).toBeVisible({ timeout: 10_000 });
+  const hrefs = await nav.locator('a[href]').evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute("href") ?? ""),
   );
   for (const href of opts.include) {
@@ -63,7 +50,7 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
     await page.goto(`${base}/overview`);
     await expect(page.locator("#nav-mainSidebar")).toBeVisible({ timeout: 15_000 });
     await openNavSection(page, "کارگاه");
-    await expectMenuHrefs(page, {
+    await expectNavHrefs(page, {
       include: [`${base}/risk-register`, `${base}/daily-reports`],
       exclude: [],
     });
@@ -78,7 +65,7 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
     await page.goto(`${base}/overview`);
     await expect(page.locator("#nav-mainSidebar")).toBeVisible({ timeout: 15_000 });
     await openNavSection(page, "کارگاه");
-    await expectMenuHrefs(page, {
+    await expectNavHrefs(page, {
       include: [`${base}/daily-reports`],
       exclude: [`${base}/risk-register`],
     });
@@ -93,7 +80,7 @@ test.describe("Core principles — capability nav + fiscal corrective", () => {
     await page.goto(`${base}/overview`);
     await expect(page.locator("#nav-mainSidebar")).toBeVisible({ timeout: 15_000 });
     await openNavSection(page, "منابع");
-    await expectMenuHrefs(page, {
+    await expectNavHrefs(page, {
       include: [`${base}/equipment-utilization`],
       exclude: [`${base}/manpower`, `${base}/leave-requests`],
     });

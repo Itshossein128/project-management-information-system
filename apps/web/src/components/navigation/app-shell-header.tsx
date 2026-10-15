@@ -15,14 +15,14 @@ export interface AppShellHeaderProps {
 }
 
 /**
- * Top bar for the app shell. Sidebar is fixed (Home + HR); it does not reflect
- * the current business or project page.
+ * Global utilities; workspace and contextual project links live in the sidebar.
  */
 export function AppShellHeader({ className }: AppShellHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const openMobileNav = useShellStore((s) => s.openMobileNav);
+  const mobileNavOpen = useShellStore((s) => s.mobileNavOpen);
   const displayName =
     user?.full_name ||
     `${user?.first_name ?? ""} ${user?.last_name ?? ""}`.trim() ||
@@ -50,8 +50,11 @@ export function AppShellHeader({ className }: AppShellHeaderProps) {
                 type="button"
                 variant="outline"
                 size="icon-sm"
-                className="shrink-0 lg:hidden"
+                className="min-h-11 min-w-11 shrink-0 lg:hidden"
                 aria-label={t("nav.openMenu")}
+                aria-haspopup="dialog"
+                aria-expanded={mobileNavOpen}
+                aria-controls={mobileNavOpen ? "container-mobileNavigation" : undefined}
                 onClick={openMobileNav}
               >
                 <Menu id="icon-menu" className="size-4" aria-hidden />

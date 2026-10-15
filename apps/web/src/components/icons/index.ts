@@ -1,27 +1,25 @@
 import {
-  FaBuilding,
-  FaBusinessTime,
-  FaClipboardList,
-  FaShieldAlt,
-  FaTruck,
-  FaUsers,
-  FaWrench,
-} from "react-icons/fa";
-import { MdBolt, MdDashboard, MdSettings, MdWarehouse } from "react-icons/md";
+  Banknote, Bolt, BriefcaseBusiness, Building2, ClipboardList, FolderKanban,
+  LayoutDashboard, Layers3, Network, Settings2, ShieldCheck, Truck,
+  UsersRound, Warehouse, Wrench,
+} from "lucide-react";
 
 export const ICONS = {
-  dashboard: MdDashboard,
-  users: FaUsers,
-  business: FaBusinessTime,
-  settings: MdSettings,
-  building: FaBuilding,
-  wrench: FaWrench,
-  shield: FaShieldAlt,
-  truck: FaTruck,
-  warehouse: MdWarehouse,
-  bolt: MdBolt,
-  clipboard: FaClipboardList,
+  dashboard: LayoutDashboard,
+  users: UsersRound,
+  business: BriefcaseBusiness,
+  settings: Settings2,
+  building: Building2,
+  projects: FolderKanban,
+  wrench: Wrench,
+  shield: ShieldCheck,
+  truck: Truck,
+  warehouse: Warehouse,
+  bolt: Bolt,
+  clipboard: ClipboardList,
+  cashflow: Banknote,
+  organization: Network,
+  templates: Layers3,
 } as const;
 
 export type IconName = keyof typeof ICONS;
-

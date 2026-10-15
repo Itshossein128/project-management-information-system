@@ -3,19 +3,35 @@ import type { NavigationItem } from "@/types/navigation";
 import { ROLES } from "./roles";
 
 /**
- * Global sidebar: Home, Projects, HR hub, and settings for admins.
+ * Daily work first; organization configuration and access management last.
  */
 export const mainSidebarNavigation: NavigationItem[] = [
   {
     label: "Projects",
+    section: "workspace",
     labelI18nKey: "nav.sidebarProjects",
-    icon: "building",
+    icon: "projects",
     path: PATHS.PROJECT,
-    activePathPrefix: `/${PATHS.PROJECT}`,
-    activePathExclude: `^/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}$`,
+    activePathPrefix: PATHS.PROJECT,
+    activePathExclude: `^/${PATHS.PROJECT}/setup(?:/|$)`,
+  },
+  {
+    label: "Portfolio dashboard",
+    section: "workspace",
+    labelI18nKey: "nav.executiveDashboard",
+    icon: "dashboard",
+    path: PATHS.EXECUTIVE_DASHBOARD,
+  },
+  {
+    label: "Portfolio liquidity",
+    section: "workspace",
+    labelI18nKey: "nav.portfolioLiquidity",
+    icon: "cashflow",
+    path: PATHS.PORTFOLIO_LIQUIDITY,
   },
   {
     label: "HR",
+    section: "workspace",
     labelI18nKey: "nav.sidebarHr",
     icon: "users",
     path: PATHS.HR,
@@ -23,27 +39,38 @@ export const mainSidebarNavigation: NavigationItem[] = [
     activePathPrefix: PATHS.HR,
   },
   {
+    label: "Data administration",
+    section: "administration",
+    labelI18nKey: "nav.dataAdministration",
+    icon: "settings",
+    path: `${PATHS.PROJECT}/setup`,
+    roles: [ROLES.BUSINESS_SETUP],
+    activeExact: true,
+  },
+  {
+    label: "Organization references",
+    section: "administration",
+    labelI18nKey: "nav.settingsOrgRefs",
+    icon: "organization",
+    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`,
+    roles: [ROLES.ADMIN, ROLES.HR, ROLES.BUSINESS_SETUP],
+  },
+  {
     label: "Templates",
+    section: "administration",
     labelI18nKey: "nav.settingsTemplates",
-    icon: "building",
+    icon: "templates",
     path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`,
     roles: [ROLES.ADMIN, ROLES.HR, ROLES.BUSINESS_SETUP],
     activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`,
   },
   {
     label: "Roles",
+    section: "administration",
     labelI18nKey: "nav.settingsRoles",
     icon: "shield",
     path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
     roles: [ROLES.ADMIN, ROLES.HR],
     activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
-  },
-  {
-    label: "Org refs",
-    labelI18nKey: "nav.settingsOrgRefs",
-    icon: "building",
-    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`,
-    roles: [ROLES.ADMIN, ROLES.HR, ROLES.BUSINESS_SETUP],
-    activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`,
   },
 ];

@@ -12,6 +12,7 @@ import {
   projectStatusI18nKey,
 } from "@/components/ui/badge";
 import { Button } from "@/components/ui/sprint-button";
+import { buttonVariants } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
@@ -27,7 +28,7 @@ export default function ProjectListPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects"],
-    queryFn: fetchProjects,
+    queryFn: () => fetchProjects(),
   });
   const { data: portfolio } = useQuery({
     queryKey: ["portfolio-summary"],
@@ -93,9 +94,7 @@ export default function ProjectListPage() {
         title={t("project.title")}
         subtitle={t("project.subtitle")}
         actions={
-          <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-            <Button variant='primary'>{t("project.create")}</Button>
-          </Link>
+          <Link className={buttonVariants()} to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>{t("project.create")}</Link>
         }
       />
 
@@ -133,9 +132,7 @@ export default function ProjectListPage() {
           icon={<FolderKanban />}
           title={t("project.empty")}
           action={
-            <Link to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>
-              <Button variant='primary'>{t("project.create")}</Button>
-            </Link>
+            <Link className={buttonVariants()} to={`/${PATHS.PROJECT}/${PATHS.PROJECT_NEW}`}>{t("project.create")}</Link>
           }
         />
       ) : (

@@ -42,35 +42,41 @@ function filterNavByCapabilities(
     .filter((item): item is NavigationItem => item != null);
 }
 
+/** Global destinations depend only on the user's roles, never on the page. */
 export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
-  const { pathname } = useLocation();
-
-  const filtered = useMemo(
-    () =>
-      mainSidebarNavigation.filter((item) => {
-        if (!item.roles) return true;
-        if (!roles) return false;
-
-        return roles.some((role) => item.roles!.includes(role));
-      }),
+  return useMemo(
+    () => mainSidebarNavigation.filter((item) =>
+      !item.roles || Boolean(roles?.some((role) => item.roles!.includes(role))),
+    ),
     [roles],
   );
+}
 
+/** Contextual project tools are rendered outside the global sidebar. */
+export function useProjectNavigation() {
+  const { pathname } = useLocation();
   const projectId = pathname.match(PROJECT_WITH_ID)?.[1];
-
-  const { data: capabilities } = useQuery({
+  const capabilities = useQuery({
     queryKey: ["project-capabilities", projectId],
     queryFn: () => listCapabilities(projectId!),
     enabled: Boolean(projectId),
     staleTime: 30_000,
   });
-
-  return useMemo(() => {
-    if (!projectId) return filtered;
-    const projectItems = filterNavByCapabilities(
-      buildProjectNavItems(projectId),
-      capabilities,
-    );
-    return [...filtered, ...projectItems, ...buildBusinessNavItems(projectId)];
-  }, [filtered, projectId, capabilities]);
+  const items = useMemo<NavigationItem[]>(() => {
+    if (!projectId) return [];
+    const projectItems = filterNavByCapabilities(buildProjectNavItems(projectId), capabilities.data);
+    const departments = buildBusinessNavItems(projectId);
+    return [
+      ...projectItems.filter((item) => item.labelI18nKey !== "nav.projectAdmin"),
+      {
+        label: "Departments",
+        labelI18nKey: "nav.departments",
+        icon: "organization" as const,
+        path: departments[0].path,
+        children: departments.map(({ label, labelI18nKey, path }) => ({ label, labelI18nKey, path })),
+      },
+      ...projectItems.filter((item) => item.labelI18nKey === "nav.projectAdmin"),
+    ];
+  }, [projectId, capabilities.data]);
+  return { projectId, items, capabilities };
 }

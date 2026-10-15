@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { NavLink, useLocation } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/app/lib/utils";
-import { isRTL } from "@/app/lib/i18n";
 import { ICONS, type IconName } from "@/components/icons";
 import type { NavigationChildItem } from "@/types/navigation";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export interface SidebarItemProps {
   name: string;
@@ -19,232 +18,90 @@ export interface SidebarItemProps {
   children?: NavigationChildItem[];
 }
 
-function isNavActive(
-  pathname: string,
-  path: string,
-  options: {
-    activePathPrefix?: string;
-    activePathExclude?: string;
-    activeExact?: boolean;
-  },
-): boolean {
-  const base = `/${path}`.replace(/\/+/g, "/") || "/";
-
-  if (options.activePathPrefix) {
-    const prefix =
-      `/${options.activePathPrefix}`.replace(/\/+/g, "/") || "/";
-    const prefixMatches =
-      pathname === prefix || pathname.startsWith(`${prefix}/`);
-    if (!prefixMatches) return false;
-    if (options.activePathExclude) {
-      const re = new RegExp(options.activePathExclude);
-      if (re.test(pathname)) return false;
-    }
-    return true;
-  }
-
-  if (options.activeExact) {
-    return pathname === base || pathname === `${base}/`;
-  }
-
-  return pathname === base || pathname.startsWith(`${base}/`);
+function normalizePath(path: string): string {
+  return `/${path}`.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
 }
 
-function childPathIsNavigable(path: string): boolean {
-  return !path.includes(":");
+function matchesPath(pathname: string, path: string): boolean {
+  const target = normalizePath(path);
+  return pathname === target || pathname.startsWith(`${target}/`);
 }
 
-function normalizeNavPath(path: string): string {
-  return `/${path}`.replace(/\/+/g, "/");
-}
-
-function isChildRouteActive(pathname: string, childPath: string): boolean {
-  const childTo = normalizeNavPath(childPath);
-  return pathname === childTo || pathname.startsWith(`${childTo}/`);
-}
-
-const itemBaseClass =
-  "group flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-center text-xs font-medium text-sidebar-foreground transition-all duration-200 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:outline-none";
-
-const itemActiveClass =
-  "bg-sidebar-primary text-sidebar-primary-foreground shadow-[var(--shadow-sm)] ring-1 ring-sidebar-ring/30";
-
-const iconClass =
-  "size-7 shrink-0 opacity-90 transition-transform duration-200 group-hover:scale-110";
+const itemClass = "flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-start text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring motion-reduce:transition-none";
+const activeClass = "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground";
 
 export const SidebarItem = ({
-  name,
-  label,
-  icon,
-  path,
-  activePathPrefix,
-  activePathExclude,
-  activeExact,
-  children,
+  name, label, icon, path, activePathPrefix, activePathExclude, activeExact, children,
 }: SidebarItemProps) => {
   const { t } = useTranslation();
-  const location = useLocation();
+  const { pathname } = useLocation();
   const Icon = ICONS[icon];
-
-  const to = normalizeNavPath(path);
-
-  const active = useMemo(
-    () =>
-      isNavActive(location.pathname, path, {
-        activePathPrefix,
-        activePathExclude,
-        activeExact,
-      }),
-    [location.pathname, path, activePathPrefix, activePathExclude, activeExact],
+  const navigableChildren = useMemo(
+    () => children?.filter((child) => !child.path.includes(":")) ?? [],
+    [children],
   );
+  // A parent route such as /settings must not compete with /settings/members.
+  const currentChild = navigableChildren
+    .filter((child) => matchesPath(pathname, child.path))
+    .sort((a, b) => b.path.length - a.path.length)[0];
+  const active = activePathPrefix
+    ? matchesPath(pathname, activePathPrefix) && !(activePathExclude && new RegExp(activePathExclude).test(pathname))
+    : activeExact ? normalizePath(pathname) === normalizePath(path) : matchesPath(pathname, path);
+  const sectionActive = Boolean(currentChild);
+  const [open, setOpen] = useState(sectionActive);
 
-  const hasChildren = Boolean(children?.length);
-  const navigableChildren =
-    children?.filter((c) => childPathIsNavigable(c.path)) ?? [];
-
-  const childActive = useMemo(
-    () =>
-      (children ?? [])
-        .filter((c) => childPathIsNavigable(c.path))
-        .some((c) => isChildRouteActive(location.pathname, c.path)),
-    [location.pathname, children],
-  );
-
-  const [open, setOpen] = useState(false);
-  const closeTimer = useRef<number | null>(null);
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current) {
-      window.clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-    }
-  }, []);
-
-  const openFlyout = useCallback(() => {
-    cancelClose();
-    setOpen(true);
-  }, [cancelClose]);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimer.current = window.setTimeout(() => setOpen(false), 140);
-  }, [cancelClose]);
-
-  // Close the flyout whenever the route changes.
   useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
+    setOpen(sectionActive);
+  }, [pathname, sectionActive]);
 
-  useEffect(() => () => cancelClose(), [cancelClose]);
-
-  if (hasChildren && navigableChildren.length > 0) {
-    const parentHighlighted = active || childActive;
+  if (navigableChildren.length) {
     return (
-      <div id={`container-sidebarItem-${name}`} className="px-2 pb-1">
-        <Popover open={open} onOpenChange={setOpen} modal={false}>
-          <PopoverTrigger asChild>
-            <div
-              className="flex items-stretch gap-0.5"
-              onMouseEnter={openFlyout}
-              onMouseLeave={scheduleClose}
-            >
-          <NavLink
-            id={`button-sidebarNav-${name}`}
-            to={to}
-            end={Boolean(activeExact)}
-            className={cn(
-              itemBaseClass,
-              "flex-1",
-              parentHighlighted && itemActiveClass,
-            )}
-          >
-            <Icon aria-hidden className={iconClass} />
-            <span id={`text-sidebarLabel-${name}`} className="leading-tight">
-              {label}
-            </span>
-          </NavLink>
-          <button
-            id={`button-sidebarExpand-${name}`}
-            type="button"
-            aria-expanded={open}
-            aria-haspopup="menu"
-            aria-label={open ? t("nav.closeSubmenu") : t("nav.openSubmenu")}
-            className={cn(
-              "flex w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-sidebar-foreground/80 transition-colors",
-              "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              "focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:outline-none",
-              open && "bg-sidebar-accent text-sidebar-accent-foreground",
-            )}
-            onClick={() => (open ? setOpen(false) : openFlyout())}
-          >
-            <ChevronDown
-              aria-hidden="true"
-              className={cn(
-                "size-4 transition-transform duration-200",
-                open && "-rotate-90",
-              )}
-            />
-          </button>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent
-            role="menu"
-            aria-label={label}
-            onMouseEnter={cancelClose}
-            onMouseLeave={scheduleClose}
-            side={isRTL() ? "left" : "right"}
-            align="start"
-            sideOffset={12}
-            className="z-[70] flex w-56 flex-col overflow-y-auto rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-[var(--shadow-lg)]"
-          >
-            <div className="px-2 pb-1.5 pt-1 text-xs font-semibold tracking-wide text-muted-foreground">
-              {label}
-            </div>
-            <ul className="flex flex-col gap-0.5">
-              {navigableChildren.map((child, index) => (
-                <li key={`${child.path}-${index}`}>
-                  <NavLink
-                        id={`button-sidebarSubnav-${name}-${index}`}
-                        role="menuitem"
-                        to={normalizeNavPath(child.path)}
-                        onClick={() => setOpen(false)}
-                        className={({ isActive }) =>
-                          cn(
-                            "block rounded-lg px-2.5 py-2 text-sm leading-snug transition-colors",
-                            "text-foreground/85 hover:bg-muted hover:text-foreground",
-                            "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
-                            isActive &&
-                              "bg-gradient-to-br from-brand-500/15 to-brand-700/10 font-medium text-brand-700 dark:text-brand-300",
-                          )
-                        }
-                      >
-                    {child.labelI18nKey
-                      ? t(child.labelI18nKey, { defaultValue: child.label })
-                      : child.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </PopoverContent>
-        </Popover>
-      </div>
+      <Collapsible id={`container-sidebarItem-${name}`} open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger
+          id={`button-sidebarExpand-${name}`}
+          className={cn(itemClass, sectionActive && "bg-sidebar-accent font-semibold text-sidebar-accent-foreground")}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && open) {
+              event.stopPropagation();
+              setOpen(false);
+            }
+          }}
+        >
+          <Icon aria-hidden="true" className="size-5 shrink-0" />
+          <span id={`text-sidebarLabel-${name}`} className="min-w-0 flex-1">{label}</span>
+          <ChevronDown aria-hidden="true" className={cn("size-4 shrink-0 transition-transform motion-reduce:transition-none", open && "rotate-180")} />
+        </CollapsibleTrigger>
+        <CollapsibleContent id={`list-sidebarSubnav-${name}`}>
+          <ul aria-label={label} className="ms-5 mt-1 flex flex-col gap-0.5 border-s border-sidebar-border ps-3">
+            {navigableChildren.map((child, index) => (
+              <li key={child.path}>
+                <Link
+                  id={`button-sidebarSubnav-${name}-${index}`}
+                  to={normalizePath(child.path)}
+                  aria-current={currentChild === child ? "page" : undefined}
+                  className={cn(itemClass, "text-[13px] font-normal", currentChild === child && activeClass)}
+                >
+                  {child.labelI18nKey ? t(child.labelI18nKey, { defaultValue: child.label }) : child.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
     );
   }
 
   return (
-    <div id={`container-sidebarItem-${name}`} className="px-2 pb-1">
-      <NavLink
+    <div id={`container-sidebarItem-${name}`}>
+      <Link
         id={`button-sidebarNav-${name}`}
-        to={to}
-        end={Boolean(activeExact)}
-        className={cn(itemBaseClass, active && itemActiveClass)}
-        aria-current={active ? "page" : undefined}
+        to={normalizePath(path)}
+        className={cn(itemClass, active && activeClass)}
+        aria-current={active ? normalizePath(pathname) === normalizePath(path) ? "page" : "location" : undefined}
       >
-        <Icon aria-hidden className={iconClass} />
-        <span id={`text-sidebarLabel-${name}`} className="leading-tight">
-          {label}
-        </span>
-      </NavLink>
+        <Icon aria-hidden="true" className="size-5 shrink-0" />
+        <span id={`text-sidebarLabel-${name}`}>{label}</span>
+      </Link>
     </div>
   );
 };

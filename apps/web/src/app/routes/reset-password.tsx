@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   Label,
+  Input,
   PasswordInput,
 } from "@/components/form";
 import { AppPreferencesBar } from "@/components/AppPreferencesBar";
@@ -19,7 +20,7 @@ import { apiFetch } from "src/app/lib/api-client";
 export default function ResetPassword() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") ?? "";
+  const [token, setToken] = useState(searchParams.get("token") ?? "");
 
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -101,6 +102,18 @@ export default function ResetPassword() {
                 {error}
               </p>
             )}
+            <div className='grid gap-2'>
+              <Label htmlFor='reset-code'>{t("resetPassword.codeLabel")}</Label>
+              <Input
+                id='reset-code'
+                name='reset_code'
+                autoComplete='one-time-code'
+                inputMode='numeric'
+                value={token}
+                onChange={(e) => setToken(e.target.value.trim())}
+                required
+              />
+            </div>
             <div className='grid gap-2'>
               <Label htmlFor='reset-password'>{t("common.newPassword")}</Label>
               <PasswordInput

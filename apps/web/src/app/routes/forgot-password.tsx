@@ -64,8 +64,11 @@ export default function ForgotPassword() {
               {t("forgotPassword.emailSent", { email: phoneNumber })}
             </CardDescription>
           </CardHeader>
-          <CardFooter>
+          <CardFooter className='flex flex-col gap-2'>
             <Button asChild>
+              <Link to='/reset-password'>{t("forgotPassword.enterCode")}</Link>
+            </Button>
+            <Button variant='link' asChild>
               <Link to='/login'>{t("forgotPassword.backToSignIn")}</Link>
             </Button>
           </CardFooter>

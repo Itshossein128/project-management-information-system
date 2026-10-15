@@ -147,8 +147,8 @@
     "projectAdmin": "تنظیمات",
     "projectSyncConflicts": "تعارض‌های همگام‌سازی",
     "settingsTemplates": "قالب‌ها",
-    "settingsRoles": "نقش‌ها",
-    "settingsOrgRefs": "مراجع سازمانی",
+    "settingsRoles": "نقش‌ها و دسترسی‌ها",
+    "settingsOrgRefs": "اطلاعات پایه سازمان",
     "deptBuildings": "ابنیه",
     "deptMechanical": "مکانیک",
     "deptSecurity": "حراست",
@@ -181,7 +181,23 @@
     "projects": "پروژه‌ها",
     "projectDashboard": "داشبورد نقش",
     "projectStandardReports": "گزارش‌های استاندارد",
-    "executiveDashboard": "داشبورد پرتفولیو"
+    "executiveDashboard": "داشبورد پرتفولیو",
+    "section": {
+      "workspace": "فضای کاری",
+      "project": "پروژه جاری",
+      "administration": "مدیریت سازمان"
+    },
+    "workspaceSubtitle": "مدیریت پروژه",
+    "departments": "واحدهای تخصصی",
+    "portfolioLiquidity": "نقدینگی سبد پروژه‌ها",
+    "projectNavigation": "ناوبری پروژه",
+    "projectWorkspace": "فضای کاری پروژه",
+    "projectNavigationError": "ابزارهای پروژه بارگذاری نشد. دوباره تلاش کنید.",
+    "dataAdministration": "مدیریت داده‌ها",
+    "projectSubReports": "گزارش‌های تخصصی",
+    "projectConcreteOperations": "عملیات بتن",
+    "projectStakeholders": "ذی‌نفعان و ارتباطات",
+    "projectDataTables": "داده‌ها و جداول پروژه"
   },
   "hr": {
     "capacity": {
@@ -332,7 +348,8 @@
     "backToSignIn": "بازگشت به صفحه ورود",
     "checkEmail": "پیامک خود را بررسی کنید",
     "emailSent": "اگر حسابی با شماره {{email}} وجود داشته باشد، کد بازنشانی رمز عبور برایتان ارسال شده است.",
-    "failed": "درخواست ناموفق بود. دوباره تلاش کنید."
+    "failed": "درخواست ناموفق بود. دوباره تلاش کنید.",
+    "enterCode": "وارد کردن کد بازیابی"
   },
   "resetPassword": {
     "title": "تنظیم رمز عبور جدید",
@@ -343,8 +360,9 @@
     "successTitle": "رمز عبور بازنشانی شد",
     "successMessage": "رمز عبور شما به‌روزرسانی شد. اکنون می‌توانید وارد شوید.",
     "passwordsMismatch": "رمزهای عبور مطابقت ندارند.",
-    "missingToken": "توکن بازنشانی یافت نشد. از لینک ارسال شده در ایمیل استفاده کنید.",
-    "failed": "بازنشانی ناموفق بود."
+    "missingToken": "کد بازیابی ارسال‌شده به تلفن خود را وارد کنید.",
+    "failed": "بازنشانی ناموفق بود.",
+    "codeLabel": "کد بازیابی"
   },
   "home": {
     "pageTitle": "خانه | Velora",

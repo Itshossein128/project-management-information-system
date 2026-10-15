@@ -205,7 +205,7 @@ export default function BusinessUsersPage() {
                 variant='outline'
                 onClick={() =>
                   navigate(
-                    `/${PATHS.API_PROJECTS}/${businessId ?? ""}/job-positions`,
+                    `/${PATHS.PROJECT}/${businessId ?? ""}/job-positions`,
                   )
                 }
               >

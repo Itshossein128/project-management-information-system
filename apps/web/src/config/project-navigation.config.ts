@@ -135,6 +135,16 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           path: `${base}/${PATHS.PROJECT_SYNC_CONFLICTS}`,
         },
         {
+          label: "Discipline reports",
+          labelI18nKey: "nav.projectSubReports",
+          path: `${base}/${PATHS.PROJECT_SUB_REPORTS}`,
+        },
+        {
+          label: "Concrete operations",
+          labelI18nKey: "nav.projectConcreteOperations",
+          path: `${base}/${PATHS.PROJECT_CONCRETE_OPERATIONS}`,
+        },
+        {
           label: "Weather",
           labelI18nKey: "nav.projectWeather",
           path: `${base}/${PATHS.PROJECT_WEATHER}`,
@@ -302,6 +312,17 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           label: "Members",
           labelI18nKey: "nav.projectMembers",
           path: `${base}/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_MEMBERS}`,
+        },
+        {
+          label: "Stakeholders & communications",
+          labelI18nKey: "nav.projectStakeholders",
+          path: `${base}/${PATHS.PROJECT_STAKEHOLDERS}`,
+        },
+        {
+          label: "Project data & tables",
+          labelI18nKey: "nav.projectDataTables",
+          path: base,
+          activeExact: true,
         },
       ],
     },

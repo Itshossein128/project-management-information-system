@@ -259,7 +259,7 @@ export default function BusinessSetupSchema() {
       <div className='page-main mx-auto max-w-4xl !p-0'>
         <div className='flex flex-wrap items-center gap-2 gap-y-1 sm:gap-3'>
           <Link
-            to={`/${PATHS.BUSINESS}`}
+            to={`/${PATHS.BUSINESS}/setup`}
             className='text-muted-foreground hover:underline'
           >
             Business setup

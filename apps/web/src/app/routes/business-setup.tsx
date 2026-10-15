@@ -32,7 +32,7 @@ interface BusinessesListResponse {
   count: number;
   next: string | null;
   previous: string | null;
-  results: BusinessItem[];
+  results: Array<BusinessItem & { project_id?: string; project_name?: string; project_code?: string }>;
 }
 
 export default function BusinessSetup() {
@@ -63,7 +63,12 @@ export default function BusinessSetup() {
       }).toString()}`,
     )
       .then((data) => {
-        setBusinesses(data.results);
+        setBusinesses(data.results.map((row) => ({
+          ...row,
+          id: row.project_id ?? row.id,
+          name: row.project_name ?? row.name,
+          slug: row.project_code ?? row.slug,
+        })));
         setCount(data.count ?? data.results.length);
         setError(null);
       })
