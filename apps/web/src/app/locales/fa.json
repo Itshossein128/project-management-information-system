@@ -85,7 +85,12 @@
     "block_engineer": "مهندس بلوک",
     "technical_office": "دفتر فنی",
     "workshop_supervisor": "سرپرست کارگاه",
-    "ceo": "مدیرعامل"
+    "ceo": "مدیرعامل",
+    "executive_approver": "تصویب‌کننده ارشد",
+    "project_controls": "کنترل پروژه",
+    "site_specialist": "کارشناس کارگاه",
+    "supervisor_consultant": "ناظر / مشاور",
+    "hr_officer": "کارشناس منابع انسانی"
   },
   "roleDescriptions": {
     "project_manager": "دسترسی کامل به همه ماژول‌های پروژه.",
@@ -95,7 +100,12 @@
     "finance_manager": "مدیریت مالی و قراردادها.",
     "procurement_officer": "تدارکات و بارگذاری اسناد.",
     "document_controller": "مدیریت اسناد.",
-    "viewer": "دسترسی فقط‌خواندنی به داده‌های پروژه."
+    "viewer": "دسترسی فقط‌خواندنی به داده‌های پروژه.",
+    "executive_approver": "تصویب‌کننده ارشد / کمیته راهبری.",
+    "project_controls": "کنترل پروژه و شاخص‌های زمان‌بندی/EVM.",
+    "site_specialist": "کارشناس کارگاه.",
+    "supervisor_consultant": "ناظر / مشاور (عمدتاً مشاهده).",
+    "hr_officer": "منابع انسانی و ظرفیت."
   },
   "form": {
     "sticky": {
@@ -1940,5 +1950,46 @@
     "reasonRequired": "دلیل (الزامی)",
     "overrideSaved": "اصلاح ثبت شد",
     "manualSaved": "پیشرفت دستی ثبت شد"
+  },
+  "permissionLabels": {
+    "view_project": "مشاهده پروژه",
+    "edit_project": "ویرایش پروژه",
+    "approve_project": "تأیید چرخه عمر پروژه و درخواست‌های تغییر",
+    "manage_members": "مدیریت اعضا",
+    "view_wbs": "مشاهده ساختار شکست کار",
+    "edit_wbs": "ویرایش ساختار شکست کار",
+    "view_activities": "مشاهده فعالیت‌ها",
+    "edit_activities": "ویرایش فعالیت‌ها",
+    "view_costs": "مشاهده هزینه‌ها",
+    "edit_costs": "ویرایش هزینه‌ها",
+    "approve_costs": "تأیید هزینه‌ها",
+    "view_suppliers": "مشاهده تأمین‌کنندگان",
+    "edit_suppliers": "ویرایش تأمین‌کنندگان",
+    "view_reports": "مشاهده گزارش‌ها",
+    "edit_reports": "ویرایش گزارش‌ها",
+    "approve_reports": "تأیید گزارش‌ها",
+    "view_contracts": "مشاهده قراردادها",
+    "edit_contracts": "ویرایش قراردادها",
+    "view_ipcs": "مشاهده صورت‌وضعیت‌ها",
+    "edit_ipcs": "ویرایش صورت‌وضعیت‌ها",
+    "approve_ipcs": "تأیید صورت‌وضعیت‌ها",
+    "view_cashflow": "مشاهده جریان نقدی",
+    "edit_cashflow": "ویرایش جریان نقدی",
+    "view_procurement": "مشاهده تدارکات",
+    "edit_procurement": "ویرایش تدارکات",
+    "approve_procurement": "تأیید تدارکات",
+    "view_documents": "مشاهده اسناد",
+    "upload_documents": "بارگذاری اسناد",
+    "view_correspondence": "مشاهده مکاتبات",
+    "edit_correspondence": "ویرایش مکاتبات",
+    "view_sensitive_contacts": "مشاهده اطلاعات تماس حساس ذی‌نفعان",
+    "view_dashboard": "مشاهده داشبورد",
+    "view_hr": "مشاهده منابع انسانی و ظرفیت",
+    "edit_hr": "ویرایش منابع انسانی و ظرفیت",
+    "approve_hr": "تأیید استثناهای ظرفیت منابع انسانی",
+    "view_wage": "مشاهده نرخ دستمزد و نیروی کار",
+    "edit_wage": "ویرایش نرخ دستمزد و نیروی کار",
+    "view_decision_support": "مشاهده تصمیم‌یار",
+    "edit_decision_support": "ویرایش تصمیم‌یار"
   }
 }

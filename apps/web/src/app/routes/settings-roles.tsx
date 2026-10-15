@@ -26,6 +26,7 @@ import { Modal } from "@/components/overlay/modal";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/app/contexts/auth-context";
 import { ROLES } from "@/config/roles";
+import { formatPermissionLabel } from "@/app/lib/permission-labels";
 
 export default function SettingsRolesPage() {
   const { t } = useTranslation();
@@ -293,7 +294,7 @@ export default function SettingsRolesPage() {
                               disabled={selectedRole.is_system}
                               onChange={() => togglePermission(p.codename)}
                             />
-                            <span>{p.label}</span>
+                            <span>{formatPermissionLabel(p.codename, p.label, t)}</span>
                           </label>
                         ))}
                       </div>

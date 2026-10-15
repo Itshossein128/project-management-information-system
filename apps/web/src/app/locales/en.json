@@ -85,7 +85,12 @@
     "block_engineer": "Block engineer",
     "technical_office": "Technical office",
     "workshop_supervisor": "Workshop supervisor",
-    "ceo": "CEO"
+    "ceo": "CEO",
+    "executive_approver": "Executive approver",
+    "project_controls": "Project controls",
+    "site_specialist": "Site specialist",
+    "supervisor_consultant": "Supervisor / consultant",
+    "hr_officer": "HR officer"
   },
   "roleDescriptions": {
     "project_manager": "Full access to all project modules.",
@@ -95,7 +100,12 @@
     "finance_manager": "Financial and contract management.",
     "procurement_officer": "Procurement and document upload.",
     "document_controller": "Document management.",
-    "viewer": "Read-only access to project data."
+    "viewer": "Read-only access to project data.",
+    "executive_approver": "Senior approver / steering committee.",
+    "project_controls": "Project controls and scheduling / earned value indicators.",
+    "site_specialist": "Site specialist.",
+    "supervisor_consultant": "Supervisor / consultant (primarily read-only).",
+    "hr_officer": "Human resources and capacity."
   },
   "form": {
     "sticky": {
@@ -1940,5 +1950,46 @@
     "reasonRequired": "Reason (required)",
     "overrideSaved": "Override saved",
     "manualSaved": "Manual progress saved"
+  },
+  "permissionLabels": {
+    "view_project": "View project",
+    "edit_project": "Edit project",
+    "approve_project": "Approve project lifecycle and change requests",
+    "manage_members": "Manage members",
+    "view_wbs": "View WBS",
+    "edit_wbs": "Edit WBS",
+    "view_activities": "View activities",
+    "edit_activities": "Edit activities",
+    "view_costs": "View costs",
+    "edit_costs": "Edit costs",
+    "approve_costs": "Approve costs",
+    "view_suppliers": "View suppliers",
+    "edit_suppliers": "Edit suppliers",
+    "view_reports": "View reports",
+    "edit_reports": "Edit reports",
+    "approve_reports": "Approve reports",
+    "view_contracts": "View contracts",
+    "edit_contracts": "Edit contracts",
+    "view_ipcs": "View IPCs",
+    "edit_ipcs": "Edit IPCs",
+    "approve_ipcs": "Approve IPCs",
+    "view_cashflow": "View cash flow",
+    "edit_cashflow": "Edit cash flow",
+    "view_procurement": "View procurement",
+    "edit_procurement": "Edit procurement",
+    "approve_procurement": "Approve procurement",
+    "view_documents": "View documents",
+    "upload_documents": "Upload documents",
+    "view_correspondence": "View correspondence",
+    "edit_correspondence": "Edit correspondence",
+    "view_sensitive_contacts": "View stakeholder sensitive contact fields",
+    "view_dashboard": "View dashboard",
+    "view_hr": "View HR & capacity",
+    "edit_hr": "Edit HR & capacity",
+    "approve_hr": "Approve HR capacity exceptions",
+    "view_wage": "View wage and labor rates",
+    "edit_wage": "Edit wage and labor rates",
+    "view_decision_support": "View decision support",
+    "edit_decision_support": "Edit decision support"
   }
 }

@@ -26,6 +26,7 @@ import { Input } from "@/components/form";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import { usePermission } from "@/app/contexts/project-context";
+import { formatPermissionLabel } from "@/app/lib/permission-labels";
 
 interface AddMemberDrawerProps {
   projectId: string;
@@ -218,7 +219,7 @@ export function AddMemberDrawer({
             <p className="text-sm font-medium">{t("projectMembers.effectiveSummary")}</p>
             <p className="mt-1 text-xs text-muted-foreground">
               {grantedSummary.length > 0
-                ? grantedSummary.map((p) => p.label).join(" · ")
+                ? grantedSummary.map((p) => formatPermissionLabel(p.codename, p.label, t)).join(" · ")
                 : "—"}
             </p>
           </div>
@@ -254,7 +255,7 @@ export function AddMemberDrawer({
                           const state = overrideState(p.codename);
                           return (
                             <tr key={p.codename}>
-                              <td className="py-1">{p.label}</td>
+                              <td className="py-1">{formatPermissionLabel(p.codename, p.label, t)}</td>
                               <td>
                                 <input
                                   type="radio"
