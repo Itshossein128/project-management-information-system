@@ -3,6 +3,11 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/app/lib/utils";
 
 /**
@@ -30,21 +35,27 @@ function PasswordInput({
         className={cn("pr-10", className)}
         {...props}
       />
-      <Button
-        id={`button-togglePasswordVisibility-${inputId}`}
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={
-          visible ? t("common.hidePassword") : t("common.showPassword")
-        }
-        title={visible ? t("common.hidePassword") : t("common.showPassword")}
-        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-        onClick={() => setVisible((v) => !v)}
-        onPointerDown={(e) => e.preventDefault()}
-      >
-        {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            id={`button-togglePasswordVisibility-${inputId}`}
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={
+              visible ? t("common.hidePassword") : t("common.showPassword")
+            }
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={() => setVisible((v) => !v)}
+            onPointerDown={(e) => e.preventDefault()}
+          >
+            {visible ? <EyeOff size={16} /> : <Eye size={16} />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          {visible ? t("common.hidePassword") : t("common.showPassword")}
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 }
