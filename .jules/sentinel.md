@@ -45,3 +45,8 @@ Added missing authentication and permission checks to RequisitionItemHoldView to
 **Vulnerability:** Procurement report views in `apps/api/core/procurement/views/report_views.py` used `PROJECT_MEMBER_PERMISSIONS` (`[IsAuthenticated, IsProjectMember]`), which allowed any active project member to access sensitive procurement metrics, liquidity dashboards, material deviation, and audit logs without possessing the `view_procurement` permission.
 **Learning:** Checking project membership (`IsProjectMember`) verifies that a user belongs to a project, but does not enforce role-based access control (RBAC). Project-scoped endpoints must explicitly enforce `HasProjectPermission` along with a defined `required_permission` (e.g. `'view_procurement'`) to prevent horizontal privilege escalation.
 **Prevention:** Always add `HasProjectPermission` to `permission_classes` on project-scoped `APIView` classes and set `required_permission = '<codename>'`.
+
+## 2026-07-27 - Require IsProjectMember on Daily Report Child ViewSets
+**Vulnerability:** `DailyReportChildViewSet` in `apps/api/core/field_reports/daily_report_views.py` only applied `IsProjectMember()` permission on read actions (`list`, `retrieve`), omitting it for write actions (`create`, `update`, `destroy`).
+**Learning:** Omission of `IsProjectMember()` on write operations for project-scoped resources allows users who are not active members of a project (but possess global role permissions) to bypass project membership boundaries when creating or modifying child items.
+**Prevention:** Always include `IsProjectMember()` alongside `HasProjectPermission()` in `get_permissions()` across all HTTP methods for project-scoped viewsets.
