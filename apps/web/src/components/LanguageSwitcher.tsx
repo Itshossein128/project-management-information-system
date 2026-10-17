@@ -1,6 +1,7 @@
 import { useLanguageStore } from "src/app/store/languageStore";
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const LanguageSwitcher = () => {
   const { t } = useTranslation();
@@ -18,18 +19,24 @@ export const LanguageSwitcher = () => {
       dir="ltr"
       className="bg-muted p-1 rounded-md"
     >
-      {(["en", "fa"] as const).map((lang) => (
-        <ToggleGroupItem
-          key={lang}
-          id={`button-language-${lang}`}
-          value={lang}
-          aria-label={lang === "en" ? t("language.english") : t("language.persian")}
-          title={lang === "en" ? t("language.english") : t("language.persian")}
-          className="uppercase text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:hover:text-foreground data-[state=on]:shadow-sm rounded-sm px-3 py-1.5 h-auto text-xs font-medium"
-        >
-          {lang}
-        </ToggleGroupItem>
-      ))}
+      {(["en", "fa"] as const).map((lang) => {
+        const label = lang === "en" ? t("language.english") : t("language.persian");
+        return (
+          <Tooltip key={lang}>
+            <TooltipTrigger asChild>
+              <ToggleGroupItem
+                id={`button-language-${lang}`}
+                value={lang}
+                aria-label={label}
+                className="uppercase text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:hover:text-foreground data-[state=on]:shadow-sm rounded-sm px-3 py-1.5 h-auto text-xs font-medium"
+              >
+                {lang}
+              </ToggleGroupItem>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+          </Tooltip>
+        );
+      })}
     </ToggleGroup>
   );
 };
