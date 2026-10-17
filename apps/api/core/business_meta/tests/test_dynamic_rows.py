@@ -56,6 +56,16 @@ class TestDynamicRowCrud:
         response = api_client.get(rows_url(project, dynamic_table.slug))
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_member_without_wbs_permission_cannot_access_dynamic_rows(self, api_client, member, project, dynamic_table):
+        from master_data.models import ProjectMemberPermissionOverride
+
+        ProjectMemberPermissionOverride.objects.create(
+            member=member, permission_codename='view_wbs', is_granted=False
+        )
+        api_client.force_authenticate(user=member.user)
+        response = api_client.get(rows_url(project, dynamic_table.slug))
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_create_list_get_update_delete_row(self, auth_client, project, dynamic_table):
         base = rows_url(project, dynamic_table.slug)
 
