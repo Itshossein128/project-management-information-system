@@ -5,9 +5,10 @@ Excel export/import for table rows.
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from projects.mixins import PROJECT_MEMBER_PERMISSIONS
+from permissions.project import HasProjectPermission, IsProjectMember
 from common.validators import validate_xlsx_upload
 import logging
 from django.http import HttpResponse
@@ -48,7 +49,11 @@ def parse_row_id(row_id):
 
 class DynamicRowsView(APIView):
     """GET list, POST create for rows of a dynamic table."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        return 'view_wbs' if self.request.method == 'GET' else 'edit_wbs'
 
     @extend_schema(
         summary='List rows',
@@ -113,7 +118,8 @@ class DynamicRowsView(APIView):
 
 class DynamicRowsExportView(APIView):
     """GET export table rows as .xlsx file."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_wbs'
 
     @extend_schema(
         summary='Export rows to Excel',
@@ -134,7 +140,8 @@ class DynamicRowsExportView(APIView):
 
 class DynamicRowsImportView(APIView):
     """POST import rows from .xlsx file (multipart)."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_wbs'
     parser_classes = [MultiPartParser, FormParser]
 
     @extend_schema(
@@ -168,7 +175,11 @@ class DynamicRowsImportView(APIView):
 
 class DynamicRowDetailView(APIView):
     """GET, PUT, PATCH, DELETE a single row by id."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        return 'view_wbs' if self.request.method == 'GET' else 'edit_wbs'
 
     @extend_schema(summary='Get row', tags=['Dynamic data'])
     def get(self, request, project_pk, table_slug, row_id):
