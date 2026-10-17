@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role, RolePermission
 from procurement.models import Block, RequisitionHeader, RequisitionScope, RequisitionStatus
 from procurement.permissions import ProcurementStepPermission, has_procurement_step_role
 from procurement.services.approval_engine import get_required_role
@@ -190,6 +190,7 @@ class TestWorkshopDraftPermissions:
         workshop_block = ensure_workshop_block(project, created_by=user_creator)
 
         role_supervisor, _ = Role.objects.get_or_create(role_name='workshop_supervisor')
+        RolePermission.objects.get_or_create(role=role_supervisor, permission_codename='view_procurement')
         role_engineer, _ = Role.objects.get_or_create(role_name='block_engineer')
 
         m_super = ProjectMember.objects.create(
