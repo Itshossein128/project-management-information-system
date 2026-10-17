@@ -768,6 +768,14 @@
     "date": "تاریخ",
     "stakeholders": "ذینفعان",
     "stakeholderCreated": "ذینفع ثبت شد",
+    "role": "نقش",
+    "rolePlaceholder": "انتخاب نقش",
+    "roleContractor": "پیمانکار",
+    "roleOwner": "کارفرما",
+    "roleConsultant": "مشاور",
+    "status": "وضعیت",
+    "statusActive": "فعال",
+    "statusInactive": "غیرفعال",
     "noStakeholders": "ذینفعی ثبت نشده است.",
     "name": "نام",
     "organization": "سازمان",
@@ -2169,5 +2177,9 @@
       "suspend": "تعلیق اولیه",
       "complete": "خاتمهٔ اولیه"
     }
+  },
+  "contractors": {
+    "emptyHelp": "پیمانکاری ثبت نشده است. ابتدا در صفحه ذینفعان اضافه کنید.",
+    "selectPlaceholder": "انتخاب پیمانکار"
   }
 }

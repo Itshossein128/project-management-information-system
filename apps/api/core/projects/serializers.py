@@ -21,6 +21,50 @@ PROTECTED_WHEN_STATUSES = {
 }
 
 
+def _apply_project_contractor_ref(attrs, *, project_id):
+    """Sync contractor CharField snapshot from contractor_ref when provided."""
+    if 'contractor_ref' not in attrs:
+        return attrs
+    ref = attrs.get('contractor_ref')
+    if ref is None:
+        attrs['contractor'] = ''
+        return attrs
+    from django.core.exceptions import ValidationError as DjangoValidationError
+    from projects.contractor_utils import resolve_active_contractor
+
+    if project_id is None:
+        # Create path: accept active contractor; project binding happens on save.
+        from projects.contractor_utils import CONTRACTOR_ROLE
+        from projects.models import Stakeholder, StakeholderStatus
+
+        pk = getattr(ref, 'pk', ref)
+        try:
+            stakeholder = Stakeholder.objects.get(
+                pk=pk,
+                is_deleted=False,
+                status=StakeholderStatus.ACTIVE,
+                role=CONTRACTOR_ROLE,
+            )
+        except Stakeholder.DoesNotExist as exc:
+            raise serializers.ValidationError(
+                {'contractor_ref': _('Select a valid active contractor.')}
+            ) from exc
+        attrs['contractor_ref'] = stakeholder
+        attrs['contractor'] = stakeholder.name
+        return attrs
+    try:
+        stakeholder = resolve_active_contractor(
+            project_id=project_id, contractor_id=getattr(ref, 'pk', ref)
+        )
+    except DjangoValidationError as exc:
+        raise serializers.ValidationError(
+            getattr(exc, 'message_dict', {'contractor_ref': list(exc.messages)})
+        ) from exc
+    attrs['contractor_ref'] = stakeholder
+    attrs['contractor'] = stakeholder.name
+    return attrs
+
+
 class ProjectListSerializer(serializers.ModelSerializer):
     project_id = serializers.UUIDField(source='id', read_only=True)
     id = serializers.UUIDField(read_only=True)
@@ -130,6 +174,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'main_deliverables',
             'employer',
             'contractor',
+            'contractor_ref',
             'consultant',
             'project_manager',
             'location',
@@ -183,6 +228,7 @@ class ProjectCreateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'main_deliverables',
             'employer',
             'contractor',
+            'contractor_ref',
             'consultant',
             'project_manager',
             'planned_finish_date',
@@ -208,6 +254,7 @@ class ProjectCreateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             raise serializers.ValidationError({'employer': 'This field is required.'})
         if not attrs.get('start_date'):
             raise serializers.ValidationError({'start_date': 'This field is required.'})
+        attrs = _apply_project_contractor_ref(attrs, project_id=None)
         return attrs
 
     def create(self, validated_data):
@@ -228,6 +275,7 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'main_deliverables',
             'employer',
             'contractor',
+            'contractor_ref',
             'consultant',
             'project_manager',
             'location',
@@ -240,23 +288,6 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'cut_off_date',
             'owning_unit',
         ]
-
-    def update(self, instance, validated_data):
-        from django.db import transaction
-        from projects.lifecycle_service import lock_project, save_project, assert_not_archived_mutable
-        with transaction.atomic():
-            fresh = lock_project(instance)
-            request = self.context.get('request')
-            if request:
-                assert_not_archived_mutable(fresh, request.user)
-            self.instance = fresh
-            self.validate(validated_data)
-            changed = [key for key, value in validated_data.items() if getattr(fresh, key) != value]
-            for key, value in validated_data.items():
-                setattr(fresh, key, value)
-            if changed:
-                save_project(fresh, changed)
-            return fresh
 
     def validate(self, attrs):
         instance: Project = self.instance
@@ -271,7 +302,25 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
                     },
                     code='protected_field_requires_change_request',
                 )
-        return attrs
+        project_id = getattr(instance, 'id', None)
+        return _apply_project_contractor_ref(attrs, project_id=project_id)
+
+    def update(self, instance, validated_data):
+        from django.db import transaction
+        from projects.lifecycle_service import lock_project, save_project, assert_not_archived_mutable
+        with transaction.atomic():
+            fresh = lock_project(instance)
+            request = self.context.get('request')
+            if request:
+                assert_not_archived_mutable(fresh, request.user)
+            self.instance = fresh
+            validated_data = self.validate(validated_data)
+            changed = [key for key, value in validated_data.items() if getattr(fresh, key) != value]
+            for key, value in validated_data.items():
+                setattr(fresh, key, value)
+            if changed:
+                save_project(fresh, changed)
+            return fresh
 
 
 # Backward-compatible alias

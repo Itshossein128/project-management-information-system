@@ -18,6 +18,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from business_meta.models import Project
+from projects.contractor_utils import parse_contractor_id, resolve_active_contractor
 
 from .models import Department, DepartmentActivityRecord, department_uses_unit, is_warehouse_department
 
@@ -362,6 +363,29 @@ def import_activities_from_xlsx(
             else str(values['unit']).strip()[:64]
         )
 
+        contractor_raw = str(values['contractor']).strip()
+        contractor_uuid = parse_contractor_id(contractor_raw)
+        try:
+            stakeholder = resolve_active_contractor(
+                project_id=business.id,
+                contractor_id=contractor_uuid,
+                name=None if contractor_uuid else contractor_raw,
+            )
+        except ValidationError as exc:
+            message_dict = getattr(exc, 'message_dict', None) or {
+                'contractor': [str(m) for m in exc.messages]
+            }
+            errors.append(
+                {
+                    'row': row_index,
+                    'errors': {
+                        k: (v[0] if isinstance(v, (list, tuple)) else v)
+                        for k, v in message_dict.items()
+                    },
+                }
+            )
+            continue
+
         try:
             DepartmentActivityRecord.objects.create(
                 project=business,
@@ -369,7 +393,8 @@ def import_activities_from_xlsx(
                 date=activity_date,
                 location=str(values['location']).strip()[:255],
                 activity_description=str(values['activity_description']).strip()[:500],
-                contractor=str(values['contractor']).strip()[:255],
+                contractor=stakeholder.name,
+                contractor_ref=stakeholder,
                 unit=unit_text,
                 description=description_text,
                 material_type='',

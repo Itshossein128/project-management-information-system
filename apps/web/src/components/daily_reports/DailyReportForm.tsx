@@ -8,6 +8,7 @@ import { useDailyReportForm } from "@/app/hooks/useDailyReportForm";
 import { usePermission } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
 import { apiJson } from "@/app/lib/api-client";
+import { asList, fetchProjectContractors } from "@/app/lib/api/central-data";
 import { fetchActivities } from "@/app/lib/api/activities";
 import {
   approveReport,
@@ -130,17 +131,14 @@ export function DailyReportForm({
       return fetchActivities(projectId, { per_page: 500 });
     },
   });
-  const subcontractorsQuery = useQuery({
-    queryKey: ["subcontractors", projectId],
+  const contractorsQuery = useQuery({
+    queryKey: ["project-contractors", projectId],
     queryFn: async () => {
       if (isNetworkError()) {
         return getCachedSubcontractors(projectId);
       }
       try {
-        const data = await apiJson<{ results?: unknown[] } | unknown[]>(
-          `/${PATHS.API_PROJECTS}/${projectId}/contracts/`,
-        );
-        return Array.isArray(data) ? data : (data.results ?? []);
+        return asList(await fetchProjectContractors(projectId));
       } catch {
         return [];
       }
@@ -157,13 +155,13 @@ export function DailyReportForm({
   );
   const subcontractorOptions = useMemo(
     () =>
-      (Array.isArray(subcontractorsQuery.data) ? subcontractorsQuery.data : []).map(
-        (c: any) => ({
-          value: String(c.id ?? c.contract_id ?? ""),
-          label: String(c.counterparty ?? c.name ?? c.contract_number ?? ""),
+      (Array.isArray(contractorsQuery.data) ? contractorsQuery.data : []).map(
+        (c: { id?: string; name?: string }) => ({
+          value: String(c.id ?? ""),
+          label: String(c.name ?? ""),
         }),
       ),
-    [subcontractorsQuery.data],
+    [contractorsQuery.data],
   );
 
   const editable = !report || report.status === "draft" || report.status === "rejected";

@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from common.viewsets import ProjectScopedViewSet
 from permissions.project import HasProjectPermission, IsProjectMember, member_has_codename
+from projects.contractor_utils import normalize_stakeholder_role
 from projects.models import CommunicationPlan, Stakeholder
 
 
@@ -48,6 +49,9 @@ class StakeholderSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Must be between 1 and 5')
         return value
 
+    def validate_role(self, value):
+        return normalize_stakeholder_role(value)
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
@@ -72,6 +76,16 @@ class StakeholderViewSet(ProjectScopedViewSet):
         ctx = super().get_serializer_context()
         ctx['request'] = self.request
         return ctx
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(is_deleted=False)
+        role = self.request.query_params.get('role')
+        status_param = self.request.query_params.get('status')
+        if role:
+            qs = qs.filter(role=normalize_stakeholder_role(role))
+        if status_param:
+            qs = qs.filter(status=status_param)
+        return qs
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())

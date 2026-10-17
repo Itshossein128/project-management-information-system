@@ -8,6 +8,7 @@ import { departmentUsesUnit, isWarehouseDepartment } from "@/app/lib/api-types";
 import { CONSTRUCTION_UNIT_OPTIONS } from "@/app/lib/construction-units";
 import {
   Button,
+  ContractorSelect,
   CreatableSelect,
   Field,
   Input,
@@ -30,6 +31,7 @@ const EMPTY_FORM: {
   location: string;
   activity_description: string;
   contractor: string;
+  contractor_ref: string;
   unit: string;
   description: string;
   material_type: string;
@@ -42,6 +44,7 @@ const EMPTY_FORM: {
   location: "",
   activity_description: "",
   contractor: "",
+  contractor_ref: "",
   unit: "",
   description: "",
   material_type: "",
@@ -117,6 +120,7 @@ export function DepartmentActivityRecordModal({
         location: "",
         activity_description: "",
         contractor: "",
+        contractor_ref: null,
       };
     }
     return {
@@ -124,7 +128,8 @@ export function DepartmentActivityRecordModal({
       date: form.date,
       location: form.location,
       activity_description: form.activity_description,
-      contractor: form.contractor,
+      contractor: "",
+      contractor_ref: form.contractor_ref || null,
       unit: showsUnit ? form.unit : "",
       description: form.description,
       material_type: "",
@@ -150,7 +155,7 @@ export function DepartmentActivityRecordModal({
     : payload.date.trim() !== "" &&
       payload.location.trim() !== "" &&
       payload.activity_description.trim() !== "" &&
-      payload.contractor.trim() !== "" &&
+      Boolean(payload.contractor_ref) &&
       (!showsUnit || payload.unit.trim() !== "");
 
   return (
@@ -417,22 +422,17 @@ export function DepartmentActivityRecordModal({
                 id="container-departmentActivityContractor"
                 className="sm:col-span-1"
               >
-                <Field
-                  name="departmentActivityContractor"
-                  label={t("businessDepartment.activityLog.fields.contractor")}
-                  htmlFor="input-departmentActivityContractor"
-                  {...stickyFieldProps("contractor")}
-                >
-                  {() => (
-                    <Input
-                      id="input-departmentActivityContractor"
-                      name="departmentActivityContractor"
-                      value={form.contractor}
-                      onChange={(e) => setField("contractor", e.target.value)}
-                      required
-                    />
-                  )}
-                </Field>
+                <div id="container-departmentActivityContractorField">
+                  <ContractorSelect
+                    projectId={String(businessId)}
+                    name="departmentActivityContractor"
+                    id="input-departmentActivityContractor"
+                    label={t("businessDepartment.activityLog.fields.contractor")}
+                    value={form.contractor_ref}
+                    onChange={(next) => setField("contractor_ref", next)}
+                    {...stickyFieldProps("contractor_ref")}
+                  />
+                </div>
               </div>
 
               <div

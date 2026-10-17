@@ -349,3 +349,15 @@ msgstr "مبلغ نامعتبر است. یک عدد معتبر برای مبلغ
 
 msgid "At least one protected field is required."
 msgstr "حداقل یک فیلد مصوب را برای درخواست تغییر مشخص کنید."
+
+msgid "Select a valid active contractor."
+msgstr "یک پیمانکار فعال معتبر انتخاب کنید."
+
+msgid "Multiple contractors match this name; use the contractor id."
+msgstr "چند پیمانکار با این نام وجود دارد؛ از شناسه پیمانکار استفاده کنید."
+
+msgid "Unknown contractor. Register the contractor on stakeholders (ذینفعان) first."
+msgstr "پیمانکار ناشناس است. ابتدا پیمانکار را در صفحه ذینفعان ثبت کنید."
+
+msgid "Select a valid active contractor. Register the contractor on stakeholders (ذینفعان) first."
+msgstr "یک پیمانکار فعال معتبر انتخاب کنید. ابتدا پیمانکار را در صفحه ذینفعان ثبت کنید."

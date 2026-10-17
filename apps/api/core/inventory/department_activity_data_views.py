@@ -77,6 +77,7 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             OpenApiParameter(name='location', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='activity_description', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='contractor', type=OpenApiTypes.STR, required=False),
+            OpenApiParameter(name='contractor_ref', type=OpenApiTypes.UUID, required=False),
             OpenApiParameter(name='unit', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='material_type', type=OpenApiTypes.STR, required=False),
             OpenApiParameter(name='consumption_location', type=OpenApiTypes.STR, required=False),

@@ -1,7 +1,10 @@
 from decimal import Decimal, InvalidOperation
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+
+from projects.contractor_utils import resolve_active_contractor
 
 from .models import (
     Item,
@@ -65,6 +68,7 @@ def _as_decimal(value, default: Decimal = Decimal('0')) -> Decimal:
 
 class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
     project_id = serializers.UUIDField(source='project.id', read_only=True)
+    contractor_ref = serializers.UUIDField(required=False, allow_null=True)
 
     class Meta:
         model = DepartmentActivityRecord
@@ -76,6 +80,7 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             'location',
             'activity_description',
             'contractor',
+            'contractor_ref',
             'unit',
             'description',
             'material_type',
@@ -99,6 +104,13 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             'quantity_out': {'required': False},
             'description': {'required': False, 'allow_blank': True},
         }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['contractor_ref'] = (
+            str(instance.contractor_ref_id) if instance.contractor_ref_id else None
+        )
+        return data
 
     def validate(self, attrs):
         department = attrs.get('department')
@@ -190,12 +202,12 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             attrs['location'] = ''
             attrs['activity_description'] = ''
             attrs['contractor'] = ''
+            attrs['contractor_ref'] = None
             return attrs
 
         # Non-warehouse: preserve prior required rules; clear warehouse fields.
         location = str(_merged('location', '') or '').strip()
         activity_description = str(_merged('activity_description', '') or '').strip()
-        contractor = str(_merged('contractor', '') or '').strip()
         unit = _merged('unit', '')
         unit_text = '' if unit is None else str(unit).strip()
 
@@ -213,13 +225,6 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
                 'Ensure this field has no more than 500 characters.'
             )
 
-        if not contractor:
-            errors['contractor'] = _('This field is required.')
-        elif len(contractor) > 255:
-            errors['contractor'] = _(
-                'Ensure this field has no more than 255 characters.'
-            )
-
         if not department_uses_unit(department or ''):
             attrs['unit'] = ''
         elif not unit_text:
@@ -229,12 +234,46 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
         else:
             attrs['unit'] = unit_text[:64]
 
+        project = None
+        if self.instance is not None:
+            project = self.instance.project
+        else:
+            project = self.context.get('project')
+        project_id = getattr(project, 'id', None) or self.context.get('project_id')
+
+        contractor_ref_raw = attrs.get('contractor_ref', serializers.empty)
+        if contractor_ref_raw is serializers.empty and self.instance is not None:
+            contractor_ref_raw = self.instance.contractor_ref_id
+        contractor_name_raw = str(_merged('contractor', '') or '').strip()
+
+        stakeholder = None
+        if project_id and not errors:
+            try:
+                if contractor_ref_raw not in (None, '', serializers.empty):
+                    stakeholder = resolve_active_contractor(
+                        project_id=project_id, contractor_id=contractor_ref_raw
+                    )
+                elif contractor_name_raw:
+                    stakeholder = resolve_active_contractor(
+                        project_id=project_id, name=contractor_name_raw
+                    )
+                else:
+                    errors['contractor_ref'] = _('This field is required.')
+            except DjangoValidationError as exc:
+                messages = getattr(exc, 'message_dict', None) or {
+                    'contractor_ref': list(exc.messages)
+                }
+                for key, vals in messages.items():
+                    errors[key] = vals[0] if isinstance(vals, (list, tuple)) else vals
+
         if errors:
             raise serializers.ValidationError(errors)
 
         attrs['location'] = location
         attrs['activity_description'] = activity_description
-        attrs['contractor'] = contractor
+        if stakeholder is not None:
+            attrs['contractor_ref'] = stakeholder
+            attrs['contractor'] = stakeholder.name
         attrs['material_type'] = ''
         attrs['quantity_in'] = Decimal('0')
         attrs['quantity_out'] = Decimal('0')

@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from common.jalali import persian_day_of_week
@@ -108,6 +109,7 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'shift',
             'subcontractor_name',
             'subcontractor_ref',
+            'contractor_ref',
             'headcount',
             'zone',
             'block',
@@ -150,6 +152,61 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
                 'quantity': 'در حالت اندازه‌گیری‌شده مقدار الزامی است',
                 'code': 'quantity_unset_invalid',
             })
+
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from projects.contractor_utils import resolve_active_contractor
+
+        report = getattr(self.instance, 'report', None)
+        if report is None:
+            report = self.context.get('report')
+        project_id = getattr(report, 'project_id', None) or self.context.get('project_id')
+
+        contractor = attrs.get('contractor_ref', serializers.empty)
+        if contractor is not serializers.empty and contractor is not None and project_id:
+            try:
+                stakeholder = resolve_active_contractor(
+                    project_id=project_id, contractor_id=getattr(contractor, 'pk', contractor)
+                )
+            except DjangoValidationError as exc:
+                raise serializers.ValidationError(
+                    getattr(exc, 'message_dict', {'contractor_ref': list(exc.messages)})
+                ) from exc
+            attrs['contractor_ref'] = stakeholder
+            attrs['subcontractor_name'] = stakeholder.name
+            return attrs
+
+        name = ''
+        if 'subcontractor_name' in attrs:
+            name = str(attrs.get('subcontractor_name') or '').strip()
+        elif self.instance is not None:
+            name = str(getattr(self.instance, 'subcontractor_name', '') or '').strip()
+
+        clearing_ref = contractor is None
+        existing_ref = getattr(self.instance, 'contractor_ref_id', None) if self.instance else None
+        if name and (clearing_ref or (contractor is serializers.empty and not existing_ref)):
+            if project_id:
+                try:
+                    stakeholder = resolve_active_contractor(project_id=project_id, name=name)
+                except DjangoValidationError as exc:
+                    raise serializers.ValidationError(
+                        {
+                            'contractor_ref': _(
+                                'Select a valid active contractor. Register the contractor on '
+                                'stakeholders (ذینفعان) first.'
+                            )
+                        }
+                    ) from exc
+                attrs['contractor_ref'] = stakeholder
+                attrs['subcontractor_name'] = stakeholder.name
+            else:
+                raise serializers.ValidationError(
+                    {
+                        'contractor_ref': _(
+                            'Select a valid active contractor. Register the contractor on '
+                            'stakeholders (ذینفعان) first.'
+                        )
+                    }
+                )
         return attrs
 
 
@@ -268,12 +325,98 @@ class BaseLaborCampEntrySerializer(serializers.ModelSerializer):
             'id',
             'connex_number',
             'subcontractor_name',
+            'contractor_ref',
             'total_residents',
             'present_count',
             'on_leave_count',
             'capacity',
         ]
         read_only_fields = ['id']
+        extra_kwargs = {
+            'subcontractor_name': {'required': False, 'allow_blank': True},
+            'contractor_ref': {'required': False, 'allow_null': True},
+        }
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from projects.contractor_utils import resolve_active_contractor
+
+        report = getattr(self.instance, 'report', None)
+        if report is None:
+            report = self.context.get('report')
+        project_id = (
+            getattr(report, 'project_id', None)
+            or getattr(self.instance, 'project_id', None)
+            or self.context.get('project_id')
+        )
+
+        contractor = attrs.get('contractor_ref', serializers.empty)
+        if contractor is not serializers.empty and contractor is not None and project_id:
+            try:
+                stakeholder = resolve_active_contractor(
+                    project_id=project_id,
+                    contractor_id=getattr(contractor, 'pk', contractor),
+                )
+            except DjangoValidationError as exc:
+                raise serializers.ValidationError(
+                    getattr(
+                        exc,
+                        'message_dict',
+                        {'contractor_ref': list(exc.messages)},
+                    )
+                ) from exc
+            attrs['contractor_ref'] = stakeholder
+            attrs['subcontractor_name'] = stakeholder.name
+            return attrs
+
+        name = ''
+        if 'subcontractor_name' in attrs:
+            name = str(attrs.get('subcontractor_name') or '').strip()
+        elif self.instance is not None:
+            name = str(getattr(self.instance, 'subcontractor_name', '') or '').strip()
+
+        clearing_ref = contractor is None
+        existing_ref = getattr(self.instance, 'contractor_ref_id', None) if self.instance else None
+        needs_resolve = clearing_ref or (
+            contractor is serializers.empty and not existing_ref
+        )
+
+        if needs_resolve:
+            if name and project_id:
+                try:
+                    stakeholder = resolve_active_contractor(
+                        project_id=project_id, name=name
+                    )
+                except DjangoValidationError as exc:
+                    raise serializers.ValidationError(
+                        {
+                            'contractor_ref': _(
+                                'Select a valid active contractor. Register the contractor on '
+                                'stakeholders (ذینفعان) first.'
+                            )
+                        }
+                    ) from exc
+                attrs['contractor_ref'] = stakeholder
+                attrs['subcontractor_name'] = stakeholder.name
+                return attrs
+            if self.instance is None:
+                raise serializers.ValidationError(
+                    {'contractor_ref': _('This field is required.')}
+                )
+            if name:
+                raise serializers.ValidationError(
+                    {
+                        'contractor_ref': _(
+                            'Select a valid active contractor. Register the contractor on '
+                            'stakeholders (ذینفعان) first.'
+                        )
+                    }
+                )
+
+        if name:
+            attrs['subcontractor_name'] = name
+        return attrs
 
 
 class DailyReportLaborCampSerializer(BaseLaborCampEntrySerializer):

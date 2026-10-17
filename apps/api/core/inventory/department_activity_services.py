@@ -64,6 +64,7 @@ def get_department_activity_queryset(
     location = query_params.get('location')
     activity_description = query_params.get('activity_description')
     contractor = query_params.get('contractor')
+    contractor_ref = query_params.get('contractor_ref')
     unit = query_params.get('unit')
     material_type = query_params.get('material_type')
     consumption_location = query_params.get('consumption_location')
@@ -73,7 +74,9 @@ def get_department_activity_queryset(
         qs = qs.filter(location__icontains=location)
     if activity_description:
         qs = qs.filter(activity_description__icontains=activity_description)
-    if contractor:
+    if contractor_ref:
+        qs = qs.filter(contractor_ref_id=contractor_ref)
+    elif contractor:
         qs = qs.filter(contractor__icontains=contractor)
     if unit:
         qs = qs.filter(unit__icontains=unit)

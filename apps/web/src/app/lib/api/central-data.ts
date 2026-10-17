@@ -249,10 +249,22 @@ export interface CommunicationPlanRow {
   created_at: string;
 }
 
-export function fetchStakeholders(projectId: string) {
+export function fetchStakeholders(
+  projectId: string,
+  params?: { role?: string; status?: string },
+) {
+  const sp = new URLSearchParams();
+  if (params?.role) sp.set("role", params.role);
+  if (params?.status) sp.set("status", params.status);
+  const qs = sp.toString();
   return apiJson<StakeholderRow[] | { results: StakeholderRow[] }>(
-    `${projectBase(projectId)}/stakeholders/`,
+    `${projectBase(projectId)}/stakeholders/${qs ? `?${qs}` : ""}`,
   );
+}
+
+/** Active contractors registered on ذینفعان for پیمانکار pickers. */
+export function fetchProjectContractors(projectId: string) {
+  return fetchStakeholders(projectId, { role: "contractor", status: "active" });
 }
 
 export function fetchStakeholderMatrix(projectId: string) {
@@ -269,6 +281,20 @@ export function createStakeholder(
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function updateStakeholder(
+  projectId: string,
+  stakeholderId: string,
+  body: Record<string, unknown>,
+) {
+  return apiJson<StakeholderRow>(
+    `${projectBase(projectId)}/stakeholders/${stakeholderId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
 }
 
 export function fetchCommunicationPlans(projectId: string) {

@@ -199,6 +199,13 @@ class DailyReportActivity(ChildRowModel):
         blank=True,
         related_name='daily_report_activities',
     )
+    contractor_ref = models.ForeignKey(
+        'projects.Stakeholder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_activities_as_contractor',
+    )
     headcount = models.PositiveIntegerField(null=True, blank=True)
     zone = models.CharField(max_length=60, null=True, blank=True)
     block = models.CharField(max_length=60, null=True, blank=True)
@@ -375,6 +382,13 @@ class DailyReportConcreteLog(ChildRowModel):
 class BaseLaborCampEntry(models.Model):
     connex_number = models.CharField(max_length=60)
     subcontractor_name = models.CharField(max_length=120)
+    contractor_ref = models.ForeignKey(
+        'projects.Stakeholder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='%(class)s_contractor_rows',
+    )
     total_residents = models.PositiveIntegerField()
     present_count = models.PositiveIntegerField()
     on_leave_count = models.PositiveIntegerField()

@@ -223,6 +223,9 @@ export function CreatableSelect({
               role="listbox"
               aria-label={typeof label === "string" ? label : name}
               className="max-h-48 overflow-y-auto p-1"
+              // Dialog scroll-lock listens on document (bubble). Stop here so
+              // the portaled list can still scroll with the mouse wheel.
+              onWheel={(e) => e.stopPropagation()}
             >
               {filteredOptions.length === 0 ? (
                 <li

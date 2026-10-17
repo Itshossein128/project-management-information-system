@@ -1,0 +1,158 @@
+/**
+ * Theme overrides for react-multi-date-picker.
+ * Applied via `className="rmdp-velora"` on JalaliDatePicker / JalaliDateRangePicker.
+ * Uses semantic tokens so light/dark modes stay in sync with the app chrome.
+ */
+
+.rmdp-velora.rmdp-wrapper,
+.rmdp-velora .rmdp-month-picker,
+.rmdp-velora .rmdp-year-picker,
+.rmdp-velora .rmdp-time-picker div input,
+.rmdp-container .rmdp-velora.ep-arrow::after {
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.rmdp-velora.rmdp-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-sans);
+}
+
+.rmdp-velora .rmdp-header-values,
+.rmdp-velora .rmdp-day:not(.rmdp-deactive):not(.rmdp-disabled),
+.rmdp-velora .rmdp-panel-header,
+.rmdp-velora .rmdp-time-picker div .rmdp-am {
+  color: var(--popover-foreground);
+}
+
+.rmdp-velora .rmdp-week-day {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.rmdp-velora .rmdp-day.rmdp-deactive,
+.rmdp-velora .rmdp-day.rmdp-disabled {
+  color: var(--muted-foreground);
+  opacity: 0.55;
+}
+
+.rmdp-velora .rmdp-arrow {
+  border-color: var(--primary);
+}
+
+.rmdp-velora .rmdp-arrow-container:hover {
+  background-color: var(--primary);
+  box-shadow: none;
+}
+
+.rmdp-velora .rmdp-arrow-container:hover .rmdp-arrow {
+  border-color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-day.rmdp-today span {
+  background-color: color-mix(in oklch, var(--primary) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 45%, transparent);
+  color: var(--foreground);
+}
+
+.rmdp-velora .rmdp-day.rmdp-selected span:not(.highlight) {
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-day.rmdp-today.rmdp-selected span {
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-day:not(.rmdp-day-hidden):not(.rmdp-disabled) span:hover {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+}
+
+.rmdp-velora .rmdp-day.rmdp-selected:not(.rmdp-disabled) span:hover {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  filter: brightness(1.05);
+}
+
+.rmdp-velora .rmdp-range {
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-day.rmdp-range span:hover {
+  background-color: transparent !important;
+  color: var(--primary-foreground) !important;
+}
+
+.rmdp-velora .rmdp-panel-body li {
+  background-color: var(--primary);
+  box-shadow: none;
+  color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-panel-body::-webkit-scrollbar-thumb {
+  background: var(--primary);
+}
+
+.rmdp-velora .rmdp-action-button {
+  color: var(--primary);
+}
+
+.rmdp-velora .rmdp-button:not(.rmdp-action-button) {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.rmdp-velora .rmdp-button:not(.rmdp-action-button):hover {
+  background-color: color-mix(in oklch, var(--primary) 85%, var(--foreground));
+}
+
+/* Toolbar plugin (Today / Deselect / Close) */
+.rmdp-velora .rmdp-toolbar {
+  border-top: 1px solid var(--border);
+  padding: 0.25rem 0.35rem 0.35rem;
+}
+
+.rmdp-velora .rmdp-toolbar div {
+  background-color: var(--primary);
+  border-radius: calc(var(--radius) - 4px);
+  box-shadow: none;
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0.2rem 0;
+  padding: 0.35rem 0.5rem;
+  transition:
+    background-color var(--duration-fast, 150ms) var(--ease-standard, ease),
+    filter var(--duration-fast, 150ms) var(--ease-standard, ease);
+}
+
+.rmdp-velora .rmdp-toolbar div:hover {
+  box-shadow: none;
+  filter: brightness(1.06);
+}
+
+/* Popup arrow */
+.rmdp-container .rmdp-velora.ep-arrow[direction="top"] {
+  border-bottom-color: var(--border);
+}
+
+.rmdp-container .rmdp-velora.ep-arrow[direction="bottom"] {
+  border-top-color: var(--border);
+}
+
+.rmdp-container .rmdp-velora.ep-arrow[direction="left"] {
+  border-right-color: var(--border);
+}
+
+.rmdp-container .rmdp-velora.ep-arrow[direction="right"] {
+  border-left-color: var(--border);
+}

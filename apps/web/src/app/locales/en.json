@@ -768,6 +768,14 @@
     "date": "Date",
     "stakeholders": "Stakeholders",
     "stakeholderCreated": "Stakeholder saved",
+    "role": "Role",
+    "rolePlaceholder": "Select role",
+    "roleContractor": "Contractor",
+    "roleOwner": "Owner",
+    "roleConsultant": "Consultant",
+    "status": "Status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
     "noStakeholders": "No stakeholders yet.",
     "name": "Name",
     "organization": "Organization",
@@ -2169,5 +2177,9 @@
       "suspend": "Original suspension",
       "complete": "Original completion"
     }
+  },
+  "contractors": {
+    "emptyHelp": "No contractors yet. Add them on the stakeholders page.",
+    "selectPlaceholder": "Select contractor"
   }
 }

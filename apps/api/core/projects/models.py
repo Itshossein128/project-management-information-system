@@ -52,6 +52,13 @@ class Project(UUIDModel, TimeStampedModel):
     main_deliverables = models.TextField(blank=True, default='')
     employer = models.CharField(max_length=120, blank=True, default='')
     contractor = models.CharField(max_length=120, blank=True, default='')
+    contractor_ref = models.ForeignKey(
+        'projects.Stakeholder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='projects_as_main_contractor',
+    )
     consultant = models.CharField(max_length=120, blank=True, default='')
     project_manager = models.ForeignKey(
         settings.AUTH_USER_MODEL,

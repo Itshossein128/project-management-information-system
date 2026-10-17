@@ -26,7 +26,13 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ProjectChangeRequestPanel } from "@/components/projects/ProjectChangeRequestPanel";
-import { Input, Label, Select, ToggleSwitch } from "@/components/form";
+import {
+  ContractorSelect,
+  Input,
+  Label,
+  Select,
+  ToggleSwitch,
+} from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -148,6 +154,8 @@ function ProjectSettingsContent() {
     project_code: form.project_code ?? project.project_code,
     employer: form.employer ?? project.employer,
     contractor: form.contractor ?? project.contractor ?? "",
+    contractor_ref:
+      form.contractor_ref ?? project.contractor_ref ?? "",
     consultant: form.consultant ?? project.consultant ?? "",
     location: form.location ?? project.location ?? "",
     contract_type: form.contract_type ?? project.contract_type ?? "",
@@ -182,6 +190,7 @@ function ProjectSettingsContent() {
       main_deliverables: values.main_deliverables || undefined,
       contract_number: values.contract_number || undefined,
       contractor: values.contractor || undefined,
+      contractor_ref: values.contractor_ref || null,
       consultant: values.consultant || undefined,
       location: values.location || undefined,
       contract_type: values.contract_type || undefined,
@@ -371,15 +380,15 @@ function ProjectSettingsContent() {
           </div>
         ) : null}
         <div>
-          <Label htmlFor='input-contractor'>
-            {t("projectSettings.contractor", "پیمانکار")}
-          </Label>
-          <Input
-            id='input-contractor'
-            value={values.contractor}
+          <ContractorSelect
+            projectId={id}
+            name="contractor"
+            id="input-contractor"
+            label={t("projectSettings.contractor", "پیمانکار")}
+            value={values.contractor_ref || ""}
             disabled={!canEdit}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, contractor: e.target.value }))
+            onChange={(next) =>
+              setForm((f) => ({ ...f, contractor_ref: next, contractor: "" }))
             }
           />
         </div>

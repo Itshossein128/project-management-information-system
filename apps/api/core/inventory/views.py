@@ -329,6 +329,13 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
             IsHrOrAdminOrReadOnly(),
         ]
 
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        project_pk = self.kwargs.get('project_pk')
+        if project_pk is not None:
+            ctx['project_id'] = project_pk
+        return ctx
+
     def get_queryset(self):
         project_pk = self.kwargs.get('project_pk')
         if project_pk is None:

@@ -44,6 +44,7 @@ export interface ProjectDetail extends ProjectListItem {
   archive_cycle_id?: string|null;
   lifecycle_version?: number;
   contractor: string;
+  contractor_ref?: string | null;
   consultant: string;
   project_manager: string | null;
   location: string;
@@ -65,6 +66,7 @@ export interface CreateProjectPayload {
   project_name: string;
   employer: string;
   contractor?: string;
+  contractor_ref?: string | null;
   consultant?: string;
   contract_type?: string;
   contract_number?: string;

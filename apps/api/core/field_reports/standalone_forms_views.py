@@ -56,6 +56,11 @@ class LaborCampReportViewSet(ProjectScopedViewSet):
     view_permission = 'view_reports'
     edit_permission = 'edit_reports'
 
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['project_id'] = self.get_project_id()
+        return ctx
+
     def get_queryset(self):
         qs = super().get_queryset()
         date_from = self.request.query_params.get('date_from')

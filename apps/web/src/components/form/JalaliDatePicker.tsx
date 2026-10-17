@@ -100,6 +100,7 @@ export function JalaliDatePicker({
           calendar={calendar}
           locale={locale}
           format={format}
+          className="rmdp-velora"
           calendarPosition="bottom-right"
           inputClass={cn(
             "border-input bg-transparent dark:bg-input/30 h-9 w-full rounded-md border px-3 text-base shadow-xs outline-none transition-[color,box-shadow] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",

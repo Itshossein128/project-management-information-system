@@ -6,6 +6,7 @@ export interface LaborCampRecord {
   report_date: string;
   connex_number: string;
   subcontractor_name: string;
+  contractor_ref?: string | null;
   total_residents: number;
   present_count: number;
   on_leave_count: number;

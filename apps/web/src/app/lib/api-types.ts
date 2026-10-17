@@ -75,6 +75,8 @@ export interface DepartmentActivityRecord {
   location: string;
   activity_description: string;
   contractor: string;
+  /** Stakeholder UUID when selected from ذینفعان contractors. */
+  contractor_ref?: string | null;
   /** Empty for security department. */
   unit: string;
   description: string;
@@ -98,6 +100,7 @@ export interface DepartmentActivityRecordListParams {
   location?: string;
   activity_description?: string;
   contractor?: string;
+  contractor_ref?: string;
   unit?: string;
   material_type?: string;
   consumption_location?: string;
@@ -111,6 +114,7 @@ export type DepartmentActivityRecordPayload = Pick<
   | "location"
   | "activity_description"
   | "contractor"
+  | "contractor_ref"
   | "unit"
   | "description"
   | "material_type"

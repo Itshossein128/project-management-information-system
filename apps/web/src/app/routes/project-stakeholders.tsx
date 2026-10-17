@@ -15,13 +15,41 @@ import {
   fetchCommunicationPlans,
   fetchStakeholderMatrix,
   fetchStakeholders,
+  updateStakeholder,
+  type StakeholderRow,
 } from "@/app/lib/api/central-data";
 import { PATHS } from "@/app/routeVars";
-import { Input, Label } from "@/components/form";
+import { Input, Label, Select } from "@/components/form";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+
+const ROLE_OPTIONS = (t: (k: string, d: string) => string) => [
+  {
+    value: "contractor",
+    label: t("centralData.roleContractor", "پیمانکار"),
+  },
+  {
+    value: "owner",
+    label: t("centralData.roleOwner", "کارفرما"),
+  },
+  {
+    value: "consultant",
+    label: t("centralData.roleConsultant", "مشاور"),
+  },
+];
+
+const STATUS_OPTIONS = (t: (k: string, d: string) => string) => [
+  {
+    value: "active",
+    label: t("centralData.statusActive", "فعال"),
+  },
+  {
+    value: "inactive",
+    label: t("centralData.statusInactive", "غیرفعال"),
+  },
+];
 
 function StakeholdersContent() {
   const { t } = useTranslation();
@@ -34,6 +62,8 @@ function StakeholdersContent() {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [org, setOrg] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("active");
   const [influence, setInfluence] = useState("");
   const [interest, setInterest] = useState("");
   const [email, setEmail] = useState("");
@@ -63,11 +93,19 @@ function StakeholdersContent() {
     enabled: canView && Boolean(projectId),
   });
 
+  const invalidateStakeholderQueries = () => {
+    void qc.invalidateQueries({ queryKey: ["stakeholders", projectId] });
+    void qc.invalidateQueries({ queryKey: ["project-contractors", projectId] });
+    void qc.invalidateQueries({ queryKey: ["stakeholder-matrix", projectId] });
+  };
+
   const create = useMutation({
     mutationFn: () =>
       createStakeholder(projectId, {
         name,
         organization_name: org,
+        role: role || "",
+        status,
         influence: influence ? Number(influence) : null,
         interest: interest ? Number(interest) : null,
         email: email || "",
@@ -78,12 +116,28 @@ function StakeholdersContent() {
       toast.success(t("centralData.stakeholderCreated", "ذینفع ثبت شد"));
       setName("");
       setOrg("");
+      setRole("");
+      setStatus("active");
       setInfluence("");
       setInterest("");
       setEmail("");
       setPhone("");
-      void qc.invalidateQueries({ queryKey: ["stakeholders", projectId] });
-      void qc.invalidateQueries({ queryKey: ["stakeholder-matrix", projectId] });
+      invalidateStakeholderQueries();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const patch = useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Partial<Pick<StakeholderRow, "role" | "status">>;
+    }) => updateStakeholder(projectId, id, body),
+    onSuccess: () => {
+      toast.success(t("centralData.stakeholderUpdated", "ذینفع به‌روز شد"));
+      invalidateStakeholderQueries();
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -119,9 +173,11 @@ function StakeholdersContent() {
   const rows = asList(data ?? []);
   const matrixCells = matrixData?.cells ?? [];
   const plans = plansData?.results ?? [];
+  const roleOptions = ROLE_OPTIONS(t);
+  const statusOptions = STATUS_OPTIONS(t);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="stakeholders-page">
       <PageHeader
         title={t("centralData.stakeholders", "ذینفعان")}
         subtitle={project.project_name}
@@ -129,7 +185,11 @@ function StakeholdersContent() {
 
       <ul className="divide-y rounded border">
         {rows.map((s) => (
-          <li key={s.id} className="space-y-1 px-3 py-2 text-sm">
+          <li
+            key={s.id}
+            className="space-y-2 px-3 py-2 text-sm"
+            data-testid={`stakeholder-row-${s.id}`}
+          >
             <div className="flex flex-wrap justify-between gap-2">
               <span>
                 {s.name}
@@ -156,6 +216,42 @@ function StakeholdersContent() {
                 </>
               )}
             </div>
+            {canEdit ? (
+              <div className="flex flex-wrap gap-3 pt-1">
+                <Select
+                  id={`stakeholder-role-${s.id}`}
+                  name={`stakeholder-role-${s.id}`}
+                  label={t("centralData.role", "نقش")}
+                  value={s.role || ""}
+                  onChange={(e) =>
+                    patch.mutate({ id: s.id, body: { role: e.target.value } })
+                  }
+                  options={
+                    s.role && !roleOptions.some((o) => o.value === s.role)
+                      ? [...roleOptions, { value: s.role, label: s.role }]
+                      : roleOptions
+                  }
+                />
+                <Select
+                  id={`stakeholder-status-${s.id}`}
+                  name={`stakeholder-status-${s.id}`}
+                  label={t("centralData.status", "وضعیت")}
+                  value={s.status || "active"}
+                  onChange={(e) =>
+                    patch.mutate({ id: s.id, body: { status: e.target.value } })
+                  }
+                  options={statusOptions}
+                />
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground">
+                {s.role ? `${t("centralData.role", "نقش")}: ${s.role}` : null}
+                {s.role && s.status ? " · " : ""}
+                {s.status
+                  ? `${t("centralData.status", "وضعیت")}: ${s.status}`
+                  : null}
+              </div>
+            )}
           </li>
         ))}
         {rows.length === 0 ? (
@@ -240,12 +336,33 @@ function StakeholdersContent() {
       </section>
 
       {canEdit ? (
-        <div className="grid max-w-xl gap-2">
+        <div className="grid max-w-xl gap-2" data-testid="stakeholder-create-form">
           <h2 className="text-sm font-medium">{t("collab.addStakeholder", "Add stakeholder")}</h2>
           <Label>{t("centralData.name", "نام")}</Label>
-          <Input value={name} onChange={(e) => setName(e.target.value)} />
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            data-testid="stakeholder-name"
+          />
           <Label>{t("centralData.organization", "سازمان")}</Label>
           <Input value={org} onChange={(e) => setOrg(e.target.value)} />
+          <Select
+            id="stakeholder-create-role"
+            name="stakeholderRole"
+            label={t("centralData.role", "نقش")}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            placeholder={t("centralData.rolePlaceholder", "Select role")}
+            options={roleOptions}
+          />
+          <Select
+            id="stakeholder-create-status"
+            name="stakeholderStatus"
+            label={t("centralData.status", "وضعیت")}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            options={statusOptions}
+          />
           <Label>{t("centralData.influence", "نفوذ (۱–۵)")}</Label>
           <Input
             value={influence}
@@ -272,6 +389,7 @@ function StakeholdersContent() {
             loading={create.isPending}
             disabled={!name}
             onClick={() => create.mutate()}
+            data-testid="stakeholder-create-submit"
           >
             {t("common.add", "افزودن")}
           </Button>

@@ -16,6 +16,10 @@ export {
   CreatableSelect,
   type CreatableSelectProps,
 } from "./CreatableSelect";
+export {
+  ContractorSelect,
+  type ContractorSelectProps,
+} from "./ContractorSelect";
 export { JalaliDatePicker, type JalaliDatePickerProps } from "./JalaliDatePicker";
 export {
   JalaliDateRangePicker,

@@ -137,7 +137,22 @@ import datetime
 
 class DepartmentActivityIOTests(TestCase):
     def setUp(self):
+        from django.contrib.auth import get_user_model
+        from projects.models import Stakeholder
+
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='io_user', password='password', mobile='09120000001'
+        )
         self.project = Project.objects.create(project_code='P1', project_name='Project 1', employer='Emp1', start_date=date.today())
+        for name in ('Contractor A', 'Con B', 'Con C', 'SecCo'):
+            Stakeholder.objects.create(
+                project=self.project,
+                name=name,
+                role='contractor',
+                created_by=self.user,
+                updated_by=self.user,
+            )
         self.record1 = DepartmentActivityRecord.objects.create(
             project=self.project,
             department=Department.BUILDINGS,
@@ -437,6 +452,15 @@ class ViewsTests(TestCase):
             item_description='Ceramic Tiles'
         )
 
+        from projects.models import Stakeholder
+
+        self.contractor = Stakeholder.objects.create(
+            project=self.project,
+            name='ElecCorp',
+            role='contractor',
+            created_by=self.user,
+            updated_by=self.user,
+        )
         self.dar = DepartmentActivityRecord.objects.create(
             project=self.project,
             department=Department.ELECTRICAL,
@@ -444,6 +468,7 @@ class ViewsTests(TestCase):
             location='Floor 1',
             activity_description='Wiring',
             contractor='ElecCorp',
+            contractor_ref=self.contractor,
             unit='m'
         )
 
@@ -493,60 +518,81 @@ class ViewsTests(TestCase):
         response = self.client.get(url, {'department': Department.ELECTRICAL})
         self.assertEqual(len(response.data['results']), 1)
 
+    def _ensure_contractor(self, name: str):
+        from projects.models import Stakeholder
+
+        row, _ = Stakeholder.objects.get_or_create(
+            project=self.project,
+            name=name,
+            defaults={
+                'role': 'contractor',
+                'created_by': self.user,
+                'updated_by': self.user,
+            },
+        )
+        if row.role != 'contractor':
+            row.role = 'contractor'
+            row.save(update_fields=['role', 'updated_at'])
+        return row
+
     def test_department_activity_record_create(self):
         url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        contractor = self._ensure_contractor('PlumbCo')
         data = {
             'department': Department.MECHANICAL,
             'date': '2023-02-01',
             'location': 'Basement',
             'activity_description': 'Plumbing',
-            'contractor': 'PlumbCo',
+            'contractor_ref': str(contractor.id),
             'unit': 'pipes'
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(DepartmentActivityRecord.objects.filter(project=self.project).count(), 2)
 
     def test_department_activity_record_create_requires_unit(self):
         url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        contractor = self._ensure_contractor('BuildCo')
         data = {
             'department': Department.BUILDINGS,
             'date': '2023-02-02',
             'location': 'Roof',
             'activity_description': 'Waterproofing',
-            'contractor': 'BuildCo',
+            'contractor_ref': str(contractor.id),
             'unit': '',
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertIn('unit', response.data.get('error', {}).get('details', {}))
 
     def test_department_activity_record_create_security_without_unit(self):
         url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        contractor = self._ensure_contractor('SecCo')
         data = {
             'department': Department.SECURITY,
             'date': '2023-02-03',
             'location': 'Gate',
             'activity_description': 'Night patrol',
-            'contractor': 'SecCo',
+            'contractor_ref': str(contractor.id),
             'description': 'All clear',
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 201)
         record = DepartmentActivityRecord.objects.get(id=response.data['id'])
         self.assertEqual(record.unit, '')
 
     def test_department_activity_record_create_security_clears_unit(self):
         url = reverse('project-department-activity-record-list', kwargs={'project_pk': self.project.id})
+        contractor = self._ensure_contractor('SecCo')
         data = {
             'department': Department.SECURITY,
             'date': '2023-02-04',
             'location': 'Gate',
             'activity_description': 'Day patrol',
-            'contractor': 'SecCo',
+            'contractor_ref': str(contractor.id),
             'unit': 'm',
         }
-        response = self.client.post(url, data)
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['unit'], '')
 
@@ -653,6 +699,22 @@ class WarehouseCreateAPITests(TestCase):
         self.member = ProjectMember.objects.create(project=self.project, user=self.user)
         ProjectMemberRole.objects.create(member=self.member, role=self.role)
         self.client.force_authenticate(user=self.user)
+        from projects.models import Stakeholder
+
+        self.acme = Stakeholder.objects.create(
+            project=self.project,
+            name='Acme',
+            role='contractor',
+            created_by=self.user,
+            updated_by=self.user,
+        )
+        self.secco = Stakeholder.objects.create(
+            project=self.project,
+            name='SecCo',
+            role='contractor',
+            created_by=self.user,
+            updated_by=self.user,
+        )
         self.url = reverse(
             'project-department-activity-record-list',
             kwargs={'project_pk': self.project.id},
@@ -810,9 +872,10 @@ class WarehouseCreateAPITests(TestCase):
                 'date': '2026-10-01',
                 'location': '',
                 'activity_description': 'Pouring',
-                'contractor': 'Acme',
+                'contractor_ref': str(self.acme.id),
                 'unit': 'm3',
             },
+            format='json',
         )
         self.assertEqual(response.status_code, 400)
         details = response.data.get('error', {}).get('details', {})
@@ -826,7 +889,7 @@ class WarehouseCreateAPITests(TestCase):
                 'date': '2026-10-01',
                 'location': 'Site A',
                 'activity_description': 'Pouring',
-                'contractor': 'Acme',
+                'contractor_ref': str(self.acme.id),
                 'unit': 'm3',
                 'material_type': 'should clear',
                 'quantity_in': '9',
@@ -834,6 +897,7 @@ class WarehouseCreateAPITests(TestCase):
                 'consumption_location': 'should clear',
                 'supplier': 'should clear',
             },
+            format='json',
         )
         self.assertEqual(response.status_code, 201)
         record = DepartmentActivityRecord.objects.get(id=response.data['id'])
@@ -851,9 +915,10 @@ class WarehouseCreateAPITests(TestCase):
                 'date': '2026-10-01',
                 'location': 'Gate',
                 'activity_description': 'Patrol',
-                'contractor': 'SecCo',
+                'contractor_ref': str(self.secco.id),
                 'description': 'ok',
             },
+            format='json',
         )
         self.assertEqual(response.status_code, 201)
         record = DepartmentActivityRecord.objects.get(id=response.data['id'])

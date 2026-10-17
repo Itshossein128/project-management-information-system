@@ -87,6 +87,13 @@ class DepartmentActivityRecord(TimeStampedModel):
     location = models.CharField(max_length=255, blank=True, default='')
     activity_description = models.CharField(max_length=500, blank=True, default='')
     contractor = models.CharField(max_length=255, blank=True, default='')
+    contractor_ref = models.ForeignKey(
+        'projects.Stakeholder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='department_activity_records',
+    )
     unit = models.CharField(max_length=64, blank=True, default='')
     description = models.TextField(blank=True, default='')
     material_type = models.CharField(max_length=255, blank=True, default='')

@@ -121,7 +121,6 @@ export default function ProjectCreateWizardPage() {
         project_name: form.project_name.trim(),
         employer: form.employer.trim(),
         start_date: form.start_date,
-        ...(form.contractor?.trim() ? { contractor: form.contractor.trim() } : {}),
         ...(form.consultant?.trim() ? { consultant: form.consultant.trim() } : {}),
         ...(form.contract_type?.trim() ? { contract_type: form.contract_type.trim() } : {}),
         ...(form.contract_number?.trim()
@@ -338,12 +337,14 @@ export default function ProjectCreateWizardPage() {
               onChange={(e) => setForm((f) => ({ ...f, main_deliverables: e.target.value }))}
             />
           </div>
-          <div>
-            <Label>پیمانکار</Label>
-            <Input
-              value={form.contractor}
-              onChange={(e) => setForm((f) => ({ ...f, contractor: e.target.value }))}
-            />
+          <div data-testid="wizard-contractor-deferred">
+            <Label>{t("project.contractor", "پیمانکار")}</Label>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t(
+                "projectWizard.contractorDeferredHelp",
+                "پس از ایجاد پروژه، پیمانکار را از صفحه ذینفعان با نقش پیمانکار ثبت کنید؛ سپس در تنظیمات پروژه انتخاب کنید. تایپ آزاد مجاز نیست.",
+              )}
+            </p>
           </div>
           <div>
             <Label>مشاور</Label>

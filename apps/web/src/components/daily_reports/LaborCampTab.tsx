@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import { asList, fetchProjectContractors } from "@/app/lib/api/central-data";
 import type { DailyTabProps } from "./ActivityTab";
 import type { GridColumn, GridRow } from "./EditableGrid";
 import { InlineGridTab } from "./InlineGridTab";
@@ -9,9 +11,27 @@ export function LaborCampTab({
   readOnly,
   onChanged,
 }: DailyTabProps) {
+  const contractorsQuery = useQuery({
+    queryKey: ["project-contractors", projectId],
+    queryFn: async () => asList(await fetchProjectContractors(projectId)),
+    enabled: Boolean(projectId),
+  });
+  const contractorOptions = (contractorsQuery.data ?? []).map((c) => ({
+    value: String(c.id),
+    label: c.name,
+  }));
+
   const columns: GridColumn[] = [
     { key: "connex_number", header: "شماره کانکس", width: "120px" },
-    { key: "subcontractor_name", header: "پیمانکار", width: "160px" },
+    {
+      key: "contractor_ref",
+      header: "پیمانکار",
+      type: "select",
+      options: contractorOptions,
+      width: "160px",
+      placeholder: "انتخاب پیمانکار",
+      testId: "labor-camp-contractor-select",
+    },
     { key: "total_residents", header: "کل ساکنین", type: "number", width: "100px" },
     { key: "present_count", header: "حاضر", type: "number", width: "90px" },
     { key: "on_leave_count", header: "مرخصی", type: "number", width: "90px" },
@@ -38,6 +58,7 @@ export function LaborCampTab({
       emptyRow={() => ({
         connex_number: "",
         subcontractor_name: "",
+        contractor_ref: "",
         total_residents: 0,
         present_count: 0,
         on_leave_count: 0,
@@ -46,6 +67,7 @@ export function LaborCampTab({
       toPayload={(row: GridRow) => ({
         connex_number: row.connex_number ?? "",
         subcontractor_name: row.subcontractor_name ?? "",
+        contractor_ref: row.contractor_ref || null,
         total_residents: row.total_residents ?? 0,
         present_count: row.present_count ?? 0,
         on_leave_count: row.on_leave_count ?? 0,

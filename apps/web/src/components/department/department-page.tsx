@@ -5,7 +5,13 @@ import type {
 } from "@/app/lib/api-types";
 import { departmentUsesUnit, isWarehouseDepartment } from "@/app/lib/api-types";
 import { apiBlob, apiUploadFile } from "@/app/lib/api-client";
-import { Button, Input, JalaliDateRangePicker, type DateRangeValue } from "@/components/form";
+import {
+  Button,
+  ContractorSelect,
+  Input,
+  JalaliDateRangePicker,
+  type DateRangeValue,
+} from "@/components/form";
 import { DataTable, useGridState } from "@/components/grid";
 import { DepartmentActivityRecordModal } from "@/components/department/department-activity-record-modal";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
@@ -74,7 +80,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         !isWarehouse && locationFilter.trim() ? locationFilter.trim() : undefined,
       activity_description:
         !isWarehouse && activityFilter.trim() ? activityFilter.trim() : undefined,
-      contractor:
+      contractor_ref:
         !isWarehouse && contractorFilter.trim()
           ? contractorFilter.trim()
           : undefined,
@@ -115,7 +121,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     if (!isWarehouse && activityFilter.trim())
       sp.set("activity_description", activityFilter.trim());
     if (!isWarehouse && contractorFilter.trim())
-      sp.set("contractor", contractorFilter.trim());
+      sp.set("contractor_ref", contractorFilter.trim());
     if (showsUnit && unitFilter.trim()) sp.set("unit", unitFilter.trim());
     if (isWarehouse && materialTypeFilter.trim())
       sp.set("material_type", materialTypeFilter.trim());
@@ -611,12 +617,16 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                         "businessDepartment.activityLog.filters.activityDescription",
                       )}
                     />
-                    <Input
+                    <ContractorSelect
+                      projectId={String(businessId ?? "")}
                       id="input-departmentActivityFilterContractor"
                       name="departmentActivityFilterContractor"
+                      label={t(
+                        "businessDepartment.activityLog.filters.contractor",
+                      )}
                       value={contractorFilter}
-                      onChange={(e) => {
-                        setContractorFilter(e.target.value);
+                      onChange={(next) => {
+                        setContractorFilter(next);
                         grid.resetPage();
                       }}
                       placeholder={t(
