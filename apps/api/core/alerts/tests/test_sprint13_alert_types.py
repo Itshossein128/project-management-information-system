@@ -32,6 +32,7 @@ def test_critical_path_delay_fires(project, activity, user):
         project=project,
         version_name='B1',
         is_current=True,
+        created_by=user,
     )
     BaselineActivity.objects.create(
         baseline=baseline,

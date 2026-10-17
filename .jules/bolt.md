@@ -46,3 +46,7 @@
 ## 2024-07-30 - Resolve N+1 queries in Subcontractor API serializers
 **Learning:** Using `.aggregate()` and `.order_by().first()` inside python functions that are subsequently called within `SerializerMethodField`s completely bypasses the `prefetch_related` cache. In `average_overall_score` and `score_trend`, hitting the database manually meant multiple N+1 queries per subcontractor detail request.
 **Action:** When a queryset is already prefetched (e.g., `Prefetch('scores')`), calculate averages and trend sorting directly in Python by iterating over `sub.scores.all()` to take advantage of the prefetched cache and eliminate the extra database queries.
+
+## 2026-07-28 - Database-agnostic batch fetching for alert engine checkers
+**Learning:** Using `ActivityProgress.objects.filter(activity=activity).first()` inside a loop over activities causes N+1 queries. Additionally, using PostgreSQL-specific `.distinct('field')` raises `NotSupportedError` on SQLite in-memory test databases.
+**Action:** Batch fetch related records for all IDs in a single query ordered by date ascending (`.filter(id__in=ids).order_by('date')`), and construct a Python map `{obj.parent_id: obj}` to keep the latest record per parent in a database-agnostic manner while avoiding N+1 queries.
