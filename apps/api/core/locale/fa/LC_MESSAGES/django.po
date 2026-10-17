@@ -262,3 +262,90 @@ msgstr "ابعاد ماتریس باید با معیارها مطابقت داش
 
 msgid "Row dimensions must match criteria."
 msgstr "ابعاد سطر باید با معیارها مطابقت داشته باشد."
+
+msgid "Only a system administrator can restore an archived project."
+msgstr "فقط مدیر سیستم می‌تواند پروژهٔ بایگانی‌شده را بازگرداند."
+
+msgid "Enter a reason for restoration."
+msgstr "دلیل بازگردانی را وارد کنید."
+
+msgid "A reason is required."
+msgstr "ثبت دلیل الزامی است."
+
+msgid "The project changed. Review its current state and confirm again."
+msgstr "اطلاعات پروژه تغییر کرده است. وضعیت فعلی را بررسی و دوباره تأیید کنید."
+
+msgid "Invalid restoration confirmation. Open a new preview."
+msgstr "تأیید بازگردانی معتبر نیست. پیش‌نمایش تازه‌ای باز کنید."
+
+msgid "This restoration confirmation belongs to another user or project."
+msgstr "این تأیید بازگردانی متعلق به کاربر یا پروژهٔ دیگری است."
+
+msgid "Complete the missing activation information before restoration."
+msgstr "پیش از بازگردانی، همهٔ اطلاعات ناقص فعال‌سازی را تکمیل کنید."
+
+msgid "Invalid restoration request. Open a new preview."
+msgstr "درخواست بازگردانی معتبر نیست. پیش‌نمایش تازه‌ای باز کنید."
+
+msgid "Restoration was not applied. Please try again."
+msgstr "بازگردانی انجام نشد. لطفاً دوباره تلاش کنید."
+
+msgid "Use a change request only to complete the missing scope or contract amount."
+msgstr "از درخواست تغییر فقط برای تکمیل محدوده یا مبلغ قراردادِ ناقص استفاده کنید."
+
+msgid "Project lifecycle fields are read-only. Use the project actions."
+msgstr "فیلدهای چرخهٔ عمر فقط خواندنی هستند. از عملیات وضعیت پروژه استفاده کنید."
+
+msgid "Another authorized person must approve this change request."
+msgstr "این درخواست تغییر باید توسط فرد مجاز دیگری تصویب شود."
+
+msgid "You no longer have permission for this project action. Contact a system administrator."
+msgstr "دیگر مجوز این اقدام روی پروژه را ندارید. با مدیر سیستم تماس بگیرید."
+
+msgid "Invalid status correction request. Open a new preview and confirm again."
+msgstr "درخواست اصلاح وضعیت معتبر نیست. پیش‌نمایش تازه بگیرید و دوباره تأیید کنید."
+
+msgid "Enter a reason for this status correction."
+msgstr "دلیل اصلاح وضعیت را وارد کنید."
+
+msgid "This confirmation belongs to another user, project or action. Open your own preview."
+msgstr "این تأیید مربوط به کاربر، پروژه یا اقدام دیگری است. پیش‌نمایش مربوط به خودتان را باز کنید."
+
+msgid "Complete all missing activation information, then review and confirm again."
+msgstr "همهٔ اطلاعات ناقص فعال‌سازی را تکمیل کنید؛ سپس دوباره بررسی و تأیید کنید."
+
+msgid "The status correction was not applied. Retry the same request."
+msgstr "اصلاح وضعیت اعمال نشد. همان درخواست را دوباره ارسال کنید."
+
+msgid "The status change was not applied. Please try again."
+msgstr "تغییر وضعیت اعمال نشد. دوباره تلاش کنید."
+
+msgid "Enter a valid contract amount."
+msgstr "مبلغ قرارداد معتبر وارد کنید."
+
+msgid "Reason must be at least 10 characters."
+msgstr "دلیل درخواست تغییر باید دست‌کم ۱۰ نویسه داشته باشد."
+
+msgid "Only draft change requests can be edited."
+msgstr "فقط درخواست تغییر پیش‌نویس قابل ویرایش است. وضعیت درخواست را بررسی کنید."
+
+msgid "Only draft change requests can be submitted."
+msgstr "فقط درخواست تغییر پیش‌نویس قابل ارسال است. وضعیت درخواست را بررسی کنید."
+
+msgid "Only submitted change requests can be approved."
+msgstr "فقط درخواست تغییر ارسال‌شده قابل تصویب است. ابتدا درخواست را ارسال کنید."
+
+msgid "Only submitted change requests can be rejected."
+msgstr "فقط درخواست تغییر ارسال‌شده قابل رد است. وضعیت درخواست را بررسی کنید."
+
+msgid "Only open change requests can be cancelled."
+msgstr "فقط درخواست تغییر باز قابل لغو است. وضعیت درخواست را بررسی کنید."
+
+msgid "An open project change request already exists."
+msgstr "یک درخواست تغییر باز برای این پروژه وجود دارد. ابتدا همان درخواست را بررسی یا تعیین تکلیف کنید."
+
+msgid "Invalid amount"
+msgstr "مبلغ نامعتبر است. یک عدد معتبر برای مبلغ قرارداد وارد کنید."
+
+msgid "At least one protected field is required."
+msgstr "حداقل یک فیلد مصوب را برای درخواست تغییر مشخص کنید."

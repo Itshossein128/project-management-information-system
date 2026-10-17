@@ -24,3 +24,9 @@ apps/api/venv
 apps/web/node_modules
 apps/web/build
 apps/web/.react-router
+
+# Generated validation/build artifacts
+coverage/
+**/dist/
+**/test-results/
+**/playwright-report/

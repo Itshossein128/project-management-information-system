@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { usePermission } from "@/app/contexts/project-context";
 import {
   approveProjectChangeRequest,
+  cancelProjectChangeRequest,
   createProjectChangeRequest,
   fetchProjectChangeRequests,
+  fetchProject,
   rejectProjectChangeRequest,
   submitProjectChangeRequest,
   type ProjectChangeRequest,
@@ -25,6 +27,11 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
   const { has } = usePermission(projectId);
   const canEdit = has("edit_project");
   const canApprove = has("approve_project") || has("edit_project");
+  const {data: project} = useQuery({queryKey:["project",projectId],queryFn:()=>fetchProject(projectId)});
+  const archived = project?.status === "archived";
+  const completed = project?.status === "completed";
+  const repair = archived || completed;
+  const canCreate = archived ? project?.can_create_restore_remediation === true : completed ? project?.status_undo_remediation?.can_create_change_request === true : canEdit;
 
   const [reason, setReason] = useState("");
   const [employer, setEmployer] = useState("");
@@ -38,7 +45,13 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
 
   const open = requests.find((r) => r.status === "draft" || r.status === "submitted");
 
+  const repairActions = repair || Boolean(open?.restore_completion_event_id);
+  const allowed = (action:"submit"|"approve"|"reject"|"cancel") => repairActions
+    ? Boolean(open?.restore_remediation_actions?.includes(action))
+    : action === "submit" || action === "cancel" ? canEdit : canApprove;
+
   const invalidate = () => {
+    void qc.invalidateQueries({queryKey:["project",projectId]});
     void qc.invalidateQueries({ queryKey: ["project-change-requests", projectId] });
     void qc.invalidateQueries({ queryKey: ["project", projectId] });
   };
@@ -46,9 +59,9 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
   const createMutation = useMutation({
     mutationFn: () => {
       const proposed_changes: Record<string, unknown> = {};
-      if (employer.trim()) proposed_changes.employer = employer.trim();
-      if (contractAmount.trim()) proposed_changes.contract_amount = contractAmount.trim();
-      if (scope.trim()) proposed_changes.scope_description = scope.trim();
+      if (!repair && employer.trim()) proposed_changes.employer = employer.trim();
+      if ((!repair || project?.contract_amount == null) && contractAmount.trim()) proposed_changes.contract_amount = contractAmount.trim();
+      if ((!repair || !project?.scope_description?.trim()) && scope.trim()) proposed_changes.scope_description = scope.trim();
       return createProjectChangeRequest(projectId, reason.trim(), proposed_changes);
     },
     onSuccess: () => {
@@ -68,8 +81,9 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
       action,
     }: {
       cr: ProjectChangeRequest;
-      action: "submit" | "approve" | "reject";
+      action: "submit" | "approve" | "reject" | "cancel";
     }) => {
+      if (action === "cancel") return cancelProjectChangeRequest(projectId, cr.id);
       if (action === "submit") return submitProjectChangeRequest(projectId, cr.id);
       if (action === "approve") return approveProjectChangeRequest(projectId, cr.id);
       return rejectProjectChangeRequest(projectId, cr.id);
@@ -85,6 +99,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
     <section
       className="mx-auto mt-10 max-w-2xl space-y-3 border-t pt-8"
       data-testid="project-change-request-panel"
+      id="project-change-requests"
     >
       <h2 className="text-base font-semibold">
         {t("project.changeRequests", "درخواست‌های تغییر")}
@@ -100,6 +115,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
         <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
       ) : null}
 
+      {repair ? <p className="text-sm text-muted-foreground">{t("projectRestore.approvalHint")}</p> : null}
       {open ? (
         <div
           className="space-y-2 rounded-md border border-border p-3 text-sm"
@@ -107,17 +123,16 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
         >
           <p>
             <span className="text-muted-foreground">{t("project.crStatus", "وضعیت")}: </span>
-            {open.status}
+            {repair ? t(`projectRestore.crStates.${open.status}`) : open.status}
           </p>
           <p>
             <span className="text-muted-foreground">{t("project.crReason", "دلیل")}: </span>
             {open.reason}
           </p>
-          <pre className="overflow-x-auto rounded bg-muted/40 p-2 text-xs">
-            {JSON.stringify(open.proposed_changes, null, 2)}
-          </pre>
+          {repair ? <dl className="space-y-1 rounded bg-muted/40 p-2 text-sm">{Object.entries(open.proposed_changes).map(([field,value])=><div key={field}><dt className="font-medium">{t(`projectRestore.fields.${field}`)}</dt><dd className="whitespace-pre-wrap break-words">{value == null ? t("projectRestore.notSet") : String(value)}</dd></div>)}</dl> : <pre className="overflow-x-auto rounded bg-muted/40 p-2 text-xs">{JSON.stringify(open.proposed_changes,null,2)}</pre>}
           <div className="flex flex-wrap gap-2">
-            {open.status === "draft" && canEdit ? (
+            {repairActions && allowed("cancel") ? <Button type="button" size="sm" variant="secondary" data-testid="cr-cancel-btn" loading={actionMutation.isPending} onClick={()=>actionMutation.mutate({cr:open,action:"cancel"})}>{t("common.cancel")}</Button> : null}
+            {open.status === "draft" && allowed("submit") ? (
               <Button
                 type="button"
                 size="sm"
@@ -128,17 +143,18 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
                 {t("project.crSubmit", "ارسال")}
               </Button>
             ) : null}
-            {open.status === "submitted" && canApprove ? (
+            {open.status === "submitted" && (allowed("approve") || allowed("reject")) ? (
               <>
-                <Button
+                {allowed("approve") ? <Button
                   type="button"
                   size="sm"
                   data-testid="cr-approve-btn"
+                  hidden={!allowed("approve")}
                   loading={actionMutation.isPending}
                   onClick={() => actionMutation.mutate({ cr: open, action: "approve" })}
                 >
                   {t("project.crApprove", "تایید")}
-                </Button>
+                </Button> : null}
                 <Button
                   type="button"
                   size="sm"
@@ -153,7 +169,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
             ) : null}
           </div>
         </div>
-      ) : canEdit ? (
+      ) : canCreate ? (
         <form
           className="space-y-3"
           onSubmit={(e) => {
@@ -183,7 +199,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
               required
             />
           </div>
-          <div>
+          <div hidden={repair}>
             <label className="mb-1 block text-sm" htmlFor="cr-field-employer">
               {t("project.employer", "کارفرما")}
             </label>
@@ -194,7 +210,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
               onChange={(e) => setEmployer(e.target.value)}
             />
           </div>
-          <div>
+          <div hidden={repair && project?.contract_amount != null}>
             <label className="mb-1 block text-sm" htmlFor="cr-field-amount">
               {t("project.amount", "مبلغ قرارداد")}
             </label>
@@ -205,7 +221,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
               onChange={(e) => setContractAmount(e.target.value)}
             />
           </div>
-          <div>
+          <div hidden={repair && Boolean(project?.scope_description?.trim())}>
             <label className="mb-1 block text-sm" htmlFor="cr-field-scope">
               {t("project.scope", "شرح محدوده")}
             </label>

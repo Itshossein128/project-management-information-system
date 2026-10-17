@@ -1,3 +1,4 @@
+import { ProjectArchiveRestoreManager } from "@/components/projects/ProjectArchiveRestoreManager";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
@@ -209,6 +210,8 @@ function ProjectSettingsContent() {
             : t("projectSettings.readOnly", "نمایش فقط خواندنی")
         }
       />
+
+      {(project.can_edit_manager_for_restore || project.status_undo_remediation?.can_edit_manager) ? <ProjectArchiveRestoreManager project={project} /> : null}
 
       <form onSubmit={handleSubmit} className='mx-auto max-w-2xl space-y-4'>
         <div>

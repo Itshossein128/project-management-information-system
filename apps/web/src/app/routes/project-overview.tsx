@@ -28,6 +28,10 @@ import {
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { ExecutiveKpiPanel } from "@/components/dashboard/ExecutiveKpiPanel";
 import { KickoffCharterPanel } from "@/components/projects/KickoffCharterPanel";
+import { ProjectArchiveRestoreHistory } from "@/components/projects/ProjectArchiveRestoreHistory";
+import { ProjectArchiveRestoreDialog } from "@/components/projects/ProjectArchiveRestoreDialog";
+import { ProjectStatusUndoHistory } from "@/components/projects/ProjectStatusUndoHistory";
+import { ProjectStatusUndoSection } from "@/components/projects/ProjectStatusUndoDialog";
 import { ProjectLifecycleBar } from "@/components/projects/ProjectLifecycleBar";
 
 function OverviewContent() {
@@ -138,6 +142,10 @@ function OverviewContent() {
       />
 
       <ProjectLifecycleBar project={project} />
+      <ProjectStatusUndoSection project={project} />
+      {project.can_view_status_undo_history && <ProjectStatusUndoHistory key={project.project_id} projectId={project.project_id} />}
+      <ProjectArchiveRestoreDialog project={project} />
+      {project.can_view_restore_history && <ProjectArchiveRestoreHistory key={project.project_id} projectId={project.project_id} />}
 
       {canViewDashboard ? (
         kpisLoading ? (

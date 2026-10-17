@@ -29,6 +29,20 @@ export interface ProjectListItem {
 }
 
 export interface ProjectDetail extends ProjectListItem {
+  can_resume_with_confirmation?: boolean;
+  can_undo_completion?: boolean;
+  can_view_status_undo_history?: boolean;
+  suspension_event_id?: string | null;
+  completion_event_id?: string | null;
+  completed_from_status?: "active" | "suspended" | null;
+  status_undo_remediation?: {operation:StatusUndoOperation;source_event_id:string;can_edit_manager:boolean;can_create_change_request:boolean} | null;
+  can_restore_from_archive?: boolean;
+  can_edit_manager_for_restore?: boolean;
+  can_create_restore_remediation?: boolean;
+  can_view_restore_history?: boolean;
+  archived_from_status?: RestoreTarget|null;
+  archive_cycle_id?: string|null;
+  lifecycle_version?: number;
   contractor: string;
   consultant: string;
   project_manager: string | null;
@@ -77,6 +91,9 @@ export interface KickoffCharter {
 }
 
 export interface ProjectChangeRequest {
+  restore_completion_event_id?: string | null;
+  restore_archive_cycle_id?: string | null;
+  restore_remediation_actions?: ("update"|"submit"|"approve"|"reject"|"cancel")[];
   id: string;
   reason: string;
   status: string;
@@ -139,8 +156,8 @@ export function suspendProject(projectId: string) {
   return apiJson<ProjectDetail>(`${base(projectId)}/suspend/`, { method: "POST" });
 }
 
-export function resumeProject(projectId: string) {
-  return apiJson<ProjectDetail>(`${base(projectId)}/resume/`, { method: "POST" });
+export function resumeProject(projectId: string, payload: StatusUndoPayload) {
+  return apiJson<StatusUndoResult>(`${base(projectId)}/resume/`, { method: "POST", body: JSON.stringify(payload) });
 }
 
 export function completeProject(projectId: string) {
@@ -195,4 +212,86 @@ export function rejectProjectChangeRequest(projectId: string, crId: string, deci
     method: "POST",
     body: JSON.stringify({ decision_notes }),
   });
+}
+
+export type RestoreTarget = "active" | "suspended" | "completed";
+export interface RestorePreview {
+  project_id: string; project_name: string; from_status: "archived"; to_status: RestoreTarget;
+  archive_cycle_id: string; lifecycle_version: number; confirmation_token: string; can_confirm: boolean;
+  missing: string[]; remediation: {field:string;action:"project_settings"|"project_change_request"}[];
+}
+export interface RestorePayload { request_id: string; confirmation_token: string; reason: string }
+export interface RestoreReceipt {
+  id:string;project_id:string;project_name:string;archive_cycle_id:string;request_id:string;
+  actor:{id:string;display_name:string};restored_at:string;reason:string;from_status:"archived";to_status:RestoreTarget;
+}
+export interface RestoreResult {
+  outcome:"restored"|"replayed";
+  receipt:RestoreReceipt;
+  current_project:{project_id:string;project_name:string;status:string;archive_cycle_id:string|null;lifecycle_version:number};
+}
+export function fetchRestorePreview(projectId:string) {
+  return apiJson<RestorePreview>(`${base(projectId)}/restore-preview/`);
+}
+export function restoreProject(projectId:string,payload:RestorePayload) {
+  return apiJson<RestoreResult>(`${base(projectId)}/restore/`,{method:"POST",body:JSON.stringify(payload)});
+}
+export function cancelProjectChangeRequest(projectId:string,crId:string) {
+  return apiJson<ProjectChangeRequest>(`${base(projectId)}/change-requests/${crId}/cancel/`,{method:"POST"});
+}
+export interface RestoreAttemptResult {
+  outcome:"completed"|"not_recorded";receipt:RestoreReceipt|null;current_project:RestoreResult["current_project"];
+}
+export function fetchRestoreAttempt(projectId:string,requestId:string) {
+  return apiJson<RestoreAttemptResult>(`${base(projectId)}/restore-attempts/${requestId}/`);
+}
+
+export interface RestoreHistoryPage {
+  count:number;next:string|null;previous:string|null;results:RestoreReceipt[];
+}
+export function fetchRestoreHistory(projectId:string,page=1) {
+  return apiJson<RestoreHistoryPage>(`${base(projectId)}/restore-history/?page=${page}`);
+}
+
+
+export type StatusUndoOperation = "resume" | "undo_completion";
+export interface StatusUndoPayload { request_id:string; confirmation_token:string; reason:string }
+export interface StatusUndoPreview {
+  project_id:string;project_name:string;operation:StatusUndoOperation;source_event_id:string;
+  from_status:"suspended"|"completed";to_status:"active"|"suspended";lifecycle_version:number;
+  confirmation_token:string;can_confirm:boolean;missing:string[];
+  remediation:{field:string;action:"project_settings"|"project_change_request";can_perform:boolean}[];
+}
+export interface StatusUndoSource {
+  id:string;kind:"suspend"|"complete";from_status:"active"|"suspended";to_status:"suspended"|"completed";
+  occurred_at:string;actor:{id:string;display_name:string};project_name:string;
+}
+export interface StatusUndoReceipt {
+  id:string;project_id:string;project_name:string;operation:StatusUndoOperation;source_event_id:string;request_id:string;
+  actor:{id:string;display_name:string};performed_at:string;reason:string;
+  from_status:"suspended"|"completed";to_status:"active"|"suspended";source_event:StatusUndoSource;
+}
+export interface StatusUndoCurrent {
+  project_id:string;project_name:string;status:string;lifecycle_version:number;
+  suspension_event_id:string|null;completion_event_id:string|null;completed_from_status:"active"|"suspended"|null;archive_cycle_id:string|null;
+}
+export interface StatusUndoResult { outcome:"applied"|"replayed";receipt:StatusUndoReceipt;current_project:StatusUndoCurrent }
+export function fetchStatusUndoPreview(projectId:string,operation:StatusUndoOperation) {
+  return apiJson<StatusUndoPreview>(`${base(projectId)}/${operation==="resume"?"resume-preview":"undo-completion-preview"}/`);
+}
+export function undoProjectCompletion(projectId:string,payload:StatusUndoPayload) {
+  return apiJson<StatusUndoResult>(`${base(projectId)}/undo-completion/`,{method:"POST",body:JSON.stringify(payload)});
+}
+export function applyStatusUndo(projectId:string,operation:StatusUndoOperation,payload:StatusUndoPayload) {
+  return operation==="resume"?resumeProject(projectId,payload):undoProjectCompletion(projectId,payload);
+}
+
+export interface StatusUndoAttemptResult {outcome:"completed"|"not_recorded";receipt:StatusUndoReceipt|null;current_project:StatusUndoCurrent}
+export function fetchStatusUndoAttempt(projectId:string,operation:StatusUndoOperation,requestId:string) {
+ return apiJson<StatusUndoAttemptResult>(`${base(projectId)}/status-undo-attempts/${operation}/${requestId}/`);
+}
+
+export interface StatusUndoHistoryPage {count:number;next:string|null;previous:string|null;results:StatusUndoReceipt[]}
+export function fetchStatusUndoHistory(projectId:string,page=1) {
+ return apiJson<StatusUndoHistoryPage>(`${base(projectId)}/status-undo-history/?page=${page}`);
 }

@@ -11,6 +11,7 @@ from rest_framework.exceptions import (
 from rest_framework.views import exception_handler
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy as _lazy
+from django.http import Http404
 
 from common.i18n import localize_api_payload
 
@@ -81,7 +82,7 @@ def _error_code(exc) -> str:
         return 'not_authenticated'
     if isinstance(exc, AuthenticationFailed):
         return 'authentication_failed'
-    if isinstance(exc, NotFound):
+    if isinstance(exc, (NotFound, Http404)):
         return 'not_found'
     if isinstance(exc, Throttled):
         return 'throttled'

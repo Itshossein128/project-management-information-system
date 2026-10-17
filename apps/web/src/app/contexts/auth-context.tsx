@@ -1,3 +1,6 @@
+import { retainStatusUndoStateForUser } from "@/app/lib/project-status-undo-state";
+import { clearProjectSessionQueries } from "@/app/lib/react-query";
+import { retainRestoreAttemptsForUser } from "@/app/lib/project-archive-restore-pending";
 import { ROLES } from "@/config/roles";
 import * as React from "react";
 import { apiJson, restoreSessionFromServer } from "src/app/lib/api-client";
@@ -64,6 +67,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Stay in loading while a stored session is validated — avoids flashing protected UI with dead tokens.
   const [isLoading, setIsLoading] = React.useState(() => hasStoredSession());
+  const queryActor = React.useRef(user?.id);
+  const prepareQueryActor = React.useCallback((next?: string) => {
+    if (queryActor.current !== next) {
+      clearProjectSessionQueries();
+      queryActor.current = next;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!isLoading) { retainRestoreAttemptsForUser(user?.id); retainStatusUndoStateForUser(user?.id); }
+  }, [user?.id, isLoading]);
 
   const completeSession = React.useCallback((data: AuthApiResponse) => {
     const raw = data.user as AuthUser & { groups?: string[] };
@@ -72,9 +86,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: String(data.user.id),
       roles: normalizeRoles(raw.roles ?? raw.groups ?? []),
     };
+    retainRestoreAttemptsForUser(userWithRoles.id);
+    retainStatusUndoStateForUser(userWithRoles.id);
+    prepareQueryActor(userWithRoles.id);
     setStoredAuth({ access: data.access, refresh: data.refresh }, userWithRoles);
     setUser(userWithRoles);
-  }, []);
+  }, [prepareQueryActor]);
 
   const login = React.useCallback(async (creds: LoginCredentials) => {
     setIsLoading(true);
@@ -114,9 +131,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
     }
+    retainRestoreAttemptsForUser();
+    retainStatusUndoStateForUser();
+    prepareQueryActor();
     clearStoredAuth();
     setUser(null);
-  }, []);
+  }, [prepareQueryActor]);
 
   const hasRole = React.useCallback(
     (role: ROLES) => (user?.roles ?? []).includes(role),
@@ -131,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: String(profile.id),
         roles: normalizeRoles(profile.roles ?? (profile as AuthUser & { groups?: string[] }).groups),
       };
+      prepareQueryActor(withRoles.id);
       setUser(withRoles);
       const access = getStoredAccessToken();
       const refresh = getStoredRefreshToken();
@@ -138,9 +159,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStoredAuth({ access, refresh }, withRoles);
       }
     } else {
+      prepareQueryActor();
       setUser(null);
     }
-  }, []);
+  }, [prepareQueryActor]);
 
   React.useEffect(() => {
     // Keep SSR cookie aligned with localStorage so hard reloads don't bounce to /login.
@@ -170,12 +192,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Sync immediately in case a 401 cleared storage before this effect subscribed.
     const syncFromStorage = () => {
       if (!hasStoredSession()) {
+        prepareQueryActor();
         setUser(null);
       }
     };
     syncFromStorage();
     return subscribeAuthStorage(syncFromStorage);
-  }, []);
+  }, [prepareQueryActor]);
 
   const value: AuthContextValue = {
     user,

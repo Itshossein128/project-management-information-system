@@ -6,16 +6,49 @@ on:
     paths:
       - "apps/web/**"
       - "apps/api/**"
+      - "e2e/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
       - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main]
     paths:
       - "apps/web/**"
       - "apps/api/**"
+      - "e2e/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
       - ".github/workflows/e2e.yml"
   workflow_dispatch:
 
 jobs:
+  activation-feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile --registry https://registry.npmjs.org/
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Test project activation messages on desktop and mobile
+        run: pnpm test:project-activation
+      - name: Upload activation test report and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: project-activation-report
+          path: |
+            playwright-report/project-activation/
+            test-results/project-activation.json
+            test-results/project-activation/
+          if-no-files-found: ignore
+
   playwright:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}

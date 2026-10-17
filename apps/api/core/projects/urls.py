@@ -99,6 +99,20 @@ urlpatterns = [
     path('<uuid:project_pk>/complete/', ProjectViewSet.as_view({'post': 'complete'}), name='project-complete'),
     path('<uuid:project_pk>/archive/', ProjectViewSet.as_view({'post': 'archive'}), name='project-archive'),
 
+    path('<uuid:project_pk>/restore-history/', ProjectViewSet.as_view({'get': 'restore_history'}), name='project-restore-history'),
+    path('<uuid:project_pk>/restore-preview/', ProjectViewSet.as_view({'get': 'restore_preview'}), name='project-restore-preview'),
+    path('<uuid:project_pk>/restore/', ProjectViewSet.as_view({'post': 'restore'}), name='project-restore'),
+
+    path('<uuid:project_pk>/restore-attempts/<uuid:request_id>/', ProjectViewSet.as_view({'get': 'restore_attempt'}), name='project-restore-attempt'),
+
+    path('<uuid:project_pk>/resume-preview/', ProjectViewSet.as_view({'get':'resume_preview'}), name='project-resume-preview'),
+    path('<uuid:project_pk>/undo-completion-preview/', ProjectViewSet.as_view({'get':'undo_completion_preview'}), name='project-undo-completion-preview'),
+    path('<uuid:project_pk>/undo-completion/', ProjectViewSet.as_view({'post':'undo_completion'}), name='project-undo-completion'),
+
+    path('<uuid:project_pk>/status-undo-attempts/<str:operation>/<uuid:request_id>/', ProjectViewSet.as_view({'get':'status_undo_attempt'}), name='project-status-undo-attempt'),
+
+    path('<uuid:project_pk>/status-undo-history/', ProjectViewSet.as_view({'get':'status_undo_history'}), name='project-status-undo-history'),
+
     # Kickoff charter
     path(
         '<uuid:project_pk>/kickoff-charter/',

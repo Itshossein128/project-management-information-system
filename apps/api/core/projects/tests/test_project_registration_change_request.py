@@ -14,7 +14,7 @@ class TestProjectRegistrationChangeRequest:
         code = response.data.get('error', {}).get('code') or response.data.get('code')
         assert code == 'protected_field_requires_change_request'
 
-    def test_change_request_lifecycle(self, auth_client, project):
+    def test_change_request_lifecycle(self, auth_client, project, other_user):
         base = f'/api/v1/projects/{project.id}/change-requests/'
         create = auth_client.post(
             base,
@@ -43,7 +43,15 @@ class TestProjectRegistrationChangeRequest:
         assert submit.data['status'] == 'submitted'
         assert submit.data['previous_values'].get('employer') == project.employer
 
-        approve = auth_client.post(f'{base}{cr_id}/approve/')
+        self_approval = auth_client.post(f'{base}{cr_id}/approve/')
+        assert self_approval.status_code == status.HTTP_400_BAD_REQUEST
+        assert self_approval.data['error']['code'] == 'sod_self_approve'
+        from django.contrib.auth.models import Group
+        from rest_framework.test import APIClient
+        other_user.groups.add(Group.objects.get_or_create(name='admin')[0])
+        approver = APIClient()
+        approver.force_authenticate(other_user)
+        approve = approver.post(f'{base}{cr_id}/approve/')
         assert approve.status_code == status.HTTP_200_OK
         assert approve.data['status'] == 'approved'
 

@@ -33,6 +33,8 @@ SENSITIVE_KEYS = frozenset({
 
 class AuditLogMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
+        if getattr(request, '_project_restore_audited', False) or getattr(request, '_project_status_audited', False):
+            return response
         if request.method not in AUDIT_METHODS:
             return response
         if any(request.path.startswith(p) for p in SKIP_PATH_PREFIXES):

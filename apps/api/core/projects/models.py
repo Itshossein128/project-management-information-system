@@ -76,6 +76,12 @@ class Project(UUIDModel, TimeStampedModel):
         choices=ProjectStatus.choices,
         default=ProjectStatus.DRAFT,
     )
+    archived_from_status = models.CharField(max_length=30, null=True, blank=True)
+    archive_cycle_id = models.UUIDField(null=True, blank=True)
+    lifecycle_version = models.PositiveBigIntegerField(default=0)
+    suspension_event = models.ForeignKey('audit.AuditLog', null=True, blank=True, on_delete=models.PROTECT, related_name='+', editable=False)
+    completion_event = models.ForeignKey('audit.AuditLog', null=True, blank=True, on_delete=models.PROTECT, related_name='+', editable=False)
+    completed_from_status = models.CharField(max_length=30, null=True, blank=True, choices=[('active', 'Active'), ('suspended', 'Suspended')], editable=False)
     budget_approved_at = models.DateTimeField(null=True, blank=True)
     budget_approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -102,6 +108,32 @@ class Project(UUIDModel, TimeStampedModel):
     class Meta:
         db_table = 'projects'
         ordering = ['project_name']
+        constraints = [
+            models.CheckConstraint(name='project_completion_pair', check=(
+                models.Q(completion_event__isnull=True, completed_from_status__isnull=True)
+                | models.Q(completion_event__isnull=False, completed_from_status__isnull=False, completed_from_status__in=['active','suspended'])
+            )),
+            models.CheckConstraint(name='project_completed_source', check=(
+                ~(models.Q(status='completed') | models.Q(status='archived', archived_from_status='completed'))
+                | models.Q(completion_event__isnull=False, completed_from_status__isnull=False)
+            )),
+            models.CheckConstraint(name='project_suspended_source', check=(
+                ~(models.Q(status='suspended') | models.Q(status='archived', archived_from_status='suspended')
+                  | ((models.Q(status='completed') | models.Q(status='archived', archived_from_status='completed')) & models.Q(completed_from_status='suspended')))
+                | models.Q(suspension_event__isnull=False)
+            )),
+            models.CheckConstraint(
+                name='project_archive_context_valid',
+                check=(
+                    models.Q(archived_from_status__isnull=True, archive_cycle_id__isnull=True)
+                    & ~models.Q(status=ProjectStatus.ARCHIVED)
+                ) | models.Q(
+                    archived_from_status__in=['active', 'suspended', 'completed'],
+                    archived_from_status__isnull=False,
+                    archive_cycle_id__isnull=False,
+                ),
+            ),
+        ]
         indexes = [
             models.Index(fields=['status'], name='projects_status_idx'),
         ]
@@ -116,6 +148,66 @@ class Project(UUIDModel, TimeStampedModel):
     @property
     def slug(self):
         return self.project_code
+
+
+class ProjectArchiveRestore(UUIDModel):
+    """Immutable committed result for one archive occurrence and request."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='archive_restores')
+    archive_cycle_id = models.UUIDField()
+    request_id = models.UUIDField()
+    request_fingerprint = models.CharField(max_length=64)
+    confirmation_version = models.PositiveBigIntegerField()
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
+    actor_snapshot = models.JSONField()
+    project_snapshot = models.JSONField()
+    reason = models.TextField()
+    from_status = models.CharField(max_length=30, default='archived')
+    to_status = models.CharField(max_length=30)
+    restored_at = models.DateTimeField()
+    audit_log = models.OneToOneField('audit.AuditLog', on_delete=models.PROTECT, related_name='archive_restore')
+
+    class Meta:
+        ordering = ['-restored_at', '-id']
+        constraints = [
+            models.UniqueConstraint(fields=['project', 'archive_cycle_id'], name='restore_once_per_archive_cycle'),
+            models.UniqueConstraint(fields=['project', 'request_id'], name='restore_once_per_request'),
+            models.CheckConstraint(
+                name='restore_statuses_valid',
+                check=models.Q(from_status='archived', to_status__in=['active', 'suspended', 'completed']),
+            ),
+            models.CheckConstraint(name='restore_reason_required', check=models.Q(reason__regex=r'^\S(?:.*\S)?$')),
+        ]
+
+
+class ProjectStatusUndo(UUIDModel):
+    """Immutable committed correction of one exact suspend/complete event."""
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='status_undos')
+    operation = models.CharField(max_length=30, choices=[('resume','Resume'),('undo_completion','Undo completion')])
+    source_audit_log = models.ForeignKey('audit.AuditLog', on_delete=models.PROTECT, related_name='+')
+    source_snapshot = models.JSONField()
+    request_id = models.UUIDField()
+    request_fingerprint = models.CharField(max_length=64)
+    confirmation_version = models.PositiveBigIntegerField()
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
+    actor_snapshot = models.JSONField()
+    project_snapshot = models.JSONField()
+    reason = models.TextField()
+    from_status = models.CharField(max_length=30)
+    to_status = models.CharField(max_length=30)
+    performed_at = models.DateTimeField()
+    audit_log = models.OneToOneField('audit.AuditLog', on_delete=models.PROTECT, related_name='status_undo')
+
+    class Meta:
+        ordering = ['-performed_at', '-id']
+        indexes = [models.Index(fields=['project','-performed_at','-id'], name='status_undo_history_idx')]
+        constraints = [
+            models.UniqueConstraint(fields=['project','request_id'], name='status_undo_once_request'),
+            models.UniqueConstraint(fields=['project','operation','source_audit_log'], name='status_undo_once_source'),
+            models.CheckConstraint(name='status_undo_distinct_audits', check=~models.Q(source_audit_log=models.F('audit_log'))),
+            models.CheckConstraint(name='status_undo_tuple', check=(models.Q(operation='resume',from_status='suspended',to_status='active') | models.Q(operation='undo_completion',from_status='completed',to_status__in=['active','suspended']))),
+            models.CheckConstraint(name='status_undo_reason', check=models.Q(reason__regex=r'^\S(?:[\s\S]*\S)?$')),
+        ]
 
 
 class ProjectChangeRequestStatus(models.TextChoices):
@@ -153,6 +245,9 @@ class ProjectKickoffCharter(AuditSoftDeleteModel):
 
 
 class ProjectChangeRequest(AuditSoftDeleteModel):
+    # Only requests created to repair an archived active project bind to its cycle.
+    restore_archive_cycle_id = models.UUIDField(null=True, blank=True, editable=False)
+    restore_completion_event = models.ForeignKey('audit.AuditLog', null=True, blank=True, on_delete=models.PROTECT, related_name='+', editable=False)
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
@@ -183,6 +278,7 @@ class ProjectChangeRequest(AuditSoftDeleteModel):
     decision_notes = models.TextField(blank=True, default='')
 
     class Meta:
+        constraints = [models.CheckConstraint(name='project_cr_exclusive_binding', check=models.Q(restore_archive_cycle_id__isnull=True) | models.Q(restore_completion_event__isnull=True))]
         db_table = 'project_change_requests'
         ordering = ['-requested_at']
 

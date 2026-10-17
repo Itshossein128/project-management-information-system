@@ -38,6 +38,19 @@ export interface ApiError {
   [key: string]: unknown;
 }
 
+/** Preserve structured API errors so forms can offer actionable guidance. */
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string,
+    public readonly details?: unknown,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
@@ -173,7 +186,16 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
       detail ??
       (raw && raw.trim() ? raw.trim() : null) ??
       (res.statusText || "Request failed");
-    throw new Error(message);
+    const payload =
+      typeof apiError.error === "object" && apiError.error !== null
+        ? apiError.error as Record<string, unknown>
+        : undefined;
+    throw new ApiRequestError(
+      message,
+      res.status,
+      typeof payload?.code === "string" ? payload.code : undefined,
+      payload?.details,
+    );
   }
   if (!raw) return {} as T;
   return data as T;

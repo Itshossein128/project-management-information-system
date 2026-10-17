@@ -1,11 +1,15 @@
 """REST CRUD for blueprint projects."""
 import logging
 
+from django.db import transaction, IntegrityError
+from django.utils.translation import gettext as _, gettext_lazy as _lazy
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -23,6 +27,9 @@ from projects.serializers import (
     ProjectKickoffCharterSerializer,
     ProjectListSerializer,
     ProjectUpdateSerializer,
+    ProjectRestoreRequestSerializer,
+    ProjectStatusUndoRequestSerializer,
+    ProjectLifecycleWriteGuard,
 )
 from projects.services import create_project_with_creator
 from business_meta.services import create_project_from_template, get_available_templates
@@ -30,8 +37,47 @@ from business_meta.services import create_project_from_template, get_available_t
 logger = logging.getLogger(__name__)
 
 
-def _detail(project):
-    return ProjectDetailSerializer(project).data
+def _detail(project, request=None):
+    return ProjectDetailSerializer(project, context={'request': request}).data
+
+
+class IsRestoreAdministrator(BasePermission):
+    def has_permission(self, request, view):
+        lifecycle_service.require_restore_admin(request.user)
+        return True
+
+
+class RestoreNotApplied(APIException):
+    status_code = 503
+    default_code = 'restore_not_applied'
+    def __init__(self):
+        super().__init__({'error': {'code': self.default_code, 'message': _('Restoration was not applied. Please try again.'), 'details': {}}})
+
+
+class StatusUndoHistoryPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class IsStatusUndoAuthority(BasePermission):
+    def has_permission(self, request, view):
+        from projects.status_undo_service import require_authority
+        operation = view.kwargs.get('operation') or ('resume' if view.action in ('resume','resume_preview') else 'undo_completion')
+        require_authority(request.user, view.kwargs.get('project_pk'), operation)
+        return True
+
+
+class StatusUndoNotApplied(APIException):
+    status_code = 503
+    default_code = 'status_undo_not_applied'
+    default_detail = _lazy('The status correction was not applied. Retry the same request.')
+
+
+class LifecycleNotApplied(APIException):
+    status_code = 503
+    default_code = 'lifecycle_not_applied'
+    default_detail = _lazy('The status change was not applied. Please try again.')
 
 
 @extend_schema_view(
@@ -47,6 +93,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = 'project_pk'
 
     def get_permissions(self):
+        if self.action in ('resume','resume_preview','undo_completion','undo_completion_preview','status_undo_attempt'):
+            return [IsAuthenticated(), IsStatusUndoAuthority()]
+        if self.action in ('restore_preview', 'restore', 'restore_attempt'):
+            return [IsAuthenticated(), IsRestoreAdministrator()]
+        if self.action in ('restore_history','status_undo_history'):
+            return [IsAuthenticated(), HasProjectPermission()]
         if self.action == 'create':
             return [IsAuthenticated()]
         if self.action in ('list', 'retrieve'):
@@ -64,6 +116,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated(), IsProjectMember()]
 
     def get_required_permission(self):
+        if self.action in ('restore_history','status_undo_history'):
+            return 'view_project'
         if self.action == 'approve':
             return 'approve_project'
         if self.action in (
@@ -127,18 +181,33 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        lifecycle_service.assert_not_archived_mutable(instance, request.user)
-        return super().partial_update(request, *args, **kwargs)
+        with transaction.atomic():
+            instance = lifecycle_service.lock_project(instance)
+            lifecycle_service.assert_not_archived_mutable(instance, request.user)
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        lifecycle_service.assert_not_archived_mutable(instance, request.user)
-        return super().destroy(request, *args, **kwargs)
+        with transaction.atomic():
+            instance = lifecycle_service.lock_project(instance)
+            lifecycle_service.assert_not_archived_mutable(instance, request.user)
+            self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def _lifecycle(self, request, fn, **kwargs):
         project = self.get_object()
-        project = fn(project, request.user, **kwargs)
-        return Response(_detail(project))
+        try:
+            project = fn(project, request.user, **kwargs)
+        except IntegrityError:
+            if fn in (lifecycle_service.suspend, lifecycle_service.complete):
+                raise LifecycleNotApplied()
+            raise
+        if fn in (lifecycle_service.suspend, lifecycle_service.complete):
+            request._request._project_status_audited = True
+        return Response(_detail(project, request))
 
     @extend_schema(summary='Submit project for approval', tags=['Projects'])
     @action(detail=True, methods=['post'], url_path='submit')
@@ -167,7 +236,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @extend_schema(summary='Resume suspended project', tags=['Projects'])
     @action(detail=True, methods=['post'], url_path='resume')
     def resume(self, request, project_pk=None):
-        return self._lifecycle(request, lifecycle_service.resume)
+        return self._status_undo(request, "resume")
 
     @extend_schema(summary='Mark project completed', tags=['Projects'])
     @action(detail=True, methods=['post'], url_path='complete')
@@ -179,6 +248,99 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def archive(self, request, project_pk=None):
         return self._lifecycle(request, lifecycle_service.archive)
 
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(request, response, *args, **kwargs)
+        if self.action in ('resume','resume_preview','undo_completion','undo_completion_preview','status_undo_attempt','status_undo_history'):
+            response['Cache-Control'] = 'no-store'
+        return response
+
+    def resume_preview(self, request, project_pk=None):
+        from projects.status_undo_service import preview
+        return Response(preview(self.get_object(), request.user, 'resume'))
+
+    def undo_completion_preview(self, request, project_pk=None):
+        from projects.status_undo_service import preview
+        return Response(preview(self.get_object(), request.user, 'undo_completion'))
+
+    def undo_completion(self, request, project_pk=None):
+        return self._status_undo(request, 'undo_completion')
+
+    def _status_undo(self, request, operation):
+        from projects.status_undo_service import undo
+        project = self.get_object()
+        serializer = ProjectStatusUndoRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            result = undo(project, request.user, operation, **serializer.validated_data)
+        except IntegrityError:
+            # The atomic service has exited with proven rollback. Other DB/commit
+            # uncertainty remains unclassified and must be recovered by identity.
+            raise StatusUndoNotApplied()
+        request._request._project_status_audited = True
+        return Response(result)
+
+    def status_undo_attempt(self, request, project_pk=None, operation=None, request_id=None):
+        from projects import status_undo_service as service
+        from projects.models import ProjectStatusUndo
+        project = self.get_object()
+        user = service.require_authority(request.user, project.pk, operation)
+        receipt = ProjectStatusUndo.objects.filter(project=project, operation=operation, request_id=request_id, actor_snapshot__id=str(user.pk)).first()
+        project = get_object_or_404(Project, pk=project.pk)
+        return Response({'outcome': 'completed' if receipt else 'not_recorded', 'receipt': service.receipt_data(receipt) if receipt else None, 'current_project': service.current_data(project)})
+
+    def status_undo_history(self, request, project_pk=None):
+        from projects import status_undo_service as service
+        project = self.get_object()
+        service.require_authority(request.user, project.pk, 'history')
+        paginator = StatusUndoHistoryPagination()
+        page = paginator.paginate_queryset(project.status_undos.order_by('-performed_at','-id'), request, view=self)
+        return paginator.get_paginated_response([service.receipt_data(row) for row in page])
+
+    def restore_preview(self, request, project_pk=None):
+        response = Response(lifecycle_service.restore_preview(self.get_object(), request.user))
+        response['Cache-Control'] = 'no-store'
+        return response
+
+    def restore_attempt(self, request, project_pk=None, request_id=None):
+        from projects.models import ProjectArchiveRestore
+        project = self.get_object()
+        lifecycle_service.require_restore_admin(request.user)
+        receipt = ProjectArchiveRestore.objects.filter(project=project, request_id=request_id).first()
+        project = get_object_or_404(Project, pk=project.pk)
+        response = Response({
+            'outcome': 'completed' if receipt else 'not_recorded',
+            'receipt': lifecycle_service.restore_receipt_data(receipt) if receipt else None,
+            'current_project': lifecycle_service.current_project_data(project),
+        })
+        response['Cache-Control'] = 'no-store'
+        return response
+
+    def restore_history(self, request, project_pk=None):
+        from config.pagination import DefaultPageNumberPagination
+        project = self.get_object()
+        paginator = DefaultPageNumberPagination()
+        rows = project.archive_restores.order_by('-restored_at', '-id')
+        page = paginator.paginate_queryset(rows, request, view=self)
+        response = paginator.get_paginated_response([
+            lifecycle_service.restore_receipt_data(row) for row in page
+        ])
+        response['Cache-Control'] = 'no-store'
+        return response
+
+    def restore(self, request, project_pk=None):
+        project = self.get_object()
+        serializer = ProjectRestoreRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            result = lifecycle_service.restore(project, request.user, **serializer.validated_data)
+        except IntegrityError:
+            # atomic has exited and rollback is established; connection-loss errors remain unknown.
+            raise RestoreNotApplied()
+        request._request._project_restore_audited = True
+        response = Response(result)
+        response['Cache-Control'] = 'no-store'
+        return response
+
     @extend_schema(summary='List available templates', tags=['Projects'])
     @action(detail=False, methods=['get'], url_path='templates')
     def templates(self, request):
@@ -187,6 +349,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @extend_schema(summary='Create project from template', tags=['Projects'])
     @action(detail=False, methods=['post'], url_path='from_template')
     def from_template(self, request):
+        ProjectLifecycleWriteGuard.assert_writable(request.data)
         name = request.data.get('name') or request.data.get('project_name')
         code = request.data.get('slug') or request.data.get('project_code')
         template = request.data.get('template')
@@ -257,9 +420,10 @@ class ProjectChangeRequestListCreateView(APIView):
 
     def get(self, request, project_pk=None):
         qs = change_request_service.list_change_requests(project_pk)
-        return Response(ProjectChangeRequestSerializer(qs, many=True).data)
+        return Response(ProjectChangeRequestSerializer(qs, many=True, context={'request': request}).data)
 
     def post(self, request, project_pk=None):
+        ProjectChangeRequestSerializer.assert_unbound_input(request.data)
         project = get_object_or_404(Project, pk=project_pk)
         cr = change_request_service.create_change_request(
             project=project,
@@ -267,7 +431,7 @@ class ProjectChangeRequestListCreateView(APIView):
             reason=request.data.get('reason', ''),
             proposed_changes=request.data.get('proposed_changes') or {},
         )
-        return Response(ProjectChangeRequestSerializer(cr).data, status=status.HTTP_201_CREATED)
+        return Response(ProjectChangeRequestSerializer(cr, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
 class ProjectChangeRequestDetailView(APIView):
@@ -284,9 +448,10 @@ class ProjectChangeRequestDetailView(APIView):
 
     def get(self, request, project_pk=None, pk=None):
         cr = self.get_object(project_pk, pk)
-        return Response(ProjectChangeRequestSerializer(cr).data)
+        return Response(ProjectChangeRequestSerializer(cr, context={'request': request}).data)
 
     def patch(self, request, project_pk=None, pk=None):
+        ProjectChangeRequestSerializer.assert_unbound_input(request.data)
         cr = self.get_object(project_pk, pk)
         cr = change_request_service.update_change_request(
             cr,
@@ -294,7 +459,7 @@ class ProjectChangeRequestDetailView(APIView):
             reason=request.data.get('reason', cr.reason),
             proposed_changes=request.data.get('proposed_changes', cr.proposed_changes),
         )
-        return Response(ProjectChangeRequestSerializer(cr).data)
+        return Response(ProjectChangeRequestSerializer(cr, context={'request': request}).data)
 
 
 class ProjectChangeRequestActionView(APIView):
@@ -311,6 +476,7 @@ class ProjectChangeRequestActionView(APIView):
         return self.get_required_permission()
 
     def post(self, request, project_pk=None, pk=None, action_name=None):
+        ProjectChangeRequestSerializer.assert_unbound_input(request.data)
         cr = get_object_or_404(
             ProjectChangeRequest, pk=pk, project_id=project_pk, is_deleted=False,
         )
@@ -325,4 +491,4 @@ class ProjectChangeRequestActionView(APIView):
             cr = change_request_service.cancel_change_request(cr, request.user)
         else:
             return Response({'detail': 'Unknown action'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(ProjectChangeRequestSerializer(cr).data)
+        return Response(ProjectChangeRequestSerializer(cr, context={'request': request}).data)

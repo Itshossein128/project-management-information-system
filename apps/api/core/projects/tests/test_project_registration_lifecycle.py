@@ -106,9 +106,10 @@ class TestProjectRegistrationLifecycle:
         s = auth_client.post(f'/api/v1/projects/{project.id}/suspend/')
         assert s.status_code == status.HTTP_200_OK
         assert s.data['status'] == 'suspended'
-        r = auth_client.post(f'/api/v1/projects/{project.id}/resume/')
+        from projects.tests.status_undo_helpers import confirmed_body
+        r = auth_client.post(f'/api/v1/projects/{project.id}/resume/', confirmed_body(auth_client, project), format='json')
         assert r.status_code == status.HTTP_200_OK
-        assert r.data['status'] == 'active'
+        assert r.data['current_project']['status'] == 'active'
         c = auth_client.post(f'/api/v1/projects/{project.id}/complete/')
         assert c.status_code == status.HTTP_200_OK
         assert c.data['status'] == 'completed'

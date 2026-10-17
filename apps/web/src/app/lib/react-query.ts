@@ -10,3 +10,12 @@ export const queryClient = new QueryClient({
   },
 });
 
+// Detail includes actor-specific capabilities; history includes private reasons.
+// Cancel before eviction so a late response cannot refill another session's key.
+export function clearProjectSessionQueries() {
+  const prefixes = new Set(["project", "status-undo-history", "status-undo-preview"]);
+  const filters = { predicate: (query: { queryKey: readonly unknown[] }) => prefixes.has(String(query.queryKey[0])) };
+  void queryClient.cancelQueries(filters);
+  queryClient.removeQueries(filters);
+}
+
