@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { getDownloadUrl } from "@/app/lib/api/files";
 import { cn } from "@/app/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { RowSyncStatus } from "@/app/lib/offlineWrite";
 
 export type CellType =
@@ -262,31 +263,39 @@ export function EditableGrid({
                 {!readOnly ? (
                   <td className="px-2 py-1">
                     <div className="flex items-center justify-center gap-1">
-                      <button
-                        type="button"
-                        title="ذخیره"
-                        aria-label="ذخیره"
-                        disabled={!row._dirty || savingKey === row._key}
-                        onClick={() => saveRow(row)}
-                        className={cn(
-                          "rounded p-1 hover:bg-muted disabled:opacity-30",
-                          row._dirty
-                            ? "text-success-600"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        <Save className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        title="حذف"
-                        aria-label="حذف"
-                        disabled={savingKey === row._key}
-                        onClick={() => deleteRow(row)}
-                        className="rounded p-1 text-danger-600 hover:bg-muted disabled:opacity-30"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="ذخیره"
+                            disabled={!row._dirty || savingKey === row._key}
+                            onClick={() => saveRow(row)}
+                            className={cn(
+                              "rounded p-1 hover:bg-muted disabled:opacity-30",
+                              row._dirty
+                                ? "text-success-600"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            <Save className="size-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>ذخیره</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="حذف"
+                            disabled={savingKey === row._key}
+                            onClick={() => deleteRow(row)}
+                            className="rounded p-1 text-danger-600 hover:bg-muted disabled:opacity-30"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>حذف</TooltipContent>
+                      </Tooltip>
                     </div>
                   </td>
                 ) : null}
