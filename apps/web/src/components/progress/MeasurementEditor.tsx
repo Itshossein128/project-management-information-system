@@ -13,11 +13,12 @@ import { Field, Input, Select } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
-export function MeasurementEditor({ projectId }: { projectId: string }) {
+export function MeasurementEditor({ projectId, activityId: controlledActivityId }: { projectId: string; activityId?: string }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const [activityId, setActivityId] = useState("");
+  const [internalActivityId, setInternalActivityId] = useState("");
+  const activityId = controlledActivityId ?? internalActivityId;
   const [method, setMethod] = useState<MeasurementMethod>("quantity");
   const [totalQty, setTotalQty] = useState("");
   const [changeReason, setChangeReason] = useState("");
@@ -104,7 +105,7 @@ export function MeasurementEditor({ projectId }: { projectId: string }) {
         label={t("progress.selectActivity", { defaultValue: "Activity" })}
         value={activityId || undefined}
         placeholder="…"
-        onChange={(e) => setActivityId(e.target.value)}
+        onChange={(e) => setInternalActivityId(e.target.value)}
         options={activities.map((a) => ({
           value: a.activity_id,
           label: `${a.activity_code} — ${a.activity_name}`,

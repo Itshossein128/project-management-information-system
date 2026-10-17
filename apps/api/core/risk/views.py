@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from common.jalali import parse_date_optional
 from common.viewsets import ProjectScopedViewSet
+from risk.services.risk_service import validate_barrier_status_update, validate_risk_event_status_update
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
 from risk.models import (
@@ -92,19 +93,9 @@ class BarrierLogViewSet(ProjectScopedViewSet):
     def perform_create(self, serializer):
         super().perform_create(serializer, event_type=EventType.BARRIER)
 
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        new_status = serializer.validated_data.get('status')
-        if new_status in (RiskStatus.CLOSED, BarrierStatus.RESOLVED):
-            if not serializer.validated_data.get('resolved_date') and not instance.resolved_date:
-                return Response(
-                    {'error': {'message': 'برای وضعیت رفع شده، تاریخ رفع الزامی است.'}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    def perform_update(self, serializer):
+        validate_barrier_status_update(serializer.instance, serializer.validated_data)
+        super().perform_update(serializer)
 
 
 @extend_schema_view(
@@ -172,31 +163,9 @@ class RiskEventViewSet(ProjectScopedViewSet):
             qs = qs.filter(Q(event_date__lte=date_to) | Q(due_date__lte=date_to))
         return qs.order_by('-event_date', '-created_at')
 
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        new_status = serializer.validated_data.get('status')
-        if new_status == RiskStatus.CLOSED:
-            open_count = instance.actions.filter(
-                status=RiskActionStatus.OPEN,
-                is_deleted=False,
-            ).count()
-            ack = bool(request.data.get('acknowledge_open_actions'))
-            if open_count and not ack:
-                return Response(
-                    {
-                        'code': 'open_actions_warning',
-                        'error': {
-                            'code': 'open_actions_warning',
-                            'message': 'اقدامات باز وجود دارد. برای بستن، تأیید کنید.',
-                            'open_actions_count': open_count,
-                        },
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    def perform_update(self, serializer):
+        validate_risk_event_status_update(serializer.instance, serializer.validated_data, self.request.data)
+        super().perform_update(serializer)
 
 
 class RiskMatrixView(APIView):
