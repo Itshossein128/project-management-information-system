@@ -357,9 +357,7 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
         return self.edit_permission
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     def get_project_id(self):
         return self.kwargs['project_pk']

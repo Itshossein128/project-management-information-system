@@ -144,3 +144,16 @@ class TestJobTitles:
         assert 'مدیرشعبه' in titles
         assert 'کارگر ساده' in titles
         assert 'اپراتور تاور' in titles
+
+    def test_child_viewset_write_permission_denied_for_non_member(self, api_client, project, user, other_user):
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-06-01',
+            status=ReportStatus.DRAFT,
+            created_by=user,
+            updated_by=user,
+        )
+        api_client.force_authenticate(user=other_user)
+        url = f'/api/v1/projects/{project.id}/daily-reports/{report.id}/activities/'
+        resp = api_client.post(url, {'activity_name': 'Test'}, format='json')
+        assert resp.status_code == status.HTTP_403_FORBIDDEN
