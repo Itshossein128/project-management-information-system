@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import MultiDatePicker from "react-multi-date-picker";
+import MultiToolbar from "react-multi-date-picker/plugins/toolbar";
 import DateObject from "react-date-object";
 import {
   dateObjectToIso,
@@ -12,6 +13,10 @@ import { Field, type FieldProps } from "./Field";
 const DatePicker =
   (MultiDatePicker as unknown as { default?: typeof MultiDatePicker }).default ??
   MultiDatePicker;
+
+const Toolbar =
+  (MultiToolbar as unknown as { default?: typeof MultiToolbar }).default ??
+  MultiToolbar;
 
 export interface DateRangeValue {
   /** ISO `YYYY-MM-DD` Gregorian, or "" when not set. */
@@ -104,6 +109,7 @@ export function JalaliDateRangePicker({
           placeholder={placeholder}
           disabled={disabled}
           editable={false}
+          plugins={[<Toolbar key="toolbar" position="bottom" sort={["today"]} />]}
         />
       )}
     </Field>

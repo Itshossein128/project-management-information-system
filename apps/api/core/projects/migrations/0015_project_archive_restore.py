@@ -6,6 +6,20 @@ import django.db.models.deletion
 import uuid
 
 
+def backfill_archive_context(apps, schema_editor):
+    """Existing archived rows predate archive metadata; give them a valid cycle."""
+    Project = apps.get_model('projects', 'Project')
+    for project in Project.objects.filter(status='archived'):
+        updates = {}
+        if project.archived_from_status is None:
+            # Origin was not recorded; active is the only restore-eligible origin.
+            updates['archived_from_status'] = 'active'
+        if project.archive_cycle_id is None:
+            updates['archive_cycle_id'] = uuid.uuid4()
+        if updates:
+            Project.objects.filter(pk=project.pk).update(**updates)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -49,6 +63,7 @@ class Migration(migrations.Migration):
             name='lifecycle_version',
             field=models.PositiveBigIntegerField(default=0),
         ),
+        migrations.RunPython(backfill_archive_context, migrations.RunPython.noop),
         migrations.AddConstraint(
             model_name='project',
             constraint=models.CheckConstraint(check=models.Q(models.Q(('archive_cycle_id__isnull', True), ('archived_from_status__isnull', True), models.Q(('status', 'archived'), _negated=True)), models.Q(('archive_cycle_id__isnull', False), ('archived_from_status__in', ['active', 'suspended', 'completed']), ('archived_from_status__isnull', False)), _connector='OR'), name='project_archive_context_valid'),

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import MultiDatePicker from "react-multi-date-picker";
+import MultiToolbar from "react-multi-date-picker/plugins/toolbar";
 import DateObject from "react-date-object";
 import {
   dateObjectToIso,
@@ -13,6 +14,10 @@ import { Field, type FieldProps } from "./Field";
 const DatePicker =
   (MultiDatePicker as unknown as { default?: typeof MultiDatePicker }).default ??
   MultiDatePicker;
+
+const Toolbar =
+  (MultiToolbar as unknown as { default?: typeof MultiToolbar }).default ??
+  MultiToolbar;
 
 export interface JalaliDatePickerProps {
   name: string;
@@ -109,6 +114,7 @@ export function JalaliDatePicker({
           minDate={parsedMinDate || undefined}
           maxDate={parsedMaxDate || undefined}
           editable={false}
+          plugins={[<Toolbar key="toolbar" position="bottom" sort={["today"]} />]}
         />
       )}
     </Field>
