@@ -466,6 +466,7 @@ class DailyReportIncidentViewSet(DailyReportChildViewSet):
 
 @extend_schema_view(get=extend_schema(summary='List fixed labor job titles', tags=['Daily Reports']))
 class LaborJobTitleListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     serializer_class = LaborJobTitleSerializer
     queryset = LaborJobTitle.objects.all()
     pagination_class = None

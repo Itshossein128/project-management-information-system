@@ -144,3 +144,8 @@ class TestJobTitles:
         assert 'مدیرشعبه' in titles
         assert 'کارگر ساده' in titles
         assert 'اپراتور تاور' in titles
+
+    def test_unauthenticated_cannot_list_job_titles(self, api_client, project):
+        url = f'/api/v1/projects/{project.id}/manpower/job-titles/'
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
