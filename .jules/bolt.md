@@ -46,3 +46,7 @@
 ## 2024-07-30 - Resolve N+1 queries in Subcontractor API serializers
 **Learning:** Using `.aggregate()` and `.order_by().first()` inside python functions that are subsequently called within `SerializerMethodField`s completely bypasses the `prefetch_related` cache. In `average_overall_score` and `score_trend`, hitting the database manually meant multiple N+1 queries per subcontractor detail request.
 **Action:** When a queryset is already prefetched (e.g., `Prefetch('scores')`), calculate averages and trend sorting directly in Python by iterating over `sub.scores.all()` to take advantage of the prefetched cache and eliminate the extra database queries.
+
+## 2026-07-28 - Resolve N+1 query in BudgetVersionSerializer
+**Learning:** Calling `.filter()` or `.aggregate()` on a related manager (e.g., `obj.lines.filter(is_deleted=False)`) inside serializer methods like `get_line_count` and `get_total_amount` bypasses Django's `prefetch_related` cache, causing 2 extra database queries per item in list views.
+**Action:** Always prefetch related collections in the view (`prefetch_related('lines')`), and compute aggregations directly in Python over `obj.lines.all()` using list comprehensions or generators (`sum(1 for x in obj.lines.all() if not x.is_deleted)`).
