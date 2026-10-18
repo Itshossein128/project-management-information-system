@@ -43,6 +43,7 @@ API_BASE is configurable; endpoint examples use its default /api path. Login hon
 - [Organization references](%5Bnavigate-org-refs%5D/README.md)
 - [Open legacy project area](%5Bopen-legacy-project%5D/README.md)
 - [Portfolio liquidity allocation](open-portfolio-liquidity/README.md)
+- [Executive portfolio dashboard](open-executive-dashboard/README.md)
 - [Retry failed load](retry-failed-load/README.md)
 - [Recover an expired session](recover-expired-session/README.md)
 

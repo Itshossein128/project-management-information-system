@@ -72,6 +72,11 @@ Sidebar availability is affected by capabilities, not uniformly by project coden
 - [Stakeholders](%5Bnavigate-stakeholders%5D/README.md)
 - [Discipline subreports](%5Bnavigate-sub-reports%5D/README.md)
 - [Concrete operations](%5Bnavigate-concrete-operations%5D/README.md)
+- [Role dashboard](%5Bnavigate-dashboard%5D/README.md)
+- [Standard reports](%5Bnavigate-standard-reports%5D/README.md)
+- [Decision support](%5Bnavigate-decision-support%5D/README.md)
+- [Quality and HSE](%5Bnavigate-quality-hse%5D/README.md)
+- [Decisions and workflow](%5Bnavigate-decisions-workflow%5D/README.md)
 - [Retry failed load](retry-failed-load/README.md)
 
 Continue / return links (the same state is documented once):

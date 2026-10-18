@@ -110,9 +110,20 @@ export interface ProjectChangeRequest {
 
 const base = (projectId: string) => `/${PATHS.API_PROJECTS}/${projectId}`;
 
-export function fetchProjects(params?: { status?: string }) {
-  const q = params?.status ? `?status=${encodeURIComponent(params.status)}` : "";
-  return apiJson<ListResponse<ProjectListItem>>(`/${PATHS.API_PROJECTS}/${q}`);
+export function fetchProjects(params?: {
+  status?: string;
+  search?: string;
+  page?: number;
+  page_size?: number;
+}) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  }
+  const suffix = query.size ? `?${query}` : "";
+  return apiJson<ListResponse<ProjectListItem>>(
+    `/${PATHS.API_PROJECTS}/${suffix}`,
+  );
 }
 
 export function fetchProject(projectId: string) {

@@ -1,6 +1,6 @@
 # Application Decision Tree & State Machine
 
-Source baseline: **2026-10-09**, current working checkout, including uncommitted application changes. **550 decision directories** map **all 76 registered URL patterns** in `routes.ts` and `business-setup.routes.ts`. Each directory has a README describing trigger, inputs, authorization, API/state result, guards, source evidence and continuations.
+Source baseline: **2026-10-18**, current working checkout, including uncommitted application changes. **556 decision directories** map **all 82 registered URL patterns** in `routes.ts` and `business-setup.routes.ts`. Each directory has a README describing trigger, inputs, authorization, API/state result, guards, source evidence and continuations.
 
 Start at [Login](login/README.md), then [authenticated project list](login/submit-valid-credentials/README.md) or [project overview](login/submit-valid-credentials/select-project/README.md).
 
@@ -217,6 +217,11 @@ docs/decision-tree/
     │   │   │   └── … 3 documented decisions (open README.md)
     │   │   ├── [navigate-concrete-operations]/
     │   │   │   └── … 6 documented decisions (open README.md)
+    │   │   ├── [navigate-dashboard]/
+    │   │   ├── [navigate-standard-reports]/
+    │   │   ├── [navigate-decision-support]/
+    │   │   ├── [navigate-quality-hse]/
+    │   │   ├── [navigate-decisions-workflow]/
     │   │   └── retry-failed-load/
     │   ├── [navigate-hr-hub]/
     │   │   ├── [navigate-hr-users]/
@@ -254,6 +259,7 @@ docs/decision-tree/
     │   │       └── … 6 documented decisions (open README.md)
     │   ├── open-portfolio-liquidity/
     │   │   └── … 7 documented decisions (open README.md)
+    │   ├── open-executive-dashboard/
     │   ├── retry-failed-load/
     │   └── recover-expired-session/
     ├── submit-invalid-credentials/
@@ -288,6 +294,7 @@ docs/decision-tree/
 | `/hr/job-positions` | [job-positions.tsx](../../apps/web/src/app/routes/hr/job-positions.tsx) | [HR job positions](login/submit-valid-credentials/%5Bnavigate-hr-hub%5D/%5Bnavigate-hr-job-positions%5D/README.md) | Placeholder |
 | `/hr/users` | [users.tsx](../../apps/web/src/app/routes/hr/users.tsx) | [HR users](login/submit-valid-credentials/%5Bnavigate-hr-hub%5D/%5Bnavigate-hr-users%5D/README.md) | Current |
 | `/login` | [login.tsx](../../apps/web/src/app/routes/login.tsx) | [Open the application](login/README.md) | Current |
+| `/portfolio/dashboard` | [executive-dashboard.tsx](../../apps/web/src/app/routes/executive-dashboard.tsx) | [Executive portfolio dashboard](login/submit-valid-credentials/open-executive-dashboard/README.md) | Current |
 | `/portfolio/liquidity` | [portfolio-liquidity.tsx](../../apps/web/src/app/routes/portfolio-liquidity.tsx) | [Portfolio liquidity allocation](login/submit-valid-credentials/open-portfolio-liquidity/README.md) | Current |
 | `/projects` | [project-list.tsx](../../apps/web/src/app/routes/project-list.tsx) | [Submit valid credentials](login/submit-valid-credentials/README.md) | Current |
 | `/projects/:businessId` | [business.tsx](../../apps/web/src/app/routes/business.tsx) | [Open legacy project area](login/submit-valid-credentials/%5Bopen-legacy-project%5D/README.md) | Legacy |
@@ -315,6 +322,9 @@ docs/decision-tree/
 | `/projects/:projectId/daily-reports/:reportId/edit` | [daily-report-form-edit.tsx](../../apps/web/src/app/routes/daily-report-form-edit.tsx) | [Edit daily report](login/submit-valid-credentials/select-project/%5Bnavigate-daily-reports%5D/%5Bedit-report%5D/README.md) | Current |
 | `/projects/:projectId/daily-reports/:reportId/view` | [daily-report-view.tsx](../../apps/web/src/app/routes/daily-report-view.tsx) | [View daily report](login/submit-valid-credentials/select-project/%5Bnavigate-daily-reports%5D/%5Bview-report%5D/README.md) | Current |
 | `/projects/:projectId/daily-reports/new` | [daily-report-form.tsx](../../apps/web/src/app/routes/daily-report-form.tsx) | [Create daily report](login/submit-valid-credentials/select-project/%5Bnavigate-daily-reports%5D/%5Bcreate-report%5D/README.md) | Current |
+| `/projects/:projectId/dashboard` | [project-dashboard.tsx](../../apps/web/src/app/routes/project-dashboard.tsx) | [Role dashboard](login/submit-valid-credentials/select-project/%5Bnavigate-dashboard%5D/README.md) | Current |
+| `/projects/:projectId/decision-support` | [project-decision-support.tsx](../../apps/web/src/app/routes/project-decision-support.tsx) | [Decision support](login/submit-valid-credentials/select-project/%5Bnavigate-decision-support%5D/README.md) | Current |
+| `/projects/:projectId/decisions-workflow` | [project-decisions-workflow.tsx](../../apps/web/src/app/routes/project-decisions-workflow.tsx) | [Decisions and workflow](login/submit-valid-credentials/select-project/%5Bnavigate-decisions-workflow%5D/README.md) | Current |
 | `/projects/:projectId/documents` | [project-documents.tsx](../../apps/web/src/app/routes/project-documents.tsx) | [Documents and correspondence](login/submit-valid-credentials/select-project/%5Bnavigate-documents%5D/README.md) | Current |
 | `/projects/:projectId/economic` | [project-economic.tsx](../../apps/web/src/app/routes/project-economic.tsx) | [Economic analysis](login/submit-valid-credentials/select-project/%5Bnavigate-economic%5D/README.md) | Current |
 | `/projects/:projectId/equipment-log` | [project-equipment-log.tsx](../../apps/web/src/app/routes/project-equipment-log.tsx) | [Equipment logs](login/submit-valid-credentials/select-project/%5Bnavigate-equipment-log%5D/README.md) | Current |
@@ -337,6 +347,7 @@ docs/decision-tree/
 | `/projects/:projectId/procurement/req/:reqId` | [procurement-detail.tsx](../../apps/web/src/app/routes/procurement/procurement-detail.tsx) | [Open requisition](login/submit-valid-credentials/select-project/%5Bnavigate-procurement%5D/%5Bopen-requisition%5D/README.md) | Current |
 | `/projects/:projectId/procurement/transfers` | [procurement-transfers.tsx](../../apps/web/src/app/routes/procurement/procurement-transfers.tsx) | [Internal stock transfers](login/submit-valid-credentials/select-project/%5Bnavigate-procurement%5D/%5Bopen-stock-transfers%5D/README.md) | Current |
 | `/projects/:projectId/progress` | [project-progress.tsx](../../apps/web/src/app/routes/project-progress.tsx) | [Progress dashboard](login/submit-valid-credentials/select-project/%5Bnavigate-progress%5D/README.md) | Current |
+| `/projects/:projectId/quality-hse` | [project-quality-hse.tsx](../../apps/web/src/app/routes/project-quality-hse.tsx) | [Quality and HSE](login/submit-valid-credentials/select-project/%5Bnavigate-quality-hse%5D/README.md) | Current |
 | `/projects/:projectId/resource-allocations` | [project-resource-allocations.tsx](../../apps/web/src/app/routes/project-resource-allocations.tsx) | [Resource allocations](login/submit-valid-credentials/select-project/%5Bnavigate-resource-allocations%5D/README.md) | Current |
 | `/projects/:projectId/risk-register` | [project-risk-register.tsx](../../apps/web/src/app/routes/project-risk-register.tsx) | [Risk and delay register](login/submit-valid-credentials/select-project/%5Bnavigate-risk-register%5D/README.md) | Current |
 | `/projects/:projectId/schedule/gantt` | [project-schedule-gantt.tsx](../../apps/web/src/app/routes/project-schedule-gantt.tsx) | [Schedule Gantt](login/submit-valid-credentials/select-project/%5Bnavigate-gantt%5D/README.md) | Current |
@@ -344,6 +355,7 @@ docs/decision-tree/
 | `/projects/:projectId/settings` | [project-settings.tsx](../../apps/web/src/app/routes/project-settings.tsx) | [Project settings](login/submit-valid-credentials/select-project/navigate-project-settings/README.md) | Current |
 | `/projects/:projectId/settings/members` | [project-members.tsx](../../apps/web/src/app/routes/project-members.tsx) | [Project members](login/submit-valid-credentials/select-project/%5Bnavigate-project-members%5D/README.md) | Current |
 | `/projects/:projectId/stakeholders` | [project-stakeholders.tsx](../../apps/web/src/app/routes/project-stakeholders.tsx) | [Stakeholders](login/submit-valid-credentials/select-project/%5Bnavigate-stakeholders%5D/README.md) | Current |
+| `/projects/:projectId/standard-reports` | [project-standard-reports.tsx](../../apps/web/src/app/routes/project-standard-reports.tsx) | [Standard reports](login/submit-valid-credentials/select-project/%5Bnavigate-standard-reports%5D/README.md) | Current |
 | `/projects/:projectId/sub-reports` | [project-sub-reports.tsx](../../apps/web/src/app/routes/project-sub-reports.tsx) | [Discipline subreports](login/submit-valid-credentials/select-project/%5Bnavigate-sub-reports%5D/README.md) | Current |
 | `/projects/:projectId/subcontractors` | [project-subcontractors.tsx](../../apps/web/src/app/routes/project-subcontractors.tsx) | [Subcontractors](login/submit-valid-credentials/select-project/%5Bnavigate-subcontractors%5D/README.md) | Current |
 | `/projects/:projectId/subcontractors/:subId` | [project-subcontractor-detail.tsx](../../apps/web/src/app/routes/project-subcontractor-detail.tsx) | [Open subcontractor](login/submit-valid-credentials/select-project/%5Bnavigate-subcontractors%5D/%5Bopen-subcontractor%5D/README.md) | Current |

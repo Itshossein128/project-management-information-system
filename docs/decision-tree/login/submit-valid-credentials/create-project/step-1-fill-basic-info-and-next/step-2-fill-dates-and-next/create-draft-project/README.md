@@ -44,5 +44,5 @@ Continue / return links (the same state is documented once):
 - [apps/web/src/app/lib/api/projects.ts](../../../../../../../../apps/web/src/app/lib/api/projects.ts)
 - [apps/web/src/app/lib/api/members.ts](../../../../../../../../apps/web/src/app/lib/api/members.ts)
 - [apps/web/src/app/lib/api/templates.ts](../../../../../../../../apps/web/src/app/lib/api/templates.ts)
-- [apps/api/core/projects/services.py](../../../../../../../../apps/api/core/projects/services.py)
+- [apps/api/core/projects/lifecycle_service.py](../../../../../../../../apps/api/core/projects/lifecycle_service.py)
 - [apps/web/src/app/lib/api/central-data.ts](../../../../../../../../apps/web/src/app/lib/api/central-data.ts)

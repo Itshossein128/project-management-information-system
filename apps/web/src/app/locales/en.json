@@ -615,8 +615,27 @@
     "deleteSuccess": "Weather log deleted"
   },
   "project": {
+    "list": {
+      "portfolioProjects": "My portfolio projects",
+      "overview": "Portfolio overview",
+      "directory": "Project directory",
+      "searchLabel": "Find a project",
+      "searchPlaceholder": "Name, code or employer…",
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters",
+      "noMatches": "No projects match your filters",
+      "noMatchesHint": "Try a different name, code or employer, or clear the filters to see all projects.",
+      "emptyHint": "Create your first project to start managing its team, schedule and budget.",
+      "perPage": "Projects per page",
+      "showing": "Showing {{from}}–{{to}} of {{total}} projects",
+      "page": "{{page}} / {{total}}",
+      "previous": "Previous",
+      "next": "Next",
+      "pagination": "Project pages",
+      "openProject": "View {{name}}"
+    },
     "title": "Projects",
-    "subtitle": "Projects you are a member of",
+    "subtitle": "Find and manage projects you can access",
     "create": "Create project",
     "view": "View",
     "empty": "No projects yet",

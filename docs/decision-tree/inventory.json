@@ -534,6 +534,48 @@
       "source": "apps/web/src/app/routes/settings-templates.tsx",
       "node": "login/submit-valid-credentials/[navigate-templates]",
       "scope": "Current"
+    },
+    {
+      "key": "EXECUTIVE_DASHBOARD",
+      "path": "/portfolio/dashboard",
+      "source": "apps/web/src/app/routes/executive-dashboard.tsx",
+      "node": "login/submit-valid-credentials/open-executive-dashboard",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DASHBOARD",
+      "path": "/projects/:projectId/dashboard",
+      "source": "apps/web/src/app/routes/project-dashboard.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-dashboard]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_STANDARD_REPORTS",
+      "path": "/projects/:projectId/standard-reports",
+      "source": "apps/web/src/app/routes/project-standard-reports.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-standard-reports]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DECISIONS_WORKFLOW",
+      "path": "/projects/:projectId/decisions-workflow",
+      "source": "apps/web/src/app/routes/project-decisions-workflow.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-decisions-workflow]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_DECISION_SUPPORT",
+      "path": "/projects/:projectId/decision-support",
+      "source": "apps/web/src/app/routes/project-decision-support.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-decision-support]",
+      "scope": "Current"
+    },
+    {
+      "key": "PROJECT_QUALITY_HSE",
+      "path": "/projects/:projectId/quality-hse",
+      "source": "apps/web/src/app/routes/project-quality-hse.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-quality-hse]",
+      "scope": "Current"
     }
   ],
   "nodes": [
@@ -3286,6 +3328,36 @@
       "path": "login/toggle-theme",
       "protected": false,
       "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/open-executive-dashboard",
+      "protected": false,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-dashboard]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-standard-reports]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-decision-support]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-quality-hse]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-decisions-workflow]",
+      "protected": true,
+      "kind": "page"
     }
   ]
 }

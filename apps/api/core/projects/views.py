@@ -148,6 +148,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
         status_filter = self.request.query_params.get('status')
         if status_filter:
             qs = qs.filter(status=status_filter)
+        if self.action == 'list':
+            search = self.request.query_params.get('search', '').strip()
+            if search:
+                qs = qs.filter(
+                    Q(project_code__icontains=search)
+                    | Q(project_name__icontains=search)
+                    | Q(employer__icontains=search)
+                )
+            # A unique tie-breaker keeps adjacent pages stable.
+            qs = qs.order_by('-created_at', '-id')
         if user.is_superuser or user.groups.filter(name='admin').exists():
             return qs
         active_project_ids = ProjectMember.objects.filter(

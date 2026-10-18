@@ -30,6 +30,44 @@ class TestProjectList:
         roles = list(member.member_roles.values_list('role__role_name', flat=True))
         assert 'project_manager' in roles
 
+    @pytest.mark.parametrize('search', ['PRJ-001', 'test project', 'Employer', 'پروژه'])
+    def test_search_matches_code_name_or_employer(self, auth_client, project, search):
+        project.project_name = 'Test Project پروژه'
+        project.employer = 'Employer'
+        project.save()
+        response = auth_client.get('/api/v1/projects/', {'search': search})
+        assert response.status_code == 200
+        assert response.data['count'] == 1
+
+    def test_search_excludes_nonmatches_and_nonmembers(self, auth_client, project):
+        Project.objects.create(
+            project_code='HIDDEN', project_name='Secret Needle',
+            employer='X', start_date='2024-01-01',
+        )
+        response = auth_client.get('/api/v1/projects/', {'search': 'Needle'})
+        assert response.status_code == 200
+        assert response.data['count'] == 0
+
+    def test_search_and_status_apply_before_pagination(self, api_client, user, project):
+        user.is_superuser = True
+        user.save()
+        api_client.force_authenticate(user=user)
+        for code in ['SEARCH-B', 'SEARCH-A', 'SEARCH-C']:
+            Project.objects.create(
+                project_code=code, project_name='Matching project', status='active',
+                employer='X', start_date='2024-01-01',
+            )
+        params = {'search': 'SEARCH-', 'status': 'active', 'page_size': 2}
+        first = api_client.get('/api/v1/projects/', params).data
+        second = api_client.get('/api/v1/projects/', {**params, 'page': 2}).data
+        assert first['count'] == second['count'] == 3
+        assert len(first['results']) == 2
+        assert len(second['results']) == 1
+        assert {p['project_code'] for p in first['results'] + second['results']} == {
+            'SEARCH-A', 'SEARCH-B', 'SEARCH-C',
+        }
+        assert first['next'] and second['previous']
+
 
 @pytest.mark.django_db
 class TestProjectCreate:
