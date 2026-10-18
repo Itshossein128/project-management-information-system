@@ -1995,7 +1995,37 @@
     "reconciliation": "Material reconciliation",
     "match": "Match",
     "mismatch": "Mismatch",
-    "insufficientData": "Insufficient data"
+    "insufficientData": "Insufficient data",
+    "summary": {
+      "openByDate": "Open report by date",
+      "open": "Open",
+      "gotoSpecialty": "Enter specialty daily report",
+      "emptyTitle": "No reports found",
+      "emptyDesc": "After specialty-unit reports are submitted, the daily summary appears here. Pick a date or go to specialty reports.",
+      "noSpecialty": "No specialty-unit reports have been submitted for this day yet.",
+      "partial": "Summary is incomplete. Missing units: {{missing}}",
+      "header": "Daily report header",
+      "title": "Daily report",
+      "contractNumber": "Contract number",
+      "employer": "Employer",
+      "workHours": "Work hours / shifts",
+      "shiftFull": "Full (day)",
+      "indirectLabor": "Indirect (staff) labor",
+      "directLabor": "Direct labor",
+      "materials": "Incoming materials",
+      "concrete": "Concrete poured",
+      "activities": "Executed site activities",
+      "generalActivities": "General site activities",
+      "issues": "Issues / remarks",
+      "visits": "Visits",
+      "notes": "Issues / visits",
+      "managementOpinion": "Management opinion",
+      "override": "override",
+      "weatherOverride": "Override derived weather",
+      "siteOverride": "Override derived site status",
+      "specialtySavedToast": "Saved — the project daily summary will update",
+      "specialtySubmittedToast": "Submitted — the project daily summary will update"
+    }
   },
   "progress": {
     "errors": {

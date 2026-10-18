@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
   CloudOff,
   Eye,
   FileText,
   Pencil,
-  Plus,
   RefreshCw,
   Trash2,
 } from "lucide-react";
@@ -32,6 +31,7 @@ import {
   STATUS_LABELS,
   WEATHER_META,
   deleteDailyReport,
+  ensureDailyReportByDate,
   fetchDailyReports,
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
@@ -76,6 +76,7 @@ function StatCard({
 export default function DailyReportsListPage() {
   const { t } = useTranslation();
   const { projectId = "" } = useParams();
+  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { has } = usePermission(projectId);
@@ -86,6 +87,8 @@ export default function DailyReportsListPage() {
     page: 1,
     per_page: 20,
   });
+  const [openDate, setOpenDate] = useState("");
+  const [openingDate, setOpeningDate] = useState(false);
   const [offlineRows, setOfflineRows] = useState<OfflineReport[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
@@ -176,21 +179,7 @@ export default function DailyReportsListPage() {
           { label: "گزارش‌های روزانه" },
         ]}
       />
-      <PageHeader
-        title={t("pages.dailyReports.title")}
-        actions={
-          canEdit ? (
-            <Link
-              to={`${base}/${PATHS.PROJECT_NEW}`}
-              data-testid="daily-report-new-btn"
-              className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90'
-            >
-              <Plus className='size-4' />
-              گزارش جدید
-            </Link>
-          ) : null
-        }
-      />
+      <PageHeader title={t("pages.dailyReports.title")} />
 
       {pendingCount > 0 ? (
         <div className='mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warning-300 bg-warning-50 px-4 py-3 text-sm text-warning-900 dark:bg-warning-950/30 dark:text-warning-200'>
@@ -290,6 +279,42 @@ export default function DailyReportsListPage() {
         />
       </div>
 
+      <div className='mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4'>
+        <div className='min-w-[200px] flex-1'>
+          <JalaliDatePicker
+            name='open_date'
+            label={t("dailyReports.summary.openByDate", "نمایش گزارش روز")}
+            value={openDate}
+            onChange={(iso) => setOpenDate(iso || "")}
+          />
+        </div>
+        <Button
+          variant='primary'
+          data-testid='daily-report-open-by-date'
+          disabled={!openDate || openingDate}
+          onClick={async () => {
+            if (!openDate || !projectId) return;
+            setOpeningDate(true);
+            try {
+              const report = await ensureDailyReportByDate(projectId, openDate);
+              void navigate(`${base}/${report.report_id}/view`);
+            } catch (e) {
+              toast.error((e as Error).message);
+            } finally {
+              setOpeningDate(false);
+            }
+          }}
+        >
+          {openingDate ? "…" : t("dailyReports.summary.open", "نمایش")}
+        </Button>
+        <Link
+          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SUB_REPORTS}`}
+          className='text-sm text-primary underline-offset-2 hover:underline'
+        >
+          {t("dailyReports.summary.gotoSpecialty", "ثبت گزارش واحد تخصصی")}
+        </Link>
+      </div>
+
       {listQuery.isLoading ? (
         <LoadingSkeleton rows={6} />
       ) : listQuery.isError ? (
@@ -297,18 +322,11 @@ export default function DailyReportsListPage() {
       ) : rows.length === 0 ? (
         <EmptyState
           icon={<FileText />}
-          title='گزارشی یافت نشد'
-          description='گزارش جدیدی بسازید یا فیلترها را تغییر دهید.'
-          action={
-            canEdit ? (
-              <Link to={`${base}/${PATHS.PROJECT_NEW}`}>
-                <Button variant='primary'>
-                  <Plus className='size-4' />
-                  گزارش جدید
-                </Button>
-              </Link>
-            ) : null
-          }
+          title={t("dailyReports.summary.emptyTitle", "گزارشی یافت نشد")}
+          description={t(
+            "dailyReports.summary.emptyDesc",
+            "پس از ارسال گزارش‌های واحد تخصصی، جمع‌بندی روزانه اینجا دیده می‌شود. تاریخ را انتخاب کنید یا به گزارش رشته‌ای بروید.",
+          )}
         />
       ) : (
         <div className='overflow-x-auto rounded-xl border border-border'>

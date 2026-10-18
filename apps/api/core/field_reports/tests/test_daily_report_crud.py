@@ -14,57 +14,41 @@ class TestDailyReportCrud:
     def test_unauthenticated_cannot_list(self, api_client, reports_url):
         assert api_client.get(reports_url).status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_create_with_jalali_date(self, auth_client, reports_url):
+    def test_create_rejected_use_by_date(self, auth_client, reports_url, project):
         response = auth_client.post(
             reports_url,
             {'report_date': '1403/03/12', 'weather_condition': 'sunny', 'site_status': 'active'},
             format='json',
         )
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.data['report_date'] == '1403/03/12'
-        assert response.data['activities'] == []
-        assert response.data['status'] == 'draft'
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_duplicate_date_returns_409(self, auth_client, reports_url, project, user):
+        by_date = f'/api/v1/projects/{project.id}/daily-reports/by-date/'
+        ensured = auth_client.get(by_date, {'date': '1403/03/12'})
+        assert ensured.status_code == status.HTTP_200_OK
+        assert ensured.data['report_date'] == '1403/03/12'
+        assert ensured.data['activities'] == []
+        assert ensured.data['is_auto_summary'] is True
+
+    def test_by_date_idempotent_for_same_day(self, auth_client, project, user):
         DailyReport.objects.create(
             project=project, report_date='2024-06-01', created_by=user, updated_by=user,
+            is_auto_summary=True,
         )
-        response = auth_client.post(
-            reports_url,
-            {'report_date': '1403/03/12', 'site_status': 'active'},
-            format='json',
-        )
-        # 1403/03/12 == 2024-06-01; default shift is full for both
-        assert response.status_code == status.HTTP_409_CONFLICT
+        by_date = f'/api/v1/projects/{project.id}/daily-reports/by-date/'
+        response = auth_client.get(by_date, {'date': '1403/03/12'})
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['shift'] == 'full'
 
-    def test_same_date_different_shift_allowed(self, auth_client, reports_url, project, user):
-        DailyReport.objects.create(
-            project=project,
-            report_date='2024-06-01',
-            shift='day',
-            created_by=user,
-            updated_by=user,
-        )
-        response = auth_client.post(
-            reports_url,
-            {
-                'report_date': '1403/03/12',
-                'shift': 'night',
-                'site_status': 'active',
-            },
-            format='json',
-        )
-        assert response.status_code == status.HTTP_201_CREATED
-        assert response.data['shift'] == 'night'
-    def test_viewer_cannot_create(self, api_client, other_user, viewer_member, reports_url):
-        # site_supervisor has edit_reports; use plain viewer member instead
+    def test_viewer_cannot_blank_create(self, api_client, other_user, viewer_member, reports_url):
         api_client.force_authenticate(user=other_user)
-        # viewer_member grants edit; downgrade by removing roles
         viewer_member.member_roles.all().delete()
         response = api_client.post(
             reports_url, {'report_date': '1403/03/12'}, format='json',
         )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code in (
+            status.HTTP_403_FORBIDDEN,
+            status.HTTP_400_BAD_REQUEST,
+        )
 
     def test_retrieve_includes_child_arrays(self, auth_client, reports_url, project, user):
         report = DailyReport.objects.create(

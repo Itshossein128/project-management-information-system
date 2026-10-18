@@ -1,6 +1,13 @@
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
+
+from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
 from sub_reports.models import SubReportStatus
+
+
+def _trigger_rebuild(sub_report, user=None):
+    rebuild_daily_report_summary(sub_report.project_id, sub_report.report_date, user=user)
+
 
 def submit_sub_report(sub_report, user):
     """
@@ -16,7 +23,9 @@ def submit_sub_report(sub_report, user):
     sub_report.submitted_at = timezone.now()
     sub_report.updated_by = user
     sub_report.save(update_fields=['status', 'submitted_by', 'submitted_at', 'updated_by', 'updated_at'])
+    _trigger_rebuild(sub_report, user=user)
     return sub_report
+
 
 def approve_sub_report(sub_report, user):
     """
@@ -32,7 +41,9 @@ def approve_sub_report(sub_report, user):
     sub_report.approved_at = timezone.now()
     sub_report.updated_by = user
     sub_report.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_by', 'updated_at'])
+    _trigger_rebuild(sub_report, user=user)
     return sub_report
+
 
 def reject_sub_report(sub_report, user, rejection_reason):
     """
@@ -52,4 +63,5 @@ def reject_sub_report(sub_report, user, rejection_reason):
     sub_report.rejection_reason = reason
     sub_report.updated_by = user
     sub_report.save(update_fields=['status', 'rejection_reason', 'updated_by', 'updated_at'])
+    _trigger_rebuild(sub_report, user=user)
     return sub_report

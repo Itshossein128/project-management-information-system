@@ -28,11 +28,14 @@ class TestDailyReportGapsHeader:
         assert report.is_current is True
         assert report.supersedes_id is None
 
-    def test_create_with_work_front(self, auth_client, reports_url):
-        response = auth_client.post(
-            reports_url,
+    def test_create_with_work_front(self, auth_client, reports_url, project):
+        by_date = f'/api/v1/projects/{project.id}/daily-reports/by-date/'
+        ensured = auth_client.get(by_date, {'date': '1403/05/11'})
+        assert ensured.status_code == status.HTTP_200_OK
+        report_id = ensured.data['report_id']
+        response = auth_client.patch(
+            f'{reports_url}{report_id}/',
             {
-                'report_date': '1403/05/11',
                 'work_front': 'جبهه شمالی',
                 'location_notes': 'بلوک A',
                 'weather_condition': 'sunny',
@@ -40,7 +43,7 @@ class TestDailyReportGapsHeader:
             },
             format='json',
         )
-        assert response.status_code == status.HTTP_201_CREATED
+        assert response.status_code == status.HTTP_200_OK
         assert response.data['work_front'] == 'جبهه شمالی'
         assert response.data['location_notes'] == 'بلوک A'
         assert response.data['is_current'] is True

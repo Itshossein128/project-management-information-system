@@ -38,6 +38,7 @@ weather_detail = WeatherLogViewSet.as_view(
 )
 
 report_list = DailyReportViewSet.as_view({'get': 'list', 'post': 'create'})
+report_by_date = DailyReportViewSet.as_view({'get': 'by_date', 'post': 'by_date'})
 report_detail = DailyReportViewSet.as_view(
     {'get': 'retrieve', 'patch': 'partial_update', 'delete': 'destroy'},
 )
@@ -113,6 +114,7 @@ urlpatterns = [
     path('activity-log/filters/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filters'),
 
     path(f'{DR}/', report_list, name='daily-report-list'),
+    path(f'{DR}/by-date/', report_by_date, name='daily-report-by-date'),
     path(f'{DR}/sync-batch/', report_sync_batch, name='daily-report-sync-batch'),
     path(f'{DR}/<uuid:pk>/', report_detail, name='daily-report-detail'),
     path(

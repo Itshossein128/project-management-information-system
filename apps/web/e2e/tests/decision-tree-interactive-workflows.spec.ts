@@ -78,31 +78,19 @@ test.describe("Decision Tree — Interactive Domain Workflows", () => {
     await expect(page.locator("input[name='counterparty'], #counterparty").first()).toBeVisible();
   });
 
-  test("Daily Reports Flow: tabs rendering, new report creation, and sync conflicts route", async ({ page }) => {
-    // 1. Navigate to Daily Reports List
+  test("Daily Reports Flow: list without create, by-date control, specialty, sync conflicts", async ({ page }) => {
     await page.goto(`${projectBase}/daily-reports`);
     await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId("daily-report-new-btn")).toBeVisible();
+    await expect(page.getByTestId("daily-report-new-btn")).toHaveCount(0);
+    await expect(page.getByTestId("daily-report-open-by-date")).toBeVisible();
 
-    // 2. Navigate to New Daily Report form
-    await page.getByTestId("daily-report-new-btn").click();
-    await expect(page).toHaveURL(new RegExp(`${projectBase}/daily-reports/new`));
-    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
+    await page.goto(`${projectBase}/daily-reports/new`);
+    await expect(page).toHaveURL(new RegExp(`${projectBase}/daily-reports/?$`));
 
-    // Verify sub-tabs: activities, labor, equipment, materials, concrete, incidents
-    await expect(page.getByTestId("report-tab-activities")).toBeVisible();
-    await expect(page.getByTestId("report-tab-labor")).toBeVisible();
-    await expect(page.getByTestId("report-tab-equipment")).toBeVisible();
-    await expect(page.getByTestId("report-tab-materials")).toBeVisible();
-    await expect(page.getByTestId("report-tab-concrete")).toBeVisible();
-    await expect(page.getByTestId("report-tab-incidents")).toBeVisible();
+    await page.goto(`${projectBase}/sub-reports`);
+    await expect(page).toHaveURL(new RegExp(`${projectBase}/sub-reports`));
+    await expect(page.locator("main").first()).toBeVisible({ timeout: 15_000 });
 
-    // Switch between tabs
-    await page.getByTestId("report-tab-labor").click();
-    await page.getByTestId("report-tab-equipment").click();
-    await page.getByTestId("report-tab-activities").click();
-
-    // 3. Navigate to Sync Conflicts / Offline Recovery route
     await page.goto(`${projectBase}/sync-conflicts`);
     await expect(page).toHaveURL(new RegExp(`${projectBase}/sync-conflicts`));
     await expect(page.locator("[data-testid='conflict-page-container']")).toBeVisible({

@@ -45,6 +45,17 @@ export interface DailyReportListItem {
   has_incidents: boolean;
 }
 
+export interface AggregationMeta {
+  is_auto_summary: boolean;
+  aggregated_at: string | null;
+  is_partial: boolean;
+  expected_disciplines: string[];
+  contributing_disciplines: string[];
+  missing_disciplines: string[];
+  weather_source: "derived" | "override";
+  site_status_source: "derived" | "override";
+}
+
 export interface ActivityRow {
   id: string;
   activity_ref: string | null;
@@ -66,6 +77,8 @@ export interface ActivityRow {
   responsible_name?: string;
   notes: string;
   photo_file: string | null;
+  source_discipline?: string;
+  is_derived?: boolean;
 }
 
 export interface LaborRow {
@@ -80,6 +93,8 @@ export interface LaborRow {
   work_hours?: number | null;
   overtime_hours?: number | null;
   absence_count?: number | null;
+  source_discipline?: string;
+  is_derived?: boolean;
 }
 
 export interface EquipmentRow {
@@ -165,6 +180,12 @@ export interface DailyReportDetail {
   site_status: SiteStatus;
   site_status_label: string;
   general_notes: string;
+  management_opinion?: string;
+  weather_override?: boolean;
+  site_status_override?: boolean;
+  is_auto_summary?: boolean;
+  aggregated_at?: string | null;
+  aggregation?: AggregationMeta;
   status: ReportStatus;
   status_label: string;
   is_locked?: boolean;
@@ -205,6 +226,9 @@ export interface HeaderPayload {
   temp_min?: string | number | null;
   site_status?: SiteStatus;
   general_notes?: string;
+  management_opinion?: string;
+  weather_override?: boolean;
+  site_status_override?: boolean;
   local_id?: string | null;
 }
 
@@ -256,10 +280,13 @@ export function fetchDailyReport(projectId: string, reportId: string) {
 }
 
 export function createDailyReport(projectId: string, payload: HeaderPayload) {
-  return apiJson<DailyReportDetail>(`${base(projectId)}/`, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  // Project daily reports are auto-summaries; prefer ensure-by-date.
+  return ensureDailyReportByDate(projectId, payload.report_date);
+}
+
+export function ensureDailyReportByDate(projectId: string, date: string) {
+  const q = new URLSearchParams({ date });
+  return apiJson<DailyReportDetail>(`${base(projectId)}/by-date/?${q.toString()}`);
 }
 
 export function updateDailyReport(

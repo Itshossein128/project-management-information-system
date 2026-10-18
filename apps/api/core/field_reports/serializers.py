@@ -123,8 +123,11 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'responsible_name',
             'notes',
             'photo_file',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
 
     def validate_quantity(self, value):
         from common.unset import coerce_optional_decimal
@@ -228,8 +231,11 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'overtime_hours',
             'daily_rate',
             'absence_count',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
         ]
-        read_only_fields = ['id', 'total_count']
+        read_only_fields = ['id', 'total_count', 'source_sub_report', 'source_discipline', 'is_derived']
         extra_kwargs = {'absence_count': {'required': False, 'allow_null': True}}
 
     def to_representation(self, instance):
@@ -291,8 +297,11 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
             'consumption_location',
             'activity_ref',
             'notes',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
 
     def validate_quantity(self, value):
         if value is None or value == '':
@@ -315,8 +324,11 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
             'block',
             'floor',
             'notes',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
 
 
 class BaseLaborCampEntrySerializer(serializers.ModelSerializer):
@@ -472,6 +484,9 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
             'temp_min',
             'site_status',
             'general_notes',
+            'management_opinion',
+            'weather_override',
+            'site_status_override',
             'local_id',
             'synced_from_offline',
         ]
@@ -508,6 +523,7 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     concrete_logs = serializers.SerializerMethodField()
     labor_camp = serializers.SerializerMethodField()
     incidents = serializers.SerializerMethodField()
+    aggregation = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReport
@@ -525,6 +541,12 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'site_status',
             'site_status_label',
             'general_notes',
+            'management_opinion',
+            'weather_override',
+            'site_status_override',
+            'is_auto_summary',
+            'aggregated_at',
+            'aggregation',
             'status',
             'status_label',
             'is_locked',
@@ -557,6 +579,11 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'labor_camp',
             'incidents',
         ]
+
+    def get_aggregation(self, obj):
+        from field_reports.services.daily_report_aggregation import build_aggregation_meta
+
+        return build_aggregation_meta(obj.project_id, obj.report_date, report=obj)
 
     def get_status_label(self, obj):
         if obj.status == 'approved':

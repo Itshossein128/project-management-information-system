@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import { Download } from "lucide-react";
@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toast";
 import { usePermission } from "@/app/contexts/project-context";
 import { PATHS } from "@/app/routeVars";
 import { fetchActivities } from "@/app/lib/api/activities";
+import { fetchProject } from "@/app/lib/api/projects";
 import {
   approveReport,
   fetchDailyReport,
@@ -14,6 +15,9 @@ import {
   rejectReport,
   reviewReport,
   submitReport,
+  updateDailyReport,
+  type SiteStatus,
+  type WeatherCondition,
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import {
@@ -31,21 +35,44 @@ import { IncidentsTab } from "@/components/daily_reports/IncidentsTab";
 import { LaborCampTab } from "@/components/daily_reports/LaborCampTab";
 import { LaborTab } from "@/components/daily_reports/LaborTab";
 import { MaterialsTab } from "@/components/daily_reports/MaterialsTab";
+import { DailyReportSummaryView } from "@/components/daily_reports/summary/DailyReportSummaryView";
+import { Button } from "@/components/ui/sprint-button";
 
 export default function DailyReportViewPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { projectId = "", reportId = "" } = useParams();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { has } = usePermission(projectId);
   const canApprove = has("approve_reports");
+  const canEdit = has("edit_reports");
   const [downloading, setDownloading] = useState(false);
+  const [opinion, setOpinion] = useState("");
+  const [weatherOverride, setWeatherOverride] = useState(false);
+  const [siteOverride, setSiteOverride] = useState(false);
+  const [weather, setWeather] = useState<string>("");
+  const [siteStatus, setSiteStatus] = useState<string>("active");
+
+  const projectQuery = useQuery({
+    queryKey: ["project", projectId],
+    queryFn: () => fetchProject(projectId),
+    enabled: Boolean(projectId),
+  });
 
   const reportQuery = useQuery({
     queryKey: ["daily-report", projectId, reportId],
     queryFn: () => fetchDailyReport(projectId, reportId),
   });
   const report = reportQuery.data ?? null;
+
+  useEffect(() => {
+    if (!report) return;
+    setOpinion(report.management_opinion ?? "");
+    setWeatherOverride(Boolean(report.weather_override));
+    setSiteOverride(Boolean(report.site_status_override));
+    setWeather(report.weather_condition ?? "");
+    setSiteStatus(report.site_status ?? "active");
+  }, [report]);
 
   const activitiesQuery = useQuery({
     queryKey: ["activities-lite", projectId],
@@ -173,7 +200,8 @@ export default function DailyReportViewPage() {
         }
         actions={
           <div className='flex gap-2'>
-            {report.status === "draft" || report.status === "rejected" ? (
+            {!report.is_auto_summary &&
+            (report.status === "draft" || report.status === "rejected") ? (
               <Link
                 to={`${base}/${reportId}/edit`}
                 className='rounded-md border border-border px-4 py-2 text-sm hover:bg-muted/40'
@@ -196,6 +224,7 @@ export default function DailyReportViewPage() {
 
       <div className='space-y-5'>
         <ApprovalStatusBar
+          projectId={projectId}
           report={report}
           canApprove={canApprove}
           busy={workflow.isPending}
@@ -205,51 +234,161 @@ export default function DailyReportViewPage() {
           onReject={(reason) => workflow.mutate({ type: "reject", reason })}
         />
 
-        <div className='grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4'>
-          <Info label='شیفت' value={report.shift} />
-          <Info label='وضعیت کارگاه' value={report.site_status_label} />
-          <Info
-            label='وضعیت جوی'
-            value={report.weather_condition_label ?? "—"}
-          />
-          <Info
-            label='دما'
-            value={
-              report.temp_max || report.temp_min
-                ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"}`
-                : "—"
-            }
-          />
-        </div>
+        {report.is_auto_summary ? (
+          <>
+            <DailyReportSummaryView
+              report={report}
+              projectName={projectQuery.data?.project_name}
+              contractNumber={projectQuery.data?.contract_number}
+              employer={projectQuery.data?.employer}
+            />
+            {canEdit ? (
+              <div
+                className='space-y-4 rounded-xl border border-border bg-card p-4'
+                data-testid='summary-metadata-editor'
+              >
+                <div>
+                  <label className='mb-2 block text-sm font-medium' htmlFor='mgmt-opinion'>
+                    نظر مدیریت
+                  </label>
+                  <textarea
+                    id='mgmt-opinion'
+                    className='min-h-24 w-full rounded-md border border-border bg-background p-2 text-sm'
+                    value={opinion}
+                    onChange={(e) => setOpinion(e.target.value)}
+                  />
+                </div>
+                <div className='grid gap-3 sm:grid-cols-2'>
+                  <label className='flex items-center gap-2 text-sm'>
+                    <input
+                      type='checkbox'
+                      checked={weatherOverride}
+                      onChange={(e) => setWeatherOverride(e.target.checked)}
+                      data-testid='weather-override-toggle'
+                    />
+                    {t("dailyReports.summary.weatherOverride", "لغو خودکار شرایط جوی")}
+                  </label>
+                  <label className='flex items-center gap-2 text-sm'>
+                    <input
+                      type='checkbox'
+                      checked={siteOverride}
+                      onChange={(e) => setSiteOverride(e.target.checked)}
+                      data-testid='site-override-toggle'
+                    />
+                    {t("dailyReports.summary.siteOverride", "لغو خودکار وضعیت کارگاه")}
+                  </label>
+                  {weatherOverride ? (
+                    <label className='block text-sm'>
+                      <span className='mb-1 block text-muted-foreground'>شرایط جوی</span>
+                      <select
+                        className='w-full rounded-md border border-border bg-background p-2'
+                        value={weather}
+                        onChange={(e) => setWeather(e.target.value)}
+                        data-testid='weather-override-value'
+                      >
+                        <option value='sunny'>آفتابی</option>
+                        <option value='partly_cloudy'>نیمه‌ابری</option>
+                        <option value='cloudy'>ابری</option>
+                        <option value='rainy'>بارانی</option>
+                        <option value='stormy'>طوفانی</option>
+                        <option value='snowy'>برفی</option>
+                        <option value='foggy'>مه</option>
+                      </select>
+                    </label>
+                  ) : null}
+                  {siteOverride ? (
+                    <label className='block text-sm'>
+                      <span className='mb-1 block text-muted-foreground'>وضعیت کارگاه</span>
+                      <select
+                        className='w-full rounded-md border border-border bg-background p-2'
+                        value={siteStatus}
+                        onChange={(e) => setSiteStatus(e.target.value)}
+                        data-testid='site-override-value'
+                      >
+                        <option value='active'>فعال</option>
+                        <option value='inactive'>غیرفعال</option>
+                      </select>
+                    </label>
+                  ) : null}
+                </div>
+                <Button
+                  variant='secondary'
+                  data-testid='summary-metadata-save'
+                  onClick={async () => {
+                    try {
+                      await updateDailyReport(projectId, reportId, {
+                        report_date: report.report_date,
+                        management_opinion: opinion,
+                        weather_override: weatherOverride,
+                        site_status_override: siteOverride,
+                        ...(weatherOverride
+                          ? { weather_condition: weather as WeatherCondition }
+                          : {}),
+                        ...(siteOverride
+                          ? { site_status: siteStatus as SiteStatus }
+                          : {}),
+                      });
+                      toast.success("ذخیره شد");
+                      void refetch();
+                    } catch (e) {
+                      toast.error((e as Error).message);
+                    }
+                  }}
+                >
+                  ذخیره نظر و لغو خودکارها
+                </Button>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <div className='grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4'>
+              <Info label='شیفت' value={report.shift} />
+              <Info label='وضعیت کارگاه' value={report.site_status_label} />
+              <Info
+                label='وضعیت جوی'
+                value={report.weather_condition_label ?? "—"}
+              />
+              <Info
+                label='دما'
+                value={
+                  report.temp_max || report.temp_min
+                    ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"}`
+                    : "—"
+                }
+              />
+            </div>
 
-        {report.general_notes ? (
-          <div className='rounded-xl border border-border bg-card p-4'>
-            <p className='mb-1 text-sm text-muted-foreground'>توضیحات کلی</p>
-            <p className='text-sm'>{report.general_notes}</p>
-          </div>
-        ) : null}
+            {report.general_notes ? (
+              <div className='rounded-xl border border-border bg-card p-4'>
+                <p className='mb-1 text-sm text-muted-foreground'>توضیحات کلی</p>
+                <p className='text-sm'>{report.general_notes}</p>
+              </div>
+            ) : null}
 
-        <Section title='فعالیت‌های اجرایی'>
-          <ActivityTab {...tabProps} />
-        </Section>
-        <Section title='نیروی انسانی'>
-          <LaborTab {...tabProps} />
-        </Section>
-        <Section title='ماشین‌آلات'>
-          <EquipmentTab {...tabProps} />
-        </Section>
-        <Section title='مصالح'>
-          <MaterialsTab {...tabProps} />
-        </Section>
-        <Section title='بتن‌ریزی'>
-          <ConcreteTab {...tabProps} />
-        </Section>
-        <Section title='کمپ کارگری'>
-          <LaborCampTab {...tabProps} />
-        </Section>
-        <Section title='حوادث و موانع'>
-          <IncidentsTab {...tabProps} />
-        </Section>
+            <Section title='فعالیت‌های اجرایی'>
+              <ActivityTab {...tabProps} />
+            </Section>
+            <Section title='نیروی انسانی'>
+              <LaborTab {...tabProps} />
+            </Section>
+            <Section title='ماشین‌آلات'>
+              <EquipmentTab {...tabProps} />
+            </Section>
+            <Section title='مصالح'>
+              <MaterialsTab {...tabProps} />
+            </Section>
+            <Section title='بتن‌ریزی'>
+              <ConcreteTab {...tabProps} />
+            </Section>
+            <Section title='کمپ کارگری'>
+              <LaborCampTab {...tabProps} />
+            </Section>
+            <Section title='حوادث و موانع'>
+              <IncidentsTab {...tabProps} />
+            </Section>
+          </>
+        )}
       </div>
     </main>
   );

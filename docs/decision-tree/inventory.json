@@ -221,6 +221,13 @@
       "scope": "Current"
     },
     {
+      "key": "PROJECT_DAILY_REPORT_BY_DATE",
+      "path": "/projects/:projectId/daily-reports (by-date ensure)",
+      "source": "apps/web/src/app/routes/daily-reports-list.tsx",
+      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/open-by-date",
+      "scope": "Current"
+    },
+    {
       "key": "PROJECT_DAILY_REPORT_EDIT",
       "path": "/projects/:projectId/daily-reports/:reportId/edit",
       "source": "apps/web/src/app/routes/daily-report-form-edit.tsx",
@@ -237,9 +244,9 @@
     {
       "key": "PROJECT_DAILY_REPORT_NEW",
       "path": "/projects/:projectId/daily-reports/new",
-      "source": "apps/web/src/app/routes/daily-report-form.tsx",
+      "source": "apps/web/src/app/routes/daily-reports-list.tsx",
       "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
-      "scope": "Current"
+      "scope": "Superseded"
     },
     {
       "key": "PROJECT_DOCUMENTS",
@@ -1795,9 +1802,14 @@
       "kind": "page"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/open-by-date",
+      "protected": false,
+      "kind": "local"
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
       "protected": true,
-      "kind": "page"
+      "kind": "superseded"
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]",

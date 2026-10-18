@@ -47,6 +47,13 @@ class DisciplineSubReportViewSet(WorkflowViewSetMixin, ProjectScopedViewSet):
             qs = qs.filter(discipline=discipline)
         return qs.order_by('-report_date')
 
+    def post_delete(self, instance):
+        from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
+
+        rebuild_daily_report_summary(
+            instance.project_id, instance.report_date, user=self.request.user,
+        )
+
     def _submit(self, instance, request):
         obj = submit_sub_report(instance, request.user)
         return Response(self.get_serializer(obj).data)

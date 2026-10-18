@@ -55,10 +55,11 @@ export async function queueReportHeader(
   payload: HeaderPayload,
 ): Promise<string> {
   const localId = reportRef ?? generateUUID();
+  // Blank POST /daily-reports/ is retired — ensure-by-date for new shells.
   const method: QueueMethod = reportRef ? "PATCH" : "POST";
   const endpoint = reportRef
     ? `${reportBase(projectId)}/${reportRef}/`
-    : `${reportBase(projectId)}/`;
+    : `${reportBase(projectId)}/by-date/`;
 
   await saveOfflineReport({
     ...payload,
@@ -76,7 +77,14 @@ export async function queueReportHeader(
     project_id: projectId,
     method,
     endpoint,
-    payload: { ...payload, local_id: localId },
+    payload: reportRef
+      ? { ...payload, local_id: localId }
+      : {
+          report_date: payload.report_date,
+          date: payload.report_date,
+          local_id: localId,
+          shift: "full",
+        },
     created_at: new Date().toISOString(),
     status: "pending",
     retry_count: 0,

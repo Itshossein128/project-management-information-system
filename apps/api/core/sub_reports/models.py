@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from common.models import AuditSoftDeleteModel, UUIDModel
-from field_reports.models import WeatherCondition
+from field_reports.models import LaborCategory, SiteStatus, WeatherCondition
 
 
 class Discipline(models.TextChoices):
@@ -21,6 +21,19 @@ class SubReportStatus(models.TextChoices):
     REJECTED = 'rejected', 'Rejected'
 
 
+class SubReportNoteType(models.TextChoices):
+    ISSUE = 'issue', 'Issue'
+    VISIT = 'visit', 'Visit'
+    OTHER = 'other', 'Other'
+
+
+DEFAULT_EXPECTED_DISCIPLINES = (
+    Discipline.CIVIL,
+    Discipline.ELECTRICAL,
+    Discipline.MECHANICAL,
+)
+
+
 class DisciplineSubReport(AuditSoftDeleteModel):
     """
     Represents a discipline-specific sub-report within a project, which can optionally
@@ -31,6 +44,9 @@ class DisciplineSubReport(AuditSoftDeleteModel):
     report_date = models.DateField()
     discipline = models.CharField(max_length=20, choices=Discipline.choices, default=Discipline.CIVIL)
     weather_condition = models.CharField(max_length=20, choices=WeatherCondition.choices, blank=True, default='')
+    site_status = models.CharField(
+        max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE,
+    )
     form_code = models.CharField(max_length=60, blank=True, default='')
     revision_number = models.CharField(max_length=20, blank=True, default='')
     status = models.CharField(max_length=20, choices=SubReportStatus.choices, default=SubReportStatus.DRAFT)
@@ -101,4 +117,82 @@ class DisciplineSubReportActivity(UUIDModel):
 
     class Meta:
         db_table = 'discipline_sub_report_activities'
+        ordering = ['row_number']
+
+
+class DisciplineSubReportLabor(UUIDModel):
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='labor_entries',
+    )
+    labor_category = models.CharField(max_length=10, choices=LaborCategory.choices)
+    job_title = models.CharField(max_length=120)
+    present_count = models.PositiveIntegerField(default=0)
+    leave_count = models.PositiveIntegerField(default=0)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'discipline_sub_report_labor'
+
+
+class DisciplineSubReportMaterial(UUIDModel):
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='material_entries',
+    )
+    material_description = models.CharField(max_length=200)
+    quantity = models.DecimalField(max_digits=18, decimal_places=4)
+    unit = models.CharField(max_length=40)
+    notes = models.TextField(blank=True, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'discipline_sub_report_materials'
+
+
+class DisciplineSubReportConcrete(UUIDModel):
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='concrete_entries',
+    )
+    concrete_description = models.CharField(max_length=120)
+    volume_m3 = models.DecimalField(max_digits=10, decimal_places=3)
+    zone = models.CharField(max_length=60, null=True, blank=True)
+    block = models.CharField(max_length=60, null=True, blank=True)
+    floor = models.CharField(max_length=60, null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'discipline_sub_report_concrete'
+
+
+class DisciplineSubReportGeneralActivity(UUIDModel):
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='general_activities',
+    )
+    activity_description = models.TextField()
+    location = models.CharField(max_length=120, blank=True, default='')
+    quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    unit = models.CharField(max_length=40, null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'discipline_sub_report_general_activities'
+
+
+class DisciplineSubReportNote(UUIDModel):
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='notes',
+    )
+    note_type = models.CharField(max_length=20, choices=SubReportNoteType.choices)
+    text = models.TextField()
+    row_number = models.PositiveIntegerField(default=1)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'discipline_sub_report_notes'
         ordering = ['row_number']

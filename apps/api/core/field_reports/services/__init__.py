@@ -392,21 +392,27 @@ def sync_batch(project_id, user, reports: list) -> dict:
                 counts['merged'] += 1
                 resolve_sync_conflict(project_id, local_id=local_id, daily_report_id=existing.id)
             else:
-                header = DailyReportHeaderSerializer(data=item)
-                if not header.is_valid():
-                    results.append({
-                        'local_id': local_id,
-                        'status': 'error',
-                        'server_id': None,
-                        'conflict_reason': 'اطلاعات سربرگ نامعتبر',
-                        'server_payload': None,
-                        'conflict_fields': [],
-                        'child_errors': [{'section': 'header', 'errors': header.errors}],
-                    })
-                    counts['errors'] += 1
-                    continue
-                child_errors = _validate_children(item)
-                if child_errors:
+                # Auto-summary: ensure-by-date shell instead of blank authored create.
+                # Reject payloads that try to author child rows on create (specialty is source).
+                from field_reports.services.daily_report_aggregation import (
+                    ensure_daily_report_summary,
+                )
+
+                sections = _child_sections_in_payload(item)
+                if sections:
+                    child_errors = _validate_children(item, sections=sections)
+                    if not child_errors:
+                        child_errors = [
+                            {
+                                'section': section,
+                                'errors': {
+                                    'detail': [
+                                        'ردیف‌های وابسته فقط از گزارش واحد تخصصی پذیرفته می‌شوند',
+                                    ],
+                                },
+                            }
+                            for section in sections
+                        ]
                     results.append({
                         'local_id': local_id,
                         'status': 'error',
@@ -418,15 +424,21 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     })
                     counts['errors'] += 1
                     continue
-                report = header.save(
-                    project_id=project_id,
-                    prepared_by=user,
-                    created_by=user,
-                    updated_by=user,
-                    synced_from_offline=True,
-                    local_id=local_id,
-                )
-                _save_children(report, item)
+
+                report = ensure_daily_report_summary(project_id, report_date, user=user)
+                header_errors = _apply_header_merge(report, item, user, local_id)
+                if header_errors is not None:
+                    results.append({
+                        'local_id': local_id,
+                        'status': 'error',
+                        'server_id': str(report.id),
+                        'conflict_reason': 'اطلاعات سربرگ نامعتبر',
+                        'server_payload': None,
+                        'conflict_fields': [],
+                        'child_errors': header_errors,
+                    })
+                    counts['errors'] += 1
+                    continue
                 results.append({
                     'local_id': local_id,
                     'status': 'created',

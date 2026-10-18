@@ -31,12 +31,14 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 ## Subsequent Decisions
 
 - [Filter or change the displayed view](filter-and-change-view/README.md)
-- [Create daily report](%5Bcreate-report%5D/README.md)
-- [Edit daily report](%5Bedit-report%5D/README.md)
+- [Open summary by date](open-by-date/README.md)
+- [Create daily report (superseded)](%5Bcreate-report%5D/README.md) — blank create retired; use by-date / specialty
+- [Edit daily report](%5Bedit-report%5D/README.md) — metadata/overrides only for auto-summary
 - [View daily report](%5Bview-report%5D/README.md)
 - [Delete a daily report](%5Bdelete-report%5D/README.md)
 - [Synchronize queued reports](%5Bsync-now%5D/README.md)
 - [Retry failed load](retry-failed-load/README.md)
+- [Discipline subreports](../%5Bnavigate-sub-reports%5D/README.md) — authoring surface
 
 Continue / return links (the same state is documented once):
 

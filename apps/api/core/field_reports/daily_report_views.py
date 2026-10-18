@@ -11,7 +11,6 @@ from rest_framework.response import Response
 
 from common.mixins import WorkflowViewSetMixin
 from common.jalali import parse_date_optional
-from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
 from permissions.project import HasProjectPermission, IsProjectMember
 from field_reports.models import (
@@ -44,9 +43,18 @@ from field_reports.serializers import (
 )
 from field_reports import services
 from field_reports.services import correction_service
+from field_reports.services.daily_report_aggregation import (
+    build_aggregation_meta,
+    ensure_daily_report_summary,
+)
 from field_reports.services.material_reconciliation import reconcile_report_materials
 
 EDITABLE_STATUSES = {ReportStatus.DRAFT, ReportStatus.REJECTED}
+AUTO_SUMMARY_CREATE_MSG = (
+    'گزارش روزانه پروژه به‌صورت خودکار از گزارش‌های واحد تخصصی ساخته می‌شود. '
+    'از مسیر by-date استفاده کنید.'
+)
+DERIVED_READONLY_MSG = 'ردیف‌های تجمیعی فقط از طریق گزارش واحد تخصصی قابل تغییر هستند'
 
 
 def _validate_report_ready_for_submit(report: DailyReport) -> list[str]:
@@ -109,7 +117,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     @property
     def required_permission(self):
         if self.action in (
-            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation', 'by_date',
         ):
             return self.view_permission
         if self.action == 'correction_requests' and self.request.method.upper() == 'GET':
@@ -120,7 +128,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in (
-            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation', 'by_date',
         ) or (
             self.action == 'correction_requests' and self.request.method.upper() == 'GET'
         ):
@@ -166,45 +174,45 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     # -- CRUD ---------------------------------------------------------------
 
     def create(self, request, *args, **kwargs):
-        serializer = DailyReportHeaderSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        project_id = self.get_project_id()
-        report_date = serializer.validated_data['report_date']
-        shift = serializer.validated_data.get('shift') or 'full'
-        if DailyReport.objects.filter(
-            project_id=project_id,
-            report_date=report_date,
-            shift=shift,
-            is_deleted=False,
-            is_current=True,
-        ).exists():
-            raise ConflictError(
-                detail=(
-                    f'گزارش روزانه برای تاریخ {request.data.get("report_date")} '
-                    f'و شیفت {shift} قبلاً ثبت شده است'
-                ),
-                code='duplicate_current_report',
-            )
-        instance = serializer.save(
-            project_id=project_id,
-            prepared_by=request.user,
-            created_by=request.user,
-            updated_by=request.user,
+        raise ValidationError({'detail': AUTO_SUMMARY_CREATE_MSG, 'code': 'auto_summary_only'})
+
+    @action(detail=False, methods=['get', 'post'], url_path='by-date')
+    def by_date(self, request, *args, **kwargs):
+        raw = request.query_params.get('date') or request.data.get('report_date') or request.data.get('date')
+        report_date = parse_date_optional(raw)
+        if report_date is None:
+            raise ValidationError({'date': 'تاریخ الزامی است', 'code': 'date_required'})
+        report = ensure_daily_report_summary(
+            self.get_project_id(), report_date, user=request.user,
         )
-        detail = DailyReportDetailSerializer(instance)
-        return Response(detail.data, status=status.HTTP_201_CREATED)
+        return Response(DailyReportDetailSerializer(report).data)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.status == ReportStatus.APPROVED:
             raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
-        if instance.status not in EDITABLE_STATUSES:
+        # Auto-summary allows metadata/overrides even when not draft if still editable workflow.
+        if instance.is_auto_summary:
+            allowed = {
+                'management_opinion', 'general_notes', 'weather_condition', 'site_status',
+                'weather_override', 'site_status_override', 'temp_min', 'temp_max',
+                'work_front', 'location_notes',
+            }
+            if instance.status not in EDITABLE_STATUSES and not set(request.data).issubset(allowed):
+                raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
+            if instance.status not in EDITABLE_STATUSES:
+                data = {k: v for k, v in request.data.items() if k in allowed}
+                serializer = DailyReportHeaderSerializer(instance, data=data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save(updated_by=request.user)
+                instance.refresh_from_db()
+                return Response(DailyReportDetailSerializer(instance).data)
+        elif instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
         serializer = DailyReportHeaderSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
         return Response(DailyReportDetailSerializer(instance).data)
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.status != ReportStatus.DRAFT:
@@ -377,6 +385,8 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
 
     def _assert_editable(self):
         report = self.get_report()
+        if report.is_auto_summary:
+            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_readonly'})
         if report.status == ReportStatus.APPROVED:
             raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
         if report.status not in EDITABLE_STATUSES:

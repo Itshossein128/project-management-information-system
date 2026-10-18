@@ -107,6 +107,11 @@ class DailyReport(AuditSoftDeleteModel):
     temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
     site_status = models.CharField(max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE)
     general_notes = models.TextField(blank=True, default='')
+    management_opinion = models.TextField(blank=True, default='')
+    weather_override = models.BooleanField(default=False)
+    site_status_override = models.BooleanField(default=False)
+    is_auto_summary = models.BooleanField(default=False)
+    aggregated_at = models.DateTimeField(null=True, blank=True)
 
     prepared_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -231,6 +236,15 @@ class DailyReportActivity(ChildRowModel):
         blank=True,
         related_name='daily_report_activities',
     )
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_activities',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'daily_report_activities'
@@ -263,6 +277,15 @@ class DailyReportLabor(ChildRowModel):
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     daily_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     absence_count = models.PositiveIntegerField(null=True, blank=True)
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_labor',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'daily_report_labor'
@@ -354,6 +377,15 @@ class DailyReportMaterial(ChildRowModel):
         related_name='daily_report_materials',
     )
     notes = models.TextField(blank=True, default='')
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_materials',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'daily_report_materials'
@@ -374,6 +406,15 @@ class DailyReportConcreteLog(ChildRowModel):
     block = models.CharField(max_length=60, null=True, blank=True)
     floor = models.CharField(max_length=60, null=True, blank=True)
     notes = models.TextField(blank=True, default='')
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_concrete',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'daily_report_concrete_logs'

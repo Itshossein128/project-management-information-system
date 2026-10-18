@@ -80,10 +80,10 @@ test.describe("Decision Tree — Comprehensive Project Domain Navigation Flows",
     await expect(page).toHaveURL(new RegExp(`${projectBasePath}/daily-reports`));
     await expect(page.locator("main").first()).toBeVisible({ timeout: 15_000 });
 
-    // 2. New Daily Report
+    // 2. Blank create route redirects to list (auto-summary)
     await page.goto(`${projectBasePath}/daily-reports/new`);
-    await expect(page).toHaveURL(new RegExp(`${projectBasePath}/daily-reports/new`));
-    await expect(page.locator("form, main").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page).toHaveURL(new RegExp(`${projectBasePath}/daily-reports/?$`));
+    await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
 
     // 3. Sync Conflicts
     await page.goto(`${projectBasePath}/sync-conflicts`);

@@ -11,18 +11,13 @@ def sync_url(project):
 
 @pytest.mark.django_db
 class TestSyncBatch:
-    def test_create_new_report_with_children(self, auth_client, sync_url, project):
+    def test_create_new_report_ensures_auto_summary_shell(self, auth_client, sync_url, project):
+        """Blank authored create is retired; sync ensures an auto-summary shell."""
         payload = [
             {
                 'local_id': 'local-1',
                 'report_date': '2024-09-01',
                 'site_status': 'active',
-                'activities': [
-                    {'activity_description': 'بتن‌ریزی', 'shift': 'shift_1', 'quantity': '10'},
-                ],
-                'labor': [
-                    {'labor_category': 'direct', 'job_title': 'بنا', 'shift_1_count': 3},
-                ],
             },
         ]
         response = auth_client.post(sync_url, payload, format='json')
@@ -32,8 +27,28 @@ class TestSyncBatch:
         assert result['status'] == 'created'
         report = DailyReport.objects.get(id=result['server_id'])
         assert report.synced_from_offline is True
-        assert report.activities.count() == 1
-        assert report.labor_entries.count() == 1
+        assert report.is_auto_summary is True
+        assert report.activities.count() == 0
+
+    def test_create_with_authored_children_rejected(self, auth_client, sync_url):
+        payload = [
+            {
+                'local_id': 'local-kids',
+                'report_date': '2024-09-01',
+                'site_status': 'active',
+                'activities': [
+                    {
+                        'activity_description': 'بتن‌ریزی',
+                        'shift': 'shift_1',
+                        'quantity_measured': False,
+                    },
+                ],
+            },
+        ]
+        response = auth_client.post(sync_url, payload, format='json')
+        assert response.data['summary']['errors'] == 1
+        assert response.data['results'][0]['status'] == 'error'
+        assert response.data['results'][0]['child_errors']
 
     def test_approved_existing_is_conflict(self, auth_client, sync_url, project, user):
         DailyReport.objects.create(
@@ -55,7 +70,11 @@ class TestSyncBatch:
                 'local_id': 'l3',
                 'report_date': '2024-09-03',
                 'activities': [
-                    {'activity_description': 'کار', 'shift': 'shift_2'},
+                    {
+                        'activity_description': 'کار',
+                        'shift': 'shift_2',
+                        'quantity_measured': False,
+                    },
                 ],
             },
         ]
@@ -173,7 +192,11 @@ class TestSyncBatch:
                 'local_id': 'resync-1',
                 'report_date': '2024-09-11',
                 'activities': [
-                    {'activity_description': 'کار اول', 'shift': 'shift_1'},
+                    {
+                        'activity_description': 'کار اول',
+                        'shift': 'shift_1',
+                        'quantity_measured': False,
+                    },
                 ],
             },
         ]
@@ -206,7 +229,8 @@ class TestSyncBatch:
         assert response.data['summary']['errors'] == 1
         assert response.data['results'][0]['status'] == 'error'
 
-    def test_multi_shift_same_date_creates_independently(self, auth_client, sync_url, project, user):
+    def test_sync_ensure_auto_summary_alongside_legacy_shift(self, auth_client, sync_url, project, user):
+        """Legacy day-shift row can coexist; sync ensures auto-summary (shift=full) shell."""
         DailyReport.objects.create(
             project=project,
             report_date='2024-09-13',
@@ -217,19 +241,18 @@ class TestSyncBatch:
         )
         payload = [
             {
-                'local_id': 'night-1',
+                'local_id': 'ensure-1',
                 'report_date': '2024-09-13',
-                'shift': 'night',
                 'site_status': 'active',
-                'activities': [
-                    {'activity_description': 'کار شب', 'shift': 'shift_2'},
-                ],
             },
         ]
         response = auth_client.post(sync_url, payload, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['summary']['created'] == 1
         assert response.data['results'][0]['status'] == 'created'
+        ensured = DailyReport.objects.get(id=response.data['results'][0]['server_id'])
+        assert ensured.is_auto_summary is True
+        assert ensured.shift == 'full'
         assert DailyReport.objects.filter(
             project=project, report_date='2024-09-13', is_deleted=False,
         ).count() == 2

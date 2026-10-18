@@ -261,7 +261,7 @@ async function syncProjectBatch(
           entity_type: "daily_report",
           project_id: projectId,
           method: "POST",
-          endpoint: `/v1/projects/${projectId}/daily-reports/`,
+          endpoint: `/v1/projects/${projectId}/daily-reports/by-date/`,
           payload: batchPayloads[i],
           created_at: new Date().toISOString(),
           status: "failed",

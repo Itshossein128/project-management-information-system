@@ -1,5 +1,5 @@
 /**
- * FLOW: Daily report create and approval workflow (Sprint 4)
+ * FLOW: Daily report auto-summary and approval workflow
  * MODULE: Daily Reports
  */
 
@@ -23,37 +23,41 @@ async function authHeaders(page: Page): Promise<Record<string, string>> {
   };
 }
 
-test.describe("Daily reports — Sprint 4", () => {
+test.describe("Daily reports — auto summary", () => {
   test.beforeEach(async ({ page }) => {
     await loginAs(page, E2E_USERS.admin);
   });
 
-  test("visitor cannot see new report button", async ({ page }) => {
+  test("list has no new-report button for any role", async ({ page }) => {
     const base = await createProjectViaApi(page);
+    await page.goto(`${base}/daily-reports`);
+    await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("daily-report-new-btn")).toHaveCount(0);
+    await expect(page.getByTestId("daily-report-open-by-date")).toBeVisible();
+
     await loginAs(page, E2E_USERS.visitor);
     await page.goto(`${base}/daily-reports`);
     await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("daily-report-new-btn")).toHaveCount(0);
   });
 
-  test("daily reports list page loads", async ({ page }) => {
+  test("daily reports list page loads with by-date control", async ({ page }) => {
     const base = await createProjectViaApi(page);
     await page.goto(`${base}/daily-reports`);
     await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("heading", { name: /گزارش.*روزانه/i })).toBeVisible();
-    await expect(page.getByTestId("daily-report-new-btn")).toBeVisible();
+    await expect(page.getByTestId("daily-report-open-by-date")).toBeVisible();
   });
 
-  test("new daily report form route renders tabs", async ({ page }) => {
+  test("/daily-reports/new redirects away from blank create form", async ({ page }) => {
     const base = await createProjectViaApi(page);
     await page.goto(`${base}/daily-reports/new`);
-    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId("report-tab-activities")).toBeVisible();
-    await expect(page.getByTestId("report-tab-labor")).toBeVisible();
-    await expect(page.getByTestId("daily-report-save-header")).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`${base}/daily-reports/?$`));
+    await expect(page.getByTestId("daily-reports-list")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("daily-report-form")).toHaveCount(0);
   });
 
-  test("submit and approve workflow updates status", async ({ page }) => {
+  test("submit and approve workflow updates status on summary view", async ({ page }) => {
     const base = await createProjectViaApi(page);
     const wbsId = await createRootWbs(page, base, { code: "1", name: "DR Root" });
     const activityId = await createActivityViaApi(page, base, {
@@ -68,8 +72,8 @@ test.describe("Daily reports — Sprint 4", () => {
       quantity: 25,
     });
 
-    await page.goto(`${base}/daily-reports/${reportId}/edit`);
-    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
+    await page.goto(`${base}/daily-reports/${reportId}/view`);
+    await expect(page.getByTestId("daily-report-summary-view")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("approval-status-bar")).toBeVisible();
     await expect(page.getByTestId("report-status-badge")).toContainText(/پیش‌نویس|draft/i);
 
@@ -85,7 +89,7 @@ test.describe("Daily reports — Sprint 4", () => {
     await expect(page.getByTestId("approval-status-bar")).toContainText(/قفل/);
   });
 
-  test("gap closure smoke: work front, versions, correction, materials recon", async ({ page }) => {
+  test("gap closure smoke: specialty seed, by-date, approve, versions", async ({ page }) => {
     const base = await createProjectViaApi(page);
     const projectId = base.split("/").pop()!;
     const wbsId = await createRootWbs(page, base, { code: "1", name: "DR Gaps Root" });
@@ -96,73 +100,64 @@ test.describe("Daily reports — Sprint 4", () => {
       totalQuantity: 50,
     });
     const headers = await authHeaders(page);
+    const reportDate = "1404/05/01";
 
-    const createRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/`, {
+    const subRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/sub-reports/`, {
       headers,
       data: {
-        report_date: "1404/05/01",
-        shift: "full",
-        site_status: "active",
+        report_date: reportDate,
+        discipline: "civil",
         weather_condition: "sunny",
-        work_front: "جبهه شرقی",
+        activities: [
+          {
+            row_number: 1,
+            shift: "shift_1",
+            crew_name: "Crew",
+            worker_count: 2,
+            activity_ref: activityId,
+            activity_description: "Gaps Activity",
+            unit: "m3",
+            quantity: 12,
+          },
+        ],
+        labor_entries: [
+          {
+            labor_category: "direct",
+            job_title: "کارگر",
+            present_count: 3,
+            leave_count: 1,
+          },
+        ],
+        material_entries: [
+          {
+            material_description: "سیمان",
+            quantity: 2,
+            unit: "کیسه",
+            notes: "انبار A",
+          },
+        ],
       },
     });
-    expect(createRes.ok()).toBeTruthy();
-    const created = (await createRes.json()) as { report_id?: string; id?: string };
-    const reportId = created.report_id ?? created.id!;
-
-    const activityRes = await page.request.post(
-      `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/activities/`,
-      {
-        headers,
-        data: {
-          activity_ref: activityId,
-          activity_description: "Gaps Activity",
-          shift: "shift_1",
-          quantity: 12,
-          quantity_measured: true,
-          unit: "m3",
-          responsible_name: "سرپرست الف",
-        },
-      },
+    expect(subRes.ok()).toBeTruthy();
+    const sub = (await subRes.json()) as { id: string };
+    const submitSub = await page.request.post(
+      `${API_BASE}/v1/projects/${projectId}/sub-reports/${sub.id}/submit/`,
+      { headers },
     );
-    expect(activityRes.ok()).toBeTruthy();
+    expect(submitSub.ok()).toBeTruthy();
 
-    await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/labor/`, {
+    const ensureRes = await page.request.get(
+      `${API_BASE}/v1/projects/${projectId}/daily-reports/by-date/?date=${encodeURIComponent(reportDate)}`,
+      { headers },
+    );
+    expect(ensureRes.ok()).toBeTruthy();
+    const ensured = (await ensureRes.json()) as { report_id?: string; id?: string };
+    const reportId = ensured.report_id ?? ensured.id!;
+
+    await page.request.patch(`${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/`, {
       headers,
-      data: {
-        labor_category: "direct",
-        job_title: "کارگر",
-        shift_1_count: 3,
-        absence_count: 1,
-      },
+      data: { work_front: "جبهه شرقی" },
     });
-    await page.request.post(
-      `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/materials/`,
-      {
-        headers,
-        data: {
-          material_description: "سیمان",
-          transaction_type: "return",
-          quantity: 2,
-          unit: "کیسه",
-          consumption_location: "انبار A",
-        },
-      },
-    );
-    await page.request.post(
-      `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/incidents/`,
-      {
-        headers,
-        data: {
-          incident_type: "barrier",
-          description: "مانع دسترسی به جبهه",
-          corrective_action: "مسیر جایگزین",
-          follow_up_owner_name: "ناظر ب",
-          due_date: "1403/07/13",
-        },
-      },
-    );
 
     const submitRes = await page.request.post(
       `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/submit/`,
@@ -175,16 +170,13 @@ test.describe("Daily reports — Sprint 4", () => {
     );
     expect(approveRes.ok()).toBeTruthy();
 
-    await page.goto(`${base}/daily-reports/${reportId}/edit`);
-    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId("report-status-badge")).toContainText(/قفل|locked/i);
+    await page.goto(`${base}/daily-reports/${reportId}/view`);
+    await expect(page.getByTestId("daily-report-summary-view")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("report-status-badge")).toContainText(/قفل|locked|تأیید|approved/i);
     await expect(page.getByTestId("report-correction-btn")).toBeVisible();
 
     await page.getByTestId("report-versions-btn").click();
     await expect(page.getByTestId("report-versions-panel")).toBeVisible();
     await expect(page.getByTestId("report-versions-panel")).toContainText(/نسخه/);
-
-    await page.getByTestId("report-tab-materials").click();
-    await expect(page.getByTestId("materials-reconciliation-panel")).toBeVisible({ timeout: 10_000 });
   });
 });

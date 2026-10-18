@@ -293,7 +293,10 @@ export async function createActivityViaApi(
   return id;
 }
 
-/** Create a draft daily report with one activity row. Returns report id. */
+/**
+ * Ensure project daily summary for a date (auto-aggregation) and seed via specialty sub-report.
+ * Returns the project daily report id. Blank POST /daily-reports/ is retired.
+ */
 export async function createDailyReportViaApi(
   page: Page,
   projectBasePath: string,
@@ -303,47 +306,61 @@ export async function createDailyReportViaApi(
     activityId?: string;
     activityDescription?: string;
     quantity?: number;
+    discipline?: string;
   } = {},
 ): Promise<string> {
   const projectId = projectBasePath.split("/").pop();
   if (!projectId) throw new Error("invalid projectBasePath");
   const headers = await authHeaders(page);
-  const createRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/`, {
+  const reportDate = opts.reportDate ?? "1404/04/26";
+
+  const subRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/sub-reports/`, {
     headers,
     data: {
-      report_date: opts.reportDate ?? "1404/04/26",
-      shift: opts.shift ?? "full",
-      site_status: "active",
+      report_date: reportDate,
+      discipline: opts.discipline ?? "civil",
       weather_condition: "sunny",
+      activities: [
+        {
+          row_number: 1,
+          shift: "shift_1",
+          crew_name: "E2E crew",
+          worker_count: 2,
+          activity_description: opts.activityDescription ?? "E2E activity row",
+          activity_ref: opts.activityId ?? null,
+          unit: "m3",
+          quantity: opts.quantity ?? 10,
+        },
+      ],
     },
   });
-  if (!createRes.ok()) {
-    throw new Error(`createDailyReportViaApi failed: ${createRes.status()} ${await createRes.text()}`);
+  if (!subRes.ok()) {
+    throw new Error(`createDailyReportViaApi sub-report failed: ${subRes.status()} ${await subRes.text()}`);
   }
-  const created = (await createRes.json()) as { report_id?: string; id?: string };
-  const reportId = created.report_id ?? created.id;
-  if (!reportId) {
-    throw new Error(`createDailyReportViaApi missing id: ${JSON.stringify(created)}`);
+  const sub = (await subRes.json()) as { id?: string };
+  if (!sub.id) throw new Error(`createDailyReportViaApi missing sub-report id: ${JSON.stringify(sub)}`);
+
+  const submitRes = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/sub-reports/${sub.id}/submit/`,
+    { headers },
+  );
+  if (!submitRes.ok()) {
+    throw new Error(
+      `createDailyReportViaApi submit failed: ${submitRes.status()} ${await submitRes.text()}`,
+    );
   }
 
-  const activityRes = await page.request.post(
-    `${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/activities/`,
-    {
-      headers,
-      data: {
-        activity_ref: opts.activityId ?? null,
-        activity_description: opts.activityDescription ?? "E2E activity row",
-        shift: "shift_1",
-        quantity: opts.quantity ?? 10,
-        quantity_measured: true,
-        unit: "m3",
-      },
-    },
+  const ensureRes = await page.request.get(
+    `${API_BASE}/v1/projects/${projectId}/daily-reports/by-date/?date=${encodeURIComponent(reportDate)}`,
+    { headers },
   );
-  if (!activityRes.ok()) {
-    throw new Error(
-      `createDailyReportViaApi activity failed: ${activityRes.status()} ${await activityRes.text()}`,
-    );
+  if (!ensureRes.ok()) {
+    throw new Error(`createDailyReportViaApi by-date failed: ${ensureRes.status()} ${await ensureRes.text()}`);
+  }
+  const ensured = (await ensureRes.json()) as { report_id?: string; id?: string };
+  const reportId = ensured.report_id ?? ensured.id;
+  if (!reportId) {
+    throw new Error(`createDailyReportViaApi missing report id: ${JSON.stringify(ensured)}`);
   }
   return reportId;
 }
