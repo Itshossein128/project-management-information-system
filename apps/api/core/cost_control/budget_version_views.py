@@ -35,7 +35,7 @@ class BudgetVersionListCreateView(APIView):
 
     @extend_schema(summary='List budget versions', tags=['Cost control'])
     def get(self, request, project_pk=None):
-        qs = BudgetVersion.objects.filter(project_id=project_pk, is_deleted=False)
+        qs = BudgetVersion.objects.filter(project_id=project_pk, is_deleted=False).prefetch_related('lines')
         return Response(BudgetVersionSerializer(qs, many=True).data)
 
     @extend_schema(summary='Create budget version draft', tags=['Cost control'])
@@ -58,7 +58,9 @@ class BudgetVersionDetailView(APIView):
         return 'view_costs' if self.request.method == 'GET' else 'edit_costs'
 
     def get_object(self, project_pk, pk):
-        return get_object_or_404(BudgetVersion, pk=pk, project_id=project_pk, is_deleted=False)
+        return get_object_or_404(
+            BudgetVersion.objects.prefetch_related('lines'), pk=pk, project_id=project_pk, is_deleted=False
+        )
 
     @extend_schema(summary='Retrieve budget version', tags=['Cost control'])
     def get(self, request, project_pk=None, pk=None):

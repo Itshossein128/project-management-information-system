@@ -152,13 +152,12 @@ class BudgetVersionSerializer(serializers.ModelSerializer):
         ]
 
     def get_line_count(self, obj):
-        return obj.lines.filter(is_deleted=False).count()
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries
+        return sum(1 for line in obj.lines.all() if not line.is_deleted)
 
     def get_total_amount(self, obj):
-        from django.db.models import Sum
-
-        total = obj.lines.filter(is_deleted=False).aggregate(t=Sum('budget_amount'))['t'] or 0
-        return float(total)
+        # ⚡ Bolt: Use python iteration over prefetched collection to avoid N+1 queries
+        return float(sum(line.budget_amount for line in obj.lines.all() if not line.is_deleted))
 
 
 class BudgetVersionCreateSerializer(serializers.Serializer):
