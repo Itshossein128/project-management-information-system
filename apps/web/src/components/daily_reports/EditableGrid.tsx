@@ -95,7 +95,7 @@ function SyncCell({
         title={title}
         aria-label={title}
         onClick={onRetry}
-        className={cn("rounded p-1 hover:bg-muted", className)}
+        className={cn("rounded p-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", className)}
       >
         <Icon className="size-4" />
       </button>
@@ -269,7 +269,7 @@ export function EditableGrid({
                         disabled={!row._dirty || savingKey === row._key}
                         onClick={() => saveRow(row)}
                         className={cn(
-                          "rounded p-1 hover:bg-muted disabled:opacity-30",
+                          "rounded p-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30",
                           row._dirty
                             ? "text-success-600"
                             : "text-muted-foreground",
@@ -283,7 +283,7 @@ export function EditableGrid({
                         aria-label="حذف"
                         disabled={savingKey === row._key}
                         onClick={() => deleteRow(row)}
-                        className="rounded p-1 text-danger-600 hover:bg-muted disabled:opacity-30"
+                        className="rounded p-1 text-danger-600 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-30"
                       >
                         <Trash2 className="size-4" />
                       </button>
@@ -302,7 +302,7 @@ export function EditableGrid({
           type="button"
           onClick={addRow}
           data-testid="grid-add-row-btn"
-          className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/40"
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Plus className="size-4" />
           {addLabel}
