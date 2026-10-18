@@ -20,11 +20,10 @@ export {
   ContractorSelect,
   type ContractorSelectProps,
 } from "./ContractorSelect";
-export { JalaliDatePicker, type JalaliDatePickerProps } from "./JalaliDatePicker";
-export {
-  JalaliDateRangePicker,
-  type JalaliDateRangePickerProps,
-  type DateRangeValue,
+export type { JalaliDatePickerProps } from "./JalaliDatePicker";
+export type {
+  JalaliDateRangePickerProps,
+  DateRangeValue,
 } from "./JalaliDateRangePicker";
 export {
   Card,

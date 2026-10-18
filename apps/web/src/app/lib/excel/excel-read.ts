@@ -1,5 +1,3 @@
-import * as XLSX from "xlsx";
-
 export interface ExcelReadOptions {
   /** Sheet name; if omitted uses the first sheet. */
   sheetName?: string;
@@ -25,6 +23,7 @@ export async function readExcelFile(
   file: File,
   options: ExcelReadOptions = {},
 ): Promise<ExcelReadResult> {
+  const XLSX = await import("xlsx");
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
   const sheetName = options.sheetName ?? wb.SheetNames[0] ?? "";

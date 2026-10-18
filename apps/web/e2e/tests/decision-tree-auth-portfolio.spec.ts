@@ -70,21 +70,26 @@ test.describe("Decision Tree — Authentication & Portfolio Navigation Flows", (
   });
 
   test("Login screen: submit invalid credentials displays error feedback", async ({ page }) => {
-    await page.goto("/login");
-    await page.locator("#login-phone").fill("+19999999999");
-    await page.locator("#login-password").fill("wrongpassword");
+    await page.goto("/login", { waitUntil: "networkidle" });
+    await expect(page.locator('button[type="submit"]')).toBeEnabled();
+    await page.locator("#login-phone").fill(E2E_USERS.admin.phone);
+    await page.locator("#login-password").fill("wrong-password");
+    const loginResponse = page.waitForResponse(
+      (res) => res.url().includes("/auth/login/") && res.request().method() === "POST",
+    );
     await page.locator('button[type="submit"]').click();
+    const response = await loginResponse;
+    expect(response.status()).toBe(401);
 
     // Verify user stays on login and error notification/alert appears
     await expect(page).toHaveURL(/\/login/);
-    await expect(page.locator(".text-destructive, [role='alert'], .text-red-500").first()).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(page.getByRole("alert")).toBeVisible({ timeout: 10_000 });
   });
 
   test("Login screen: navigate to Register and return back to Login", async ({ page }) => {
-    await page.goto("/login");
-    const registerBtn = page.getByRole("button", { name: /ثبت‌?نام|register/i });
+    await page.goto("/login", { waitUntil: "networkidle" });
+    await expect(page.locator('button[type="submit"]')).toBeEnabled();
+    const registerBtn = page.getByRole("link", { name: /ثبت‌?نام|register/i }).or(page.getByRole("button", { name: /ثبت‌?نام|register/i }));
     await expect(registerBtn).toBeVisible();
     await registerBtn.click();
 
@@ -99,8 +104,9 @@ test.describe("Decision Tree — Authentication & Portfolio Navigation Flows", (
   });
 
   test("Login screen: navigate to Forgot Password and return back to Login", async ({ page }) => {
-    await page.goto("/login");
-    const forgotBtn = page.getByRole("button", { name: /فراموش|forgot/i });
+    await page.goto("/login", { waitUntil: "networkidle" });
+    await expect(page.locator('button[type="submit"]')).toBeEnabled();
+    const forgotBtn = page.getByRole("link", { name: /فراموش|forgot/i }).or(page.getByRole("button", { name: /فراموش|forgot/i }));
     await expect(forgotBtn).toBeVisible();
     await forgotBtn.click();
 

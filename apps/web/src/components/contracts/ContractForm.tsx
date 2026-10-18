@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Input, JalaliDatePicker, Select, TextArea } from "@/components/form";
+import { Input, Select, TextArea } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
 import { CONTRACT_TYPE_LABELS } from "@/app/lib/api/contracts";
 import { formatWithCommas, parseFormattedNumber, toRawNumericString } from "@/app/lib/utils";

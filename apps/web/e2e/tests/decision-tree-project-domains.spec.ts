@@ -12,11 +12,24 @@
 import { expect, test } from "@playwright/test";
 import { E2E_USERS, loginAs } from "../helpers/auth";
 import { createProjectViaApi } from "../helpers/project";
+import { markToursSeen } from "../helpers/tour";
 
 test.describe("Decision Tree — Comprehensive Project Domain Navigation Flows", () => {
   test.setTimeout(180_000);
 
   test.beforeEach(async ({ page }) => {
+    await markToursSeen(
+      page,
+      "procurement-list",
+      "procurement-new",
+      "procurement-blocks",
+      "procurement-inventory",
+      "procurement-transfers",
+      "procurement-officer",
+      "procurement-reports",
+      "project-alerts",
+      "project-manpower",
+    );
     await loginAs(page, E2E_USERS.admin);
   });
 

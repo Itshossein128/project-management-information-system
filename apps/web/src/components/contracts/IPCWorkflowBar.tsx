@@ -12,7 +12,7 @@ import {
   submitIPC,
   type IPCDetail,
 } from "@/app/lib/api/contracts";
-import { JalaliDatePicker } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 

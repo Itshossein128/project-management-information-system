@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Field, Input, JalaliDatePicker, Select } from "@/components/form";
+import { Field, Input, Select } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import {
   WEATHER_CONDITIONS,
   formToPayload,

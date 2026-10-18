@@ -7,6 +7,7 @@ import {
   FolderKanban,
   LayoutDashboard,
   Plus,
+  ReceiptText,
   Search,
   Wallet,
   X,
@@ -26,6 +27,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/form/Input";
 import { Select } from "@/components/form/Select";
 import { DataTable } from "@/components/ui/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
@@ -64,7 +66,12 @@ export default function ProjectListPage() {
     queryKey: ["projects", { search, status, page, pageSize }],
     queryFn: () => fetchProjects({ search, status, page, page_size: pageSize }),
   });
-  const { data: portfolio } = useQuery({
+  const {
+    data: portfolio,
+    isPending: portfolioPending,
+    isError: portfolioError,
+    refetch: refetchPortfolio,
+  } = useQuery({
     queryKey: ["portfolio-summary"],
     queryFn: fetchPortfolioSummary,
   });
@@ -228,76 +235,112 @@ export default function ProjectListPage() {
         }
       />
 
-      {portfolio ? (
-        <section
-          className="mb-6 space-y-3"
-          data-testid="portfolio-summary"
-          aria-label={t("project.list.overview")}
-        >
-          <dl className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
-              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                <FolderKanban
-                  className="size-4 text-primary"
+      <section
+        className="mb-6 space-y-3"
+        data-testid="portfolio-summary"
+        aria-label={t("project.list.overview")}
+        aria-busy={portfolioPending}
+      >
+        <dl className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+            <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FolderKanban
+                className="size-4 text-primary"
+                aria-hidden="true"
+              />
+              {t("project.list.portfolioProjects")}
+            </dt>
+            <dd className="mt-3 flex min-h-9 items-center text-3xl font-semibold tabular-nums tracking-tight">
+              {portfolioPending ? (
+                <Skeleton
+                  className="h-9 w-24 bg-muted motion-reduce:animate-none"
                   aria-hidden="true"
                 />
-                {t("project.list.portfolioProjects")}
+              ) : portfolioError ? (
+                <Button
+                  variant="ghost"
+                  className="h-9 px-0"
+                  onClick={() => void refetchPortfolio()}
+                  title={t("common.loadFailed")}
+                >
+                  {t("common.retry")}
+                </Button>
+              ) : (
+                number(portfolio?.totals.project_count ?? 0)
+              )}
+            </dd>
+          </div>
+          {(
+            [
+              {
+                key: "total_budget",
+                label: "centralData.budget",
+                icon: Wallet,
+              },
+              {
+                key: "total_actual",
+                label: "glossary.actualCost",
+                icon: ReceiptText,
+              },
+            ] as const
+          ).map(({ key, label, icon: Icon }) => (
+            <div
+              key={key}
+              className="rounded-xl border border-border/80 bg-card p-4 shadow-sm"
+            >
+              <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Icon className="size-4 text-primary" aria-hidden="true" />
+                {t(label)}
+                <span className="ms-auto rounded bg-muted px-2 py-0.5 text-xs font-medium">
+                  IRR
+                </span>
               </dt>
-              <dd className="mt-3 text-3xl font-semibold tabular-nums tracking-tight">
-                {number(portfolio.totals.project_count)}
+              <dd className="mt-3 break-words text-3xl font-semibold tabular-nums tracking-tight">
+                {portfolioPending ? (
+                  <Skeleton
+                    className="h-9 w-32 max-w-full bg-muted motion-reduce:animate-none"
+                    aria-hidden="true"
+                  />
+                ) : portfolioError ? (
+                  "—"
+                ) : (
+                  <bdi>
+                    {number(
+                      Number(portfolio?.totals_by_currency.IRR?.[key] ?? 0),
+                    )}
+                  </bdi>
+                )}
               </dd>
             </div>
-            {Object.entries(portfolio.totals_by_currency).map(
-              ([currency, bucket]) => (
-                <div
-                  key={currency}
-                  className="rounded-xl border border-border/80 bg-card p-4 shadow-sm"
-                >
-                  <dt className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Wallet
-                      className="size-4 text-primary"
-                      aria-hidden="true"
-                    />
-                    {t("centralData.budget")}
-                    <span className="ms-auto rounded bg-muted px-2 py-0.5 text-xs font-medium">
-                      {currency}
-                    </span>
-                  </dt>
-                  <dd className="mt-3 break-words text-3xl font-semibold tabular-nums tracking-tight">
-                    <bdi>{number(Number(bucket.total_budget))}</bdi>
-                  </dd>
-                </div>
-              ),
-            )}
-          </dl>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <Link
-              className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
-              to={`/${PATHS.EXECUTIVE_DASHBOARD}`}
-              data-testid="portfolio-dashboard-link"
-            >
-              <LayoutDashboard className="size-4" aria-hidden="true" />
-              {t("dashboard.executiveTitle")}
-              <ArrowUpRight
-                className="size-3.5 rtl:-scale-x-100"
-                aria-hidden="true"
-              />
-            </Link>
-            <Link
-              className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
-              to={`/${PATHS.PORTFOLIO_LIQUIDITY}`}
-              data-testid="portfolio-liquidity-link"
-            >
-              <Wallet className="size-4" aria-hidden="true" />
-              {t("pages.portfolioLiquidity.title")}
-              <ArrowUpRight
-                className="size-3.5 rtl:-scale-x-100"
-                aria-hidden="true"
-              />
-            </Link>
-          </div>
-        </section>
-      ) : null}
+          ))}
+        </dl>
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <Link
+            className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+            to={`/${PATHS.EXECUTIVE_DASHBOARD}`}
+            data-testid="portfolio-dashboard-link"
+          >
+            <LayoutDashboard className="size-4" aria-hidden="true" />
+            {t("dashboard.executiveTitle")}
+            <ArrowUpRight
+              className="size-3.5 rtl:-scale-x-100"
+              aria-hidden="true"
+            />
+          </Link>
+          <Link
+            className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+            to={`/${PATHS.PORTFOLIO_LIQUIDITY}`}
+            data-testid="portfolio-liquidity-link"
+          >
+            <Wallet className="size-4" aria-hidden="true" />
+            {t("pages.portfolioLiquidity.title")}
+            <ArrowUpRight
+              className="size-3.5 rtl:-scale-x-100"
+              aria-hidden="true"
+            />
+          </Link>
+        </div>
+      </section>
 
       <section aria-label={t("project.list.directory")} className="space-y-4">
         <div className="rounded-xl border border-border/80 bg-card p-4 shadow-sm">

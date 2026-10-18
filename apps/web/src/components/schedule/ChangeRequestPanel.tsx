@@ -13,7 +13,8 @@ import {
   type ScheduleChangeItem,
   type ScheduleChangeRequest,
 } from "@/app/lib/api/schedule";
-import { JalaliDatePicker, Input, TextArea } from "@/components/form";
+import { Input, TextArea } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";

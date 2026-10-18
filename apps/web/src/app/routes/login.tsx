@@ -14,7 +14,7 @@ import { AppPreferencesBar } from "@/components/AppPreferencesBar";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
-import { redirect, useNavigate, useSearchParams } from "react-router";
+import { Link, redirect, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
 import { getAccessTokenFromRequest } from "src/app/lib/auth-storage";
 
@@ -143,18 +143,22 @@ export default function Login() {
             <Button
               type='button'
               variant='link'
+              asChild
               className='text-sm'
-              onClick={() => navigate("/register")}
             >
-              {t("login.noAccount")} {t("login.registerLink")}
+              <Link to='/register'>
+                {t("login.noAccount")} {t("login.registerLink")}
+              </Link>
             </Button>
             <Button
               type='button'
               variant='link'
+              asChild
               className='text-sm'
-              onClick={() => navigate("/forgot-password")}
             >
-              {t("login.forgotPassword")}
+              <Link to='/forgot-password'>
+                {t("login.forgotPassword")}
+              </Link>
             </Button>
           </CardFooter>
         </form>

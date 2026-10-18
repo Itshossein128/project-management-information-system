@@ -7,7 +7,7 @@ import {
   type ContractDetail,
 } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
-import { JalaliDatePicker } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";

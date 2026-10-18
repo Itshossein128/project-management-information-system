@@ -1,11 +1,10 @@
-import * as XLSX from "xlsx";
-
-export function downloadExcel(args: {
+export async function downloadExcel(args: {
   filename: string;
   sheetName?: string;
   headers: string[];
   rows: Record<string, unknown>[];
 }) {
+  const XLSX = await import("xlsx");
   const ws = XLSX.utils.json_to_sheet(args.rows, {
     header: args.headers,
     skipHeader: false,

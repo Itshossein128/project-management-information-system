@@ -12,9 +12,9 @@ import {
   CreatableSelect,
   Field,
   Input,
-  JalaliDatePicker,
   TextArea,
 } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Modal } from "@/components/overlay/modal";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";

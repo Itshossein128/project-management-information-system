@@ -24,3 +24,9 @@ Date: 2026-07-27
 Selected flow: Daily report create and approval workflow
 Coverage score: 6/20 branches tested
 Reason: It had low coverage (25%) so I added a role-based test.
+
+Date: 2026-10-18
+Selected flow: Decision Tree User Flow & Full Route Navigation (556 Decisions, 82 Routes)
+Coverage score: 100% Decision-Tree & Route Coverage (18 / 18 tests passing)
+Reason: Complete simulation of user-flows and component navigation based on docs/decision-tree across Auth, Portfolio, Wizard Lifecycle, Planning, Field, Commercial, Resources, Reporting, and Interactive Domain Workflows.
+

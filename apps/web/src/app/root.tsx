@@ -28,6 +28,12 @@ export function meta() {
   ];
 }
 
+export function links() {
+  return [
+    { rel: "preconnect", href: "/" },
+  ];
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
 

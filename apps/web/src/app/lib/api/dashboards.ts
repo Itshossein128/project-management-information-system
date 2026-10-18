@@ -103,24 +103,7 @@ export function fetchPortfolioDashboard(params: { as_of?: string } = {}) {
   return apiJson<PortfolioDashboard>(`/v1/portfolio/dashboard/${queryString(params)}`);
 }
 
-export function formatFigureValue(figure: DashboardFigure): string {
-  if (figure.status === "inactive") return "—";
-  if (figure.value == null) return "—";
-  const key = figure.figure_key;
-  if (key.startsWith("evm.")) {
-    const n = Number(figure.value);
-    return Number.isFinite(n) ? n.toFixed(3) : String(figure.value);
-  }
-  if (key === "progress.plan_vs_actual") {
-    const n = Number(figure.value);
-    return Number.isFinite(n) ? `${n.toFixed(1)}%` : String(figure.value);
-  }
-  if (key.startsWith("finance.") || key.startsWith("cash.")) {
-    const n = Number(figure.value);
-    return Number.isFinite(n) ? n.toLocaleString("fa-IR") : String(figure.value);
-  }
-  return String(figure.value);
-}
+export { formatFigureValue } from "../dashboard-figures";
 
 export function figureTitleKey(figureKey: string): string {
   return `dashboard.figures.${figureKey.replace(/\./g, "_")}`;

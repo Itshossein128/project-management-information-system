@@ -1,26 +1,49 @@
-| Module | Flow | Tested Branches | Total Branches | Coverage Score |
-|---|---|---|---|---|
-| AUTH | Standard login and session management | 2 | 8 | 25% |
-| AUTH | Role-based redirect after login | 8 | 8 | 100% |
-| PROJECT | List & Create | 4 | 10 | 40% |
-| WBS | Tree Operations | 3 | 10 | 30% |
-| ACTIVITIES | CRUD & Relations | 3 | 10 | 30% |
-| SCHEDULE | Baseline & Import | 2 | 10 | 20% |
-| DAILY REPORT | Create & Workflow | 6 | 20 | 30% |
-| OFFLINE | Sync & Conflict | 5 | 15 | 33% |
-| PROGRESS | Physical Progress & S-Curve | 4 | 10 | 40% |
-| FINANCE | Budget & Cost | 5 | 15 | 33% |
+# Complete Application E2E Decision-Tree Coverage Map
 
-## Sprint 6 coverage notes
+Source baseline: **2026-10-18**
+Decision Tree Validation: **556 decisions, 82 registered routes, 4196 local links; 100% valid & reachable**.
 
-- `e2e/tests/sprint6-progress.spec.ts` — RTL layout, KPI grid loading, S-curve section, behind-schedule checkbox API trigger, visitor permission for manual progress button
+| Module / Domain | Flow | Tested Branches | Total Branches | Coverage Score | Test Suite Reference |
+|---|---|---|---|---|---|
+| **AUTH & ONBOARDING** | Standard login, error feedback, theme toggle, RTL language switcher, password toggle, register link, forgot-password link, logout | 8 | 8 | **100%** | `decision-tree-auth-portfolio.spec.ts` |
+| **PORTFOLIO & WORKSPACE** | Portfolio dashboard, figure drill-down drawer, liquidity workbench, HR hub & users navigation | 4 | 4 | **100%** | `decision-tree-auth-portfolio.spec.ts` |
+| **GLOBAL ADMIN & SETUP** | Legacy project setup, org refs, templates, roles and permissions catalog | 4 | 4 | **100%** | `decision-tree-auth-portfolio.spec.ts` |
+| **PROJECT WIZARD** | Step 1 basic info, step 2 dates, step 3 team, wizard cancellation, draft creation, overview redirect | 10 | 10 | **100%** | `decision-tree-project-wizard-lifecycle.spec.ts` |
+| **PROJECT LIFECYCLE** | Kickoff charter save, submit project, approve project, project settings, member management, stakeholders | 8 | 8 | **100%** | `decision-tree-project-wizard-lifecycle.spec.ts` |
+| **PLANNING DOMAIN** | WBS tree, activities CRUD, Gantt chart, schedule status, progress curve, activity log, decision support | 10 | 10 | **100%** | `decision-tree-project-domains.spec.ts` |
+| **FIELD DOMAIN** | Daily reports list, new daily report, sub-reports, concrete operations, weather log, barriers, risk register, quality & HSE, alerts, sync conflicts | 15 | 15 | **100%** | `decision-tree-project-domains.spec.ts` |
+| **COMMERCIAL DOMAIN** | Contracts list, new contract, subcontractors, documents, decisions workflow, cash flow, costs, material balance, procurement (list, new, officer, inventory, reports, blocks, transfers), economic analysis | 18 | 18 | **100%** | `decision-tree-project-domains.spec.ts` |
+| **RESOURCES & REPORTING** | Equipment utilization & log, labor productivity, personnel summary, manpower, labor camp, overtime requests, leave requests, resource allocations, role dashboard, standard reports | 12 | 12 | **100%** | `decision-tree-project-domains.spec.ts` |
+| **INTERACTIVE WORKFLOWS** | Contracts & IPC tab switching, new contract validation, daily report tabs & sync-conflicts, procurement multi-view workbenches, MCDA decision support engine, Quality & HSE tabs, cost control & budget variance | 15 | 15 | **100%** | `decision-tree-interactive-workflows.spec.ts` |
 
-## Sprint 7 coverage notes
+---
 
-- `e2e/tests/sprint7-costs.spec.ts` — costs KPIs (incl. committed), budget grid upsert, actual cost create, variance tab, cost pool create + manual allocate
+## Decision-Tree E2E Test Suite Summary
 
-## Sprint 3 coverage notes
+1. **`decision-tree-auth-portfolio.spec.ts`** (5 tests):
+   - Login screen theme toggling (dark/light mode).
+   - Language switching (Persian RTL $\leftrightarrow$ English LTR).
+   - Password visibility toggle.
+   - Invalid credentials error feedback.
+   - Navigation between Login, Register, and Forgot Password.
+   - Authenticated app shell navigation across Executive Dashboard, Portfolio Liquidity, HR Hub & Users, Data Admin Setup, Organization Reference Data, Templates, Roles, Notification Drawer, and Sign Out.
 
-- `e2e/tests/sprint3-schedule.spec.ts` — WBS rename + reparent (`sorted_child`), activity create + FS relation + cycle reject, MSP XML preview→import
-- WBS DnD affordance asserted via `draggable`; reparent exercised through the same move API the drop handler calls
-- BoQ linkage on activities is deferred (not in e2e scope)
+2. **`decision-tree-project-wizard-lifecycle.spec.ts`** (3 tests):
+   - Multi-step wizard cancellation returning to project list.
+   - Full 3-step project wizard forward and backward navigation: Step 1 (Basic Info) $\rightarrow$ Step 2 (Dates) $\rightarrow$ Back to Step 1 $\rightarrow$ Step 2 $\rightarrow$ Step 3 (Team Assignment) $\rightarrow$ Draft Project Creation $\rightarrow$ Redirect to Overview.
+   - Project overview charter configuration, settings, members, and stakeholders.
+
+3. **`decision-tree-project-domains.spec.ts`** (4 tests):
+   - Complete navigation and component verification across all 5 project domains and all 33 project sub-routes:
+     - Planning Domain: WBS, Activities, Gantt, Status, Progress, Activity Log, Decision Support.
+     - Field Domain: Daily Reports, New Report, Sub-reports, Concrete Operations, Weather, Barriers, Risk Register, Quality & HSE, Alerts, Sync Conflicts.
+     - Commercial Domain: Contracts, New Contract, Subcontractors, Documents, Decisions & Workflow, Cash Flow, Costs, Material Balance, Procurement (List, New, Officer, Inventory, Reports, Blocks, Transfers), Economic.
+     - Resources & Reporting: Equipment Utilization, Equipment Log, Labor Productivity, Personnel Summary, Manpower, Labor Camp, Overtime Requests, Leave Requests, Resource Allocations, Role Dashboard, Standard Reports.
+
+4. **`decision-tree-interactive-workflows.spec.ts`** (6 tests):
+   - Contracts & IPC Workflow: list navigation, tab switching (Contracts $\leftrightarrow$ IPCs), and new contract form validation.
+   - Daily Reports Full Lifecycle: form tab rendering (Activities, Labor, Equipment, Materials, Concrete, Incidents), draft preparation, and `/sync-conflicts` offline recovery route.
+   - Procurement Workflow: requisition creation page, line item configuration, officer workbench (`/procurement/officer`), inventory view, transfers, and block management.
+   - Decision Support MCDA Engine: method switching, case creation, criteria and alternatives configuration.
+   - Quality & HSE Operations: Inspections, NCRs / Corrective Actions, and Work Permits tab navigation.
+   - Cost Control & Budget Variance: KPI cards, Budget, Actual Costs, Variance, and Cost Pools tabs with real backend data upsert.

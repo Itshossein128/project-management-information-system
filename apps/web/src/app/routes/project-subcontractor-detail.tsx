@@ -19,7 +19,8 @@ import {
 } from "@/app/lib/api/subcontractors";
 import { fetchIPCs, IPC_STATUS_LABELS } from "@/app/lib/api/contracts";
 import { PATHS } from "@/app/routeVars";
-import { JalaliDatePicker, Select, TextArea } from "@/components/form";
+import { Select, TextArea } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
@@ -31,7 +32,6 @@ import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import * as XLSX from "xlsx";
 
 type Tab = "performance" | "financial" | "warnings" | "activities";
 
@@ -152,7 +152,8 @@ function SubcontractorDetailContent() {
     });
   }, [sub?.recent_activities, activityFrom, activityTo]);
 
-  const exportExcel = () => {
+  const exportExcel = async () => {
+    const XLSX = await import("xlsx");
     const rows = filteredActivities.map((a) => ({
       تاریخ: a.report_date,
       شیفت: a.shift,
