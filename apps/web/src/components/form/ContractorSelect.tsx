@@ -24,6 +24,7 @@ export type ContractorSelectProps = {
   className?: string;
   placeholder?: string;
   disabled?: boolean;
+  variant?: "form" | "filter";
   id?: string;
   sticky?: FieldProps["sticky"];
   onStickyChange?: FieldProps["onStickyChange"];
@@ -42,6 +43,7 @@ export function ContractorSelect({
   className,
   placeholder,
   disabled,
+  variant = "form",
   id,
   sticky,
   onStickyChange,
@@ -65,8 +67,9 @@ export function ContractorSelect({
       : row.name,
   }));
 
+  const isEmpty = !isLoading && options.length === 0;
   const emptyHelp =
-    !isLoading && options.length === 0
+    isEmpty
       ? t(
           "contractors.emptyHelp",
           "No contractors yet. Add them on the stakeholders (ذینفعان) page.",
@@ -76,8 +79,8 @@ export function ContractorSelect({
   return (
     <Field
       name={name}
-      label={label}
-      helpText={emptyHelp}
+      label={variant === "filter" ? <span className="sr-only">{label}</span> : label}
+      helpText={variant === "filter" ? helpText : emptyHelp}
       error={error}
       htmlFor={selectId}
       className={fieldClassName}
@@ -85,7 +88,7 @@ export function ContractorSelect({
       onStickyChange={onStickyChange}
       stickyAriaLabel={stickyAriaLabel}
     >
-      {() => (
+      {({ helpId, errorId }) => (
         <ShadcnSelect
           name={name}
           value={value || undefined}
@@ -97,15 +100,27 @@ export function ContractorSelect({
             id={selectId}
             className={cn("w-full", className)}
             data-testid={selectId}
+            aria-label={variant === "filter" && typeof label === "string" ? label : undefined}
+            aria-invalid={error != null || undefined}
+            aria-describedby={[
+              (variant === "filter" ? helpText : emptyHelp) != null ? helpId : null,
+              error != null ? errorId : null,
+            ].filter(Boolean).join(" ") || undefined}
           >
             <SelectValue
               placeholder={
-                placeholder ??
-                t("contractors.selectPlaceholder", "Select contractor")
+                variant === "filter" && isEmpty
+                  ? t("contractors.emptyPlaceholder", "No contractors yet")
+                  : placeholder ?? t("contractors.selectPlaceholder", "Select contractor")
               }
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position={variant === "filter" ? "popper" : "item-aligned"}>
+            {variant === "filter" && isEmpty ? (
+              <p className="max-w-64 px-3 py-2 text-start text-sm leading-6 text-muted-foreground" dir={dir}>
+                {emptyHelp}
+              </p>
+            ) : null}
             {options.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}

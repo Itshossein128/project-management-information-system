@@ -2179,6 +2179,7 @@
     }
   },
   "contractors": {
+    "emptyPlaceholder": "پیمانکاری ثبت نشده",
     "emptyHelp": "پیمانکاری ثبت نشده است. ابتدا در صفحه ذینفعان اضافه کنید.",
     "selectPlaceholder": "انتخاب پیمانکار"
   }

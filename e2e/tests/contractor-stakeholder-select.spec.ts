@@ -116,9 +116,12 @@ test.describe("027 contractor stakeholder select", () => {
     await visit(page, `/projects/${projectId}/buildings`);
     const emptySelect = page.getByTestId("input-departmentActivityFilterContractor");
     await expect(emptySelect).toBeVisible({ timeout: 20_000 });
+    await expect(emptySelect).toContainText(/No contractors yet|پیمانکاری ثبت نشده/i);
+    await emptySelect.click();
     await expect(
-      page.getByText(/No contractors yet|ذینفعان/i).first(),
+      page.getByRole("listbox").getByText(/No contractors yet|ذینفعان/i),
     ).toBeVisible({ timeout: 10_000 });
+    await page.keyboard.press("Escape");
 
     await mockProjectShell(page, { contractors: [contractorRow] });
     await page.reload();

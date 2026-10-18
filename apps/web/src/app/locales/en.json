@@ -2179,6 +2179,7 @@
     }
   },
   "contractors": {
+    "emptyPlaceholder": "No contractors yet",
     "emptyHelp": "No contractors yet. Add them on the stakeholders page.",
     "selectPlaceholder": "Select contractor"
   }

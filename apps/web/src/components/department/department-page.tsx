@@ -534,11 +534,11 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
             toolbarLeftSlot={
               <div
                 id="container-departmentActivityFilters"
-                className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))] items-start gap-2"
               >
                 <div
                   id="container-departmentActivityDateRange"
-                  className="w-full sm:min-w-[220px] sm:w-auto"
+                  className="min-w-0"
                 >
                   <JalaliDateRangePicker
                     name="departmentActivityDateRange"
@@ -618,6 +618,8 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                       )}
                     />
                     <ContractorSelect
+                      variant="filter"
+                      fieldClassName="min-w-0 gap-0"
                       projectId={String(businessId ?? "")}
                       id="input-departmentActivityFilterContractor"
                       name="departmentActivityFilterContractor"
