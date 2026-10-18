@@ -134,6 +134,10 @@ class SubcontractorDetailSerializer(SubcontractorSerializer):
         return WarningSerializer(warnings, many=True).data
 
     def get_recent_activities(self, obj):
+        # ⚡ Bolt: Early return if company name is missing, and select only required fields with select_related to optimize query payload.
+        if not obj.company_name:
+            return []
+
         from field_reports.models import DailyReportActivity
 
         qs = (
@@ -143,6 +147,19 @@ class SubcontractorDetailSerializer(SubcontractorSerializer):
                 subcontractor_name__icontains=obj.company_name,
             )
             .select_related('report')
+            .only(
+                'id',
+                'report_id',
+                'shift',
+                'zone',
+                'block',
+                'floor',
+                'activity_description',
+                'headcount',
+                'quantity',
+                'unit',
+                'report__report_date',
+            )
             .order_by('-report__report_date')[:20]
         )
         return [
