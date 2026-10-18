@@ -45,3 +45,8 @@ Added missing authentication and permission checks to RequisitionItemHoldView to
 **Vulnerability:** Procurement report views in `apps/api/core/procurement/views/report_views.py` used `PROJECT_MEMBER_PERMISSIONS` (`[IsAuthenticated, IsProjectMember]`), which allowed any active project member to access sensitive procurement metrics, liquidity dashboards, material deviation, and audit logs without possessing the `view_procurement` permission.
 **Learning:** Checking project membership (`IsProjectMember`) verifies that a user belongs to a project, but does not enforce role-based access control (RBAC). Project-scoped endpoints must explicitly enforce `HasProjectPermission` along with a defined `required_permission` (e.g. `'view_procurement'`) to prevent horizontal privilege escalation.
 **Prevention:** Always add `HasProjectPermission` to `permission_classes` on project-scoped `APIView` classes and set `required_permission = '<codename>'`.
+
+## 2026-07-27 - Enforce HasProjectPermission on ApprovalLogListView
+**Vulnerability:** ApprovalLogListView permitted any active project member (`[IsAuthenticated, IsProjectMember]`) to view requisition approval logs, exposing sensitive workflow comments and reviewer details without enforcing the `view_procurement` permission.
+**Learning:** Using `IsProjectMember` validates project membership but omits role-based access control. Project-scoped `APIView` endpoints must explicitly list `HasProjectPermission` in `permission_classes` and define `required_permission`.
+**Prevention:** Always pair `HasProjectPermission` with `required_permission` on project-scoped APIViews that expose domain-specific data.
