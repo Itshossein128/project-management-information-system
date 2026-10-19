@@ -3286,6 +3286,10 @@
       "path": "login/toggle-theme",
       "protected": false,
       "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-risk-register]/start-product-tour",
+      "protected": false
     }
   ]
 }

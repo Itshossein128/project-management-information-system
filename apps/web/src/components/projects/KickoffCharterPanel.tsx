@@ -56,7 +56,9 @@ export function KickoffCharterPanel({ projectId }: Props) {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  const fields: { key: keyof KickoffCharter; label: string }[] = [
+  type CharterFieldKey = keyof Omit<KickoffCharter, "id" | "created_at" | "updated_at">;
+
+  const fields: { key: CharterFieldKey; label: string }[] = [
     { key: "justification", label: t("project.charterJustification", "توجیه") },
     { key: "success_criteria", label: t("project.charterSuccess", "معیار موفقیت") },
     { key: "constraints", label: t("project.charterConstraints", "محدودیت‌ها") },

@@ -32,6 +32,7 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 
 - [Filter or change the displayed view](filter-and-change-view/README.md)
 - [Record risk/delay event](%5Brecord-risk-event%5D/README.md)
+- [Start product tour](start-product-tour/README.md)
 - [Retry failed load](retry-failed-load/README.md)
 
 Continue / return links (the same state is documented once):
