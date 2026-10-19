@@ -151,12 +151,25 @@ class BudgetVersionSerializer(serializers.ModelSerializer):
             'total_amount',
         ]
 
+    def _get_active_lines(self, obj):
+        if hasattr(obj, '_prefetched_objects_cache') and 'lines' in obj._prefetched_objects_cache:
+            return [line for line in obj.lines.all() if not line.is_deleted]
+        return None
+
     def get_line_count(self, obj):
+        active = self._get_active_lines(obj)
+        if active is not None:
+            return len(active)
+        # ⚡ Bolt: Use python iteration over prefetched collection if available to avoid N+1 queries from .filter()
         return obj.lines.filter(is_deleted=False).count()
 
     def get_total_amount(self, obj):
+        active = self._get_active_lines(obj)
+        if active is not None:
+            return float(sum(line.budget_amount or 0 for line in active))
         from django.db.models import Sum
 
+        # ⚡ Bolt: Use python iteration over prefetched collection if available to avoid N+1 queries from .filter()
         total = obj.lines.filter(is_deleted=False).aggregate(t=Sum('budget_amount'))['t'] or 0
         return float(total)
 

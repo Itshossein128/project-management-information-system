@@ -6,6 +6,7 @@ import pytest
 from rest_framework import status
 
 from cost_control.models import Budget, BudgetVersion, BudgetVersionKind, BudgetVersionStatus
+from cost_control.serializers import BudgetVersionSerializer
 
 
 @pytest.fixture
@@ -165,3 +166,33 @@ class TestBudgetVersions:
         assert response.status_code == status.HTTP_200_OK
         assert response.data['saved'] == 1
         assert response.data.get('version_id')
+
+    def test_budget_version_serializer_uses_prefetch(self, project, user, wbs):
+        version = BudgetVersion.objects.create(
+            project=project,
+            kind=BudgetVersionKind.INITIAL,
+            status=BudgetVersionStatus.DRAFT,
+            version_number=1,
+            created_by=user,
+            updated_by=user,
+        )
+        Budget.objects.create(
+            project=project,
+            version=version,
+            level='wbs',
+            wbs=wbs,
+            cost_category='labor',
+            budget_amount=Decimal('5000'),
+            created_by=user,
+            updated_by=user,
+        )
+        # Test prefetched queryset
+        qs = BudgetVersion.objects.filter(pk=version.pk).prefetch_related('lines')
+        serializer = BudgetVersionSerializer(qs.first())
+        assert serializer.data['line_count'] == 1
+        assert serializer.data['total_amount'] == 5000.0
+
+        # Test non-prefetched single instance
+        serializer_unprefetched = BudgetVersionSerializer(version)
+        assert serializer_unprefetched.data['line_count'] == 1
+        assert serializer_unprefetched.data['total_amount'] == 5000.0
