@@ -1,3 +1,4 @@
+import logging
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -23,6 +24,8 @@ from cost_control.serializers import (
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Project
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class CBSListCreateView(APIView):
@@ -66,8 +69,12 @@ class CBSDetailView(APIView):
         node = get_object_or_404(CostBreakdownNode, pk=pk, project_id=project_pk, is_deleted=False)
         try:
             delete_cbs_node(node, user=request.user)
-        except CBSConflictError as exc:
-            return Response({'code': 'conflict', 'message': str(exc)}, status=409)
+        except CBSConflictError:
+            logger.exception('Failed to delete CBS node %s', pk)
+            return Response(
+                {'code': 'conflict', 'message': 'CBS node cannot be deleted due to existing dependencies.'},
+                status=409,
+            )
         return Response(status=204)
 
 

@@ -48,3 +48,4 @@ def test_cannot_delete_cbs_with_child(auth_client, project, user):
     )
     resp = auth_client.delete(f'/api/v1/projects/{project.id}/cbs/{parent.id}/')
     assert resp.status_code == 409
+    assert resp.json()['message'] == 'CBS node cannot be deleted due to existing dependencies.'
