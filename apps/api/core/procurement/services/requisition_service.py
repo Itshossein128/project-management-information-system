@@ -10,7 +10,28 @@ from procurement.models import (
     RequisitionItem,
     RequisitionStatus,
 )
+from procurement.services.fast_track_notify import notify_fast_track_requisition
 from procurement.services.workflow_timeline_service import log_partial_approve
+
+
+@transaction.atomic
+def update_requisition(instance: RequisitionHeader, serializer, user) -> RequisitionHeader:
+    if instance.status != RequisitionStatus.DRAFT:
+        raise ValidationError(
+            {'detail': 'Requisition can only be edited in DRAFT status.'}
+        )
+    instance = serializer.save(updated_by=user)
+    notify_fast_track_requisition(instance)
+    return instance
+
+
+@transaction.atomic
+def delete_requisition(instance: RequisitionHeader, user) -> None:
+    if instance.status != RequisitionStatus.DRAFT:
+        raise ValidationError(
+            {'detail': 'Only DRAFT requisitions can be deleted.'}
+        )
+    instance.soft_delete(user=user)
 
 
 @transaction.atomic
