@@ -3,6 +3,7 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/app/lib/utils";
 
 /**
@@ -20,6 +21,9 @@ function PasswordInput({
     typeof props.id === "string" && props.id.trim()
       ? props.id.trim()
       : "password";
+  const toggleLabel = visible
+    ? t("common.hidePassword")
+    : t("common.showPassword");
 
   return (
     <div className="relative">
@@ -27,24 +31,26 @@ function PasswordInput({
         dir="ltr"
         type={visible ? "text" : "password"}
         autoComplete="current-password"
-        className={cn("pr-10", className)}
+        className={cn("pe-10", className)}
         {...props}
       />
-      <Button
-        id={`button-togglePasswordVisibility-${inputId}`}
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={
-          visible ? t("common.hidePassword") : t("common.showPassword")
-        }
-        title={visible ? t("common.hidePassword") : t("common.showPassword")}
-        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
-        onClick={() => setVisible((v) => !v)}
-        onPointerDown={(e) => e.preventDefault()}
-      >
-        {visible ? <EyeOff size={16} /> : <Eye size={16} />}
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            id={`button-togglePasswordVisibility-${inputId}`}
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={toggleLabel}
+            className="absolute end-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={() => setVisible((v) => !v)}
+            onPointerDown={(e) => e.preventDefault()}
+          >
+            {visible ? <EyeOff size={16} /> : <Eye size={16} />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{toggleLabel}</TooltipContent>
+      </Tooltip>
     </div>
   );
 }
