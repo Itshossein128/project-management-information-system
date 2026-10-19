@@ -1892,6 +1892,17 @@
       "step3Desc": "Enter shift 1–3 headcount, work hours, and overtime. Row totals and the footer grand total update live.",
       "step4Title": "Save the Day",
       "step4Desc": "Add a custom job title when needed, then save the selected category for this date."
+    },
+    "projectRiskRegister": {
+      "title": "Risk & Delay Register Tour",
+      "step1Title": "Risk & Delay Matrix",
+      "step1Desc": "Inspect risk distribution across probability buckets and impact severity levels. Total open risks count is shown in the header.",
+      "step2Title": "Filters & Search",
+      "step2Desc": "Filter events by type (risk, delay, claim, change), impact dimension (schedule, cost, quality, safety, contract, liquidity), or search by title.",
+      "step3Title": "New Event Registration",
+      "step3Desc": "When holding report-edit permission, register new risks or delays with cause, consequence, corrective action, owner, and severity levels.",
+      "step4Title": "Risk Event List & Status",
+      "step4Desc": "Review all registered risk events and update status (open, under review, mitigated, closed, residual) as response actions progress."
     }
   },
   "dailyReports": {

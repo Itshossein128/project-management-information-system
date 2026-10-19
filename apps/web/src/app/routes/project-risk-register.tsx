@@ -37,6 +37,8 @@ import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 
 const SEVERITIES: RiskSeverity[] = ["low", "medium", "high", "critical"];
 const IMPACTS: ImpactDimension[] = [
@@ -224,11 +226,46 @@ function RiskRegisterContent() {
   const rows = events?.results ?? [];
   const members = membersQuery.data ?? [];
 
+  const { startTour } = useProductTour({
+    tourId: "project-risk-register",
+    steps: [
+      {
+        element: "[data-tour='risk-matrix']",
+        popover: {
+          title: t("tour.projectRiskRegister.step1Title"),
+          description: t("tour.projectRiskRegister.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='risk-filters']",
+        popover: {
+          title: t("tour.projectRiskRegister.step2Title"),
+          description: t("tour.projectRiskRegister.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='risk-new-button']",
+        popover: {
+          title: t("tour.projectRiskRegister.step3Title"),
+          description: t("tour.projectRiskRegister.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='risk-events-list']",
+        popover: {
+          title: t("tour.projectRiskRegister.step4Title"),
+          description: t("tour.projectRiskRegister.step4Desc"),
+        },
+      },
+    ],
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
         title={t("pages.riskRegister.title")}
         subtitle={t("pages.riskRegister.subtitle")}
+        actions={<ProductTourButton onClick={startTour} />}
       />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -239,6 +276,7 @@ function RiskRegisterContent() {
           <Button
             className="ms-auto"
             size="sm"
+            data-tour="risk-new-button"
             onClick={() => {
               setForm((f) => ({ ...f, owner: user?.id ?? "" }));
               setOpen(true);
@@ -249,7 +287,7 @@ function RiskRegisterContent() {
         ) : null}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
+      <div className="overflow-x-auto rounded-lg border" data-tour="risk-matrix">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
@@ -291,7 +329,7 @@ function RiskRegisterContent() {
         </table>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" data-tour="risk-filters">
         <select
           className="rounded border px-2 py-1 text-sm"
           value={eventType}
@@ -325,12 +363,14 @@ function RiskRegisterContent() {
       </div>
 
       {rows.length === 0 ? (
-        <EmptyState
-          title={t("pages.riskRegister.empty")}
-          description={t("pages.riskRegister.emptyDescription")}
-        />
+        <div data-tour="risk-events-list">
+          <EmptyState
+            title={t("pages.riskRegister.empty")}
+            description={t("pages.riskRegister.emptyDescription")}
+          />
+        </div>
       ) : (
-        <table className="w-full text-sm border rounded-lg">
+        <table className="w-full text-sm border rounded-lg" data-tour="risk-events-list">
           <thead className="bg-muted/50">
             <tr>
               {[
