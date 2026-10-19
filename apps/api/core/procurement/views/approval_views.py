@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from permissions.project import IsProjectMember
+from permissions.project import HasProjectPermission, IsProjectMember
 from procurement.models import ApprovalLog, RequisitionHeader
 from procurement.permissions import ProcurementStepPermission
 from procurement.serializers import ApprovalActionSerializer, ApprovalLogSerializer, RequisitionHeaderSerializer
@@ -62,7 +62,8 @@ class RequisitionReturnView(_BaseApprovalActionView):
 class ApprovalLogListView(APIView):
     """List all approval log entries for a requisition."""
 
-    permission_classes = [IsAuthenticated, IsProjectMember]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_procurement'
 
     def get(self, request, project_pk=None, pk=None):
         requisition = get_object_or_404(
