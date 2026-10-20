@@ -37,6 +37,19 @@ DOCUMENT_MIMES: dict[str, frozenset[str]] = {
 }
 
 MSP_MIMES = frozenset({'text/xml', 'application/xml'})
+MPP_MIMES = frozenset(
+    {
+        'application/x-ole-storage',
+        'application/vnd.ms-project',
+        'application/octet-stream',
+        'application/x-ms-project',
+    }
+)
+MSP_FAMILY_MIMES: dict[str, frozenset[str]] = {
+    '.xml': MSP_MIMES,
+    '.mpp': MPP_MIMES,
+}
+OLE_MAGIC = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'
 
 XLSX_MIMES = frozenset(
     {
@@ -103,8 +116,29 @@ def validate_upload(
             raise ValidationError({'file': MSG_INVALID_TYPE})
 
 
+def _peek_head(file, n: int = 8) -> bytes:
+    try:
+        pos = file.tell() if hasattr(file, 'tell') else 0
+        head = file.read(n) or b''
+        if hasattr(file, 'seek'):
+            file.seek(pos)
+        return head
+    except Exception:
+        return b''
+
+
 def validate_msp_upload(file) -> None:
-    validate_upload(file, allowed_extensions={'.xml'}, expected_mimes=MSP_MIMES)
+    """Validate MSP-family upload: Microsoft Project XML (.xml) or native MPP (.mpp)."""
+    validate_upload(
+        file,
+        allowed_extensions={'.xml', '.mpp'},
+        expected_mimes=MSP_FAMILY_MIMES,
+    )
+    ext = _extension(getattr(file, 'name', '') or '')
+    if ext == '.mpp':
+        head = _peek_head(file, 8)
+        if not head.startswith(OLE_MAGIC):
+            raise ValidationError({'file': MSG_INVALID_TYPE})
 
 
 def validate_p6_upload(file) -> None:

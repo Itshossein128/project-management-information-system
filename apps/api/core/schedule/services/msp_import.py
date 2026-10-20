@@ -93,6 +93,23 @@ class ParseResult:
     warnings: list[str] = field(default_factory=list)
 
 
+def is_mpp_bytes(file_bytes: bytes) -> bool:
+    from schedule.services.mpp_errors import OLE_MAGIC
+
+    return bool(file_bytes) and file_bytes.startswith(OLE_MAGIC)
+
+
+def parse_msp_family(file_bytes: bytes, *, filename: str = '') -> ParseResult:
+    """Parse MSP XML or native MPP (convert then XML) into ParseResult."""
+    name = (filename or '').lower()
+    if name.endswith('.mpp') or is_mpp_bytes(file_bytes):
+        from schedule.services.mpp_convert import convert_mpp_to_mspdi
+
+        xml_bytes = convert_mpp_to_mspdi(file_bytes)
+        return parse_msp_xml(xml_bytes)
+    return parse_msp_xml(file_bytes)
+
+
 def parse_msp_xml(file_bytes: bytes) -> ParseResult:
     # defusedxml protects against XML bomb, XXE, and billion laughs attacks on
     # user-uploaded MSP XML files. Never revert to stdlib xml.etree on user input.
@@ -213,7 +230,7 @@ def execute_msp_import(
     progress_callback=None,
     user=None,
 ) -> dict:
-    parsed = parse_msp_xml(file_bytes)
+    parsed = parse_msp_family(file_bytes, filename=filename)
     warnings = list(parsed.warnings)
 
     if replace:

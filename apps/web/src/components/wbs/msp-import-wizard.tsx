@@ -6,6 +6,7 @@ import {
   fetchMspImportStatus,
   fetchP6ImportStatus,
   isP6File,
+  isScheduleImportFile,
   previewMspImport,
   previewP6Import,
   startMspImport,
@@ -124,12 +125,13 @@ export function MspImportWizard({
 
   const onFileSelect = (f: File | null) => {
     if (!f) return;
-    const lower = f.name.toLowerCase();
-    if (!lower.endsWith(".xml") && !lower.endsWith(".xer")) {
-      toast.error("فقط فایل‌های XML (MSP) یا XER (P6) پذیرفته می‌شوند");
+    if (!isScheduleImportFile(f)) {
+      toast.error("فقط فایل‌های Microsoft Project (.mpp یا .xml) یا Primavera P6 (.xer) پذیرفته می‌شوند");
       return;
     }
     setFile(f);
+    setPreview(null);
+    setImportError(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -137,6 +139,9 @@ export function MspImportWizard({
     const dropped = e.dataTransfer.files[0];
     onFileSelect(dropped ?? null);
   };
+
+  const isProcessing = previewMutation.isPending || importMutation.isPending;
+  const showPreviewProcessing = previewMutation.isPending && step === 1;
 
   return (
     <Modal
@@ -159,9 +164,8 @@ export function MspImportWizard({
 
       {step === 1 && (
         <div className="space-y-4">
-          <div className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200">
-            Microsoft Project: File → Save As → XML (.xml). Primavera P6: Export → XER (.xer).
-            فایل‌های باینری .mpp پشتیبانی نمی‌شوند.
+          <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+            قالب‌های پذیرفته‌شده: Microsoft Project (‎.mpp و ‎.xml) و Primavera P6 (‎.xer).
           </div>
 
           <div
@@ -170,12 +174,15 @@ export function MspImportWizard({
             onDrop={handleDrop}
           >
             <Upload className="size-10 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">فایل XML را اینجا رها کنید یا انتخاب کنید</p>
+            <p className="text-sm text-muted-foreground">
+              فایل ‎.mpp، ‎.xml یا ‎.xer را اینجا رها کنید یا انتخاب کنید
+            </p>
             <label className="cursor-pointer">
               <input
                 type="file"
-                accept=".xml,.xer,application/xml,text/xml"
+                accept=".mpp,.xml,.xer,application/xml,text/xml,application/vnd.ms-project"
                 className="peer sr-only"
+                disabled={isProcessing}
                 onChange={(e) => onFileSelect(e.target.files?.[0] ?? null)}
               />
               <span className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm hover:bg-muted/80 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
@@ -184,19 +191,30 @@ export function MspImportWizard({
               </span>
             </label>
             {file ? (
-              <p className="text-sm">
+              <p className="text-sm" data-testid="msp-import-filename">
                 {file.name} — {(file.size / 1024).toFixed(1)} KB
               </p>
             ) : null}
           </div>
 
+          {showPreviewProcessing ? (
+            <div
+              className="rounded-md border border-border bg-muted/30 p-3 text-sm text-muted-foreground"
+              data-testid="msp-import-processing"
+              role="status"
+              aria-live="polite"
+            >
+              در حال آماده‌سازی پیش‌نمایش…
+            </div>
+          ) : null}
+
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isProcessing}>
               انصراف
             </Button>
             <Button
               variant="primary"
-              disabled={!file}
+              disabled={!file || isProcessing}
               loading={previewMutation.isPending}
               onClick={() => file && previewMutation.mutate(file)}
             >
@@ -209,7 +227,10 @@ export function MspImportWizard({
       {step === 2 && preview && (
         <div className="space-y-4">
           {preview.warnings.length > 0 && (
-            <div className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200">
+            <div
+              className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200"
+              data-testid="msp-import-warnings"
+            >
               <p className="font-medium">هشدارها</p>
               <ul className="mt-1 list-inside list-disc">
                 {preview.warnings.map((w) => (
@@ -218,6 +239,12 @@ export function MspImportWizard({
               </ul>
             </div>
           )}
+
+          {file ? (
+            <p className="text-xs text-muted-foreground" data-testid="msp-import-filename">
+              {file.name}
+            </p>
+          ) : null}
 
           <TemplateWBSPreviewTree nodes={preview.wbs_tree} />
 
@@ -244,13 +271,13 @@ export function MspImportWizard({
           </div>
 
           <div className="flex justify-between gap-2">
-            <Button variant="ghost" onClick={() => setStep(1)}>
+            <Button variant="ghost" onClick={() => setStep(1)} disabled={isProcessing}>
               قبلی
             </Button>
             <Button
               variant="primary"
               loading={importMutation.isPending}
-              disabled={!file}
+              disabled={!file || isProcessing}
               onClick={() => file && importMutation.mutate({ file, replace })}
             >
               وارد کردن
@@ -262,7 +289,26 @@ export function MspImportWizard({
       {step === 3 && (
         <div className="space-y-4">
           {importError ? (
-            <p className="text-destructive text-sm">{importError}</p>
+            <div className="space-y-3" data-testid="msp-import-fatal-error">
+              <p className="text-destructive text-sm">{importError}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setImportError(null);
+                    setTaskId(null);
+                    setProgress(0);
+                    setSummary(null);
+                    setStep(1);
+                  }}
+                >
+                  انتخاب فایل دیگر
+                </Button>
+                <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                  بستن
+                </Button>
+              </div>
+            </div>
           ) : summary ? (
             <div className="space-y-2 text-sm">
               <p>وارد کردن با موفقیت انجام شد.</p>
@@ -294,11 +340,11 @@ export function MspImportWizard({
                   مشاهده WBS
                 </Button>
               </Link>
-            ) : (
+            ) : !importError ? (
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
                 بستن
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
       )}

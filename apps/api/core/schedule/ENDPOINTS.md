@@ -95,9 +95,11 @@ When `critical_path.valid` is `false`, `critical_activity_ids` / `near_critical_
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| `import/msp/preview/` | POST | Preview MSP XML import (multipart file). Uses `validate_msp_upload`. |
-| `import/msp/` | POST | Start async MSP import job. Returns `task_id`. |
-| `import/msp/status/{task_id}/` | GET | Poll import job status. |
+| `import/msp/preview/` | POST | Preview MSP XML (`.xml`) or native MPP (`.mpp`) import (multipart). Uses `validate_msp_upload`. |
+| `import/msp/` | POST | Start async MSP-family import job (XML or MPP). Returns `task_id`. |
+| `import/msp/status/{task_id}/` | GET | Poll import job status (includes `error_code` when failed). |
+
+**MPP note:** Native `.mpp` is converted to MSPDI then parsed with the same importer as XML. Requires JRE + MPXJ (`mpxj`/JPype or `MPP_MPXJ_CLASSPATH`). Password-protected files are rejected (never bypassed). Upload size limit: 50 MB. |
 | `import/p6/preview/` | POST | Preview P6 XER import. Uses `validate_p6_upload`. |
 | `import/p6/` | POST | Start async P6 import. |
 | `import/p6/status/{task_id}/` | GET | Poll P6 import status. |

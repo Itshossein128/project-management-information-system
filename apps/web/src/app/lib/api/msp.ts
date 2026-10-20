@@ -1,5 +1,12 @@
 import { apiFormData, apiJson } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
+import {
+  isMspFamilyFile,
+  isP6File,
+  isScheduleImportFile,
+} from "@/app/lib/api/msp-file-utils";
+
+export { isMspFamilyFile, isP6File, isScheduleImportFile };
 
 export interface MspPreviewWBSNode {
   wbs_code: string;
@@ -86,6 +93,3 @@ export function fetchP6ImportStatus(projectId: string, taskId: string) {
   );
 }
 
-export function isP6File(file: File): boolean {
-  return file.name.toLowerCase().endsWith(".xer");
-}

@@ -618,7 +618,20 @@
     "packageMetaMore": " و {{count}} مورد دیگر",
     "packageMetaSingle": "این بسته کاری فاقد مسئول یا معیار پذیرش است. می‌توانید ادامه دهید؛ آن را در صفحه WBS تکمیل کنید.",
     "save": "ذخیره",
-    "cancel": "انصراف"
+    "cancel": "انصراف",
+    "mspImport": {
+      "title": "بارگذاری برنامه زمان‌بندی (MSP / P6)",
+      "acceptedFormats": "قالب‌های پذیرفته‌شده: Microsoft Project (‎.mpp و ‎.xml) و Primavera P6 (‎.xer).",
+      "dropHint": "فایل ‎.mpp، ‎.xml یا ‎.xer را اینجا رها کنید یا انتخاب کنید",
+      "processingPreview": "در حال آماده‌سازی پیش‌نمایش…",
+      "invalidType": "فقط فایل‌های Microsoft Project (‎.mpp یا ‎.xml) یا Primavera P6 (‎.xer) پذیرفته می‌شوند",
+      "chooseAnother": "انتخاب فایل دیگر",
+      "passwordProtected": "این فایل رمزگذاری شده است. رمز را بردارید یا XML بدون رمز صادر کنید.",
+      "corrupt": "فایل Microsoft Project خراب یا غیرقابل‌خواندن است.",
+      "unsupported": "این فایل Microsoft Project قابل پردازش نیست. XML صادر کنید.",
+      "tooLarge": "حجم فایل نباید از ۵۰ مگابایت بیشتر باشد.",
+      "timeout": "پردازش زمان‌بر شد. دوباره تلاش کنید یا XML صادر کنید."
+    }
   },
   "weather": {
     "title": "وضعیت جوی",

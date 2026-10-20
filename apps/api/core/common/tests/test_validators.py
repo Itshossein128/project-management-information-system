@@ -19,24 +19,24 @@ class _FakeUpload:
     def __init__(self, name, content=b'hello', content_type='application/octet-stream', size=None):
         self.name = name
         self.content_type = content_type
-        self._content = content
+        self._original = content
+        self._pos = 0
         self.size = size if size is not None else len(content)
 
     def read(self, n=-1):
         if n == -1:
-            data = self._content
-            self._content = b''
+            data = self._original[self._pos :]
+            self._pos = len(self._original)
             return data
-        data = self._content[:n]
-        self._content = self._content[n:]
+        data = self._original[self._pos : self._pos + n]
+        self._pos += len(data)
         return data
 
     def tell(self):
-        return 0
+        return self._pos
 
     def seek(self, pos):
-        if pos == 0:
-            pass
+        self._pos = pos
 
 
 def test_rejects_oversized_file():
@@ -56,6 +56,27 @@ def test_rejects_invalid_extension():
 def test_accepts_xml_extension():
     upload = _FakeUpload('schedule.xml', content=b'<?xml version="1.0"?><root/>')
     validate_msp_upload(upload)
+
+
+def test_accepts_mpp_with_ole_magic():
+    ole = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1' + b'project-bytes'
+    upload = _FakeUpload('schedule.mpp', content=ole, content_type='application/x-ole-storage')
+    validate_msp_upload(upload)
+
+
+def test_rejects_mpp_without_ole_magic():
+    upload = _FakeUpload('fake.mpp', content=b'not-ole-content')
+    with pytest.raises(ValidationError) as exc:
+        validate_msp_upload(upload)
+    assert str(MSG_INVALID_TYPE) in str(exc.value.detail)
+
+
+def test_rejects_oversized_mpp():
+    ole = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1' + b'x'
+    upload = _FakeUpload('big.mpp', content=ole, size=51 * 1024 * 1024)
+    with pytest.raises(ValidationError) as exc:
+        validate_msp_upload(upload)
+    assert str(MSG_FILE_TOO_LARGE) in str(exc.value.detail)
 
 
 def test_accepts_xlsx_extension():

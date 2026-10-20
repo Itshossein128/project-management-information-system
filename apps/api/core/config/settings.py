@@ -239,6 +239,9 @@ RABBITMQ_URL = os.environ.get('RABBITMQ_URL', 'amqp://ipcas:ipcas@localhost:5672
 # Audit: publish to RabbitMQ when true; sync fallback on publish failure
 AUDIT_LOG_ASYNC = os.environ.get('AUDIT_LOG_ASYNC', 'true').lower() in ('1', 'true', 'yes')
 
+# MSP native MPP conversion (MPXJ); wall-clock bound for untrusted uploads
+MPP_CONVERT_TIMEOUT_SECONDS = int(os.environ.get('MPP_CONVERT_TIMEOUT_SECONDS', '60'))
+
 # Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get(

@@ -618,7 +618,20 @@
     "packageMetaMore": " +{{count}} more",
     "packageMetaSingle": "This work package is missing responsible or acceptance criteria. You can continue; complete them on the WBS page.",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "mspImport": {
+      "title": "Upload schedule (MSP / P6)",
+      "acceptedFormats": "Accepted formats: Microsoft Project (.mpp and .xml) and Primavera P6 (.xer).",
+      "dropHint": "Drop a .mpp, .xml, or .xer file here or choose one",
+      "processingPreview": "Preparing preview…",
+      "invalidType": "Only Microsoft Project (.mpp or .xml) or Primavera P6 (.xer) files are accepted",
+      "chooseAnother": "Choose another file",
+      "passwordProtected": "This file is password-protected. Remove the password or export unprotected XML.",
+      "corrupt": "The Microsoft Project file is corrupt or unreadable.",
+      "unsupported": "This Microsoft Project file cannot be processed. Try exporting to XML.",
+      "tooLarge": "File size must not exceed 50 MB.",
+      "timeout": "Processing timed out. Try again or export to XML."
+    }
   },
   "weather": {
     "title": "Weather log",

@@ -515,6 +515,7 @@ class BaseImportJob(UUIDModel, TimeStampedModel):
     file_data = models.BinaryField(null=True, blank=True)
     result = models.JSONField(default=dict, blank=True)
     error_message = models.TextField(blank=True, default='')
+    error_code = models.CharField(max_length=64, blank=True, default='')
 
     class Meta:
         abstract = True

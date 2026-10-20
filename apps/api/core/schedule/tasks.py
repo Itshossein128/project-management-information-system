@@ -62,12 +62,20 @@ def _run_import_task(task_instance, job_model, job_id, execute_func):
         job.status = MspImportStatus.DONE
         job.progress_pct = 100
         job.result = result
-        job.save(update_fields=['status', 'progress_pct', 'result', 'updated_at'])
+        job.error_code = ''
+        job.save(update_fields=['status', 'progress_pct', 'result', 'error_code', 'updated_at'])
         return result
     except Exception as exc:
+        from schedule.services.mpp_errors import IMPORT_FAILED, MppImportError
+
         job.status = MspImportStatus.FAILED
-        job.error_message = str(exc)
-        job.save(update_fields=['status', 'error_message', 'updated_at'])
+        if isinstance(exc, MppImportError):
+            job.error_code = exc.code
+            job.error_message = exc.message
+        else:
+            job.error_code = IMPORT_FAILED
+            job.error_message = str(exc)
+        job.save(update_fields=['status', 'error_message', 'error_code', 'updated_at'])
         raise
 
 
