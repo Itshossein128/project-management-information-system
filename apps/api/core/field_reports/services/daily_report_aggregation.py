@@ -112,14 +112,13 @@ def _pick_weather(sub_reports) -> str | None:
 
 
 def _clear_derived(report: DailyReport) -> None:
-    now = timezone.now()
     for manager in (
         report.activities,
         report.labor_entries,
         report.material_entries,
         report.concrete_logs,
     ):
-        manager.filter(is_derived=True, is_deleted=False).update(is_deleted=True, deleted_at=now)
+        manager.filter(is_derived=True).delete()
 
 
 @transaction.atomic

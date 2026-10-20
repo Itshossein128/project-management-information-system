@@ -182,8 +182,30 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         report_date = parse_date_optional(raw)
         if report_date is None:
             raise ValidationError({'date': 'تاریخ الزامی است', 'code': 'date_required'})
+
+        project_id = self.get_project_id()
+        if request.method.upper() == 'GET':
+            report = (
+                DailyReport.objects.filter(
+                    project_id=project_id,
+                    report_date=report_date,
+                    shift=ReportShift.FULL,
+                    is_deleted=False,
+                    is_current=True,
+                )
+                .order_by('-created_at')
+                .first()
+            )
+            if report is not None:
+                return Response(DailyReportDetailSerializer(report).data)
+
+            report = ensure_daily_report_summary(
+                project_id, report_date, user=request.user,
+            )
+            return Response(DailyReportDetailSerializer(report).data)
+
         report = ensure_daily_report_summary(
-            self.get_project_id(), report_date, user=request.user,
+            project_id, report_date, user=request.user,
         )
         return Response(DailyReportDetailSerializer(report).data)
 

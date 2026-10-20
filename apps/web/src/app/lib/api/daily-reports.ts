@@ -285,6 +285,13 @@ export function createDailyReport(projectId: string, payload: HeaderPayload) {
 }
 
 export function ensureDailyReportByDate(projectId: string, date: string) {
+  return apiJson<DailyReportDetail>(`${base(projectId)}/by-date/`, {
+    method: "POST",
+    body: JSON.stringify({ report_date: date }),
+  });
+}
+
+export function fetchDailyReportByDate(projectId: string, date: string) {
   const q = new URLSearchParams({ date });
   return apiJson<DailyReportDetail>(`${base(projectId)}/by-date/?${q.toString()}`);
 }
