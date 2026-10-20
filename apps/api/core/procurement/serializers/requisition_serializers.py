@@ -15,6 +15,15 @@ from procurement.models import (
 )
 from procurement.services.fast_track_notify import notify_fast_track_requisition
 from procurement.services.workshop_block_service import ensure_workshop_block
+from procurement.services.workflow_timeline_service import (
+    build_approval_summary,
+    build_workflow_timeline,
+    compute_workflow_progress,
+    get_current_step_label,
+    get_last_action_summary,
+    get_next_approver,
+    log_requisition_created,
+)
 
 
 class BlockSerializer(serializers.ModelSerializer):
@@ -138,18 +147,12 @@ class RequisitionHeaderSerializer(serializers.ModelSerializer):
         return str(obj.requested_by) if obj.requested_by else None
 
     def get_workflow_timeline(self, obj):
-        from procurement.services.workflow_timeline_service import build_workflow_timeline
-
         return build_workflow_timeline(obj)
 
     def get_next_approver(self, obj):
-        from procurement.services.workflow_timeline_service import get_next_approver
-
         return get_next_approver(obj)
 
     def get_approval_summary(self, obj):
-        from procurement.services.workflow_timeline_service import build_approval_summary
-
         return build_approval_summary(obj)
 
 
@@ -196,8 +199,6 @@ class RequisitionHeaderCreateSerializer(serializers.ModelSerializer):
                 updated_by=user,
                 **item_data,
             )
-        from procurement.services.workflow_timeline_service import log_requisition_created
-
         log_requisition_created(header, user)
         notify_fast_track_requisition(header)
         return header
@@ -276,7 +277,6 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
     def _get_last_action_summary(self, obj):
         if hasattr(obj, '_cached_last_action'):
             return obj._cached_last_action
-        from procurement.services.workflow_timeline_service import get_last_action_summary
 
         obj._cached_last_action = get_last_action_summary(obj)
         return obj._cached_last_action
@@ -305,7 +305,6 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
     def _get_next_approver(self, obj):
         if hasattr(obj, '_cached_next_approver'):
             return obj._cached_next_approver
-        from procurement.services.workflow_timeline_service import get_next_approver
 
         obj._cached_next_approver = get_next_approver(obj)
         return obj._cached_next_approver
@@ -321,11 +320,7 @@ class RequisitionHeaderListSerializer(serializers.ModelSerializer):
         return approver['role_label'] if approver else None
 
     def get_workflow_progress(self, obj):
-        from procurement.services.workflow_timeline_service import compute_workflow_progress
-
         return compute_workflow_progress(obj)
 
     def get_workflow_step_label(self, obj):
-        from procurement.services.workflow_timeline_service import get_current_step_label
-
         return get_current_step_label(obj)
