@@ -7,3 +7,7 @@ Replaced the native browser title tooltip with Shadcn UI's Tooltip component for
 
 ## 2026-07-25 - Improve horizontal scrollbar in Shadcn Table container
 In `apps/web/src/components/ui/table.tsx`, added `[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]` to the `overflow-x-auto` wrapper. This cleanly hides the scrollbar on mobile and web viewports to improve the UX on wide tables.
+
+## 2026-07-28 - Logical Directional Classes for Form Middleware Elements
+**Learning:** Inputs with forced `dir="ltr"` inside an RTL application layout (e.g. `PasswordInput`) will cause action buttons positioned with physical classes (`right-1`, `pr-10`) to overlap or misalign in RTL viewports.
+**Action:** Use logical direction utilities (`end-1`, `pe-10`) so inner form elements align consistently across document text directions and language contexts.
