@@ -543,6 +543,11 @@
       "kind": "local"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/start-product-tour",
+      "protected": false,
+      "kind": "local"
+    },
+    {
       "path": "login/change-language",
       "protected": false,
       "kind": "local"

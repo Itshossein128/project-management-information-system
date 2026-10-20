@@ -30,6 +30,7 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 
 ## Subsequent Decisions
 
+- [Start screen walkthrough](start-product-tour/README.md)
 - [Filter or change the displayed view](filter-and-change-view/README.md)
 - [Create daily report](%5Bcreate-report%5D/README.md)
 - [Edit daily report](%5Bedit-report%5D/README.md)

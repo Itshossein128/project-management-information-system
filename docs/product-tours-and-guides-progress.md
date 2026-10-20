@@ -6,9 +6,9 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 
 ## Status Overview
 
-- **Completed**: 11 routes / workflows
-- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/risk-register`)
-- **Remaining**: 64 routes / workflows
+- **Completed**: 12 routes / workflows
+- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/daily-reports`)
+- **Remaining**: 63 routes / workflows
 
 ---
 
@@ -26,13 +26,14 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 | `/projects/:projectId/procurement/officer` | `procurement-officer` | Track Rows, Cards, Officer Identity, Metrics | Decision Tree & Tour | Completed |
 | `/projects/:projectId/procurement/reports` | `procurement-reports` | Liquidity Tab, Results, Variance, Audit, Queue | Decision Tree & Tour | Completed |
 | `/projects/:projectId/procurement/transfers` | `procurement-transfers` | Doc, Queue, PM Approval | Decision Tree & Tour | Completed |
-| `/projects/:projectId/risk-register` | `project-risk-register` | Matrix, Filters, New Button, Event List | Decision Tree & Tour | **In Review (Today)** |
+| `/projects/:projectId/risk-register` | `project-risk-register` | Matrix, Filters, New Button, Event List | Decision Tree & Tour | Completed |
+| `/projects/:projectId/daily-reports` | `project-daily-reports` | Stats, Filters, New Button, Table | Decision Tree & Tour | **In Review (Today)** |
 
 ---
 
 ## High-Priority Backlog (Next Slices)
 
-1. **Daily Field Reports** (`/projects/:projectId/daily-reports` & `/daily-reports/new`): Field report logging, approval workflow, and material reconciliation.
+1. **Daily Report Form** (`/projects/:projectId/daily-reports/new`): Field report logging, approval workflow, section entries, and material reconciliation.
 2. **Cost Control & Budget** (`/projects/:projectId/costs`): Multi-level budget, cost breakdown, and variance analysis.
 3. **Contracts & Payment Certificates (IPC)** (`/projects/:projectId/contracts` & `/ipcs/:ipcId`): Subcontractor/Client contract workflow, IPC submission, and approval chain.
 4. **Schedule & WBS** (`/projects/:projectId/wbs` & `/schedule/gantt`): Work breakdown structure, progress entry, and Gantt baseline comparison.

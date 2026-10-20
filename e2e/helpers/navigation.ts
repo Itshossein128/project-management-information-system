@@ -15,7 +15,7 @@ export async function session(page: Page, roles = ["admin"], language = "en") {
     localStorage.setItem("i18nextLng", language);
     // Returning-user fixture: keep first-run onboarding overlays separate
     // from the controls exercised by this navigation reachability suite.
-    for (const tour of ["project-manpower", "project-alerts", "project-risk-register", "procurement-new", "procurement-list", "procurement-officer", "procurement-reports", "procurement-inventory", "procurement-transfers", "procurement-blocks", "procurement-detail"]) {
+    for (const tour of ["project-manpower", "project-alerts", "project-risk-register", "project-daily-reports", "procurement-new", "procurement-list", "procurement-officer", "procurement-reports", "procurement-inventory", "procurement-transfers", "procurement-blocks", "procurement-detail"]) {
       localStorage.setItem(`tour_seen_${tour}`, "true");
     }
   }, { user, language });
