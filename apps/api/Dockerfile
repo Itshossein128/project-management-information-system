@@ -6,8 +6,10 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends libpq-dev gcc \
+  && apt-get install -y --no-install-recommends libpq-dev gcc default-jre-headless \
   && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
