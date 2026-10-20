@@ -179,7 +179,7 @@ class WarningListCreateView(APIView):
 
 
 class WarningPatchView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_contracts'
 
     def patch(self, request, project_pk=None, pk=None, wid=None):
