@@ -46,6 +46,8 @@ import { QueryErrorState } from "@/components/layout/query-error-state";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Select } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "", label: "همه وضعیت‌ها" },
@@ -165,6 +167,40 @@ export default function DailyReportsListPage() {
   const setFilter = (patch: Partial<DailyReportListParams>) =>
     setFilters((prev) => ({ ...prev, page: 1, ...patch }));
 
+  const { startTour } = useProductTour({
+    tourId: "project-daily-reports",
+    steps: [
+      {
+        element: "[data-tour='daily-reports-stats']",
+        popover: {
+          title: t("tour.projectDailyReports.step1Title"),
+          description: t("tour.projectDailyReports.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-reports-filters']",
+        popover: {
+          title: t("tour.projectDailyReports.step2Title"),
+          description: t("tour.projectDailyReports.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-reports-new-button']",
+        popover: {
+          title: t("tour.projectDailyReports.step3Title"),
+          description: t("tour.projectDailyReports.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-reports-table']",
+        popover: {
+          title: t("tour.projectDailyReports.step4Title"),
+          description: t("tour.projectDailyReports.step4Desc"),
+        },
+      },
+    ],
+  });
+
   return (
     <main className='page-main page-shell mx-auto  px-4 py-6' data-testid="daily-reports-list">
       <Breadcrumb
@@ -179,16 +215,20 @@ export default function DailyReportsListPage() {
       <PageHeader
         title={t("pages.dailyReports.title")}
         actions={
-          canEdit ? (
-            <Link
-              to={`${base}/${PATHS.PROJECT_NEW}`}
-              data-testid="daily-report-new-btn"
-              className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90'
-            >
-              <Plus className='size-4' />
-              گزارش جدید
-            </Link>
-          ) : null
+          <div className="flex items-center gap-2">
+            <ProductTourButton onClick={startTour} />
+            {canEdit ? (
+              <Link
+                to={`${base}/${PATHS.PROJECT_NEW}`}
+                data-testid="daily-report-new-btn"
+                data-tour="daily-reports-new-button"
+                className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90'
+              >
+                <Plus className='size-4' />
+                گزارش جدید
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
@@ -236,7 +276,7 @@ export default function DailyReportsListPage() {
         </div>
       ) : null}
 
-      <div className='mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      <div className='mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4' data-tour="daily-reports-stats">
         <StatCard
           label='کل گزارش‌ها'
           value={stats.total}
@@ -259,7 +299,7 @@ export default function DailyReportsListPage() {
         />
       </div>
 
-      <div className='mb-4 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3'>
+      <div className='mb-4 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3' data-tour="daily-reports-filters">
         <JalaliDatePicker
           name='date_from'
           label='از تاریخ'
@@ -311,7 +351,7 @@ export default function DailyReportsListPage() {
           }
         />
       ) : (
-        <div className='overflow-x-auto rounded-xl border border-border'>
+        <div className='overflow-x-auto rounded-xl border border-border' data-tour="daily-reports-table">
           <table className='w-full min-w-[760px] text-sm'>
             <thead>
               <tr className='bg-muted/50 text-muted-foreground'>

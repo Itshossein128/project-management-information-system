@@ -1903,6 +1903,17 @@
       "step3Desc": "When holding report-edit permission, register new risks or delays with cause, consequence, corrective action, owner, and severity levels.",
       "step4Title": "Risk Event List & Status",
       "step4Desc": "Review all registered risk events and update status (open, under review, mitigated, closed, residual) as response actions progress."
+    },
+    "projectDailyReports": {
+      "title": "Daily Reports Guide",
+      "step1Title": "Reports Summary & Stats",
+      "step1Desc": "View total report counts, approved reports, pending reviews, and draft counts for the site.",
+      "step2Title": "Report Filters",
+      "step2Desc": "Filter reports by date range (from/to) and status (draft, submitted, under review, approved, rejected).",
+      "step3Title": "Create New Report",
+      "step3Desc": "Click to log a new field report including weather conditions, labor, site activities, equipment, and material consumption.",
+      "step4Title": "Report Register & Actions",
+      "step4Desc": "Browse logged reports with status, total manpower, and activity counts. Use row actions to view, edit, or export PDF."
     }
   },
   "dailyReports": {
