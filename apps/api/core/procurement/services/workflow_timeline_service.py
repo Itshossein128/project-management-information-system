@@ -15,6 +15,12 @@ ROADMAP_STEP_CODES: list[str] = [
     RequisitionStatus.FINAL_APPROVAL,
 ]
 
+_STEP_INDEX_MAP: dict[str, int] = {code: idx for idx, code in enumerate(ROADMAP_STEP_CODES)}
+_EFFECTIVE_STEPS_DEFAULT: tuple[str, ...] = tuple(ROADMAP_STEP_CODES)
+_EFFECTIVE_STEPS_WORKSHOP: tuple[str, ...] = tuple(
+    s for s in ROADMAP_STEP_CODES if s != RequisitionStatus.WORKSHOP_APPROVAL
+)
+
 PROCUREMENT_ROLE_LABELS: dict[str, str] = {
     'block_engineer': 'مهندس بلوک',
     'technical_office': 'دفتر فنی',
@@ -42,11 +48,11 @@ def _role_label(role_code: str | None) -> str | None:
     return PROCUREMENT_ROLE_LABELS.get(role_code, role_code)
 
 
-def _effective_steps(requisition) -> list[str]:
+def _effective_steps(requisition) -> tuple[str, ...]:
     """Roadmap step codes that count toward progress (excludes skipped workshop step)."""
     if requisition.scope == RequisitionScope.WORKSHOP:
-        return [s for s in ROADMAP_STEP_CODES if s != RequisitionStatus.WORKSHOP_APPROVAL]
-    return list(ROADMAP_STEP_CODES)
+        return _EFFECTIVE_STEPS_WORKSHOP
+    return _EFFECTIVE_STEPS_DEFAULT
 
 
 def _get_logs(requisition) -> list:
@@ -106,10 +112,7 @@ def get_roadmap_steps(requisition) -> list[dict]:
 
 
 def _step_index(code: str) -> int:
-    try:
-        return ROADMAP_STEP_CODES.index(code)
-    except ValueError:
-        return -1
+    return _STEP_INDEX_MAP.get(code, -1)
 
 
 def _completed_step_codes(requisition, logs: list) -> dict[str, dict]:
