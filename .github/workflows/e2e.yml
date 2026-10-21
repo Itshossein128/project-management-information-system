@@ -85,5 +85,6 @@ jobs:
           e2e/tests/contracts-ipc.spec.ts
         env:
           CI: "true"
+          DATABASE_URL: "sqlite:///:memory:"
           CELERY_TASK_ALWAYS_EAGER: "true"
           AUDIT_LOG_ASYNC: "false"
