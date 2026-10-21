@@ -41,7 +41,9 @@ def admin_client(api_client, admin_user):
 @pytest.fixture
 def project(db, user):
     proj = Project.objects.create(project_code="P01", project_name="Test Project")
-    ProjectMember.objects.create(project=proj, user=user, status='active')
+    member = ProjectMember.objects.create(project=proj, user=user, status='active')
+    from master_data.models import ProjectMemberPermissionOverride
+    ProjectMemberPermissionOverride.objects.create(member=member, permission_codename='upload_documents', is_granted=True)
     return proj
 
 @pytest.fixture
@@ -168,6 +170,17 @@ class TestStorageViews:
         })
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data['error'] == 'Invalid request.'
+
+    def test_upload_url_view_permission_denied(self, api_client, project, other_user):
+        from master_data.models import ProjectMember
+        ProjectMember.objects.create(project=project, user=other_user, status='active')
+        api_client.force_authenticate(user=other_user)
+        url = reverse('file-upload-url', kwargs={'project_pk': project.pk})
+        response = api_client.post(url, {
+            'filename': 'document.pdf',
+            'content_type': 'application/pdf'
+        })
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_confirm_upload_view(self, auth_client, stored_file):
         url = reverse('file-confirm', kwargs={'file_id': stored_file.pk})

@@ -48,3 +48,8 @@ Added missing authentication and permission checks to RequisitionItemHoldView to
 - Discovered that `ApprovalLogListView` (`apps/api/core/procurement/views/approval_views.py`) was only enforcing `IsProjectMember` but not verifying the specific `view_procurement` permission. Fixed by adding `HasProjectPermission` to the `permission_classes` list and setting `required_permission = 'view_procurement'`.
 - Updated test setups to grant `view_procurement` permission to roles that require them for successful test execution after tightening the `ApprovalLogListView` permissions.
 - When running backend tests against an in-memory SQLite database (`DATABASE_URL=sqlite:///:memory:`), concurrency tests using threads (e.g. in `test_inventory_concurrency.py`) fail with `OperationalError('database table is locked')`. These are known SQLite limitations and can be safely ignored.
+
+## 2026-07-27 - Enforce HasProjectPermission on Presigned S3 Upload Endpoint
+**Vulnerability:** `UploadUrlView` in `apps/api/core/storage/views.py` used `permission_classes = [IsAuthenticated, IsProjectMember]`, allowing any project member to generate presigned upload URLs without checking for document upload permissions (`upload_documents`).
+**Learning:** `IsProjectMember` only verifies project membership, permitting authorization bypass for project-level operations. Storage endpoints that upload files must enforce `HasProjectPermission` and define `required_permission = 'upload_documents'` to restrict URL generation to authorized roles.
+**Prevention:** Always include `HasProjectPermission` and set `required_permission` on project-scoped API views handling file uploads or resource modifications.
