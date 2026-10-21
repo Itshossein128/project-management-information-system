@@ -1914,6 +1914,17 @@
       "step3Desc": "Click to log a new field report including weather conditions, labor, site activities, equipment, and material consumption.",
       "step4Title": "Report Register & Actions",
       "step4Desc": "Browse logged reports with status, total manpower, and activity counts. Use row actions to view, edit, or export PDF."
+    },
+    "dailyReportForm": {
+      "title": "Daily Report Form",
+      "step1Title": "Report Header & Basic Info",
+      "step1Desc": "Specify report date, shift, work front, site status, and weather conditions.",
+      "step2Title": "Save Header",
+      "step2Desc": "Save header details to generate a report ID and enable sub-report sections. The header also autosaves.",
+      "step3Title": "Report Sub-sections",
+      "step3Desc": "Switch tabs to record activities, manpower, equipment, materials, concrete pours, labor camp, and incidents.",
+      "step4Title": "Section Details",
+      "step4Desc": "Add and manage individual log entries for the selected section tab."
     }
   },
   "dailyReports": {

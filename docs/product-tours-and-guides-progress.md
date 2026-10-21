@@ -6,9 +6,9 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 
 ## Status Overview
 
-- **Completed**: 12 routes / workflows
-- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/daily-reports`)
-- **Remaining**: 63 routes / workflows
+- **Completed**: 13 routes / workflows
+- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/daily-reports/new`)
+- **Remaining**: 62 routes / workflows
 
 ---
 
@@ -27,7 +27,8 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 | `/projects/:projectId/procurement/reports` | `procurement-reports` | Liquidity Tab, Results, Variance, Audit, Queue | Decision Tree & Tour | Completed |
 | `/projects/:projectId/procurement/transfers` | `procurement-transfers` | Doc, Queue, PM Approval | Decision Tree & Tour | Completed |
 | `/projects/:projectId/risk-register` | `project-risk-register` | Matrix, Filters, New Button, Event List | Decision Tree & Tour | Completed |
-| `/projects/:projectId/daily-reports` | `project-daily-reports` | Stats, Filters, New Button, Table | Decision Tree & Tour | **In Review (Today)** |
+| `/projects/:projectId/daily-reports` | `project-daily-reports` | Stats, Filters, New Button, Table | Decision Tree & Tour | Completed |
+| `/projects/:projectId/daily-reports/new` | `project-daily-report-form` | Header, Save Header, Tabs, Section Details | Decision Tree & Tour | **In Review (Today)** |
 
 ---
 

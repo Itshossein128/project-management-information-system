@@ -29,6 +29,7 @@ const TOURS = [
   { id: "project-manpower", path: "manpower" },
   { id: "project-risk-register", path: "risk-register" },
   { id: "project-daily-reports", path: "daily-reports" },
+  { id: "project-daily-report-form", path: "daily-reports/new" },
 ] as const;
 
 /** An untranslated step renders the raw i18n key instead of a sentence. */

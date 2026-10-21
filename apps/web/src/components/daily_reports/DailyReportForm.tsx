@@ -23,6 +23,8 @@ import { warmProjectCache } from "@/app/lib/offlineCache";
 import { isNetworkError } from "@/app/lib/offlineWrite";
 import { isoToJalali, jalaliToIso } from "@/app/lib/jalali-utils";
 import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivityTab } from "./ActivityTab";
 import { ApprovalStatusBar } from "./ApprovalStatusBar";
@@ -260,18 +262,55 @@ export function DailyReportForm({
     incidents: report?.incidents.length ?? 0,
   };
 
+  const { startTour } = useProductTour({
+    tourId: "project-daily-report-form",
+    steps: [
+      {
+        element: "[data-tour='daily-report-header']",
+        popover: {
+          title: i18n.t("tour.dailyReportForm.step1Title"),
+          description: i18n.t("tour.dailyReportForm.step1Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-report-save-header']",
+        popover: {
+          title: i18n.t("tour.dailyReportForm.step2Title"),
+          description: i18n.t("tour.dailyReportForm.step2Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-report-tabs']",
+        popover: {
+          title: i18n.t("tour.dailyReportForm.step3Title"),
+          description: i18n.t("tour.dailyReportForm.step3Desc"),
+        },
+      },
+      {
+        element: "[data-tour='daily-report-tab-content']",
+        popover: {
+          title: i18n.t("tour.dailyReportForm.step4Title"),
+          description: i18n.t("tour.dailyReportForm.step4Desc"),
+        },
+      },
+    ],
+  });
+
   if (reportId && reportQuery.isLoading) return <LoadingSkeleton rows={8} />;
 
   const listHref = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}`;
 
   return (
     <div className="space-y-5" data-testid="daily-report-form">
-      <Breadcrumb
-        items={[
-          { label: "گزارش‌های روزانه", href: listHref },
-          { label: reportId ? `گزارش ${isoToJalali(header.report_date)}` : "گزارش جدید" },
-        ]}
-      />
+      <div className="flex items-center justify-between">
+        <Breadcrumb
+          items={[
+            { label: "گزارش‌های روزانه", href: listHref },
+            { label: reportId ? `گزارش ${isoToJalali(header.report_date)}` : "گزارش جدید" },
+          ]}
+        />
+        <ProductTourButton onClick={startTour} />
+      </div>
 
       {!isOnline ? (
         <div className="flex items-center gap-2 rounded-lg border border-warning-300 bg-warning-50 px-4 py-2 text-sm text-warning-900 dark:bg-warning-950/30 dark:text-warning-200">
@@ -281,23 +320,27 @@ export function DailyReportForm({
       ) : null}
 
       {report ? (
-        <ApprovalStatusBar
-          projectId={projectId}
-          report={report}
-          canApprove={canApprove}
-          canEdit={has("edit_reports")}
-          busy={workflow.isPending}
-          onSubmit={() => workflow.mutate({ type: "submit" })}
-          onReview={() => workflow.mutate({ type: "review" })}
-          onApprove={() => workflow.mutate({ type: "approve" })}
-          onReject={(reason) => workflow.mutate({ type: "reject", reason })}
-        />
+        <div data-tour="daily-report-approval-bar">
+          <ApprovalStatusBar
+            projectId={projectId}
+            report={report}
+            canApprove={canApprove}
+            canEdit={has("edit_reports")}
+            busy={workflow.isPending}
+            onSubmit={() => workflow.mutate({ type: "submit" })}
+            onReview={() => workflow.mutate({ type: "review" })}
+            onApprove={() => workflow.mutate({ type: "approve" })}
+            onReject={(reason) => workflow.mutate({ type: "reject", reason })}
+          />
+        </div>
       ) : null}
 
-      <ReportHeader value={header} onChange={setHeader} readOnly={!editable} />
+      <div data-tour="daily-report-header">
+        <ReportHeader value={header} onChange={setHeader} readOnly={!editable} />
+      </div>
 
       {editable ? (
-        <div className="flex justify-end">
+        <div className="flex justify-end" data-tour="daily-report-save-header">
           <button
             type="button"
             onClick={() => saveHeader.mutate()}
@@ -317,7 +360,7 @@ export function DailyReportForm({
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabKey)} className="w-full" dir={i18n.dir()}>
         <div className="rounded-xl border border-border bg-card">
-          <TabsList className="flex h-auto flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-2">
+          <TabsList className="flex h-auto flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-2" data-tour="daily-report-tabs">
             {TABS.map((t) => (
               <TabsTrigger
                 key={t.key}
@@ -334,7 +377,7 @@ export function DailyReportForm({
               </TabsTrigger>
             ))}
           </TabsList>
-          <div className="p-4">
+          <div className="p-4" data-tour="daily-report-tab-content">
             <ShadcnTabsContent value="activities" className="mt-0"><ActivityTab {...tabProps} /></ShadcnTabsContent>
             <ShadcnTabsContent value="labor" className="mt-0"><LaborTab {...tabProps} /></ShadcnTabsContent>
             <ShadcnTabsContent value="equipment" className="mt-0"><EquipmentTab {...tabProps} /></ShadcnTabsContent>
