@@ -101,9 +101,9 @@ def _pick_weather(sub_reports) -> str | None:
     best_score = -1
     for sr in sub_reports:
         cond = (sr.weather_condition or '').strip()
-        if not cond:
+        if not cond or cond not in WEATHER_SEVERITY:
             continue
-        score = WEATHER_SEVERITY.get(cond, 0)
+        score = WEATHER_SEVERITY[cond]
         if score > best_score:
             best_score = score
             best = cond
@@ -179,9 +179,7 @@ def rebuild_daily_report_summary(
     _clear_derived(report)
 
     if not report.weather_override:
-        weather = _pick_weather(sub_reports)
-        if weather:
-            report.weather_condition = weather
+        report.weather_condition = _pick_weather(sub_reports)
     if not report.site_status_override:
         # Decision 7: inactive if any contributing specialty marks inactive; else active.
         if any(

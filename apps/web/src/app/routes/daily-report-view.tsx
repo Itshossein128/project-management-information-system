@@ -33,6 +33,8 @@ import { ActivityTab } from "@/components/daily_reports/ActivityTab";
 import { ApprovalStatusBar } from "@/components/daily_reports/ApprovalStatusBar";
 import { ConcreteTab } from "@/components/daily_reports/ConcreteTab";
 import { EquipmentTab } from "@/components/daily_reports/EquipmentTab";
+import { WeatherSelector } from "@/components/daily_reports/WeatherSelector";
+import { validateTemperatures } from "@/app/lib/temperatureValidation";
 import { IncidentsTab } from "@/components/daily_reports/IncidentsTab";
 import { LaborCampTab } from "@/components/daily_reports/LaborCampTab";
 import { LaborTab } from "@/components/daily_reports/LaborTab";
@@ -58,6 +60,24 @@ export default function DailyReportViewPage() {
   const [tempMin, setTempMin] = useState<string>("");
   const [tempMax, setTempMax] = useState<string>("");
   const [weatherImpactNotes, setWeatherImpactNotes] = useState<string>("");
+  const [serverTempErrors, setServerTempErrors] = useState<{ min?: string | null; max?: string | null }>({});
+
+  const tempValidation = useMemo(
+    () => validateTemperatures(tempMin, tempMax, { isBlurOrSubmit: false }),
+    [tempMin, tempMax]
+  );
+  const inlineTempMinError =
+    serverTempErrors.min ||
+    (tempValidation.tempMinError === "min_value" || tempValidation.tempMinError === "max_value"
+      ? t("errors.temp_range", "دما باید بین ۴۰- تا ۶۰+ باشد")
+      : null);
+  const inlineTempMaxError =
+    serverTempErrors.max ||
+    (tempValidation.tempMaxError === "temp_max_must_be_gte_temp_min"
+      ? t("errors.temp_max_must_be_gte_temp_min", "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.")
+      : tempValidation.tempMaxError === "min_value" || tempValidation.tempMaxError === "max_value"
+      ? t("errors.temp_range", "دما باید بین ۴۰- تا ۶۰+ باشد")
+      : null);
 
   const projectQuery = useQuery({
     queryKey: ["project", projectId],
@@ -288,21 +308,14 @@ export default function DailyReportViewPage() {
                     {t("dailyReports.summary.siteOverride", "لغو خودکار وضعیت کارگاه")}
                   </label>
                   {weatherOverride ? (
-                    <label className='block text-sm'>
+                    <div className='block text-sm' data-testid='weather-override-value'>
                       <span className='mb-1 block text-muted-foreground'>شرایط جوی</span>
-                      <select
-                        className='w-full rounded-md border border-border bg-background p-2'
-                        value={weather}
-                        onChange={(e) => setWeather(e.target.value)}
-                        data-testid='weather-override-value'
-                      >
-                        <option value='clear'>صاف</option>
-                        <option value='cloudy'>ابری</option>
-                        <option value='rainy'>بارانی</option>
-                        <option value='snowy'>برفی</option>
-                        <option value='stormy'>طوفانی</option>
-                      </select>
-                    </label>
+                      <WeatherSelector
+                        value={weather as WeatherCondition}
+                        onChange={(w) => setWeather(w)}
+                        id='summary-weather-override'
+                      />
+                    </div>
                   ) : null}
                   {siteOverride ? (
                     <label className='block text-sm'>
@@ -337,8 +350,18 @@ export default function DailyReportViewPage() {
                       max={60}
                       className='w-full rounded-md border border-border bg-background p-2 text-sm'
                       value={tempMax}
-                      onChange={(e) => setTempMax(e.target.value)}
+                      onChange={(e) => {
+                        setTempMax(e.target.value);
+                        setServerTempErrors((prev) => ({ ...prev, max: null }));
+                      }}
+                      aria-invalid={inlineTempMaxError ? true : undefined}
+                      aria-describedby={inlineTempMaxError ? 'summary-temp-max-error' : undefined}
                     />
+                    {inlineTempMaxError ? (
+                      <p id='summary-temp-max-error' role='alert' className='mt-1 text-xs text-destructive'>
+                        {inlineTempMaxError}
+                      </p>
+                    ) : null}
                   </div>
                   <div>
                     <label htmlFor='summary-temp-min' className='mb-1 block text-sm text-muted-foreground'>
@@ -352,15 +375,25 @@ export default function DailyReportViewPage() {
                       max={60}
                       className='w-full rounded-md border border-border bg-background p-2 text-sm'
                       value={tempMin}
-                      onChange={(e) => setTempMin(e.target.value)}
+                      onChange={(e) => {
+                        setTempMin(e.target.value);
+                        setServerTempErrors((prev) => ({ ...prev, min: null }));
+                      }}
+                      aria-invalid={inlineTempMinError ? true : undefined}
+                      aria-describedby={inlineTempMinError ? 'summary-temp-min-error' : undefined}
                     />
+                    {inlineTempMinError ? (
+                      <p id='summary-temp-min-error' role='alert' className='mt-1 text-xs text-destructive'>
+                        {inlineTempMinError}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
                 {(siteOverride ? siteStatus === "inactive" : report.site_status === "inactive") ? (
                   <div>
                     <label htmlFor='summary-inactivity-reason' className='mb-1 block text-sm font-medium'>
-                      علت تعطیلی کارگاه <span className='text-destructive'>*</span>
+                      {t("dailyReports.inactivityReason", "علت تعطیلی کارگاه")} <span className='text-destructive'>*</span>
                     </label>
                     <select
                       id='summary-inactivity-reason'
@@ -369,10 +402,10 @@ export default function DailyReportViewPage() {
                       onChange={(e) => setInactivityReason(e.target.value)}
                       data-testid='inactivity-reason-select'
                     >
-                      <option value=''>-- انتخاب علت تعطیلی --</option>
+                      <option value=''>{t("dailyReports.selectInactivityReason", "-- انتخاب علت تعطیلی --")}</option>
                       {INACTIVITY_REASONS.map((r) => (
                         <option key={r.value} value={r.value}>
-                          {r.label}
+                          {t(`dailyReports.inactivityReasons.${r.value}`, r.label)}
                         </option>
                       ))}
                     </select>
@@ -381,13 +414,14 @@ export default function DailyReportViewPage() {
 
                 <div>
                   <label htmlFor='summary-weather-impact' className='mb-1 block text-sm font-medium'>
-                    تأثیرات شرایط جوی بر کارگاه
+                    {t("dailyReports.weatherImpactNotes", t("weatherImpactNotes", "توضیحات و اثرات شرایط جوی"))}
                   </label>
                   <textarea
                     id='summary-weather-impact'
                     rows={2}
+                    dir='auto'
                     className='w-full rounded-md border border-border bg-background p-2 text-sm'
-                    placeholder='توضیح اثر شرایط جوی بر روند کار...'
+                    placeholder={t("dailyReports.weatherImpactNotesPlaceholder", "توضیح اثر شرایط جوی بر روند کار...")}
                     value={weatherImpactNotes}
                     onChange={(e) => setWeatherImpactNotes(e.target.value)}
                   />
@@ -397,19 +431,18 @@ export default function DailyReportViewPage() {
                   variant='secondary'
                   data-testid='summary-metadata-save'
                   onClick={async () => {
-                    const minN = tempMin !== "" ? Number(tempMin) : null;
-                    const maxN = tempMax !== "" ? Number(tempMax) : null;
-                    if (minN !== null && (minN < -40 || minN > 60)) {
-                      toast.error("حداقل دما باید بین ۴۰- تا ۶۰+ باشد");
-                      return;
-                    }
-                    if (maxN !== null && (maxN < -40 || maxN > 60)) {
-                      toast.error("حداکثر دما باید بین ۴۰- تا ۶۰+ باشد");
-                      return;
-                    }
-                    if (minN !== null && maxN !== null && maxN < minN) {
-                      toast.error("حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد");
-                      return;
+                    const submitVal = validateTemperatures(tempMin, tempMax, { isBlurOrSubmit: true });
+                    if (!submitVal.isValid) {
+                      if (submitVal.tempMaxError === "temp_max_must_be_gte_temp_min") {
+                        const msg = t("errors.temp_max_must_be_gte_temp_min", "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.");
+                        setServerTempErrors({ max: msg });
+                        toast.error(msg);
+                        return;
+                      }
+                      if (submitVal.tempMinError || submitVal.tempMaxError) {
+                        toast.error(t("errors.temp_range", "دما باید بین ۴۰- تا ۶۰+ باشد"));
+                        return;
+                      }
                     }
                     const isInactive = siteOverride
                       ? siteStatus === "inactive"
@@ -436,16 +469,21 @@ export default function DailyReportViewPage() {
                           ? { site_status: siteStatus as SiteStatus }
                           : {}),
                       });
+                      setServerTempErrors({});
                       toast.success("ذخیره شد");
                       void refetch();
                     } catch (e: any) {
+                      const code = e?.code || e?.response?.data?.error?.code;
+                      const details = e?.details || e?.response?.data?.error?.details;
                       const msg =
                         e?.response?.data?.error?.message ||
                         e?.message ||
                         "خطا در ثبت اطلاعات";
-                      if (msg.includes("temp_max_must_be_gte_temp_min")) {
-                        toast.error("حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد");
-                      } else if (msg.includes("inactivity_reason_required")) {
+                      if (code === "temp_max_must_be_gte_temp_min" || details?.temp_max) {
+                        const text = t("errors.temp_max_must_be_gte_temp_min", "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.");
+                        setServerTempErrors({ max: text });
+                        toast.error(text);
+                      } else if (code === "inactivity_reason_required" || msg.includes("inactivity_reason_required")) {
                         toast.error("علت تعطیلی کارگاه الزامی است");
                       } else {
                         toast.error(msg);
@@ -486,8 +524,10 @@ export default function DailyReportViewPage() {
 
             {report.weather_impact_notes ? (
               <div className='rounded-xl border border-border bg-card p-4'>
-                <p className='mb-1 text-sm text-muted-foreground'>تأثیرات جوی بر کارگاه</p>
-                <p className='text-sm whitespace-pre-wrap'>{report.weather_impact_notes}</p>
+                <p className='mb-1 text-sm text-muted-foreground'>
+                  {t("dailyReports.weatherImpactNotes", t("weatherImpactNotes", "توضیحات و اثرات شرایط جوی"))}
+                </p>
+                <p className='text-sm whitespace-pre-wrap' dir='auto'>{report.weather_impact_notes}</p>
               </div>
             ) : null}
 

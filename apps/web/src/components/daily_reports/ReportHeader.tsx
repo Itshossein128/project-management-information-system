@@ -1,5 +1,6 @@
 import { Input, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/app/lib/utils";
 import {
   type HeaderPayload,
@@ -10,6 +11,8 @@ import {
   INACTIVITY_REASONS,
   WEATHER_META,
 } from "@/app/lib/api/daily-reports";
+import { WeatherSelector } from "./WeatherSelector";
+import { validateTemperatures } from "@/app/lib/temperatureValidation";
 
 export interface HeaderState {
   report_date: string;
@@ -119,18 +122,23 @@ export function ReportHeader({
   const set = <K extends keyof HeaderState>(key: K, v: HeaderState[K]) =>
     onChange({ ...value, [key]: v });
 
-  const maxNum = value.temp_max !== "" ? Number(value.temp_max) : null;
-  const minNum = value.temp_min !== "" ? Number(value.temp_min) : null;
-  const tempMaxError =
-    maxNum !== null && (maxNum < -40 || maxNum > 60)
-      ? "دما باید بین ۴۰- تا ۶۰+ باشد"
-      : maxNum !== null && minNum !== null && maxNum < minNum
-      ? "حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد"
-      : null;
-  const tempMinError =
-    minNum !== null && (minNum < -40 || minNum > 60)
-      ? "دما باید بین ۴۰- تا ۶۰+ باشد"
-      : null;
+  const { t } = useTranslation();
+  const tempValidation = validateTemperatures(value.temp_min, value.temp_max, { isBlurOrSubmit: false });
+  const formatTempError = (code: string | null) => {
+    if (!code) return null;
+    if (code === "temp_max_must_be_gte_temp_min") {
+      return t("errors.temp_max_must_be_gte_temp_min", "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.");
+    }
+    if (code === "min_value" || code === "max_value") {
+      return t("errors.temp_range", "دما باید بین ۴۰- تا ۶۰+ باشد");
+    }
+    if (code === "invalid_number") {
+      return t("errors.invalid_number", "مقدار دما معتبر نیست");
+    }
+    return code;
+  };
+  const tempMinError = formatTempError(tempValidation.tempMinError);
+  const tempMaxError = formatTempError(tempValidation.tempMaxError);
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4">
@@ -185,9 +193,10 @@ export function ReportHeader({
               disabled={readOnly}
               onChange={(e) => set("temp_max", e.target.value)}
               aria-invalid={tempMaxError != null || undefined}
+              aria-describedby={tempMaxError ? "temp-max-error" : undefined}
             />
             {tempMaxError ? (
-              <p className="mt-1 text-xs text-destructive">{tempMaxError}</p>
+              <p id="temp-max-error" role="alert" className="mt-1 text-xs text-destructive">{tempMaxError}</p>
             ) : null}
           </div>
           <div className="flex-1">
@@ -207,9 +216,10 @@ export function ReportHeader({
               disabled={readOnly}
               onChange={(e) => set("temp_min", e.target.value)}
               aria-invalid={tempMinError != null || undefined}
+              aria-describedby={tempMinError ? "temp-min-error" : undefined}
             />
             {tempMinError ? (
-              <p className="mt-1 text-xs text-destructive">{tempMinError}</p>
+              <p id="temp-min-error" role="alert" className="mt-1 text-xs text-destructive">{tempMinError}</p>
             ) : null}
           </div>
         </div>
@@ -218,7 +228,7 @@ export function ReportHeader({
       {value.site_status === "inactive" ? (
         <div>
           <label htmlFor="report-inactivity-reason" className="mb-1 block text-sm text-muted-foreground">
-            علت تعطیلی کارگاه <span className="text-destructive">*</span>
+            {t("dailyReports.inactivityReason", "علت تعطیلی کارگاه")} <span className="text-destructive">*</span>
           </label>
           <select
             id="report-inactivity-reason"
@@ -229,10 +239,10 @@ export function ReportHeader({
               set("inactivity_reason", (e.target.value || null) as InactivityReason | null)
             }
           >
-            <option value="">-- انتخاب علت تعطیلی --</option>
+            <option value="">{t("dailyReports.selectInactivityReason", "-- انتخاب علت تعطیلی --")}</option>
             {INACTIVITY_REASONS.map((r) => (
               <option key={r.value} value={r.value}>
-                {r.label}
+                {t(`dailyReports.inactivityReasons.${r.value}`, r.label)}
               </option>
             ))}
           </select>
@@ -270,43 +280,19 @@ export function ReportHeader({
         <p className="mb-1 text-sm text-muted-foreground" id="weather-label">
           وضعیت جوی
         </p>
-        <div
-          role="radiogroup"
-          aria-labelledby="weather-label"
-          className="flex flex-wrap gap-2"
-        >
-          {(Object.keys(WEATHER_META) as WeatherCondition[]).map((w) => {
-            const selected = value.weather_condition === w;
-            return (
-              <button
-                key={w}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                aria-label={WEATHER_META[w].label}
-                disabled={readOnly}
-                onClick={() => set("weather_condition", w)}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-sm transition",
-                  selected
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:bg-muted/40",
-                )}
-              >
-                <span className="me-1" aria-hidden>
-                  {WEATHER_META[w].icon}
-                </span>
-                {WEATHER_META[w].label}
-              </button>
-            );
-          })}
-        </div>
+        <WeatherSelector
+          value={value.weather_condition}
+          onChange={(w) => set("weather_condition", w)}
+          disabled={readOnly}
+          id="header-weather"
+        />
       </div>
 
       <TextArea
         name="weather_impact_notes"
-        label="تأثیرات جوی بر کارگاه"
-        placeholder="توضیح اثر شرایط جوی بر روند پیشرفت کارگاه..."
+        label={t("dailyReports.weatherImpactNotes", t("weatherImpactNotes", "توضیحات و اثرات شرایط جوی"))}
+        placeholder={t("dailyReports.weatherImpactNotesPlaceholder", "توضیح اثر شرایط جوی بر روند پیشرفت کارگاه...")}
+        dir="auto"
         rows={2}
         value={value.weather_impact_notes ?? ""}
         disabled={readOnly}

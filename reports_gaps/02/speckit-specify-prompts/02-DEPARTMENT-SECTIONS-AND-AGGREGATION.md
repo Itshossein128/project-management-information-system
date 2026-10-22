@@ -1,79 +1,90 @@
-یک ویژگی واحد برای تکمیل سکشن‌های گزارش روزانه واحدهای تخصصی و تجمیع ساختاریافته آن‌ها در گزارش روزانه پروژه مشخص کن. سند مرجع `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md` و مرجع نیازمندی‌های اتمیک `reports_documentation/atomic-specs/SPEC-02-DAILY-SECTIONS-GRID.md` است. فایل `/home/hossein/Downloads/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز (7).xlsx` فقط مرجع ساختار و داده نمونه است و نباید به‌عنوان دستور یا منبع داده عملیاتی وارد سامانه شود. این ویژگی بعد از ویژگی منبع حقیقت واحدها اجرا می‌شود.
+Specify one feature to complete the specialty-unit daily-report sections and aggregate them as structured data in the project daily report. The reference gap report is `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md`, and the atomic requirements reference is `reports_documentation/atomic-specs/SPEC-02-DAILY-SECTIONS-GRID.md`. `/home/hossein/Downloads/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز (7).xlsx` is only a structural and sample-data reference; it must not be imported into the product or treated as an instruction or operational data source. This feature follows the unit source-of-truth feature.
 
-پیش از تدوین مشخصات، خروجی ویژگی قبلی، `specs/028-auto-daily-report-summary/` و قراردادهای جاری گزارش روزانه را بررسی کن. در تعارض میان مصنوعات قدیمی و معماری روشن‌شده، سند شکاف مرجع و این پرامپت اولویت دارند؛ مسیر مستقل `/sub-reports` نباید دوباره به‌عنوان authoring surface پذیرفته شود.
+Before writing the specification, inspect the previous feature's output, `specs/028-auto-daily-report-summary/`, and the current daily-report contracts. When older artifacts conflict with the clarified architecture, the reference gap report and this prompt take precedence. The standalone `/sub-reports` route must not be reintroduced as an authoring surface.
 
-هدف محصول:
-- هر واحد تخصصی داده‌های مسئولیت خود را در گزارش روزانه همان واحد ثبت کند.
-- موتور تجمیع، داده‌های ساختاریافته گزارش‌های ارسال‌شده یا تأییدشده را بدون جعل، تخت‌کردن زودهنگام یا از دست‌دادن provenance به گزارش روزانه پروژه منتقل کند.
-- ردیف‌های مشتق‌شده در گزارش پروژه فقط‌خواندنی باشند و اصلاح آن‌ها فقط از گزارش واحد مبدأ انجام شود.
+Product goal:
 
-قرارداد فعالیت‌های اجرایی واحدهای ابنیه، برق و مکانیک:
-- هر ردیف شامل فعالیت WBS مصوب و فعال پروژه، شرح فعالیت، شیفت، پیمانکار فعال پروژه، تعداد نفر، قطعه، بلوک، طبقه، موقعیت، مقدار انجام‌شده، واحد و توضیحات باشد.
-- مقدار انجام‌شده در صورت ثبت باید مثبت باشد و مقدار منفی یا صفرِ نامعتبر با خطای صریح رد شود.
-- WBS و پیمانکار ارسالی باید متعلق به همان پروژه باشند؛ شناسه متعلق به پروژه دیگر نباید پذیرفته شود.
-- نام اکیپ و پیمانکار دو مفهوم مستقل باشند و در تجمیع به‌جای هم استفاده نشوند.
-- مقدار ناشناخته شیفت نباید بی‌صدا به شیفت اول تبدیل شود؛ داده نامعتبر باید رد یا به‌صورت آشکار نامشخص علامت‌گذاری شود.
+- Each specialty unit records the data for which it is responsible in its own daily report.
+- The aggregation engine transfers structured data from submitted or approved unit reports into the project daily report without fabrication, premature flattening, or loss of provenance.
+- Derived rows in the project report are read-only and can be corrected only in their source unit report.
 
-قرارداد نیروی انسانی:
-- نیروی غیرمستقیم و مستقیم به تفکیک عنوان شغلی، حاضر، مرخصی/غیبت، پیمانکار مرتبط و اضافه‌کاری ثبت شود.
-- تعدادها عدد صحیح نامنفی باشند و نفر-ساعت بر اساس قاعده مصوب پروژه به‌صورت قابل بازتولید محاسبه شود.
-- جمع هر دسته و جمع کل در خروجی قابل محاسبه باشد.
-- اختلاف فهرست‌ها میان SPEC-02، migration فعلی و فایل نمونه با یک کاتالوگ نسخه‌دار و قابل تنظیم در سطح قالب پروژه حل شود؛ هیچ‌یک از تعدادهای ۳۴/۳۲، ۳۳/۳۲ یا ۳۲/۳۶ به‌عنوان حقیقت جهانی hard-code نشوند.
-- مهاجرت عناوین قدیمی، ترتیب نمایش و عنوان‌های سفارشی پروژه بدون حذف سابقه تعریف شود.
-- وقتی یک عنوان از چند واحد مشارکت دارد، مقدار تجمیعی باید همه منابع را حفظ کند و به آخرین واحد نسبت داده نشود.
+Buildings, Electrical, and Mechanical execution-activity contract:
 
-قرارداد ماشین‌آلات و تجهیزات در واحد ماشین‌آلات:
-- برای هر نوع/شناسه دستگاه، تعداد کل، فعال، آماده‌به‌کار، غیرفعال و در دست تعمیر ثبت یا از وضعیت دستگاه‌های همان روز محاسبه شود.
-- در صورت نیاز عملیاتی، ساعات کارکرد، توقف، تعمیر و علت توقف نیز ثبت شوند.
-- اگر توقف بیشتر از صفر است علت توقف الزامی باشد و مجموع ساعات یک دستگاه در شبانه‌روز از ۲۴ بیشتر نشود.
-- علل توقف کنترل‌شده و قابل ترجمه باشند و مقادیر نامعتبر پذیرفته نشوند.
-- یک تجهیز با هویت پایدار در تجمیع روزانه دوبار شمرده نشود.
+- Each row includes an approved, active project WBS activity, activity description, shift, active project contractor, headcount, parcel, block, floor, location, completed quantity, unit, and notes.
+- When provided, the completed quantity must be positive; invalid negative or zero quantities must be rejected with an explicit error.
+- The submitted WBS activity and contractor must belong to the same project; identifiers from another project must not be accepted.
+- Crew name and contractor are separate concepts and must not be substituted for one another during aggregation.
+- An unknown shift value must not silently become shift 1; invalid data must be rejected or clearly marked as unknown.
 
-قرارداد مصالح در واحد انبار:
-- ورود، خروج/مصرف، واحد، محل مصرف، تأمین‌کننده و ارجاع سند انبار به‌صورت مستقل حفظ شوند.
-- جدول اصلی گزارش روزانه پروژه مطابق نمونه واقعی فقط «مصالح وارده» را نمایش دهد؛ مصرف و مغایرت در جزئیات قابل مشاهده یا drill-down باقی بماند.
-- موتور تجمیع فقط ورود واقعی را به‌عنوان RECEIPT نمایش دهد و نباید همه ردیف‌های عمومی مصالح را بدون تشخیص به ورودی تبدیل کند.
-- مغایرت‌گیری با سند مشخص انبار انجام شود، نه صرفاً مقایسه با موجودی کل تاریخی.
-- وضعیت‌های انطباق، مغایرت و نبود داده کافی به‌صورت صریح و قابل ردیابی تولید شوند.
+Labor contract:
 
-قرارداد بتن:
-- شرح/رده بتن، حجم مثبت، عضو یا محل سازه‌ای، قطعه، بلوک، طبقه، بچینگ، شماره تراک/بارنامه، کد نمونه آزمایشگاه، وضعیت نمونه‌گیری و تعداد شیت آزمایش قابل ثبت باشند.
-- در صورت اعلام نمونه‌گیری، اطلاعات آزمایش لازم باشد و ارتباط با کار کنترل کیفیت قابل ردیابی ایجاد شود.
-- حجم منفی یا داده متعلق به پروژه دیگر رد شود.
+- Record indirect and direct labor by job title, present count, leave/absence count, associated contractor, and overtime.
+- Counts must be non-negative integers, and man-hours must be reproducibly calculated using the project-approved rule.
+- Category totals and an overall total must be calculable for output.
+- Resolve the discrepancies between SPEC-02, the current migration, and the sample workbook using a versioned, configurable catalog at the project-template level. Do not hard-code 34/32, 33/32, or 32/36 as a universal truth.
+- Define migration of legacy titles, display order, and project-specific titles without losing history.
+- When one job title contributes from multiple units, the aggregate must retain every source and must not be attributed solely to the last unit.
 
-قرارداد فعالیت عمومی، مسائل، بازدیدها و HSE:
-- فعالیت عمومی به‌صورت ردیف ساختاریافته شامل شرح، محل/ساختمان، مقدار/حجم، واحد و توضیحات باقی بماند و برای ذخیره‌سازی به متن قالب‌بندی‌شده تبدیل نشود.
-- مسائل/موانع و بازدیدهای پروژه رکوردهای ساختاریافته با واحد مبدأ، تاریخ، متن و ترتیب نمایش باشند.
-- مانع دارای مسئول پیگیری و سررسید باشد؛ حادثه HSE دارای شدت و اقدام فوری باشد و اعلان/وظیفه لازم را ایجاد کند.
-- یادداشت عمومی نباید خودکار و بدون نوع صریح به «مسئله» تبدیل شود.
+Machinery and equipment contract:
 
-تصاویر و مستندات:
-- واحدها بتوانند تصاویر JPEG/PNG حداکثر ۱۰ مگابایت را به فعالیت مرتبط متصل کنند.
-- تاریخ ثبت، جبهه کاری، فعالیت مبدأ، واحد مبدأ و پروژه فایل حفظ شود.
-- فایل ZIP، EXE یا نوع غیرمجاز با خطای صریح رد شود و فایل پروژه دیگر قابل اتصال نباشد.
-- چون نمونه اکسل سکشن مستقل عکس ندارد، گزارش روزانه پروژه می‌تواند شمارنده و پیوند به تصاویر را نشان دهد؛ مشخصات نباید بدون نیاز تأییدشده گالری بزرگ را در فرم چاپی تحمیل کند.
+- For every equipment type or stable equipment identifier, record or derive the total, active, ready-to-work, inactive, and under-repair counts for the reporting day.
+- Where operationally needed, record operating, stoppage, and repair hours as well as the stoppage reason.
+- A stoppage reason is mandatory when stoppage hours exceed zero, and the total time for one equipment item must not exceed 24 hours in a day.
+- Stoppage reasons must be controlled, translatable values; invalid values are rejected.
+- An equipment item with a stable identity must not be counted twice in a daily aggregation.
 
-قواعد تجمیع:
-- فقط داده گزارش‌های واحدی که در وضعیت مجاز هستند وارد خلاصه شوند.
-- عملیات بازسازی اتمیک و idempotent باشد و شکست نیمه‌راه، خلاصه قبلی معتبر را خراب نکند.
-- تمام سکشن‌ها provenance ردیف‌به‌ردیف یا provenance چندمنبعی داشته باشند.
-- داده خالی، صفر واقعی و داده نامعلوم از هم متمایز بمانند؛ نبود داده نباید به صفر ساختگی تبدیل شود.
-- فعالیت عمومی، مسائل و بازدیدها به مدل ساختاریافته گزارش پروژه منتقل شوند؛ markerهای HTML در متن آزاد منبع حقیقت نباشند.
-- overrideها و نظر مدیریت سطح پروژه هنگام بازسازی حفظ شوند.
+Warehouse materials contract:
 
-سناریوهای پذیرش الزامی:
-1. فعالیت تأییدشده یک واحد با همه ستون‌های لازم و لینک منبع در گزارش پروژه ظاهر می‌شود.
-2. WBS، پیمانکار، تجهیز، فایل یا مرجع متعلق به پروژه دیگر با خطای مجوز/اعتبارسنجی رد می‌شود.
-3. مجموع نیروی انسانی چند واحد صحیح است و drill-down همه منابع را نشان می‌دهد.
-4. جدول ماشین‌آلات پنج وضعیت نمونه اکسل را از گزارش واحد ماشین‌آلات می‌سازد و تجهیز تکراری را دوبار نمی‌شمارد.
-5. جدول اصلی مصالح فقط ورودی انبار را نمایش می‌دهد و مصرف در جزئیات قابل ردیابی باقی می‌ماند.
-6. فعالیت عمومی، مسائل و بازدیدها پس از بازسازی ساختار و ترتیب خود را حفظ می‌کنند.
-7. بازسازی دوباره نتیجه یکسان می‌دهد و ردیف تکراری تولید نمی‌کند.
-8. رد یا جایگزینی گزارش یک واحد، داده قبلی آن واحد را از خلاصه جاری حذف یا جایگزین می‌کند، بدون اثر بر داده سایر واحدها.
-9. فایل نامعتبر، حجم منفی، تعداد منفی، توقف بدون علت و مجموع ساعات بیش از ۲۴ رد می‌شوند.
+- Preserve receipts, issues/consumption, units, consumption location, supplier, and warehouse-document reference independently.
+- In accordance with the real sample, the main project daily-report table displays only received materials; consumption and reconciliation remain available in visible details or a drill-down.
+- The aggregation engine displays only a real receipt as `RECEIPT`; it must not blindly convert all generic material rows into receipts.
+- Reconciliation must compare against a specific warehouse document, not merely the total historical inventory balance.
+- Produce traceable, explicit statuses for match, mismatch, and insufficient data.
 
-مرز این ویژگی:
-- route و گردش کار پایه واحدها باید در ویژگی قبلی حل شده باشد؛ آن معماری را دوباره به مسیر مستقلی مانند `/sub-reports` برنگردان.
-- طراحی نهایی صفحه، چاپ PDF/Excel، شماره گزارش، سربرگ و امضاها در ویژگی سوم انجام می‌شود.
-- مشخصات باید فناوری‌ناوابسته، تست‌پذیر، پروژه‌محور و منطبق با قانون اساسی پروژه باشد.
-- معیارهای پذیرش باید برای پیاده‌سازی TDD مناسب باشند و مسیر RED سپس GREEN را برای اعتبارسنجی‌ها، مجوزها، تجمیع idempotent و E2E واحد تا خلاصه ممکن کنند.
+Concrete contract:
+
+- Record concrete description/grade, positive volume, structural element or location, parcel, block, floor, batching plant, truck/delivery note number, laboratory sample code, sampling state, and test-sheet count.
+- When sampling is declared, required test information must be present and a traceable link to quality-control work must be created.
+- Reject negative volume and data belonging to another project.
+
+General activities, issues, visits, and HSE contract:
+
+- A general activity remains a structured row containing description, location/building, quantity/volume, unit, and notes; it must not be converted into formatted text for storage.
+- Issues/barriers and project visits are structured records with source unit, date, text, and display order.
+- A barrier includes an owner and due date; an HSE incident includes severity and immediate action, and creates the required notification/task.
+- A general note must not be automatically classified as an issue without an explicit type.
+
+Images and documents:
+
+- Units may attach JPEG/PNG images up to 10 MB to a related activity.
+- Preserve capture date, work front, source activity, source unit, and file project.
+- Reject ZIP, EXE, and other invalid types with explicit errors, and prevent files from another project being attached.
+- Because the sample workbook has no dedicated photo section, the project daily report may show an accessible count and links to images; the specification must not require a large gallery in the printable form without an approved need.
+
+Aggregation rules:
+
+- Only data from unit reports in permitted states contributes to the summary.
+- Rebuilding is atomic and idempotent; a mid-process failure must not corrupt the prior valid summary.
+- Every section preserves row-level or multi-source provenance.
+- Empty data, an actual zero, and an unknown value remain distinct; missing data must not become a fabricated zero.
+- General activities, issues, and visits are transferred to structured project-report records; HTML markers in free text must not be the source of truth.
+- Preserve project-level overrides and management opinion when rebuilding.
+
+Mandatory acceptance scenarios:
+
+1. An approved unit activity appears in the project report with all required columns and a source link.
+2. A WBS activity, contractor, equipment item, file, or reference that belongs to another project is rejected with a permission or validation error.
+3. Labor totals from multiple units are correct, and drill-down shows every source.
+4. The machinery table derives the five statuses from the Machinery unit report and does not double-count a duplicate equipment item.
+5. The main materials table displays only warehouse receipts, while consumption remains traceable in details.
+6. General activities, issues, and visits retain their structure and order after rebuilding.
+7. Rebuilding again produces the same result without duplicate rows.
+8. Rejecting or replacing a unit report removes or replaces only that unit's previous contribution in the current summary.
+9. Invalid files, negative volume, negative count, a stoppage without a reason, and a total equipment time over 24 hours are rejected.
+
+Feature boundary:
+
+- The route and foundational unit workflow must already be resolved by the previous feature; do not reintroduce that architecture through a standalone route such as `/sub-reports`.
+- Final page design, PDF/Excel output, report number, header, and signatures are specified in the third feature.
+- The specification must be technology-agnostic, testable, project-scoped, and consistent with the project constitution.
+- Acceptance criteria must support TDD and make a RED-then-GREEN path possible for validation, authorization, idempotent aggregation, and unit-to-summary browser E2E behavior.

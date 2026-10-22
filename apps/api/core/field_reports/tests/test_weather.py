@@ -145,7 +145,8 @@ class TestWeatherLogCreate:
         err = response.data.get('error', {})
         code = response.data.get('code') or err.get('code')
         details = response.data.get('details') or err.get('details', {})
-        assert code == 'temp_max_must_be_gte_temp_min' or 'temp_max' in details
+        assert code == 'temp_max_must_be_gte_temp_min'
+        assert 'temp_max' in details
 
     def test_legacy_weather_rejected(self, auth_client, weather_url):
         for retired in ('sunny', 'partly_cloudy', 'foggy'):

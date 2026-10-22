@@ -203,7 +203,7 @@ export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
   }
   if (!dbPromise) {
     dbPromise = openDB<VeloraDB>(OFFLINE_DB_NAME, OFFLINE_DB_VERSION, {
-      upgrade(db, oldVersion) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (oldVersion < 1) {
           const queue = db.createObjectStore("offline_queue", { keyPath: "queue_id" });
           queue.createIndex("entity_type", "entity_type");
@@ -249,7 +249,7 @@ export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
         if (oldVersion < 3 && transaction) {
           if (db.objectStoreNames.contains("offline_daily_reports")) {
             const reportStore = transaction.objectStore("offline_daily_reports");
-            reportStore.openCursor().then(function iter(cursor) {
+            reportStore.openCursor().then(function iter(cursor: any) {
               if (!cursor) return;
               const rep = cursor.value;
               let changed = false;
@@ -269,7 +269,7 @@ export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
 
           if (db.objectStoreNames.contains("offline_queue")) {
             const queueStore = transaction.objectStore("offline_queue");
-            queueStore.openCursor().then(function iter(cursor) {
+            queueStore.openCursor().then(function iter(cursor: any) {
               if (!cursor) return;
               const item = cursor.value;
               if (item.payload && typeof item.payload === "object") {

@@ -108,7 +108,7 @@ class TestLaborBatchUpsert:
 class TestPdfExport:
     def test_pdf_download(self, auth_client, reports_url, project, user):
         report = DailyReport.objects.create(
-            project=project, report_date='2024-11-01', weather_condition='sunny',
+            project=project, report_date='2024-11-01', weather_condition='clear',
             created_by=user, updated_by=user, prepared_by=user,
         )
         response = auth_client.get(f'{reports_url}{report.id}/pdf/')

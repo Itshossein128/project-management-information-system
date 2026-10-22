@@ -3,10 +3,10 @@
  */
 
 export const INACTIVE_ACTIVITY_WARNING_FA =
-  "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت کارکرد اجرایی اطمینان دارید؟";
+  "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت فعالیت اجرایی با حجم مثبت اطمینان دارید؟";
 
 export const INACTIVE_ACTIVITY_WARNING_EN =
-  "The worksite is marked inactive on this date. Are you sure you want to record execution progress?";
+  "The site is marked inactive on this date; are you sure you want to record execution activity with positive volume?";
 
 /**
  * Checks whether an activity edit/creation triggers the inactive site confirmation prompt.

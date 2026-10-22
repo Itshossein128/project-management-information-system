@@ -75,3 +75,33 @@ class TestSubReportsAPI:
         api_client.force_authenticate(user=member.user)
         approve = api_client.post(f'{sub_reports_base}{report_id}/approve/')
         assert approve.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_sub_report_weather_condition_choices(self, auth_client, sub_reports_base):
+        # 5 approved choices accepted
+        for i, cond in enumerate(('clear', 'cloudy', 'rainy', 'snowy', 'stormy', '')):
+            res = auth_client.post(
+                sub_reports_base,
+                {
+                    'report_date': f'2024-08-{10 + i:02d}',
+                    'discipline': Discipline.CIVIL,
+                    'weather_condition': cond,
+                    'activities': [],
+                },
+                format='json',
+            )
+            assert res.status_code == status.HTTP_201_CREATED
+            assert res.data['weather_condition'] == cond
+
+        # Retired / unknown choices rejected
+        for i, bad in enumerate(('sunny', 'partly_cloudy', 'foggy', 'tornado')):
+            res = auth_client.post(
+                sub_reports_base,
+                {
+                    'report_date': f'2024-08-{20 + i:02d}',
+                    'discipline': Discipline.CIVIL,
+                    'weather_condition': bad,
+                    'activities': [],
+                },
+                format='json',
+            )
+            assert res.status_code == status.HTTP_400_BAD_REQUEST

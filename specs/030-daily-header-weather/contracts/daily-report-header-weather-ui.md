@@ -1,26 +1,18 @@
-# UI Contract: Daily Report Header and Weather Controls
+# UI Contract: Standardized Daily Weather and Temperature
 
-## 1. Daily-report entry
+## 1. Covered daily-report surfaces
 
-- `/projects/:id/daily-reports` has no **New report** button and no raw report-creation form.
-- Opening a date uses `POST by-date` only when the current member has `edit_reports`.
-- A viewer uses `GET by-date`; an absent report produces a localized no-data state and never creates a shell.
-- The report header represents the full project day. It does not expose day/evening/night header-shift controls.
-- Activity rows retain `shift_1`, `shift_2`, and `shift_3`; workforce rows retain their three shift-count columns.
+The same weather/temperature/note behavior applies to:
 
-## 2. Header state
+- the reusable `ReportHeader` used by the daily-report form;
+- the comprehensive auto-summary metadata editor in the daily-report detail route;
+- the read-only comprehensive report detail/summary display.
 
-Both `ReportHeader` and the auto-summary metadata editor use the same typed state, metadata, labels, and validators for:
+The editable surfaces share one ordered weather metadata source, one selector behavior, one temperature validator, the same locale keys, and the same field-error mapping. This feature does not change report-entry permissions, shift controls, site status, or activity editing.
 
-- `weather_condition`
-- `temp_min`
-- `temp_max`
-- `weather_impact_notes`
-- `site_status`
-- `inactivity_reason`
-- the existing weather/site override controls where applicable
+## 2. Weather selector
 
-The five weather choices, in presentation order, are:
+Presentation order:
 
 1. `clear` — آفتابی / صاف — Clear / sunny
 2. `cloudy` — ابری — Cloudy
@@ -28,104 +20,95 @@ The five weather choices, in presentation order, are:
 4. `snowy` — برفی — Snowy
 5. `stormy` — طوفانی / گرد و غبار — Stormy / dust
 
-No UI metadata, icon mapping, default, fixture, or fallback emits `sunny`, `partly_cloudy`, or `foggy`.
+Requirements:
+
+- Display exactly five choices and no retired value.
+- Reuse a single ordered metadata source; do not duplicate abbreviated labels in another editor.
+- Expose one selected value through radio semantics.
+- Provide visible localized text in addition to the decorative icon.
+- Support pointer and keyboard selection; checked/selected state is programmatically exposed.
+- When read-only, display the localized label rather than the raw stable value.
+- An API-returned `null` is represented as no observation according to the existing optional behavior; it is never silently converted to a fabricated weather observation on read.
 
 ## 3. Temperature interaction
 
-- Minimum and maximum inputs accept decimals with `step=0.1` and expose `min=-40`, `max=60`.
-- Blank remains allowed.
-- Client validation checks each bound and the effective min/max pair before mutation or queueing.
-- When `temp_max < temp_min`, the error appears beside/following `temp_max`, focuses or associates with that field, and uses the localized message mapped from `temp_max_must_be_gte_temp_min`.
-- Server field details override or supplement local errors without losing the stable code.
+Both inputs:
+
+- use decimal-capable numeric entry;
+- expose `min=-40`, `max=60`, and `step=0.1`;
+- allow intentional blank values;
+- retain string state until a valid edit is committed.
+
+### Immediate validation
+
+1. A complete numeric value below `-40` or above `60` receives a localized field error.
+2. When both completed values are valid numbers but the maximum is lower, only `temp_max` receives `temp_max_must_be_gte_temp_min` guidance.
+3. Equal values are valid.
+4. A temporarily incomplete in-focus token is not converted to `null`, does not trigger an unrelated pair error, and is not autosaved.
+5. On blur or explicit save, an incomplete/invalid token becomes an actionable field error.
+
+### Save gate
+
+The same validation result must block all header write paths before they call the API or queue an offline mutation:
+
+- explicit save from the daily-report form;
+- debounced/autosave from the daily-report form;
+- explicit save from the auto-summary metadata editor;
+- offline header queueing.
+
+When valid, a blank committed value is serialized as `null`; a complete numeric value is sent in the existing accepted decimal representation.
+
+### Server errors
+
+The UI consumes `ApiRequestError.code` and `ApiRequestError.details`. It does not inspect an Axios-style `response` object or parse localized message text.
+
+- `temp_max_must_be_gte_temp_min` maps to the same inline `temp_max` error region.
+- Bound errors map to the temperature field named in details.
+- Toasts may supplement inline feedback but never replace it.
 
 ## 4. Weather-impact notes
 
-- The header contains a localized multiline text field for `weather_impact_notes`.
-- It is optional and does not disappear when weather changes.
-- Saved text survives refetch, rebuild, correction creation, online sync, and offline replay.
+- Provide a localized, labelled multi-line control in each editable daily-report header surface.
+- The field is optional and its local empty representation is always `""`.
+- Initialize local state from `report.weather_impact_notes ?? ""` before dirty-checking or autosave starts.
+- Preserve line breaks and mixed Persian/English text through save, refetch, route reload, and read-only display.
+- Use `dir="auto"` on editable and displayed narrative text where necessary for mixed-language readability.
+- Do not add an arbitrary business character limit or rich-text behavior.
+- Do not clear or hide the field when the selected weather condition changes.
 
-## 5. Site status and inactivity reason
+## 5. Read-only display and PDF handoff
 
-When `site_status=inactive`, reveal a required select containing exactly:
+- Read-only daily-report views show non-empty notes with whitespace preserved.
+- Empty notes may be omitted from the on-screen narrative card, but the API value remains `""`.
+- Downloading the official PDF uses the existing endpoint.
+- The PDF itself always contains the exact row label «توضیحات و اثرات شرایط جوی», including when the value is empty.
 
-- adverse weather (`weather`)
-- official/calendar holiday (`holiday`)
-- strike or dispute (`strike_or_dispute`)
-- client/consultant stop order (`client_stop_order`)
-- safety incident (`safety_incident`)
+## 6. Offline compatibility
 
-Behavior:
+- Cached reports and queued header payloads normalize `sunny→clear`, `partly_cloudy→cloudy`, and `foggy→cloudy` during the existing data upgrade.
+- Queue identity, ordering, retry count, timestamps, unrelated fields, and note text remain unchanged.
+- New queued writes contain only approved weather values.
+- Temperature validation runs before queue insertion; invalid or incomplete edits produce no queued mutation.
+- `weather_impact_notes` survives queueing, replay, server refetch, and conflict display.
 
-- Switching from active to inactive reveals the selector and blocks save until a reason is chosen.
-- Switching from inactive to active immediately clears the local reason; the server also clears stale values.
-- A derived inactive draft without a reason opens with an actionable missing-reason state, not a fabricated selection.
-- `inactivity_reason_required` maps to the reason select and its localized recovery guidance.
-- The reason control is removed from focus order while hidden.
+## 7. Localization and accessibility
 
-## 6. Inactive-site execution guard
+- Labels, weather names, helper text, placeholders, and validation messages come from both `fa` and `en` locale catalogs.
+- Persian renders under RTL and English under LTR; mixed note content remains readable.
+- Each temperature label is associated with its input.
+- Inline errors have stable IDs, are referenced by `aria-describedby`, set `aria-invalid`, and are announced through an appropriate alert/live region.
+- The weather group has a localized accessible group name; each choice has the same localized accessible and visible name.
+- Focus remains on or can return directly to the invalid field after a failed save.
 
-### Trigger
+## 8. Acceptance scenarios
 
-Before creating or editing an activity row, normalize `quantity` using the same numeric rules as the grid. If the value is greater than zero and the current header state is inactive, pause the save and open a confirmation dialog.
-
-The Persian prompt is exactly:
-
-```text
-کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت کارکرد اجرایی اطمینان دارید؟
-```
-
-An equivalent localized English prompt is supplied through the locale catalog.
-
-### Confirm
-
-- Close the dialog.
-- Resume the original save exactly once through the normal online API or offline queue path.
-- Preserve all ordinary authorization, validation, provenance, conflict, and error handling.
-- Confirmation is an acknowledgment only; it does not alter site status or the activity payload.
-
-### Cancel
-
-- Close the dialog and restore focus to the initiating row/control.
-- Do not call the API, enqueue an offline mutation, or mark the row saved.
-- Keep the user's draft available for correction.
-- Suppress repeated autosave prompts for the identical canceled row snapshot until the row changes or the user explicitly retries.
-
-### Coverage boundary
-
-The guard applies to both new and edited activity rows, manual save and autosave, and online and offline modes. It does not prompt for blank, zero, or negative/non-executable quantities, nor when the effective current header status is active.
-
-## 7. Save pipeline and stale-state prevention
-
-- `ActivityTab` receives the current editable header status, not only the last server-refetched report.
-- An optional asynchronous pre-save guard is invoked before the save pipeline selects online mutation versus offline queueing.
-- Changing the row after cancel invalidates the canceled-snapshot suppression.
-- Changing the header from inactive to active before save prevents the prompt; changing it to inactive makes the next positive save eligible.
-- Double confirmation/clicking cannot issue duplicate writes.
-
-## 8. Offline compatibility
-
-- IndexedDB schema version increments without deleting user data.
-- Cached reports and pending/failed queue payloads normalize `sunny→clear`, `partly_cloudy→cloudy`, and `foggy→cloudy` during upgrade.
-- Queue identity, order, retry count, timestamps, failure details, and unrelated payload properties are preserved.
-- The new fields participate in offline serialization, replay, and conflict display.
-- The activity guard runs before queue insertion, so cancellation is mutation-free even without connectivity.
-
-## 9. Localization and accessibility
-
-- All new field labels, choice labels, validation messages, empty states, and dialog controls come from `fa` and `en` locale files; stable API identifiers are never shown as fallback copy.
-- Persian layout remains RTL and English remains LTR.
-- Labels are programmatically associated with controls; required/error state is announced.
-- The confirmation uses the existing accessible dialog primitive with a labelled title/description, keyboard-operable confirm/cancel actions, focus trap, Escape/cancel behavior, and focus restoration.
-- Weather meanings are conveyed by text in addition to icons/color.
-
-## 10. Acceptance scenarios
-
-1. An editor opens a missing date; one full-day summary is ensured. Reopening it does not duplicate the report.
-2. A viewer opens an existing date via GET and can view it; opening a missing date shows no data and causes no database write.
-3. The five weather choices appear consistently in daily header, specialty form, and standalone weather log.
-4. Invalid temperature bounds and reversed range block online and offline writes with the error on the correct field.
-5. Selecting inactive reveals the reason select; save is blocked until a reason is selected; selecting active clears it.
-6. Weather-impact notes survive save/refetch and appear in the official PDF.
-7. A positive activity quantity on an inactive day prompts; cancel writes nothing; confirm writes once.
-8. The same guard behavior works while offline and after reconnect/replay.
-9. Persian and English labels/messages are complete, and the dialog works using keyboard-only navigation.
+1. In Persian and English, both editable header surfaces expose exactly the five approved weather choices in the documented order and never show a retired value.
+2. Keyboard selection changes the checked weather choice without relying on icon or color alone.
+3. `-40`, `60`, and equal minimum/maximum values save successfully.
+4. `-40.1`, `60.1`, and a maximum below the minimum show the correct inline error and cause zero API/offline writes.
+5. A temporarily incomplete numeric token causes no autosave; completing or correcting it restores normal save behavior.
+6. A structured server reversed-range error is displayed beside `temp_max` in the active locale.
+7. Clearing one temperature intentionally sends `null` and leaves the other valid value intact.
+8. Multi-line Persian/English notes survive save, refetch, route reload, summary rebuild, correction, and offline replay.
+9. Reopening the legacy daily-report form hydrates saved notes before autosave, preventing accidental erasure.
+10. The downloaded PDF contains the exact weather-impact label and either the saved text or an empty cell.

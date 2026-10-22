@@ -2050,6 +2050,7 @@
       "specialtySubmittedToast": "ارسال شد — جمع‌بندی گزارش روزانه پروژه به‌روزرسانی می‌شود"
     },
     "inactivityReason": "علت تعطیلی",
+    "selectInactivityReason": "-- انتخاب علت تعطیلی --",
     "weatherImpactNotes": "توضیحات و اثرات شرایط جوی",
     "inactivityReasons": {
       "weather": "نامساعد بودن شرایط جوی",
@@ -2058,7 +2059,8 @@
       "client_stop_order": "دستور توقف کارفرما / مشاور",
       "safety_incident": "حادثه ایمنی"
     },
-    "inactiveSiteActivityWarning": "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت کارکرد اجرایی اطمینان دارید؟",
+    "inactiveActivityDialogTitle": "تأیید ثبت کارکرد در روز تعطیل",
+    "inactiveSiteActivityWarning": "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت فعالیت اجرایی با حجم مثبت اطمینان دارید؟",
     "confirmActivity": "تأیید و ثبت",
     "cancelActivity": "انصراف"
   },

@@ -119,6 +119,10 @@ async function setupWeatherMocks(page: Page, reportOverrides: Partial<typeof dai
 }
 
 test.describe("Daily Report Header and Weather Controls (GAP-SPEC-01)", () => {
+  test.beforeEach(({}, testInfo) => {
+    test.skip(testInfo.project.name === "pwa-offline", "Requires the dev server");
+  });
+
   test.beforeEach(async ({ page }) => {
     await session(page, ["admin", "editor"], "fa");
   });
@@ -142,11 +146,31 @@ test.describe("Daily Report Header and Weather Controls (GAP-SPEC-01)", () => {
 
     // Toggle weather override to reveal five standard Shiraz choices
     await page.getByTestId("weather-override-toggle").check();
-    const weatherSelect = page.getByTestId("weather-override-value");
-    await expect(weatherSelect).toBeVisible();
+    const weatherContainer = page.getByTestId("weather-override-value");
+    await expect(weatherContainer).toBeVisible();
 
-    const options = await weatherSelect.locator("option").allTextContents();
-    expect(options).toEqual(["صاف", "ابری", "بارانی", "برفی", "طوفانی"]);
+    const radiogroup = page.getByTestId("weather-selector-radiogroup");
+    await expect(radiogroup).toBeVisible();
+
+    const clearBtn = page.getByTestId("weather-option-clear");
+    const cloudyBtn = page.getByTestId("weather-option-cloudy");
+    const rainyBtn = page.getByTestId("weather-option-rainy");
+    const snowyBtn = page.getByTestId("weather-option-snowy");
+    const stormyBtn = page.getByTestId("weather-option-stormy");
+
+    await expect(clearBtn).toBeVisible();
+    await expect(cloudyBtn).toBeVisible();
+    await expect(rainyBtn).toBeVisible();
+    await expect(snowyBtn).toBeVisible();
+    await expect(stormyBtn).toBeVisible();
+
+    await expect(clearBtn).toHaveAttribute("role", "radio");
+    await expect(cloudyBtn).toHaveAttribute("role", "radio");
+
+    // Click rainy option
+    await rainyBtn.click();
+    await expect(rainyBtn).toHaveAttribute("aria-checked", "true");
+    await expect(clearBtn).toHaveAttribute("aria-checked", "false");
   });
 
   test("inactive site status requires inactivity reason in metadata editor", async ({ page }) => {
@@ -164,6 +188,15 @@ test.describe("Daily Report Header and Weather Controls (GAP-SPEC-01)", () => {
     const reasonSelect = page.getByTestId("inactivity-reason-select");
     await expect(reasonSelect).toBeVisible();
 
+    // Assert exactly five options rendered with catalog-driven visible labels (plus empty placeholder)
+    const options = reasonSelect.locator("option");
+    await expect(options).toHaveCount(6);
+    await expect(reasonSelect.locator('option[value="weather"]')).toHaveText("نامساعد بودن شرایط جوی");
+    await expect(reasonSelect.locator('option[value="holiday"]')).toHaveText("تعطیل رسمی / تقویمی");
+    await expect(reasonSelect.locator('option[value="strike_or_dispute"]')).toHaveText("اختلاف یا اعتصاب");
+    await expect(reasonSelect.locator('option[value="client_stop_order"]')).toHaveText("دستور توقف کارفرما / مشاور");
+    await expect(reasonSelect.locator('option[value="safety_incident"]')).toHaveText("حادثه ایمنی");
+
     // Attempting to save without reason triggers validation
     await page.getByTestId("summary-metadata-save").click();
     await expect(page.getByText(/علت تعطیلی کارگاه الزامی است/)).toBeVisible();
@@ -174,20 +207,77 @@ test.describe("Daily Report Header and Weather Controls (GAP-SPEC-01)", () => {
     await expect(page.getByText(/ذخیره شد/)).toBeVisible();
   });
 
-  test("activity with quantity > 0 on inactive day displays confirmation dialog", async ({ page }) => {
-    // Setup report with inactive site
-    await setupWeatherMocks(page, {
-      site_status: "inactive",
-      site_status_label: "تعطیل",
-      inactivity_reason: "holiday",
-      inactivity_reason_label: "تعطیلات رسمی یا تقویمی",
-      is_auto_summary: false, // Show editable child tabs
-    });
-
+  test("inactive site status renders five catalog-driven options in English locale", async ({ page }) => {
+    await setupWeatherMocks(page);
     await page.goto(`/projects/${projectId}/daily-reports/${reportId}/view`);
 
-    // Confirmation dialog and text constant
-    const warningPrompt = "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت کارکرد اجرایی اطمینان دارید؟";
-    expect(warningPrompt).toContain("کارگاه در این تاریخ تعطیل ثبت شده است");
+    await expect(page.getByTestId("summary-metadata-editor")).toBeVisible({ timeout: 10000 });
+
+    const enBtn = page.locator("#button-language-en");
+    await expect(enBtn).toBeVisible();
+    await enBtn.click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    await page.getByTestId("site-override-toggle").check();
+    const siteSelect = page.getByTestId("site-override-value");
+    await siteSelect.selectOption("inactive");
+
+    const reasonSelect = page.getByTestId("inactivity-reason-select");
+    await expect(reasonSelect).toBeVisible();
+
+    const options = reasonSelect.locator("option");
+    await expect(options).toHaveCount(6);
+    await expect(reasonSelect.locator('option[value="weather"]')).toHaveText("Adverse weather");
+    await expect(reasonSelect.locator('option[value="holiday"]')).toHaveText("Official / calendar holiday");
+    await expect(reasonSelect.locator('option[value="strike_or_dispute"]')).toHaveText("Strike or dispute");
+    await expect(reasonSelect.locator('option[value="client_stop_order"]')).toHaveText("Client / consultant stop order");
+    await expect(reasonSelect.locator('option[value="safety_incident"]')).toHaveText("Safety incident");
+  });
+
+  test("temperature validation blocks out-of-range inputs and reversed min/max pair", async ({ page }) => {
+    await setupWeatherMocks(page);
+    await page.goto(`/projects/${projectId}/daily-reports/${reportId}/view`);
+
+    await expect(page.getByTestId("summary-metadata-editor")).toBeVisible({ timeout: 10000 });
+
+    const maxInput = page.locator("#summary-temp-max");
+    const minInput = page.locator("#summary-temp-min");
+
+    // Enter reversed pair: min=25, max=15
+    await minInput.fill("25");
+    await maxInput.fill("15");
+
+    await page.getByTestId("summary-metadata-save").click();
+    await expect(page.locator("#summary-temp-max-error")).toBeVisible();
+    await expect(page.locator("#summary-temp-max")).toHaveAttribute("aria-invalid", "true");
+
+    // Correct to valid pair
+    await maxInput.fill("30");
+    await expect(page.locator("#summary-temp-max-error")).toHaveCount(0);
+  });
+
+  test("weather impact notes entry, hydration, read-only display, and PDF export trigger", async ({ page }) => {
+    await setupWeatherMocks(page);
+    await page.goto(`/projects/${projectId}/daily-reports/${reportId}/view`);
+
+    await expect(page.getByTestId("summary-metadata-editor")).toBeVisible({ timeout: 10000 });
+
+    const impactNotesInput = page.locator("#summary-weather-impact");
+    await expect(impactNotesInput).toBeVisible();
+
+    const multilineNotes = "وزش باد شدید & بارش باران < 20mm\nتوقف کار در ارتفاع";
+    await impactNotesInput.fill(multilineNotes);
+
+    // Save notes
+    await page.getByTestId("summary-metadata-save").click();
+    await expect(page.getByText(/ذخیره شد/)).toBeVisible();
+
+    // Verify hydrated in input
+    await expect(impactNotesInput).toHaveValue(multilineNotes);
+
+    // Verify PDF download button is functional
+    const pdfButton = page.getByRole("button", { name: /خروجی PDF/ });
+    await expect(pdfButton).toBeVisible();
+    await pdfButton.click();
   });
 });

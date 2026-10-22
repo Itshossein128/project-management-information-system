@@ -2050,6 +2050,7 @@
       "specialtySubmittedToast": "Submitted — the project daily summary will update"
     },
     "inactivityReason": "Inactivity reason",
+    "selectInactivityReason": "-- Select inactivity reason --",
     "weatherImpactNotes": "Weather impact notes",
     "inactivityReasons": {
       "weather": "Adverse weather",
@@ -2058,7 +2059,8 @@
       "client_stop_order": "Client / consultant stop order",
       "safety_incident": "Safety incident"
     },
-    "inactiveSiteActivityWarning": "The site is marked inactive on this date; are you sure you want to record execution activity?",
+    "inactiveActivityDialogTitle": "Confirm activity on inactive day",
+    "inactiveSiteActivityWarning": "The site is marked inactive on this date; are you sure you want to record execution activity with positive volume?",
     "confirmActivity": "Confirm and save",
     "cancelActivity": "Cancel"
   },

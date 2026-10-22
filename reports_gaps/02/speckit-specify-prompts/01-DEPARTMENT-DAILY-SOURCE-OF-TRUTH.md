@@ -1,60 +1,68 @@
-یک ویژگی واحد برای اصلاح معماری ثبت گزارش‌های روزانه واحدهای تخصصی و منبع حقیقت گزارش روزانه پروژه مشخص کن. سند مرجع این ویژگی `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md` است. این ویژگی باید پیش از دو ویژگی بعدی این پوشه اجرا شود.
+Specify one feature to correct the architecture for specialty-unit daily reporting and establish the project daily report's source of truth. The reference document is `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md`. This feature must be completed before the next two features in this directory.
 
-پیش از تدوین مشخصات، `specs/028-auto-daily-report-summary/` و مصنوعات فعال مرتبط را بررسی کن. آن‌ها سابقه و baseline هستند، اما در هر تعارضی، تصمیم‌های صریح سند شکاف مرجع و این پرامپت درباره حذف صفحه مستقل و انتقال authoring به صفحات واحدها اولویت دارند. ویژگی جدید نباید معماری منسوخ را صرفاً به‌دلیل وجود در spec قبلی تثبیت کند.
+Before writing the specification, inspect `specs/028-auto-daily-report-summary/` and the related active artifacts. They are historical context and a baseline, but whenever they conflict, the explicit decisions in the reference gap report and this prompt take precedence—especially the removal of the standalone page and moving authoring into unit pages. The new feature must not preserve an obsolete architecture merely because it exists in an earlier spec.
 
-هدف محصول:
-- گزارش تخصصی هر واحد فقط در صفحه همان واحد زیر منوی «واحدهای تخصصی» ایجاد، ویرایش، ارسال، تأیید یا رد شود.
-- صفحه مستقل `/projects/{projectId}/sub-reports` نباید در محصول وجود داشته باشد.
-- گزارش روزانه پروژه یک خلاصه خودکار و فقط‌خواندنی از گزارش‌های تأییدشده یا ارسال‌شده واحدها در همان تاریخ باشد.
-- نباید دو جریان موازی برای ثبت یک مفهوم باقی بماند.
+Product goal:
 
-دامنه واحدهای تخصصی:
-- مجموعه پایه واحدها عبارت است از ابنیه، برق، مکانیک، ماشین‌آلات، انبار و حراست/HSE.
-- یک طبقه‌بندی رسمی و یکتا برای شناسه واحدها تعریف شود تا منو، مجوزها، گزارش واحد، محاسبه کامل‌بودن و گزارش روزانه پروژه از یک مجموعه مشترک استفاده کنند.
-- رشته‌های قدیمی مانند civil، plumbing، HVAC و finishing بدون تصمیم مهاجرتی به‌عنوان واحد موازی جدید نمایش داده نشوند. نگاشت داده‌های قدیمی به واحدهای رسمی باید صریح، قابل آزمون و بدون حذف تاریخچه باشد.
-- پروژه بتواند از طریق قالب فعال خود مشخص کند کدام واحدها برای گزارش روزانه آن الزامی‌اند؛ کامل‌بودن گزارش نباید به سه رشته hard-code شده محدود بماند.
+- Each unit's specialty report must be created, edited, submitted, approved, or rejected only on that unit's page under the “Specialty Units” top-level menu.
+- The standalone `/projects/{projectId}/sub-reports` page must not exist in the product.
+- The project daily report must be an automatic, read-only summary of submitted or approved unit reports for the same date.
+- No parallel workflows may remain for recording the same business concept.
 
-گردش کار گزارش روزانه واحد:
-- در صفحه هر واحد، کاربر مجاز بتواند یک تاریخ را انتخاب و گزارش همان واحد و تاریخ را باز کند یا در صورت نبود، پیش‌نویس آن را ایجاد کند.
-- برای هر پروژه، تاریخ و واحد فقط یک نسخه جاری فعال وجود داشته باشد و تاریخچه نسخه‌ها از بین نرود.
-- وضعیت‌های پیش‌نویس، ارسال‌شده، تأییدشده و ردشده پشتیبانی شوند.
-- فقط پیش‌نویس و گزارش ردشده قابل ویرایش باشند.
-- ارسال، تأیید و رد نیازمند مجوزهای پروژه‌ای متناظر باشند و تأییدکننده نتواند محدودیت‌های تفکیک وظایف پروژه را دور بزند.
-- دلیل رد ثبت شود و کاربر واحد بتواند گزارش ردشده را اصلاح و دوباره ارسال کند.
-- صفحه واحد، وضعیت گزارش، آخرین زمان تغییر، ثبت‌کننده، ارسال‌کننده، تأییدکننده و دلیل رد را به‌صورت قابل فهم نشان دهد.
+Specialty-unit scope:
 
-منبع حقیقت و تجمیع:
-- داده ثبت‌شده در صفحات واحدهای تخصصی باید تنها منبع حقیقت برای خلاصه روزانه پروژه باشد.
-- گزارش‌های پیش‌نویس، ردشده، حذف‌شده یا مربوط به تاریخ دیگر نباید در تجمیع وارد شوند.
-- بازسازی خلاصه باید تکرارپذیر و idempotent باشد و اجرای دوباره آن ردیف تکراری نسازد.
-- هر ردیف مشتق‌شده باید شناسه گزارش واحد مبدأ، واحد مبدأ و شناسه ردیف مبدأ را حفظ کند؛ برای مجموع‌های چندمنبعی نیز همه منابع باید قابل ردیابی باشند و آخرین منبع جای همه منابع ننشیند.
-- خلاصه روزانه باید فهرست واحدهای مورد انتظار، مشارکت‌کننده و غایب را بر اساس قالب پروژه اعلام کند و وضعیت ناقص را صادقانه نمایش دهد.
-- اگر یک گزارش واحد پس از رد یا اصلاح دوباره تأیید شد، خلاصه روزانه باید بدون باقی‌ماندن داده منسوخ بازسازی شود.
-- overrideهای مجاز سطح پروژه مانند نظر مدیریت، وضعیت کارگاه یا وضعیت جوی نباید هنگام بازسازی ناخواسته حذف شوند.
+- The base set of units is Buildings, Electrical, Mechanical, Machinery, Warehouse, and Security/HSE.
+- Define one official, canonical taxonomy for unit identifiers so that navigation, permissions, unit reporting, completeness calculations, and the project daily report use the same shared set.
+- Legacy disciplines such as `civil`, `plumbing`, `hvac`, and `finishing` must not appear as new parallel units without an explicit migration decision. Mapping legacy data to official units must be explicit, testable, and preserve history.
+- Each project must be able to declare, through its active template, which units are required for its daily report; completeness must not be hard-coded to three disciplines.
 
-حذف تجربه کاربری قدیمی:
-- route، گزینه منو، CTA، empty-state، ترجمه و تست‌هایی که صفحه `/sub-reports` را قابل دسترس می‌کنند حذف یا اصلاح شوند.
-- بازکردن مستقیم URL قدیمی نباید صفحه گزارش‌سازی یا فرم ثبت اطلاعات نمایش دهد.
-- صفحه گزارش‌های روزانه نباید کاربر را به `/sub-reports` هدایت کند؛ دسترسی به ثبت تخصصی فقط از منوی «واحدهای تخصصی» و صفحات همان واحدها باشد.
-- دکمه «گزارش جدید» برای گزارش روزانه پروژه ایجاد نشود و ایجاد مستقیم گزارش پروژه‌ای خام همچنان ممنوع بماند.
-- API یا مدل قدیمی فقط در صورتی می‌تواند موقتاً به‌عنوان جزئیات داخلی حفظ شود که هیچ جریان کاربری موازی ایجاد نکند و یک برنامه مهاجرت/حذف روشن داشته باشد.
+Unit daily-report workflow:
 
-مهاجرت و سازگاری:
-- داده‌های معتبر موجود در گزارش‌های تخصصی قدیمی از بین نروند. مشخصات باید راهبرد نگاشت، backfill، حل تعارض رکوردهای تکراری و rollback را تعریف کند.
-- شناسه‌های پایدار و ارتباط گزارش‌های روزانه موجود تا حد ممکن حفظ شوند.
-- هیچ migration نباید قبل از نرمال‌سازی داده‌های ناسازگار، constraint جدیدی اعمال کند.
+- On each unit page, an authorized user can select a date and open the report for that unit and date, or create its draft when it does not exist.
+- For each project, date, and unit, only one current active version may exist, while version history is preserved.
+- Support `draft`, `submitted`, `approved`, and `rejected` states.
+- Only draft and rejected reports are editable.
+- Submitting, approving, and rejecting require the corresponding project permissions, and an approver cannot bypass project segregation-of-duties rules.
+- Record the rejection reason, and allow the unit user to correct and resubmit a rejected report.
+- The unit page clearly shows report state, last-change time, preparer, submitter, approver, and rejection reason.
 
-سناریوهای پذیرش الزامی:
-1. کاربر گزارش ابنیه یک تاریخ را در صفحه ابنیه ثبت و ارسال می‌کند؛ پس از تأیید، همان داده با provenance صحیح در خلاصه روزانه آن تاریخ دیده می‌شود.
-2. گزارش پیش‌نویس یا ردشده یک واحد در خلاصه وارد نمی‌شود و واحد در فهرست کمبودها باقی می‌ماند.
-3. پس از تأیید تمام واحدهای الزامی قالب پروژه، گزارش از حالت ناقص خارج می‌شود.
-4. اصلاح و ارسال مجدد یک گزارش واحد، خلاصه را جایگزین می‌کند و داده تکراری یا منسوخ باقی نمی‌گذارد.
-5. کاربر فاقد مجوز و کاربر عضو پروژه دیگر نتوانند گزارش واحد را مشاهده، ایجاد، ارسال یا تأیید کنند.
-6. مسیر `/sub-reports` از منو و UI حذف است و بازکردن مستقیم آن هیچ فرم ثبت گزارش نمایش نمی‌دهد.
-7. داده‌های قدیمی پس از migration قابل ردیابی و خواندن باقی می‌مانند.
+Source of truth and aggregation:
 
-مرز این ویژگی:
-- در این ویژگی قرارداد سکشن‌های تخصصی مانند تجهیزات، مصالح، بتن و نیروی انسانی را کامل نکن؛ فقط چارچوب واحد، گردش کار، taxonomy، مهاجرت، provenance، completeness و اتصال منبع حقیقت را مشخص کن.
-- طراحی کامل صفحه و خروجی چاپی گزارش روزانه پروژه در ویژگی سوم انجام می‌شود.
-- مشخصات باید فناوری‌ناوابسته، سناریومحور، قابل آزمون و منطبق با قانون اساسی پروژه باشد.
-- سناریوها باید به‌گونه‌ای نوشته شوند که در مراحل tasks و implement با TDD، ابتدا تست رفتاری شکست‌خورده و سپس حداقل تغییر لازم برای سبزشدن آن ایجاد شود.
+- Data entered on specialty-unit pages must be the sole source of truth for the project daily summary.
+- Draft, rejected, deleted, or different-date unit reports must not contribute to aggregation.
+- Summary rebuilding must be repeatable and idempotent; rerunning it must not create duplicate rows.
+- Every derived row must retain the source unit report ID, source unit, and source row ID. Multi-source totals must retain all sources; the last source must not replace the complete provenance set.
+- The daily summary must state the expected, contributing, and missing units according to the project template and truthfully show partial status.
+- If a unit report is approved again after rejection or correction, rebuild the summary without retaining stale data.
+- Authorized project-level overrides, such as management opinion, site status, or weather, must not be unintentionally removed during rebuilding.
+
+Retire the obsolete user experience:
+
+- Remove or update routes, navigation entries, CTAs, empty states, translations, and tests that make `/sub-reports` accessible.
+- Opening the legacy URL directly must not display a report-creation page or data-entry form.
+- The daily-reports page must not direct users to `/sub-reports`; specialty authoring is accessible only through the “Specialty Units” menu and the corresponding unit pages.
+- Do not add a “New Report” button for the project daily report; direct creation of a raw project-level daily report remains prohibited.
+- A legacy API or model may be retained temporarily only as an internal detail if it creates no parallel user workflow and has a clear migration/removal plan.
+
+Migration and compatibility:
+
+- Existing valid specialty-report data must not be lost. The specification must define mapping, backfill, duplicate-resolution, and rollback strategies.
+- Preserve stable identifiers and links to existing daily reports wherever possible.
+- No migration may apply a new constraint before inconsistent existing data is normalized.
+
+Mandatory acceptance scenarios:
+
+1. A user records and submits a Buildings report for a date on the Buildings page; after approval, the same data appears in that date's daily summary with correct provenance.
+2. A draft or rejected report from a unit does not contribute to the summary, and that unit remains listed as missing.
+3. After all template-required units are approved, the report is no longer partial.
+4. Correcting and resubmitting a unit report replaces its contribution to the summary without duplicates or stale data.
+5. A user without permission, and a user who belongs to another project, cannot view, create, submit, or approve a unit report.
+6. `/sub-reports` is absent from navigation and UI, and opening it directly displays no specialty-report form.
+7. Legacy data remains readable and traceable after migration.
+
+Feature boundary:
+
+- Do not complete the detailed contracts for specialty sections such as equipment, materials, concrete, and labor in this feature. Specify only the unit framework, workflow, taxonomy, migration, provenance, completeness, and source-of-truth integration.
+- The full project daily-report page and printable output are specified in the third feature.
+- The specification must be technology-agnostic, scenario-driven, testable, and consistent with the project constitution.
+- Write scenarios so that the later tasks and implementation can follow TDD: first a failing behavioral test, then the smallest necessary change to make it pass.

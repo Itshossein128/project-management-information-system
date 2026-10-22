@@ -50,7 +50,7 @@ export interface EditableGridProps {
   columns: GridColumn[];
   rows: GridRow[];
   makeEmptyRow: () => GridRow;
-  onSaveRow: (row: GridRow, options?: { silent?: boolean }) => Promise<void>;
+  onSaveRow: (row: GridRow, options?: { silent?: boolean }) => Promise<boolean | void>;
   onDeleteRow: (row: GridRow) => Promise<void>;
   readOnly?: boolean;
   addLabel?: string;
@@ -133,7 +133,24 @@ export function EditableGrid({
   const [autosavingKey, setAutosavingKey] = useState<string | null>(null);
 
   useEffect(() => {
-    setRows(serverRows);
+    setRows((prev) => {
+      const dirtyUnsaved = prev.filter((r) => r._dirty || !r.id);
+      if (dirtyUnsaved.length === 0) {
+        return serverRows;
+      }
+      const serverMap = new Map(serverRows.map((s) => [s.id, s]));
+      const merged = prev.map((r) => {
+        if (r._dirty) return r;
+        if (r.id && serverMap.has(r.id)) return serverMap.get(r.id)!;
+        return r;
+      });
+      for (const s of serverRows) {
+        if (!merged.some((m) => m.id === s.id)) {
+          merged.push(s);
+        }
+      }
+      return merged;
+    });
   }, [serverRows]);
 
   const setCell = (key: string, colKey: string, value: unknown) => {
@@ -149,10 +166,12 @@ export function EditableGrid({
   const saveRow = async (row: GridRow, options?: { silent?: boolean }) => {
     setSavingKey(row._key);
     try {
-      await onSaveRow(row, options);
-      setRows((prev) =>
-        prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)),
-      );
+      const result = await onSaveRow(row, options);
+      if (result !== false) {
+        setRows((prev) =>
+          prev.map((r) => (r._key === row._key ? { ...r, _dirty: false } : r)),
+        );
+      }
     } finally {
       setSavingKey(null);
     }

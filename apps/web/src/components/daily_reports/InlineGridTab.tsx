@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import {
@@ -73,17 +73,24 @@ export function InlineGridTab({
     );
   }
 
-  const rows: GridRow[] = serverRows.map((r) => ({
-    ...(r as Record<string, unknown>),
-    _key: r.id ?? generateUUID(),
-  }));
+  const rows: GridRow[] = useMemo(
+    () =>
+      serverRows.map((r) => ({
+        ...(r as Record<string, unknown>),
+        _key: r.id ?? generateUUID(),
+      })),
+    [serverRows],
+  );
 
-  const onSaveRow = async (row: GridRow, options?: { silent?: boolean }) => {
+  const onSaveRow = async (row: GridRow, options?: { silent?: boolean }): Promise<boolean> => {
     const payload = toPayload(row);
     if (beforeSaveRow) {
+      if (options?.silent) {
+        return false;
+      }
       const proceed = await beforeSaveRow(row, payload);
       if (!proceed) {
-        return;
+        return false;
       }
     }
     if (!isOnline && canOffline) {
@@ -99,7 +106,7 @@ export function InlineGridTab({
         toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
       }
       await refreshSyncMap();
-      return;
+      return true;
     }
     try {
       if (row.id) {
@@ -111,6 +118,7 @@ export function InlineGridTab({
         toast.success("ذخیره شد");
       }
       onChanged();
+      return true;
     } catch (e) {
       if (typeof navigator !== "undefined" && !navigator.onLine && canOffline) {
         await queueChildWrite(projectId, reportId, resource, row.id ? "PATCH" : "POST", payload, row.id);
@@ -118,7 +126,7 @@ export function InlineGridTab({
           toast.warning("ذخیره آفلاین — در صف همگام‌سازی");
         }
         await refreshSyncMap();
-        return;
+        return true;
       }
       if (!options?.silent) {
         toast.error((e as Error).message);

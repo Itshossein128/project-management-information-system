@@ -121,9 +121,8 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
         ['حداقل دما', str(report.temp_min) if report.temp_min is not None else '—'],
         ['تهیه‌کننده', _full_name(report.prepared_by)],
         ['تأییدکننده', _full_name(report.approved_by)],
+        ['توضیحات و اثرات شرایط جوی', report.weather_impact_notes or ''],
     ]
-    if report.weather_impact_notes:
-        header_rows.append(['تأثیرات جوی', report.weather_impact_notes])
     story.append(_kv_table(header_rows, font))
     story.append(Spacer(1, 12))
 
@@ -237,10 +236,17 @@ def _kv_table(rows, font) -> Table:
         label = row[0]
         val = row[1] if len(row) > 1 else ''
         shaped_label = _fa(label)
-        if isinstance(val, str) and len(str(val)) > 30:
-            val_cell = Paragraph(_fa(val), val_style)
+        if isinstance(val, str) and (len(str(val)) > 30 or '\n' in str(val)):
+            escaped = (
+                str(val)
+                .replace('&', '&amp;')
+                .replace('<', '&lt;')
+                .replace('>', '&gt;')
+            )
+            paragraphs_text = '<br/>'.join(_fa(line) for line in escaped.splitlines())
+            val_cell = Paragraph(paragraphs_text, val_style)
         else:
-            val_cell = _fa(val)
+            val_cell = _fa(val) if val else ''
         data.append([shaped_label, val_cell])
     table = Table(data, colWidths=[120, 320])
     table.setStyle(

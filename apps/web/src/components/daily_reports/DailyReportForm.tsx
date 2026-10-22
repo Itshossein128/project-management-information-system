@@ -21,6 +21,7 @@ import {
 import { getCachedActivities, getCachedSubcontractors } from "@/app/lib/offlineDB";
 import { warmProjectCache } from "@/app/lib/offlineCache";
 import { isNetworkError } from "@/app/lib/offlineWrite";
+import { validateTemperatures } from "@/app/lib/temperatureValidation";
 import { isoToJalali, jalaliToIso } from "@/app/lib/jalali-utils";
 import { Breadcrumb, LoadingSkeleton } from "@/components/layout/page-header";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,9 +69,11 @@ function headerFromDetail(d: DailyReportDetail): HeaderState {
     work_front: d.work_front ?? "",
     location_notes: d.location_notes ?? "",
     site_status: d.site_status,
+    inactivity_reason: d.inactivity_reason ?? null,
     weather_condition: d.weather_condition,
     temp_max: d.temp_max ?? "",
     temp_min: d.temp_min ?? "",
+    weather_impact_notes: d.weather_impact_notes ?? "",
     general_notes: d.general_notes ?? "",
   };
 }
@@ -171,7 +174,16 @@ export function DailyReportForm({
   };
 
   const saveHeader = useMutation({
-    mutationFn: () => saveHeaderOffline(headerToPayload(header)),
+    mutationFn: () => {
+      const tempCheck = validateTemperatures(header.temp_min, header.temp_max, { isBlurOrSubmit: true });
+      if (!tempCheck.isValid) {
+        if (tempCheck.tempMaxError === "temp_max_must_be_gte_temp_min") {
+          throw new Error("حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد");
+        }
+        throw new Error("مقادیر دما نامعتبر است (باید بین ۴۰- تا ۶۰+ باشد)");
+      }
+      return saveHeaderOffline(headerToPayload(header));
+    },
     onSuccess: ({ reportId: savedId, offline }) => {
       toast.success(offline ? "به صورت آفلاین ذخیره شد" : "هدر گزارش ذخیره شد");
       if (!reportId) {
@@ -189,6 +201,8 @@ export function DailyReportForm({
 
   useEffect(() => {
     if (!editable || saveHeader.isPending || !header.report_date) return;
+    const tempCheck = validateTemperatures(header.temp_min, header.temp_max, { isBlurOrSubmit: false });
+    if (!tempCheck.isValid) return;
     const payload = headerToPayload(header);
     const payloadKey = JSON.stringify(payload);
     if (payloadKey === lastSavedHeaderRef.current) return;

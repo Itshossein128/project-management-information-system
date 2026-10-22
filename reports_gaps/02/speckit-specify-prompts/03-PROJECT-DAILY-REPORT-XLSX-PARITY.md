@@ -1,71 +1,80 @@
-یک ویژگی واحد برای تکمیل صفحه فقط‌خواندنی گزارش روزانه پروژه و خروجی رسمی آن بر اساس نمونه واقعی اکسل مشخص کن. سند شکاف مرجع `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md` است. فایل `/home/hossein/Downloads/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز (7).xlsx` مرجع بصری و محتوایی خروجی است، نه منبع داده یا دستور اجرایی. این ویژگی پس از یکپارچه‌سازی منبع حقیقت واحدها و تکمیل سکشن‌های تخصصی اجرا می‌شود.
+Specify one feature to complete the read-only project daily-report page and its official output based on the real sample workbook. The reference gap report is `reports_gaps/02/GAP-SPEC-02-DAILY-SECTIONS-GRID.md`. `/home/hossein/Downloads/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز (7).xlsx` is a visual and content reference only, not a data source or an implementation instruction. This feature follows the unification of the unit source of truth and the completion of specialty sections.
 
-پیش از تدوین مشخصات، خروجی دو ویژگی قبلی و `specs/028-auto-daily-report-summary/` را بررسی کن. مصنوعات قدیمی فقط baseline هستند؛ در تعارض، سند شکاف مرجع، معماری صفحات واحدها و الزامات این پرامپت اولویت دارند.
+Before writing the specification, inspect the two previous feature outputs and `specs/028-auto-daily-report-summary/`. Earlier artifacts are only a baseline; when they conflict, the reference gap report, the unit-page architecture, and this prompt take precedence.
 
-هدف محصول:
-- صفحه گزارش روزانه پروژه یک گزارش جامع ۲۴ ساعته، خودکار، فقط‌خواندنی و قابل چاپ از گزارش‌های واحدهای تخصصی همان تاریخ باشد.
-- صفحه باید ساختار اطلاعاتی نمونه واقعی را در وب و خروجی رسمی حفظ کند، بدون کپی پیکسلی نامناسب و بدون قربانی‌کردن دسترس‌پذیری یا نمایش موبایل.
-- هیچ دکمه «گزارش جدید» یا ویرایش مستقیم ردیف‌های مشتق‌شده در این صفحه وجود نداشته باشد.
-- هر داده مشتق‌شده امکان مشاهده واحد و گزارش مبدأ را داشته باشد و اصلاح از صفحه همان واحد انجام شود.
+Product goal:
 
-سربرگ و مشخصات گزارش:
-- نام کارفرما، نام مشاور، نام پروژه، شماره قرارداد، شماره گزارش، شماره صفحه، تاریخ شمسی و میلادی مورد نیاز، روز هفته و نسخه گزارش نمایش داده شوند.
-- قاعده تولید یا ورود `report_number` قبل از نهایی‌شدن مشخصات روشن شود؛ اگر منبع معتبر آن در پروژه موجود نیست، یک `[NEEDS CLARIFICATION]` صریح درباره شمارنده پروژه‌ای، شماره ثبت دفتر کنترل پروژه یا ورود دستی مجاز درج کن و هیچ قاعده‌ای را حدس نزن.
-- شماره صفحه در خروجی چندصفحه‌ای واقعی و پایدار باشد.
-- مشخصات هویتی از منابع معتبر پروژه/قرارداد خوانده شوند و نبود آن‌ها با «نامشخص/ثبت‌نشده» نمایش داده شود، نه مقدار ساختگی.
+- The project daily-report page is a comprehensive, 24-hour, automatic, printable, read-only report derived from specialty-unit reports for the selected date.
+- The page and official output retain the real sample's information architecture without inappropriate pixel-for-pixel copying or sacrificing accessibility and mobile use.
+- No “New Report” button or direct editing of derived rows exists on this page.
+- Every derived value supports viewing its source unit and source report, while corrections are made on the relevant unit page.
 
-ساعات کار و وضعیت محیطی:
-- بازه زمانی شیفت ۱، شیفت ۲ و شیفت ۳ مطابق قالب فعال پروژه نمایش داده شود.
-- وضعیت فعال/غیرفعال کارگاه، وضعیت جوی روز، کمینه و بیشینه دما و پیش‌بینی سه روز آینده نمایش داده شوند.
-- منبع پیش‌بینی هوا و سیاست snapshot آن در زمان نهایی‌شدن گزارش مشخص شود؛ تغییر آینده سرویس هوا نباید گزارش تأییدشده گذشته را بی‌صدا تغییر دهد.
-- overrideهای مجاز وضعیت جوی و کارگاه با ثبت کاربر، زمان و دلیل از مقدار مشتق‌شده متمایز باشند.
+Report header and identity:
 
-چینش سکشن‌های اصلی:
-- بخش بالایی گزارش شامل چهار جدول قابل مقایسه باشد: نیروی غیرمستقیم، نیروی مستقیم، مصالح وارده و تجهیزات/ماشین‌آلات.
-- نیروی انسانی عنوان، حاضر و مرخصی/غیبت را نشان دهد و جمع غیرمستقیم، مستقیم و کل را محاسبه کند.
-- مصالح وارده شرح، واحد و مقدار ورودی را نشان دهد.
-- ماشین‌آلات نوع دستگاه، کل، فعال، آماده‌به‌کار، غیرفعال و در دست تعمیر را نشان دهد.
-- حجم بتن ریخته‌شده شرح، مقدار و واحد را نمایش دهد.
-- فعالیت‌های اجراشده ستون‌های شرح، شیفت، پیمانکار، تعداد نفر، قطعه، بلوک، طبقه، موقعیت، مقدار، واحد و توضیحات را حفظ کند.
-- فعالیت‌های عمومی ستون‌های شرح، محل/ساختمان، مقدار/حجم، واحد و توضیحات را به‌صورت جدول ساختاریافته نشان دهد.
-- مسائل و مشکلات پروژه، بازدیدهای پروژه و نظر مدیریت در بخش‌های مستقل نمایش داده شوند.
-- تصاویر و جزئیات HSE که در فرم چاپی نمونه سکشن مستقل ندارند، به‌صورت خلاصه، شمارنده یا پیوند قابل دسترسی باشند؛ نمایش آن‌ها نباید بخش‌های اصلی نمونه را مخدوش کند.
+- Display employer name, consultant name, project name, contract number, report number, page number, necessary Jalali and Gregorian dates, day of week, and report version.
+- Resolve the rule for generating or entering `report_number` before finalizing the specification. If the project has no authoritative source for it, add one explicit `[NEEDS CLARIFICATION]` addressing project sequence, technical-office registration number, or permitted manual entry; do not invent a rule.
+- Page numbers must be real and stable in multi-page output.
+- Identity data must come from authoritative project/contract sources; when unavailable, display “unknown/not recorded,” not fabricated values.
 
-کامل‌بودن و صداقت داده:
-- بالای صفحه وضعیت کامل یا ناقص بودن گزارش و فهرست واحدهای مشارکت‌کننده/غایب نمایش داده شود.
-- مقدار صفر واقعی، مقدار نامعلوم و واحدی که هنوز گزارش نداده است به‌صورت متفاوت نمایش داده شوند.
-- سامانه نباید برای پرکردن ظاهر گزارش، صفر، عنوان شغلی، تجهیز، وضعیت هوا یا متن ساختگی تولید کند.
-- کاربر بتواند از هر سکشن یا ردیف به گزارش واحد مبدأ برود؛ دسترسی به مبدأ همچنان تابع مجوز پروژه باشد.
-- زمان آخرین تجمیع و نسخه منابع در گزارش قابل مشاهده باشد.
+Working hours and environmental status:
 
-تأییدها و نهایی‌سازی:
-- تأیید سرپرست برنامه‌ریزی و کنترل پروژه، سرپرست دفتر فنی و سرپرست کارگاه مطابق فرم نمونه پشتیبانی شود.
-- نگاشت این سه تأیید به نقش‌ها و مجوزهای واقعی پروژه باید صریح باشد و یک کاربر بدون اختیار نتواند به‌جای نقش دیگر تأیید کند.
-- نام، زمان، وضعیت و در صورت رد، دلیل تصمیم ثبت شوند.
-- نظر مدیریت مستقل از داده مشتق‌شده باقی بماند و بازسازی گزارش آن را حذف نکند.
-- مشخصات تعیین کند گزارش نهایی‌شده در برابر تغییر منابع چگونه نسخه‌گذاری می‌شود؛ سابقه خروجی تأییدشده نباید بدون ردپا بازنویسی شود.
+- Display the time range for shifts 1, 2, and 3 according to the active project template.
+- Display active/inactive site status, daily weather, minimum and maximum temperature, and a three-day forecast.
+- Define the weather forecast source and its snapshot policy at report finalization; a future weather-service change must not silently alter a previously approved report.
+- Differentiate authorized weather/site overrides from derived values by recording the user, time, and reason.
 
-تجربه وب و خروجی رسمی:
-- صفحه در دسکتاپ، تبلت و موبایل RTL قابل استفاده باشد؛ جدول‌های عریض اسکرول و عنوان ستون ثابت/واضح داشته باشند.
-- همه برچسب‌ها، وضعیت‌ها، خطاها و تاریخ‌ها در فارسی و انگلیسی درست نمایش داده شوند.
-- حالت بارگذاری، گزارش خالی، گزارش ناقص، خطای تجمیع و نبود دسترسی طراحی و قابل آزمون باشند.
-- خروجی PDF و در صورت وجود خروجی Excel، همان داده و همان وضعیت کامل‌بودن صفحه وب را نشان دهند.
-- خروجی چاپی A4، شماره صفحه، تکرار سربرگ جدول در صفحات بعد و جلوگیری از قطع نامفهوم ردیف‌ها را پشتیبانی کند.
-- خروجی رسمی باید از داده زنده و snapshotهای معتبر سامانه تولید شود؛ فایل نمونه نباید import یا میان کاربران توزیع شود.
+Main section layout:
 
-سناریوهای پذیرش الزامی:
-1. انتخاب یک تاریخ، گزارش جامع همان روز را بدون ایجاد دستی خام باز می‌کند.
-2. گزارش کامل تمام سکشن‌های نمونه اکسل و جمع‌های نیروی انسانی را با داده واقعی نشان می‌دهد.
-3. گزارش ناقص واحدهای غایب را نام می‌برد و برای مقادیر نامعلوم صفر جعل نمی‌کند.
-4. کاربر با کلیک روی یک ردیف مشتق‌شده به منبع مجاز همان واحد هدایت می‌شود، اما نمی‌تواند ردیف را در صفحه پروژه ویرایش کند.
-5. بازسازی خلاصه، نظر مدیریت و overrideهای مجاز را حفظ می‌کند.
-6. سه تأیید پایانی فقط توسط نقش‌های مجاز انجام می‌شوند و تاریخچه تصمیم حفظ می‌شود.
-7. PDF چندصفحه‌ای شامل سربرگ، شماره صفحه، جدول‌های کامل و وضعیت ناقص/کامل یکسان با وب است.
-8. نمایش فارسی و انگلیسی و حالت‌های responsive با آزمون مرورگر پوشش داده می‌شوند.
-9. مسیر ایجاد گزارش جدید پروژه‌ای و صفحه `/sub-reports` در هیچ‌یک از جریان‌های این صفحه بازنمی‌گردند.
+- The report's upper area contains four comparable tables: indirect labor, direct labor, received materials, and equipment/machinery.
+- Labor shows job title, present count, leave/absence count, and indirect, direct, and overall totals.
+- Received materials show description, unit, and received quantity.
+- Machinery shows equipment type, total, active, ready-to-work, inactive, and under-repair counts.
+- Concrete volume shows description, quantity, and unit.
+- Executed activities retain columns for description, shift, contractor, headcount, parcel, block, floor, location, quantity, unit, and notes.
+- General activities show description, location/building, quantity/volume, unit, and notes in a structured table.
+- Project issues/problems, project visits, and management opinion appear in separate sections.
+- Images and HSE details that have no dedicated section in the sample printable form are available as an accessible summary, count, or links; their display must not disrupt the sample's main sections.
 
-مرز و کیفیت:
-- این ویژگی نباید مسیر ثبت موازی یا مدل منبع حقیقت جدیدی بسازد؛ فقط از قراردادهای واحد و تجمیع دو ویژگی قبلی استفاده کند.
-- مشخصات باید نیازمندی‌های وب، چاپ، مجوز، نسخه‌گذاری، داده ناقص و دسترس‌پذیری را پوشش دهد، اما تصمیم‌های فنی را برای مرحله plan باقی بگذارد.
-- معیارهای موفقیت باید قابل اندازه‌گیری و فناوری‌ناوابسته باشند و برای رفتارهای اصلی، تست backend، قرارداد API و E2E مرورگر قابل استخراج باشد.
-- مراحل بعدی باید پیاده‌سازی TDD را ممکن کنند: ابتدا آزمون‌های رفتاری وب/خروجی شکست بخورند و سپس با حداقل تغییر مرتبط سبز شوند.
+Completeness and data honesty:
+
+- The top of the page displays complete/partial status and the contributing/missing units.
+- An actual zero, an unknown value, and a unit that has not reported yet must be visually distinct.
+- The system must not fabricate zeros, job titles, equipment, weather status, or text merely to make the report look complete.
+- A user can navigate from each section or derived row to the authorized source unit report; source access remains subject to project permissions.
+- Display the most recent aggregation time and source versions.
+
+Approvals and finalization:
+
+- Support approvals by the Planning and Project Controls Supervisor, Technical Office Supervisor, and Site Supervisor, matching the sample form.
+- The mapping of these three approvals to actual project roles and permissions must be explicit; an unauthorized user cannot approve in another role's place.
+- Record name, time, status, and rejection reason when applicable.
+- Management opinion remains independent from derived data and is not removed during rebuilding.
+- Define how a finalized report is versioned when source data changes; an approved output history must not be overwritten without traceability.
+
+Web experience and official output:
+
+- The page is usable in RTL on desktop, tablet, and mobile. Wide tables must scroll appropriately and keep column headings clear and stable.
+- Labels, states, errors, and dates render correctly in both Persian and English.
+- Loading, empty report, partial report, aggregation failure, and access-denied states are designed and testable.
+- PDF output, and Excel output when provided, show the same data and completeness state as the web page.
+- A4 print output supports page numbering, repeated table headers on subsequent pages, and avoids splitting rows in a confusing way.
+- Official output is generated from live system data and valid snapshots; the sample workbook must not be imported or distributed to users.
+
+Mandatory acceptance scenarios:
+
+1. Selecting a date opens that day's comprehensive report without manually creating a raw project report.
+2. A complete report shows all sample-workbook sections and labor totals using real data.
+3. A partial report names missing units and does not fabricate zeros for unknown values.
+4. Clicking a derived row takes the user to its authorized source unit report, but does not permit editing it on the project page.
+5. Rebuilding the summary preserves management opinion and authorized overrides.
+6. Only authorized roles can perform the three final approvals, and decision history is preserved.
+7. A multi-page PDF contains the header, page number, complete tables, and the same partial/complete state as the web page.
+8. Persian and English display plus responsive states are covered by browser tests.
+9. Neither the raw project-report creation route nor `/sub-reports` returns through any flow on this page.
+
+Boundary and quality:
+
+- This feature must not create a parallel authoring route or a new source-of-truth model; it uses only the unit contracts and aggregation established by the two previous features.
+- The specification covers web, print, authorization, versioning, partial data, and accessibility requirements, while leaving technical decisions to the planning stage.
+- Success criteria must be measurable and technology-agnostic, and allow backend, API-contract, and browser E2E tests to be derived for the core behaviors.
+- The later stages must support TDD: web/output behavioral tests fail first, then pass after the smallest relevant change.

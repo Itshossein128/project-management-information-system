@@ -1,146 +1,147 @@
-# API Contract: Daily Report Header and Weather Controls
+# API Contract: Standardized Daily Weather and Temperature
 
 ## 1. Scope and conventions
 
-Base project path:
+Base path:
 
 ```text
-/api/v1/projects/{project_id}
+/api/v1/projects/{project_id}/daily-reports/
 ```
 
-All identifiers are language-independent. Display labels are localized by the API/client. Existing authentication, project membership, soft-delete filtering, and error-envelope conventions remain in force.
+Existing authentication, project membership, permission checks, report lifecycle rules, and automatic-summary creation behavior remain unchanged. This contract defines only weather, temperature, weather-impact note, aggregation, and PDF behavior.
 
-## 2. Shared values
+Requests send `Accept-Language: fa|en`. Field names, weather values, and stable error codes never change with locale; human messages may be localized.
 
-### Weather condition
+## 2. Shared weather values
+
+The only valid non-empty weather values are:
 
 ```json
 ["clear", "cloudy", "rainy", "snowy", "stormy"]
 ```
 
-`sunny`, `partly_cloudy`, and `foggy` are migration-only inputs. They are invalid in new API requests after deployment.
+Presentation order and meaning:
 
-### Site status
+| Value | Persian | English |
+|-------|---------|---------|
+| `clear` | آفتابی / صاف | Clear / sunny |
+| `cloudy` | ابری | Cloudy |
+| `rainy` | بارانی | Rainy |
+| `snowy` | برفی | Snowy |
+| `stormy` | طوفانی / گرد و غبار | Stormy / dust |
 
-```json
-["active", "inactive"]
-```
+`sunny`, `partly_cloudy`, `foggy`, and unknown values are invalid for new writes. Historical/offline data is normalized before it reaches the current write contract.
 
-### Inactivity reason
-
-```json
-[
-  "weather",
-  "holiday",
-  "strike_or_dispute",
-  "client_stop_order",
-  "safety_incident"
-]
-```
-
-## 3. Daily report date lookup and ensure
-
-### Read an existing full-day summary
+## 3. Read daily-report detail
 
 ```http
-GET /api/v1/projects/{project_id}/daily-reports/by-date/?date=2026-10-22
+GET /api/v1/projects/{project_id}/daily-reports/{report_id}/
 ```
 
-- Required project permission: `view_reports`.
-- Returns only the current, non-deleted `shift=full` report for the requested project/date.
-- Must not create, rebuild, version, or otherwise mutate a report.
-- Returns `404` when no summary exists.
-- A user with only `view_reports` can read an existing report but cannot create a missing one.
-
-### Ensure or rebuild a full-day summary
-
-```http
-POST /api/v1/projects/{project_id}/daily-reports/by-date/
-Content-Type: application/json
-
-{"date":"2026-10-22"}
-```
-
-- Required project permission: `edit_reports`.
-- Ensures the one current `shift=full` report and rebuilds derived content from eligible specialty reports.
-- Repeated calls are logically idempotent: they return the same current summary rather than creating additional shells.
-- The transaction locks the authoritative project row before the existence check/create/rebuild sequence; the database uniqueness rule remains the second defense.
-- A viewer-only request fails authorization before any write occurs.
-
-### Raw collection creation remains blocked
-
-```http
-POST /api/v1/projects/{project_id}/daily-reports/
-```
-
-Response:
+Relevant response fields:
 
 ```json
 {
-  "error": {
-    "code": "auto_summary_only",
-    "message": "Daily reports are created from specialty reports.",
-    "details": {}
+  "report_id": "uuid",
+  "report_date": "1405/07/30",
+  "weather_condition": "stormy",
+  "weather_condition_label": "طوفانی / گرد و غبار",
+  "temp_min": "-2.5",
+  "temp_max": "8.0",
+  "weather_impact_notes": "بارش و وزش باد موجب توقف جرثقیل شد.",
+  "weather_override": false,
+  "aggregation": {
+    "weather_source": "derived"
   }
 }
 ```
 
-HTTP status is `400`. This endpoint never becomes the replacement for `by-date`.
+Contract rules:
 
-## 4. Header representation
+- `weather_condition` is one approved value or `null` where the existing report allows no observation.
+- `weather_condition_label` is a server display convenience and is `null` when weather is `null`; bilingual clients localize from the stable `weather_condition` value and MUST NOT depend on this label as their only translation source.
+- Temperatures are decimal strings or `null`.
+- `weather_impact_notes` is a string; the empty representation is `""`.
+- Multi-line and mixed Persian/English text is returned without silent truncation or character loss.
 
-The detail/header response exposes at least:
-
-```json
-{
-  "id": "uuid",
-  "project": "uuid",
-  "report_date": "2026-10-22",
-  "shift": "full",
-  "weather_condition": "cloudy",
-  "weather_condition_label": "ابری",
-  "temp_min": 12.5,
-  "temp_max": 21.0,
-  "weather_impact_notes": "بارندگی صبحگاهی باعث کندی خاکبرداری شد.",
-  "site_status": "inactive",
-  "site_status_label": "تعطیل",
-  "inactivity_reason": "weather",
-  "inactivity_reason_label": "نامساعد بودن شرایط جوی",
-  "weather_override": true,
-  "site_status_override": true
-}
-```
-
-Blank optional text is serialized consistently with existing API conventions. The machine value, not the localized label, is accepted in write payloads.
-
-## 5. Header update
-
-Existing detail/header update routes accept a partial payload such as:
+## 4. Update daily-report header
 
 ```http
 PATCH /api/v1/projects/{project_id}/daily-reports/{report_id}/
 Content-Type: application/json
+```
 
+Relevant partial payload:
+
+```json
 {
-  "weather_condition": "stormy",
-  "temp_min": -2.0,
-  "temp_max": 4.5,
-  "weather_impact_notes": "گرد و غبار دید ماشین‌آلات را محدود کرد.",
-  "site_status": "inactive",
-  "inactivity_reason": "safety_incident"
+  "weather_condition": "rainy",
+  "temp_min": "4.5",
+  "temp_max": "11.0",
+  "weather_impact_notes": "بارندگی دسترسی به جبهه شمالی را محدود کرد."
 }
 ```
 
-The allowlist used for auto-summary metadata updates includes `weather_impact_notes` and `inactivity_reason`. Derived row payloads and `shift` remain non-editable through header updates.
+Any subset may be sent. Validation uses the candidate object produced by merging supplied values with the current stored report.
 
-Validation uses the effective object after combining the stored instance with partial input:
+Rules:
 
-- Each temperature is nullable or within the inclusive range `-40..60`.
-- When both are non-null, `temp_max >= temp_min`.
-- An inactive report requires one allowed `inactivity_reason`.
-- Saving an active report clears a stale `inactivity_reason` server-side.
+- `weather_condition`: one approved value or `null` when existing optionality permits clearing it.
+- `temp_min`, `temp_max`: decimal values from `-40` through `60`, inclusive, or `null`.
+- When both candidate temperatures are non-null, `temp_max >= temp_min`.
+- Sending `null` for one temperature intentionally clears it.
+- `weather_impact_notes`: optional plain-text string; `""` clears it.
+- A successful response uses the daily-report detail representation so the client can replace local state with authoritative values.
 
-### Reversed temperature range
+No new daily-report POST or PUT behavior is introduced by this feature.
+
+## 5. Validation errors
+
+### Retired or unknown weather
+
+```http
+HTTP/1.1 400 Bad Request
+```
+
+```json
+{
+  "error": {
+    "code": "invalid_choice",
+    "message": "weather_condition: ...",
+    "details": {
+      "weather_condition": ["... is not a valid choice."]
+    }
+  }
+}
+```
+
+The exact localized message is not a stable contract. The error must remain field-specific.
+
+### Temperature outside the allowed range
+
+```http
+HTTP/1.1 400 Bad Request
+```
+
+```json
+{
+  "error": {
+    "code": "min_value",
+    "message": "temp_min: ...",
+    "details": {
+      "temp_min": ["..."]
+    }
+  }
+}
+```
+
+The standard bound code may be `min_value` or `max_value` according to the violated boundary. The corresponding temperature field must appear in `details`.
+
+### Maximum below minimum
+
+```http
+HTTP/1.1 400 Bad Request
+```
 
 ```json
 {
@@ -154,58 +155,61 @@ Validation uses the effective object after combining the stored instance with pa
 }
 ```
 
-HTTP status is `400`; the error is attached to `temp_max`.
+Required invariants:
 
-### Missing inactivity reason
+- Top-level `error.code` is exactly `temp_max_must_be_gte_temp_min`.
+- The field key is exactly `temp_max`.
+- The message may be Persian or English; field and code do not change.
+- The same result applies when only one submitted field makes the candidate pair invalid against its stored peer.
 
-```json
-{
-  "error": {
-    "code": "inactivity_reason_required",
-    "message": "An inactivity reason is required when the site is inactive.",
-    "details": {
-      "inactivity_reason": ["An inactivity reason is required when the site is inactive."]
-    }
-  }
-}
+## 6. Derived summary weather
+
+Eligible contributing specialty reports retain the existing eligibility rules. For their nonblank approved weather values:
+
+```text
+stormy > snowy > rainy > cloudy > clear
 ```
 
-HTTP status is `400`; the error is attached to `inactivity_reason`. Locale negotiation may translate messages but never changes codes or field keys.
+- The highest severity becomes the daily-report weather when `weather_override=false`.
+- An approved explicit value remains unchanged when `weather_override=true`.
+- Blank values do not contribute.
+- Unknown values do not contribute and are reported by data-integrity verification.
+- If no approved contribution remains and no override exists, derived weather is `null`; a stale previous derived value is not retained.
+- Rebuild never overwrites `weather_impact_notes`.
 
-## 6. Derived summary rules
+## 7. Shared compatibility surfaces
 
-- Weather is the highest-severity nonblank specialty value: `stormy > snowy > rainy > cloudy > clear`.
-- `weather_override=true` preserves the project-level weather during rebuild.
-- Any eligible inactive specialty report derives an inactive project summary unless `site_status_override=true`.
-- Rebuild never invents an inactivity reason. It preserves an existing valid reason while the effective status remains inactive and clears it when the effective status becomes active.
-- `weather_impact_notes` is never derived or overwritten by rebuild.
-- An incomplete derived inactive draft may be returned for classification, but submit/review/approve and explicit header save enforce `inactivity_reason_required`.
+Because the backend weather enum is shared:
 
-## 7. Other weather-bearing APIs
+- Standalone weather-log writes accept the same five weather values and reject retired/unknown values.
+- Specialty-report writes accept the same five values when nonblank and reject retired/unknown values.
+- This feature adds no weather-impact note field to either surface.
+- Daily-report temperature and note contracts remain scoped to the daily-report header.
 
-### Standalone weather log
+## 8. Corrections, sync, and offline replay
 
-Weather-log create/update/read uses exactly the same five weather values and temperature rules. `weather_condition` remains required. A cross-field failure is attached to `temp_max` with `temp_max_must_be_gte_temp_min`.
+- A daily-report correction/version copy carries weather, both temperatures, weather-impact notes, and the existing weather override.
+- Header sync comparison includes these fields so concurrent edits are reported rather than silently overwritten.
+- Pending offline values from the retired vocabulary are normalized by the client data upgrade before replay.
+- New or external clients that submit retired values receive the normal invalid-choice response.
+- Invalid temperatures are rejected before persistence even if browser validation is bypassed.
 
-### Specialty reports
+## 9. Official PDF
 
-`DisciplineSubReport.weather_condition` accepts the same five values and remains optional. This feature does not add `weather_impact_notes` or `inactivity_reason` to specialty reports.
+```http
+GET /api/v1/projects/{project_id}/daily-reports/{report_id}/pdf/
+```
 
-## 8. Sync, correction, and lifecycle
+Successful response:
 
-- Sync-batch header comparison and conflict details include `weather_impact_notes` and `inactivity_reason`.
-- Offline clients upgraded from old versions normalize retired weather values before sync. The API rejects retired values sent by non-upgraded clients.
-- A correction/version copy carries weather, temperatures, weather-impact notes, site status, inactivity reason, override flags, and existing summary-owned management metadata.
-- Submit, review, and approve transitions reject an inactive summary without a valid reason using `inactivity_reason_required`.
+- HTTP `200`
+- `Content-Type: application/pdf`
+- Existing attachment filename convention
 
-## 9. PDF output
+The header table always includes:
 
-The official daily-report PDF header/specification table includes:
+```text
+توضیحات و اثرات شرایط جوی
+```
 
-- localized weather label;
-- minimum and maximum temperatures;
-- site status;
-- localized inactivity reason when inactive;
-- weather-impact notes when nonblank.
-
-The PDF must not expose raw enum identifiers to end users. Automated verification asserts extracted content in addition to the existing PDF-signature smoke check.
+If notes exist, the cell reproduces the saved plain text with readable wrapping and line breaks. If notes are empty, the row remains present with an empty cell; no dash or fabricated prose is inserted as user content.

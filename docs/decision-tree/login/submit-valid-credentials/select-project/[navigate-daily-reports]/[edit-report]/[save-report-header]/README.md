@@ -8,8 +8,8 @@
 
 ## Action Taken
 
-- **Trigger**: Fill header and click Save; changing a dated header also starts the 900 ms autosave.
-- **Inputs**: Date, weather, temperatures, notes and header values.
+- **Trigger**: Fill header and click Save; changing a dated header also starts the 900 ms autosave (gated on temperature validation).
+- **Inputs**: Date, weather (standardized: clear, cloudy, rainy, snowy, stormy), temperatures (temp_min/temp_max in [-40, 60] with temp_max >= temp_min), multi-line weather impact notes (weather_impact_notes), and header values.
 
 ## Authorization & Permissions
 

@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Daily Report Header and Weather Controls
+# Specification Quality Checklist: Standardized Daily Weather and Temperature
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-10-22
@@ -31,6 +31,6 @@
 
 ## Notes
 
-- Validation iteration 1: all checklist items passed.
-- Existing route names, permission identifiers, field names, status values, and error codes are retained only as externally observable compatibility contracts required by the approved input; no internal technology or code-structure decision is prescribed.
-- No clarification marker is required. The only unspecified legacy mappings use the documented assumption that `partly_cloudy` and `foggy` normalize to `cloudy`.
+- Validation iteration 1: all checklist items passed after narrowing the prior broader draft to weather standardization, temperature validation, and weather-impact documentation only.
+- Stable field names, weather values, and the validation error code are retained as externally observable compatibility contracts required by the approved input; no internal framework or code-structure decision is prescribed.
+- No clarification marker is required. The only unspecified legacy mappings are documented as the data-preserving assumption that `partly_cloudy` and `foggy` normalize to `cloudy`.

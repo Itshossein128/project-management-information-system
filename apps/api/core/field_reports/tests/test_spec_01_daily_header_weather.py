@@ -80,6 +80,24 @@ def test_temperature_out_of_bounds_rejected(auth_client, by_date_url, detail_url
 
 
 @pytest.mark.django_db
+def test_daily_report_full_clean_temperature_bounds(project, user):
+    from django.core.exceptions import ValidationError as DjangoValidationError
+    report = DailyReport(
+        project=project,
+        report_date='2026-09-08',
+        temp_min=Decimal('-40.5'),
+        temp_max=Decimal('60.5'),
+        created_by=user,
+        updated_by=user,
+    )
+    with pytest.raises(DjangoValidationError) as exc:
+        report.full_clean()
+    err_dict = exc.value.message_dict
+    assert 'temp_min' in err_dict
+    assert 'temp_max' in err_dict
+
+
+@pytest.mark.django_db
 def test_temp_max_less_than_temp_min_full_and_partial_patch_rejected(auth_client, by_date_url, detail_url_factory):
     res = auth_client.post(by_date_url, {'date': '2026-09-05'}, format='json')
     report_id = res.data['report_id']
@@ -94,7 +112,8 @@ def test_temp_max_less_than_temp_min_full_and_partial_patch_rejected(auth_client
     err = bad_res.data.get('error', {})
     code = bad_res.data.get('code') or err.get('code')
     details = bad_res.data.get('details') or err.get('details', {})
-    assert code == 'temp_max_must_be_gte_temp_min' or 'temp_max' in details
+    assert code == 'temp_max_must_be_gte_temp_min'
+    assert 'temp_max' in details
 
     # Save valid initial values
     good_res = auth_client.patch(
@@ -114,7 +133,8 @@ def test_temp_max_less_than_temp_min_full_and_partial_patch_rejected(auth_client
     err = partial_max_res.data.get('error', {})
     code = partial_max_res.data.get('code') or err.get('code')
     details = partial_max_res.data.get('details') or err.get('details', {})
-    assert code == 'temp_max_must_be_gte_temp_min' or 'temp_max' in details
+    assert code == 'temp_max_must_be_gte_temp_min'
+    assert 'temp_max' in details
 
     # Partial patch: update only temp_min to higher than stored temp_max (25.0)
     partial_min_res = auth_client.patch(
@@ -126,7 +146,8 @@ def test_temp_max_less_than_temp_min_full_and_partial_patch_rejected(auth_client
     err = partial_min_res.data.get('error', {})
     code = partial_min_res.data.get('code') or err.get('code')
     details = partial_min_res.data.get('details') or err.get('details', {})
-    assert code == 'temp_max_must_be_gte_temp_min' or 'temp_max' in details
+    assert code == 'temp_max_must_be_gte_temp_min'
+    assert 'temp_max' in details
 
 
 @pytest.mark.django_db
@@ -148,6 +169,58 @@ def test_aggregation_weather_severity_order(project, user):
 
     rebuilt = rebuild_daily_report_summary(project.id, d, user=user, report=summary)
     assert rebuilt.weather_condition == 'clear'
+
+
+@pytest.mark.django_db
+def test_aggregation_weather_blanks_and_unknowns_ignored(project, user):
+    d = SUMMARY_DATE
+    make_sub_report(project, user, discipline=Discipline.CIVIL, weather_condition='', status=SubReportStatus.SUBMITTED, report_date=d)
+    make_sub_report(project, user, discipline=Discipline.ELECTRICAL, weather_condition='unknown_tornado', status=SubReportStatus.SUBMITTED, report_date=d)
+    make_sub_report(project, user, discipline=Discipline.MECHANICAL, weather_condition='clear', status=SubReportStatus.SUBMITTED, report_date=d)
+
+    summary = ensure_daily_report_summary(project.id, d, user=user)
+    assert summary.weather_condition == 'clear'
+
+
+@pytest.mark.django_db
+def test_aggregation_weather_no_valid_contributors_clears_derived(project, user):
+    d = SUMMARY_DATE
+    sub = make_sub_report(project, user, discipline=Discipline.CIVIL, weather_condition='clear', status=SubReportStatus.SUBMITTED, report_date=d)
+
+    summary = ensure_daily_report_summary(project.id, d, user=user)
+    assert summary.weather_condition == 'clear'
+
+    # Now sub-report weather is cleared
+    sub.weather_condition = ''
+    sub.save()
+
+    rebuilt = rebuild_daily_report_summary(project.id, d, user=user, report=summary)
+    assert rebuilt.weather_condition is None
+
+
+@pytest.mark.django_db
+def test_aggregation_weather_all_severity_pairs(project, user):
+    d = SUMMARY_DATE
+    sub1 = make_sub_report(project, user, discipline=Discipline.CIVIL, weather_condition='clear', status=SubReportStatus.SUBMITTED, report_date=d)
+    sub2 = make_sub_report(project, user, discipline=Discipline.ELECTRICAL, weather_condition='cloudy', status=SubReportStatus.SUBMITTED, report_date=d)
+
+    summary = ensure_daily_report_summary(project.id, d, user=user)
+    assert summary.weather_condition == 'cloudy'
+
+    sub1.weather_condition = 'rainy'
+    sub1.save()
+    rebuilt = rebuild_daily_report_summary(project.id, d, user=user, report=summary)
+    assert rebuilt.weather_condition == 'rainy'
+
+    sub2.weather_condition = 'snowy'
+    sub2.save()
+    rebuilt = rebuild_daily_report_summary(project.id, d, user=user, report=summary)
+    assert rebuilt.weather_condition == 'snowy'
+
+    sub1.weather_condition = 'stormy'
+    sub1.save()
+    rebuilt = rebuild_daily_report_summary(project.id, d, user=user, report=summary)
+    assert rebuilt.weather_condition == 'stormy'
 
 
 @pytest.mark.django_db
@@ -294,5 +367,70 @@ def test_pdf_export_contains_weather_impact_notes_and_inactivity_reason(project,
     text = unicodedata.normalize('NFKD', proc.stdout.decode('utf-8', errors='ignore'))
     assert 'Wind speed exceeded 70km/h causing crane stoppage' in text
     assert 'نامساعد بودن شرایط جوی' in text or 'غیرفعال' in text
+
+
+@pytest.mark.django_db
+def test_inactivity_reason_partial_update_edge_cases(auth_client, project, by_date_url, detail_url_factory):
+    # Setup: create report and set inactive with weather reason
+    res = auth_client.post(by_date_url, {'date': '2026-09-12'}, format='json')
+    report_id = res.data['report_id']
+
+    setup_res = auth_client.patch(
+        detail_url_factory(report_id),
+        {'site_status': 'inactive', 'inactivity_reason': 'weather'},
+        format='json',
+    )
+    assert setup_res.status_code == status.HTTP_200_OK
+    assert setup_res.data['site_status'] == 'inactive'
+    assert setup_res.data['inactivity_reason'] == 'weather'
+
+    # (a) PATCH changing only site_status to inactive without sending inactivity_reason -> passes using stored reason
+    patch_status_res = auth_client.patch(
+        detail_url_factory(report_id),
+        {'site_status': 'inactive'},
+        format='json',
+    )
+    assert patch_status_res.status_code == status.HTTP_200_OK
+    assert patch_status_res.data['site_status'] == 'inactive'
+    assert patch_status_res.data['inactivity_reason'] == 'weather'
+
+    # (b) PATCH changing only inactivity_reason:
+    # invalid/empty new value rejected with inactivity_reason_required
+    for bad_val in ('', None):
+        bad_reason_res = auth_client.patch(
+            detail_url_factory(report_id),
+            {'inactivity_reason': bad_val},
+            format='json',
+        )
+        assert bad_reason_res.status_code == status.HTTP_400_BAD_REQUEST
+        err = bad_reason_res.data.get('error', {})
+        code = bad_reason_res.data.get('code') or err.get('code')
+        details = bad_reason_res.data.get('details') or err.get('details', {})
+        assert code == 'inactivity_reason_required' or 'inactivity_reason' in details
+
+    # valid new value accepted
+    valid_reason_res = auth_client.patch(
+        detail_url_factory(report_id),
+        {'inactivity_reason': 'holiday'},
+        format='json',
+    )
+    assert valid_reason_res.status_code == status.HTTP_200_OK
+    assert valid_reason_res.data['inactivity_reason'] == 'holiday'
+
+    # (c) active-state clearing of a stale reason on partial update (SC-003)
+    active_patch_res = auth_client.patch(
+        detail_url_factory(report_id),
+        {'site_status': 'active'},
+        format='json',
+    )
+    assert active_patch_res.status_code == status.HTTP_200_OK
+    assert active_patch_res.data['site_status'] == 'active'
+    assert active_patch_res.data['inactivity_reason'] in ('', None)
+
+    # Verify reload from DB
+    report = DailyReport.objects.get(id=report_id)
+    assert report.site_status == 'active'
+    assert report.inactivity_reason == ''
+
 
 

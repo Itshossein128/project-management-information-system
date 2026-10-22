@@ -1,8 +1,8 @@
-# Data Model: Daily Report Header and Weather Controls
+# Data Model: Standardized Daily Weather and Temperature
 
 ## 1. Shared Weather Condition
 
-One language-independent vocabulary is shared by `DailyReport`, `WeatherLog`, and `DisciplineSubReport`.
+One language-independent vocabulary is shared by the existing daily report, standalone weather log, and specialty report models.
 
 | Value | Persian label | English label | Aggregation severity |
 |-------|---------------|---------------|----------------------|
@@ -12,136 +12,129 @@ One language-independent vocabulary is shared by `DailyReport`, `WeatherLog`, an
 | `snowy` | برفی | Snowy | 40 |
 | `stormy` | طوفانی / گرد و غبار | Stormy / dust | 50 |
 
-Blank remains allowed only where it is already optional (`DailyReport`, `DisciplineSubReport`). `WeatherLog.weather_condition` remains required.
+Blank remains allowed only where the existing field is optional. Retired and unknown values are invalid for all new writes.
 
 ### Legacy normalization
 
-| Legacy value | New value | Applies to |
-|--------------|-----------|------------|
-| `sunny` | `clear` | Daily reports, weather logs, specialty reports, offline cached/pending payloads |
+| Legacy value | New value | Affected persisted/offline data |
+|--------------|-----------|---------------------------------|
+| `sunny` | `clear` | Daily reports, weather logs, specialty reports, cached daily reports, pending daily-report payloads |
 | `partly_cloudy` | `cloudy` | Same |
 | `foggy` | `cloudy` | Same |
 
-After normalization, retired values are not valid new input and are absent from choices, metadata maps, icons/colors, severity rules, seeds, fixtures, and tests.
+Normalization changes only the weather value. Record identity, project/date relationships, lifecycle state, note text, queue metadata, and all unrelated fields are preserved.
 
-## 2. Project Daily Report
+## 2. Daily Report
 
-Existing identity and aggregation behavior remain unchanged: one current, non-deleted report for `(project, report_date, shift)` and auto-summary shells use `shift=full`.
+Existing identity and lifecycle behavior remain unchanged: the project summary is the current, non-deleted full-day report for its project/date under the automatic-summary architecture.
 
-### Added and changed header fields
+### Header fields
 
-| Field | Type / default | Rules |
-|-------|----------------|-------|
-| `weather_condition` | nullable shared weather choice | Five values only; derived by severity unless `weather_override=true` |
-| `temp_min` | decimal(5,1), nullable | Inclusive -40..60 |
-| `temp_max` | decimal(5,1), nullable | Inclusive -40..60; must be `>= temp_min` when both are known |
-| `weather_impact_notes` | text, blank, default `''` | Project-level narrative; preserved through rebuild, correction, sync, and PDF |
-| `site_status` | `active` / `inactive` | Existing field; active state clears inactive reason |
-| `inactivity_reason` | choice, blank, default `''`, max length sufficient for `strike_or_dispute` and `client_stop_order` | Required whenever an explicit save/finalization leaves `site_status=inactive` |
-| `weather_override` | boolean | Existing; rebuild must not replace weather when true |
-| `site_status_override` | boolean | Existing; rebuild must not replace site status when true |
+| Field | Representation | Default / optionality | Rules |
+|-------|----------------|-----------------------|-------|
+| `weather_condition` | nullable shared weather choice | `null` allowed | Non-empty value is one of five; derived by severity unless the existing project override is active |
+| `temp_min` | decimal with one fractional digit | `null` allowed | Inclusive `-40..60` Celsius |
+| `temp_max` | decimal with one fractional digit | `null` allowed | Inclusive `-40..60`; when both are known, `temp_max >= temp_min` |
+| `weather_impact_notes` | plain multi-line text | blank, default `''` | Project-level narrative; preserved through readback, rebuild, correction, sync, and official PDF |
+| `weather_override` | boolean | existing default | When true, an approved explicit daily-report weather value is not replaced by aggregation |
 
-### Inactive-site reasons
+### Effective-state validation
 
-| Value | Persian label | English label |
-|-------|---------------|---------------|
-| `weather` | نامساعد بودن شرایط جوی | Adverse weather |
-| `holiday` | تعطیل رسمی / تقویمی | Official / calendar holiday |
-| `strike_or_dispute` | اختلاف یا اعتصاب | Strike or dispute |
-| `client_stop_order` | دستور توقف کارفرما / مشاور | Client / consultant stop order |
-| `safety_incident` | حادثه ایمنی | Safety incident |
+For an update, compute the candidate state by taking each submitted value and falling back to the stored value for any omitted field.
 
-### Validation invariant
+1. `temp_min` is `null` or within `[-40, 60]`.
+2. `temp_max` is `null` or within `[-40, 60]`.
+3. If both candidate values are non-null, `temp_max >= temp_min`.
+4. A reversed pair produces code `temp_max_must_be_gte_temp_min` attached to `temp_max`.
+5. Equal values are valid.
+6. Clearing one temperature persists `null` and suspends the ordering rule until both values are known again.
 
-For the effective state after merging PATCH input with the stored instance:
+### Preservation rules
 
-1. Each supplied temperature is within `[-40, 60]`.
-2. When both exist, `temp_max >= temp_min`.
-3. If `site_status=inactive`, `inactivity_reason` is one of the five values.
-4. If `site_status=active`, persist `inactivity_reason=''` even if a stale client sends a value.
-5. Stable validation codes are `temp_max_must_be_gte_temp_min` and `inactivity_reason_required`.
+| Operation | Required effect |
+|-----------|-----------------|
+| Read detail/header | Return weather, both temperatures, and complete impact-note text |
+| Automatic summary rebuild | Recompute weather only when no approved override exists; never overwrite impact notes |
+| Correction/version copy | Copy weather, temperatures, impact notes, and the existing weather override |
+| Offline sync/merge | Include the same fields in payload comparison and conflict details |
+| PDF generation | Render weather and temperatures in existing rows; always render the exact weather-impact row |
 
-The field remains blank-capable at the schema level so pre-feature/derived inactive drafts can be loaded without invented history. User saves and workflow transitions enforce the invariant.
+## 3. Specialty Report Compatibility Surface
 
-### Rebuild behavior
+`DisciplineSubReport.weather_condition` uses the shared five-value vocabulary and remains optional. Eligible specialty reports continue to contribute nonblank approved values to daily-summary weather.
 
-| Condition | Weather result | Site/reason result |
-|-----------|----------------|--------------------|
-| Override flag true | Preserve project value | Preserve project status; validate reason on user save/finalization |
-| No weather override | Most severe nonblank specialty value | N/A |
-| No site override; any contributing specialty inactive | N/A | Set inactive; preserve existing valid reason, otherwise leave draft requiring classification |
-| No site override; contributing specialties all active | N/A | Set active and clear inactivity reason |
-| Weather-impact notes | Never derived | Always preserve |
+No new note or temperature field is added to specialty reports by this feature.
 
-## 3. Standalone Weather Log
+### Aggregation transition
 
-`WeatherLog` continues to have one active row per project/date.
+| Input state | Daily-report result when no override exists |
+|-------------|---------------------------------------------|
+| One or more approved nonblank values | Highest severity: `stormy > snowy > rainy > cloudy > clear` |
+| Only blank values or no eligible contributors | `null`; do not retain a stale previously derived value |
+| Unknown persisted value mixed with approved values | Unknown is ignored for ranking and reported by integrity verification |
+| Unknown persisted value only | `null` plus integrity failure evidence; never expose it as the official result |
+| Approved project override active | Preserve the project value; do not recalculate it |
 
-| Field | Change |
-|-------|--------|
-| `weather_condition` | Uses the five-value shared vocabulary; required |
-| `temp_min`, `temp_max` | Gain the same inclusive range and cross-field validation |
+## 4. Standalone Weather Log Compatibility Surface
 
-No inactivity reason or weather-impact notes are added to `WeatherLog`; those are approved project daily-summary fields.
+`WeatherLog.weather_condition` uses the same shared vocabulary and remains required. Its existing fields and lifecycle remain separate from the daily-report header.
 
-## 4. Specialty-Unit Report
+This feature requires legacy weather normalization and regression coverage for this surface because the enum is shared. It does not add `weather_impact_notes` or create a new standalone-weather user story. Temperature behavior outside the daily-report header is not expanded by this specification; any already-shared validator remains a compatibility invariant rather than new scope.
 
-`DisciplineSubReport.weather_condition` uses the five-value shared vocabulary and remains optional. `site_status` remains `active|inactive`; this feature does not add specialty inactivity reasons. Submitted/approved specialty reports continue to contribute to the project summary.
+## 5. Client Header State
 
-## 5. Execution Activity
+The editable daily-report header state uses a single representation across `ReportHeader` and the auto-summary metadata editor.
 
-No schema change is required.
+| State field | Client representation | Commit conversion |
+|-------------|-----------------------|-------------------|
+| `weather_condition` | approved weather value or `null` | same value |
+| `temp_min` | string while editing | complete valid decimal string, or `null` when intentionally blank |
+| `temp_max` | string while editing | complete valid decimal string, or `null` when intentionally blank |
+| `weather_impact_notes` | string, never `undefined` in local state | exact string, including line breaks |
 
-| Existing field | Guard rule |
-|----------------|------------|
-| `quantity` | Normalize to a number; values greater than zero on an inactive report require confirmation before save/queue |
-| `shift` | Remains one of `shift_1`, `shift_2`, `shift_3` |
-| derived/provenance flags | Remain protected by the auto-summary behavior |
+### Temperature editing states
 
-The warning is a client acknowledgment and does not change the activity record or bypass server authorization/validation.
+- **Blank**: valid optional value; conversion to `null` occurs only when the edit is committed.
+- **Incomplete while focused**: examples include a lone minus sign or unfinished decimal token; do not autosave and do not emit an unrelated cross-field error.
+- **Invalid completed token**: attach a field error and block every write path.
+- **Valid completed token**: parse as a decimal and apply range validation.
+- **Valid pair**: apply the ordering rule and attach any violation only to `temp_max`.
 
 ## 6. Offline Representation
 
-The browser cache and queue mirror these header fields:
+Cached daily reports and pending header mutations mirror:
 
 - `weather_condition`
-- `temp_min`, `temp_max`
-- `site_status`
-- `inactivity_reason`
+- `temp_min`
+- `temp_max`
 - `weather_impact_notes`
-- existing notes/override metadata already supported by the relevant flow
+- existing identity, retry, timestamp, and conflict metadata
 
-IndexedDB upgrade normalizes retired weather strings in both `offline_daily_reports` and pending/failed `offline_queue` payloads without deleting queue identity, retry state, or unrelated payload fields.
+The IndexedDB data upgrade normalizes retired weather strings without deleting or reordering queued work. New offline writes use only approved values and pass the same temperature validator before queue insertion.
 
-## 7. Correction and Sync Copies
+## 7. PDF Representation
 
-Creating a correction version copies:
+The official header table contains one unconditional row:
 
-- weather, temperatures, impact notes
-- site status and inactivity reason
-- weather/site override flags
-- existing summary-owned notes and management opinion
+| Label | Value |
+|-------|-------|
+| `توضیحات و اثرات شرایط جوی` | Exact saved note text, or an empty cell when the note is empty |
 
-Sync conflict comparison includes both new fields so simultaneous server/client edits are surfaced rather than overwritten.
+The value is treated as plain text. Markup-significant characters are escaped, line breaks are preserved for layout, and no placeholder is inserted as though it were user-authored content.
 
-## 8. State Transitions
+## 8. Migration and Rollback
 
-| From | Action | To | Required effect |
-|------|--------|----|-----------------|
-| Active | User selects inactive | Inactive draft | Reveal reason selector; block save until selected |
-| Inactive | User selects active | Active | Clear reason client-side and server-side |
-| Derived active | Specialty rebuild finds any inactive source | Inactive draft | Preserve a valid existing reason or mark as requiring classification; never guess |
-| Derived inactive | Rebuild finds all contributing sources active | Active | Clear stale reason |
-| Inactive draft without reason | Submit/review/approve | No transition | Reject with `inactivity_reason_required` |
-| Inactive + positive activity edit | Save attempt | Pending confirmation | Cancel: no write; confirm: resume normal validation/mutation |
+The committed migration sequence is:
 
-## 9. Migration and Rollback
+1. Normalize known legacy values in daily reports and weather logs.
+2. Add the daily-report weather-impact field and daily-report temperature validators as recorded in model state.
+3. Narrow the shared weather choices.
+4. Run the dependent specialty-report migration to normalize its rows and narrow its choices.
+5. Upgrade offline cached/queued representations on first client open.
 
-1. Count and back up retired weather values in all three server tables.
-2. Normalize `field_reports` rows before altering field choices/additional validation metadata.
-3. Add daily-report fields with non-destructive blank defaults.
-4. Normalize specialty rows in the dependent `sub_reports` migration, then alter choices.
-5. Upgrade offline data before pending records are synced by the new client.
-6. Verify no retired server or offline value remains.
+Implementation rules:
 
-Exact reversal of `partly_cloudy`/`foggy` is impossible after merging to `cloudy`; production rollback requiring exact legacy categories uses the pre-migration backup.
+- Do not edit already-committed migration files; corrections use a new forward migration.
+- Before a production-like apply, back up the database and count each legacy and unexpected nonblank value in all three server tables.
+- After apply, assert zero retired/unexpected values and unchanged row identities/unrelated columns.
+- Schema/model-state reversal does not restore original category meaning. Exact semantic rollback requires backup restoration.

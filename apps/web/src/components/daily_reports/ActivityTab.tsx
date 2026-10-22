@@ -213,16 +213,15 @@ export function ActivityTab({
           data-testid="inactive-activity-confirm-dialog"
         >
           <DialogHeader>
-            <DialogTitle>تأیید ثبت کارکرد در روز تعطیل</DialogTitle>
+            <DialogTitle>
+              {t("dailyReports.inactiveActivityDialogTitle", "تأیید ثبت کارکرد در روز تعطیل")}
+            </DialogTitle>
             <DialogDescription className="text-base font-medium text-foreground pt-2">
               {t(
-                "dailyReports.inactiveActivityWarning",
+                "dailyReports.inactiveSiteActivityWarning",
                 INACTIVE_ACTIVITY_WARNING_FA,
               )}
             </DialogDescription>
-            <p className="text-xs text-muted-foreground mt-1" dir="ltr">
-              {INACTIVE_ACTIVITY_WARNING_EN}
-            </p>
           </DialogHeader>
           <DialogFooter className="mt-4 flex gap-2 justify-end">
             <Button
@@ -231,7 +230,7 @@ export function ActivityTab({
               data-testid="inactive-activity-cancel-btn"
               onClick={handleCancel}
             >
-              انصراف
+              {t("dailyReports.cancelActivity", "انصراف")}
             </Button>
             <Button
               type="button"
@@ -239,7 +238,7 @@ export function ActivityTab({
               data-testid="inactive-activity-confirm-btn"
               onClick={handleConfirm}
             >
-              تأیید و ذخیره
+              {t("dailyReports.confirmActivity", "تأیید و ثبت")}
             </Button>
           </DialogFooter>
         </DialogContent>

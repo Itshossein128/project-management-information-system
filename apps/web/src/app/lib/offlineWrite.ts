@@ -17,6 +17,7 @@ import {
   updateOfflineReport,
 } from "@/app/lib/offlineDB";
 import type { ChildResource, HeaderPayload } from "@/app/lib/api/daily-reports";
+import { validateTemperatures } from "@/app/lib/temperatureValidation";
 
 export type RowSyncStatus = "synced" | "pending" | "failed" | "conflict";
 
@@ -56,6 +57,19 @@ export async function queueReportHeader(
   reportRef: string | null,
   payload: HeaderPayload,
 ): Promise<string> {
+  const tempCheck = validateTemperatures(
+    payload.temp_min != null ? String(payload.temp_min) : "",
+    payload.temp_max != null ? String(payload.temp_max) : "",
+    { isBlurOrSubmit: true },
+  );
+  if (!tempCheck.isValid) {
+    throw new Error(
+      tempCheck.tempMaxError === "temp_max_must_be_gte_temp_min"
+        ? "temp_max_must_be_gte_temp_min"
+        : "invalid_temperature",
+    );
+  }
+
   const localId = reportRef ?? generateUUID();
   // Blank POST /daily-reports/ is retired — ensure-by-date for new shells.
   const method: QueueMethod = reportRef ? "PATCH" : "POST";

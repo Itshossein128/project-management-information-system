@@ -1,19 +1,19 @@
-# Quickstart and Verification: Daily Report Header and Weather Controls
+# Quickstart and Verification: Standardized Daily Weather and Temperature
 
-This is the implementation verification guide. A green focused test is necessary but does not by itself prove migration safety, browser behavior, offline behavior, PDF content, or the full regression boundary.
+This is a brownfield convergence guide. Much of the feature already exists on `develop`; verification must prove the narrowed specification and close observed gaps rather than treating committed code or checked tasks as completion evidence.
 
 ## 1. Local prerequisites
 
-From the repository root:
+From the repository root, start the native services required by the cloud/dev environment:
 
 ```bash
 sudo pg_ctlcluster 16 main start
 sudo redis-server /etc/redis/redis.conf --daemonize yes
 ```
 
-Use the existing root `.env`. It must point to PostgreSQL on port `5433` and Redis on `6379`. Keep Django pinned to `4.2.11`; do not install `requirements-dev.txt` wholesale.
+Use the existing root `.env`, PostgreSQL on port `5433`, and Redis on `6379`. Keep Django pinned to `4.2.11`; do not install `apps/api/requirements-dev.txt` wholesale because its debug-toolbar constraint can upgrade Django.
 
-Start the services in separate terminals:
+Start the application in separate terminals when browser/API proof is needed:
 
 ```bash
 pnpm dev:api
@@ -23,141 +23,160 @@ pnpm dev:api
 pnpm dev:web
 ```
 
-The current `playwright.config.ts` has no `webServer` block, so Playwright does not start either service automatically.
+The root `playwright.config.ts` does not start these services automatically.
 
-## 2. TDD order
+## 2. Brownfield baseline and TDD order
 
-Implement in red → minimal green → regression order:
+Before editing, confirm that the committed baseline contains the shared enum, migrations, serializers, aggregation, UI controls, and PDF path described in [research.md](./research.md). Then use red → minimal green → regression order:
 
-1. Migration normalization and new model constraints/fields.
-2. Serializer field placement and stable error codes, including partial PATCH.
-3. GET/POST `by-date` permission and mutation behavior plus concurrent ensure.
-4. Aggregation, rebuild, correction, lifecycle, and sync preservation.
-5. PDF content.
-6. Shared frontend types/metadata/validation and actual summary editor.
-7. Activity confirmation before online/offline writes.
-8. IndexedDB upgrade/replay compatibility.
-9. Bilingual desktop/mobile/offline E2E.
+1. Add strict migration-executor tests for all three legacy mappings and unrelated-data preservation.
+2. Add strict model/API tests for bounds, effective-state partial updates, and both the exact top-level code and `temp_max` detail placement.
+3. Add aggregation tests for the full five-level order, blanks, unknown stored values, no-valid-contributor clearing, and approved override preservation.
+4. Add notes tests for header/detail hydration, rebuild, correction, sync, and offline replay.
+5. Add PDF tests for the exact unconditional label, empty cell, mixed-language/multiline content, markup-significant characters, and valid output.
+6. Add client tests/E2E proving shared five-choice controls, save/autosave/offline blocking, structured server-error mapping, and note hydration.
+7. Implement only the smallest changes needed to make each red test pass.
+8. Rerun focused and relevant regression suites on the final tree.
 
-Record the failing assertion before each minimal implementation change. After code changes, rerun against the final tree; a historical green run is not final evidence.
+Do not add or modify inactivity reasons, daily-report creation permissions, shift behavior, or inactive-day activity warnings under this feature.
 
-## 3. Migration safety
+## 3. Migration safety and evidence
 
-Before applying the migration outside disposable development data:
-
-```bash
-pg_dump -h 127.0.0.1 -p 5433 -U ipcas -d ipcas \
-  --format=custom --file=/tmp/velora-before-daily-header-weather.dump
-```
-
-Capture pre-migration counts for `sunny`, `partly_cloudy`, and `foggy` in daily reports, weather logs, and specialty reports. Then inspect and apply the plan:
+The existing migration files are committed history. Inspect their state; do not edit them:
 
 ```bash
 cd apps/api/core
 set -a
 source ../../../.env
 set +a
-../.venv/bin/python manage.py makemigrations --check --dry-run
+
+../.venv/bin/python manage.py showmigrations field_reports sub_reports
 ../.venv/bin/python manage.py migrate --plan
-../.venv/bin/python manage.py migrate
+../.venv/bin/python manage.py makemigrations --check --dry-run
 ```
+
+For a production-like database, create a recoverable backup before any forward corrective migration:
+
+```bash
+pg_dump -h 127.0.0.1 -p 5433 -U ipcas -d ipcas \
+  --format=custom --file=/tmp/velora-before-weather-standardization.dump
+```
+
+Capture pre/post counts for `sunny`, `partly_cloudy`, `foggy`, approved values, and unexpected nonblank values in:
+
+- `daily_reports`
+- `weather_logs`
+- `discipline_sub_reports`
 
 Post-migration assertions:
 
-- no server row contains a retired weather value;
-- `sunny` counts moved to `clear`;
-- `partly_cloudy` and `foggy` counts moved to `cloudy`;
-- report identity, project/date/shift, and unrelated fields did not change;
-- new text/reason fields have non-destructive blank defaults;
-- schema verification still passes:
+- `sunny` moved to `clear`;
+- `partly_cloudy` and `foggy` moved to `cloudy`;
+- zero retired or unexpected nonblank weather values remain;
+- row identity, project/date links, note text, and unrelated fields did not change;
+- exact legacy categories are recoverable only from the backup because normalization is lossy.
+
+Run the migration-executor test directly once created:
 
 ```bash
-../.venv/bin/python manage.py verify_blueprint_schema
+../.venv/bin/python -m pytest \
+  field_reports/tests/test_daily_report_weather_migration.py -q
 ```
-
-Exact legacy categories cannot be reconstructed from the reverse migration; use the backup when exact semantic rollback is required.
 
 ## 4. Focused backend tests
 
-From `apps/api/core` with `.env` exported:
+From `apps/api/core` with `.env` still exported:
 
 ```bash
 ../.venv/bin/python -m pytest \
   field_reports/tests/test_spec_01_daily_header_weather.py \
-  field_reports/tests/test_daily_report_by_date.py \
-  field_reports/tests/test_daily_report_summary_permissions.py \
+  field_reports/tests/test_weather.py \
   field_reports/tests/test_daily_report_summary_metadata.py \
   field_reports/tests/test_daily_report_gaps_correction.py \
   field_reports/tests/test_sync_batch.py \
-  field_reports/tests/test_weather.py \
   sub_reports/tests \
   -q
 ```
 
-`test_spec_01_daily_header_weather.py` is the planned focused feature suite. It should cover:
+The focused evidence must prove:
 
-- the five weather choices on all three persisted entities;
-- data-migration outcomes;
-- inclusive `-40` and `60` boundaries and out-of-range rejection;
-- partial-update min/max comparison and error attachment to `temp_max`;
-- required inactivity reason, active-state clearing, and lifecycle rejection;
-- weather-impact/reason preservation in rebuild, correction, and sync;
-- deterministic severity;
-- PDF content;
-- raw-create blocking and the by-date permission matrix;
-- one logical report under concurrent PostgreSQL POSTs.
+- all five approved values are accepted and retired/unknown values are rejected;
+- model `full_clean()` enforces inclusive bounds;
+- API PATCH merges omitted fields with stored values;
+- reversed ranges produce exactly `error.code=temp_max_must_be_gte_temp_min` and `error.details.temp_max`;
+- all five severity levels order correctly;
+- blank/invalid contributors do not win aggregation;
+- no valid contributor clears derived weather unless an approved override exists;
+- impact notes survive detail readback, rebuild, correction, and sync;
+- project scoping/authorization on the touched header and PDF paths has not regressed.
 
 Relevant regression suite:
 
 ```bash
 ../.venv/bin/python -m pytest field_reports/tests sub_reports/tests -q
+../.venv/bin/python manage.py verify_blueprint_schema
 ```
 
-Do not substitute `manage.py test`; this repository's suites use pytest fixtures and markers.
+Do not use `manage.py test`; these suites use pytest fixtures and markers.
 
-## 5. API permission and mutation matrix
+## 5. Direct API validation probes
 
-Verify using distinct active project members:
+Using an authorized project editor and an existing daily report, exercise the real PATCH endpoint from [the API contract](./contracts/daily-report-header-weather-api.md):
 
-| Actor/action | Expected result | Database effect |
-|--------------|-----------------|-----------------|
-| viewer GET existing date | `200` | none |
-| viewer GET missing date | `404` | none |
-| viewer POST by-date | `403` | none |
-| editor POST missing date | `200`/`201` per existing convention | one full-day summary |
-| editor POST same date again | `200` | still one current summary |
-| editor raw collection POST | `400 auto_summary_only` | none |
-| member of another project | `403`/scoped `404` per existing convention | none |
+| Probe | Expected result |
+|-------|-----------------|
+| Each approved weather value | `200`, same stable value in response |
+| `sunny`, `partly_cloudy`, `foggy`, unknown value | `400`, details under `weather_condition` |
+| `temp_min=-40`, `temp_max=60` | `200` |
+| Equal minimum and maximum | `200` |
+| Value immediately outside a bound | `400`, corresponding field in details |
+| PATCH only `temp_max` below stored `temp_min` | `400`, exact stable code and `temp_max` details |
+| PATCH only `temp_min` above stored `temp_max` | Same reversed-range contract on `temp_max` |
+| Clear one temperature with `null` | `200`, cleared field returned as `null` |
+| Multi-line Persian/English note | `200`, exact text returned on PATCH and GET |
 
-For the two viewer cases, compare row counts and timestamps before/after to prove GET is read-only. For concurrency, use real PostgreSQL transactions/workers rather than mocks and assert the current-row count is one.
+Compare row contents before and after rejected requests to prove no invalid mutation persisted.
 
-## 6. Validation probes
+## 6. Aggregation verification
 
-Exercise both full and partial header updates:
+Build eligible specialty-report sets that cover:
 
-- `temp_min=-40`, `temp_max=60` succeeds;
-- values below/above the bounds fail on their own fields;
-- update only `temp_max` below stored `temp_min` and receive `temp_max_must_be_gte_temp_min` on `temp_max`;
-- update only `temp_min` above stored `temp_max` and receive the same code on `temp_max`;
-- inactive without a reason receives `inactivity_reason_required` on `inactivity_reason`;
-- inactive with each allowed reason succeeds;
-- changing to active clears the stored reason;
-- retired weather strings are rejected as new input.
+- every adjacent severity pair;
+- all five values together;
+- blank plus approved values;
+- an unexpected stored value plus approved values;
+- only blank/unknown values;
+- removal of all previously contributing valid values;
+- an approved project override.
 
-Repeat the weather/range probes for standalone weather logs and the vocabulary probes for specialty reports.
+Expected results follow [data-model.md](./data-model.md): approved maximum severity wins, no valid contribution yields `null`, and an approved override is preserved. Verify `weather_impact_notes` is byte-for-byte unchanged across every rebuild case.
 
 ## 7. PDF proof
 
-Generate the official PDF through the real endpoint using a report with a distinctive impact note and inactive reason. Preserve the file, then inspect text:
+Generate the official PDF through the real endpoint for two reports:
+
+1. a distinctive multi-line Persian/English note containing `&` and `<`;
+2. an empty note.
+
+Automated assertions must cover:
+
+- valid `%PDF` output and endpoint content type;
+- exact required row label in the generator/header-row contract;
+- exact distinctive note after text extraction where the embedded font permits reliable extraction;
+- the same labelled row with an empty value for the empty-note report;
+- no parse/layout failure from line breaks or markup-significant characters.
+
+Preserve and inspect the artifact:
 
 ```bash
-pdftotext /tmp/daily-report-header-weather.pdf - | \
-  rg 'گرد و غبار دید ماشین‌آلات را محدود کرد|حادثه ایمنی'
+pdftotext /tmp/daily-report-weather.pdf - | rg 'اثر آزمایشی|Weather impact'
+pdftoppm -png -f 1 -singlefile \
+  /tmp/daily-report-weather.pdf /tmp/daily-report-weather-page
 ```
 
-Also render/open the output and visually inspect the header table for RTL shaping, wrapping, non-overlap, and page boundaries. `%PDF` plus extracted text proves format/content presence; the visual review covers layout quality.
+Open the rendered PNG and verify Persian shaping, the exact label, wrapping, line breaks, and absence of overlap. Text extraction and visual inspection prove different boundaries; record both.
 
-## 8. Frontend static checks
+## 8. Frontend static and offline checks
 
 From the repository root:
 
@@ -165,15 +184,28 @@ From the repository root:
 pnpm typecheck
 ```
 
-Record unrelated pre-existing failures separately if still present; do not report a non-zero baseline as feature success. Search the final client tree for retired values and confirm any remaining matches are migration compatibility code or explicit rejection tests:
+If the documented pre-existing `DailyReportForm.tsx` TypeScript baseline error remains, report it separately and show whether changed files introduce any additional errors. Do not describe a non-zero baseline as a green feature check.
+
+Search for retired values:
 
 ```bash
 rg -n 'sunny|partly_cloudy|foggy' apps/web/src e2e
 ```
 
+Every remaining match must be migration compatibility code or an explicit rejection/normalization test—not an option, default, label, icon mapping, or newly emitted payload.
+
+Run the existing pure normalization test:
+
+```bash
+node --test --experimental-strip-types \
+  apps/web/src/app/lib/__tests__/offlineDB.test.ts
+```
+
+Add focused validation-helper coverage or prove the same behavior through Playwright if no general frontend unit-test runner is introduced. The repository currently has no generic frontend unit-test script, so do not invent a passing command.
+
 ## 9. Browser verification
 
-With API and web servers already running:
+With API/web services running, execute the focused root Playwright spec:
 
 ```bash
 pnpm exec playwright test \
@@ -185,48 +217,34 @@ pnpm exec playwright test \
   --project=mobile-chrome
 ```
 
-Required scenarios:
+Required scenarios on both editable header surfaces:
 
-1. No new-report button or editable header shift is present.
-2. Editor and viewer date-opening behavior matches the permission matrix.
-3. Exactly five weather options appear on every relevant UI.
-4. Range and order errors prevent the request and identify the right field.
-5. Inactive reveals a required reason; active hides and clears it.
-6. Impact notes survive save/refetch and are visible in the downloaded PDF.
-7. Positive activity create/edit on an inactive date opens the exact Persian warning.
-8. Cancel causes no network write and does not loop under autosave; editing/retrying can prompt again.
-9. Confirm issues one write and keeps the site status unchanged.
-10. Keyboard focus enters the dialog, Escape/cancel is safe, and focus returns to the initiating row.
-11. Repeat locale-sensitive assertions in Persian RTL and English LTR.
+1. Exactly five localized weather choices appear in the required order; no retired value appears.
+2. Keyboard selection updates checked state and visible text/icon remain redundant.
+3. Boundary and equal temperatures save once with the expected payload.
+4. Out-of-range and reversed values show associated inline errors and cause zero API requests/queue writes.
+5. Slowly typing an incomplete negative/decimal token causes no autosave or accidental null write.
+6. A mocked structured API error maps by `code/details` to `temp_max`.
+7. Saving a multi-line mixed-language note, refetching, and reopening preserves the exact value.
+8. Reopening the legacy form does not blank notes before its autosave timer runs.
+9. Persian uses RTL labels/messages and English uses LTR localized labels/messages.
+10. Desktop and mobile layouts keep controls, errors, and note text readable.
 
-## 10. Offline verification
+For offline proof, load and seed the application online, switch the context offline, attempt valid and invalid edits, then reconnect. Invalid input creates no queue entry; valid weather/temperature/note data replays once and survives refetch.
 
-Use a prepared browser database at the pre-upgrade version containing:
+For the usability outcome in SC-007, run a short moderated task with at least 10 representative editors across Persian and English. Each participant must select weather, enter valid temperatures, encounter and correct one invalid temperature, and add an impact note without coaching. Record completion and first-attempt correction rates; at least 9 of 10 must complete the flow without external assistance.
 
-- a cached report with `sunny`;
-- pending queue payloads with `partly_cloudy` and `foggy`;
-- queue retry metadata and unrelated fields.
+## 10. Final evidence report
 
-Load the new client and verify the IndexedDB upgrade maps values to `clear`/`cloudy` without losing records or metadata. Then test a positive activity edit on an inactive report:
+Report these categories separately:
 
-- cancel creates no queue entry;
-- confirm creates exactly one queue entry;
-- reconnect replays it once;
-- new header fields survive replay/conflict handling.
+- migration state, backup, pre/post counts, and migration-executor result;
+- focused model/API/aggregation/correction/sync test totals;
+- full field-report/sub-report regression totals;
+- typecheck status and any independently identified baseline failures;
+- offline normalization and replay evidence;
+- desktop/mobile Persian/English Playwright results;
+- PDF generator/endpoint, extraction, and visual-render evidence;
+- infrastructure or scenarios not exercised.
 
-The configured `pwa-offline` Playwright project starts the context offline, which may prevent initial app navigation unless the service worker/cache is pre-seeded. Use a scenario that loads and seeds online first and then toggles the context offline, or a dedicated fixture that installs the cached app state; record which method was used.
-
-## 11. Final evidence report
-
-Report these separately:
-
-- migration backup, plan, applied version, and pre/post normalization counts;
-- focused backend and regression test totals;
-- permission and concurrent-ensure proof;
-- typecheck status, including any baseline failures;
-- desktop/mobile/offline Playwright results;
-- PDF extraction and visual review;
-- Persian/English and accessibility checks;
-- unavailable infrastructure or scenarios not exercised.
-
-Do not equate checked tasks, serializer unit tests, or a PDF signature with end-to-end delivery.
+A checked task list, committed migration, source inspection, or PDF signature alone is not end-to-end delivery proof.
