@@ -10,6 +10,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from django.db.models import Prefetch
@@ -262,6 +263,11 @@ class ChangePasswordView(generics.GenericAPIView):
                 new_password=new_password
             )
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
+        except DjangoValidationError as e:
+            return Response(
+                localize_api_payload(e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except ValidationError as e:
             return Response(
                 localize_api_payload(e.detail),
@@ -385,6 +391,11 @@ class ResetPasswordView(generics.GenericAPIView):
             service = PasswordResetService()
             result = service.reset_password(token=token, new_password=new_password)
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
+        except DjangoValidationError as e:
+            return Response(
+                localize_api_payload(e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except ValidationError as e:
             return Response(
                 localize_api_payload(e.detail),

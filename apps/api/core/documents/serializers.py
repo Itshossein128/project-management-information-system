@@ -11,7 +11,9 @@ from documents.models import (
     MeetingMinutes,
     ProjectDocument,
 )
-from documents.services.upload_service import presign_get_url
+from documents.services.upload_service import (
+    attachment_url_for_display, presign_get_url, validate_attachment_url,
+)
 
 User = get_user_model()
 
@@ -92,6 +94,9 @@ class CorrespondenceSerializer(serializers.ModelSerializer):
     response_due_date = JalaliDateField(required=False, allow_null=True)
     response_date = JalaliDateField(required=False, allow_null=True)
 
+    def validate_file_url(self, value):
+        return validate_attachment_url(value)
+
     class Meta:
         model = Correspondence
         fields = [
@@ -112,12 +117,15 @@ class CorrespondenceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['file_url'] = presign_get_url(instance.file_url) if instance.file_url else ''
+        data['file_url'] = attachment_url_for_display(instance.file_url)
         return data
 
 
 class MeetingMinutesSerializer(serializers.ModelSerializer):
     meeting_date = JalaliDateField()
+
+    def validate_file_url(self, value):
+        return validate_attachment_url(value)
 
     class Meta:
         model = MeetingMinutes
@@ -130,7 +138,7 @@ class MeetingMinutesSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['file_url'] = presign_get_url(instance.file_url) if instance.file_url else ''
+        data['file_url'] = attachment_url_for_display(instance.file_url)
         return data
 
 

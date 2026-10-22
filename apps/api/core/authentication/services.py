@@ -1,14 +1,15 @@
 """Authentication services."""
 import hashlib
 import logging
+import secrets
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
@@ -70,26 +71,24 @@ class LoginService:
 
 
 class PasswordResetService:
-    token_length = 6
     token_expiry_hours = 1
 
     def generate_reset_token(self) -> str:
-        return get_random_string(self.token_length, allowed_chars='0123456789')
+        return secrets.token_urlsafe(32)
 
     def send_reset_sms(self, user, reset_token: str) -> bool:
-        logger.info('Password reset code for %s: %s', user.mobile, reset_token)
-        return True
+        logger.warning('Password reset SMS delivery is not configured')
+        return False
 
     def initiate_password_reset(self, phone_number: str) -> dict:
+        response = {
+            'success': True,
+            'message': _('If an account exists with this phone number, a reset code has been sent.'),
+        }
         try:
             user = User.objects.get(mobile=phone_number)
         except User.DoesNotExist:
-            return {
-                'success': True,
-                'message': _(
-                    'If an account exists with this phone number, a reset code has been sent.'
-                ),
-            }
+            return response
         reset_token = self.generate_reset_token()
         PasswordResetToken.objects.create(
             user=user,
@@ -97,29 +96,38 @@ class PasswordResetService:
             expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours),
         )
         self.send_reset_sms(user, reset_token)
-        return {'success': True, 'message': _('Password reset code sent successfully.')}
+        return response
 
+    @transaction.atomic
     def reset_password(self, token: str, new_password: str) -> dict:
-        token_hash = _hash_token(token)
-        prt = (
-            PasswordResetToken.objects.filter(token_hash=token_hash, used_at__isnull=True)
-            .select_related('user')
-            .order_by('-created_at')
-            .first()
-        )
-        if prt is None or prt.expires_at < timezone.now():
+        # Retire legacy six-digit credentials; they cannot safely identify an account.
+        if len(token) != 43:
             raise ValidationError({'token': _('Invalid or expired reset token.')})
-        validate_password(new_password, user=prt.user)
-        prt.user.set_password(new_password)
-        prt.user.save(update_fields=['password'])
-        prt.used_at = timezone.now()
-        prt.save(update_fields=['used_at'])
-        blacklist_user_tokens(prt.user)
+        token_hash = _hash_token(token)
+        candidates = list(PasswordResetToken.objects.filter(
+            token_hash=token_hash, used_at__isnull=True,
+            expires_at__gt=timezone.now(),
+        )[:2])
+        if len(candidates) != 1:
+            raise ValidationError({'token': _('Invalid or expired reset token.')})
+        prt = candidates[0]
+        # Serialize all password changes for this account, then recheck the token.
+        user = User.objects.select_for_update().get(pk=prt.user_id)
+        prt.refresh_from_db()
+        if prt.used_at is not None or prt.expires_at <= timezone.now():
+            raise ValidationError({'token': _('Invalid or expired reset token.')})
+        validate_password(new_password, user=user)
+        user.set_password(new_password)
+        user.save(update_fields=['password'])
+        PasswordResetToken.objects.filter(user=user, used_at__isnull=True).update(used_at=timezone.now())
+        blacklist_user_tokens(user)
         return {'success': True, 'message': _('Password reset successfully.')}
 
 
 class PasswordChangeService:
+    @transaction.atomic
     def change_password(self, user, old_password: str, new_password: str) -> dict:
+        user = User.objects.select_for_update().get(pk=user.pk)
         if not user.check_password(old_password):
             raise ValidationError({'old_password': _('Current password is incorrect.')})
         validate_password(new_password, user=user)
@@ -129,5 +137,6 @@ class PasswordChangeService:
             )
         user.set_password(new_password)
         user.save(update_fields=['password'])
+        PasswordResetToken.objects.filter(user=user, used_at__isnull=True).update(used_at=timezone.now())
         blacklist_user_tokens(user)
         return {'success': True, 'message': _('Password changed successfully.')}

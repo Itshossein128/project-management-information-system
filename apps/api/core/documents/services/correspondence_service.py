@@ -7,6 +7,7 @@ from datetime import date
 
 from common.jalali import parse_date_optional
 from documents.models import Correspondence, CorrStatus, CorrType
+from documents.services.upload_service import validate_attachment_url
 
 
 def generate_corr_number(project_id, corr_type: str) -> str:
@@ -28,10 +29,13 @@ def generate_corr_number(project_id, corr_type: str) -> str:
 
 def respond_to_correspondence(corr: Correspondence, data: dict, user) -> Correspondence:
     """Respond to a correspondence and update its state."""
+    attachment = data.get('file_url')
+    if attachment:
+        validate_attachment_url(attachment)
     corr.response_date = parse_date_optional(data.get('response_date')) or date.today()
     corr.status = CorrStatus.RESPONDED
-    if data.get('file_url'):
-        corr.file_url = data['file_url']
+    if attachment:
+        corr.file_url = attachment
     corr.updated_by = user
     corr.save()
     return corr

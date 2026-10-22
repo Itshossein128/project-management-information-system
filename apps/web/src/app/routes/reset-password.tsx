@@ -108,7 +108,8 @@ export default function ResetPassword() {
                 id='reset-code'
                 name='reset_code'
                 autoComplete='one-time-code'
-                inputMode='numeric'
+                autoCapitalize='none'
+                spellCheck={false}
                 value={token}
                 onChange={(e) => setToken(e.target.value.trim())}
                 required

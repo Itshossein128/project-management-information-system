@@ -6,7 +6,30 @@ import os
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.validators import URLValidator
 from rest_framework.exceptions import ValidationError
+
+
+def validate_attachment_url(value):
+    """User-entered attachments are links, never authority to sign an object key."""
+    if value == '':
+        return value
+    try:
+        if not isinstance(value, str):
+            raise DjangoValidationError('Invalid URL')
+        URLValidator(schemes=['http', 'https'])(value)
+    except DjangoValidationError as exc:
+        raise ValidationError('Attachment must be an HTTP or HTTPS URL.') from exc
+    return value
+
+
+def attachment_url_for_display(value):
+    """Fail closed for legacy raw keys; never renew user-supplied signed URLs."""
+    try:
+        return validate_attachment_url(value)
+    except ValidationError:
+        return ''
 
 
 def _s3_client():
