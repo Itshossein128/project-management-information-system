@@ -45,6 +45,7 @@ def _register_font() -> str:
         os.environ.get('IPCAS_PDF_FONT_PATH'),
         os.path.join(os.path.dirname(__file__), 'fonts', 'Vazirmatn.ttf'),
         '/usr/share/fonts/truetype/vazirmatn/Vazirmatn-Regular.ttf',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         # Fallbacks with Arabic/Persian glyph coverage.
         '/usr/share/fonts/truetype/noto/NotoNaskhArabic-Regular.ttf',
         '/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf',
@@ -89,6 +90,12 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
     normal = ParagraphStyle('FaNormal', parent=base['Normal'], fontName=font, alignment=TA_RIGHT)
 
     report_date = report.report_date
+    if isinstance(report_date, str):
+        from datetime import date
+        try:
+            report_date = date.fromisoformat(report_date)
+        except ValueError:
+            pass
     jalali = gregorian_to_jalali(report_date) if report_date else ''
     dow = persian_day_of_week(report_date) if report_date else ''
 
@@ -100,16 +107,23 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
 
     weather = report.get_weather_condition_display() if report.weather_condition else '—'
     status_label = 'قفل‌شده' if report.status == 'approved' else report.get_status_display()
+    site_status_label = report.get_site_status_display()
+    if report.site_status == 'inactive' and report.inactivity_reason:
+        reason_label = report.get_inactivity_reason_display()
+        site_status_label = f'{site_status_label} ({reason_label})'
+
     header_rows = [
-        [_fa('وضعیت گزارش'), _fa(status_label)],
-        [_fa('محل / جبهه'), _fa(report.work_front or '—')],
-        [_fa('وضعیت کارگاه'), _fa(report.get_site_status_display())],
-        [_fa('وضعیت جوی'), _fa(weather)],
-        [_fa('حداکثر دما'), _fa(report.temp_max if report.temp_max is not None else '—')],
-        [_fa('حداقل دما'), _fa(report.temp_min if report.temp_min is not None else '—')],
-        [_fa('تهیه‌کننده'), _fa(_full_name(report.prepared_by))],
-        [_fa('تأییدکننده'), _fa(_full_name(report.approved_by))],
+        ['وضعیت گزارش', status_label],
+        ['محل / جبهه', report.work_front or '—'],
+        ['وضعیت کارگاه', site_status_label],
+        ['وضعیت جوی', weather],
+        ['حداکثر دما', str(report.temp_max) if report.temp_max is not None else '—'],
+        ['حداقل دما', str(report.temp_min) if report.temp_min is not None else '—'],
+        ['تهیه‌کننده', _full_name(report.prepared_by)],
+        ['تأییدکننده', _full_name(report.approved_by)],
     ]
+    if report.weather_impact_notes:
+        header_rows.append(['تأثیرات جوی', report.weather_impact_notes])
     story.append(_kv_table(header_rows, font))
     story.append(Spacer(1, 12))
 
@@ -217,7 +231,17 @@ def _full_name(user) -> str:
 
 
 def _kv_table(rows, font) -> Table:
-    data = [[_fa(v) if not _is_fa(v) else v for v in row] for row in rows]
+    val_style = ParagraphStyle('KVVal', fontName=font, fontSize=9, alignment=TA_RIGHT, leading=12)
+    data = []
+    for row in rows:
+        label = row[0]
+        val = row[1] if len(row) > 1 else ''
+        shaped_label = _fa(label)
+        if isinstance(val, str) and len(str(val)) > 30:
+            val_cell = Paragraph(_fa(val), val_style)
+        else:
+            val_cell = _fa(val)
+        data.append([shaped_label, val_cell])
     table = Table(data, colWidths=[120, 320])
     table.setStyle(
         TableStyle([
@@ -226,6 +250,7 @@ def _kv_table(rows, font) -> Table:
             ('GRID', (0, 0), (-1, -1), 0.25, colors.grey),
             ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#eef2f7')),
             ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ])
     )
     return table

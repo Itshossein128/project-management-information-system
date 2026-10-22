@@ -107,7 +107,7 @@ test.describe("Daily reports — auto summary", () => {
       data: {
         report_date: reportDate,
         discipline: "civil",
-        weather_condition: "sunny",
+        weather_condition: "clear",
         activities: [
           {
             row_number: 1,

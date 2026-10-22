@@ -17,7 +17,7 @@ export type SpecialtyContributionPayload = {
 
 const emptyPayload = (): SpecialtyContributionPayload => ({
   report_date: "",
-  weather_condition: "sunny",
+  weather_condition: "clear",
   site_status: "active",
   form_code: "",
   activities: [
@@ -109,13 +109,11 @@ export function SpecialtyContributionForm({ onSubmit, loading }: Props) {
               setForm((f) => ({ ...f, weather_condition: e.target.value }))
             }
           >
-            <option value='sunny'>آفتابی</option>
-            <option value='partly_cloudy'>نیمه‌ابری</option>
+            <option value='clear'>آفتابی / صاف</option>
             <option value='cloudy'>ابری</option>
             <option value='rainy'>بارانی</option>
-            <option value='stormy'>طوفانی</option>
             <option value='snowy'>برفی</option>
-            <option value='foggy'>مه</option>
+            <option value='stormy'>طوفانی / گرد و غبار</option>
           </select>
         </FieldRow>
         <FieldRow label='وضعیت کارگاه'>

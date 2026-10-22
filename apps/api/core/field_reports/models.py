@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from common.jalali import persian_day_of_week
@@ -20,13 +21,19 @@ class ReportStatus(models.TextChoices):
 
 
 class WeatherCondition(models.TextChoices):
-    SUNNY = 'sunny', 'آفتابی'
+    CLEAR = 'clear', 'آفتابی / صاف'
     CLOUDY = 'cloudy', 'ابری'
-    PARTLY_CLOUDY = 'partly_cloudy', 'نیمه‌ابری'
     RAINY = 'rainy', 'بارانی'
-    STORMY = 'stormy', 'طوفانی'
     SNOWY = 'snowy', 'برفی'
-    FOGGY = 'foggy', 'مه‌آلود'
+    STORMY = 'stormy', 'طوفانی / گرد و غبار'
+
+
+class InactivityReason(models.TextChoices):
+    WEATHER = 'weather', 'نامساعد بودن شرایط جوی'
+    HOLIDAY = 'holiday', 'تعطیل رسمی / تقویمی'
+    STRIKE_OR_DISPUTE = 'strike_or_dispute', 'اختلاف یا اعتصاب'
+    CLIENT_STOP_ORDER = 'client_stop_order', 'دستور توقف کارفرما / مشاور'
+    SAFETY_INCIDENT = 'safety_incident', 'حادثه ایمنی'
 
 
 class SiteStatus(models.TextChoices):
@@ -103,9 +110,28 @@ class DailyReport(AuditSoftDeleteModel):
         null=True,
         blank=True,
     )
-    temp_max = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
-    temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    temp_max = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(-40), MaxValueValidator(60)],
+    )
+    temp_min = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(-40), MaxValueValidator(60)],
+    )
     site_status = models.CharField(max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE)
+    inactivity_reason = models.CharField(
+        max_length=30,
+        choices=InactivityReason.choices,
+        blank=True,
+        default='',
+    )
+    weather_impact_notes = models.TextField(blank=True, default='')
     general_notes = models.TextField(blank=True, default='')
     management_opinion = models.TextField(blank=True, default='')
     weather_override = models.BooleanField(default=False)
@@ -173,7 +199,26 @@ class DailyReport(AuditSoftDeleteModel):
             ),
         ]
 
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        errors = {}
+        if self.temp_min is not None and (self.temp_min < -40 or self.temp_min > 60):
+            errors['temp_min'] = 'دمای کمینه باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد.'
+        if self.temp_max is not None and (self.temp_max < -40 or self.temp_max > 60):
+            errors['temp_max'] = 'دمای بیشینه باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد.'
+        if self.temp_min is not None and self.temp_max is not None and self.temp_max < self.temp_min:
+            errors['temp_max'] = 'دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.'
+        if self.site_status == SiteStatus.INACTIVE and not self.inactivity_reason:
+            errors['inactivity_reason'] = 'در صورت تعطیلی کارگاه، انتخاب علت الزامی است.'
+        if self.site_status == SiteStatus.ACTIVE and self.inactivity_reason:
+            self.inactivity_reason = ''
+        if errors:
+            raise ValidationError(errors)
+
     def save(self, *args, **kwargs):
+        if self.site_status == SiteStatus.ACTIVE and self.inactivity_reason:
+            self.inactivity_reason = ''
         creating = self._state.adding
         super().save(*args, **kwargs)
         if creating and self.lineage_id is None:
@@ -529,8 +574,20 @@ class WeatherLog(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='weather_logs')
     log_date = models.DateField()
     day_of_week = models.CharField(max_length=20, blank=True, default='')
-    temp_max = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
-    temp_min = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    temp_max = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(-40), MaxValueValidator(60)],
+    )
+    temp_min = models.DecimalField(
+        max_digits=5,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(-40), MaxValueValidator(60)],
+    )
     weather_condition = models.CharField(max_length=20, choices=WeatherCondition.choices)
     site_status = models.CharField(max_length=10, choices=SiteStatus.choices, default=SiteStatus.ACTIVE)
     wind_speed = models.CharField(max_length=50, blank=True, default='')
@@ -546,6 +603,19 @@ class WeatherLog(AuditSoftDeleteModel):
             ),
         ]
         ordering = ['-log_date']
+
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        errors = {}
+        if self.temp_min is not None and (self.temp_min < -40 or self.temp_min > 60):
+            errors['temp_min'] = 'دمای کمینه باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد.'
+        if self.temp_max is not None and (self.temp_max < -40 or self.temp_max > 60):
+            errors['temp_max'] = 'دمای بیشینه باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد.'
+        if self.temp_min is not None and self.temp_max is not None and self.temp_max < self.temp_min:
+            errors['temp_max'] = 'دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.'
+        if errors:
+            raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
         if self.log_date:

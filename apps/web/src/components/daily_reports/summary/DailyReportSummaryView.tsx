@@ -152,6 +152,9 @@ export function DailyReportSummaryView({
             <dt className='text-muted-foreground'>وضعیت کارگاه</dt>
             <dd>
               {report.site_status_label}
+              {report.site_status === "inactive" && report.inactivity_reason_label
+                ? ` (${report.inactivity_reason_label})`
+                : ""}
               {report.aggregation?.site_status_source === "override"
                 ? ` (${t("dailyReports.summary.override", "لغو خودکار")})`
                 : ""}
@@ -166,6 +169,20 @@ export function DailyReportSummaryView({
                 : ""}
             </dd>
           </div>
+          <div>
+            <dt className='text-muted-foreground'>دما</dt>
+            <dd>
+              {report.temp_max != null || report.temp_min != null
+                ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"} °C`
+                : "—"}
+            </dd>
+          </div>
+          {report.weather_impact_notes ? (
+            <div className='sm:col-span-2'>
+              <dt className='text-muted-foreground'>تأثیر شرایط جوی</dt>
+              <dd className='whitespace-pre-wrap'>{report.weather_impact_notes}</dd>
+            </div>
+          ) : null}
         </dl>
       </Section>
 

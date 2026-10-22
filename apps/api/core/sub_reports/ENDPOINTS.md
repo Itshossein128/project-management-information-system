@@ -62,3 +62,6 @@ The base path for these endpoints typically looks like `/api/projects/<project_i
 - **Description:** Rejects a previously submitted sub-report, transitioning it to the `REJECTED` state.
 - **Payload:** Requires a `rejection_reason` (minimum 10 characters).
 - **Permissions:** Requires `approve_reports` project permission.
+
+## Operational Notes
+- **Weather Condition Standards:** `weather_condition` uses the five standardized Shiraz categories: `clear`, `cloudy`, `rainy`, `snowy`, `stormy`. Contributing sub-report weather conditions are automatically reconciled during daily-report summary generation using severity order `stormy > snowy > rainy > cloudy > clear`.

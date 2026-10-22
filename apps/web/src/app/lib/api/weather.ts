@@ -3,13 +3,11 @@ import { isoRangeToJalali, isoToJalali } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 
 export type WeatherCondition =
-  | "sunny"
+  | "clear"
   | "cloudy"
-  | "partly_cloudy"
   | "rainy"
-  | "stormy"
   | "snowy"
-  | "foggy";
+  | "stormy";
 
 export type SiteStatus = "active" | "inactive";
 
@@ -51,13 +49,11 @@ export interface WeatherLogFormInput {
 }
 
 export const WEATHER_CONDITIONS: { value: WeatherCondition; label: string }[] = [
-  { value: "sunny", label: "آفتابی" },
+  { value: "clear", label: "آفتابی / صاف" },
   { value: "cloudy", label: "ابری" },
-  { value: "partly_cloudy", label: "نیمه‌ابری" },
   { value: "rainy", label: "بارانی" },
-  { value: "stormy", label: "طوفانی" },
   { value: "snowy", label: "برفی" },
-  { value: "foggy", label: "مه‌آلود" },
+  { value: "stormy", label: "طوفانی / گرد و غبار" },
 ];
 
 export function formToPayload(form: WeatherLogFormInput): WeatherLogPayload {

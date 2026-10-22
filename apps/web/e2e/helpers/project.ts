@@ -319,7 +319,7 @@ export async function createDailyReportViaApi(
     data: {
       report_date: reportDate,
       discipline: opts.discipline ?? "civil",
-      weather_condition: "sunny",
+      weather_condition: "clear",
       activities: [
         {
           row_number: 1,

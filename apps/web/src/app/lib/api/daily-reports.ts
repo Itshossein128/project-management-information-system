@@ -10,13 +10,18 @@ export type ReportStatus =
   | "rejected";
 
 export type WeatherCondition =
-  | "sunny"
+  | "clear"
   | "cloudy"
-  | "partly_cloudy"
   | "rainy"
-  | "stormy"
   | "snowy"
-  | "foggy";
+  | "stormy";
+
+export type InactivityReason =
+  | "weather"
+  | "holiday"
+  | "strike_or_dispute"
+  | "client_stop_order"
+  | "safety_incident";
 
 export type SiteStatus = "active" | "inactive";
 export type ReportShift = "day" | "night" | "full";
@@ -179,6 +184,9 @@ export interface DailyReportDetail {
   temp_min: string | null;
   site_status: SiteStatus;
   site_status_label: string;
+  inactivity_reason?: InactivityReason | null;
+  inactivity_reason_label?: string | null;
+  weather_impact_notes?: string;
   general_notes: string;
   management_opinion?: string;
   weather_override?: boolean;
@@ -225,6 +233,8 @@ export interface HeaderPayload {
   temp_max?: string | number | null;
   temp_min?: string | number | null;
   site_status?: SiteStatus;
+  inactivity_reason?: InactivityReason | null;
+  weather_impact_notes?: string;
   general_notes?: string;
   management_opinion?: string;
   weather_override?: boolean;
@@ -287,7 +297,7 @@ export function createDailyReport(projectId: string, payload: HeaderPayload) {
 export function ensureDailyReportByDate(projectId: string, date: string) {
   return apiJson<DailyReportDetail>(`${base(projectId)}/by-date/`, {
     method: "POST",
-    body: JSON.stringify({ report_date: date }),
+    body: JSON.stringify({ date, report_date: date }),
   });
 }
 
@@ -295,6 +305,8 @@ export function fetchDailyReportByDate(projectId: string, date: string) {
   const q = new URLSearchParams({ date });
   return apiJson<DailyReportDetail>(`${base(projectId)}/by-date/?${q.toString()}`);
 }
+
+export const getDailyReportByDate = fetchDailyReportByDate;
 
 export function updateDailyReport(
   projectId: string,
@@ -470,11 +482,17 @@ export function fetchMaterialReconciliation(projectId: string, reportId: string)
 }
 
 export const WEATHER_META: Record<WeatherCondition, { label: string; icon: string }> = {
-  sunny: { label: "آفتابی", icon: "☀️" },
+  clear: { label: "آفتابی / صاف", icon: "☀️" },
   cloudy: { label: "ابری", icon: "☁️" },
-  partly_cloudy: { label: "نیمه‌ابری", icon: "⛅" },
   rainy: { label: "بارانی", icon: "🌧️" },
-  stormy: { label: "طوفانی", icon: "🌩️" },
   snowy: { label: "برفی", icon: "❄️" },
-  foggy: { label: "مه‌آلود", icon: "🌫️" },
+  stormy: { label: "طوفانی / گرد و غبار", icon: "🌩️" },
 };
+
+export const INACTIVITY_REASONS: { value: InactivityReason; label: string }[] = [
+  { value: "weather", label: "نامساعد بودن شرایط جوی" },
+  { value: "holiday", label: "تعطیل رسمی / تقویمی" },
+  { value: "strike_or_dispute", label: "اختلاف یا اعتصاب" },
+  { value: "client_stop_order", label: "دستور توقف کارفرما / مشاور" },
+  { value: "safety_incident", label: "حادثه ایمنی" },
+];

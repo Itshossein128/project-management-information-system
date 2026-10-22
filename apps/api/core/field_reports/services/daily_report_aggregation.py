@@ -14,6 +14,7 @@ from field_reports.models import (
     DailyReportConcreteLog,
     DailyReportLabor,
     DailyReportMaterial,
+    InactivityReason,
     MaterialTransactionType,
     ReportShift,
     SiteStatus,
@@ -29,13 +30,11 @@ from sub_reports.models import (
 INCLUDE_STATUSES = {SubReportStatus.SUBMITTED, SubReportStatus.APPROVED}
 
 WEATHER_SEVERITY = {
-    WeatherCondition.STORMY: 70,
-    WeatherCondition.SNOWY: 60,
-    WeatherCondition.RAINY: 50,
-    WeatherCondition.FOGGY: 40,
-    WeatherCondition.CLOUDY: 30,
-    WeatherCondition.PARTLY_CLOUDY: 20,
-    WeatherCondition.SUNNY: 10,
+    WeatherCondition.STORMY: 50,
+    WeatherCondition.SNOWY: 40,
+    WeatherCondition.RAINY: 30,
+    WeatherCondition.CLOUDY: 20,
+    WeatherCondition.CLEAR: 10,
 }
 
 
@@ -123,6 +122,8 @@ def _clear_derived(report: DailyReport) -> None:
 
 @transaction.atomic
 def ensure_daily_report_summary(project_id, report_date: date, user=None) -> DailyReport:
+    from projects.models import Project
+    Project.objects.select_for_update().filter(id=project_id).first()
     report = (
         DailyReport.objects.filter(
             project_id=project_id,
@@ -188,8 +189,15 @@ def rebuild_daily_report_summary(
             for sr in sub_reports
         ):
             report.site_status = SiteStatus.INACTIVE
+            # Preserve existing valid inactivity_reason, or leave blank if none set
+            if report.inactivity_reason and report.inactivity_reason not in InactivityReason.values:
+                report.inactivity_reason = ''
         elif sub_reports:
             report.site_status = SiteStatus.ACTIVE
+            report.inactivity_reason = ''
+    else:
+        if report.site_status == SiteStatus.ACTIVE:
+            report.inactivity_reason = ''
 
     labor_sums: dict[tuple[str, str], dict] = defaultdict(
         lambda: {'present': 0, 'leave': 0, 'source_sub_report': None, 'source_discipline': ''},

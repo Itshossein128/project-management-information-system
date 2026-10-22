@@ -404,7 +404,7 @@ def _seed_field_reports(
         report_date=report_date,
         shift=ReportShift.FULL,
         defaults={
-            'weather_condition': WeatherCondition.SUNNY,
+            'weather_condition': WeatherCondition.CLEAR,
             'temp_max': Decimal('28.0'),
             'temp_min': Decimal('16.0'),
             'general_notes': f'Demo daily report for {spec.project_name}',

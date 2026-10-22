@@ -24,6 +24,7 @@ export interface InlineGridTabProps {
   serverRows: readonly { id?: string }[];
   emptyRow: () => Record<string, unknown>;
   toPayload: (row: GridRow) => Record<string, unknown>;
+  beforeSaveRow?: (row: GridRow, payload: Record<string, unknown>) => Promise<boolean> | boolean;
   onChanged: () => void;
   readOnly?: boolean;
   addLabel?: string;
@@ -40,6 +41,7 @@ export function InlineGridTab({
   serverRows,
   emptyRow,
   toPayload,
+  beforeSaveRow,
   onChanged,
   readOnly,
   addLabel,
@@ -78,6 +80,12 @@ export function InlineGridTab({
 
   const onSaveRow = async (row: GridRow, options?: { silent?: boolean }) => {
     const payload = toPayload(row);
+    if (beforeSaveRow) {
+      const proceed = await beforeSaveRow(row, payload);
+      if (!proceed) {
+        return;
+      }
+    }
     if (!isOnline && canOffline) {
       await queueChildWrite(
         projectId,

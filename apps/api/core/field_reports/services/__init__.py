@@ -118,6 +118,8 @@ HEADER_COMPARE_FIELDS = (
     'temp_min',
     'temp_max',
     'site_status',
+    'inactivity_reason',
+    'weather_impact_notes',
     'general_notes',
 )
 

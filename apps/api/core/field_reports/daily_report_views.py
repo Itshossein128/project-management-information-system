@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.http import HttpResponse
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -23,7 +23,9 @@ from field_reports.models import (
     DailyReportLabor,
     DailyReportLaborCamp,
     DailyReportMaterial,
+    ReportShift,
     ReportStatus,
+    SiteStatus,
 )
 from field_reports.models import LaborJobTitle
 from field_reports.serializers import (
@@ -116,8 +118,12 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     @property
     def required_permission(self):
+        if self.action == 'by_date':
+            if self.request.method.upper() == 'GET':
+                return self.view_permission
+            return self.edit_permission
         if self.action in (
-            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation', 'by_date',
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
         ):
             return self.view_permission
         if self.action == 'correction_requests' and self.request.method.upper() == 'GET':
@@ -198,16 +204,21 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             )
             if report is not None:
                 return Response(DailyReportDetailSerializer(report).data)
+            from rest_framework.exceptions import NotFound
+            raise NotFound({'detail': 'گزارشی برای این تاریخ یافت نشد', 'code': 'report_not_found'})
 
-            report = ensure_daily_report_summary(
-                project_id, report_date, user=request.user,
-            )
-            return Response(DailyReportDetailSerializer(report).data)
-
+        created_before = DailyReport.objects.filter(
+            project_id=project_id,
+            report_date=report_date,
+            shift=ReportShift.FULL,
+            is_deleted=False,
+            is_current=True,
+        ).exists()
         report = ensure_daily_report_summary(
             project_id, report_date, user=request.user,
         )
-        return Response(DailyReportDetailSerializer(report).data)
+        status_code = status.HTTP_200_OK if created_before else status.HTTP_201_CREATED
+        return Response(DailyReportDetailSerializer(report).data, status=status_code)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -218,7 +229,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             allowed = {
                 'management_opinion', 'general_notes', 'weather_condition', 'site_status',
                 'weather_override', 'site_status_override', 'temp_min', 'temp_max',
-                'work_front', 'location_notes',
+                'work_front', 'location_notes', 'weather_impact_notes', 'inactivity_reason',
             }
             if instance.status not in EDITABLE_STATUSES and not set(request.data).issubset(allowed):
                 raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
@@ -247,6 +258,10 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     def _submit(self, instance, request):
         if instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
+        if instance.site_status == SiteStatus.INACTIVE and not instance.inactivity_reason:
+            raise ValidationError(
+                {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
+            )
         warnings = _validate_report_ready_for_submit(instance)
         services.submit_report(instance, request.user)
         data = DailyReportDetailSerializer(instance).data
@@ -260,12 +275,20 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         instance = self.get_object()
         if instance.status != ReportStatus.SUBMITTED:
             raise ValidationError('فقط گزارش‌های ارسال شده قابل بررسی هستند')
+        if instance.site_status == SiteStatus.INACTIVE and not instance.inactivity_reason:
+            raise ValidationError(
+                {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
+            )
         services.review_report(instance, request.user, request.data.get('notes', ''))
         return Response(DailyReportDetailSerializer(instance).data)
 
     def _approve(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل تأیید هستند')
+        if instance.site_status == SiteStatus.INACTIVE and not instance.inactivity_reason:
+            raise ValidationError(
+                {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
+            )
         services.approve_report(instance, request.user)
         return Response(DailyReportDetailSerializer(instance).data)
 

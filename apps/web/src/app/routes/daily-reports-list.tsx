@@ -32,6 +32,7 @@ import {
   WEATHER_META,
   deleteDailyReport,
   ensureDailyReportByDate,
+  fetchDailyReportByDate,
   fetchDailyReports,
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
@@ -296,8 +297,13 @@ export default function DailyReportsListPage() {
             if (!openDate || !projectId) return;
             setOpeningDate(true);
             try {
-              const report = await ensureDailyReportByDate(projectId, openDate);
-              void navigate(`${base}/${report.report_id}/view`);
+              if (canEdit) {
+                const report = await ensureDailyReportByDate(projectId, openDate);
+                void navigate(`${base}/${report.report_id}/view`);
+              } else {
+                const report = await fetchDailyReportByDate(projectId, openDate);
+                void navigate(`${base}/${report.report_id}/view`);
+              }
             } catch (e) {
               toast.error((e as Error).message);
             } finally {

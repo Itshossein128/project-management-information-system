@@ -6,11 +6,9 @@ interface IconProps {
 
 export function WeatherIcon({ condition, className }: { condition: WeatherCondition; className?: string }) {
   switch (condition) {
-    case "sunny":
+    case "clear":
       return <SunIcon className={className} />;
     case "cloudy":
-    case "partly_cloudy":
-    case "foggy":
       return <CloudIcon className={className} />;
     case "rainy":
       return <RainIcon className={className} />;
@@ -24,13 +22,11 @@ export function WeatherIcon({ condition, className }: { condition: WeatherCondit
 }
 
 export const WEATHER_CALENDAR_COLORS: Record<WeatherCondition, string> = {
-  sunny: "bg-warning-200 text-warning-900 dark:bg-warning-900/50 dark:text-warning-200",
+  clear: "bg-warning-200 text-warning-900 dark:bg-warning-900/50 dark:text-warning-200",
   cloudy: "bg-neutral-200 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200",
-  partly_cloudy: "bg-info-200 text-info-900 dark:bg-info-900/50 dark:text-info-200",
   rainy: "bg-info-300 text-info-900 dark:bg-info-900/50 dark:text-info-200",
   stormy: "bg-brand-300 text-brand-900 dark:bg-brand-900/50 dark:text-brand-200",
   snowy: "bg-info-100 text-info-900 dark:bg-info-900/50 dark:text-info-200",
-  foggy: "bg-neutral-300 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200",
 };
 
 function SunIcon({ className }: IconProps) {

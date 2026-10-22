@@ -263,7 +263,7 @@ class TestSyncBatch:
             report_date='2024-09-14',
             shift='full',
             status=ReportStatus.DRAFT,
-            weather_condition='sunny',
+            weather_condition='clear',
             site_status='active',
             general_notes='قدیمی',
             created_by=user,
@@ -276,6 +276,7 @@ class TestSyncBatch:
                 'shift': 'full',
                 'weather_condition': 'rainy',
                 'site_status': 'inactive',
+                'inactivity_reason': 'weather',
                 'general_notes': 'به‌روز از آفلاین',
                 'temp_min': 8,
                 'temp_max': 18,
@@ -286,6 +287,7 @@ class TestSyncBatch:
         existing.refresh_from_db()
         assert existing.weather_condition == 'rainy'
         assert existing.site_status == 'inactive'
+        assert existing.inactivity_reason == 'weather'
         assert existing.general_notes == 'به‌روز از آفلاین'
         assert float(existing.temp_min) == 8.0
         assert float(existing.temp_max) == 18.0
@@ -297,7 +299,7 @@ class TestSyncBatch:
             report_date='2024-09-15',
             shift='full',
             status=ReportStatus.APPROVED,
-            weather_condition='sunny',
+            weather_condition='clear',
             site_status='active',
             general_notes='سرور',
             created_by=user,
@@ -318,8 +320,33 @@ class TestSyncBatch:
         result = response.data['results'][0]
         assert result['status'] == 'conflict'
         assert result['server_payload'] is not None
-        assert result['server_payload']['weather_condition'] == 'sunny'
+        assert result['server_payload']['weather_condition'] == 'clear'
         assert result['server_payload']['general_notes'] == 'سرور'
         assert 'weather_condition' in result['conflict_fields']
         assert 'site_status' in result['conflict_fields']
         assert 'general_notes' in result['conflict_fields']
+
+    def test_sync_batch_conflict_includes_weather_impact_and_inactivity_reason(self, auth_client, sync_url, project, user):
+        from field_reports.models import InactivityReason, SiteStatus
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-12',
+            status=ReportStatus.APPROVED,
+            site_status=SiteStatus.INACTIVE,
+            inactivity_reason=InactivityReason.WEATHER,
+            weather_impact_notes='یخبندان صبحگاهی',
+            created_by=user,
+            updated_by=user,
+        )
+        payload = [{
+            'local_id': 'diff-meta',
+            'report_date': '2024-09-12',
+            'site_status': 'inactive',
+            'inactivity_reason': 'holiday',
+            'weather_impact_notes': 'تعطیلی به علت برف سنگین',
+        }]
+        res = auth_client.post(sync_url, payload, format='json')
+        assert res.data['summary']['conflicts'] == 1
+        res0 = res.data['results'][0]
+        assert 'inactivity_reason' in res0['conflict_fields']
+        assert 'weather_impact_notes' in res0['conflict_fields']

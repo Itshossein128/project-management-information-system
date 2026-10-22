@@ -1,9 +1,25 @@
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import type { DailyReportDetail } from "@/app/lib/api/daily-reports";
 import { uploadProjectFile } from "@/app/lib/api/files";
 import { fetchMembers } from "@/app/lib/api/members";
 import { generateUUID, savePendingPhoto } from "@/app/lib/offlineDB";
 import { isNetworkError } from "@/app/lib/offlineWrite";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  INACTIVE_ACTIVITY_WARNING_EN,
+  INACTIVE_ACTIVITY_WARNING_FA,
+  shouldWarnInactiveSiteActivity,
+} from "./activity-guard";
 import type { GridColumn, GridRow } from "./EditableGrid";
 import { InlineGridTab } from "./InlineGridTab";
 
@@ -35,6 +51,10 @@ export function ActivityTab({
   activityOptions,
   subcontractorOptions,
 }: DailyTabProps) {
+  const { t } = useTranslation();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingResolver, setPendingResolver] = useState<((val: boolean) => void) | null>(null);
+
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
@@ -102,52 +122,128 @@ export function ActivityTab({
     return uploadProjectFile(projectId, file);
   };
 
+  const beforeSaveRow = useCallback(
+    (_row: GridRow, payload: Record<string, unknown>): Promise<boolean> => {
+      const qty = payload.quantity_measured !== false ? payload.quantity : null;
+      if (shouldWarnInactiveSiteActivity(report?.site_status, qty)) {
+        return new Promise<boolean>((resolve) => {
+          setPendingResolver(() => resolve);
+          setConfirmOpen(true);
+        });
+      }
+      return Promise.resolve(true);
+    },
+    [report?.site_status],
+  );
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
+    if (pendingResolver) {
+      pendingResolver(true);
+      setPendingResolver(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+    if (pendingResolver) {
+      pendingResolver(false);
+      setPendingResolver(null);
+    }
+  };
+
   return (
-    <InlineGridTab
-      projectId={projectId}
-      reportId={reportId}
-      resource="activities"
-      columns={columns}
-      serverRows={report?.activities ?? []}
-      onPhotoUpload={readOnly ? undefined : handlePhotoUpload}
-      emptyRow={() => ({
-        activity_description: "",
-        activity_ref: null,
-        shift: "shift_1",
-        subcontractor_name: "",
-        contractor_ref: "",
-        subcontractor_ref: null,
-        headcount: null,
-        zone: "",
-        block: "",
-        floor: "",
-        quantity: null,
-        quantity_measured: true,
-        unit: "",
-        responsible_user: null,
-        responsible_name: "",
-        photo_file: null,
-      })}
-      toPayload={(row: GridRow) => ({
-        activity_description: row.activity_description ?? "",
-        activity_ref: row.activity_ref ?? null,
-        shift: row.shift ?? "shift_1",
-        subcontractor_name: row.subcontractor_name ?? "",
-        contractor_ref: row.contractor_ref || null,
-        subcontractor_ref: row.subcontractor_ref ?? null,
-        headcount: row.headcount ?? null,
-        zone: row.zone ?? "",
-        block: row.block ?? "",
-        floor: row.floor ?? "",
-        quantity: row.quantity_measured ? row.quantity ?? null : null,
-        quantity_measured: row.quantity_measured ?? true,
-        unit: row.unit ?? "",
-        responsible_user: row.responsible_user || null,
-        responsible_name: row.responsible_name ?? "",
-        photo_file: row.photo_file ?? null,
-      })}
-      onChanged={onChanged}
-      readOnly={readOnly}
-    />
+    <>
+      <InlineGridTab
+        projectId={projectId}
+        reportId={reportId}
+        resource="activities"
+        columns={columns}
+        serverRows={report?.activities ?? []}
+        onPhotoUpload={readOnly ? undefined : handlePhotoUpload}
+        beforeSaveRow={beforeSaveRow}
+        emptyRow={() => ({
+          activity_description: "",
+          activity_ref: null,
+          shift: "shift_1",
+          subcontractor_name: "",
+          contractor_ref: "",
+          subcontractor_ref: null,
+          headcount: null,
+          zone: "",
+          block: "",
+          floor: "",
+          quantity: null,
+          quantity_measured: true,
+          unit: "",
+          responsible_user: null,
+          responsible_name: "",
+          photo_file: null,
+        })}
+        toPayload={(row: GridRow) => ({
+          activity_description: row.activity_description ?? "",
+          activity_ref: row.activity_ref ?? null,
+          shift: row.shift ?? "shift_1",
+          subcontractor_name: row.subcontractor_name ?? "",
+          contractor_ref: row.contractor_ref || null,
+          subcontractor_ref: row.subcontractor_ref ?? null,
+          headcount: row.headcount ?? null,
+          zone: row.zone ?? "",
+          block: row.block ?? "",
+          floor: row.floor ?? "",
+          quantity: row.quantity_measured ? row.quantity ?? null : null,
+          quantity_measured: row.quantity_measured ?? true,
+          unit: row.unit ?? "",
+          responsible_user: row.responsible_user || null,
+          responsible_name: row.responsible_name ?? "",
+          photo_file: row.photo_file ?? null,
+        })}
+        onChanged={onChanged}
+        readOnly={readOnly}
+      />
+
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancel();
+        }}
+      >
+        <DialogContent
+          className="sm:max-w-md"
+          data-testid="inactive-activity-confirm-dialog"
+        >
+          <DialogHeader>
+            <DialogTitle>تأیید ثبت کارکرد در روز تعطیل</DialogTitle>
+            <DialogDescription className="text-base font-medium text-foreground pt-2">
+              {t(
+                "dailyReports.inactiveActivityWarning",
+                INACTIVE_ACTIVITY_WARNING_FA,
+              )}
+            </DialogDescription>
+            <p className="text-xs text-muted-foreground mt-1" dir="ltr">
+              {INACTIVE_ACTIVITY_WARNING_EN}
+            </p>
+          </DialogHeader>
+          <DialogFooter className="mt-4 flex gap-2 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              data-testid="inactive-activity-cancel-btn"
+              onClick={handleCancel}
+            >
+              انصراف
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              data-testid="inactive-activity-confirm-btn"
+              onClick={handleConfirm}
+            >
+              تأیید و ذخیره
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

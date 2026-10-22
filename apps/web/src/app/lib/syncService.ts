@@ -15,6 +15,7 @@ import {
   getOfflineReportsByProject,
   getPendingPhoto,
   getPendingQueue,
+  normalizePayloadWeather,
   type QueueItem,
   removeQueueItem,
   updateOfflineReport,
@@ -169,7 +170,7 @@ async function buildReportBatchPayload(
   delete payload.updated_at;
   delete payload.status;
   delete payload.project_id;
-  return payload;
+  return normalizePayloadWeather(payload);
 }
 
 async function syncProjectBatch(

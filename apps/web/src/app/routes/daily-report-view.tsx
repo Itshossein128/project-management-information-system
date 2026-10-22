@@ -16,8 +16,10 @@ import {
   reviewReport,
   submitReport,
   updateDailyReport,
+  type InactivityReason,
   type SiteStatus,
   type WeatherCondition,
+  INACTIVITY_REASONS,
 } from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import {
@@ -52,6 +54,10 @@ export default function DailyReportViewPage() {
   const [siteOverride, setSiteOverride] = useState(false);
   const [weather, setWeather] = useState<string>("");
   const [siteStatus, setSiteStatus] = useState<string>("active");
+  const [inactivityReason, setInactivityReason] = useState<string>("");
+  const [tempMin, setTempMin] = useState<string>("");
+  const [tempMax, setTempMax] = useState<string>("");
+  const [weatherImpactNotes, setWeatherImpactNotes] = useState<string>("");
 
   const projectQuery = useQuery({
     queryKey: ["project", projectId],
@@ -70,8 +76,12 @@ export default function DailyReportViewPage() {
     setOpinion(report.management_opinion ?? "");
     setWeatherOverride(Boolean(report.weather_override));
     setSiteOverride(Boolean(report.site_status_override));
-    setWeather(report.weather_condition ?? "");
+    setWeather(report.weather_condition ?? "clear");
     setSiteStatus(report.site_status ?? "active");
+    setInactivityReason(report.inactivity_reason ?? "");
+    setTempMin(report.temp_min != null ? String(report.temp_min) : "");
+    setTempMax(report.temp_max != null ? String(report.temp_max) : "");
+    setWeatherImpactNotes(report.weather_impact_notes ?? "");
   }, [report]);
 
   const activitiesQuery = useQuery({
@@ -286,13 +296,11 @@ export default function DailyReportViewPage() {
                         onChange={(e) => setWeather(e.target.value)}
                         data-testid='weather-override-value'
                       >
-                        <option value='sunny'>آفتابی</option>
-                        <option value='partly_cloudy'>نیمه‌ابری</option>
+                        <option value='clear'>صاف</option>
                         <option value='cloudy'>ابری</option>
                         <option value='rainy'>بارانی</option>
-                        <option value='stormy'>طوفانی</option>
                         <option value='snowy'>برفی</option>
-                        <option value='foggy'>مه</option>
+                        <option value='stormy'>طوفانی</option>
                       </select>
                     </label>
                   ) : null}
@@ -302,25 +310,125 @@ export default function DailyReportViewPage() {
                       <select
                         className='w-full rounded-md border border-border bg-background p-2'
                         value={siteStatus}
-                        onChange={(e) => setSiteStatus(e.target.value)}
+                        onChange={(e) => {
+                          const next = e.target.value;
+                          setSiteStatus(next);
+                          if (next === "active") setInactivityReason("");
+                        }}
                         data-testid='site-override-value'
                       >
                         <option value='active'>فعال</option>
-                        <option value='inactive'>غیرفعال</option>
+                        <option value='inactive'>تعطیل</option>
                       </select>
                     </label>
                   ) : null}
                 </div>
+
+                <div className='grid gap-3 sm:grid-cols-2'>
+                  <div>
+                    <label htmlFor='summary-temp-max' className='mb-1 block text-sm text-muted-foreground'>
+                      حداکثر دما (°C)
+                    </label>
+                    <input
+                      id='summary-temp-max'
+                      type='number'
+                      step='0.1'
+                      min={-40}
+                      max={60}
+                      className='w-full rounded-md border border-border bg-background p-2 text-sm'
+                      value={tempMax}
+                      onChange={(e) => setTempMax(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor='summary-temp-min' className='mb-1 block text-sm text-muted-foreground'>
+                      حداقل دما (°C)
+                    </label>
+                    <input
+                      id='summary-temp-min'
+                      type='number'
+                      step='0.1'
+                      min={-40}
+                      max={60}
+                      className='w-full rounded-md border border-border bg-background p-2 text-sm'
+                      value={tempMin}
+                      onChange={(e) => setTempMin(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {(siteOverride ? siteStatus === "inactive" : report.site_status === "inactive") ? (
+                  <div>
+                    <label htmlFor='summary-inactivity-reason' className='mb-1 block text-sm font-medium'>
+                      علت تعطیلی کارگاه <span className='text-destructive'>*</span>
+                    </label>
+                    <select
+                      id='summary-inactivity-reason'
+                      className='w-full rounded-md border border-border bg-background p-2 text-sm'
+                      value={inactivityReason}
+                      onChange={(e) => setInactivityReason(e.target.value)}
+                      data-testid='inactivity-reason-select'
+                    >
+                      <option value=''>-- انتخاب علت تعطیلی --</option>
+                      {INACTIVITY_REASONS.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+
+                <div>
+                  <label htmlFor='summary-weather-impact' className='mb-1 block text-sm font-medium'>
+                    تأثیرات شرایط جوی بر کارگاه
+                  </label>
+                  <textarea
+                    id='summary-weather-impact'
+                    rows={2}
+                    className='w-full rounded-md border border-border bg-background p-2 text-sm'
+                    placeholder='توضیح اثر شرایط جوی بر روند کار...'
+                    value={weatherImpactNotes}
+                    onChange={(e) => setWeatherImpactNotes(e.target.value)}
+                  />
+                </div>
+
                 <Button
                   variant='secondary'
                   data-testid='summary-metadata-save'
                   onClick={async () => {
+                    const minN = tempMin !== "" ? Number(tempMin) : null;
+                    const maxN = tempMax !== "" ? Number(tempMax) : null;
+                    if (minN !== null && (minN < -40 || minN > 60)) {
+                      toast.error("حداقل دما باید بین ۴۰- تا ۶۰+ باشد");
+                      return;
+                    }
+                    if (maxN !== null && (maxN < -40 || maxN > 60)) {
+                      toast.error("حداکثر دما باید بین ۴۰- تا ۶۰+ باشد");
+                      return;
+                    }
+                    if (minN !== null && maxN !== null && maxN < minN) {
+                      toast.error("حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد");
+                      return;
+                    }
+                    const isInactive = siteOverride
+                      ? siteStatus === "inactive"
+                      : report.site_status === "inactive";
+                    if (isInactive && !inactivityReason) {
+                      toast.error("علت تعطیلی کارگاه الزامی است");
+                      return;
+                    }
+
                     try {
                       await updateDailyReport(projectId, reportId, {
                         report_date: report.report_date,
                         management_opinion: opinion,
                         weather_override: weatherOverride,
                         site_status_override: siteOverride,
+                        temp_min: tempMin === "" ? null : tempMin,
+                        temp_max: tempMax === "" ? null : tempMax,
+                        weather_impact_notes: weatherImpactNotes,
+                        inactivity_reason: isInactive ? (inactivityReason as InactivityReason) : null,
                         ...(weatherOverride
                           ? { weather_condition: weather as WeatherCondition }
                           : {}),
@@ -330,12 +438,22 @@ export default function DailyReportViewPage() {
                       });
                       toast.success("ذخیره شد");
                       void refetch();
-                    } catch (e) {
-                      toast.error((e as Error).message);
+                    } catch (e: any) {
+                      const msg =
+                        e?.response?.data?.error?.message ||
+                        e?.message ||
+                        "خطا در ثبت اطلاعات";
+                      if (msg.includes("temp_max_must_be_gte_temp_min")) {
+                        toast.error("حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد");
+                      } else if (msg.includes("inactivity_reason_required")) {
+                        toast.error("علت تعطیلی کارگاه الزامی است");
+                      } else {
+                        toast.error(msg);
+                      }
                     }
                   }}
                 >
-                  ذخیره نظر و لغو خودکارها
+                  ذخیره نظر و سربرگ
                 </Button>
               </div>
             ) : null}
@@ -344,7 +462,14 @@ export default function DailyReportViewPage() {
           <>
             <div className='grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4'>
               <Info label='شیفت' value={report.shift} />
-              <Info label='وضعیت کارگاه' value={report.site_status_label} />
+              <Info
+                label='وضعیت کارگاه'
+                value={
+                  report.site_status === "inactive" && report.inactivity_reason_label
+                    ? `${report.site_status_label} (${report.inactivity_reason_label})`
+                    : report.site_status_label
+                }
+              />
               <Info
                 label='وضعیت جوی'
                 value={report.weather_condition_label ?? "—"}
@@ -353,11 +478,18 @@ export default function DailyReportViewPage() {
                 label='دما'
                 value={
                   report.temp_max || report.temp_min
-                    ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"}`
+                    ? `${report.temp_max ?? "—"} / ${report.temp_min ?? "—"} °C`
                     : "—"
                 }
               />
             </div>
+
+            {report.weather_impact_notes ? (
+              <div className='rounded-xl border border-border bg-card p-4'>
+                <p className='mb-1 text-sm text-muted-foreground'>تأثیرات جوی بر کارگاه</p>
+                <p className='text-sm whitespace-pre-wrap'>{report.weather_impact_notes}</p>
+              </div>
+            ) : null}
 
             {report.general_notes ? (
               <div className='rounded-xl border border-border bg-card p-4'>

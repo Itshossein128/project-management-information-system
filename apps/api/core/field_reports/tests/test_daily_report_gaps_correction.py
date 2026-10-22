@@ -219,3 +219,34 @@ class TestDailyReportGapsCorrection:
             }],
         )
         assert summary['results'][0]['status'] == 'conflict'
+
+    def test_correction_version_copies_weather_and_inactivity_metadata(self, project, user):
+        from field_reports.models import WeatherCondition, InactivityReason, SiteStatus
+        from field_reports.services.correction_service import open_correction
+        source = DailyReport.objects.create(
+            project=project,
+            report_date='2024-09-08',
+            shift='full',
+            status=ReportStatus.APPROVED,
+            is_current=True,
+            weather_condition=WeatherCondition.RAINY,
+            temp_min=10.5,
+            temp_max=18.2,
+            site_status=SiteStatus.INACTIVE,
+            inactivity_reason=InactivityReason.WEATHER,
+            weather_impact_notes='بارندگی شدید باعث توقف کار شد',
+            created_by=user,
+            updated_by=user,
+        )
+        corr = open_correction(
+            source_report=source,
+            user=user,
+            reason='Correction reason at least 10 chars',
+        )
+        res_rep = corr.result_report
+        assert res_rep.weather_condition == WeatherCondition.RAINY
+        assert float(res_rep.temp_min) == 10.5
+        assert float(res_rep.temp_max) == 18.2
+        assert res_rep.site_status == SiteStatus.INACTIVE
+        assert res_rep.inactivity_reason == InactivityReason.WEATHER
+        assert res_rep.weather_impact_notes == 'بارندگی شدید باعث توقف کار شد'

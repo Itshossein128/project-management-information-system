@@ -99,6 +99,8 @@ def open_correction(*, source_report: DailyReport, user, reason: str) -> DailyRe
         temp_max=source_report.temp_max,
         temp_min=source_report.temp_min,
         site_status=source_report.site_status,
+        inactivity_reason=source_report.inactivity_reason,
+        weather_impact_notes=source_report.weather_impact_notes,
         general_notes=source_report.general_notes,
         prepared_by=user,
         status=ReportStatus.DRAFT,

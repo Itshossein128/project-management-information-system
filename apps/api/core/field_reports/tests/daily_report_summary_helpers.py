@@ -21,13 +21,15 @@ def make_sub_report(
     discipline=Discipline.CIVIL,
     status=SubReportStatus.DRAFT,
     report_date=SUMMARY_DATE,
-    weather_condition='sunny',
+    weather_condition='clear',
+    site_status='active',
 ):
     return DisciplineSubReport.objects.create(
         project=project,
         report_date=report_date,
         discipline=discipline,
         weather_condition=weather_condition,
+        site_status=site_status,
         status=status,
         created_by=user,
         updated_by=user,

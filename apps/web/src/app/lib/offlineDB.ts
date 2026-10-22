@@ -10,7 +10,25 @@ import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 
 // Keep the historical IndexedDB name so existing offline caches stay readable.
 export const OFFLINE_DB_NAME = "ipcas-offline";
-export const OFFLINE_DB_VERSION = 2;
+export const OFFLINE_DB_VERSION = 3;
+
+export function normalizeWeatherValue(val: unknown): string {
+  if (val === "sunny") return "clear";
+  if (val === "partly_cloudy" || val === "foggy") return "cloudy";
+  return typeof val === "string" ? val : "";
+}
+
+export function normalizePayloadWeather<T>(payload: T): T {
+  if (!payload || typeof payload !== "object") return payload;
+  const clone = { ...(payload as Record<string, unknown>) };
+  if ("weather_condition" in clone && clone.weather_condition) {
+    clone.weather_condition = normalizeWeatherValue(clone.weather_condition);
+  }
+  if ("weather" in clone && clone.weather) {
+    clone.weather = normalizeWeatherValue(clone.weather);
+  }
+  return clone as T;
+}
 
 export type EntityType =
   | "daily_report"
@@ -227,6 +245,43 @@ export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
         }
         if (oldVersion < 2 && !db.objectStoreNames.contains("pending_photos")) {
           db.createObjectStore("pending_photos", { keyPath: "photo_id" });
+        }
+        if (oldVersion < 3 && transaction) {
+          if (db.objectStoreNames.contains("offline_daily_reports")) {
+            const reportStore = transaction.objectStore("offline_daily_reports");
+            reportStore.openCursor().then(function iter(cursor) {
+              if (!cursor) return;
+              const rep = cursor.value;
+              let changed = false;
+              if (
+                rep.weather_condition &&
+                ["sunny", "partly_cloudy", "foggy"].includes(rep.weather_condition as string)
+              ) {
+                rep.weather_condition = normalizeWeatherValue(rep.weather_condition);
+                changed = true;
+              }
+              if (changed) {
+                cursor.update(rep);
+              }
+              cursor.continue().then(iter);
+            });
+          }
+
+          if (db.objectStoreNames.contains("offline_queue")) {
+            const queueStore = transaction.objectStore("offline_queue");
+            queueStore.openCursor().then(function iter(cursor) {
+              if (!cursor) return;
+              const item = cursor.value;
+              if (item.payload && typeof item.payload === "object") {
+                const norm = normalizePayloadWeather(item.payload);
+                if (JSON.stringify(norm) !== JSON.stringify(item.payload)) {
+                  item.payload = norm;
+                  cursor.update(item);
+                }
+              }
+              cursor.continue().then(iter);
+            });
+          }
         }
       },
     });

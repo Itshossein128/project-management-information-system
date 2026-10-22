@@ -25,6 +25,8 @@ export interface LaborBatchMeta {
   shift?: string;
   weather_condition?: string | null;
   site_status?: string;
+  inactivity_reason?: string | null;
+  weather_impact_notes?: string;
   general_notes?: string;
   temp_min?: number | string | null;
   temp_max?: number | string | null;
@@ -184,6 +186,8 @@ export async function queueLaborBatch(
     shift: meta.shift ?? (existing?.shift as string | undefined) ?? "full",
     weather_condition: meta.weather_condition ?? existing?.weather_condition ?? null,
     site_status: meta.site_status ?? existing?.site_status ?? "active",
+    inactivity_reason: meta.inactivity_reason ?? (existing?.inactivity_reason as string | null | undefined) ?? null,
+    weather_impact_notes: meta.weather_impact_notes ?? (existing?.weather_impact_notes as string | undefined) ?? "",
     general_notes: meta.general_notes ?? existing?.general_notes ?? "",
     temp_min: meta.temp_min ?? existing?.temp_min ?? null,
     temp_max: meta.temp_max ?? existing?.temp_max ?? null,
@@ -204,6 +208,8 @@ export async function queueLaborBatch(
     shift: base.shift,
     weather_condition: base.weather_condition,
     site_status: base.site_status,
+    inactivity_reason: base.inactivity_reason,
+    weather_impact_notes: base.weather_impact_notes,
     general_notes: base.general_notes,
     temp_min: base.temp_min,
     temp_max: base.temp_max,

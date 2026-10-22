@@ -30,15 +30,15 @@ class TestDailyReportGapsHeader:
 
     def test_create_with_work_front(self, auth_client, reports_url, project):
         by_date = f'/api/v1/projects/{project.id}/daily-reports/by-date/'
-        ensured = auth_client.get(by_date, {'date': '1403/05/11'})
-        assert ensured.status_code == status.HTTP_200_OK
+        ensured = auth_client.post(by_date, {'date': '1403/05/11'}, format='json')
+        assert ensured.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)
         report_id = ensured.data['report_id']
         response = auth_client.patch(
             f'{reports_url}{report_id}/',
             {
                 'work_front': 'جبهه شمالی',
                 'location_notes': 'بلوک A',
-                'weather_condition': 'sunny',
+                'weather_condition': 'clear',
                 'site_status': 'active',
             },
             format='json',

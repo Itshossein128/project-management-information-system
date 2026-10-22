@@ -15,7 +15,7 @@ const EMPTY_FORM: WeatherLogFormInput = {
   log_date_iso: "",
   temp_max: "",
   temp_min: "",
-  weather_condition: "sunny",
+  weather_condition: "clear",
   site_status: "active",
 };
 
@@ -64,10 +64,16 @@ export function WeatherLogDrawer({
     if (!form.log_date_iso) next.log_date_iso = "تاریخ الزامی است";
     const max = form.temp_max.trim() ? Number(form.temp_max) : null;
     const min = form.temp_min.trim() ? Number(form.temp_min) : null;
-    if (max !== null && Number.isNaN(max)) next.temp_max = "مقدار نامعتبر";
-    if (min !== null && Number.isNaN(min)) next.temp_min = "مقدار نامعتبر";
-    if (max !== null && min !== null && min > max) {
-      next.temp_min = "حداقل دما نمی‌تواند بیشتر از حداکثر باشد";
+    if (max !== null) {
+      if (Number.isNaN(max)) next.temp_max = "مقدار نامعتبر";
+      else if (max < -40 || max > 60) next.temp_max = "دما باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد";
+    }
+    if (min !== null) {
+      if (Number.isNaN(min)) next.temp_min = "مقدار نامعتبر";
+      else if (min < -40 || min > 60) next.temp_min = "دما باید بین ۴۰- تا ۶۰+ درجه سانتی‌گراد باشد";
+    }
+    if (max !== null && min !== null && max < min) {
+      next.temp_max = "حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد";
     }
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -110,6 +116,8 @@ export function WeatherLogDrawer({
               name="temp_max"
               type="number"
               step="0.1"
+              min={-40}
+              max={60}
               value={form.temp_max}
               onChange={(e) => setForm((f) => ({ ...f, temp_max: e.target.value }))}
               aria-invalid={errors.temp_max != null || undefined}
@@ -123,6 +131,8 @@ export function WeatherLogDrawer({
               name="temp_min"
               type="number"
               step="0.1"
+              min={-40}
+              max={60}
               value={form.temp_min}
               onChange={(e) => setForm((f) => ({ ...f, temp_min: e.target.value }))}
               aria-invalid={errors.temp_min != null || undefined}

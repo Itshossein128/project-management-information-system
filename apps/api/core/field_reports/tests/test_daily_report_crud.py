@@ -23,8 +23,8 @@ class TestDailyReportCrud:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
         by_date = f'/api/v1/projects/{project.id}/daily-reports/by-date/'
-        ensured = auth_client.get(by_date, {'date': '1403/03/12'})
-        assert ensured.status_code == status.HTTP_200_OK
+        ensured = auth_client.post(by_date, {'date': '1403/03/12'}, format='json')
+        assert ensured.status_code in (status.HTTP_200_OK, status.HTTP_201_CREATED)
         assert ensured.data['report_date'] == '1403/03/12'
         assert ensured.data['activities'] == []
         assert ensured.data['is_auto_summary'] is True

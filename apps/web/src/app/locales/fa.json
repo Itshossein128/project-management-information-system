@@ -401,7 +401,10 @@
     "genericTitle": "خطا"
   },
   "errors": {
-    "sod_self_approve": "طبق تفکیک وظایف، نمی‌توانید تراکنشی را که خودتان ایجاد کرده‌اید تأیید کنید."
+    "sod_self_approve": "طبق تفکیک وظایف، نمی‌توانید تراکنشی را که خودتان ایجاد کرده‌اید تأیید کنید.",
+    "temp_max_must_be_gte_temp_min": "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.",
+    "inactivity_reason_required": "در صورت تعطیلی کارگاه، انتخاب علت الزامی است.",
+    "auto_summary_only": "گزارش روزانه پروژه به صورت خودکار از گزارش‌های واحد تخصصی ایجاد می‌شود."
   },
   "dashboard": {
     "portfolio": {
@@ -652,7 +655,14 @@
     "actions": "عملیات",
     "createSuccess": "گزارش جوی ثبت شد",
     "updateSuccess": "گزارش جوی به‌روزرسانی شد",
-    "deleteSuccess": "گزارش جوی حذف شد"
+    "deleteSuccess": "گزارش جوی حذف شد",
+    "conditions": {
+      "clear": "آفتابی / صاف",
+      "cloudy": "ابری",
+      "rainy": "بارانی",
+      "snowy": "برفی",
+      "stormy": "طوفانی / گرد و غبار"
+    }
   },
   "project": {
     "list": {
@@ -2038,7 +2048,19 @@
       "siteOverride": "لغو خودکار وضعیت کارگاه",
       "specialtySavedToast": "ثبت شد — جمع‌بندی گزارش روزانه پروژه به‌روزرسانی می‌شود",
       "specialtySubmittedToast": "ارسال شد — جمع‌بندی گزارش روزانه پروژه به‌روزرسانی می‌شود"
-    }
+    },
+    "inactivityReason": "علت تعطیلی",
+    "weatherImpactNotes": "توضیحات و اثرات شرایط جوی",
+    "inactivityReasons": {
+      "weather": "نامساعد بودن شرایط جوی",
+      "holiday": "تعطیل رسمی / تقویمی",
+      "strike_or_dispute": "اختلاف یا اعتصاب",
+      "client_stop_order": "دستور توقف کارفرما / مشاور",
+      "safety_incident": "حادثه ایمنی"
+    },
+    "inactiveSiteActivityWarning": "کارگاه در این تاریخ تعطیل ثبت شده است؛ آیا از ثبت کارکرد اجرایی اطمینان دارید؟",
+    "confirmActivity": "تأیید و ثبت",
+    "cancelActivity": "انصراف"
   },
   "progress": {
     "errors": {

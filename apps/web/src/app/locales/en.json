@@ -401,7 +401,10 @@
     "genericTitle": "Error"
   },
   "errors": {
-    "sod_self_approve": "You cannot approve a transaction you created (segregation of duties)."
+    "sod_self_approve": "You cannot approve a transaction you created (segregation of duties).",
+    "temp_max_must_be_gte_temp_min": "Maximum temperature must be greater than or equal to minimum temperature.",
+    "inactivity_reason_required": "An inactivity reason is required when the site is inactive.",
+    "auto_summary_only": "Daily reports are created from specialty reports."
   },
   "dashboard": {
     "portfolio": {
@@ -652,7 +655,14 @@
     "actions": "Actions",
     "createSuccess": "Weather log created",
     "updateSuccess": "Weather log updated",
-    "deleteSuccess": "Weather log deleted"
+    "deleteSuccess": "Weather log deleted",
+    "conditions": {
+      "clear": "Clear / sunny",
+      "cloudy": "Cloudy",
+      "rainy": "Rainy",
+      "snowy": "Snowy",
+      "stormy": "Stormy / dust"
+    }
   },
   "project": {
     "list": {
@@ -2038,7 +2048,19 @@
       "siteOverride": "Override derived site status",
       "specialtySavedToast": "Saved — the project daily summary will update",
       "specialtySubmittedToast": "Submitted — the project daily summary will update"
-    }
+    },
+    "inactivityReason": "Inactivity reason",
+    "weatherImpactNotes": "Weather impact notes",
+    "inactivityReasons": {
+      "weather": "Adverse weather",
+      "holiday": "Official / calendar holiday",
+      "strike_or_dispute": "Strike or dispute",
+      "client_stop_order": "Client / consultant stop order",
+      "safety_incident": "Safety incident"
+    },
+    "inactiveSiteActivityWarning": "The site is marked inactive on this date; are you sure you want to record execution activity?",
+    "confirmActivity": "Confirm and save",
+    "cancelActivity": "Cancel"
   },
   "progress": {
     "errors": {

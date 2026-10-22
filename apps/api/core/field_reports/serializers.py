@@ -1,5 +1,6 @@
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
 
 from common.jalali import persian_day_of_week
 from common.serializers import JalaliDateField
@@ -59,9 +60,9 @@ class WeatherLogSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         temp_min = attrs.get('temp_min', getattr(self.instance, 'temp_min', None))
         temp_max = attrs.get('temp_max', getattr(self.instance, 'temp_max', None))
-        if temp_min is not None and temp_max is not None and temp_min > temp_max:
+        if temp_min is not None and temp_max is not None and temp_max < temp_min:
             raise serializers.ValidationError(
-                {'temp_min': 'حداقل دما نمی‌تواند بیشتر از حداکثر دما باشد.'},
+                {'temp_max': [ErrorDetail('حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد.', code='temp_max_must_be_gte_temp_min')]},
             )
         log_date = attrs.get('log_date', getattr(self.instance, 'log_date', None))
         if log_date:
@@ -483,6 +484,8 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
             'temp_max',
             'temp_min',
             'site_status',
+            'inactivity_reason',
+            'weather_impact_notes',
             'general_notes',
             'management_opinion',
             'weather_override',
@@ -494,10 +497,18 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         temp_min = attrs.get('temp_min', getattr(self.instance, 'temp_min', None))
         temp_max = attrs.get('temp_max', getattr(self.instance, 'temp_max', None))
-        if temp_min is not None and temp_max is not None and temp_min > temp_max:
+        if temp_min is not None and temp_max is not None and temp_max < temp_min:
             raise serializers.ValidationError(
-                {'temp_min': 'حداقل دما نمی‌تواند بیشتر از حداکثر دما باشد.'},
+                {'temp_max': [ErrorDetail('حداکثر دما باید بزرگتر یا مساوی حداقل دما باشد.', code='temp_max_must_be_gte_temp_min')]},
             )
+        site_status = attrs.get('site_status', getattr(self.instance, 'site_status', None))
+        inactivity_reason = attrs.get('inactivity_reason', getattr(self.instance, 'inactivity_reason', ''))
+        if site_status == 'inactive' and not inactivity_reason:
+            raise serializers.ValidationError(
+                {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
+            )
+        if site_status == 'active':
+            attrs['inactivity_reason'] = ''
         return attrs
 
 
@@ -507,6 +518,7 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     day_of_week = serializers.SerializerMethodField()
     weather_condition_label = serializers.SerializerMethodField()
     site_status_label = serializers.CharField(source='get_site_status_display', read_only=True)
+    inactivity_reason_label = serializers.SerializerMethodField()
     status_label = serializers.SerializerMethodField()
     is_locked = serializers.BooleanField(read_only=True)
     status_label_key = serializers.SerializerMethodField()
@@ -540,6 +552,9 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'temp_min',
             'site_status',
             'site_status_label',
+            'inactivity_reason',
+            'inactivity_reason_label',
+            'weather_impact_notes',
             'general_notes',
             'management_opinion',
             'weather_override',
@@ -601,7 +616,19 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     def get_weather_condition_label(self, obj):
         if not obj.weather_condition:
             return None
-        return WeatherCondition(obj.weather_condition).label
+        try:
+            return WeatherCondition(obj.weather_condition).label
+        except (ValueError, KeyError):
+            return obj.weather_condition
+
+    def get_inactivity_reason_label(self, obj):
+        if not getattr(obj, 'inactivity_reason', None):
+            return None
+        try:
+            from field_reports.models import InactivityReason
+            return InactivityReason(obj.inactivity_reason).label
+        except (ValueError, KeyError):
+            return obj.inactivity_reason
 
     def get_prepared_by_name(self, obj):
         return _user_name(obj.prepared_by)
@@ -646,6 +673,7 @@ class DailyReportListSerializer(serializers.ModelSerializer):
     day_of_week = serializers.SerializerMethodField()
     weather_condition_label = serializers.SerializerMethodField()
     site_status_label = serializers.CharField(source='get_site_status_display', read_only=True)
+    inactivity_reason_label = serializers.SerializerMethodField()
     status_label = serializers.SerializerMethodField()
     is_locked = serializers.BooleanField(read_only=True)
     prepared_by_name = serializers.SerializerMethodField()
@@ -664,6 +692,8 @@ class DailyReportListSerializer(serializers.ModelSerializer):
             'work_front',
             'site_status',
             'site_status_label',
+            'inactivity_reason',
+            'inactivity_reason_label',
             'weather_condition',
             'weather_condition_label',
             'status',
@@ -690,7 +720,19 @@ class DailyReportListSerializer(serializers.ModelSerializer):
     def get_weather_condition_label(self, obj):
         if not obj.weather_condition:
             return None
-        return WeatherCondition(obj.weather_condition).label
+        try:
+            return WeatherCondition(obj.weather_condition).label
+        except (ValueError, KeyError):
+            return obj.weather_condition
+
+    def get_inactivity_reason_label(self, obj):
+        if not getattr(obj, 'inactivity_reason', None):
+            return None
+        try:
+            from field_reports.models import InactivityReason
+            return InactivityReason(obj.inactivity_reason).label
+        except (ValueError, KeyError):
+            return obj.inactivity_reason
 
     def get_prepared_by_name(self, obj):
         return _user_name(obj.prepared_by)
