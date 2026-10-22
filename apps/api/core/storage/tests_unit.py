@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 
 from authentication.models import User
 from projects.models import Project
-from master_data.models import ProjectMember
+from master_data.models import ProjectMember, ProjectMemberPermissionOverride
 from storage.models import StoredFile
 from storage.permissions import CanAccessStoredFile
 from storage.services import s3_client
@@ -41,7 +41,8 @@ def admin_client(api_client, admin_user):
 @pytest.fixture
 def project(db, user):
     proj = Project.objects.create(project_code="P01", project_name="Test Project")
-    ProjectMember.objects.create(project=proj, user=user, status='active')
+    member = ProjectMember.objects.create(project=proj, user=user, status='active')
+    ProjectMemberPermissionOverride.objects.create(member=member, permission_codename='upload_documents', is_granted=True)
     return proj
 
 @pytest.fixture
@@ -141,6 +142,16 @@ class TestStorageViews:
         assert stored.filename == 'document.pdf'
         assert stored.content_type == 'application/pdf'
         assert stored.uploaded_by == auth_client.handler._force_user
+
+    def test_upload_url_view_without_permission_forbidden(self, api_client, other_user, project):
+        ProjectMember.objects.create(project=project, user=other_user, status='active')
+        api_client.force_authenticate(user=other_user)
+        url = reverse('file-upload-url', kwargs={'project_pk': project.pk})
+        response = api_client.post(url, {
+            'filename': 'document.pdf',
+            'content_type': 'application/pdf'
+        })
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_upload_url_view_directory_traversal(self, auth_client, project):
         url = reverse('file-upload-url', kwargs={'project_pk': project.pk})
