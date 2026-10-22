@@ -1986,9 +1986,9 @@
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/pdf.py": {
-    "mtime": 1792678939.9944339,
-    "seen": 1792681154.6589112,
-    "ast_hash": "b29f14e9747bc7dc151a7924bd7ff4b0",
+    "mtime": 1792684375.2607217,
+    "seen": 1792685231.6759582,
+    "ast_hash": "aee814da46dd74c18d69474652926519",
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/report_views.py": {
@@ -2070,9 +2070,9 @@
     "semantic_hash": "4f321641404f1328b29abad452bd699f"
   },
   "apps/api/core/field_reports/tests/test_daily_report_crud.py": {
-    "mtime": 1792680124.5588212,
-    "seen": 1792681154.6600344,
-    "ast_hash": "65a5f67b89faeab0195bc2609740831b",
+    "mtime": 1792684872.500475,
+    "seen": 1792685231.6776807,
+    "ast_hash": "33beac60597c92a0aff1a93f2a58ad23",
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/tests/test_equipment_utilization.py": {
@@ -2106,9 +2106,9 @@
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/tests/test_weather.py": {
-    "mtime": 1792676646.168356,
-    "seen": 1792681154.6608303,
-    "ast_hash": "38333010973eef64d833fd0bd345e10e",
+    "mtime": 1792684160.1961195,
+    "seen": 1792685231.6791394,
+    "ast_hash": "c1cc87d8c65916ac496192c7f104a942",
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/urls.py": {
@@ -3300,10 +3300,10 @@
     "semantic_hash": "f9e7018b2c738b69ccdc8c4af30c5077"
   },
   "apps/api/core/sub_reports/tests/test_sub_reports.py": {
-    "mtime": 1787313784.229192,
-    "seen": 1788090331.8715222,
-    "ast_hash": "9dee914151c31baa075310fccba875a6",
-    "semantic_hash": "9dee914151c31baa075310fccba875a6"
+    "mtime": 1792683484.2039623,
+    "seen": 1792685231.7048671,
+    "ast_hash": "24cae893004afb9e06f38ab7e9158e36",
+    "semantic_hash": ""
   },
   "apps/api/core/sub_reports/urls.py": {
     "mtime": 1783875970.4240215,
@@ -3966,15 +3966,15 @@
     "semantic_hash": "5c3abd0ef097dcc7fcb320de8f8efc5e"
   },
   "apps/web/src/app/lib/offlineDB.ts": {
-    "mtime": 1792679361.9601722,
-    "seen": 1792681154.6942556,
-    "ast_hash": "5e5484fecdfa227c98fe217fe819684e",
+    "mtime": 1792683119.7790713,
+    "seen": 1792685231.7156067,
+    "ast_hash": "31029b8643d25510c649f90f8d698661",
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/offlineWrite.ts": {
-    "mtime": 1792679526.3709002,
-    "seen": 1792681154.694258,
-    "ast_hash": "01d81542335c91cdd041b5b37d256221",
+    "mtime": 1792683909.1216743,
+    "seen": 1792685231.7156086,
+    "ast_hash": "fba32c8223d19ab0ee52e6381d8a4d49",
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/react-query-keys.ts": {
@@ -4152,9 +4152,9 @@
     "semantic_hash": "e0598870c9bb9070e653f534f02a96b2"
   },
   "apps/web/src/app/routes/daily-report-view.tsx": {
-    "mtime": 1792677491.2876403,
-    "seen": 1792681154.6957273,
-    "ast_hash": "99f43fe3391341046ff168c107bb7e63",
+    "mtime": 1792689181.8953962,
+    "seen": 1792691558.1402493,
+    "ast_hash": "a1156030886b3d7379333efa855c6a26",
     "semantic_hash": ""
   },
   "apps/web/src/app/routes/daily-reports-list.tsx": {
@@ -4656,9 +4656,9 @@
     "semantic_hash": "3a78fd4220cf709669093c7b0950cc10"
   },
   "apps/web/src/components/daily_reports/ActivityTab.tsx": {
-    "mtime": 1792679457.4421268,
-    "seen": 1792681154.7017927,
-    "ast_hash": "012cca730f407a785dc1ad95c9555704",
+    "mtime": 1792690577.6873038,
+    "seen": 1792691558.1460254,
+    "ast_hash": "6dd75b8caff964cd8951d0c780c2c67b",
     "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/ApprovalStatusBar.tsx": {
@@ -4680,16 +4680,16 @@
     "semantic_hash": "58e7afca5bd00ec5760a82bfd467594e"
   },
   "apps/web/src/components/daily_reports/DailyReportForm.tsx": {
-    "mtime": 1792267480.019228,
-    "seen": 1792294651.8755426,
-    "ast_hash": "be351d2ae7135cc3c53077f35e53fd0c",
-    "semantic_hash": "be351d2ae7135cc3c53077f35e53fd0c"
+    "mtime": 1792683950.3791316,
+    "seen": 1792685231.724599,
+    "ast_hash": "0755ab0f87cb2bf9623ceb994e74468b",
+    "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/EditableGrid.tsx": {
-    "mtime": 1791579285.1686597,
-    "seen": 1792294651.8755448,
-    "ast_hash": "a5ec3f3ba087b870de8a0d81df7d8f53",
-    "semantic_hash": "a5ec3f3ba087b870de8a0d81df7d8f53"
+    "mtime": 1792691295.4491155,
+    "seen": 1792691558.146216,
+    "ast_hash": "3ffde8c3eb8ec0a1c866db61cd48c79c",
+    "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/EquipmentTab.tsx": {
     "mtime": 1788080619.6661832,
@@ -4704,9 +4704,9 @@
     "semantic_hash": "1f76dfad1cde4ba9aa8c09401772274d"
   },
   "apps/web/src/components/daily_reports/InlineGridTab.tsx": {
-    "mtime": 1792679407.8661346,
-    "seen": 1792681154.702189,
-    "ast_hash": "b14dd2f00e0b73833025e2fd79835fd7",
+    "mtime": 1792691347.09267,
+    "seen": 1792691558.1463335,
+    "ast_hash": "2c37e26650b41dfc1cfae6931542a78f",
     "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/LaborCampTab.tsx": {
@@ -4728,9 +4728,9 @@
     "semantic_hash": "05e56a9351f8cbf3c7571678abf1622f"
   },
   "apps/web/src/components/daily_reports/ReportHeader.tsx": {
-    "mtime": 1792677410.6316528,
-    "seen": 1792681154.7023582,
-    "ast_hash": "102feafc3af23fd9640088c98f392c68",
+    "mtime": 1792689165.3141606,
+    "seen": 1792691558.146477,
+    "ast_hash": "5136c052daf359b6c55aa484ec2f3268",
     "semantic_hash": ""
   },
   "apps/web/src/components/dashboard/ExecutiveKpiPanel.tsx": {
@@ -9816,10 +9816,10 @@
     "semantic_hash": "9585863f3a261ea89cd8c33b74e943f7"
   },
   "apps/web/src/components/progress/MeasurementEditor.tsx": {
-    "mtime": 1791579285.1796594,
-    "seen": 1792294651.8778052,
-    "ast_hash": "94be57233b9d2f9dd9de4da53bb14ccf",
-    "semantic_hash": "94be57233b9d2f9dd9de4da53bb14ccf"
+    "mtime": 1792684999.0070536,
+    "seen": 1792685231.7320702,
+    "ast_hash": "fd7d608903c69e844e2b1025530c5f0f",
+    "semantic_hash": ""
   },
   "apps/web/src/components/progress/PeriodReportsPanel.tsx": {
     "mtime": 1791579285.1796594,
@@ -9828,10 +9828,10 @@
     "semantic_hash": "bc5b6dff28cffb3768de4afedf790bf5"
   },
   "apps/web/src/components/projects/KickoffCharterPanel.tsx": {
-    "mtime": 1791579285.1796594,
-    "seen": 1792294651.8780167,
-    "ast_hash": "b8dedd7a3887d07b14d0d6c79faf16d4",
-    "semantic_hash": "b8dedd7a3887d07b14d0d6c79faf16d4"
+    "mtime": 1792685012.1021116,
+    "seen": 1792685231.7322733,
+    "ast_hash": "3e234cebb7636e4819b64a3aa0412b95",
+    "semantic_hash": ""
   },
   "apps/web/src/components/projects/ProjectChangeRequestPanel.tsx": {
     "mtime": 1792259850.0436256,
@@ -11940,9 +11940,9 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[save-report-header]/README.md": {
-    "mtime": 1791579285.2606587,
-    "seen": 1791660194.097566,
-    "ast_hash": "5222656ad62f4e33a3eee7d694f859b5",
+    "mtime": 1792685256.7447774,
+    "seen": 1792691558.1895604,
+    "ast_hash": "7166e3dbca3d4804e504dd4a2efa0c90",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]/[submit-report]/README.md": {
@@ -16908,9 +16908,9 @@
     "semantic_hash": "fb6b10002b37a913a49020b9df82db57"
   },
   "apps/api/core/field_reports/services/daily_report_aggregation.py": {
-    "mtime": 1792677906.8507507,
-    "seen": 1792681154.6590154,
-    "ast_hash": "72c3ece8dad421e04c42ae5684baffc1",
+    "mtime": 1792683345.4235916,
+    "seen": 1792685231.6762056,
+    "ast_hash": "b1b39cfcfcab27519d01cbc650078d52",
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/tests/daily_report_summary_helpers.py": {
@@ -17406,15 +17406,15 @@
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/checklists/requirements.md": {
-    "mtime": 1792665461.5094597,
-    "seen": 1792666735.2590125,
-    "ast_hash": "afba1069338329955ceea200f5a65f70",
+    "mtime": 1792681536.0890098,
+    "seen": 1792685231.8247576,
+    "ast_hash": "7eeb282ff9c508fb971d8b77f41bdd0c",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/spec.md": {
-    "mtime": 1792665461.5094597,
-    "seen": 1792666735.2590153,
-    "ast_hash": "779a61416e80d467f94540aafc4b6939",
+    "mtime": 1792681536.0880096,
+    "seen": 1792685231.82477,
+    "ast_hash": "340352a60138c1830f4a043351249759",
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/migrations/0018_daily_header_weather.py": {
@@ -17424,9 +17424,9 @@
     "semantic_hash": ""
   },
   "apps/api/core/field_reports/tests/test_spec_01_daily_header_weather.py": {
-    "mtime": 1792679062.5611565,
-    "seen": 1792681154.660776,
-    "ast_hash": "48bc058c316df4e7690d2f08fb9e023d",
+    "mtime": 1792688932.0337121,
+    "seen": 1792691558.1100757,
+    "ast_hash": "b32dd3bd4ff042a0ea06b5e91d657f93",
     "semantic_hash": ""
   },
   "apps/api/core/sub_reports/migrations/0004_standardize_weather.py": {
@@ -17448,15 +17448,15 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/activity-guard.ts": {
-    "mtime": 1792679368.9340076,
-    "seen": 1792681154.7023647,
-    "ast_hash": "890503d508bdb3c765140f72d55b4153",
+    "mtime": 1792690532.8973036,
+    "seen": 1792691558.1465821,
+    "ast_hash": "0a7c7245ac144deb8b525b0870462649",
     "semantic_hash": ""
   },
   "e2e/tests/daily-report-header-weather.spec.ts": {
-    "mtime": 1792680678.325403,
-    "seen": 1792681154.713649,
-    "ast_hash": "d0d6a3bf7c7d985082b3ac5f694536e2",
+    "mtime": 1792689357.6218348,
+    "seen": 1792691558.156042,
+    "ast_hash": "181609898e358317220a4c828d5a4442",
     "semantic_hash": ""
   },
   ".cursor/skills/speckit-assess-decide/SKILL.md": {
@@ -17538,63 +17538,159 @@
     "semantic_hash": ""
   },
   "reports_gaps/02/speckit-specify-prompts/01-DEPARTMENT-DAILY-SOURCE-OF-TRUTH.md": {
-    "mtime": 1792675016.5695004,
-    "seen": 1792681154.7699444,
-    "ast_hash": "fd6db74935821a7a6f4a85a57dacc492",
+    "mtime": 1792691547.2659822,
+    "seen": 1792691558.2062726,
+    "ast_hash": "b34269d257c6e2aded88ef41d89106b2",
     "semantic_hash": ""
   },
   "reports_gaps/02/speckit-specify-prompts/02-DEPARTMENT-SECTIONS-AND-AGGREGATION.md": {
-    "mtime": 1792675016.5695004,
-    "seen": 1792681154.7699459,
-    "ast_hash": "44ee8ccdd2956fc0733aa367deba84ee",
+    "mtime": 1792691547.2659822,
+    "seen": 1792691558.206274,
+    "ast_hash": "0e4e686c8c8a6d9cc102f24edc95719e",
     "semantic_hash": ""
   },
   "reports_gaps/02/speckit-specify-prompts/03-PROJECT-DAILY-REPORT-XLSX-PARITY.md": {
-    "mtime": 1792675016.5695004,
-    "seen": 1792681154.769947,
-    "ast_hash": "b5ed0723373910bfb0ab52210c9f2935",
+    "mtime": 1792691547.2659822,
+    "seen": 1792691558.2062752,
+    "ast_hash": "f4275ca37cbde2c90932e9841ee286f7",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/contracts/daily-report-header-weather-api.md": {
-    "mtime": 1792675065.6053922,
-    "seen": 1792681154.7892673,
-    "ast_hash": "24228dc4aafbf366c6375c5b8999cfc1",
+    "mtime": 1792682025.758136,
+    "seen": 1792685231.8247607,
+    "ast_hash": "8277b362f8768ca6b45bd2c8ea55fc6a",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/contracts/daily-report-header-weather-ui.md": {
-    "mtime": 1792674997.7937336,
-    "seen": 1792681154.7892706,
-    "ast_hash": "330366eb3734821ffbeab5724f929c27",
+    "mtime": 1792681954.513086,
+    "seen": 1792685231.824762,
+    "ast_hash": "08970e6f948c9817dade683082bcb3d7",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/data-model.md": {
-    "mtime": 1792674892.4329414,
-    "seen": 1792681154.7892725,
-    "ast_hash": "a6edd8bbc888fb51c24f222d76e92210",
+    "mtime": 1792681899.1288865,
+    "seen": 1792685231.8247635,
+    "ast_hash": "aaa8eea003a298f3222a81cc9a626a27",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/plan.md": {
-    "mtime": 1792675081.9649894,
-    "seen": 1792681154.7892745,
-    "ast_hash": "67897ff3dadeb2349fd35327e8658607",
+    "mtime": 1792682042.403926,
+    "seen": 1792685231.8247654,
+    "ast_hash": "1a188a83c733f8a3839d6fdc559dc8a6",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/quickstart.md": {
-    "mtime": 1792675041.3144746,
-    "seen": 1792681154.7892761,
-    "ast_hash": "4effee91c08ed2422b1cb381f152d61f",
+    "mtime": 1792682025.7591362,
+    "seen": 1792685231.8247669,
+    "ast_hash": "b285f22223066f9a49ecd316268df2b5",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/research.md": {
-    "mtime": 1792674875.9141076,
-    "seen": 1792681154.7892785,
-    "ast_hash": "5924db5a0767a8b3238eb06c299082b1",
+    "mtime": 1792681870.039331,
+    "seen": 1792685231.8247683,
+    "ast_hash": "0250863e6b5ad2c2496f03947014f183",
     "semantic_hash": ""
   },
   "specs/030-daily-header-weather/tasks.md": {
-    "mtime": 1792681013.7223132,
-    "seen": 1792681154.7893705,
-    "ast_hash": "69187b39527dde93e2ff5342fda94ce9",
+    "mtime": 1792686675.5209708,
+    "seen": 1792691558.224545,
+    "ast_hash": "a40a7f76e5bd43c59e332462b5585a16",
+    "semantic_hash": ""
+  },
+  "apps/api/core/field_reports/tests/test_daily_report_pdf.py": {
+    "mtime": 1792684273.1840053,
+    "seen": 1792685231.6781046,
+    "ast_hash": "b5deebbedceadbdf284cd54b0f00292e",
+    "semantic_hash": ""
+  },
+  "apps/api/core/field_reports/tests/test_daily_report_weather_migration.py": {
+    "mtime": 1792683008.2989376,
+    "seen": 1792685231.6785514,
+    "ast_hash": "b68631ea8df5508211d7ae2693a509ac",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/lib/__tests__/temperatureValidation.test.ts": {
+    "mtime": 1792683720.0152073,
+    "seen": 1792685231.711552,
+    "ast_hash": "df4afb5db2c872f838d8a1c4f591f06a",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/lib/temperatureValidation.ts": {
+    "mtime": 1792683732.9753988,
+    "seen": 1792685231.715997,
+    "ast_hash": "e2d974d8efccc4e500632edfc291cfb2",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/daily_reports/WeatherSelector.tsx": {
+    "mtime": 1792683619.2615833,
+    "seen": 1792685231.7249267,
+    "ast_hash": "86a245f22c441aacba17017aa8426713",
+    "semantic_hash": ""
+  },
+  "apps/web/src/app/lib/__tests__/activityGuard.test.ts": {
+    "mtime": 1792689437.5999148,
+    "seen": 1792691558.1354516,
+    "ast_hash": "b2fdaea90d11e4e0482d8238919555a5",
+    "semantic_hash": ""
+  },
+  "e2e/tests/daily-report-inactivity-guard.spec.ts": {
+    "mtime": 1792690516.103534,
+    "seen": 1792691558.1560442,
+    "ast_hash": "dc1130b6d757aa0f9ff3bc25238d3222",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/checklists/requirements.md": {
+    "mtime": 1792687309.285526,
+    "seen": 1792691558.224547,
+    "ast_hash": "d872a7604a47d991292661a87514756a",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/contracts/daily-report-inactivity-api.md": {
+    "mtime": 1792688338.617883,
+    "seen": 1792691558.2245488,
+    "ast_hash": "919b1b71f5ec1edea673c0bc132f1a44",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/contracts/daily-report-inactivity-ui.md": {
+    "mtime": 1792688338.6238832,
+    "seen": 1792691558.2245502,
+    "ast_hash": "885128448ed049aa67add1cc1d70049a",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/data-model.md": {
+    "mtime": 1792688304.514107,
+    "seen": 1792691558.2245512,
+    "ast_hash": "1f2a6335021c2082c15df257d41b1d89",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/plan.md": {
+    "mtime": 1792688251.0668402,
+    "seen": 1792691558.2245524,
+    "ast_hash": "8d54ffb224cdc5f48175b1fe1cc948d9",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/quickstart.md": {
+    "mtime": 1792688356.564282,
+    "seen": 1792691558.2245536,
+    "ast_hash": "c4ca77527b023e56fbc7607de7b087dc",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/research.md": {
+    "mtime": 1792688296.117912,
+    "seen": 1792691558.2245548,
+    "ast_hash": "0445384f3deb0d635c9f9004947a6fee",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/spec.md": {
+    "mtime": 1792687285.5763865,
+    "seen": 1792691558.224556,
+    "ast_hash": "fd4b81442227fa46f68c674238325946",
+    "semantic_hash": ""
+  },
+  "specs/031-site-inactivity-security/tasks.md": {
+    "mtime": 1792691441.6432753,
+    "seen": 1792691558.2245572,
+    "ast_hash": "6b8a60df38f8774419df335622b9b92d",
     "semantic_hash": ""
   }
 }
