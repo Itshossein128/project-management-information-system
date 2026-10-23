@@ -276,7 +276,7 @@ def activate_project_reporting_configuration(
         .first()
     )
     if latest_catalog is not None:
-        for title in latest_catalog.titles.order_by('display_order', 'id'):
+        for title in latest_catalog.titles.filter(active=True).order_by('display_order', 'id'):
             ProjectReportingConfigurationLaborTitle.objects.create(
                 configuration=config,
                 title_code=title.title_code,
@@ -396,11 +396,18 @@ def create_labor_catalog(template: ProjectTemplate, *, version_name: str, notes:
             template=template, version_name=version_name, notes=notes,
         )
         for row in titles or []:
-            payload = {k: row.get(k) for k in (
-                'title_code', 'title_label', 'title_label_fa', 'category',
-                'display_order', 'active', 'legacy_alias', 'project_specific',
-            )}
+            payload = {
+                k: row[k]
+                for k in (
+                    'title_code', 'title_label', 'title_label_fa', 'category',
+                    'display_order', 'active', 'legacy_alias', 'project_specific',
+                )
+                if k in row and row[k] is not None
+            }
             payload.setdefault('display_order', 0)
+            payload.setdefault('legacy_alias', '')
+            payload.setdefault('active', True)
+            payload.setdefault('project_specific', False)
             try:
                 LaborTitleCatalogTitle.objects.create(catalog=catalog, **payload)
             except DjangoValidationError as exc:
@@ -437,16 +444,17 @@ def update_labor_catalog(catalog: LaborTitleCatalog, *, version_name: str | None
 def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title: str):
     """Resolve a unit-report job title against the effective snapshot.
 
-    Resolution order (contract §3): legacy alias → exact label (either stored
-    label, locale-independent) → project-specific title code. Returns the
-    matching snapshot title row or ``None`` (callers reject with
-    ``unknown_job_title``).
+    Resolution order (contract §3): legacy alias → exact label (standard
+    stored label, locale-independent) → project-specific title (or stable
+    title_code). Returns the matching snapshot title row or ``None``
+    (callers reject with ``unknown_job_title``).
     """
     if configuration is None or not (job_title or '').strip():
         return None
     needle = job_title.strip().lower()
 
     from project_templates.models import (
+        LaborTitleCatalogTitle,
         ProjectReportingConfigurationLaborTitle,
     )
 
@@ -455,32 +463,43 @@ def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title:
             configuration=configuration,
         ).order_by('display_order', 'title_code')
     )
+    if not titles:
+        return None
+
+    # Determine which title_codes in this snapshot came from project_specific=True
+    project_specific_codes: set[str] = set()
+    if configuration.source_template_id:
+        project_specific_codes = set(
+            LaborTitleCatalogTitle.objects.filter(
+                catalog__template_id=configuration.source_template_id,
+                project_specific=True,
+                title_code__in=[t.title_code for t in titles],
+            ).values_list('title_code', flat=True)
+        )
 
     # 1) legacy alias first: keeps historical rows' original evidence meaningful
     for title in titles:
         if title.legacy_alias and title.legacy_alias.strip().lower() == needle:
             return title
-    # 2) exact label match, language-independent against both stored labels
+    # 2) exact label match on standard (non-project-specific) titles
     for title in titles:
+        if title.title_code in project_specific_codes:
+            continue
         if title.title_label and title.title_label.strip().lower() == needle:
             return title
         if title.title_label_fa and title.title_label_fa.strip().lower() == needle:
             return title
-    # 3) stable language-independent code as an accepted input form
+    # 3) project-specific title match (by label or code) + stable code match
+    for title in titles:
+        if title.title_code in project_specific_codes:
+            if title.title_label and title.title_label.strip().lower() == needle:
+                return title
+            if title.title_label_fa and title.title_label_fa.strip().lower() == needle:
+                return title
+            if title.title_code and title.title_code.strip().lower() == needle:
+                return title
     for title in titles:
         if title.title_code and title.title_code.strip().lower() == needle:
             return title
     return None
-
-    return {
-        'template_id': str(template.id),
-        'template_name': template.template_name,
-        'effective_from': str(effective_from),
-        'required_units': [
-            u.unit for u in template.required_units.all().order_by('display_order', 'id')
-        ],
-        'is_backdated': is_backdated,
-        'affected_reports_count': affected_count,
-        'latest_effective_from': str(latest.effective_from) if latest else None,
-    }
 

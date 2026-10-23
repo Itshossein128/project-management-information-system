@@ -405,14 +405,40 @@ def correct_unit_report(report, *, user, unit=None):
             job_title=l.job_title,
             present_count=l.present_count,
             leave_count=l.leave_count,
+            overtime_hours=l.overtime_hours,
+            contractor_ref=l.contractor_ref,
+        )
+
+    from sub_reports.models import DisciplineSubReportMachinery
+
+    for mr in locked.machinery_rows.filter(is_deleted=False).order_by('row_number', 'id'):
+        DisciplineSubReportMachinery.objects.create(
+            sub_report=new_report,
+            row_number=mr.row_number,
+            equipment_type=mr.equipment_type,
+            equipment_ref=mr.equipment_ref,
+            status_total=mr.status_total,
+            status_active=mr.status_active,
+            status_ready=mr.status_ready,
+            status_inactive=mr.status_inactive,
+            status_under_repair=mr.status_under_repair,
+            operating_hours=mr.operating_hours,
+            stoppage_hours=mr.stoppage_hours,
+            repair_hours=mr.repair_hours,
+            stoppage_reason_code=mr.stoppage_reason_code,
         )
 
     for m in locked.material_entries.filter(is_deleted=False).order_by('id'):
         DisciplineSubReportMaterial.objects.create(
             sub_report=new_report,
+            transaction_type=m.transaction_type,
+            material_ref=m.material_ref,
             material_description=m.material_description,
             quantity=m.quantity,
             unit=m.unit,
+            consumption_location=m.consumption_location,
+            supplier=m.supplier,
+            warehouse_document_reference=m.warehouse_document_reference,
             notes=m.notes,
         )
 

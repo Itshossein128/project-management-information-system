@@ -13,6 +13,7 @@ from field_reports.models import (
     DailyReportIncident,
     DailyReportLabor,
     DailyReportLaborCamp,
+    DailyReportMachineryRow,
     DailyReportMaterial,
     LaborJobTitle,
     SiteStatus,
@@ -282,6 +283,14 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
 
 class DailyReportLaborSerializer(serializers.ModelSerializer):
     total_count = serializers.IntegerField(read_only=True)
+    present_count = serializers.IntegerField(source='total_count', read_only=True)
+    leave_count = serializers.SerializerMethodField()
+    man_hours = serializers.SerializerMethodField()
+    title_code = serializers.SerializerMethodField()
+    display_order = serializers.SerializerMethodField()
+    source_count = serializers.SerializerMethodField()
+    has_multiple_sources = serializers.SerializerMethodField()
+    per_unit_breakdown = serializers.SerializerMethodField()
     provenance = serializers.SerializerMethodField()
 
     class Meta:
@@ -291,21 +300,173 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'labor_category',
             'job_title',
             'custom_title',
+            'title_code',
+            'display_order',
+            'present_count',
+            'leave_count',
             'shift_1_count',
             'shift_2_count',
             'shift_3_count',
             'total_count',
             'work_hours',
             'overtime_hours',
+            'man_hours',
             'daily_rate',
             'absence_count',
+            'source_set_complete',
+            'source_count',
+            'has_multiple_sources',
+            'per_unit_breakdown',
             'source_sub_report',
             'source_discipline',
             'is_derived',
             'provenance',
         ]
-        read_only_fields = ['id', 'total_count', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+        read_only_fields = [
+            'id',
+            'title_code',
+            'display_order',
+            'present_count',
+            'leave_count',
+            'total_count',
+            'man_hours',
+            'source_set_complete',
+            'source_count',
+            'has_multiple_sources',
+            'per_unit_breakdown',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
+            'provenance',
+        ]
         extra_kwargs = {'absence_count': {'required': False, 'allow_null': True}}
+
+    def _effective_config(self, obj):
+        cache = self.context.setdefault('_labor_config_cache', {})
+        project_id = getattr(obj, 'project_id', None) or (
+            getattr(obj.report, 'project_id', None) if getattr(obj, 'report_id', None) else None
+        )
+        report_date = getattr(obj, 'report_date', None) or (
+            getattr(obj.report, 'report_date', None) if getattr(obj, 'report_id', None) else None
+        )
+        if not project_id or not report_date:
+            return None
+        key = (str(project_id), str(report_date))
+        if key not in cache:
+            report = getattr(obj, 'report', None)
+            if report is not None and getattr(report, 'reporting_configuration_id', None):
+                cache[key] = report.reporting_configuration
+            else:
+                from field_reports.services.daily_report_aggregation import (
+                    resolve_project_reporting_configuration,
+                )
+
+                cache[key] = resolve_project_reporting_configuration(project_id, report_date)
+        return cache[key]
+
+    def _resolved_title(self, obj):
+        config = self._effective_config(obj)
+        if config is None:
+            return None
+        from project_templates.services import resolve_labor_title
+
+        return resolve_labor_title(config, getattr(obj, 'job_title', '') or '')
+
+    def get_leave_count(self, obj) -> int:
+        return int(obj.absence_count or 0)
+
+    def get_title_code(self, obj) -> str:
+        resolved = self._resolved_title(obj)
+        return resolved.title_code if resolved else ''
+
+    def get_display_order(self, obj) -> int:
+        resolved = self._resolved_title(obj)
+        return resolved.display_order if resolved else 0
+
+    def get_man_hours(self, obj) -> str:
+        from decimal import Decimal
+        from field_reports.services.man_hours import compute_man_hours
+
+        if obj.work_hours is not None:
+            return f"{Decimal(str(obj.work_hours)):.2f}"
+        config = self._effective_config(obj)
+        rule_code = config.man_hours_rule_code if config else None
+        shift_hours = config.standard_shift_hours if config else Decimal('8')
+        val = compute_man_hours(
+            rule_code,
+            present_count=obj.total_count,
+            overtime_person_hours=obj.overtime_hours,
+            standard_shift_hours=shift_hours,
+        )
+        return f"{val:.2f}"
+
+    def _sources(self, obj):
+        from field_reports.models import DailyReportDerivedSource
+
+        cache = self.context.setdefault('_labor_sources_cache', {})
+        key = str(obj.id)
+        if key not in cache:
+            if not getattr(obj, 'report_id', None):
+                cache[key] = []
+            else:
+                cache[key] = list(
+                    DailyReportDerivedSource.objects.filter(
+                        daily_report_id=obj.report_id,
+                        derived_kind='labor',
+                        derived_row_id=str(obj.id),
+                    )
+                    .select_related('source_report')
+                    .order_by('ordinal', 'id')
+                )
+        return cache[key]
+
+    def get_source_count(self, obj) -> int:
+        return len(self._sources(obj))
+
+    def get_has_multiple_sources(self, obj) -> bool:
+        return len(self._sources(obj)) > 1
+
+    def get_per_unit_breakdown(self, obj) -> list[dict]:
+        from decimal import Decimal
+        from field_reports.services.man_hours import compute_man_hours
+        from sub_reports.models import DisciplineSubReportLabor
+
+        sources = self._sources(obj)
+        if not sources:
+            return []
+        config = self._effective_config(obj)
+        rule_code = config.man_hours_rule_code if config else None
+        shift_hours = config.standard_shift_hours if config else Decimal('8')
+        row_ids = [s.source_row_id for s in sources if s.source_row_id]
+        source_rows_map = {
+            str(r.id): r
+            for r in DisciplineSubReportLabor.objects.filter(id__in=row_ids).select_related('contractor_ref')
+        }
+        breakdown = []
+        for src in sources:
+            s_row = source_rows_map.get(str(src.source_row_id))
+            present = s_row.present_count if s_row is not None else int(src.contribution_value or 0)
+            leave = s_row.leave_count if s_row is not None else 0
+            overtime = Decimal(str(s_row.overtime_hours if s_row is not None else 0))
+            mh = compute_man_hours(
+                rule_code,
+                present_count=present,
+                overtime_person_hours=overtime,
+                standard_shift_hours=shift_hours,
+            )
+            breakdown.append({
+                'source_unit': src.source_unit,
+                'source_report_id': str(src.source_report_id_snapshot),
+                'source_report_version': src.source_report_version,
+                'source_row_id': src.source_row_id,
+                'present_count': present,
+                'leave_count': leave,
+                'overtime_hours': f"{overtime:.2f}",
+                'man_hours': f"{mh:.2f}",
+                'contractor_ref': str(s_row.contractor_ref_id) if (s_row and s_row.contractor_ref_id) else None,
+                'contractor_name': s_row.contractor_ref.name if (s_row and s_row.contractor_ref) else None,
+            })
+        return breakdown
 
     def get_provenance(self, obj):
         return _build_provenance_list(obj, 'labor', self.context)
@@ -353,8 +514,109 @@ class DailyReportEquipmentSerializer(BaseEquipmentEntrySerializer):
         model = DailyReportEquipment
 
 
+class DailyReportMachineryRowSerializer(serializers.ModelSerializer):
+    equipment_code = serializers.SerializerMethodField()
+    equipment_name = serializers.SerializerMethodField()
+    stoppage_reason = serializers.SerializerMethodField()
+    stoppage_reason_label = serializers.SerializerMethodField()
+    stoppage_reason_label_fa = serializers.SerializerMethodField()
+    provenance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DailyReportMachineryRow
+        fields = [
+            'id',
+            'equipment_type',
+            'equipment_ref',
+            'equipment_code',
+            'equipment_name',
+            'status_total',
+            'status_active',
+            'status_ready',
+            'status_inactive',
+            'status_under_repair',
+            'operating_hours',
+            'stoppage_hours',
+            'repair_hours',
+            'stoppage_reason_code',
+            'stoppage_reason',
+            'stoppage_reason_label',
+            'stoppage_reason_label_fa',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
+            'provenance',
+        ]
+        read_only_fields = fields
+
+    def get_equipment_code(self, obj) -> str | None:
+        ref = getattr(obj, 'equipment_ref', None)
+        return getattr(ref, 'equipment_code', None) if ref is not None else None
+
+    def get_equipment_name(self, obj) -> str | None:
+        ref = getattr(obj, 'equipment_ref', None)
+        return getattr(ref, 'equipment_name', None) if ref is not None else None
+
+    def _effective_config(self, obj):
+        cache = self.context.setdefault('_machinery_config_cache', {})
+        report = getattr(obj, 'report', None)
+        if report is None:
+            return None
+        key = str(report.id)
+        if key not in cache:
+            if getattr(report, 'reporting_configuration_id', None):
+                cache[key] = report.reporting_configuration
+            else:
+                from field_reports.services.daily_report_aggregation import (
+                    resolve_project_reporting_configuration,
+                )
+
+                cache[key] = resolve_project_reporting_configuration(
+                    report.project_id, report.report_date,
+                )
+        return cache[key]
+
+    def _resolve_reason(self, obj):
+        code = (getattr(obj, 'stoppage_reason_code', None) or '').strip()
+        if not code:
+            return None
+        config = self._effective_config(obj)
+        from project_templates.services import resolve_stoppage_reason
+
+        entry = resolve_stoppage_reason(config, code) if config is not None else None
+        if entry is not None:
+            return {
+                'code': entry.reason_code,
+                'label': entry.reason_label or entry.reason_code,
+                'label_fa': entry.reason_label_fa or entry.reason_label or entry.reason_code,
+            }
+        return {
+            'code': code,
+            'label': code,
+            'label_fa': code,
+        }
+
+    def get_stoppage_reason(self, obj) -> dict | None:
+        return self._resolve_reason(obj)
+
+    def get_stoppage_reason_label(self, obj) -> str:
+        resolved = self._resolve_reason(obj)
+        return resolved['label'] if resolved else ''
+
+    def get_stoppage_reason_label_fa(self, obj) -> str:
+        resolved = self._resolve_reason(obj)
+        return resolved['label_fa'] if resolved else ''
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'machinery', self.context)
+
+
+
 class DailyReportMaterialSerializer(serializers.ModelSerializer):
     quantity = serializers.DecimalField(max_digits=18, decimal_places=4)
+    material_code = serializers.SerializerMethodField()
+    material_name = serializers.SerializerMethodField()
+    receipt_evidence = serializers.SerializerMethodField()
     provenance = serializers.SerializerMethodField()
 
     class Meta:
@@ -362,12 +624,21 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'material_ref',
+            'material_code',
+            'material_name',
             'material_description',
             'quantity',
             'unit_cost',
             'unit',
             'transaction_type',
             'consumption_location',
+            'supplier',
+            'warehouse_document_reference',
+            'receipt_resolved',
+            'receipt_evidence',
+            'reconciliation_status',
+            'reconciliation_document_id',
+            'reconciliation_checked_at',
             'activity_ref',
             'notes',
             'source_sub_report',
@@ -375,7 +646,33 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
             'is_derived',
             'provenance',
         ]
-        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+        read_only_fields = [
+            'id',
+            'material_code',
+            'material_name',
+            'receipt_resolved',
+            'receipt_evidence',
+            'reconciliation_status',
+            'reconciliation_document_id',
+            'reconciliation_checked_at',
+            'source_sub_report',
+            'source_discipline',
+            'is_derived',
+            'provenance',
+        ]
+
+    def get_material_code(self, obj) -> str | None:
+        ref = getattr(obj, 'material_ref', None)
+        return getattr(ref, 'material_code', None) if ref is not None else None
+
+    def get_material_name(self, obj) -> str | None:
+        ref = getattr(obj, 'material_ref', None)
+        return getattr(ref, 'material_name', None) if ref is not None else None
+
+    def get_receipt_evidence(self, obj) -> str | None:
+        if getattr(obj, 'transaction_type', None) != 'receipt':
+            return None
+        return 'resolved' if getattr(obj, 'receipt_resolved', None) is True else 'unresolved_reference'
 
     def get_provenance(self, obj):
         return _build_provenance_list(obj, 'material', self.context)
@@ -612,8 +909,12 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
 
     activities = serializers.SerializerMethodField()
     labor = serializers.SerializerMethodField()
+    labor_summary = serializers.SerializerMethodField()
     equipment = serializers.SerializerMethodField()
+    machinery_rows = serializers.SerializerMethodField()
+    machinery = serializers.SerializerMethodField()
     materials = serializers.SerializerMethodField()
+    materials_summary = serializers.SerializerMethodField()
     concrete_logs = serializers.SerializerMethodField()
     labor_camp = serializers.SerializerMethodField()
     incidents = serializers.SerializerMethodField()
@@ -670,8 +971,12 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'updated_at',
             'activities',
             'labor',
+            'labor_summary',
             'equipment',
+            'machinery_rows',
+            'machinery',
             'materials',
+            'materials_summary',
             'concrete_logs',
             'labor_camp',
             'incidents',
@@ -733,11 +1038,123 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     def get_labor(self, obj):
         return DailyReportLaborSerializer(self._active(obj.labor_entries), many=True, context=self.context).data
 
+    def get_labor_summary(self, obj):
+        from decimal import Decimal
+
+        rows = DailyReportLaborSerializer(
+            self._active(obj.labor_entries), many=True, context=self.context,
+        ).data
+        sorted_rows = sorted(
+            rows,
+            key=lambda r: (
+                0 if r.get('labor_category') == 'indirect' else 1,
+                r.get('display_order') or 0,
+                r.get('job_title') or '',
+            ),
+        )
+        indirect_summary = [r for r in sorted_rows if r.get('labor_category') == 'indirect']
+        direct_summary = [r for r in sorted_rows if r.get('labor_category') == 'direct']
+        overall_summary = indirect_summary + direct_summary
+
+        indirect_total_count = sum(int(r.get('present_count') or 0) for r in indirect_summary)
+        direct_total_count = sum(int(r.get('present_count') or 0) for r in direct_summary)
+        overall_total_count = indirect_total_count + direct_total_count
+
+        indirect_leave_count = sum(int(r.get('leave_count') or 0) for r in indirect_summary)
+        direct_leave_count = sum(int(r.get('leave_count') or 0) for r in direct_summary)
+        overall_leave_count = indirect_leave_count + direct_leave_count
+
+        indirect_overtime = sum(
+            (Decimal(str(r.get('overtime_hours') or 0)) for r in indirect_summary),
+            Decimal('0.00'),
+        )
+        direct_overtime = sum(
+            (Decimal(str(r.get('overtime_hours') or 0)) for r in direct_summary),
+            Decimal('0.00'),
+        )
+        overall_overtime = indirect_overtime + direct_overtime
+
+        indirect_mh = sum(
+            (Decimal(str(r.get('man_hours') or 0)) for r in indirect_summary),
+            Decimal('0.00'),
+        )
+        direct_mh = sum(
+            (Decimal(str(r.get('man_hours') or 0)) for r in direct_summary),
+            Decimal('0.00'),
+        )
+        overall_mh = indirect_mh + direct_mh
+
+        all_provenance = [
+            p for r in overall_summary for p in (r.get('provenance') or [])
+        ]
+
+        return {
+            'indirect_summary': indirect_summary,
+            'direct_summary': direct_summary,
+            'overall_summary': overall_summary,
+            'totals': {
+                'indirect_total_count': indirect_total_count,
+                'direct_total_count': direct_total_count,
+                'overall_total_count': overall_total_count,
+                'indirect_leave_count': indirect_leave_count,
+                'direct_leave_count': direct_leave_count,
+                'overall_leave_count': overall_leave_count,
+                'indirect_overtime_hours': f"{indirect_overtime:.2f}",
+                'direct_overtime_hours': f"{direct_overtime:.2f}",
+                'overall_overtime_hours': f"{overall_overtime:.2f}",
+                'indirect_man_hours': f"{indirect_mh:.2f}",
+                'direct_man_hours': f"{direct_mh:.2f}",
+                'overall_man_hours': f"{overall_mh:.2f}",
+                'source_count': len(all_provenance),
+                'has_multiple_sources': len(all_provenance) > 1,
+                'provenance': all_provenance,
+            },
+        }
+
     def get_equipment(self, obj):
         return DailyReportEquipmentSerializer(self._active(obj.equipment_entries), many=True, context=self.context).data
 
+    def get_machinery_rows(self, obj):
+        return DailyReportMachineryRowSerializer(
+            self._active(obj.machinery_rows), many=True, context=self.context,
+        ).data
+
+    def get_machinery(self, obj):
+        rows = self.get_machinery_rows(obj)
+        config = getattr(obj, 'reporting_configuration', None)
+        if config is None and getattr(obj, 'project_id', None) and getattr(obj, 'report_date', None):
+            from field_reports.services.daily_report_aggregation import (
+                resolve_project_reporting_configuration,
+            )
+
+            config = resolve_project_reporting_configuration(obj.project_id, obj.report_date)
+        marker = ''
+        if config is not None:
+            marker = f"{config.id}:{getattr(config, 'snapshot_revision_marker', '') or config.effective_from}"
+        return {
+            'rows': rows,
+            'vocabulary_revision_marker': marker,
+        }
+
     def get_materials(self, obj):
         return DailyReportMaterialSerializer(self._active(obj.material_entries), many=True, context=self.context).data
+
+    def get_materials_summary(self, obj):
+        rows = DailyReportMaterialSerializer(
+            self._active(obj.material_entries), many=True, context=self.context,
+        ).data
+        main_table = [
+            r for r in rows
+            if r.get('transaction_type') == 'receipt' and r.get('receipt_resolved') is True
+        ]
+        details = [
+            r for r in rows
+            if not (r.get('transaction_type') == 'receipt' and r.get('receipt_resolved') is True)
+        ]
+        return {
+            'main_table': main_table,
+            'details': details,
+        }
 
     def get_concrete_logs(self, obj):
         return DailyReportConcreteLogSerializer(self._active(obj.concrete_logs), many=True, context=self.context).data

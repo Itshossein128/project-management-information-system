@@ -145,7 +145,8 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         qs = (
             DailyReport.objects.filter(project_id=self.get_project_id(), is_deleted=False)
-            .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by').prefetch_related('activities', 'labor_entries', 'equipment_entries', 'incidents')
+            .select_related('prepared_by', 'submitted_by', 'reviewed_by', 'approved_by')
+            .prefetch_related('activities', 'labor_entries', 'equipment_entries', 'machinery_rows', 'incidents')
         )
         params = self.request.query_params
         date_from = parse_date_optional(params.get('date_from'))
@@ -366,6 +367,13 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     def materials_reconciliation(self, request, *args, **kwargs):
         instance = self.get_object()
         return Response(reconcile_report_materials(instance))
+
+    @extend_schema(summary='Materials summary and details', tags=['Daily Reports'])
+    @action(detail=True, methods=['get'], url_path='materials-details')
+    def materials_details(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = DailyReportDetailSerializer(instance, context={'request': request})
+        return Response(serializer.get_materials_summary(instance))
 
 
 class DailyReportCorrectionCancelView(generics.GenericAPIView):

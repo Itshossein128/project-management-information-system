@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
-import type { DailyReportDetail, DerivedSourceItem } from "@/app/lib/api/daily-reports";
+import type {
+  DailyReportDetail,
+  DerivedSourceItem,
+  MaterialReconciliationStatus,
+} from "@/app/lib/api/daily-reports";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
@@ -201,14 +205,70 @@ export function DailyReportSummaryView({
   contractNumber?: string;
   employer?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams();
   const resolvedProjectId =
     projectId ?? params.projectId ?? params.businessId ?? params.id;
 
   const indirect = report.labor.filter((r) => r.labor_category === "indirect");
   const direct = report.labor.filter((r) => r.labor_category === "direct");
+  const machineryRows = report.machinery?.rows ?? report.machinery_rows ?? [];
+  const mainMaterials =
+    report.materials_summary?.main_table ??
+    report.materials.filter(
+      (r) => r.transaction_type === "receipt" && r.receipt_resolved === true,
+    );
+  const detailMaterials =
+    report.materials_summary?.details ??
+    report.materials.filter(
+      (r) => !(r.transaction_type === "receipt" && r.receipt_resolved === true),
+    );
+  const [showMaterialDetails, setShowMaterialDetails] = useState(false);
   const notes = parseAutoNotes(report.general_notes);
+
+  function renderReconciliationPill(
+    status: MaterialReconciliationStatus | undefined,
+    rowId: string,
+  ) {
+    const normalized: MaterialReconciliationStatus =
+      status === "match" ||
+      status === "mismatch" ||
+      status === "insufficient_data"
+        ? status
+        : "insufficient_data";
+
+    const label =
+      normalized === "match"
+        ? t("dailyReports.summary.reconciliationMatch", "مطابق با سند انبار")
+        : normalized === "mismatch"
+          ? t(
+              "dailyReports.summary.reconciliationMismatch",
+              "مغایر با سند انبار",
+            )
+          : t(
+              "dailyReports.summary.reconciliationInsufficientData",
+              "اطلاعات ناکافی (فاقد سند منطبق)",
+            );
+
+    const badgeClass =
+      normalized === "match"
+        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+        : normalized === "mismatch"
+          ? "border-destructive/40 bg-destructive/10 text-destructive"
+          : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300";
+
+    return (
+      <span
+        key={`reconcile-${rowId}`}
+        data-testid={`summary-material-reconciliation-${rowId}`}
+        data-reconciliation-status={normalized}
+        aria-label={label}
+        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${badgeClass}`}
+      >
+        {label}
+      </span>
+    );
+  }
 
   const shiftLabel =
     report.shift === "full"
@@ -312,14 +372,31 @@ export function DailyReportSummaryView({
         </dl>
       </Section>
 
-      <Section title={t("dailyReports.summary.indirectLabor", "نیروی انسانی غیرمستقیم (ستادی)")}>
+      <Section
+        title={t("dailyReports.summary.indirectLabor", "نیروی انسانی غیرمستقیم (ستادی)")}
+        testId='summary-indirect-labor'
+      >
         <SimpleTable
-          headers={["عنوان شغلی", "حاضر", "مرخصی", "رشته", "منابع"]}
+          headers={[
+            t("dailyReports.summary.colJobTitle", "عنوان شغلی"),
+            t("dailyReports.summary.colPresent", "حاضر"),
+            t("dailyReports.summary.colLeave", "مرخصی"),
+            t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
+            t("dailyReports.summary.colManHours", "نفر-ساعت"),
+            t("dailyReports.summary.colDiscipline", "رشته"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
           rows={indirect.map((r) => [
             r.job_title,
-            r.shift_1_count,
-            r.absence_count ?? 0,
-            r.source_discipline ?? "",
+            r.present_count ?? r.shift_1_count,
+            r.leave_count ?? r.absence_count ?? 0,
+            r.overtime_hours ?? 0,
+            r.man_hours ?? r.work_hours ?? "—",
+            r.has_multiple_sources
+              ? t("dailyReports.summary.multiUnit", "چند واحدی ({{count}})", {
+                  count: r.source_count ?? r.provenance?.length ?? 2,
+                })
+              : (r.source_discipline ?? ""),
             <ProvenanceCell
               key={`prov-${r.id}`}
               provenance={r.provenance}
@@ -328,16 +405,64 @@ export function DailyReportSummaryView({
             />,
           ])}
         />
+        {report.labor_summary?.totals?.indirect ? (
+          <div
+            className='mt-2 flex flex-wrap gap-4 border-t border-border/60 pt-2 text-xs text-muted-foreground'
+            data-testid='summary-indirect-labor-totals'
+          >
+            <span>
+              {t("dailyReports.summary.colPresent", "حاضر")}:{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.indirect.present_count}
+              </strong>
+            </span>
+            <span>
+              {t("dailyReports.summary.colLeave", "مرخصی")}:{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.indirect.leave_count}
+              </strong>
+            </span>
+            <span>
+              {t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)")}:{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.indirect.overtime_hours}
+              </strong>
+            </span>
+            <span>
+              {t("dailyReports.summary.colManHours", "نفر-ساعت")}:{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.indirect.man_hours}
+              </strong>
+            </span>
+          </div>
+        ) : null}
       </Section>
 
-      <Section title={t("dailyReports.summary.directLabor", "نیروی انسانی مستقیم")}>
+      <Section
+        title={t("dailyReports.summary.directLabor", "نیروی انسانی مستقیم")}
+        testId='summary-direct-labor'
+      >
         <SimpleTable
-          headers={["عنوان شغلی", "حاضر", "مرخصی", "رشته", "منابع"]}
+          headers={[
+            t("dailyReports.summary.colJobTitle", "عنوان شغلی"),
+            t("dailyReports.summary.colPresent", "حاضر"),
+            t("dailyReports.summary.colLeave", "مرخصی"),
+            t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
+            t("dailyReports.summary.colManHours", "نفر-ساعت"),
+            t("dailyReports.summary.colDiscipline", "رشته"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
           rows={direct.map((r) => [
             r.job_title,
-            r.shift_1_count,
-            r.absence_count ?? 0,
-            r.source_discipline ?? "",
+            r.present_count ?? r.shift_1_count,
+            r.leave_count ?? r.absence_count ?? 0,
+            r.overtime_hours ?? 0,
+            r.man_hours ?? r.work_hours ?? "—",
+            r.has_multiple_sources
+              ? t("dailyReports.summary.multiUnit", "چند واحدی ({{count}})", {
+                  count: r.source_count ?? r.provenance?.length ?? 2,
+                })
+              : (r.source_discipline ?? ""),
             <ProvenanceCell
               key={`prov-${r.id}`}
               provenance={r.provenance}
@@ -345,16 +470,133 @@ export function DailyReportSummaryView({
               reportDate={report.report_date}
             />,
           ])}
+        />
+        {report.labor_summary?.totals ? (
+          <div
+            className='mt-2 flex flex-wrap gap-6 border-t border-border/60 pt-2 text-xs text-muted-foreground'
+            data-testid='summary-direct-and-overall-labor-totals'
+          >
+            <div>
+              <span className='font-medium text-foreground'>
+                {t("dailyReports.summary.directTotal", "جمع مستقیم")}:{" "}
+              </span>
+              {t("dailyReports.summary.colPresent", "حاضر")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.direct.present_count}
+              </strong>{" "}
+              · {t("dailyReports.summary.colLeave", "مرخصی")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.direct.leave_count}
+              </strong>{" "}
+              · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.direct.man_hours}
+              </strong>
+            </div>
+            <div>
+              <span className='font-medium text-foreground'>
+                {t("dailyReports.summary.overallLaborTotal", "جمع کل نیروی انسانی")}:{" "}
+              </span>
+              {t("dailyReports.summary.colPresent", "حاضر")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.overall.present_count}
+              </strong>{" "}
+              · {t("dailyReports.summary.colLeave", "مرخصی")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.overall.leave_count}
+              </strong>{" "}
+              · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
+              <strong className='font-mono text-foreground'>
+                {report.labor_summary.totals.overall.man_hours}
+              </strong>
+            </div>
+          </div>
+        ) : null}
+      </Section>
+
+      <Section
+        title={t("dailyReports.summary.machinery", "وضعیت ماشین‌آلات و تجهیزات")}
+        testId='summary-machinery'
+      >
+        <SimpleTable
+          headers={[
+            t("dailyReports.summary.colEquipmentType", "نوع ماشین‌آلات"),
+            t("dailyReports.summary.colEquipmentRef", "شناسه تجهیز"),
+            t("dailyReports.summary.colStatusTotal", "کل"),
+            t("dailyReports.summary.colStatusActive", "فعال"),
+            t("dailyReports.summary.colStatusReady", "آماده به کار"),
+            t("dailyReports.summary.colStatusInactive", "غیرفعال"),
+            t("dailyReports.summary.colStatusUnderRepair", "در حال تعمیر"),
+            t("dailyReports.summary.colOperatingHours", "ساعت کارکرد"),
+            t("dailyReports.summary.colStoppageHours", "ساعت توقف"),
+            t("dailyReports.summary.colRepairHours", "ساعت تعمیر"),
+            t("dailyReports.summary.colStoppageReason", "علت توقف"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
+          rows={machineryRows.map((r) => {
+            const isFa = (i18n.language || "fa").startsWith("fa");
+            const reasonLabel = r.stoppage_reason
+              ? isFa
+                ? r.stoppage_reason.label_fa || r.stoppage_reason.label
+                : r.stoppage_reason.label || r.stoppage_reason.label_fa
+              : isFa
+                ? r.stoppage_reason_label_fa ||
+                  r.stoppage_reason_label ||
+                  r.stoppage_reason_code
+                : r.stoppage_reason_label ||
+                  r.stoppage_reason_label_fa ||
+                  r.stoppage_reason_code;
+
+            const eqLabel = r.equipment_code
+              ? `${r.equipment_code}${r.equipment_name ? ` — ${r.equipment_name}` : ""}`
+              : r.equipment_ref || "—";
+
+            return [
+              r.equipment_type,
+              eqLabel,
+              r.status_total,
+              r.status_active,
+              r.status_ready,
+              r.status_inactive,
+              r.status_under_repair,
+              r.operating_hours ?? "0.00",
+              r.stoppage_hours ?? "0.00",
+              r.repair_hours ?? "0.00",
+              reasonLabel || "—",
+              <ProvenanceCell
+                key={`prov-${r.id}`}
+                provenance={r.provenance}
+                projectId={resolvedProjectId}
+                reportDate={report.report_date}
+              />,
+            ];
+          })}
         />
       </Section>
 
-      <Section title={t("dailyReports.summary.materials", "مصالح وارده")}>
+      <Section
+        title={t("dailyReports.summary.materials", "مصالح وارده (دارای سند انبار)")}
+        testId='summary-materials'
+      >
         <SimpleTable
-          headers={["شرح", "مقدار", "واحد", "منابع"]}
-          rows={report.materials.map((r) => [
-            r.material_description,
+          headers={[
+            t("dailyReports.summary.colDescription", "شرح"),
+            t("dailyReports.summary.colQuantity", "مقدار"),
+            t("dailyReports.summary.colUnit", "واحد"),
+            t("dailyReports.summary.colSupplier", "تأمین‌کننده"),
+            t("dailyReports.summary.colWarehouseDocument", "شماره سند انبار"),
+            t("dailyReports.summary.colReconciliationStatus", "وضعیت تطبیق"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
+          rows={mainMaterials.map((r) => [
+            r.material_code
+              ? `${r.material_code} — ${r.material_description}`
+              : r.material_description,
             r.quantity,
             r.unit,
+            r.supplier || "—",
+            r.warehouse_document_reference || "—",
+            renderReconciliationPill(r.reconciliation_status, r.id),
             <ProvenanceCell
               key={`prov-${r.id}`}
               provenance={r.provenance}
@@ -363,6 +605,68 @@ export function DailyReportSummaryView({
             />,
           ])}
         />
+
+        <div className='mt-3 border-t border-border/60 pt-3'>
+          <button
+            type='button'
+            data-testid='summary-materials-details-toggle'
+            aria-expanded={showMaterialDetails}
+            onClick={() => setShowMaterialDetails((prev) => !prev)}
+            className='inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted/60'
+          >
+            <span>
+              {showMaterialDetails
+                ? t(
+                    "dailyReports.summary.hideMaterialDetails",
+                    "بستن جزئیات مصرف مصالح و رسیدهای فاقد سند",
+                  )
+                : t(
+                    "dailyReports.summary.showMaterialDetails",
+                    "مشاهده جزئیات مصرف مصالح و سایر تراکنش‌ها ({{count}})",
+                    { count: detailMaterials.length },
+                  )}
+            </span>
+          </button>
+
+          {showMaterialDetails ? (
+            <div
+              className='mt-3 space-y-2 rounded-lg border border-border/60 bg-muted/15 p-3'
+              data-testid='summary-materials-details-panel'
+            >
+              <SimpleTable
+                headers={[
+                  t("dailyReports.summary.colTransactionType", "نوع تراکنش"),
+                  t("dailyReports.summary.colDescription", "شرح"),
+                  t("dailyReports.summary.colQuantity", "مقدار"),
+                  t("dailyReports.summary.colUnit", "واحد"),
+                  t("dailyReports.summary.colConsumptionLocation", "محل مصرف"),
+                  t("dailyReports.summary.colWarehouseDocument", "شماره سند انبار"),
+                  t("dailyReports.summary.colReconciliationStatus", "وضعیت تطبیق"),
+                  t("dailyReports.summary.colSources", "منابع"),
+                ]}
+                rows={detailMaterials.map((r) => [
+                  r.transaction_type === "receipt"
+                    ? t("dailyReports.summary.txReceipt", "ورود (فاقد سند منطبق)")
+                    : t("dailyReports.summary.txConsumption", "مصرف"),
+                  r.material_code
+                    ? `${r.material_code} — ${r.material_description}`
+                    : r.material_description,
+                  r.quantity,
+                  r.unit,
+                  r.consumption_location || "—",
+                  r.warehouse_document_reference || "—",
+                  renderReconciliationPill(r.reconciliation_status, r.id),
+                  <ProvenanceCell
+                    key={`prov-detail-${r.id}`}
+                    provenance={r.provenance}
+                    projectId={resolvedProjectId}
+                    reportDate={report.report_date}
+                  />,
+                ])}
+              />
+            </div>
+          ) : null}
+        </div>
       </Section>
 
       <Section title={t("dailyReports.summary.concrete", "حجم بتن ریخته‌شده")}>

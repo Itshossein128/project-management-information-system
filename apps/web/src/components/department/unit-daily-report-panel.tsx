@@ -6,6 +6,9 @@ import {
   type UnitReport,
   type UnitReportStatus,
   unitSupportsActivitiesSection,
+  unitSupportsLaborSection,
+  unitSupportsMachinerySection,
+  unitSupportsMaterialsSection,
 } from "@/app/lib/api/unit-reports";
 import {
   useApproveUnitReport,
@@ -24,6 +27,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Modal } from "@/components/overlay/modal";
 import { SectionActivities } from "./section-activities";
+import { SectionLabor } from "./section-labor";
+import { SectionMachinery } from "./section-machinery";
+import { SectionMaterials } from "./section-materials";
 
 export interface UnitDailyReportPanelProps {
   businessId: string;
@@ -524,9 +530,20 @@ export function UnitDailyReportPanel({
             ) : null}
           </div>
 
-          {unitSupportsActivitiesSection(unit) ? (
+          {unitSupportsActivitiesSection(unit) ||
+          unitSupportsLaborSection(unit) ||
+          unitSupportsMachinerySection(unit) ||
+          unitSupportsMaterialsSection(unit) ? (
             <Tabs
-              defaultValue="activities"
+              defaultValue={
+                unitSupportsActivitiesSection(unit)
+                  ? "activities"
+                  : unitSupportsLaborSection(unit)
+                    ? "labor"
+                    : unitSupportsMachinerySection(unit)
+                      ? "machinery"
+                      : "materials"
+              }
               dir={i18n.dir()}
               className="w-full pt-2"
               data-testid="unit-report-sections-tabs"
@@ -535,21 +552,79 @@ export function UnitDailyReportPanel({
                 id="tablist-unitReportSections"
                 className="flex h-auto flex-wrap justify-start gap-1"
               >
-                <TabsTrigger
-                  id="tab-unitReportSection-activities"
-                  data-testid="unit-section-tab-activities"
-                  value="activities"
-                >
-                  {t("businessDepartment.unitReport.sections.activities.tab")}
-                </TabsTrigger>
+                {unitSupportsActivitiesSection(unit) ? (
+                  <TabsTrigger
+                    id="tab-unitReportSection-activities"
+                    data-testid="unit-section-tab-activities"
+                    value="activities"
+                  >
+                    {t("businessDepartment.unitReport.sections.activities.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsLaborSection(unit) ? (
+                  <TabsTrigger
+                    id="tab-unitReportSection-labor"
+                    data-testid="unit-section-tab-labor"
+                    value="labor"
+                  >
+                    {t("businessDepartment.unitReport.sections.labor.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsMachinerySection(unit) ? (
+                  <TabsTrigger
+                    id="tab-unitReportSection-machinery"
+                    data-testid="unit-section-tab-machinery"
+                    value="machinery"
+                  >
+                    {t("businessDepartment.unitReport.sections.machinery.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsMaterialsSection(unit) ? (
+                  <TabsTrigger
+                    id="tab-unitReportSection-materials"
+                    data-testid="unit-section-tab-materials"
+                    value="materials"
+                  >
+                    {t("businessDepartment.unitReport.sections.materials.tab")}
+                  </TabsTrigger>
+                ) : null}
               </TabsList>
-              <TabsContent value="activities" className="mt-3">
-                <SectionActivities
-                  businessId={businessId}
-                  unit={unit}
-                  report={report}
-                />
-              </TabsContent>
+              {unitSupportsActivitiesSection(unit) ? (
+                <TabsContent value="activities" className="mt-3">
+                  <SectionActivities
+                    businessId={businessId}
+                    unit={unit}
+                    report={report}
+                  />
+                </TabsContent>
+              ) : null}
+              {unitSupportsLaborSection(unit) ? (
+                <TabsContent value="labor" className="mt-3">
+                  <SectionLabor
+                    businessId={businessId}
+                    unit={unit}
+                    report={report}
+                  />
+                </TabsContent>
+              ) : null}
+              {unitSupportsMachinerySection(unit) ? (
+                <TabsContent value="machinery" className="mt-3">
+                  <SectionMachinery
+                    businessId={businessId}
+                    unit={unit}
+                    report={report}
+                  />
+                </TabsContent>
+              ) : null}
+              {unitSupportsMaterialsSection(unit) ? (
+                <TabsContent value="materials" className="mt-3">
+                  <SectionMaterials
+                    businessId={businessId}
+                    unit={unit}
+                    report={report}
+                  />
+                </TabsContent>
+              ) : null}
             </Tabs>
           ) : null}
         </div>

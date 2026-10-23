@@ -51,6 +51,7 @@ report_pdf = DailyReportViewSet.as_view({'get': 'pdf'})
 report_versions = DailyReportViewSet.as_view({'get': 'versions'})
 report_corrections = DailyReportViewSet.as_view({'get': 'correction_requests', 'post': 'correction_requests'})
 report_materials_reconciliation = DailyReportViewSet.as_view({'get': 'materials_reconciliation'})
+report_materials_details = DailyReportViewSet.as_view({'get': 'materials_details'})
 
 
 def _child(viewset):
@@ -137,6 +138,11 @@ urlpatterns = [
         f'{DR}/<uuid:pk>/materials/reconciliation/',
         report_materials_reconciliation,
         name='daily-report-materials-reconciliation',
+    ),
+    path(
+        f'{DR}/<uuid:pk>/materials/details/',
+        report_materials_details,
+        name='daily-report-materials-details',
     ),
     path(
         'correction-requests/<uuid:correction_id>/cancel/',

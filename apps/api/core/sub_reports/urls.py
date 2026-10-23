@@ -3,6 +3,9 @@ from django.urls import path
 # Canonical unit daily report API (feature 032).
 from sub_reports.unit_report_views import (
     UnitReportActivitySectionViewSet,
+    UnitReportLaborSectionViewSet,
+    UnitReportMachinerySectionViewSet,
+    UnitReportMaterialSectionViewSet,
     UnitReportViewSet,
 )
 
@@ -20,6 +23,30 @@ activity_section_list = UnitReportActivitySectionViewSet.as_view(
     {'get': 'list', 'post': 'create'},
 )
 activity_section_row = UnitReportActivitySectionViewSet.as_view(
+    {'patch': 'partial_update', 'delete': 'destroy'},
+)
+
+# §2 labor section rows (feature 033, T021).
+labor_section_list = UnitReportLaborSectionViewSet.as_view(
+    {'get': 'list', 'post': 'create'},
+)
+labor_section_row = UnitReportLaborSectionViewSet.as_view(
+    {'patch': 'partial_update', 'delete': 'destroy'},
+)
+
+# §3 machinery section rows (feature 033, T028).
+machinery_section_list = UnitReportMachinerySectionViewSet.as_view(
+    {'get': 'list', 'post': 'create'},
+)
+machinery_section_row = UnitReportMachinerySectionViewSet.as_view(
+    {'patch': 'partial_update', 'delete': 'destroy'},
+)
+
+# §4 materials section rows (feature 033, T035).
+material_section_list = UnitReportMaterialSectionViewSet.as_view(
+    {'get': 'list', 'post': 'create'},
+)
+material_section_row = UnitReportMaterialSectionViewSet.as_view(
     {'patch': 'partial_update', 'delete': 'destroy'},
 )
 
@@ -47,5 +74,35 @@ urlpatterns = [
         'units/<str:unit>/daily-reports/<uuid:pk>/activities/<uuid:row_pk>/',
         activity_section_row,
         name='unit-report-activity-row',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/labor/',
+        labor_section_list,
+        name='unit-report-labor',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/labor/<uuid:row_pk>/',
+        labor_section_row,
+        name='unit-report-labor-row',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/machinery/',
+        machinery_section_list,
+        name='unit-report-machinery',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/machinery/<uuid:row_pk>/',
+        machinery_section_row,
+        name='unit-report-machinery-row',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/materials/',
+        material_section_list,
+        name='unit-report-materials',
+    ),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/materials/<uuid:row_pk>/',
+        material_section_row,
+        name='unit-report-material-row',
     ),
 ]

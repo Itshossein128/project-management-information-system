@@ -425,6 +425,127 @@
             "contractor_required": "Selecting a contractor or entering a contractor name is required.",
             "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors."
           }
+        },
+        "labor": {
+          "tab": "Labor",
+          "title": "Section 3 — Site Labor Status",
+          "subtitle": "Record indirect (staff) and direct labor counts against the project's effective job-title catalog",
+          "rowCount": "{{count}} rows",
+          "addRow": "Add labor row",
+          "updateRow": "Update row",
+          "empty": "No labor rows recorded for this report yet.",
+          "categories": {
+            "indirect": "Indirect (Staff)",
+            "direct": "Direct (Field)"
+          },
+          "fields": {
+            "category": "Labor category",
+            "jobTitle": "Job title",
+            "jobTitlePlaceholder": "Select job title from catalog...",
+            "jobTitleSearch": "Search job title...",
+            "jobTitleAdd": "+ Add custom job title",
+            "contractor": "Contractor (optional)",
+            "contractorPlaceholder": "Select contractor...",
+            "contractorSearch": "Search contractor name...",
+            "contractorAdd": "+ Add new contractor",
+            "presentCount": "Present count",
+            "leaveCount": "Leave count",
+            "overtimeHours": "Overtime (hours)"
+          },
+          "columns": {
+            "category": "Category",
+            "jobTitle": "Job title",
+            "presentCount": "Present",
+            "leaveCount": "Leave",
+            "overtimeHours": "Overtime (hrs)",
+            "contractor": "Contractor"
+          },
+          "totals": {
+            "indirect": "Indirect total",
+            "direct": "Direct total",
+            "overall": "Overall total"
+          },
+          "errors": {
+            "headcount_must_be_non_negative": "Headcount and overtime hours must be non-negative.",
+            "unknown_job_title": "Selected job title was not found in this project's effective catalog.",
+            "invalid_labor_category": "Labor category does not match the catalog title's category.",
+            "contractor_not_in_project_scope": "Selected contractor does not belong to this project's scope."
+          }
+        },
+        "machinery": {
+          "tab": "Machinery & Equipment",
+          "title": "Section 4 — Site Machinery & Equipment Status",
+          "subtitle": "Record the 5 machinery status counts (total, active, ready, inactive, under repair), operating/stoppage/repair hours, and stoppage reason",
+          "addRow": "Add machinery row",
+          "editRow": "Edit machinery row",
+          "empty": "No machinery rows recorded for this report yet.",
+          "totalsLabel": "Total machinery",
+          "fields": {
+            "rowNumber": "Row #",
+            "equipmentType": "Equipment type",
+            "equipmentTypePlaceholder": "e.g. Excavator, Tower crane, Loader...",
+            "equipmentRef": "Equipment ID (optional)",
+            "equipmentRefPlaceholder": "Project equipment UUID (optional)",
+            "statusTotal": "Total",
+            "statusActive": "Active",
+            "statusReady": "Ready",
+            "statusInactive": "Inactive",
+            "statusUnderRepair": "Under repair",
+            "operatingHours": "Operating hours",
+            "stoppageHours": "Stoppage hours",
+            "repairHours": "Repair hours",
+            "stoppageReason": "Stoppage reason",
+            "noStoppageReason": "— None / Select reason —"
+          },
+          "errors": {
+            "stoppage_reason_required_when_stoppage_gt_zero": "A stoppage reason is required when stoppage hours are greater than zero.",
+            "hours_exceed_day_limit": "Combined operating, stoppage, and repair hours cannot exceed 24 hours per day.",
+            "stoppage_reason_not_in_vocabulary": "Selected stoppage reason is not in this project's active vocabulary.",
+            "status_count_must_be_non_negative": "All five machinery status counts must be non-negative.",
+            "machinery_status_sums_inconsistent": "Item-level status counts do not match the type-level summary row.",
+            "reference_not_in_project_scope": "Selected equipment does not belong to this project."
+          }
+        },
+        "materials": {
+          "tab": "Materials & Warehouse",
+          "title": "Section 5 — Incoming & Consumed Materials",
+          "subtitle": "Record material receipts (warehouse document reference required) and material consumption (consumption location required); only resolved receipts appear in the main daily summary table.",
+          "addRow": "Add material row",
+          "editRow": "Edit material row",
+          "empty": "No material rows recorded for this report yet.",
+          "totalsSummary": "Summary: {{receipts}} receipt(s) · {{consumptions}} consumption row(s)",
+          "transactionTypes": {
+            "receipt": "Receipt (incoming)",
+            "consumption": "Consumption (issued)"
+          },
+          "evidence": {
+            "resolved": "Resolved warehouse document",
+            "unresolved_reference": "Unresolved document reference"
+          },
+          "fields": {
+            "transactionType": "Transaction type",
+            "materialDescription": "Material description",
+            "materialDescriptionPlaceholder": "e.g. Rebar 18mm, Type II Cement...",
+            "materialRef": "Material ID (optional)",
+            "materialRefPlaceholder": "Project material UUID (optional)",
+            "quantity": "Quantity",
+            "unit": "Unit",
+            "unitPlaceholder": "e.g. ton, kg, bag...",
+            "supplier": "Supplier",
+            "supplierPlaceholder": "Supplier or vendor name",
+            "warehouseDocumentReference": "Warehouse document reference (GRN / issue slip)",
+            "warehouseDocumentReferencePlaceholder": "e.g. WD-2026-001",
+            "consumptionLocation": "Consumption location",
+            "consumptionLocationPlaceholder": "e.g. Block B — 2nd Floor Slab",
+            "receiptEvidence": "Document evidence"
+          },
+          "errors": {
+            "transaction_type_required": "Selecting a transaction type (receipt or consumption) is required.",
+            "receipt_requires_document_reference": "A warehouse document reference is required for material receipt rows.",
+            "consumption_location_required_for_consumption": "A consumption location is required for material consumption rows.",
+            "quantity_must_be_positive": "Material quantity must be strictly greater than zero.",
+            "reference_not_in_project_scope": "Selected material does not belong to this project."
+          }
         }
       }
     }
@@ -515,7 +636,19 @@
     "activity_not_in_project_scope": "Selected activity does not belong to this project's WBS scope.",
     "contractor_not_in_project_scope": "Selected contractor does not belong to this project's scope.",
     "contractor_required": "Selecting a contractor or entering a contractor name is required.",
-    "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors."
+    "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors.",
+    "headcount_must_be_non_negative": "Headcount and overtime hours must be non-negative.",
+    "unknown_job_title": "Selected job title was not found in this project's effective catalog.",
+    "invalid_labor_category": "Labor category does not match the catalog title's category.",
+    "stoppage_reason_required_when_stoppage_gt_zero": "A stoppage reason is required when stoppage hours are greater than zero.",
+    "hours_exceed_day_limit": "Combined operating, stoppage, and repair hours cannot exceed 24 hours per day.",
+    "stoppage_reason_not_in_vocabulary": "Selected stoppage reason is not in this project's active vocabulary.",
+    "status_count_must_be_non_negative": "All five machinery status counts must be non-negative.",
+    "machinery_status_sums_inconsistent": "Item-level status counts do not match the type-level summary row.",
+    "reference_not_in_project_scope": "Selected equipment or material does not belong to this project.",
+    "transaction_type_required": "Selecting a material transaction type (receipt or consumption) is required.",
+    "receipt_requires_document_reference": "A warehouse document reference is required for material receipt rows.",
+    "consumption_location_required_for_consumption": "A consumption location is required for material consumption rows."
   },
   "dashboard": {
     "portfolio": {
@@ -2197,7 +2330,19 @@
       "shiftFull": "Full (day)",
       "indirectLabor": "Indirect (staff) labor",
       "directLabor": "Direct labor",
-      "materials": "Incoming materials",
+      "materials": "Incoming materials (verified receipts)",
+      "colSupplier": "Supplier",
+      "colWarehouseDocument": "Warehouse document",
+      "colReconciliationStatus": "Reconciliation status",
+      "colTransactionType": "Transaction type",
+      "colConsumptionLocation": "Consumption location",
+      "reconciliationMatch": "Matches warehouse document",
+      "reconciliationMismatch": "Mismatches warehouse document",
+      "reconciliationInsufficientData": "Insufficient data (unresolved document)",
+      "showMaterialDetails": "Show material consumption & other transactions ({{count}})",
+      "hideMaterialDetails": "Hide material consumption & unresolved receipts",
+      "txReceipt": "Receipt (unresolved document)",
+      "txConsumption": "Consumption",
       "concrete": "Concrete poured",
       "activities": "Executed site activities",
       "generalActivities": "General site activities",

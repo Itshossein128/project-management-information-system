@@ -255,6 +255,7 @@ urlpatterns = [
     # --- Nested Apps ---
     # These apps have endpoints nested under a specific project context
     path('<uuid:project_pk>/reporting-configurations/', include('project_templates.project_urls')),
+    path('<uuid:project_pk>/reporting-configuration/', include('project_templates.project_urls')),
     path('<uuid:project_pk>/', include('inventory.project_urls')),
     path('<uuid:project_pk>/', include('wbs.urls')),
     path('<uuid:project_pk>/', include('schedule.urls')),

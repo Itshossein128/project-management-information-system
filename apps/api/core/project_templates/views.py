@@ -175,14 +175,16 @@ class LaborCatalogViewSet(viewsets.ViewSet):
 
     _create_serializer_error_template = 'labor_catalog_invalid'
 
-    def _template(self, request, pk):
+    def _template(self, request, pk, *, for_write: bool = False):
         template = get_object_or_404(ProjectTemplate, pk=pk)
         if not _can_manage_templates(request):
             raise PermissionDenied('Project template management permission required.')
+        if for_write and template.is_system:
+            raise PermissionDenied('System templates cannot be edited.')
         return template
 
-    def _catalog(self, request, pk, catalog_pk):
-        template = self._template(request, pk)
+    def _catalog(self, request, pk, catalog_pk, *, for_write: bool = False):
+        template = self._template(request, pk, for_write=for_write)
         return get_object_or_404(LaborTitleCatalog, pk=catalog_pk, template=template)
 
     def list(self, request, pk=None):
@@ -195,7 +197,7 @@ class LaborCatalogViewSet(viewsets.ViewSet):
         return Response(LaborTitleCatalogSerializer(catalogs, many=True).data)
 
     def create(self, request, pk=None):
-        template = self._template(request, pk)
+        template = self._template(request, pk, for_write=True)
         serializer = LaborTitleCatalogCreateSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -223,7 +225,7 @@ class LaborCatalogViewSet(viewsets.ViewSet):
         return Response(LaborTitleCatalogSerializer(catalog).data)
 
     def partial_update(self, request, pk=None, catalog_pk=None):
-        catalog = self._catalog(request, pk, catalog_pk)
+        catalog = self._catalog(request, pk, catalog_pk, for_write=True)
         serializer = LaborTitleCatalogCreateSerializer(
             data={**catalog_data_for_update(catalog), **request.data},
             partial=True,
@@ -250,10 +252,12 @@ class LaborCatalogTitleAPIView(APIView):
     permission_classes = [IsAuthenticated]
     pagination_class = None
 
-    def _catalog(self, request, pk, catalog_pk):
+    def _catalog(self, request, pk, catalog_pk, *, for_write: bool = False):
         template = get_object_or_404(ProjectTemplate, pk=pk)
         if not _can_manage_templates(request):
             raise PermissionDenied('Project template management permission required.')
+        if for_write and template.is_system:
+            raise PermissionDenied('System templates cannot be edited.')
         return get_object_or_404(LaborTitleCatalog, pk=catalog_pk, template=template)
 
     def get(self, request, pk, catalog_pk):
@@ -262,7 +266,7 @@ class LaborCatalogTitleAPIView(APIView):
         return Response(LaborTitleCatalogTitleSerializer(titles, many=True).data)
 
     def post(self, request, pk, catalog_pk):
-        catalog = self._catalog(request, pk, catalog_pk)
+        catalog = self._catalog(request, pk, catalog_pk, for_write=True)
         serializer = LaborTitleCatalogTitleSerializer(data=request.data, context={'catalog': catalog})
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -273,10 +277,12 @@ class LaborCatalogTitleAPIView(APIView):
 class LaborCatalogTitleDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def _title(self, request, pk, catalog_pk, title_pk):
+    def _title(self, request, pk, catalog_pk, title_pk, *, for_write: bool = False):
         template = get_object_or_404(ProjectTemplate, pk=pk)
         if not _can_manage_templates(request):
             raise PermissionDenied('Project template management permission required.')
+        if for_write and template.is_system:
+            raise PermissionDenied('System templates cannot be edited.')
         catalog = get_object_or_404(LaborTitleCatalog, pk=catalog_pk, template=template)
         return get_object_or_404(LaborTitleCatalogTitle, pk=title_pk, catalog=catalog)
 
@@ -291,7 +297,7 @@ class LaborCatalogTitleDetailAPIView(APIView):
         return self._update(request, pk, catalog_pk, title_pk, partial=True)
 
     def _update(self, request, pk, catalog_pk, title_pk, *, partial):
-        title = self._title(request, pk, catalog_pk, title_pk)
+        title = self._title(request, pk, catalog_pk, title_pk, for_write=True)
         serializer = LaborTitleCatalogTitleSerializer(
             title, data=request.data, partial=partial, context={'catalog': title.catalog},
         )
@@ -303,7 +309,7 @@ class LaborCatalogTitleDetailAPIView(APIView):
         return Response(LaborTitleCatalogTitleSerializer(saved).data)
 
     def delete(self, request, pk, catalog_pk, title_pk):
-        title = self._title(request, pk, catalog_pk, title_pk)
+        title = self._title(request, pk, catalog_pk, title_pk, for_write=True)
         title.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -27,6 +27,26 @@ import {
   createUnitReportActivity,
   updateUnitReportActivity,
   deleteUnitReportActivity,
+  type UnitReportLaborRow,
+  type UnitReportLaborPayload,
+  type EffectiveReportingConfiguration,
+  fetchEffectiveReportingConfiguration,
+  fetchUnitReportLabor,
+  createUnitReportLabor,
+  updateUnitReportLabor,
+  deleteUnitReportLabor,
+  type UnitReportMachineryRow,
+  type UnitReportMachineryPayload,
+  fetchUnitReportMachinery,
+  createUnitReportMachinery,
+  updateUnitReportMachinery,
+  deleteUnitReportMachinery,
+  type UnitReportMaterialRow,
+  type UnitReportMaterialPayload,
+  fetchUnitReportMaterials,
+  createUnitReportMaterial,
+  updateUnitReportMaterial,
+  deleteUnitReportMaterial,
 } from "@/app/lib/api/unit-reports";
 import { queryKeys } from "@/app/lib/react-query-keys";
 import { PATHS } from "@/app/routeVars";
@@ -611,6 +631,341 @@ export function useDeleteUnitReportActivity(
       if (reportId) {
         void qc.invalidateQueries({
           queryKey: queryKeys.unitReportActivities(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §2 — Labor Section & Effective Reporting Configuration Queries
+// ---------------------------------------------------------------------------
+
+export function useEffectiveReportingConfigurationQuery(
+  businessId: number | string | undefined,
+  reportDate: string | undefined,
+) {
+  return useQuery<EffectiveReportingConfiguration>({
+    queryKey: queryKeys.effectiveReportingConfiguration(
+      businessId ?? "",
+      reportDate ?? "",
+    ),
+    queryFn: () => {
+      if (!businessId || !reportDate) {
+        throw new Error("Missing businessId or reportDate");
+      }
+      return fetchEffectiveReportingConfiguration(String(businessId), reportDate);
+    },
+    enabled: Boolean(businessId && reportDate),
+    retry: false,
+  });
+}
+
+export function useUnitReportLaborQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  return useQuery<UnitReportLaborRow[]>({
+    queryKey: queryKeys.unitReportLabor(businessId ?? "", unit, reportId ?? ""),
+    queryFn: () => {
+      if (!businessId || !reportId) {
+        throw new Error("Missing unit report labor parameters");
+      }
+      return fetchUnitReportLabor(String(businessId), unit, reportId);
+    },
+    enabled: Boolean(businessId && reportId),
+  });
+}
+
+export function useCreateUnitReportLabor(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UnitReportLaborPayload) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return createUnitReportLabor(String(businessId), unit, reportId, payload);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportLabor(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useUpdateUnitReportLabor(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      rowId,
+      patch,
+    }: {
+      rowId: string;
+      patch: Partial<UnitReportLaborPayload>;
+    }) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return updateUnitReportLabor(
+        String(businessId),
+        unit,
+        reportId,
+        rowId,
+        patch,
+      );
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportLabor(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useDeleteUnitReportLabor(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (rowId: string) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return deleteUnitReportLabor(String(businessId), unit, reportId, rowId);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportLabor(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §3 — Machinery Section Queries (T031)
+// ---------------------------------------------------------------------------
+
+export function useUnitReportMachineryQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  return useQuery<UnitReportMachineryRow[]>({
+    queryKey: queryKeys.unitReportMachinery(businessId ?? "", unit, reportId ?? ""),
+    queryFn: () => {
+      if (!businessId || !reportId) {
+        throw new Error("Missing unit report machinery parameters");
+      }
+      return fetchUnitReportMachinery(String(businessId), unit, reportId);
+    },
+    enabled: Boolean(businessId && reportId),
+  });
+}
+
+export function useCreateUnitReportMachinery(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UnitReportMachineryPayload) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return createUnitReportMachinery(String(businessId), unit, reportId, payload);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMachinery(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useUpdateUnitReportMachinery(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      rowId,
+      patch,
+    }: {
+      rowId: string;
+      patch: Partial<UnitReportMachineryPayload>;
+    }) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return updateUnitReportMachinery(
+        String(businessId),
+        unit,
+        reportId,
+        rowId,
+        patch,
+      );
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMachinery(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useDeleteUnitReportMachinery(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (rowId: string) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return deleteUnitReportMachinery(String(businessId), unit, reportId, rowId);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMachinery(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §4 — Materials Section Queries (T038)
+// ---------------------------------------------------------------------------
+
+export function useUnitReportMaterialsQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  return useQuery<UnitReportMaterialRow[]>({
+    queryKey: queryKeys.unitReportMaterials(businessId ?? "", unit, reportId ?? ""),
+    queryFn: () => {
+      if (!businessId || !reportId) {
+        throw new Error("Missing unit report materials parameters");
+      }
+      return fetchUnitReportMaterials(String(businessId), unit, reportId);
+    },
+    enabled: Boolean(businessId && reportId),
+  });
+}
+
+export function useCreateUnitReportMaterial(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UnitReportMaterialPayload) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return createUnitReportMaterial(String(businessId), unit, reportId, payload);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMaterials(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useUpdateUnitReportMaterial(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      rowId,
+      patch,
+    }: {
+      rowId: string;
+      patch: Partial<UnitReportMaterialPayload>;
+    }) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return updateUnitReportMaterial(
+        String(businessId),
+        unit,
+        reportId,
+        rowId,
+        patch,
+      );
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMaterials(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useDeleteUnitReportMaterial(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (rowId: string) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return deleteUnitReportMaterial(String(businessId), unit, reportId, rowId);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportMaterials(businessId, unit, reportId),
         });
       }
       void qc.invalidateQueries({

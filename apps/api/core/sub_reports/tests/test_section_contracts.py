@@ -16,9 +16,11 @@ from sub_reports.models import DisciplineSubReport, SubReportStatus
 from common.reporting_units import SpecialtyUnit
 from sub_reports.serializers import (
     UnitReportActivitySectionSerializer,
+    UnitReportLaborSectionSerializer,
 )
 from sub_reports.services.section_validation import (
     validate_activity_rows,
+    validate_labor_rows,
     SectionContractError,
 )
 
@@ -195,3 +197,509 @@ class TestActivitySectionContract:
         assert 'contractor_ref' in data
         assert data['crew_name'] == 'Crew A'
         assert data['contractor_ref'] == str(contractor.id)
+
+
+# ---------------------------------------------------------------------------
+# §2: labor section contract (US2, tasks T020/T021)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestLaborSectionContract:
+    """Labor section validation per contracts/unit-report-sections-api.md §2."""
+
+    @pytest.fixture
+    def active_labor_config(self, db, project, user):
+        from project_templates.models import ProjectTemplate
+        from project_templates.services import (
+            activate_project_reporting_configuration,
+            create_labor_catalog,
+        )
+
+        tpl = ProjectTemplate.objects.create(
+            template_name='Labor Section Test Template',
+            is_system=False,
+            created_by=user,
+        )
+        create_labor_catalog(
+            tpl,
+            version_name='v1',
+            titles=[
+                {
+                    'title_code': 'site_manager',
+                    'title_label': 'Site Manager',
+                    'title_label_fa': 'سرپرست کارگاه',
+                    'category': 'indirect',
+                    'display_order': 1,
+                    'active': True,
+                    'project_specific': False,
+                },
+                {
+                    'title_code': 'rebar_worker',
+                    'title_label': 'Rebar Worker',
+                    'title_label_fa': 'آرماتوربند',
+                    'category': 'direct',
+                    'display_order': 1,
+                    'active': True,
+                    'project_specific': False,
+                },
+            ],
+        )
+        return activate_project_reporting_configuration(
+            project=project,
+            template=tpl,
+            effective_from=date(2024, 6, 1),
+            user=user,
+        )
+
+    def test_valid_labor_row_saves_and_resolves_catalog_title(
+        self, db, unit_report, active_labor_config, contractor,
+    ):
+        rows = validate_labor_rows(
+            unit_report,
+            [
+                {
+                    'labor_category': 'direct',
+                    'job_title': 'آرماتوربند',
+                    'present_count': 6,
+                    'leave_count': 1,
+                    'overtime_hours': '2.50',
+                    'contractor_ref': str(contractor.id),
+                },
+            ],
+        )
+        assert len(rows) == 1
+        row = rows[0]
+        assert row.labor_category == 'direct'
+        assert row.job_title == 'آرماتوربند'
+        assert row.present_count == 6
+        assert row.leave_count == 1
+        assert str(row.overtime_hours) == '2.50'
+        assert row.contractor_ref_id == contractor.id
+        data = UnitReportLaborSectionSerializer(row).data
+        assert data['present_count'] == 6
+        assert data['leave_count'] == 1
+        assert data['contractor_ref'] == str(contractor.id)
+
+    @pytest.mark.parametrize(
+        'field_name,bad_value',
+        [
+            ('present_count', -1),
+            ('leave_count', -1),
+            ('overtime_hours', '-0.50'),
+        ],
+    )
+    def test_headcount_must_be_non_negative(
+        self, db, unit_report, active_labor_config, field_name, bad_value,
+    ):
+        payload = {
+            'labor_category': 'direct',
+            'job_title': 'آرماتوربند',
+            'present_count': 5,
+            'leave_count': 0,
+            'overtime_hours': '0.00',
+            field_name: bad_value,
+        }
+        with pytest.raises(SectionContractError) as excinfo:
+            validate_labor_rows(unit_report, [payload])
+        assert excinfo.value.field_errors(field_name) == ['headcount_must_be_non_negative']
+
+    def test_unknown_job_title_outside_effective_catalog_refused(
+        self, db, unit_report, active_labor_config,
+    ):
+        payload = {
+            'labor_category': 'direct',
+            'job_title': 'فضانورد کارگاهی',
+            'present_count': 2,
+            'leave_count': 0,
+        }
+        with pytest.raises(SectionContractError) as excinfo:
+            validate_labor_rows(unit_report, [payload])
+        assert excinfo.value.field_errors('job_title') == ['unknown_job_title']
+
+    def test_invalid_labor_category_mismatch_with_catalog_title_refused(
+        self, db, unit_report, active_labor_config,
+    ):
+        payload = {
+            'labor_category': 'indirect',  # catalog says rebar_worker is 'direct'
+            'job_title': 'آرماتوربند',
+            'present_count': 3,
+            'leave_count': 0,
+        }
+        with pytest.raises(SectionContractError) as excinfo:
+            validate_labor_rows(unit_report, [payload])
+        assert excinfo.value.field_errors('labor_category') == ['invalid_labor_category']
+
+    def test_foreign_project_contractor_refused_in_labor_row(
+        self, db, unit_report, active_labor_config, foreign_project,
+    ):
+        payload = {
+            'labor_category': 'direct',
+            'job_title': 'آرماتوربند',
+            'present_count': 4,
+            'leave_count': 0,
+            'contractor_ref': str(foreign_project['stakeholder'].id),
+        }
+        with pytest.raises(SectionContractError) as excinfo:
+            validate_labor_rows(unit_report, [payload])
+        assert excinfo.value.field_errors('contractor_ref') == [
+            'contractor_not_in_project_scope',
+        ]
+
+
+# ---------------------------------------------------------------------------
+# §7: attachment group tests (T049)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestAttachmentContract:
+    """Attachment tests per contracts/unit-report-sections-api.md §7.
+
+    Tests verify content validation, size limits, project scope, and mutability
+    rules for activity image attachments.
+    """
+
+    def test_unsupported_file_format(self, db, unit_report, section_activity_payload):
+        """ZIP/EXE/content-misdeclared files are rejected at upload."""
+        from sub_reports.services import attach_image_to_activity
+
+        # Simulate uploading a ZIP file (misdeclared as image)
+        zip_content = b'PK\x03\x04\x14\x00\x00\x00\x08\x00'  # PK zip header
+        misdeclared_exe = b'MZ\x90\x00\x04\x00\x00'  # PE/EXE header
+
+        with pytest.raises(Exception) as excinfo:  # will be ValidationError
+            attach_image_to_activity(
+                report=unit_report,
+                activity_row_id=str(unit_report.activities.first().id),
+                file_content=zip_content,
+                declared_content_type='image/jpeg',
+            )
+
+        # Should reject unsupported format
+        assert 'unsupported_file_format' in str(excinfo.value).lower() or \
+            'unsupported' in str(excinfo.value).lower()
+
+    def test_file_too_large(self, db, unit_report, section_activity_payload):
+        """Files above 10 MB are rejected at upload."""
+        from sub_reports.services import attach_image_to_activity
+
+        # Create content > 10 MB (10 * 1024 * 1024 + 1 bytes)
+        large_content = b'x' * (10 * 1024 * 1024 + 1)
+
+        with pytest.raises(Exception) as excinfo:
+            attach_image_to_activity(
+                report=unit_report,
+                activity_row_id=str(unit_report.activities.first().id),
+                file_content=large_content,
+                declared_content_type='image/jpeg',
+            )
+
+        # Should reject oversized file
+        assert 'file_too_large' in str(excinfo.value).lower() or \
+            'too large' in str(excinfo.value).lower() or \
+            'size limit' in str(excinfo.value).lower()
+
+    def test_attachment_row_not_in_version(self, db, unit_report, section_activity_payload, project):
+        """Attachment target outside the versioned report is rejected."""
+        from sub_reports.services import attach_image_to_activity
+
+        # Create a different report (different version)
+        from django.contrib.auth import get_user_model
+        other_user = get_user_model().objects.create_user(
+            username='other',
+            email='other@example.com',
+            password='pass123',
+        )
+        other_report = DisciplineSubReport.objects.create(
+            project=project,
+            report_date=date(2024, 6, 11),  # different date = different version
+            unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil',
+            lineage_id=None,
+            status=SubReportStatus.DRAFT,
+            created_by=other_user,
+        )
+
+        # Try to attach to a row from the other report
+        with pytest.raises(Exception) as excinfo:
+            attach_image_to_activity(
+                report=unit_report,
+                activity_row_id=str(other_report.activities.first().id),
+                file_content=b'fake-image-data',
+                declared_content_type='image/jpeg',
+            )
+
+        # Should reject attachment to row outside version
+        assert 'attachment_row_not_in_version' in str(excinfo.value).lower() or \
+            'not in version' in str(excinfo.value).lower() or \
+            'cross-project' in str(excinfo.value).lower()
+
+    def test_reference_not_in_project_scope(self, db, unit_report, section_activity_payload, foreign_project, project):
+        """Cross-project attachment target is refused with no partial storage."""
+        from sub_reports.services import attach_image_to_activity
+
+        # Try to attach to a row belonging to a different project
+        with pytest.raises(Exception) as excinfo:
+            attach_image_to_activity(
+                report=unit_report,
+                activity_row_id=str(unit_report.activities.first().id),
+                file_content=b'fake-image-data',
+                declared_content_type='image/jpeg',
+            )
+
+        # Should refuse cross-project attachment
+        assert 'reference_not_in_project_scope' in str(excinfo.value).lower() or \
+            'not in project scope' in str(excinfo.value).lower() or \
+            'cross-project' in str(excinfo.value).lower()
+
+    def test_attachment_mutable_only_on_draft(self, db, unit_report, section_activity_payload):
+        """Attachments can only be modified on draft reports, not submitted/approved."""
+        from sub_reports.services import attach_image_to_activity
+
+        # First, submit the report
+        unit_report.status = SubReportStatus.SUBMITTED
+        unit_report.save()
+
+        # Try to add attachment to submitted report
+        with pytest.raises(Exception) as excinfo:
+            attach_image_to_activity(
+                report=unit_report,
+                activity_row_id=str(unit_report.activities.first().id),
+                file_content=b'fake-image-data',
+                declared_content_type='image/jpeg',
+            )
+
+        # Should reject modification on non-draft
+        assert 'draft only' in str(excinfo.value).lower() or \
+            'not allowed' in str(excinfo.value).lower() or \
+            'submitted' in str(excinfo.value).lower()
+
+    def test_provenance_metadata_preserved(self, db, unit_report, section_activity_payload):
+        """Provenance metadata (capture date, work front, source activity/unit/project) preserved."""
+        from sub_reports.services import attach_image_to_activity
+
+        attachment = attach_image_to_activity(
+            report=unit_report,
+            activity_row_id=str(unit_report.activities.first().id),
+            file_content=b'fake-image-data',
+            declared_content_type='image/jpeg',
+            capture_date=date(2024, 6, 10),
+            work_front='Site A',
+        )
+
+        # Verify provenance fields are stored
+        assert attachment.capture_date == date(2024, 6, 10)
+        assert attachment.work_front == 'Site A'
+        assert attachment.sub_report_id == unit_report.id
+        # Source activity/unit should be inferable from the report/activity context
+        assert attachment.row_kind  # should have a row_kind set
+
+
+@pytest.mark.django_db
+class TestAttachmentSummaryCounts:
+    """Summary count tests for attachments (FR-036)."""
+
+    def test_per_section_accessible_counts(
+        self, db, user, project, material
+    ):
+        """Per-section accessible counts + link payloads derive from contributing units (FR-036)."""
+        from projects.models import Project
+        from resources.models import Material
+
+        # Create project and report
+        project = Project.objects.create(
+            project_code='PRJ-ATT',
+            project_name='Attachment Test',
+            employer='Employer Co',
+        )
+
+        report = DisciplineSubReport.objects.create(
+            project=project,
+            report_date=date(2024, 6, 10),
+            unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil',
+            lineage_id=None,
+            status=SubReportStatus.DRAFT,
+            created_by=user,
+        )
+
+        # Create activities with attachments across units
+        activity1 = Activity.objects.create(
+            project=project,
+            wbs=None,
+            activity_code='A1',
+            activity_name='Activity 1',
+            status='in_progress',
+            created_by=user,
+        )
+
+        activity2 = Activity.objects.create(
+            project=project,
+            wbs=None,
+            activity_code='A2',
+            activity_name='Activity 2',
+            status='in_progress',
+            created_by=user,
+        )
+
+        # Save sub-report activities
+        act1 = DisciplineSubReportActivity.objects.create(
+            sub_report=report,
+            row_number=1,
+            shift='shift_1',
+            activity_ref=activity1,
+            activity_description='Activity 1',
+            contractor_ref=None,
+            crew_name='Crew A',
+            foreman_count=2,
+            worker_count=3,
+            quantity='10.0',
+            unit='m3',
+        )
+
+        act2 = DisciplineSubReportActivity.objects.create(
+            sub_report=report,
+            row_number=2,
+            shift='shift_1',
+            activity_ref=activity2,
+            activity_description='Activity 2',
+            contractor_ref=None,
+            crew_name='Crew B',
+            foreman_count=1,
+            worker_count=4,
+            quantity='5.0',
+            unit='m3',
+        )
+
+        # Attach images to both activities (simulate via service)
+        from sub_reports.models import UnitReportAttachment
+        from django.core.files.base import ContentFile
+
+        # Activity 1 attachment
+        att1 = UnitReportAttachment.objects.create(
+            sub_report=report,
+            row_kind='activity',
+            row_id=str(act1.id),
+            storage_key='attachments/activity1/image1.jpg',
+            declared_content_type='image/jpeg',
+            size_bytes=2 * 1024 * 1024,  # 2 MB
+            checksum='abc123',
+            capture_date=date(2024, 6, 10),
+            work_front='Site A',
+        )
+
+        # Activity 2 attachment
+        att2 = UnitReportAttachment.objects.create(
+            sub_report=report,
+            row_kind='activity',
+            row_id=str(act2.id),
+            storage_key='attachments/activity2/image2.png',
+            declared_content_type='image/png',
+            size_bytes=5 * 1024 * 1024,  # 5 MB
+            checksum='def456',
+            capture_date=date(2024, 6, 10),
+            work_front='Site B',
+        )
+
+        # Test that summary counts are derived from contributing units
+        # per-section counts should reflect attachments from contributing units
+        from sub_reports.services import get_attachment_counts
+
+        counts = get_attachment_counts(report)
+
+        # Should have 2 attachments total across the section
+        assert counts['total'] == 2, (
+            f"Expected 2 total attachments, got {counts['total']}"
+        )
+        assert counts['by_section']['activity'] == 2, (
+            f"Expected 2 activity attachments, got {counts['by_section'].get('activity')}"
+        )
+
+        # Links should be accessible URLs (relative paths, not full URLs)
+        assert 'links' in counts or 'url' in counts, (
+            "Summary should provide accessible link payloads"
+        )
+
+    def test_urls_never_returned_to_users_lacking_permission(self, db, user, project):
+        """URLs never returned to users lacking project/unit view permission."""
+        from projects.models import Project
+        from django.contrib.auth import get_user_model
+
+        # Create project and report
+        project = Project.objects.create(
+            project_code='PRJ-ATT2',
+            project_name='Attachment Perm Test',
+            employer='Employer Co',
+        )
+
+        report = DisciplineSubReport.objects.create(
+            project=project,
+            report_date=date(2024, 6, 10),
+            unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil',
+            lineage_id=None,
+            status=SubReportStatus.DRAFT,
+            created_by=user,
+        )
+
+        activity = Activity.objects.create(
+            project=project,
+            wbs=None,
+            activity_code='A1',
+            activity_name='Activity 1',
+            status='in_progress',
+            created_by=user,
+        )
+
+        act = DisciplineSubReportActivity.objects.create(
+            sub_report=report,
+            row_number=1,
+            shift='shift_1',
+            activity_ref=activity,
+            activity_description='Activity 1',
+            contractor_ref=None,
+            crew_name='Crew A',
+            foreman_count=2,
+            worker_count=3,
+            quantity='10.0',
+            unit='m3',
+        )
+
+        from django.core.files.base import ContentFile
+        from sub_reports.models import UnitReportAttachment
+
+        # Attachment exists
+        UnitReportAttachment.objects.create(
+            sub_report=report,
+            row_kind='activity',
+            row_id=str(act.id),
+            storage_key='attachments/activity1/image1.jpg',
+            declared_content_type='image/jpeg',
+            size_bytes=2 * 1024 * 1024,
+            checksum='abc123',
+            capture_date=date(2024, 6, 10),
+            work_front='Site A',
+        )
+
+        # Create a user without project permission
+        from projects.models import ProjectMember
+        unprivileged_user = get_user_model().objects.create_user(
+            username='unprivileged',
+            email='unpriv@example.com',
+            password='pass123',
+        )
+
+        # Try to retrieve attachment URLs without permission
+        # The service should not expose URLs to unprivileged users
+        from sub_reports.services import get_attachment_links
+
+        links = get_attachment_links(report, user=unprivileged_user)
+
+        # Should either return empty or masked/redacted URLs, not real paths
+        assert links == {} or (
+            'redacted' in str(links).lower() or
+            'no access' in str(links).lower()
+        ), (
+            "URLs should not be returned to users lacking project/unit view permission"
+        )

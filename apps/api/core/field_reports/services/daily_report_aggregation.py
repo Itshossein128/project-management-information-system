@@ -18,6 +18,7 @@ from field_reports.models import (
     DailyReportConcreteLog,
     DailyReportDerivedSource,
     DailyReportLabor,
+    DailyReportMachineryRow,
     DailyReportMaterial,
     InactivityReason,
     MaterialTransactionType,
@@ -67,6 +68,7 @@ def contributing_sub_reports(project_id, report_date: date):
         .prefetch_related(
             'activities',
             'labor_entries',
+            'machinery_rows',
             'material_entries',
             'concrete_entries',
             'general_activities',
@@ -233,15 +235,40 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
                     l.job_title,
                     l.present_count,
                     l.leave_count,
+                    str(l.overtime_hours) if l.overtime_hours is not None else '0',
+                    str(l.contractor_ref_id) if l.contractor_ref_id else '',
                 )
                 for l in sr.labor_entries.filter(is_deleted=False).order_by('id')
+            ],
+            'machinery': [
+                (
+                    str(m.id),
+                    m.row_number,
+                    m.equipment_type or '',
+                    str(m.equipment_ref_id) if m.equipment_ref_id else '',
+                    m.status_total,
+                    m.status_active,
+                    m.status_ready,
+                    m.status_inactive,
+                    m.status_under_repair,
+                    str(m.operating_hours) if m.operating_hours is not None else '',
+                    str(m.stoppage_hours) if m.stoppage_hours is not None else '',
+                    str(m.repair_hours) if m.repair_hours is not None else '',
+                    m.stoppage_reason_code or '',
+                )
+                for m in sr.machinery_rows.filter(is_deleted=False).order_by('row_number', 'id')
             ],
             'materials': [
                 (
                     str(m.id),
+                    m.transaction_type or '',
+                    str(m.material_ref_id) if m.material_ref_id else '',
                     m.material_description,
                     str(m.quantity),
                     m.unit,
+                    m.consumption_location or '',
+                    m.supplier or '',
+                    m.warehouse_document_reference or '',
                     m.notes or '',
                 )
                 for m in sr.material_entries.filter(is_deleted=False).order_by('id')
@@ -559,39 +586,97 @@ def rebuild_daily_report_summary(
         obs.delete()
 
     # -------------------------------------------------------------------------
-    # Labor (Multi-source aggregation without last-source-wins)
+    # Labor (Multi-source aggregation without last-source-wins, feature 033 T022)
     # -------------------------------------------------------------------------
+    from field_reports.services.man_hours import compute_man_hours
+    from project_templates.services import resolve_labor_title
+
+    effective_config = report.reporting_configuration or config or resolve_project_reporting_configuration(
+        project_id, report_date,
+    )
+    rule_code = effective_config.man_hours_rule_code if effective_config else None
+    shift_hours = (
+        effective_config.standard_shift_hours
+        if (effective_config and effective_config.standard_shift_hours is not None)
+        else Decimal('8')
+    )
+    has_catalog = bool(effective_config and effective_config.labor_titles.exists())
+
     labor_buckets: dict[tuple[str, str], dict] = defaultdict(
-        lambda: {'present': 0, 'leave': 0, 'sources': []},
+        lambda: {
+            'present': 0,
+            'leave': 0,
+            'overtime': Decimal('0.00'),
+            'canonical_title': '',
+            'sources': [],
+        },
     )
 
     for sr in sub_reports:
         for row in sr.labor_entries.all().order_by('id'):
             if row.is_deleted:
                 continue
-            key = (row.labor_category, (row.job_title or '').strip())
-            if not key[1]:
+            raw_title = (row.job_title or '').strip()
+            if not raw_title:
                 continue
-            bucket = labor_buckets[key]
+
+            resolved = (
+                resolve_labor_title(effective_config, raw_title)
+                if has_catalog
+                else None
+            )
+            if resolved is not None:
+                bucket_key = (row.labor_category, f"code:{resolved.title_code}")
+                if raw_title in (resolved.title_label, resolved.title_label_fa):
+                    display_title = raw_title
+                else:
+                    display_title = (
+                        resolved.title_label_fa
+                        or resolved.title_label
+                        or raw_title
+                    )
+            else:
+                bucket_key = (row.labor_category, raw_title)
+                display_title = raw_title
+
+            bucket = labor_buckets[bucket_key]
+            if not bucket['canonical_title']:
+                bucket['canonical_title'] = display_title
             bucket['present'] += row.present_count or 0
             bucket['leave'] += row.leave_count or 0
+            bucket['overtime'] += Decimal(str(row.overtime_hours or 0))
             bucket['sources'].append({
                 'sr': sr,
                 'row': row,
             })
 
     current_derived_labor_ids = set()
-    for (category, title), bucket in labor_buckets.items():
+    for (category, _bucket_id), bucket in labor_buckets.items():
+        title = bucket['canonical_title']
+        bucket_man_hours = compute_man_hours(
+            rule_code,
+            present_count=bucket['present'],
+            overtime_person_hours=bucket['overtime'],
+            standard_shift_hours=shift_hours,
+        )
+
+        # Stably order sources: unit, version, source_row_id (never last-source-wins)
+        sorted_sources = sorted(
+            bucket['sources'],
+            key=lambda s: (s['sr'].unit or '', s['sr'].version_number, str(s['row'].id)),
+        )
+
+        primary_sr = sorted_sources[0]['sr'] if sorted_sources else None
+        primary_disc = (
+            (primary_sr.unit or primary_sr.discipline or '') if primary_sr else ''
+        )
+
         labor_row = report.labor_entries.filter(
             is_derived=True,
             labor_category=category,
             job_title=title,
         ).first()
 
-        primary_sr = bucket['sources'][0]['sr'] if bucket['sources'] else None
-        primary_disc = (
-            (primary_sr.unit or primary_sr.discipline or '') if primary_sr else ''
-        )
         if labor_row is None:
             labor_row = DailyReportLabor.objects.create(
                 report=report,
@@ -603,6 +688,9 @@ def rebuild_daily_report_summary(
                 shift_2_count=0,
                 shift_3_count=0,
                 absence_count=bucket['leave'],
+                overtime_hours=bucket['overtime'],
+                work_hours=bucket_man_hours,
+                source_set_complete=True,
                 source_sub_report=primary_sr,
                 source_discipline=primary_disc,
                 is_derived=True,
@@ -610,24 +698,14 @@ def rebuild_daily_report_summary(
         else:
             labor_row.shift_1_count = bucket['present']
             labor_row.absence_count = bucket['leave']
+            labor_row.overtime_hours = bucket['overtime']
+            labor_row.work_hours = bucket_man_hours
+            labor_row.source_set_complete = True
             labor_row.source_sub_report = primary_sr
             labor_row.source_discipline = primary_disc
-            labor_row.save(
-                update_fields=[
-                    'shift_1_count',
-                    'absence_count',
-                    'source_sub_report',
-                    'source_discipline',
-                ]
-            )
+            labor_row.save()
 
         current_derived_labor_ids.add(str(labor_row.id))
-
-        # Stably order sources: unit, version, source_row_id
-        sorted_sources = sorted(
-            bucket['sources'],
-            key=lambda s: (s['sr'].unit or '', s['sr'].version_number, str(s['row'].id)),
-        )
 
         desired_source_keys = set()
         for idx, src in enumerate(sorted_sources):
@@ -668,8 +746,170 @@ def rebuild_daily_report_summary(
         obs.delete()
 
     # -------------------------------------------------------------------------
-    # Materials
+    # Machinery (Feature 033 T029: 5-status derivation + identity dedupe)
     # -------------------------------------------------------------------------
+    current_derived_machinery_ids = set()
+    existing_mach_sources = {
+        s.source_row_id: s.derived_row_id
+        for s in DailyReportDerivedSource.objects.filter(
+            daily_report=report, derived_kind='machinery',
+        )
+    }
+
+    identity_buckets: dict[str, list[tuple]] = defaultdict(list)
+    type_only_rows: list[tuple] = []
+
+    for sr in sub_reports:
+        for row in sr.machinery_rows.all().order_by('row_number', 'id'):
+            if row.is_deleted:
+                continue
+            if row.equipment_ref_id:
+                identity_buckets[str(row.equipment_ref_id)].append((sr, row))
+            else:
+                type_only_rows.append((sr, row))
+
+    # 1. Item-level rows with declared equipment_ref (deduplicated per identity)
+    for eq_ref_id, contribs in identity_buckets.items():
+        primary_sr, primary_row = contribs[0]
+        primary_disc = primary_sr.unit or primary_sr.discipline or ''
+
+        mach_obj = report.machinery_rows.filter(
+            is_derived=True, equipment_ref_id=eq_ref_id,
+        ).first()
+
+        if mach_obj is None:
+            mach_obj = DailyReportMachineryRow.objects.create(
+                report=report,
+                equipment_type=primary_row.equipment_type,
+                equipment_ref_id=eq_ref_id,
+                status_total=primary_row.status_total,
+                status_active=primary_row.status_active,
+                status_ready=primary_row.status_ready,
+                status_inactive=primary_row.status_inactive,
+                status_under_repair=primary_row.status_under_repair,
+                operating_hours=primary_row.operating_hours,
+                stoppage_hours=primary_row.stoppage_hours,
+                repair_hours=primary_row.repair_hours,
+                stoppage_reason_code=primary_row.stoppage_reason_code or '',
+                source_sub_report=primary_sr,
+                source_discipline=primary_disc,
+                is_derived=True,
+            )
+        else:
+            mach_obj.equipment_type = primary_row.equipment_type
+            mach_obj.status_total = primary_row.status_total
+            mach_obj.status_active = primary_row.status_active
+            mach_obj.status_ready = primary_row.status_ready
+            mach_obj.status_inactive = primary_row.status_inactive
+            mach_obj.status_under_repair = primary_row.status_under_repair
+            mach_obj.operating_hours = primary_row.operating_hours
+            mach_obj.stoppage_hours = primary_row.stoppage_hours
+            mach_obj.repair_hours = primary_row.repair_hours
+            mach_obj.stoppage_reason_code = primary_row.stoppage_reason_code or ''
+            mach_obj.source_sub_report = primary_sr
+            mach_obj.source_discipline = primary_disc
+            mach_obj.save()
+
+        current_derived_machinery_ids.add(str(mach_obj.id))
+        desired_mach_source_ids = set()
+        for idx, (s_sr, s_row) in enumerate(contribs):
+            DailyReportDerivedSource.objects.update_or_create(
+                daily_report=report,
+                derived_kind='machinery',
+                derived_row_id=str(mach_obj.id),
+                source_report_id_snapshot=s_sr.id,
+                source_row_kind='machinery',
+                source_row_id=str(s_row.id),
+                defaults={
+                    'source_report': s_sr,
+                    'source_report_version': s_sr.version_number,
+                    'source_unit': s_sr.unit or s_sr.discipline,
+                    'contribution_value': Decimal(str(s_row.status_total or 0)),
+                    'ordinal': idx,
+                },
+            )
+            desired_mach_source_ids.add(str(s_row.id))
+
+        DailyReportDerivedSource.objects.filter(
+            daily_report=report,
+            derived_kind='machinery',
+            derived_row_id=str(mach_obj.id),
+        ).exclude(source_row_id__in=desired_mach_source_ids).delete()
+
+    # 2. Type-only rows (equipment_ref is None: preserved per source row)
+    for sr, row in type_only_rows:
+        existing_id = existing_mach_sources.get(str(row.id))
+        mach_obj = None
+        if existing_id:
+            mach_obj = DailyReportMachineryRow.objects.filter(
+                id=existing_id, report=report, equipment_ref__isnull=True,
+            ).first()
+
+        disc = sr.unit or sr.discipline or ''
+        if mach_obj is None:
+            mach_obj = DailyReportMachineryRow.objects.create(
+                report=report,
+                equipment_type=row.equipment_type,
+                equipment_ref=None,
+                status_total=row.status_total,
+                status_active=row.status_active,
+                status_ready=row.status_ready,
+                status_inactive=row.status_inactive,
+                status_under_repair=row.status_under_repair,
+                operating_hours=row.operating_hours,
+                stoppage_hours=row.stoppage_hours,
+                repair_hours=row.repair_hours,
+                stoppage_reason_code=row.stoppage_reason_code or '',
+                source_sub_report=sr,
+                source_discipline=disc,
+                is_derived=True,
+            )
+        else:
+            mach_obj.equipment_type = row.equipment_type
+            mach_obj.status_total = row.status_total
+            mach_obj.status_active = row.status_active
+            mach_obj.status_ready = row.status_ready
+            mach_obj.status_inactive = row.status_inactive
+            mach_obj.status_under_repair = row.status_under_repair
+            mach_obj.operating_hours = row.operating_hours
+            mach_obj.stoppage_hours = row.stoppage_hours
+            mach_obj.repair_hours = row.repair_hours
+            mach_obj.stoppage_reason_code = row.stoppage_reason_code or ''
+            mach_obj.source_sub_report = sr
+            mach_obj.source_discipline = disc
+            mach_obj.save()
+
+        current_derived_machinery_ids.add(str(mach_obj.id))
+        DailyReportDerivedSource.objects.update_or_create(
+            daily_report=report,
+            derived_kind='machinery',
+            derived_row_id=str(mach_obj.id),
+            source_report_id_snapshot=sr.id,
+            source_row_kind='machinery',
+            source_row_id=str(row.id),
+            defaults={
+                'source_report': sr,
+                'source_report_version': sr.version_number,
+                'source_unit': disc,
+                'contribution_value': Decimal(str(row.status_total or 0)),
+                'ordinal': 0,
+            },
+        )
+
+    obsolete_machinery = report.machinery_rows.filter(is_derived=True).exclude(
+        id__in=current_derived_machinery_ids,
+    )
+    for obs in obsolete_machinery:
+        DailyReportDerivedSource.objects.filter(
+            daily_report=report, derived_kind='machinery', derived_row_id=str(obs.id),
+        ).delete()
+        obs.delete()
+
+    # -------------------------------------------------------------------------
+    # Materials (Feature 033 T036: receipt resolution + document reconciliation)
+    # -------------------------------------------------------------------------
+    from field_reports.services.material_reconciliation import reconcile_material_row
+
     current_derived_material_ids = set()
     existing_mat_sources = {
         s.source_row_id: s.derived_row_id
@@ -677,6 +917,7 @@ def rebuild_daily_report_summary(
             daily_report=report, derived_kind='material',
         )
     }
+    checked_at = timezone.now()
 
     for sr in sub_reports:
         for row in sr.material_entries.all().order_by('id'):
@@ -687,22 +928,51 @@ def rebuild_daily_report_summary(
             if existing_id:
                 mat_obj = DailyReportMaterial.objects.filter(id=existing_id, report=report).first()
 
+            tx_type = (
+                MaterialTransactionType.ISSUE
+                if row.transaction_type == 'consumption'
+                else MaterialTransactionType.RECEIPT
+            )
+            rec_status, resolved_doc = reconcile_material_row(project_id, row)
+            is_receipt_resolved = bool(
+                row.transaction_type == 'receipt' and resolved_doc is not None
+            )
+            rec_doc_id = str(resolved_doc.id) if resolved_doc is not None else ''
+
             if mat_obj is None:
                 mat_obj = DailyReportMaterial.objects.create(
                     report=report,
+                    material_ref=row.material_ref,
                     material_description=row.material_description,
                     quantity=row.quantity,
                     unit=row.unit,
-                    transaction_type=MaterialTransactionType.RECEIPT,
+                    transaction_type=tx_type,
+                    consumption_location=row.consumption_location or '',
+                    supplier=row.supplier or '',
+                    warehouse_document_reference=row.warehouse_document_reference or '',
+                    receipt_resolved=is_receipt_resolved,
+                    reconciliation_status=rec_status,
+                    reconciliation_document_id=rec_doc_id,
+                    reconciliation_checked_at=checked_at,
                     notes=row.notes or '',
                     source_sub_report=sr,
                     source_discipline=sr.unit or sr.discipline,
                     is_derived=True,
                 )
             else:
+                mat_obj.material_ref = row.material_ref
                 mat_obj.material_description = row.material_description
                 mat_obj.quantity = row.quantity
                 mat_obj.unit = row.unit
+                mat_obj.transaction_type = tx_type
+                mat_obj.consumption_location = row.consumption_location or ''
+                mat_obj.supplier = row.supplier or ''
+                mat_obj.warehouse_document_reference = row.warehouse_document_reference or ''
+                mat_obj.receipt_resolved = is_receipt_resolved
+                mat_obj.reconciliation_status = rec_status
+                mat_obj.reconciliation_document_id = rec_doc_id
+                mat_obj.reconciliation_checked_at = checked_at
+                mat_obj.notes = row.notes or ''
                 mat_obj.source_sub_report = sr
                 mat_obj.source_discipline = sr.unit or sr.discipline
                 mat_obj.save()

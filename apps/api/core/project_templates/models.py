@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -248,6 +249,14 @@ class ProjectReportingConfigurationLaborTitle(UUIDModel):
                 name='unique_configuration_labor_title_code',
             ),
         ]
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise ValidationError('Activated labor title snapshots are immutable.')
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError('Activated labor title snapshots are immutable.')
 
 
 class ProjectReportingConfigurationStoppageReason(UUIDModel):

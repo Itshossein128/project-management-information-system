@@ -117,21 +117,58 @@ export interface ActivityRow {
   provenance?: DerivedSourceItem[];
 }
 
+export interface LaborUnitBreakdownItem {
+  unit: string;
+  report_id: string;
+  report_version: number;
+  source_row_id: string;
+  present_count: number;
+  leave_count?: number;
+  overtime_hours?: string;
+}
+
 export interface LaborRow {
   id: string;
   labor_category: LaborCategory;
   job_title: string;
   custom_title: string;
+  title_code?: string | null;
+  display_order?: number;
   shift_1_count: number;
   shift_2_count: number;
   shift_3_count: number;
   total_count: number;
+  present_count?: number;
+  leave_count?: number;
   work_hours?: number | null;
   overtime_hours?: number | null;
+  man_hours?: string | null;
   absence_count?: number | null;
   source_discipline?: string;
   is_derived?: boolean;
+  source_set_complete?: boolean;
+  source_count?: number;
+  has_multiple_sources?: boolean;
+  per_unit_breakdown?: LaborUnitBreakdownItem[];
   provenance?: DerivedSourceItem[];
+}
+
+export interface LaborCategoryTotals {
+  present_count: number;
+  leave_count: number;
+  overtime_hours: string;
+  man_hours: string;
+}
+
+export interface LaborSummaryPayload {
+  indirect_summary: LaborRow[];
+  direct_summary: LaborRow[];
+  overall_summary: LaborRow[];
+  totals: {
+    indirect: LaborCategoryTotals;
+    direct: LaborCategoryTotals;
+    overall: LaborCategoryTotals;
+  };
 }
 
 export interface EquipmentRow {
@@ -152,20 +189,72 @@ export interface EquipmentRow {
   notes: string;
 }
 
+export interface MachinerySummaryRow {
+  id: string;
+  equipment_type: string;
+  equipment_ref: string | null;
+  equipment_code?: string | null;
+  equipment_name?: string | null;
+  status_total: number;
+  status_active: number;
+  status_ready: number;
+  status_inactive: number;
+  status_under_repair: number;
+  operating_hours: string | null;
+  stoppage_hours: string | null;
+  repair_hours: string | null;
+  stoppage_reason_code: string;
+  stoppage_reason?: {
+    code: string;
+    label: string;
+    label_fa: string;
+  } | null;
+  stoppage_reason_label?: string;
+  stoppage_reason_label_fa?: string;
+  source_discipline?: string;
+  is_derived?: boolean;
+  provenance?: DerivedSourceItem[];
+}
+
+export interface MachinerySummaryPayload {
+  rows: MachinerySummaryRow[];
+  vocabulary_revision_marker: string;
+}
+
+export type MaterialReconciliationStatus =
+  | "match"
+  | "mismatch"
+  | "insufficient_data"
+  | "";
+
 export interface MaterialRow {
   id: string;
   material_ref: string | null;
+  material_code?: string | null;
+  material_name?: string | null;
   material_description: string;
   quantity: string;
   unit_cost: string | null;
   unit: string;
   transaction_type: "receipt" | "issue" | "waste" | "return";
   consumption_location?: string;
+  supplier?: string;
+  warehouse_document_reference?: string;
+  receipt_resolved?: boolean;
+  receipt_evidence?: "resolved" | "unresolved_reference" | null;
+  reconciliation_status?: MaterialReconciliationStatus;
+  reconciliation_document_id?: string;
+  reconciliation_checked_at?: string | null;
   activity_ref: string | null;
   notes: string;
   source_discipline?: string;
   is_derived?: boolean;
   provenance?: DerivedSourceItem[];
+}
+
+export interface MaterialsSummaryPayload {
+  main_table: MaterialRow[];
+  details: MaterialRow[];
 }
 
 export interface ConcreteRow {
@@ -254,8 +343,12 @@ export interface DailyReportDetail {
   updated_at: string;
   activities: ActivityRow[];
   labor: LaborRow[];
+  labor_summary?: LaborSummaryPayload;
   equipment: EquipmentRow[];
+  machinery_rows?: MachinerySummaryRow[];
+  machinery?: MachinerySummaryPayload;
   materials: MaterialRow[];
+  materials_summary?: MaterialsSummaryPayload;
   concrete_logs: ConcreteRow[];
   labor_camp: LaborCampRow[];
   incidents: IncidentRow[];

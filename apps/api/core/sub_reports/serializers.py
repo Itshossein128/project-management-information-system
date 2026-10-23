@@ -2,13 +2,16 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
+from field_reports.models import Equipment
 from projects.models import Activity, Stakeholder
+from resources.models import Material
 from sub_reports.models import (
     DisciplineSubReport,
     DisciplineSubReportActivity,
     DisciplineSubReportConcrete,
     DisciplineSubReportGeneralActivity,
     DisciplineSubReportLabor,
+    DisciplineSubReportMachinery,
     DisciplineSubReportMaterial,
     DisciplineSubReportNote,
 )
@@ -143,11 +146,409 @@ class SubReportLaborSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-class SubReportMaterialSerializer(serializers.ModelSerializer):
+class UnitReportLaborSectionSerializer(serializers.ModelSerializer):
+    """Canonical unit-report §2 labor rows (feature 033, task T021).
+
+    Resolves job titles against the effective project reporting configuration
+    snapshot for the report date, enforces non-negative integer headcounts
+    (`headcount_must_be_non_negative`), category consistency with the catalog
+    title (`invalid_labor_category`), and optional project-scoped contractor.
+    Man-hours are not stored on the unit row; aggregation computes them per the
+    effective rule.
+    """
+
+    labor_category = serializers.CharField(required=True, allow_blank=True)
+    job_title = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
+    custom_title = serializers.CharField(
+        max_length=120, required=False, allow_blank=True, default='', write_only=True,
+    )
+    present_count = serializers.IntegerField(required=False, default=0)
+    leave_count = serializers.IntegerField(required=False, default=0)
+    overtime_hours = serializers.DecimalField(
+        max_digits=6, decimal_places=2, required=False, default=0,
+    )
+    contractor_ref = serializers.PrimaryKeyRelatedField(
+        queryset=Stakeholder.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    contractor_name = serializers.CharField(source='contractor_ref.name', read_only=True)
+    title_code = serializers.SerializerMethodField()
+    display_order = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DisciplineSubReportLabor
+        fields = [
+            'id',
+            'labor_category',
+            'job_title',
+            'custom_title',
+            'present_count',
+            'leave_count',
+            'overtime_hours',
+            'contractor_ref',
+            'contractor_name',
+            'title_code',
+            'display_order',
+        ]
+        read_only_fields = ['id', 'contractor_name', 'title_code', 'display_order']
+
+    def _effective_config(self, obj):
+        cache = self.context.setdefault('_config_cache', {})
+        report = self.context.get('report') or getattr(obj, 'sub_report', None)
+        if report is None:
+            return None
+        key = (str(report.project_id), str(report.report_date))
+        if key not in cache:
+            from field_reports.services.daily_report_aggregation import (
+                resolve_project_reporting_configuration,
+            )
+
+            cache[key] = resolve_project_reporting_configuration(
+                report.project_id, report.report_date,
+            )
+        return cache[key]
+
+    def _resolved_title(self, obj):
+        config = self._effective_config(obj)
+        if config is None:
+            return None
+        from project_templates.services import resolve_labor_title
+
+        return resolve_labor_title(config, getattr(obj, 'job_title', '') or '')
+
+    def get_title_code(self, obj) -> str:
+        resolved = self._resolved_title(obj)
+        return resolved.title_code if resolved else ''
+
+    def get_display_order(self, obj) -> int:
+        resolved = self._resolved_title(obj)
+        return resolved.display_order if resolved else 0
+
+    def validate_present_count(self, value):
+        if value is not None and value < 0:
+            raise serializers.ValidationError(
+                _('تعداد نفرات حاضر نمی‌تواند منفی باشد'),
+                code='headcount_must_be_non_negative',
+            )
+        return 0 if value is None else value
+
+    def validate_leave_count(self, value):
+        if value is not None and value < 0:
+            raise serializers.ValidationError(
+                _('تعداد نفرات مرخصی/غیبت نمی‌تواند منفی باشد'),
+                code='headcount_must_be_non_negative',
+            )
+        return 0 if value is None else value
+
+    def validate_overtime_hours(self, value):
+        if value is not None and value < 0:
+            raise serializers.ValidationError(
+                _('ساعت اضافه‌کاری نمی‌تواند منفی باشد'),
+                code='headcount_must_be_non_negative',
+            )
+        return 0 if value is None else value
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get('contractor_ref') is not None:
+            data['contractor_ref'] = str(data['contractor_ref'])
+        return data
+
+
+class UnitReportMachinerySectionSerializer(serializers.ModelSerializer):
+    """Canonical unit-report §3 machinery rows (feature 033, task T028).
+
+    Enforces non-negative status counts (`status_count_must_be_non_negative`),
+    day-limit hours (`hours_exceed_day_limit`), and stoppage reason vocabulary
+    (`stoppage_reason_required_when_stoppage_gt_zero`, `stoppage_reason_not_in_vocabulary`).
+    """
+
+    row_number = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+    equipment_type = serializers.CharField(max_length=120, required=True, allow_blank=False)
+    equipment_ref = serializers.PrimaryKeyRelatedField(
+        queryset=Equipment.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    equipment_code = serializers.CharField(source='equipment_ref.equipment_code', read_only=True)
+    equipment_name = serializers.CharField(source='equipment_ref.equipment_name', read_only=True)
+    status_total = serializers.IntegerField(required=False, default=0)
+    status_active = serializers.IntegerField(required=False, default=0)
+    status_ready = serializers.IntegerField(required=False, default=0)
+    status_inactive = serializers.IntegerField(required=False, default=0)
+    status_under_repair = serializers.IntegerField(required=False, default=0)
+    operating_hours = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True,
+    )
+    stoppage_hours = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True,
+    )
+    repair_hours = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True,
+    )
+    stoppage_reason_code = serializers.CharField(
+        max_length=60, required=False, allow_blank=True, default='',
+    )
+    stoppage_reason_label = serializers.SerializerMethodField()
+    stoppage_reason_label_fa = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DisciplineSubReportMachinery
+        fields = [
+            'id',
+            'row_number',
+            'equipment_type',
+            'equipment_ref',
+            'equipment_code',
+            'equipment_name',
+            'status_total',
+            'status_active',
+            'status_ready',
+            'status_inactive',
+            'status_under_repair',
+            'operating_hours',
+            'stoppage_hours',
+            'repair_hours',
+            'stoppage_reason_code',
+            'stoppage_reason_label',
+            'stoppage_reason_label_fa',
+        ]
+        read_only_fields = [
+            'id',
+            'equipment_code',
+            'equipment_name',
+            'stoppage_reason_label',
+            'stoppage_reason_label_fa',
+        ]
+
+    def _vocabulary_map(self, obj):
+        cache = self.context.setdefault('_stoppage_vocab_cache', {})
+        report = self.context.get('report') or getattr(obj, 'sub_report', None)
+        key = (
+            (str(report.project_id), str(report.report_date))
+            if report is not None
+            else ('default', 'default')
+        )
+        if key not in cache:
+            from sub_reports.services.section_validation import resolve_stoppage_vocabulary
+
+            vocab = resolve_stoppage_vocabulary(report, context=self.context)
+            cache[key] = {v['reason_code']: v for v in vocab}
+        return cache[key]
+
+    def get_stoppage_reason_label(self, obj):
+        code = (getattr(obj, 'stoppage_reason_code', None) or '').strip()
+        if not code:
+            return None
+        entry = self._vocabulary_map(obj).get(code)
+        return entry['reason_label'] if entry else code
+
+    def get_stoppage_reason_label_fa(self, obj):
+        code = (getattr(obj, 'stoppage_reason_code', None) or '').strip()
+        if not code:
+            return None
+        entry = self._vocabulary_map(obj).get(code)
+        return entry['reason_label_fa'] if entry else code
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get('equipment_ref') is not None:
+            data['equipment_ref'] = str(data['equipment_ref'])
+        return data
+
+
+class UnitReportMaterialSectionSerializer(serializers.ModelSerializer):
+    """Canonical unit-report §4 material rows (feature 033, task T035).
+
+    Enforces transaction_type (`transaction_type_required`), positive quantity
+    (`quantity_must_be_positive`), document reference on receipts
+    (`receipt_requires_document_reference`), consumption location on consumption
+    (`consumption_location_required_for_consumption`), and project-scoped
+    material_ref (`reference_not_in_project_scope`). Receipt resolution is
+    computed read-only from project warehouse documents (never client-stored).
+    """
+
+    transaction_type = serializers.CharField(required=True, allow_blank=True, allow_null=True)
+    material_description = serializers.CharField(max_length=255, required=True, allow_blank=False)
+    material_ref = serializers.PrimaryKeyRelatedField(
+        queryset=Material.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+    material_code = serializers.CharField(source='material_ref.material_code', read_only=True)
+    material_name = serializers.CharField(source='material_ref.material_name', read_only=True)
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=4, required=True)
+    unit = serializers.CharField(max_length=40, required=True, allow_blank=False)
+    consumption_location = serializers.CharField(
+        max_length=160, required=False, allow_blank=True, default='',
+    )
+    supplier = serializers.CharField(
+        max_length=160, required=False, allow_blank=True, default='',
+    )
+    warehouse_document_reference = serializers.CharField(
+        max_length=120, required=False, allow_blank=True, default='',
+    )
+    notes = serializers.CharField(required=False, allow_blank=True, default='')
+    receipt_evidence = serializers.SerializerMethodField()
+    receipt_resolved = serializers.SerializerMethodField()
+
     class Meta:
         model = DisciplineSubReportMaterial
-        fields = ['id', 'material_description', 'quantity', 'unit', 'notes']
-        read_only_fields = ['id']
+        fields = [
+            'id',
+            'transaction_type',
+            'material_description',
+            'material_ref',
+            'material_code',
+            'material_name',
+            'quantity',
+            'unit',
+            'consumption_location',
+            'supplier',
+            'warehouse_document_reference',
+            'notes',
+            'receipt_evidence',
+            'receipt_resolved',
+        ]
+        read_only_fields = [
+            'id',
+            'material_code',
+            'material_name',
+            'receipt_evidence',
+            'receipt_resolved',
+        ]
+
+    def _is_receipt_resolved(self, obj) -> bool:
+        tx_type = getattr(obj, 'transaction_type', None)
+        if tx_type != 'receipt':
+            return False
+        doc_ref = (getattr(obj, 'warehouse_document_reference', '') or '').strip()
+        if not doc_ref:
+            return False
+        report = self.context.get('report') or getattr(obj, 'sub_report', None)
+        project_id = getattr(report, 'project_id', None) or self.context.get('project_id')
+        if not project_id:
+            return False
+        from sub_reports.services.section_validation import resolve_warehouse_document
+
+        doc = resolve_warehouse_document(
+            project_id, doc_ref, getattr(obj, 'material_ref_id', None)
+        )
+        return doc is not None
+
+    def get_receipt_evidence(self, obj) -> str | None:
+        tx_type = getattr(obj, 'transaction_type', None)
+        if tx_type != 'receipt':
+            return None
+        return 'resolved' if self._is_receipt_resolved(obj) else 'unresolved_reference'
+
+    def get_receipt_resolved(self, obj) -> bool:
+        return self._is_receipt_resolved(obj)
+
+    def validate_transaction_type(self, value):
+        val = (value or '').strip()
+        if val not in ('receipt', 'consumption'):
+            raise serializers.ValidationError(
+                _('انتخاب نوع تراکنش مصالح الزامی است'),
+                code='transaction_type_required',
+            )
+        return val
+
+    def validate_quantity(self, value):
+        if value is None or value <= 0:
+            raise serializers.ValidationError(
+                _('مقدار مصالح باید بزرگ‌تر از صفر باشد'),
+                code='quantity_must_be_positive',
+            )
+        return value
+
+    def validate(self, attrs):
+        tx_type = attrs.get(
+            'transaction_type',
+            getattr(self.instance, 'transaction_type', None) if self.instance else None,
+        )
+        tx_type = (tx_type or '').strip()
+        if tx_type not in ('receipt', 'consumption'):
+            raise serializers.ValidationError({
+                'transaction_type': serializers.ErrorDetail(
+                    _('انتخاب نوع تراکنش مصالح الزامی است'),
+                    code='transaction_type_required',
+                )
+            })
+        attrs['transaction_type'] = tx_type
+
+        if tx_type == 'receipt':
+            doc_ref = (
+                attrs.get(
+                    'warehouse_document_reference',
+                    getattr(self.instance, 'warehouse_document_reference', '')
+                    if self.instance
+                    else '',
+                )
+                or ''
+            ).strip()
+            if not doc_ref:
+                raise serializers.ValidationError({
+                    'warehouse_document_reference': serializers.ErrorDetail(
+                        _('برای رسید انبار، شماره برگه/سند انبار الزامی است'),
+                        code='receipt_requires_document_reference',
+                    )
+                })
+            attrs['warehouse_document_reference'] = doc_ref
+        elif tx_type == 'consumption':
+            loc = (
+                attrs.get(
+                    'consumption_location',
+                    getattr(self.instance, 'consumption_location', '')
+                    if self.instance
+                    else '',
+                )
+                or ''
+            ).strip()
+            if not loc:
+                raise serializers.ValidationError({
+                    'consumption_location': serializers.ErrorDetail(
+                        _('برای مصرف مصالح، محل مصرف الزامی است'),
+                        code='consumption_location_required_for_consumption',
+                    )
+                })
+            attrs['consumption_location'] = loc
+
+        mat_ref = attrs.get(
+            'material_ref',
+            getattr(self.instance, 'material_ref', None) if self.instance else None,
+        )
+        report = self.context.get('report') or getattr(self.instance, 'sub_report', None)
+        project_id = getattr(report, 'project_id', None) or self.context.get('project_id')
+        if mat_ref is not None:
+            if getattr(mat_ref, 'is_deleted', False) or (
+                project_id and str(mat_ref.project_id) != str(project_id)
+            ):
+                raise serializers.ValidationError({
+                    'material_ref': serializers.ErrorDetail(
+                        _('شناسه ارجاع‌شده متعلق به این پروژه نیست'),
+                        code='reference_not_in_project_scope',
+                    )
+                })
+
+        return attrs
+
+    def create(self, validated_data):
+        if 'sub_report' not in validated_data and self.context.get('report') is not None:
+            validated_data['sub_report'] = self.context['report']
+        return super().create(validated_data)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get('material_ref') is not None:
+            data['material_ref'] = str(data['material_ref'])
+        return data
+
+
+class SubReportMaterialSerializer(UnitReportMaterialSectionSerializer):
+    """Alias/compat serializer enforcing the §4 materials contract."""
+    pass
 
 
 class SubReportConcreteSerializer(serializers.ModelSerializer):

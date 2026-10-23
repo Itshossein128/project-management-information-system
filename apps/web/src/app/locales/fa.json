@@ -425,6 +425,127 @@
             "contractor_required": "انتخاب پیمانکار یا وارد کردن نام پیمانکار الزامی است.",
             "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد."
           }
+        },
+        "labor": {
+          "tab": "نیروی انسانی",
+          "title": "بخش ۳ — وضعیت نیروی انسانی کارگاه",
+          "subtitle": "ثبت آمار نیروی انسانی غیرمستقیم (ستادی) و مستقیم بر اساس کاتالوگ عناوین شغلی پروژه",
+          "rowCount": "{{count}} ردیف",
+          "addRow": "افزودن ردیف نیروی انسانی",
+          "updateRow": "به‌روزرسانی ردیف",
+          "empty": "هنوز ردیف نیروی انسانی برای این گزارش ثبت نشده است.",
+          "categories": {
+            "indirect": "غیرمستقیم (ستادی)",
+            "direct": "مستقیم (اجرایی)"
+          },
+          "fields": {
+            "category": "دسته نیروی انسانی",
+            "jobTitle": "عنوان شغلی",
+            "jobTitlePlaceholder": "انتخاب عنوان شغلی از کاتالوگ...",
+            "jobTitleSearch": "جستجوی عنوان شغلی...",
+            "jobTitleAdd": "+ افزودن عنوان شغلی سفارشی",
+            "contractor": "پیمانکار (اختیاری)",
+            "contractorPlaceholder": "انتخاب پیمانکار...",
+            "contractorSearch": "جستجوی نام پیمانکار...",
+            "contractorAdd": "+ افزودن پیمانکار جدید",
+            "presentCount": "تعداد حاضر",
+            "leaveCount": "تعداد مرخصی",
+            "overtimeHours": "اضافه‌کاری (ساعت)"
+          },
+          "columns": {
+            "category": "دسته",
+            "jobTitle": "عنوان شغلی",
+            "presentCount": "حاضر",
+            "leaveCount": "مرخصی",
+            "overtimeHours": "اضافه‌کاری (ساعت)",
+            "contractor": "پیمانکار"
+          },
+          "totals": {
+            "indirect": "جمع غیرمستقیم",
+            "direct": "جمع مستقیم",
+            "overall": "جمع کل"
+          },
+          "errors": {
+            "headcount_must_be_non_negative": "تعداد نفرات و ساعات اضافه‌کاری نمی‌تواند منفی باشد.",
+            "unknown_job_title": "عنوان شغلی انتخاب‌شده در کاتالوگ فعال این پروژه یافت نشد.",
+            "invalid_labor_category": "دسته نیروی انسانی با کاتالوگ عنوان شغلی مطابقت ندارد.",
+            "contractor_not_in_project_scope": "پیمانکار انتخاب‌شده متعلق به این پروژه نیست."
+          }
+        },
+        "machinery": {
+          "tab": "ماشین‌آلات و تجهیزات",
+          "title": "بخش ۴ — وضعیت ماشین‌آلات و تجهیزات کارگاه",
+          "subtitle": "ثبت آمار ۵ وضعیت ماشین‌آلات (کل، فعال، آماده به کار، غیرفعال، در حال تعمیر)، ساعات کارکرد/توقف/تعمیر و علت توقف",
+          "addRow": "افزودن ردیف ماشین‌آلات",
+          "editRow": "ویرایش ردیف ماشین‌آلات",
+          "empty": "هنوز ردیف ماشین‌آلاتی برای این گزارش ثبت نشده است.",
+          "totalsLabel": "جمع کل ماشین‌آلات",
+          "fields": {
+            "rowNumber": "شماره ردیف",
+            "equipmentType": "نوع ماشین‌آلات / تجهیز",
+            "equipmentTypePlaceholder": "مثال: بیل مکانیکی، جرثقیل، لودر...",
+            "equipmentRef": "شناسه تجهیز (اختیاری)",
+            "equipmentRefPlaceholder": "UUID تجهیز ثبت‌شده در پروژه (اختیاری)",
+            "statusTotal": "کل",
+            "statusActive": "فعال",
+            "statusReady": "آماده به کار",
+            "statusInactive": "غیرفعال",
+            "statusUnderRepair": "در حال تعمیر",
+            "operatingHours": "ساعت کارکرد",
+            "stoppageHours": "ساعت توقف",
+            "repairHours": "ساعت تعمیر",
+            "stoppageReason": "علت توقف",
+            "noStoppageReason": "— بدون توقف / انتخاب علت —"
+          },
+          "errors": {
+            "stoppage_reason_required_when_stoppage_gt_zero": "در صورت ثبت ساعت توقف بزرگ‌تر از صفر، انتخاب علت توقف الزامی است.",
+            "hours_exceed_day_limit": "مجموع ساعات کارکرد، توقف و تعمیر در شبانه‌روز نمی‌تواند از ۲۴ ساعت بیشتر باشد.",
+            "stoppage_reason_not_in_vocabulary": "علت توقف انتخاب‌شده در فهرست مجاز این پروژه وجود ندارد.",
+            "status_count_must_be_non_negative": "تعداد ماشین‌آلات در هیچ‌یک از وضعیت‌های پنج‌گانه نمی‌تواند منفی باشد.",
+            "machinery_status_sums_inconsistent": "مجموع وضعیت‌های ردیف‌های تفکیکی با ردیف نوع ماشین‌آلات هم‌خوانی ندارد.",
+            "reference_not_in_project_scope": "تجهیز انتخاب‌شده متعلق به این پروژه نیست."
+          }
+        },
+        "materials": {
+          "tab": "مصالح و تجهیزات (انبار)",
+          "title": "بخش ۵ — مصالح وارده و مصرفی کارگاه",
+          "subtitle": "ثبت ورود مصالح (با الزام شماره سند انبار) و مصرف مصالح (با الزام محل مصرف)؛ تنها رسیدهای دارای سند منطبق در جدول اصلی گزارش روزانه درج می‌شوند.",
+          "addRow": "افزودن ردیف مصالح",
+          "editRow": "ویرایش ردیف مصالح",
+          "empty": "هنوز ردیف مصالحی برای این گزارش ثبت نشده است.",
+          "totalsSummary": "جمع ردیف‌ها: {{receipts}} رسید انبار · {{consumptions}} مصرف مصالح",
+          "transactionTypes": {
+            "receipt": "ورود به انبار (رسید)",
+            "consumption": "خروج از انبار (مصرف)"
+          },
+          "evidence": {
+            "resolved": "دارای سند انبار منطبق",
+            "unresolved_reference": "در انتظار تطبیق سند انبار"
+          },
+          "fields": {
+            "transactionType": "نوع تراکنش",
+            "materialDescription": "شرح مصالح / کالا",
+            "materialDescriptionPlaceholder": "مثال: میلگرد ۱۸ آجدار، سیمان تیپ ۲...",
+            "materialRef": "شناسه مصالح (اختیاری)",
+            "materialRefPlaceholder": "UUID مصالح ثبت‌شده در پروژه (اختیاری)",
+            "quantity": "مقدار",
+            "unit": "واحد",
+            "unitPlaceholder": "مثال: تن، کیلوگرم، کیسه...",
+            "supplier": "تأمین‌کننده",
+            "supplierPlaceholder": "نام تأمین‌کننده یا فروشنده",
+            "warehouseDocumentReference": "شماره سند انبار (GRN / حواله)",
+            "warehouseDocumentReferencePlaceholder": "مثال: WD-2026-001",
+            "consumptionLocation": "محل مصرف در کارگاه",
+            "consumptionLocationPlaceholder": "مثال: بلوک B — سقف طبقه دوم",
+            "receiptEvidence": "وضعیت سند انبار"
+          },
+          "errors": {
+            "transaction_type_required": "انتخاب نوع تراکنش (ورود یا مصرف) الزامی است.",
+            "receipt_requires_document_reference": "برای ثبت ورود مصالح (رسید)، وارد کردن شماره سند انبار الزامی است.",
+            "consumption_location_required_for_consumption": "برای ثبت مصرف مصالح، وارد کردن محل مصرف الزامی است.",
+            "quantity_must_be_positive": "مقدار مصالح باید بزرگ‌تر از صفر باشد.",
+            "reference_not_in_project_scope": "مصالح انتخاب‌شده متعلق به این پروژه نیست."
+          }
         }
       }
     }
@@ -515,7 +636,19 @@
     "activity_not_in_project_scope": "فعالیت انتخاب‌شده متعلق به ساختار شکست کار (WBS) این پروژه نیست.",
     "contractor_not_in_project_scope": "پیمانکار انتخاب‌شده متعلق به این پروژه نیست.",
     "contractor_required": "انتخاب پیمانکار یا وارد کردن نام پیمانکار الزامی است.",
-    "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد."
+    "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد.",
+    "headcount_must_be_non_negative": "تعداد نفرات و ساعات اضافه‌کاری نمی‌تواند منفی باشد.",
+    "unknown_job_title": "عنوان شغلی انتخاب‌شده در کاتالوگ فعال این پروژه یافت نشد.",
+    "invalid_labor_category": "دسته نیروی انسانی با کاتالوگ عنوان شغلی مطابقت ندارد.",
+    "stoppage_reason_required_when_stoppage_gt_zero": "در صورت ثبت ساعت توقف بزرگ‌تر از صفر، انتخاب علت توقف الزامی است.",
+    "hours_exceed_day_limit": "مجموع ساعات کارکرد، توقف و تعمیر در شبانه‌روز نمی‌تواند از ۲۴ ساعت بیشتر باشد.",
+    "stoppage_reason_not_in_vocabulary": "علت توقف انتخاب‌شده در فهرست مجاز این پروژه وجود ندارد.",
+    "status_count_must_be_non_negative": "تعداد ماشین‌آلات در هیچ‌یک از وضعیت‌های پنج‌گانه نمی‌تواند منفی باشد.",
+    "machinery_status_sums_inconsistent": "مجموع وضعیت‌های ردیف‌های تفکیکی با ردیف نوع ماشین‌آلات هم‌خوانی ندارد.",
+    "reference_not_in_project_scope": "تجهیز یا مصالح انتخاب‌شده متعلق به این پروژه نیست.",
+    "transaction_type_required": "انتخاب نوع تراکنش مصالح (ورود یا مصرف) الزامی است.",
+    "receipt_requires_document_reference": "برای ثبت ورود مصالح (رسید)، وارد کردن شماره سند انبار الزامی است.",
+    "consumption_location_required_for_consumption": "برای ثبت مصرف مصالح، وارد کردن محل مصرف الزامی است."
   },
   "dashboard": {
     "portfolio": {
@@ -2197,7 +2330,19 @@
       "shiftFull": "کامل (روز)",
       "indirectLabor": "نیروی انسانی غیرمستقیم (ستادی)",
       "directLabor": "نیروی انسانی مستقیم",
-      "materials": "مصالح وارده",
+      "materials": "مصالح وارده (دارای سند انبار)",
+      "colSupplier": "تأمین‌کننده",
+      "colWarehouseDocument": "شماره سند انبار",
+      "colReconciliationStatus": "وضعیت تطبیق",
+      "colTransactionType": "نوع تراکنش",
+      "colConsumptionLocation": "محل مصرف",
+      "reconciliationMatch": "مطابق با سند انبار",
+      "reconciliationMismatch": "مغایر با سند انبار",
+      "reconciliationInsufficientData": "اطلاعات ناکافی (فاقد سند منطبق)",
+      "showMaterialDetails": "مشاهده جزئیات مصرف مصالح و سایر تراکنش‌ها ({{count}})",
+      "hideMaterialDetails": "بستن جزئیات مصرف مصالح و رسیدهای فاقد سند",
+      "txReceipt": "ورود (فاقد سند منطبق)",
+      "txConsumption": "مصرف",
       "concrete": "حجم بتن ریخته‌شده",
       "activities": "فعالیت‌های اجرا شده کارگاه",
       "generalActivities": "فعالیت‌های عمومی کارگاه",

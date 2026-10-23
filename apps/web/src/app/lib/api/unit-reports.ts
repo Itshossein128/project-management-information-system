@@ -23,6 +23,32 @@ export function unitSupportsActivitiesSection(unit: CanonicalUnit | string): boo
   return (ACTIVITY_ENABLED_UNITS as readonly string[]).includes(unit);
 }
 
+export const LABOR_ENABLED_UNITS: readonly CanonicalUnit[] = [
+  "buildings",
+  "electrical",
+  "mechanical",
+] as const;
+
+export function unitSupportsLaborSection(unit: CanonicalUnit | string): boolean {
+  return (LABOR_ENABLED_UNITS as readonly string[]).includes(unit);
+}
+
+export const MACHINERY_ENABLED_UNITS: readonly CanonicalUnit[] = [
+  "machinery",
+] as const;
+
+export function unitSupportsMachinerySection(unit: CanonicalUnit | string): boolean {
+  return (MACHINERY_ENABLED_UNITS as readonly string[]).includes(unit);
+}
+
+export const MATERIALS_ENABLED_UNITS: readonly CanonicalUnit[] = [
+  "warehouse",
+] as const;
+
+export function unitSupportsMaterialsSection(unit: CanonicalUnit | string): boolean {
+  return (MATERIALS_ENABLED_UNITS as readonly string[]).includes(unit);
+}
+
 export type UnitReportStatus = "draft" | "submitted" | "approved" | "rejected";
 
 export interface UnitReportUserRef {
@@ -332,6 +358,323 @@ export function deleteUnitReportActivity(
 ): Promise<void> {
   return apiJson<void>(
     `${base(projectId, unit)}/${reportId}/activities/${rowId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §2 — Labor Section CRUD, Effective Catalog & Validation Contract
+// ---------------------------------------------------------------------------
+
+export type UnitLaborCategory = "indirect" | "direct";
+
+export interface EffectiveLaborTitle {
+  title_code: string;
+  title_label: string;
+  title_label_fa: string;
+  category: UnitLaborCategory;
+  display_order: number;
+  legacy_alias?: string;
+  source_catalog_version?: string;
+}
+
+export interface EffectiveReportingConfiguration {
+  id?: string;
+  project_id?: string;
+  effective_from?: string;
+  state?: string;
+  required_units: string[];
+  labor_titles?: EffectiveLaborTitle[];
+  man_hours_rule?: {
+    rule_code: string;
+    parameters?: {
+      standard_shift_hours?: string;
+    };
+  };
+  stoppage_reasons?: Array<{
+    reason_code: string;
+    reason_label: string;
+    reason_label_fa: string;
+    display_order: number;
+  }>;
+}
+
+export interface UnitReportLaborRow {
+  id: string;
+  labor_category: UnitLaborCategory;
+  job_title: string;
+  present_count: number;
+  leave_count: number;
+  overtime_hours: string;
+  contractor_ref: string | null;
+  contractor_name?: string | null;
+  title_code: string;
+  display_order: number;
+}
+
+export interface UnitReportLaborPayload {
+  labor_category: string;
+  job_title: string;
+  custom_title?: string;
+  present_count: number;
+  leave_count: number;
+  overtime_hours?: string | number;
+  contractor_ref?: string | null;
+}
+
+export function fetchEffectiveReportingConfiguration(
+  projectId: string,
+  reportDate: string,
+): Promise<EffectiveReportingConfiguration> {
+  return apiJson<EffectiveReportingConfiguration>(
+    `/api/v1/projects/${projectId}/reporting-configuration/?date=${encodeURIComponent(reportDate)}`,
+  );
+}
+
+export function fetchUnitReportLabor(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+): Promise<UnitReportLaborRow[]> {
+  return apiJson<UnitReportLaborRow[]>(
+    `${base(projectId, unit)}/${reportId}/labor/`,
+  );
+}
+
+export function createUnitReportLabor(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  payload: UnitReportLaborPayload | UnitReportLaborPayload[],
+): Promise<UnitReportLaborRow[]> {
+  return apiJson<UnitReportLaborRow[]>(
+    `${base(projectId, unit)}/${reportId}/labor/`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateUnitReportLabor(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+  payload: Partial<UnitReportLaborPayload>,
+): Promise<UnitReportLaborRow> {
+  return apiJson<UnitReportLaborRow>(
+    `${base(projectId, unit)}/${reportId}/labor/${rowId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUnitReportLabor(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+): Promise<void> {
+  return apiJson<void>(
+    `${base(projectId, unit)}/${reportId}/labor/${rowId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §3 — Machinery Section CRUD & Validation Contract (T031)
+// ---------------------------------------------------------------------------
+
+export interface EffectiveStoppageReason {
+  reason_code: string;
+  reason_label: string;
+  reason_label_fa: string;
+  display_order?: number;
+}
+
+export interface UnitReportMachineryRow {
+  id: string;
+  row_number: number;
+  equipment_type: string;
+  equipment_ref: string | null;
+  equipment_code?: string | null;
+  equipment_name?: string | null;
+  status_total: number;
+  status_active: number;
+  status_ready: number;
+  status_inactive: number;
+  status_under_repair: number;
+  operating_hours: string | null;
+  stoppage_hours: string | null;
+  repair_hours: string | null;
+  stoppage_reason_code: string;
+  stoppage_reason_label?: string;
+  stoppage_reason_label_fa?: string;
+}
+
+export interface UnitReportMachineryPayload {
+  row_number?: number;
+  equipment_type: string;
+  equipment_ref?: string | null;
+  status_total: number;
+  status_active: number;
+  status_ready: number;
+  status_inactive: number;
+  status_under_repair: number;
+  operating_hours?: string | number | null;
+  stoppage_hours?: string | number | null;
+  repair_hours?: string | number | null;
+  stoppage_reason_code?: string;
+}
+
+export function fetchUnitReportMachinery(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+): Promise<UnitReportMachineryRow[]> {
+  return apiJson<UnitReportMachineryRow[]>(
+    `${base(projectId, unit)}/${reportId}/machinery/`,
+  );
+}
+
+export function createUnitReportMachinery(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  payload: UnitReportMachineryPayload | UnitReportMachineryPayload[],
+): Promise<UnitReportMachineryRow[]> {
+  return apiJson<UnitReportMachineryRow[]>(
+    `${base(projectId, unit)}/${reportId}/machinery/`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateUnitReportMachinery(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+  payload: Partial<UnitReportMachineryPayload>,
+): Promise<UnitReportMachineryRow> {
+  return apiJson<UnitReportMachineryRow>(
+    `${base(projectId, unit)}/${reportId}/machinery/${rowId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUnitReportMachinery(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+): Promise<void> {
+  return apiJson<void>(
+    `${base(projectId, unit)}/${reportId}/machinery/${rowId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Feature 033 §4 — Materials Section CRUD & Validation Contract (T038)
+// ---------------------------------------------------------------------------
+
+export type UnitMaterialTransactionType = "receipt" | "consumption";
+export type UnitMaterialReceiptEvidence =
+  | "resolved"
+  | "unresolved_reference"
+  | null;
+
+export interface UnitReportMaterialRow {
+  id: string;
+  transaction_type: UnitMaterialTransactionType;
+  material_ref: string | null;
+  material_code?: string | null;
+  material_name?: string | null;
+  material_description: string;
+  quantity: string;
+  unit: string;
+  supplier: string;
+  warehouse_document_reference: string;
+  consumption_location: string;
+  receipt_evidence?: UnitMaterialReceiptEvidence;
+  receipt_resolved?: boolean;
+}
+
+export interface UnitReportMaterialPayload {
+  transaction_type: UnitMaterialTransactionType;
+  material_ref?: string | null;
+  material_description: string;
+  quantity: string | number;
+  unit: string;
+  supplier?: string;
+  warehouse_document_reference?: string;
+  consumption_location?: string;
+}
+
+export function fetchUnitReportMaterials(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+): Promise<UnitReportMaterialRow[]> {
+  return apiJson<UnitReportMaterialRow[]>(
+    `${base(projectId, unit)}/${reportId}/materials/`,
+  );
+}
+
+export function createUnitReportMaterial(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  payload: UnitReportMaterialPayload | UnitReportMaterialPayload[],
+): Promise<UnitReportMaterialRow[]> {
+  return apiJson<UnitReportMaterialRow[]>(
+    `${base(projectId, unit)}/${reportId}/materials/`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateUnitReportMaterial(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+  payload: Partial<UnitReportMaterialPayload>,
+): Promise<UnitReportMaterialRow> {
+  return apiJson<UnitReportMaterialRow>(
+    `${base(projectId, unit)}/${reportId}/materials/${rowId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUnitReportMaterial(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+): Promise<void> {
+  return apiJson<void>(
+    `${base(projectId, unit)}/${reportId}/materials/${rowId}/`,
     {
       method: "DELETE",
     },

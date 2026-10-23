@@ -16,13 +16,32 @@ from rest_framework.response import Response
 
 from common.reporting_units import SpecialtyUnit, is_canonical_unit
 from permissions.project import HasProjectPermission, IsProjectMember
-from sub_reports.models import DisciplineSubReportActivity, SubReportStatus, UnitReportStatusEvent
+from sub_reports.models import (
+    DisciplineSubReportActivity,
+    DisciplineSubReportLabor,
+    DisciplineSubReportMachinery,
+    DisciplineSubReportMaterial,
+    SubReportStatus,
+    UnitReportStatusEvent,
+)
 from sub_reports import unit_report_services as svc
-from sub_reports.serializers import UnitReportActivitySectionSerializer
+from sub_reports.serializers import (
+    UnitReportActivitySectionSerializer,
+    UnitReportLaborSectionSerializer,
+    UnitReportMachinerySectionSerializer,
+    UnitReportMaterialSectionSerializer,
+)
 from sub_reports.services.section_validation import (
     SectionContractError,
+    resolve_stoppage_vocabulary,
     update_activity_row,
+    update_labor_row,
+    update_machinery_row,
+    update_material_row,
     validate_activity_rows,
+    validate_labor_rows,
+    validate_machinery_rows,
+    validate_material_rows,
 )
 from sub_reports.unit_report_serializers import (
     UnitReportCurrentQuerySerializer,
@@ -332,3 +351,356 @@ class UnitReportActivitySectionViewSet(viewsets.GenericViewSet):
         row.deleted_at = timezone.now()
         row.save(update_fields=['is_deleted', 'deleted_at'])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UnitReportLaborSectionViewSet(viewsets.GenericViewSet):
+    """§2 labor child rows bound to one unit-report version (feature 033, T021).
+
+    Reads require ``view_reports``; mutations require ``edit_reports`` and
+    the 032 edit rule (current draft/rejected version, same project scope).
+    """
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        if self.action == 'list':
+            return 'view_reports'
+        return 'edit_reports'
+
+    def _unit(self):
+        unit = self.kwargs.get('unit')
+        if not is_canonical_unit(unit):
+            raise svc.UnitReportError(_('invalid_specialty_unit'), 'invalid_specialty_unit')
+        return unit
+
+    def _report(self):
+        return svc.get_scoped_report(
+            project_id=self.kwargs['project_pk'],
+            unit=self._unit(),
+            report_id=self.kwargs['pk'],
+        )
+
+    def _editable_report(self):
+        report = self._report()
+        svc.assert_editable(report, self.request.user, unit=self._unit())
+        return report
+
+    def _row(self, report):
+        try:
+            return report.labor_entries.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except DisciplineSubReportLabor.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def _rows(self, report, saved, code=status.HTTP_200_OK):
+        data = UnitReportLaborSectionSerializer(
+            saved, many=True, context={'request': self.request, 'report': report},
+        ).data
+        data_sorted = sorted(
+            data,
+            key=lambda r: (
+                0 if r.get('labor_category') == 'indirect' else 1,
+                r.get('display_order') or 0,
+                r.get('job_title') or '',
+            ),
+        )
+        return Response(data_sorted, code)
+
+    def _violation(self, exc: SectionContractError):
+        return Response(
+            {
+                'error': {
+                    'code': exc.codes[0] if exc.codes else 'section_contract_violation',
+                    'message': (
+                        exc.messages[0]
+                        if exc.messages
+                        else str(_('invalid section payload'))
+                    ),
+                    'details': {'errors': exc.errors},
+                },
+            },
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+
+    @extend_schema(responses={200: UnitReportLaborSectionSerializer(many=True)})
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = report.labor_entries.filter(is_deleted=False).select_related('contractor_ref').order_by('id')
+        return self._rows(report, rows)
+
+    @extend_schema(
+        request=UnitReportLaborSectionSerializer,
+        responses={201: UnitReportLaborSectionSerializer(many=True)},
+    )
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        payload = request.data
+        rows = payload if isinstance(payload, list) else [payload]
+        try:
+            saved = validate_labor_rows(
+                report, rows, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return self._rows(report, saved, status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=UnitReportLaborSectionSerializer,
+        responses={200: UnitReportLaborSectionSerializer},
+    )
+    def partial_update(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        try:
+            updated = update_labor_row(
+                report, row, request.data, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return Response(
+            UnitReportLaborSectionSerializer(
+                updated, context={'request': request, 'report': report},
+            ).data
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        row.is_deleted = True
+        row.deleted_at = timezone.now()
+        row.save(update_fields=['is_deleted', 'deleted_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UnitReportMachinerySectionViewSet(viewsets.GenericViewSet):
+    """§3 machinery child rows bound to one unit-report version (feature 033, T028).
+
+    Reads require ``view_reports``; mutations require ``edit_reports`` and
+    the 032 edit rule (current draft/rejected version, same project scope).
+    """
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        if self.action == 'list':
+            return 'view_reports'
+        return 'edit_reports'
+
+    def _unit(self):
+        unit = self.kwargs.get('unit')
+        if not is_canonical_unit(unit):
+            raise svc.UnitReportError(_('invalid_specialty_unit'), 'invalid_specialty_unit')
+        return unit
+
+    def _report(self):
+        return svc.get_scoped_report(
+            project_id=self.kwargs['project_pk'],
+            unit=self._unit(),
+            report_id=self.kwargs['pk'],
+        )
+
+    def _editable_report(self):
+        report = self._report()
+        svc.assert_editable(report, self.request.user, unit=self._unit())
+        return report
+
+    def _row(self, report):
+        try:
+            return report.machinery_rows.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except DisciplineSubReportMachinery.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def _rows(self, report, saved, code=status.HTTP_200_OK):
+        data = UnitReportMachinerySectionSerializer(
+            saved, many=True, context={'request': self.request, 'report': report},
+        ).data
+        if self.request.query_params.get('include_vocabulary') in ('1', 'true', 'yes'):
+            vocabulary = resolve_stoppage_vocabulary(report)
+            return Response({'rows': data, 'stoppage_reasons': vocabulary}, code)
+        return Response(data, code)
+
+    def _violation(self, exc: SectionContractError):
+        return Response(
+            {
+                'error': {
+                    'code': exc.codes[0] if exc.codes else 'section_contract_violation',
+                    'message': (
+                        exc.messages[0]
+                        if exc.messages
+                        else str(_('invalid section payload'))
+                    ),
+                    'details': {'errors': exc.errors},
+                },
+            },
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+
+    @extend_schema(responses={200: UnitReportMachinerySectionSerializer(many=True)})
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = (
+            report.machinery_rows.filter(is_deleted=False)
+            .select_related('equipment_ref')
+            .order_by('row_number', 'id')
+        )
+        return self._rows(report, rows)
+
+    @extend_schema(
+        request=UnitReportMachinerySectionSerializer,
+        responses={201: UnitReportMachinerySectionSerializer(many=True)},
+    )
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        payload = request.data
+        rows = payload if isinstance(payload, list) else [payload]
+        try:
+            saved = validate_machinery_rows(
+                report, rows, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return self._rows(report, saved, status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=UnitReportMachinerySectionSerializer,
+        responses={200: UnitReportMachinerySectionSerializer},
+    )
+    def partial_update(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        try:
+            updated = update_machinery_row(
+                report, row, request.data, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return Response(
+            UnitReportMachinerySectionSerializer(
+                updated, context={'request': request, 'report': report},
+            ).data
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        row.is_deleted = True
+        row.deleted_at = timezone.now()
+        row.save(update_fields=['is_deleted', 'deleted_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UnitReportMaterialSectionViewSet(viewsets.GenericViewSet):
+    """§4 material child rows bound to one unit-report version (feature 033, T035).
+
+    Reads require ``view_reports``; mutations require ``edit_reports`` and
+    the 032 edit rule (current draft/rejected version, same project scope).
+    """
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        if self.action == 'list':
+            return 'view_reports'
+        return 'edit_reports'
+
+    def _unit(self):
+        unit = self.kwargs.get('unit')
+        if not is_canonical_unit(unit):
+            raise svc.UnitReportError(_('invalid_specialty_unit'), 'invalid_specialty_unit')
+        return unit
+
+    def _report(self):
+        return svc.get_scoped_report(
+            project_id=self.kwargs['project_pk'],
+            unit=self._unit(),
+            report_id=self.kwargs['pk'],
+        )
+
+    def _editable_report(self):
+        report = self._report()
+        svc.assert_editable(report, self.request.user, unit=self._unit())
+        return report
+
+    def _row(self, report):
+        try:
+            return report.material_entries.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except DisciplineSubReportMaterial.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def _rows(self, report, saved, code=status.HTTP_200_OK):
+        data = UnitReportMaterialSectionSerializer(
+            saved, many=True, context={'request': self.request, 'report': report},
+        ).data
+        return Response(data, code)
+
+    def _violation(self, exc: SectionContractError):
+        return Response(
+            {
+                'error': {
+                    'code': exc.codes[0] if exc.codes else 'section_contract_violation',
+                    'message': (
+                        exc.messages[0]
+                        if exc.messages
+                        else str(_('invalid section payload'))
+                    ),
+                    'details': {'errors': exc.errors},
+                },
+            },
+            status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
+
+    @extend_schema(responses={200: UnitReportMaterialSectionSerializer(many=True)})
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = (
+            report.material_entries.filter(is_deleted=False)
+            .select_related('material_ref')
+            .order_by('id')
+        )
+        return self._rows(report, rows)
+
+    @extend_schema(
+        request=UnitReportMaterialSectionSerializer,
+        responses={201: UnitReportMaterialSectionSerializer(many=True)},
+    )
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        payload = request.data
+        rows = payload if isinstance(payload, list) else [payload]
+        try:
+            saved = validate_material_rows(
+                report, rows, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return self._rows(report, saved, status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=UnitReportMaterialSectionSerializer,
+        responses={200: UnitReportMaterialSectionSerializer},
+    )
+    def partial_update(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        try:
+            updated = update_material_row(
+                report, row, request.data, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return Response(
+            UnitReportMaterialSectionSerializer(
+                updated, context={'request': request, 'report': report},
+            ).data
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        report = self._editable_report()
+        row = self._row(report)
+        row.is_deleted = True
+        row.deleted_at = timezone.now()
+        row.save(update_fields=['is_deleted', 'deleted_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+

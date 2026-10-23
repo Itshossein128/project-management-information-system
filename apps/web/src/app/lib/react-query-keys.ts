@@ -42,5 +42,25 @@ export const queryKeys = {
 
   unitReportActivities: (businessId: number | string, unit: string, reportId: string) =>
     ["businesses", businessId, "unit-report", unit, reportId, "activities"] as const,
+
+  unitReportLabor: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId, "labor"] as const,
+
+  unitReportMachinery: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId, "machinery"] as const,
+
+  unitReportMaterials: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId, "materials"] as const,
+
+  effectiveReportingConfiguration: (
+    businessId: number | string,
+    reportDate: string,
+  ) =>
+    [
+      "businesses",
+      businessId,
+      "reporting-configuration",
+      reportDate,
+    ] as const,
 };
 
