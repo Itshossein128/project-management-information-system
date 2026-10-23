@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
-from projects.permissions import IsProjectMember
+from permissions.project import HasProjectPermission
 from storage.permissions import CanAccessStoredFile
 from storage.services import generate_upload_url, confirm_upload, generate_download_url
 
@@ -23,7 +23,8 @@ class UploadUrlView(APIView):
     """
     Handles the generation of presigned URLs for uploading files to S3.
     """
-    permission_classes = [IsAuthenticated, IsProjectMember]
+    permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'upload_documents'
 
     @extend_schema(summary='Get presigned upload URL', tags=['Storage'])
     def post(self, request, project_pk):
