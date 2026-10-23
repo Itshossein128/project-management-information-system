@@ -87,9 +87,12 @@ test.describe("Decision Tree — Interactive Domain Workflows", () => {
     await page.goto(`${projectBase}/daily-reports/new`);
     await expect(page).toHaveURL(new RegExp(`${projectBase}/daily-reports/?$`));
 
+    // Legacy sub-reports route retired per FR-029/FR-030/T080 -> 404 not-found boundary
     await page.goto(`${projectBase}/sub-reports`);
     await expect(page).toHaveURL(new RegExp(`${projectBase}/sub-reports`));
-    await expect(page.locator("main").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/صفحه مورد نظر یافت نشد|یافت نشد|Not Found|404/i).first()).toBeVisible({
+      timeout: 15_000,
+    });
 
     await page.goto(`${projectBase}/sync-conflicts`);
     await expect(page).toHaveURL(new RegExp(`${projectBase}/sync-conflicts`));

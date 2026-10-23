@@ -16,7 +16,7 @@ import {
 } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Modal } from "@/components/overlay/modal";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface DepartmentActivityRecordModalProps {
@@ -24,6 +24,7 @@ export interface DepartmentActivityRecordModalProps {
   onOpenChange: (open: boolean) => void;
   businessId: number | string;
   department: DepartmentSlug;
+  defaultDate?: string;
 }
 
 const EMPTY_FORM: {
@@ -69,6 +70,7 @@ export function DepartmentActivityRecordModal({
   onOpenChange,
   businessId,
   department,
+  defaultDate,
 }: DepartmentActivityRecordModalProps) {
   const { t } = useTranslation();
   const createMutation = useCreateDepartmentActivityRecord(businessId);
@@ -88,6 +90,12 @@ export function DepartmentActivityRecordModal({
     initialValues: EMPTY_FORM,
     defaultSticky: true,
   });
+
+  useEffect(() => {
+    if (open && defaultDate) {
+      setField("date", defaultDate);
+    }
+  }, [open, defaultDate, setField]);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 

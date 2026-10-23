@@ -91,6 +91,49 @@ class LaborJobTitleSerializer(serializers.ModelSerializer):
 # ---------------------------------------------------------------------------
 
 
+def _build_provenance_list(obj, derived_kind, context):
+    if not getattr(obj, 'is_derived', False):
+        return []
+    from field_reports.models import DailyReportDerivedSource
+
+    sources = list(
+        DailyReportDerivedSource.objects.filter(
+            daily_report_id=getattr(obj, 'report_id', None),
+            derived_kind=derived_kind,
+            derived_row_id=str(obj.id),
+        ).order_by('ordinal', 'id')
+    )
+
+    request = context.get('request') if context else None
+    user = getattr(request, 'user', None) if request else None
+    can_view = False
+    if user and user.is_authenticated:
+        if user.is_superuser or user.groups.filter(name='admin').exists():
+            can_view = True
+        else:
+            from permissions.project import member_has_codename
+            proj_id = getattr(obj, 'project_id', None)
+            if not proj_id and getattr(obj, 'report', None):
+                proj_id = getattr(obj.report, 'project_id', None)
+            if not proj_id and getattr(request, 'project_id', None):
+                proj_id = request.project_id
+            if proj_id:
+                can_view = member_has_codename(user, proj_id, 'view_reports')
+
+    return [
+        {
+            'unit': s.source_unit,
+            'report_id': str(s.source_report_id_snapshot),
+            'report_version': s.source_report_version,
+            'source_row_kind': s.source_row_kind,
+            'source_row_id': s.source_row_id,
+            'contribution_value': str(s.contribution_value) if s.contribution_value is not None else None,
+            'can_view_source': can_view,
+        }
+        for s in sources
+    ]
+
+
 class DailyReportActivitySerializer(serializers.ModelSerializer):
     activity_code = serializers.CharField(source='activity_ref.activity_code', read_only=True)
     quantity = serializers.DecimalField(
@@ -99,6 +142,7 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    provenance = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportActivity
@@ -127,8 +171,12 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'source_sub_report',
             'source_discipline',
             'is_derived',
+            'provenance',
         ]
-        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'activity', self.context)
 
     def validate_quantity(self, value):
         from common.unset import coerce_optional_decimal
@@ -216,6 +264,7 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
 
 class DailyReportLaborSerializer(serializers.ModelSerializer):
     total_count = serializers.IntegerField(read_only=True)
+    provenance = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportLabor
@@ -235,9 +284,13 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'source_sub_report',
             'source_discipline',
             'is_derived',
+            'provenance',
         ]
-        read_only_fields = ['id', 'total_count', 'source_sub_report', 'source_discipline', 'is_derived']
+        read_only_fields = ['id', 'total_count', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
         extra_kwargs = {'absence_count': {'required': False, 'allow_null': True}}
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'labor', self.context)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -284,6 +337,7 @@ class DailyReportEquipmentSerializer(BaseEquipmentEntrySerializer):
 
 class DailyReportMaterialSerializer(serializers.ModelSerializer):
     quantity = serializers.DecimalField(max_digits=18, decimal_places=4)
+    provenance = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportMaterial
@@ -301,8 +355,12 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
             'source_sub_report',
             'source_discipline',
             'is_derived',
+            'provenance',
         ]
-        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'material', self.context)
 
     def validate_quantity(self, value):
         if value is None or value == '':
@@ -314,6 +372,8 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
 
 
 class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
+    provenance = serializers.SerializerMethodField()
+
     class Meta:
         model = DailyReportConcreteLog
         fields = [
@@ -328,8 +388,12 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
             'source_sub_report',
             'source_discipline',
             'is_derived',
+            'provenance',
         ]
-        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived']
+        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'concrete', self.context)
 
 
 class BaseLaborCampEntrySerializer(serializers.ModelSerializer):
@@ -646,19 +710,19 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         return [item for item in manager.all() if not item.is_deleted]
 
     def get_activities(self, obj):
-        return DailyReportActivitySerializer(self._active(obj.activities), many=True).data
+        return DailyReportActivitySerializer(self._active(obj.activities), many=True, context=self.context).data
 
     def get_labor(self, obj):
-        return DailyReportLaborSerializer(self._active(obj.labor_entries), many=True).data
+        return DailyReportLaborSerializer(self._active(obj.labor_entries), many=True, context=self.context).data
 
     def get_equipment(self, obj):
-        return DailyReportEquipmentSerializer(self._active(obj.equipment_entries), many=True).data
+        return DailyReportEquipmentSerializer(self._active(obj.equipment_entries), many=True, context=self.context).data
 
     def get_materials(self, obj):
-        return DailyReportMaterialSerializer(self._active(obj.material_entries), many=True).data
+        return DailyReportMaterialSerializer(self._active(obj.material_entries), many=True, context=self.context).data
 
     def get_concrete_logs(self, obj):
-        return DailyReportConcreteLogSerializer(self._active(obj.concrete_logs), many=True).data
+        return DailyReportConcreteLogSerializer(self._active(obj.concrete_logs), many=True, context=self.context).data
 
     def get_labor_camp(self, obj):
         return DailyReportLaborCampSerializer(self._active(obj.labor_camp_entries), many=True).data

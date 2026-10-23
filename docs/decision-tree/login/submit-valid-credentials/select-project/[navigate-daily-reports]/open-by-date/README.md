@@ -24,6 +24,10 @@
 - **Navigation**: Summary view for the ensured report id
 - **UI Feedback**: Excel-like sectional summary; incompleteness banner when partial
 
+## Outcomes & Guards
+
+Ensuring the daily report by date validates project membership and date parameter. If a summary already exists, it is loaded; if not, an empty or rebuilt summary is created.
+
 ## Subsequent Decisions
 
 - [View daily report](../%5Bview-report%5D/README.md)

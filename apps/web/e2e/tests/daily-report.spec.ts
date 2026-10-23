@@ -102,49 +102,65 @@ test.describe("Daily reports — auto summary", () => {
     const headers = await authHeaders(page);
     const reportDate = "1404/05/01";
 
-    const subRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/sub-reports/`, {
+    const openRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/units/buildings/daily-reports/open/`, {
       headers,
       data: {
         report_date: reportDate,
-        discipline: "civil",
-        weather_condition: "clear",
-        activities: [
-          {
-            row_number: 1,
-            shift: "shift_1",
-            crew_name: "Crew",
-            worker_count: 2,
-            activity_ref: activityId,
-            activity_description: "Gaps Activity",
-            unit: "m3",
-            quantity: 12,
-          },
-        ],
-        labor_entries: [
-          {
-            labor_category: "direct",
-            job_title: "کارگر",
-            present_count: 3,
-            leave_count: 1,
-          },
-        ],
-        material_entries: [
-          {
-            material_description: "سیمان",
-            quantity: 2,
-            unit: "کیسه",
-            notes: "انبار A",
-          },
-        ],
       },
     });
-    expect(subRes.ok()).toBeTruthy();
-    const sub = (await subRes.json()) as { id: string };
+    expect(openRes.ok()).toBeTruthy();
+    const sub = (await openRes.json()) as { id: string };
+
+    const updateRes = await page.request.patch(
+      `${API_BASE}/v1/projects/${projectId}/units/buildings/daily-reports/${sub.id}/`,
+      {
+        headers,
+        data: {
+          weather_condition: "clear",
+          activities: [
+            {
+              row_number: 1,
+              shift: "shift_1",
+              crew_name: "Crew",
+              worker_count: 2,
+              activity_ref: activityId,
+              activity_description: "Gaps Activity",
+              unit: "m3",
+              quantity: 12,
+            },
+          ],
+          labor_entries: [
+            {
+              labor_category: "direct",
+              job_title: "کارگر",
+              present_count: 3,
+              leave_count: 1,
+            },
+          ],
+          material_entries: [
+            {
+              material_description: "سیمان",
+              quantity: 2,
+              unit: "کیسه",
+              notes: "انبار A",
+            },
+          ],
+        },
+      },
+    );
+    expect(updateRes.ok()).toBeTruthy();
+
     const submitSub = await page.request.post(
-      `${API_BASE}/v1/projects/${projectId}/sub-reports/${sub.id}/submit/`,
+      `${API_BASE}/v1/projects/${projectId}/units/buildings/daily-reports/${sub.id}/submit/`,
       { headers },
     );
     expect(submitSub.ok()).toBeTruthy();
+
+    const approveSub = await page.request.post(
+      `${API_BASE}/v1/projects/${projectId}/units/buildings/daily-reports/${sub.id}/approve/`,
+      { headers },
+    );
+    expect(approveSub.ok()).toBeTruthy();
 
     const ensureRes = await page.request.get(
       `${API_BASE}/v1/projects/${projectId}/daily-reports/by-date/?date=${encodeURIComponent(reportDate)}`,

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiJson } from "@/app/lib/api-client";
+import { apiJson, ApiRequestError } from "@/app/lib/api-client";
 import type {
   Business,
   BusinessJobPosition,
@@ -9,6 +9,19 @@ import type {
   ListResponse,
   UserBusinessAssignment,
 } from "@/app/lib/api-types";
+import {
+  type CanonicalUnit,
+  type UnitReport,
+  type UnitReportHistory,
+  fetchCurrentUnitReport,
+  openUnitReport,
+  submitUnitReport,
+  approveUnitReport,
+  rejectUnitReport,
+  correctUnitReport,
+  deleteUnitReport,
+  fetchUnitReportHistory,
+} from "@/app/lib/api/unit-reports";
 import { queryKeys } from "@/app/lib/react-query-keys";
 import { PATHS } from "@/app/routeVars";
 
@@ -271,6 +284,9 @@ export function useCreateDepartmentActivityRecord(businessId: number | string) {
           record.department,
         ),
       });
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", record.department],
+      });
     },
   });
 }
@@ -298,6 +314,9 @@ export function useUpdateDepartmentActivityRecord(
           record.department,
         ),
       });
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", record.department],
+      });
     },
   });
 }
@@ -319,7 +338,177 @@ export function useDeleteDepartmentActivityRecord(
       void qc.invalidateQueries({
         queryKey: queryKeys.departmentActivityRecords(businessId, department),
       });
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", department],
+      });
     },
+  });
+}
+
+/**
+ * Returns whether activity row mutation is permitted for the given report state.
+ * Mutations are only permitted when no report exists yet or the report is draft / rejected.
+ */
+export function isUnitReportEditable(report: UnitReport | null | undefined): boolean {
+  if (!report) return true;
+  return report.status === "draft" || report.status === "rejected";
+}
+
+export function useCurrentUnitReportQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit | string | undefined,
+  date: string | undefined,
+  enabled = true,
+) {
+  return useQuery<UnitReport | null>({
+    queryKey: queryKeys.unitReportCurrent(businessId ?? "", unit ?? "", date ?? ""),
+    enabled: Boolean(enabled && businessId && unit && date),
+    queryFn: async () => {
+      try {
+        return await fetchCurrentUnitReport(
+          String(businessId),
+          unit as CanonicalUnit,
+          date!,
+        );
+      } catch (err) {
+        if (err instanceof ApiRequestError && err.status === 404) {
+          return null;
+        }
+        throw err;
+      }
+    },
+  });
+}
+
+export function useOpenUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reportDate: string) =>
+      openUnitReport(String(businessId), unit, reportDate),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useSubmitUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reportId: string) =>
+      submitUnitReport(String(businessId), unit, reportId),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useApproveUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reportId: string) =>
+      approveUnitReport(String(businessId), unit, reportId),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useRejectUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ reportId, reason }: { reportId: string; reason: string }) =>
+      rejectUnitReport(String(businessId), unit, reportId, reason),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useCorrectUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reportId: string) =>
+      correctUnitReport(String(businessId), unit, reportId),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useDeleteUnitReport(
+  businessId: number | string,
+  unit: CanonicalUnit,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ reportId }: { reportId: string; date: string }) =>
+      deleteUnitReport(String(businessId), unit, reportId),
+    onSuccess: () => {
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+      void qc.invalidateQueries({
+        queryKey: queryKeys.departmentActivityRecords(businessId, unit),
+      });
+    },
+  });
+}
+
+export function useUnitReportHistoryQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit | string | undefined,
+  reportId: string | undefined,
+  enabled = true,
+) {
+  return useQuery<UnitReportHistory>({
+    queryKey: queryKeys.unitReportHistory(businessId ?? "", unit ?? "", reportId ?? ""),
+    enabled: Boolean(enabled && businessId && unit && reportId),
+    queryFn: () =>
+      fetchUnitReportHistory(
+        String(businessId),
+        unit as CanonicalUnit,
+        reportId!,
+      ),
   });
 }
 

@@ -27,5 +27,17 @@ export const queryKeys = {
       department,
       params ?? {},
     ] as const,
+
+  unitReportCurrent: (
+    businessId: number | string,
+    unit: string,
+    date: string,
+  ) => ["businesses", businessId, "unit-report", unit, "current", date] as const,
+
+  unitReport: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId] as const,
+
+  unitReportHistory: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId, "history"] as const,
 };
 

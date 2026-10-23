@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/v1/', include('storage.urls')),
     path('api/v1/project-templates/', include('project_templates.urls')),
+    path('api/v1/unit-reports/quarantine/', include('sub_reports.quarantine_urls')),
     path('api/v1/projects/<uuid:project_pk>/', include('procurement.urls')),
     path('api/v1/projects/', include('projects.urls')),
     path('api/v1/roles/', include('projects.role_urls')),

@@ -1,6 +1,7 @@
 """Tests for legacy weather normalization and schema migration (0018_daily_header_weather and 0004_standardize_weather)."""
 import importlib
 import pytest
+from common.reporting_units import SpecialtyUnit
 from django.apps import apps
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -58,6 +59,7 @@ def test_normalize_discipline_weather_conditions(project, user):
     """Verify normalize_discipline_weather_conditions maps sunny->clear, partly_cloudy->cloudy, foggy->cloudy."""
     s1 = DisciplineSubReport.objects.create(
         project=project,
+        unit=SpecialtyUnit.BUILDINGS,
         discipline=Discipline.CIVIL,
         report_date='2026-08-10',
         weather_condition='clear',
@@ -66,6 +68,7 @@ def test_normalize_discipline_weather_conditions(project, user):
     )
     s2 = DisciplineSubReport.objects.create(
         project=project,
+        unit=SpecialtyUnit.ELECTRICAL,
         discipline=Discipline.ELECTRICAL,
         report_date='2026-08-10',
         weather_condition='clear',
@@ -74,6 +77,7 @@ def test_normalize_discipline_weather_conditions(project, user):
     )
     s3 = DisciplineSubReport.objects.create(
         project=project,
+        unit=SpecialtyUnit.MECHANICAL,
         discipline=Discipline.MECHANICAL,
         report_date='2026-08-10',
         weather_condition='clear',

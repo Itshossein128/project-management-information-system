@@ -8,6 +8,21 @@ export interface BusinessDepartmentDef {
   icon: IconName;
 }
 
+/**
+ * Canonical SpecialtyUnit identifiers (FR-001). Language-independent and
+ * contract-tested against the API vocabulary in `common/reporting_units.py`.
+ */
+export const CANONICAL_SPECIALTY_UNITS = [
+  "buildings",
+  "electrical",
+  "mechanical",
+  "machinery",
+  "warehouse",
+  "security",
+] as const;
+
+export type CanonicalSpecialtyUnit = (typeof CANONICAL_SPECIALTY_UNITS)[number];
+
 export const BUSINESS_DEPARTMENTS = [
   {
     slug: PATHS.BUSINESS_DEPT.BUILDINGS,

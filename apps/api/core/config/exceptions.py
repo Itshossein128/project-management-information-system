@@ -83,6 +83,12 @@ def _error_code(exc) -> str:
     if isinstance(exc, AuthenticationFailed):
         return 'authentication_failed'
     if isinstance(exc, (NotFound, Http404)):
+        code = getattr(exc, 'default_code', None)
+        if code and code != 'not_found':
+            return str(code)
+        for candidate in _collect_detail_codes(getattr(exc, 'detail', None)):
+            if candidate not in ('not_found', 'null', 'blank', 'required'):
+                return candidate
         return 'not_found'
     if isinstance(exc, Throttled):
         return 'throttled'

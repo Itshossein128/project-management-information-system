@@ -10,7 +10,25 @@ from django.db import transaction
 
 from master_data.models import ProjectMember, ProjectMemberRole, Role
 from projects.models import Activity, Project, WBS
-from project_templates.models import ProjectTemplate, ProjectTemplateWBS
+from project_templates.models import (
+    LaborTitleCatalog,
+    ProjectReportingConfiguration,
+    ProjectTemplate,
+    ProjectTemplateWBS,
+)
+
+
+# Feature 033 (data-model §1.2): default controlled stoppage-reason vocabulary.
+# Codes are stable and language-independent; labels are translatable and seeded
+# into every activation snapshot. Template-level extension rows, when present,
+# are appended after the defaults.
+DEFAULT_STOPPAGE_REASONS = (
+    ('breakdown', 'Breakdown', 'خرابی تجهیزات'),
+    ('lack_of_fuel', 'Lack of fuel', 'کمبود سوخت'),
+    ('weather', 'Weather', 'شرایط جوی نامساعد'),
+    ('no_operator', 'No operator', 'عدم تخصیص اپراتور'),
+    ('site_obstruction', 'Site obstruction', 'بازداشت کارگاه'),
+)
 
 
 class TemplateApplyConflict(ValueError):
@@ -174,3 +192,295 @@ def save_project_as_template(
             )
 
     return template
+
+
+class ReportingConfigurationConflict(ValueError):
+    """Raised when an activation date conflicts with an existing configuration."""
+
+    def __init__(self, message, code='reporting_configuration_date_conflict'):
+        super().__init__(message)
+        self.code = code
+
+
+@transaction.atomic
+def activate_project_reporting_configuration(
+    project: Project,
+    template: ProjectTemplate,
+    effective_from,
+    user=None,
+    confirm_backdated: bool = False,
+    reason: str = '',
+):
+    from project_templates.models import (
+        ProjectReportingConfiguration,
+        ProjectReportingConfigurationLaborTitle,
+        ProjectReportingConfigurationStoppageReason,
+        ProjectReportingConfigurationUnit,
+    )
+
+    # 1. Exact date conflict check
+    if ProjectReportingConfiguration.objects.filter(
+        project=project, effective_from=effective_from,
+    ).exists():
+        raise ReportingConfigurationConflict(
+            f'A reporting configuration is already active for {effective_from}.',
+            code='reporting_configuration_date_conflict',
+        )
+
+    # 2. Append-only check: cannot be earlier than or equal to latest without explicit confirmation
+    latest = (
+        ProjectReportingConfiguration.objects.filter(project=project)
+        .order_by('-effective_from')
+        .first()
+    )
+    if latest and effective_from <= latest.effective_from and not confirm_backdated:
+        raise ReportingConfigurationConflict(
+            'Activating a backdated configuration requires explicit confirmation.',
+            code='backdated_activation_requires_confirmation',
+        )
+
+    # 3. Find supersedes: latest prior configuration
+    supersedes = (
+        ProjectReportingConfiguration.objects.filter(
+            project=project, effective_from__lt=effective_from,
+        )
+        .order_by('-effective_from')
+        .first()
+    )
+
+    # 4. Create immutable configuration snapshot
+    config = ProjectReportingConfiguration.objects.create(
+        project=project,
+        source_template=template,
+        source_template_name_snapshot=template.template_name,
+        effective_from=effective_from,
+        activated_by=user,
+        supersedes=supersedes,
+    )
+
+    # 5. Snapshot required units from template
+    template_units = list(template.required_units.all().order_by('display_order', 'id'))
+    for order, tu in enumerate(template_units):
+        ProjectReportingConfigurationUnit.objects.create(
+            configuration=config,
+            unit=tu.unit,
+            display_order=order,
+        )
+
+    # 6. Feature 033 (data-model §1.1/§1.2): immutable snapshot of the labor-title
+    # catalog, the man-hours rule, and the controlled stoppage vocabulary. Only the
+    # latest catalog version of the template becomes effective at activation.
+    latest_catalog = (
+        LaborTitleCatalog.objects.filter(template=template)
+        .order_by('-created_at')
+        .first()
+    )
+    if latest_catalog is not None:
+        for title in latest_catalog.titles.order_by('display_order', 'id'):
+            ProjectReportingConfigurationLaborTitle.objects.create(
+                configuration=config,
+                title_code=title.title_code,
+                title_label=title.title_label,
+                title_label_fa=title.title_label_fa,
+                category=title.category,
+                display_order=title.display_order,
+                legacy_alias=title.legacy_alias,
+                source_catalog_version=latest_catalog.version_name,
+            )
+
+    # Man-hours rule: only one code exists in the fixed registry today; the
+    # snapshot carries it plus the template-independent default shift length.
+    if not config.man_hours_rule_code:
+        config.man_hours_rule_code = 'standard_shift_plus_overtime'
+    if config.standard_shift_hours is None:
+        config.standard_shift_hours = 8
+    config.save(update_fields=['man_hours_rule_code', 'standard_shift_hours'])
+
+    for ordinal, (code, label_en, label_fa) in enumerate(DEFAULT_STOPPAGE_REASONS):
+        ProjectReportingConfigurationStoppageReason.objects.create(
+            configuration=config,
+            reason_code=code,
+            reason_label=label_en,
+            reason_label_fa=label_fa,
+            display_order=ordinal,
+        )
+
+    return config
+
+
+def preview_project_reporting_configuration(
+    project: Project,
+    template: ProjectTemplate,
+    effective_from,
+) -> dict:
+    from field_reports.models import DailyReport
+    from project_templates.models import ProjectReportingConfiguration
+
+    latest = (
+        ProjectReportingConfiguration.objects.filter(project=project)
+        .order_by('-effective_from')
+        .first()
+    )
+    is_backdated = bool(latest and effective_from <= latest.effective_from)
+    affected_count = DailyReport.objects.filter(
+        project=project,
+        report_date__gte=effective_from,
+        is_deleted=False,
+    ).count()
+
+    # Feature 033 (contract §2): preview shows the exact labor catalog snapshot,
+    # man-hours rule and stoppage vocabulary that would become effective.
+    from project_templates.models import LaborTitleCatalog
+
+    catalog = (
+        LaborTitleCatalog.objects.filter(template=template)
+        .order_by('-created_at')
+        .first()
+    )
+    labor_titles = [
+        {
+            'title_code': t.title_code,
+            'title_label': t.title_label,
+            'title_label_fa': t.title_label_fa,
+            'category': t.category,
+            'display_order': t.display_order,
+            'legacy_alias': t.legacy_alias,
+            'project_specific': t.project_specific,
+            'source_catalog_version': catalog.version_name if catalog else '',
+        }
+        for t in (catalog.titles.order_by('display_order', 'id') if catalog else [])
+    ]
+
+    return {
+        'template_id': str(template.id),
+        'template_name': template.template_name,
+        'effective_from': str(effective_from),
+        'required_units': [
+            u.unit for u in template.required_units.all().order_by('display_order', 'id')
+        ],
+        'labor_titles': labor_titles,
+        'man_hours_rule': {
+            'rule_code': ProjectReportingConfiguration._meta.get_field(
+                'man_hours_rule_code'
+            ).get_default(),
+            'parameters': {
+                'standard_shift_hours': str(
+                    ProjectReportingConfiguration._meta.get_field(
+                        'standard_shift_hours'
+                    ).get_default()
+                ),
+            },
+        },
+        'stoppage_reasons': [
+            {'reason_code': c, 'reason_label': en, 'reason_label_fa': fa}
+            for c, en, fa in DEFAULT_STOPPAGE_REASONS
+        ],
+        'is_backdated': is_backdated,
+        'affected_reports_count': affected_count,
+        'latest_effective_from': str(latest.effective_from) if latest else None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Labor-title catalog draft CRUD (feature 033, contract §1)
+# ---------------------------------------------------------------------------
+
+
+def create_labor_catalog(template: ProjectTemplate, *, version_name: str, notes: str = '', titles: list | None = None) -> LaborTitleCatalog:
+    from django.core.exceptions import ValidationError as DjangoValidationError
+
+    from project_templates.models import LaborTitleCatalogTitle
+
+    with transaction.atomic():
+        catalog = LaborTitleCatalog.objects.create(
+            template=template, version_name=version_name, notes=notes,
+        )
+        for row in titles or []:
+            payload = {k: row.get(k) for k in (
+                'title_code', 'title_label', 'title_label_fa', 'category',
+                'display_order', 'active', 'legacy_alias', 'project_specific',
+            )}
+            payload.setdefault('display_order', 0)
+            try:
+                LaborTitleCatalogTitle.objects.create(catalog=catalog, **payload)
+            except DjangoValidationError as exc:
+                raise _catalog_payload_error(exc)
+        return catalog
+
+
+def _catalog_payload_error(exc) -> ValueError:
+    message = getattr(exc, 'message', str(exc))
+    text = message if isinstance(message, str) else '; '.join(map(str, message))
+    if 'title_code' in text:
+        code = 'duplicate_title_code'
+    elif 'display_order' in text:
+        code = 'duplicate_display_order'
+    else:
+        code = 'invalid_catalog_title'
+    return ValueError(f'{code}: {text}')
+
+
+def update_labor_catalog(catalog: LaborTitleCatalog, *, version_name: str | None = None, notes: str | None = None) -> LaborTitleCatalog:
+    if version_name is not None:
+        catalog.version_name = version_name
+    if notes is not None:
+        catalog.notes = notes
+    catalog.save(update_fields=['version_name', 'notes', 'updated_at'])
+    return catalog
+
+
+# ---------------------------------------------------------------------------
+# Labor-title resolution (feature 033, contract reporting-configuration-catalog-api.md §3)
+# ---------------------------------------------------------------------------
+
+
+def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title: str):
+    """Resolve a unit-report job title against the effective snapshot.
+
+    Resolution order (contract §3): legacy alias → exact label (either stored
+    label, locale-independent) → project-specific title code. Returns the
+    matching snapshot title row or ``None`` (callers reject with
+    ``unknown_job_title``).
+    """
+    if configuration is None or not (job_title or '').strip():
+        return None
+    needle = job_title.strip().lower()
+
+    from project_templates.models import (
+        ProjectReportingConfigurationLaborTitle,
+    )
+
+    titles = list(
+        ProjectReportingConfigurationLaborTitle.objects.filter(
+            configuration=configuration,
+        ).order_by('display_order', 'title_code')
+    )
+
+    # 1) legacy alias first: keeps historical rows' original evidence meaningful
+    for title in titles:
+        if title.legacy_alias and title.legacy_alias.strip().lower() == needle:
+            return title
+    # 2) exact label match, language-independent against both stored labels
+    for title in titles:
+        if title.title_label and title.title_label.strip().lower() == needle:
+            return title
+        if title.title_label_fa and title.title_label_fa.strip().lower() == needle:
+            return title
+    # 3) stable language-independent code as an accepted input form
+    for title in titles:
+        if title.title_code and title.title_code.strip().lower() == needle:
+            return title
+    return None
+
+    return {
+        'template_id': str(template.id),
+        'template_name': template.template_name,
+        'effective_from': str(effective_from),
+        'required_units': [
+            u.unit for u in template.required_units.all().order_by('display_order', 'id')
+        ],
+        'is_backdated': is_backdated,
+        'affected_reports_count': affected_count,
+        'latest_effective_from': str(latest.effective_from) if latest else None,
+    }
+

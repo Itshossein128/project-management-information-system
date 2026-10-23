@@ -73,15 +73,3 @@ export function securityApproveLeave(projectId: string, id: string, approved = t
     body: JSON.stringify({ approved }),
   });
 }
-
-export function fetchSubReports(projectId: string, discipline: string) {
-  return apiJson<{ results: unknown[] }>(`${base(projectId)}/sub-reports/?discipline=${discipline}`);
-}
-
-export function createSubReport(projectId: string, body: Record<string, unknown>) {
-  return apiJson(`${base(projectId)}/sub-reports/`, { method: "POST", body: JSON.stringify(body) });
-}
-
-export function submitSubReport(projectId: string, id: string) {
-  return apiJson(`${base(projectId)}/sub-reports/${id}/submit/`, { method: "POST" });
-}

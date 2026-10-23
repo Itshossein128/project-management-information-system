@@ -1,5 +1,6 @@
 import pytest
 
+from common.reporting_units import SpecialtyUnit
 from field_reports.services.daily_report_aggregation import (
     contributing_sub_reports,
     ensure_daily_report_summary,
@@ -25,14 +26,14 @@ def test_include_only_submitted_and_approved(project, user):
     )
     add_activity(approved, description='apr-act')
     rejected = make_sub_report(
-        project, user, discipline=Discipline.PLUMBING, status=SubReportStatus.REJECTED,
+        project, user, unit=SpecialtyUnit.MACHINERY, discipline=Discipline.MECHANICAL, status=SubReportStatus.REJECTED,
     )
     add_activity(rejected, description='rej-act')
 
     qs = contributing_sub_reports(project.id, SUMMARY_DATE)
-    assert set(qs.values_list('discipline', flat=True)) == {
-        Discipline.ELECTRICAL,
-        Discipline.MECHANICAL,
+    assert set(qs.values_list('unit', flat=True)) == {
+        SpecialtyUnit.ELECTRICAL,
+        SpecialtyUnit.MECHANICAL,
     }
 
     report = ensure_daily_report_summary(project.id, SUMMARY_DATE, user=user)

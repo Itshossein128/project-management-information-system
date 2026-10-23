@@ -17,6 +17,9 @@ def test_cache_backend(settings):
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         }
     }
+    settings.PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
 
 
 @pytest.fixture
@@ -39,14 +42,33 @@ def other_user(db):
     )
 
 
+def _ensure_role_permissions(role_name: str) -> Role:
+    from master_data.models import Permission, Role, RolePermission
+    from permissions.constants import (
+        DEFAULT_ROLE_DESCRIPTIONS,
+        DEFAULT_ROLE_PERMISSIONS,
+        PERMISSIONS,
+    )
+    role, _ = Role.objects.get_or_create(
+        role_name=role_name,
+        defaults={'description': DEFAULT_ROLE_DESCRIPTIONS.get(role_name, '')},
+    )
+    if not role.role_permissions.exists():
+        for codename, label in PERMISSIONS.items():
+            Permission.objects.get_or_create(codename=codename, defaults={'label': label})
+        for codename in DEFAULT_ROLE_PERMISSIONS.get(role_name, []):
+            RolePermission.objects.get_or_create(role=role, permission_codename=codename)
+    return role
+
+
 @pytest.fixture
 def project_manager_role(db):
-    return Role.objects.get(role_name='project_manager')
+    return _ensure_role_permissions('project_manager')
 
 
 @pytest.fixture
 def viewer_role(db):
-    return Role.objects.get(role_name='viewer')
+    return _ensure_role_permissions('viewer')
 
 
 @pytest.fixture
@@ -93,7 +115,7 @@ def member(db, project, other_user, viewer_role):
 
 @pytest.fixture
 def site_supervisor_role(db):
-    return Role.objects.get(role_name='site_supervisor')
+    return _ensure_role_permissions('site_supervisor')
 
 
 @pytest.fixture

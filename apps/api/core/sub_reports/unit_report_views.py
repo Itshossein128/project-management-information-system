@@ -1,0 +1,221 @@
+"""Canonical unit daily report API views (feature 032, US1).
+
+Base: /api/v1/projects/{project_id}/units/{unit}/daily-reports/
+`unit` is one of the six canonical values taken from the URL and is never an
+editable report field.
+"""
+from __future__ import annotations
+
+from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from common.reporting_units import SpecialtyUnit, is_canonical_unit
+from permissions.project import HasProjectPermission, IsProjectMember
+from sub_reports.models import SubReportStatus, UnitReportStatusEvent
+from sub_reports import unit_report_services as svc
+from sub_reports.unit_report_serializers import (
+    UnitReportCurrentQuerySerializer,
+    UnitReportDetailSerializer,
+    UnitReportHistorySerializer,
+    UnitReportOpenSerializer,
+    UnitReportRejectSerializer,
+)
+
+
+class UnitReportViewSet(viewsets.GenericViewSet):
+    """Read/open/mutate the current unit report for project/date/unit."""
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    def get_permissions(self):
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.action in ('retrieve', 'history', 'current'):
+            return 'view_reports'
+        if self.action in ('approve', 'reject'):
+            return 'approve_reports'
+        return 'edit_reports'
+
+    # -- helpers ---------------------------------------------------------
+
+    def _unit(self):
+        unit = self.kwargs.get('unit')
+        if not is_canonical_unit(unit):
+            raise svc.UnitReportError(_('invalid_specialty_unit'), 'invalid_specialty_unit')
+        return unit
+
+    def _project_id(self):
+        return self.kwargs['project_pk']
+
+    def _report_or_404(self):
+        return svc.get_scoped_report(
+            project_id=self._project_id(), unit=self._unit(), report_id=self.kwargs['pk'],
+        )
+
+    def _detail(self, report):
+        return Response(UnitReportDetailSerializer(report, context={'request': self.request}).data)
+
+    # -- endpoints -------------------------------------------------------
+
+    @extend_schema(methods=['GET'], responses=UnitReportDetailSerializer)
+    @action(detail=False, methods=['get'])
+    def current(self, request, *args, **kwargs):
+        query = UnitReportCurrentQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        report = (
+            svc.current_report_queryset(self._project_id(), self._unit(), query.validated_data['date'])
+            .first()
+        )
+        if report is None:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+        return self._detail(report)
+
+    @extend_schema(methods=['POST'], request=UnitReportOpenSerializer, responses={
+        201: UnitReportDetailSerializer, 200: UnitReportDetailSerializer,
+    })
+    @action(detail=False, methods=['post'])
+    def open(self, request, *args, **kwargs):
+        payload = UnitReportOpenSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        report, created = svc.open_unit_report(
+            project=self._project(),
+            unit=self._unit(),
+            report_date=payload.validated_data['report_date'],
+            user=request.user,
+        )
+        data = UnitReportDetailSerializer(report, context={'request': request}).data
+        return Response(data, status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    def _project(self):
+        from projects.models import Project
+
+        try:
+            return Project.objects.get(id=self._project_id())
+        except Project.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def retrieve(self, request, *args, **kwargs):
+        return self._detail(self._report_or_404())
+
+    def partial_update(self, request, *args, **kwargs):
+        from sub_reports.serializers import (
+            SubReportActivitySerializer,
+            SubReportConcreteSerializer,
+            SubReportGeneralActivitySerializer,
+            SubReportLaborSerializer,
+            SubReportMaterialSerializer,
+            SubReportNoteSerializer,
+        )
+
+        nested_serializers = {
+            'activities': SubReportActivitySerializer,
+            'labor_entries': SubReportLaborSerializer,
+            'material_entries': SubReportMaterialSerializer,
+            'concrete_entries': SubReportConcreteSerializer,
+            'general_activities': SubReportGeneralActivitySerializer,
+            'notes': SubReportNoteSerializer,
+        }
+        nested_data = {}
+        for key, ser_cls in nested_serializers.items():
+            if key in request.data:
+                ser = ser_cls(data=request.data[key], many=True)
+                ser.is_valid(raise_exception=True)
+                nested_data[key] = ser.validated_data
+
+        report = svc.update_unit_report(
+            self._report_or_404(),
+            user=request.user,
+            unit=self._unit(),
+            validated_fields={
+                field: request.data[field]
+                for field in ('form_code', 'revision_number', 'weather_condition', 'site_status')
+                if field in request.data
+            },
+            nested_data=nested_data,
+        )
+        return self._detail(report)
+
+    def destroy(self, request, *args, **kwargs):
+        svc.soft_delete_unit_report(self._report_or_404(), user=request.user, unit=self._unit())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(methods=['GET'], responses=UnitReportHistorySerializer)
+    @action(detail=True, methods=['get'])
+    def history(self, request, *args, **kwargs):
+        report = self._report_or_404()
+        versions = list(
+            type(report).all_objects.filter(lineage_id=report.lineage_id).order_by('version_number'),
+        )
+        superseded_by_map = {
+            v.supersedes_id: v.id for v in versions if v.supersedes_id
+        }
+        for v in versions:
+            v.superseded_by = superseded_by_map.get(v.id)
+
+        events = list(
+            UnitReportStatusEvent.objects.filter(report_version__lineage_id=report.lineage_id)
+            .select_related('actor')
+            .order_by('occurred_at', 'id'),
+        )
+        serializer = UnitReportHistorySerializer({
+            'lineage_id': report.lineage_id,
+            'current_version_id': next(
+                (v.id for v in versions if v.is_current and not v.is_deleted), report.id,
+            ),
+            'versions': versions,
+            'events': events,
+        })
+        return Response(serializer.data)
+
+    @extend_schema(methods=['POST'], responses=UnitReportDetailSerializer)
+    @action(detail=True, methods=['post'])
+    def correct(self, request, *args, **kwargs):
+        report = svc.correct_unit_report(
+            self._report_or_404(), user=request.user, unit=self._unit(),
+        )
+        return self._detail(report)
+
+    @extend_schema(methods=['POST'], responses=UnitReportDetailSerializer)
+    @action(detail=True, methods=['post'])
+    def submit(self, request, *args, **kwargs):
+        report = svc.submit_unit_report(self._report_or_404(), user=request.user, unit=self._unit())
+        return self._detail(report)
+
+    @extend_schema(methods=['POST'], responses=UnitReportDetailSerializer)
+    @action(detail=True, methods=['post'])
+    def approve(self, request, *args, **kwargs):
+        report = svc.approve_unit_report(
+            self._report_or_404(), user=request.user, unit=self._unit(),
+            sod_checker=_sod_violation,
+        )
+        return self._detail(report)
+
+    @extend_schema(methods=['POST'], request=UnitReportRejectSerializer, responses=UnitReportDetailSerializer)
+    @action(detail=True, methods=['post'])
+    def reject(self, request, *args, **kwargs):
+        payload = UnitReportRejectSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        report = svc.reject_unit_report(
+            self._report_or_404(),
+            user=request.user,
+            rejection_reason=payload.validated_data['rejection_reason'],
+            unit=self._unit(),
+        )
+        return self._detail(report)
+
+
+def _sod_violation(report, approver):
+    """Existing stable SoD contract: preparer/submitter may not approve."""
+    if getattr(approver, 'is_superuser', False):
+        return None
+    if report.created_by_id == approver.id:
+        return _('sod_self_approve')
+    if report.submitted_by_id == approver.id:
+        return _('sod_self_approve')
+    return None

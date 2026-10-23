@@ -8,21 +8,43 @@ export const E2E_USERS = {
   visitor: { phone: "+10000000003", password: "devpass123" },
 } as const;
 
+const cachedTokens = new Map<
+  string,
+  {
+    access: string;
+    refresh: string;
+    user: { id: number; mobile: string; full_name: string };
+  }
+>();
+
 export async function loginAs(
   page: Page,
   user: (typeof E2E_USERS)[keyof typeof E2E_USERS] = E2E_USERS.admin,
 ) {
-  const res = await page.request.post(`${API_BASE}/auth/login/`, {
-    data: { phone_number: user.phone, password: user.password },
-  });
-  if (!res.ok()) {
-    throw new Error(`loginAs failed: ${res.status()} ${await res.text()}`);
+  let data = cachedTokens.get(user.phone);
+  if (!data) {
+    let res;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        res = await page.request.post(`${API_BASE}/auth/login/`, {
+          data: { phone_number: user.phone, password: user.password },
+        });
+        if (res.ok()) break;
+      } catch (e) {
+        if (attempt === 4) throw e;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+    }
+    if (!res || !res.ok()) {
+      throw new Error(`loginAs failed: ${res?.status()} ${await res?.text()}`);
+    }
+    data = (await res.json()) as {
+      access: string;
+      refresh: string;
+      user: { id: number; mobile: string; full_name: string };
+    };
+    cachedTokens.set(user.phone, data);
   }
-  const data = (await res.json()) as {
-    access: string;
-    refresh: string;
-    user: { id: number; mobile: string; full_name: string };
-  };
   await page.goto("/login");
   await page.evaluate(
     ({ access, refresh, user }) => {

@@ -257,6 +257,7 @@ export default function DailyReportViewPage() {
           projectId={projectId}
           report={report}
           canApprove={canApprove}
+          canEdit={canEdit}
           busy={workflow.isPending}
           onSubmit={() => workflow.mutate({ type: "submit" })}
           onReview={() => workflow.mutate({ type: "review" })}

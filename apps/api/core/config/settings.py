@@ -118,6 +118,8 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
+if 'TEST_DATABASE_NAME' in os.environ:
+    DATABASES['default']['TEST'] = {'NAME': os.environ['TEST_DATABASE_NAME']}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

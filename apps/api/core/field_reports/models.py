@@ -88,6 +88,17 @@ class CorrectionRequestStatus(models.TextChoices):
     REJECTED = 'rejected', 'Rejected'
 
 
+class SamplingState(models.TextChoices):
+    NOT_SAMPLED = 'not_sampled', 'Not sampled'
+    SAMPLING_DECLARED = 'sampling_declared', 'Sampling declared'
+
+
+class ReconciliationStatus(models.TextChoices):
+    MATCH = 'match', 'Match'
+    MISMATCH = 'mismatch', 'Mismatch'
+    INSUFFICIENT_DATA = 'insufficient_data', 'Insufficient data'
+
+
 class ChildRowModel(UUIDModel):
     """Abstract base for daily-report child rows with soft delete."""
 
@@ -188,6 +199,16 @@ class DailyReport(AuditSoftDeleteModel):
     synced_from_offline = models.BooleanField(default=False)
     local_id = models.CharField(max_length=36, null=True, blank=True)
 
+    # Feature 032: canonical completeness binding + rebuild fingerprint.
+    reporting_configuration = models.ForeignKey(
+        'project_templates.ProjectReportingConfiguration',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_reports',
+    )
+    aggregation_fingerprint = models.CharField(max_length=64, blank=True, default='')
+
     class Meta:
         db_table = 'daily_reports'
         ordering = ['-report_date']
@@ -256,7 +277,14 @@ class DailyReportActivity(ChildRowModel):
         blank=True,
         related_name='daily_report_activities_as_contractor',
     )
+    # Feature 033 (data-model §3.1): crew and contractor are separate derived
+    # columns (never merged), headcount keeps its foreman/worker components and
+    # parcel joins the location set.
+    crew_name = models.CharField(max_length=120, blank=True, default='')
     headcount = models.PositiveIntegerField(null=True, blank=True)
+    foreman_count = models.PositiveIntegerField(null=True, blank=True)
+    worker_count = models.PositiveIntegerField(null=True, blank=True)
+    parcel = models.CharField(max_length=60, null=True, blank=True)
     zone = models.CharField(max_length=60, null=True, blank=True)
     block = models.CharField(max_length=60, null=True, blank=True)
     floor = models.CharField(max_length=60, null=True, blank=True)
@@ -322,6 +350,10 @@ class DailyReportLabor(ChildRowModel):
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     daily_rate = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     absence_count = models.PositiveIntegerField(null=True, blank=True)
+    # Feature 033 (data-model §3.2): DailyReportDerivedSource is the source of
+    # truth; the legacy columns above stay as compat aliases only. The marker
+    # records that the derived row's source set was written completely.
+    source_set_complete = models.BooleanField(default=False)
     source_sub_report = models.ForeignKey(
         'sub_reports.DisciplineSubReport',
         on_delete=models.SET_NULL,
@@ -414,6 +446,17 @@ class DailyReportMaterial(ChildRowModel):
     unit = models.CharField(max_length=40)
     transaction_type = models.CharField(max_length=10, choices=MaterialTransactionType.choices)
     consumption_location = models.CharField(max_length=120, blank=True, default='')
+    # Feature 033 (data-model §3.4): receipts-only display is computed from the
+    # resolved-vs-unresolved marker; reconciliation fields are written by the
+    # document-anchored reconciliation service, never by product users.
+    supplier = models.CharField(max_length=120, blank=True, default='')
+    warehouse_document_reference = models.CharField(max_length=120, blank=True, default='')
+    receipt_resolved = models.BooleanField(null=True, blank=True)
+    reconciliation_status = models.CharField(
+        max_length=20, choices=ReconciliationStatus.choices, null=True, blank=True,
+    )
+    reconciliation_document_id = models.CharField(max_length=64, blank=True, default='')
+    reconciliation_checked_at = models.DateTimeField(null=True, blank=True)
     activity_ref = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,
@@ -451,6 +494,24 @@ class DailyReportConcreteLog(ChildRowModel):
     block = models.CharField(max_length=60, null=True, blank=True)
     floor = models.CharField(max_length=60, null=True, blank=True)
     notes = models.TextField(blank=True, default='')
+    # Feature 033 (data-model §3.5): derived pour rows keep the full §2.5
+    # column set so the summary is as rich as the source.
+    structural_element = models.CharField(max_length=120, blank=True, default='')
+    parcel = models.CharField(max_length=60, blank=True, default='')
+    batching_plant = models.CharField(max_length=120, blank=True, default='')
+    truck_delivery_note_number = models.CharField(max_length=60, blank=True, default='')
+    lab_sample_code = models.CharField(max_length=60, blank=True, default='')
+    sampling_state = models.CharField(
+        max_length=20, choices=SamplingState.choices, blank=True, default='',
+    )
+    test_sheet_count = models.PositiveIntegerField(null=True, blank=True)
+    qc_inspection = models.ForeignKey(
+        'risk.Inspection',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_concrete_pours',
+    )
     source_sub_report = models.ForeignKey(
         'sub_reports.DisciplineSubReport',
         on_delete=models.SET_NULL,
@@ -491,6 +552,12 @@ class DailyReportLaborCamp(ChildRowModel, BaseLaborCampEntry):
         db_table = 'daily_report_labor_camp'
 
 
+class HseSeverity(models.TextChoices):
+    MINOR = 'minor', 'Minor'
+    MODERATE = 'moderate', 'Moderate'
+    MAJOR = 'major', 'Major'
+
+
 class DailyReportIncident(ChildRowModel):
     report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='incidents')
     incident_type = models.CharField(max_length=40, choices=IncidentType.choices)
@@ -505,9 +572,108 @@ class DailyReportIncident(ChildRowModel):
     )
     follow_up_owner_name = models.CharField(max_length=120, blank=True, default='')
     due_date = models.DateField(null=True, blank=True)
+    # Feature 033 (data-model §3.7): HSE incident rows carry a nullable severity
+    # and the notification reference generated at submit; structured provenance
+    # for the source row lives in DailyReportDerivedSource.
+    severity = models.CharField(max_length=10, choices=HseSeverity.choices, null=True, blank=True)
+    notification_id = models.CharField(max_length=64, blank=True, default='')
 
     class Meta:
         db_table = 'daily_report_incidents'
+
+
+class DailyReportMachineryRow(ChildRowModel):
+    """Derived machinery daily-status row (feature 033, data-model §3.3).
+
+    Rows with ``equipment_ref`` are item rows (identity-deduped across
+    contributing units); rows without are type rows. Written only by the
+    aggregation service.
+    """
+
+    report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='machinery_rows')
+    equipment_type = models.CharField(max_length=120)
+    equipment_ref = models.ForeignKey(
+        'field_reports.Equipment',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_machinery_rows',
+    )
+    status_total = models.PositiveIntegerField(default=0)
+    status_active = models.PositiveIntegerField(default=0)
+    status_ready = models.PositiveIntegerField(default=0)
+    status_inactive = models.PositiveIntegerField(default=0)
+    status_under_repair = models.PositiveIntegerField(default=0)
+    operating_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    stoppage_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    repair_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    stoppage_reason_code = models.CharField(max_length=60, blank=True, default='')
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_machinery',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'daily_report_machinery_rows'
+        indexes = [
+            models.Index(fields=['report', 'equipment_type'], name='drmr_report_type_idx'),
+        ]
+
+
+class DailyReportGeneralActivity(ChildRowModel):
+    """Structured derived general-activity row (feature 033, data-model §3.6).
+
+    Replaces preformatted text-encoding of general activities in the summary.
+    """
+
+    report = models.ForeignKey(
+        DailyReport, on_delete=models.CASCADE, related_name='general_activities',
+    )
+    row_number = models.PositiveIntegerField()
+    activity_description = models.TextField()
+    location = models.CharField(max_length=120, blank=True, default='')
+    quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    unit = models.CharField(max_length=40, null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_general_activities',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'daily_report_general_activities'
+        ordering = ['row_number']
+
+
+class DailyReportVisit(ChildRowModel):
+    """Structured derived visit row (feature 033, data-model §3.7)."""
+
+    report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='visits')
+    row_number = models.PositiveIntegerField()
+    text = models.TextField()
+    source_sub_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_visits',
+    )
+    source_discipline = models.CharField(max_length=20, blank=True, default='')
+    is_derived = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'daily_report_visits'
+        ordering = ['row_number']
 
 
 class DailyReportCorrectionRequest(AuditSoftDeleteModel):
@@ -704,4 +870,52 @@ class SyncConflictLog(UUIDModel):
         db_table = 'sync_conflict_logs'
         indexes = [
             models.Index(fields=['project', 'resolved_at'], name='synclog_project_resolved_idx'),
+        ]
+
+
+class DailyReportDerivedSource(UUIDModel):
+    """Normalized many-source provenance for every derived row or combined
+    value in a project daily summary (feature 032, data-model §8).
+
+    A single-source row has exactly one source; a combined value has all
+    contributing sources in deterministic order. No last-source-wins rule.
+    """
+
+    daily_report = models.ForeignKey(
+        'field_reports.DailyReport', on_delete=models.CASCADE, related_name='derived_sources',
+    )
+    derived_kind = models.CharField(max_length=40)
+    derived_row_id = models.CharField(max_length=64)
+    # Nullable FK for navigation/integrity; snapshots below survive even if a
+    # future retention action nulls the FK.
+    source_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_sources',
+    )
+    source_report_id_snapshot = models.UUIDField()
+    source_report_version = models.PositiveIntegerField(default=1)
+    source_unit = models.CharField(max_length=20)
+    source_row_kind = models.CharField(max_length=40)
+    # String representation supporting both UUID and existing integer source IDs.
+    source_row_id = models.CharField(max_length=64)
+    contribution_value = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    ordinal = models.PositiveIntegerField(default=0)
+
+    class Meta(UUIDModel.Meta):
+        db_table = 'daily_report_derived_sources'
+        ordering = ['derived_kind', 'ordinal', 'id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=[
+                    'derived_kind', 'derived_row_id', 'source_report_id_snapshot',
+                    'source_row_kind', 'source_row_id',
+                ],
+                name='unique_derived_source_key',
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['daily_report', 'derived_kind'], name='drds_report_kind_idx'),
         ]

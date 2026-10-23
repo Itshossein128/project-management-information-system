@@ -50,13 +50,36 @@ export interface DailyReportListItem {
   has_incidents: boolean;
 }
 
+export interface CompletenessMeta {
+  state: "configuration_incomplete" | "partial" | "complete";
+  configuration_id: string | null;
+  source_template: {
+    id: string;
+    name: string;
+  } | null;
+  expected_units: string[];
+  contributing_units: string[];
+  missing_units: string[];
+}
+
+export interface DerivedSourceItem {
+  unit: string;
+  report_id: string;
+  report_version: number;
+  source_row_kind: string;
+  source_row_id: string;
+  contribution_value: string | null;
+  can_view_source: boolean;
+}
+
 export interface AggregationMeta {
   is_auto_summary: boolean;
   aggregated_at: string | null;
   is_partial: boolean;
-  expected_disciplines: string[];
-  contributing_disciplines: string[];
-  missing_disciplines: string[];
+  expected_disciplines?: string[];
+  contributing_disciplines?: string[];
+  missing_disciplines?: string[];
+  completeness?: CompletenessMeta;
   weather_source: "derived" | "override";
   site_status_source: "derived" | "override";
 }
@@ -84,6 +107,7 @@ export interface ActivityRow {
   photo_file: string | null;
   source_discipline?: string;
   is_derived?: boolean;
+  provenance?: DerivedSourceItem[];
 }
 
 export interface LaborRow {
@@ -100,6 +124,7 @@ export interface LaborRow {
   absence_count?: number | null;
   source_discipline?: string;
   is_derived?: boolean;
+  provenance?: DerivedSourceItem[];
 }
 
 export interface EquipmentRow {
@@ -131,6 +156,9 @@ export interface MaterialRow {
   consumption_location?: string;
   activity_ref: string | null;
   notes: string;
+  source_discipline?: string;
+  is_derived?: boolean;
+  provenance?: DerivedSourceItem[];
 }
 
 export interface ConcreteRow {
@@ -142,6 +170,9 @@ export interface ConcreteRow {
   block: string | null;
   floor: string | null;
   notes: string;
+  source_discipline?: string;
+  is_derived?: boolean;
+  provenance?: DerivedSourceItem[];
 }
 
 export interface LaborCampRow {

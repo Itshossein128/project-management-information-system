@@ -87,6 +87,7 @@ export interface DepartmentActivityRecord {
   supplier: string;
   created_at: string;
   updated_at: string;
+  unit_report?: string | null;
 }
 
 export interface DepartmentActivityRecordListParams {

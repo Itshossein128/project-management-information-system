@@ -20,6 +20,7 @@ Project-level blank «گزارش جدید» / `/daily-reports/new` is retired. A
 ## Authorization & Permissions
 
 - **Required Permissions**: `edit_reports` (historical; create control removed from list)
+- **Required Roles / Groups**: None (retired redirect)
 - **Protection notation**: Directory remains bracketed for historical inventory.
 
 ## Desired Result
@@ -28,6 +29,10 @@ Project-level blank «گزارش جدید» / `/daily-reports/new` is retired. A
 - **State Change**: Redirect to daily reports list.
 - **Navigation**: `/projects/:projectId/daily-reports`
 - **UI Feedback**: No blank create form.
+
+## Outcomes & Guards
+
+The blank new report route redirects directly to the daily reports list. No blank creation form exists; daily reports are summaries auto-built by date from Specialty Unit contributions.
 
 ## Subsequent Decisions
 

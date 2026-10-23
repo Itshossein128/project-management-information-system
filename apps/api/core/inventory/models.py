@@ -101,6 +101,15 @@ class DepartmentActivityRecord(TimeStampedModel):
     quantity_out = models.DecimalField(max_digits=14, decimal_places=3, default=0)
     consumption_location = models.CharField(max_length=255, blank=True, default='')
     supplier = models.CharField(max_length=255, blank=True, default='')
+    # Owning unit-report version (feature 032, data-model §6). Nullable only
+    # during migration; every new/mutable product row requires a current parent.
+    unit_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='activity_records',
+    )
 
     class Meta:
         ordering = ['-date', '-created_at']

@@ -32,6 +32,7 @@ def _create_sub_report(auth_client, sub_reports_base):
     )
 
 
+@pytest.mark.skip(reason="Legacy sub-reports endpoints unregistered per FR-032; superseded by canonical unit daily-reports endpoints")
 @pytest.mark.django_db
 class TestSubReportsAPI:
     def test_create_submit_approve(self, auth_client, sub_reports_base, user):

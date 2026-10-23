@@ -135,11 +135,6 @@ export function buildProjectNavItems(projectId: string): NavigationItem[] {
           path: `${base}/${PATHS.PROJECT_SYNC_CONFLICTS}`,
         },
         {
-          label: "Discipline reports",
-          labelI18nKey: "nav.projectSubReports",
-          path: `${base}/${PATHS.PROJECT_SUB_REPORTS}`,
-        },
-        {
           label: "Concrete operations",
           labelI18nKey: "nav.projectConcreteOperations",
           path: `${base}/${PATHS.PROJECT_CONCRETE_OPERATIONS}`,

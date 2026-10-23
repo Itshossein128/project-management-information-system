@@ -221,13 +221,6 @@
       "scope": "Current"
     },
     {
-      "key": "PROJECT_DAILY_REPORT_BY_DATE",
-      "path": "/projects/:projectId/daily-reports (by-date ensure)",
-      "source": "apps/web/src/app/routes/daily-reports-list.tsx",
-      "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/open-by-date",
-      "scope": "Current"
-    },
-    {
       "key": "PROJECT_DAILY_REPORT_EDIT",
       "path": "/projects/:projectId/daily-reports/:reportId/edit",
       "source": "apps/web/src/app/routes/daily-report-form-edit.tsx",
@@ -244,7 +237,7 @@
     {
       "key": "PROJECT_DAILY_REPORT_NEW",
       "path": "/projects/:projectId/daily-reports/new",
-      "source": "apps/web/src/app/routes/daily-reports-list.tsx",
+      "source": "apps/web/src/app/routes/daily-report-form.tsx",
       "node": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
       "scope": "Superseded"
     },
@@ -449,13 +442,6 @@
       "path": "/projects/:projectId/stakeholders",
       "source": "apps/web/src/app/routes/project-stakeholders.tsx",
       "node": "login/submit-valid-credentials/select-project/[navigate-stakeholders]",
-      "scope": "Current"
-    },
-    {
-      "key": "PROJECT_SUB_REPORTS",
-      "path": "/projects/:projectId/sub-reports",
-      "source": "apps/web/src/app/routes/project-sub-reports.tsx",
-      "node": "login/submit-valid-credentials/select-project/[navigate-sub-reports]",
       "scope": "Current"
     },
     {
@@ -1812,191 +1798,6 @@
       "kind": "superseded"
     },
     {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[attach-photo]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-activities/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-concrete/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-equipment/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-incidents/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor-camp/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-labor/add-custom-job-title",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[add-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[delete-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[edit-row]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/[refresh-material-reconciliation]",
-      "protected": true,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[edit-report-sections]/open-materials/retry-row-sync",
-      "protected": false,
-      "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]/[save-report-header]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[delete-report]",
       "protected": true,
       "kind": "mutation"
@@ -3055,21 +2856,6 @@
       "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]",
       "protected": true,
       "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/[create-sub-report]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/[submit-sub-report]",
-      "protected": true,
-      "kind": "mutation"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]/filter-and-change-view",
-      "protected": false,
-      "kind": "local"
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-subcontractors]",

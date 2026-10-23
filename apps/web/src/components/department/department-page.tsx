@@ -1,10 +1,14 @@
-import { useDepartmentActivityRecordsQuery } from "@/app/hooks/queries";
+import {
+  useDepartmentActivityRecordsQuery,
+  isUnitReportEditable,
+} from "@/app/hooks/queries";
 import type {
   DepartmentActivityRecord,
   DepartmentSlug,
 } from "@/app/lib/api-types";
 import { departmentUsesUnit, isWarehouseDepartment } from "@/app/lib/api-types";
 import { apiBlob, apiUploadFile } from "@/app/lib/api-client";
+import type { CanonicalUnit, UnitReport } from "@/app/lib/api/unit-reports";
 import {
   Button,
   ContractorSelect,
@@ -16,12 +20,13 @@ import {
 } from "@/components/form/JalaliDateRangePicker";
 import { DataTable, useGridState } from "@/components/grid";
 import { DepartmentActivityRecordModal } from "@/components/department/department-activity-record-modal";
+import { UnitDailyReportPanel } from "@/components/department/unit-daily-report-panel";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useAuth } from "~/contexts/auth-context";
 import { apiJson } from "~/lib/api-client";
 import { queryKeys } from "~/lib/react-query-keys";
@@ -43,10 +48,12 @@ export interface DepartmentPageProps {
 export function DepartmentPage({ slug }: DepartmentPageProps) {
   const { t } = useTranslation();
   const { businessId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentReport, setCurrentReport] = useState<UnitReport | null>(null);
 
   const dept = findDepartmentBySlug(slug);
   const department = slug as DepartmentSlug;
@@ -55,7 +62,19 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
 
   const grid = useGridState({ initialPageIndex: 0, initialPageSize: 20 });
 
-  const [dateRange, setDateRange] = useState<DateRangeValue>({ from: "", to: "" });
+  const urlDate = searchParams.get("date") ?? "";
+  const [dateRange, setDateRange] = useState<DateRangeValue>({
+    from: urlDate,
+    to: urlDate,
+  });
+
+  useEffect(() => {
+    if (urlDate) {
+      setDateRange({ from: urlDate, to: urlDate });
+    }
+  }, [urlDate]);
+
+  const canMutateRows = isUnitReportEditable(currentReport);
   const [locationFilter, setLocationFilter] = useState("");
   const [activityFilter, setActivityFilter] = useState("");
   const [contractorFilter, setContractorFilter] = useState("");
@@ -435,6 +454,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         onOpenChange={setCreateOpen}
         businessId={businessId ?? ""}
         department={department}
+        defaultDate={urlDate || undefined}
       />
       <header className="page-route-header">
         <div className="page-route-header-inner">
@@ -471,6 +491,16 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       </header>
 
       <main className="page-main" id="container-businessDepartmentMain">
+        <UnitDailyReportPanel
+          businessId={businessId ?? ""}
+          unit={department as CanonicalUnit}
+          onReportChange={setCurrentReport}
+          onDateChange={(d) => {
+            setDateRange({ from: d, to: d });
+            grid.resetPage();
+          }}
+        />
+
         {error && (
           <p
             id="text-departmentError"
@@ -684,7 +714,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   type="button"
                   size="sm"
                   variant="outline"
-                  disabled={importing}
+                  disabled={importing || !canMutateRows}
                   onClick={() => importInputRef.current?.click()}
                 >
                   {importing
@@ -701,7 +731,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                 >
                   {reporting === "daily"
                     ? t("businessDepartment.activityLog.generatingReport")
-                    : t("businessDepartment.activityLog.dailyReport")}
+                    : t("businessDepartment.unitReport.activityLogExport")}
                 </Button>
                 <Button
                   id="button-departmentActivityWeeklyReport"
@@ -719,6 +749,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   id="button-openDepartmentActivityCreateModal"
                   type="button"
                   size="sm"
+                  disabled={!canMutateRows}
                   onClick={() => setCreateOpen(true)}
                 >
                   {t("businessDepartment.activityLog.add")}

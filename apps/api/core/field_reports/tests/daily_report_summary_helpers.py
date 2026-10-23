@@ -1,36 +1,61 @@
 """Shared fixtures/helpers for auto daily-report summary tests."""
+import uuid
 from datetime import date
 
+from common.reporting_units import SpecialtyUnit
 from field_reports.models import LaborCategory
 from sub_reports.models import (
     Discipline,
     DisciplineSubReport,
     DisciplineSubReportActivity,
     DisciplineSubReportLabor,
+    DisciplineSubReportMachinery,
+    DisciplineSubReportMaterial,
     SubReportStatus,
 )
 
 
 SUMMARY_DATE = date(2024, 6, 10)
 
+DISCIPLINE_TO_CANONICAL_UNIT = {
+    'civil': SpecialtyUnit.BUILDINGS,
+    'finishing': SpecialtyUnit.BUILDINGS,
+    'electrical': SpecialtyUnit.ELECTRICAL,
+    'mechanical': SpecialtyUnit.MECHANICAL,
+    'plumbing': SpecialtyUnit.MECHANICAL,
+    'hvac': SpecialtyUnit.MECHANICAL,
+    'machinery': SpecialtyUnit.MACHINERY,
+    'warehouse': SpecialtyUnit.WAREHOUSE,
+    'security': SpecialtyUnit.SECURITY,
+}
+
 
 def make_sub_report(
     project,
     user,
     *,
+    unit=None,
     discipline=Discipline.CIVIL,
     status=SubReportStatus.DRAFT,
     report_date=SUMMARY_DATE,
     weather_condition='clear',
     site_status='active',
+    lineage_id=None,
+    version_number=1,
+    is_current=True,
 ):
+    canonical_unit = unit or DISCIPLINE_TO_CANONICAL_UNIT.get(str(discipline), SpecialtyUnit.BUILDINGS)
     return DisciplineSubReport.objects.create(
         project=project,
         report_date=report_date,
+        unit=canonical_unit,
         discipline=discipline,
         weather_condition=weather_condition,
         site_status=site_status,
         status=status,
+        lineage_id=lineage_id or uuid.uuid4(),
+        version_number=version_number,
+        is_current=is_current,
         created_by=user,
         updated_by=user,
         submitted_by=user if status != SubReportStatus.DRAFT else None,
@@ -60,4 +85,21 @@ def add_labor(sub_report, *, title='کارگر ساده', category=LaborCategory
         job_title=title,
         present_count=present,
         leave_count=leave,
+    )
+
+
+def add_machinery(sub_report, *, name='Excavator', count=1, shift='shift_1'):
+    return DisciplineSubReportMachinery.objects.create(
+        sub_report=sub_report,
+        machinery_name=name,
+        count=count,
+        shift=shift,
+    )
+
+
+def add_material(sub_report, *, name='سیمان', quantity=100):
+    return DisciplineSubReportMaterial.objects.create(
+        sub_report=sub_report,
+        material_name=name,
+        quantity=quantity,
     )

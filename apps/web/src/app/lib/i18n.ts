@@ -29,6 +29,7 @@ function resolveStoredLanguage(): SupportedLanguage | null {
  * hydration mismatches. I18nSync / language store then apply the stored lang.
  */
 const BOOT_LNG: SupportedLanguage = "fa";
+const initialStoredLanguage = resolveStoredLanguage();
 
 i18n
   .use(LanguageDetector)
@@ -48,17 +49,16 @@ i18n
       // Prefer the app language store key; keep i18nextLng as secondary.
       // Disabled on first paint — sync happens via I18nSync after mount.
       order: [],
-      caches: ["localStorage"],
+      caches: [],
       lookupLocalStorage: "app-language",
     },
   });
 
 if (typeof window !== "undefined") {
-  const stored = resolveStoredLanguage();
-  if (stored && stored !== BOOT_LNG) {
+  if (initialStoredLanguage && initialStoredLanguage !== BOOT_LNG) {
     // Defer until after hydration so <html lang/dir> match SSR markup.
     queueMicrotask(() => {
-      void i18n.changeLanguage(stored);
+      void i18n.changeLanguage(initialStoredLanguage);
     });
   }
 }

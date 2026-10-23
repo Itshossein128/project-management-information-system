@@ -55,6 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        <I18nSync />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -67,7 +68,6 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeSync />
-      <I18nSync />
       <TooltipProvider>
       <ToastProvider>
         <PwaManager />
@@ -79,7 +79,17 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [, setLang] = React.useState(i18n.language);
+
+  React.useEffect(() => {
+    const handler = (l: string) => setLang(l);
+    i18n.on("languageChanged", handler);
+    return () => {
+      i18n.off("languageChanged", handler);
+    };
+  }, [i18n]);
+
   let message = t("error.oops");
   let details = t("error.unexpected");
   let stack: string | undefined;

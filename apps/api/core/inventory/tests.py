@@ -374,6 +374,8 @@ class DepartmentActivityDataViewsTests(TestCase):
         self.assertEqual(response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
     def test_import_view(self):
+        from projects.tests.contractor_select_helpers import make_active_contractor
+        make_active_contractor(self.project, self.user, name='Con B')
         url = reverse('project-department-activity-record-import', kwargs={'project_pk': self.project.id})
 
         # Valid xlsx bytes from io tests

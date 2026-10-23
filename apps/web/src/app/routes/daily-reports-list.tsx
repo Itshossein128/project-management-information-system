@@ -313,12 +313,6 @@ export default function DailyReportsListPage() {
         >
           {openingDate ? "…" : t("dailyReports.summary.open", "نمایش")}
         </Button>
-        <Link
-          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SUB_REPORTS}`}
-          className='text-sm text-primary underline-offset-2 hover:underline'
-        >
-          {t("dailyReports.summary.gotoSpecialty", "ثبت گزارش واحد تخصصی")}
-        </Link>
       </div>
 
       {listQuery.isLoading ? (
@@ -331,7 +325,7 @@ export default function DailyReportsListPage() {
           title={t("dailyReports.summary.emptyTitle", "گزارشی یافت نشد")}
           description={t(
             "dailyReports.summary.emptyDesc",
-            "پس از ارسال گزارش‌های واحد تخصصی، جمع‌بندی روزانه اینجا دیده می‌شود. تاریخ را انتخاب کنید یا به گزارش رشته‌ای بروید.",
+            "پس از ارسال گزارش‌های واحد تخصصی، جمع‌بندی روزانه اینجا دیده می‌شود. تاریخ را انتخاب کنید.",
           )}
         />
       ) : (

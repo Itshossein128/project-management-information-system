@@ -341,3 +341,61 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
         if project_pk is None:
             return self.queryset.none()
         return get_department_activity_queryset(project_pk, self.request.query_params)
+
+    # -- unit-report ownership (feature 032, data-model §6) --------------
+
+    def _current_parent_report(self, record_date, department):
+        """Current unit-report for project/department/date, if one exists."""
+        from sub_reports.models import DisciplineSubReport
+
+        project_pk = self.kwargs.get('project_pk')
+        if project_pk is None:
+            return None
+        return (
+            DisciplineSubReport.objects
+            .filter(
+                project_id=project_pk,
+                unit=department,
+                report_date=record_date,
+                is_current=True,
+                is_deleted=False,
+            )
+            .first()
+        )
+
+    def _assert_parent_mutable(self, report):
+        """Mutations require a current draft/rejected parent (or no parent yet)."""
+        from rest_framework.exceptions import ValidationError as DrfValidationError
+
+        if report is None:
+            return
+        if report.status not in ('draft', 'rejected'):
+            raise DrfValidationError({
+                'detail': 'گزارش واحد قابل ویرایش نیست',
+                'code': 'unit_report_not_editable',
+            })
+
+    def perform_create(self, serializer):
+        project_pk = self.kwargs.get('project_pk')
+        record_date = serializer.validated_data.get('date')
+        department = serializer.validated_data.get('department')
+        parent = self._current_parent_report(record_date, department) if record_date and department else None
+        self._assert_parent_mutable(parent)
+        kwargs = {'project_id': project_pk} if project_pk is not None else {}
+        if parent is not None:
+            kwargs['unit_report'] = parent
+        serializer.save(**kwargs)
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        parent = instance.unit_report or self._current_parent_report(instance.date, instance.department)
+        self._assert_parent_mutable(parent)
+        if parent is not None and instance.unit_report_id is None:
+            serializer.save(unit_report=parent)
+        else:
+            serializer.save()
+
+    def perform_destroy(self, instance):
+        parent = instance.unit_report or self._current_parent_report(instance.date, instance.department)
+        self._assert_parent_mutable(parent)
+        instance.delete()

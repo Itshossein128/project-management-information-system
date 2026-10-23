@@ -1,6 +1,8 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
+from projects.models import Activity, Stakeholder
 from sub_reports.models import (
     DisciplineSubReport,
     DisciplineSubReportActivity,
@@ -10,6 +12,7 @@ from sub_reports.models import (
     DisciplineSubReportMaterial,
     DisciplineSubReportNote,
 )
+from sub_reports.section_rules import resolve_shift
 
 
 class SubReportActivitySerializer(serializers.ModelSerializer):
@@ -36,6 +39,74 @@ class SubReportActivitySerializer(serializers.ModelSerializer):
             'activity_ref',
         ]
         read_only_fields = ['id']
+
+
+class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
+    """Canonical unit-report §1 activity rows (feature 033, task T014).
+
+    Enforces the §1 contract at the serializer layer: the recognized shift
+    vocabulary with synonyms (no silent fallback), project-scoped activity and
+    contractor references (fielded stable codes), and a strictly positive
+    quantity when provided. `headcount` is derived and read-only; the model
+    maintains it as foreman_count + worker_count in save().
+    """
+
+    # Not a ChoiceField: synonyms must resolve through validate_shift (no
+    # silent fallback — anything unrecognized is refused, FR-003).
+    shift = serializers.CharField(required=True)
+    headcount = serializers.IntegerField(read_only=True)
+    quantity = serializers.DecimalField(
+        max_digits=18, decimal_places=4, required=False, allow_null=True,
+    )
+    activity_ref = serializers.PrimaryKeyRelatedField(
+        queryset=Activity.objects.all(),
+        required=True,
+        allow_null=False,
+    )
+    contractor_ref = serializers.PrimaryKeyRelatedField(
+        queryset=Stakeholder.objects.all(),
+        required=True,
+        allow_null=False,
+    )
+    foreman_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+    worker_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+
+    class Meta:
+        model = DisciplineSubReportActivity
+        fields = [
+            'row_number',
+            'shift',
+            'crew_name',
+            'foreman_count',
+            'worker_count',
+            'headcount',
+            'activity_ref',
+            'activity_description',
+            'contractor_ref',
+            'parcel',
+            'zone',
+            'block',
+            'floor',
+            'quantity',
+            'unit',
+            'notes',
+        ]
+
+    def validate_shift(self, raw):
+        resolved = resolve_shift(raw)
+        if resolved is None:
+            raise serializers.ValidationError(
+                _('شناسه شیفت نامعتبر است؛ یکی از شیفت‌های ۱ تا ۳ را انتخاب کنید'),
+                code='invalid_shift',
+            )
+        return resolved
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        for field in ('activity_ref', 'contractor_ref'):
+            if data.get(field) is not None:
+                data[field] = str(data[field])
+        return data
 
 
 class SubReportLaborSerializer(serializers.ModelSerializer):

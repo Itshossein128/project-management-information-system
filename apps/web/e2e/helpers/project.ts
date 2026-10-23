@@ -314,39 +314,62 @@ export async function createDailyReportViaApi(
   const headers = await authHeaders(page);
   const reportDate = opts.reportDate ?? "1404/04/26";
 
-  const subRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/sub-reports/`, {
+  const unit = opts.discipline === "electrical" ? "electrical" : opts.discipline === "mechanical" ? "mechanical" : "buildings";
+  const openRes = await page.request.post(`${API_BASE}/v1/projects/${projectId}/units/${unit}/daily-reports/open/`, {
     headers,
     data: {
       report_date: reportDate,
-      discipline: opts.discipline ?? "civil",
-      weather_condition: "clear",
-      activities: [
-        {
-          row_number: 1,
-          shift: "shift_1",
-          crew_name: "E2E crew",
-          worker_count: 2,
-          activity_description: opts.activityDescription ?? "E2E activity row",
-          activity_ref: opts.activityId ?? null,
-          unit: "m3",
-          quantity: opts.quantity ?? 10,
-        },
-      ],
     },
   });
-  if (!subRes.ok()) {
-    throw new Error(`createDailyReportViaApi sub-report failed: ${subRes.status()} ${await subRes.text()}`);
+  if (!openRes.ok()) {
+    throw new Error(`createDailyReportViaApi open unit-report failed: ${openRes.status()} ${await openRes.text()}`);
   }
-  const sub = (await subRes.json()) as { id?: string };
-  if (!sub.id) throw new Error(`createDailyReportViaApi missing sub-report id: ${JSON.stringify(sub)}`);
+  const reportData = (await openRes.json()) as { id?: string };
+  const unitReportId = reportData.id;
+  if (!unitReportId) throw new Error(`createDailyReportViaApi missing report id: ${JSON.stringify(reportData)}`);
+
+  const updateRes = await page.request.patch(
+    `${API_BASE}/v1/projects/${projectId}/units/${unit}/daily-reports/${unitReportId}/`,
+    {
+      headers,
+      data: {
+        weather_condition: "clear",
+        activities: [
+          {
+            row_number: 1,
+            shift: "shift_1",
+            crew_name: "E2E crew",
+            worker_count: 2,
+            activity_description: opts.activityDescription ?? "E2E activity row",
+            activity_ref: opts.activityId ?? null,
+            unit: "m3",
+            quantity: opts.quantity ?? 10,
+          },
+        ],
+      },
+    },
+  );
+  if (!updateRes.ok()) {
+    throw new Error(`createDailyReportViaApi patch failed: ${updateRes.status()} ${await updateRes.text()}`);
+  }
 
   const submitRes = await page.request.post(
-    `${API_BASE}/v1/projects/${projectId}/sub-reports/${sub.id}/submit/`,
+    `${API_BASE}/v1/projects/${projectId}/units/${unit}/daily-reports/${unitReportId}/submit/`,
     { headers },
   );
   if (!submitRes.ok()) {
     throw new Error(
       `createDailyReportViaApi submit failed: ${submitRes.status()} ${await submitRes.text()}`,
+    );
+  }
+
+  const approveRes = await page.request.post(
+    `${API_BASE}/v1/projects/${projectId}/units/${unit}/daily-reports/${unitReportId}/approve/`,
+    { headers },
+  );
+  if (!approveRes.ok()) {
+    throw new Error(
+      `createDailyReportViaApi approve failed: ${approveRes.status()} ${await approveRes.text()}`,
     );
   }
 

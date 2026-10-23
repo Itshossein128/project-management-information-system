@@ -1,5 +1,6 @@
 import pytest
 
+from common.reporting_units import SpecialtyUnit
 from field_reports.services.daily_report_aggregation import ensure_daily_report_summary
 from field_reports.tests.daily_report_summary_helpers import (
     SUMMARY_DATE,
@@ -23,7 +24,7 @@ def test_activity_union_with_provenance(project, user):
     assert len(rows) == 2
     assert all(r.is_derived for r in rows)
     by_desc = {r.activity_description: r for r in rows}
-    assert by_desc['civil-a'].source_discipline == Discipline.CIVIL
+    assert by_desc['civil-a'].source_discipline == SpecialtyUnit.BUILDINGS
     assert by_desc['civil-a'].source_sub_report_id == civil.id
     assert by_desc['civil-a'].zone == 'C8'
     civil.refresh_from_db()

@@ -31,6 +31,13 @@ class Command(BaseCommand):
         admin.set_password('devpass123')
         admin.save()
 
+        visitor, _ = User.objects.get_or_create(
+            mobile='+10000000003',
+            defaults={'username': 'visitor', 'full_name': 'Visitor User'},
+        )
+        visitor.set_password('devpass123')
+        visitor.save()
+
         project = Project.objects.filter(project_code=E2E_PROJECT_CODE).first()
         if project is None:
             project = create_project_with_creator(
