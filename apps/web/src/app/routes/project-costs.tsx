@@ -22,6 +22,8 @@ import { RemainingAllocatablePanel } from "@/components/costs/RemainingAllocatab
 import { VarianceTab } from "@/components/costs/VarianceTab";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { KPICard } from "@/components/progress/KPICard";
 import { Tabs, TabsContent as ShadcnTabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -104,13 +106,89 @@ function CostsContent() {
 
   const consumption = summary?.budget_consumption_pct;
 
+  const { startTour } = useProductTour({
+    tourId: "project-costs",
+    steps: [
+      {
+        element: '[data-tour="costs-kpi-grid"]',
+        popover: {
+          title: t("tour.projectCosts.kpiTitle", {
+            defaultValue: "شاخص‌های کلیدی بودجه و هزینه",
+          }),
+          description: t("tour.projectCosts.kpiDesc", {
+            defaultValue:
+              "خلاصه بودجه مصوب (BAC)، هزینه‌های واقعی، تعهدات و درصد مصرف بودجه پروژه را در یک نگاه بررسی کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="costs-tabs"]',
+        popover: {
+          title: t("tour.projectCosts.tabsTitle", {
+            defaultValue: "تب‌های مدیریت مالی",
+          }),
+          description: t("tour.projectCosts.tabsDesc", {
+            defaultValue:
+              "بین بودجه، هزینه‌های واقعی، تحلیل واریانس، استخرهای هزینه، تعهدات CBS و دفتر کل پرداخت‌ها جابه‌جا شوید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="costs-versions-panel"]',
+        popover: {
+          title: t("tour.projectCosts.versionsTitle", {
+            defaultValue: "نسخه‌های بودجه",
+          }),
+          description: t("tour.projectCosts.versionsDesc", {
+            defaultValue:
+              "نسخه‌های پیش‌نویس را ویرایش کرده یا نسخه کنترل (Baseline) مصوب پروژه را جهت مقایسه عملکرد انتخاب کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="costs-budget-grid"]',
+        popover: {
+          title: t("tour.projectCosts.gridTitle", {
+            defaultValue: "جدول ساختار شکست هزینه (CBS)",
+          }),
+          description: t("tour.projectCosts.gridDesc", {
+            defaultValue:
+              "سطوح مختلف بودجه پروژه را مشاهده کرده و ردیف‌های هزینه را بر اساس گروه‌های کاری مدیریت کنید.",
+          }),
+          side: "top",
+        },
+      },
+      {
+        element: '[data-tour="costs-change-requests"]',
+        popover: {
+          title: t("tour.projectCosts.changeRequestsTitle", {
+            defaultValue: "درخواست‌های تغییر بودجه (BCR)",
+          }),
+          description: t("tour.projectCosts.changeRequestsDesc", {
+            defaultValue:
+              "در صورت نیاز به اصلاح بودجه مصوب، درخواست تغییر ثبت کرده و گردش‌کار تأیید آن را پیگیری نمایید.",
+          }),
+          side: "top",
+        },
+      },
+    ],
+  });
+
   return (
     <div className="space-y-6">
-      <PageHeader title={t("pages.costs.title")} subtitle={project.project_name} />
+      <PageHeader
+        title={t("pages.costs.title")}
+        subtitle={project.project_name}
+        actions={<ProductTourButton onClick={startTour} />}
+      />
 
       <div
         className="grid gap-4 md:grid-cols-2 xl:grid-cols-5"
         data-testid="costs-kpi-grid"
+        data-tour="costs-kpi-grid"
       >
         <KPICard
           title="بودجه کل (BAC)"
@@ -148,7 +226,7 @@ function CostsContent() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="w-full" dir={i18n.dir()}>
-        <TabsList className="mb-4" data-testid="costs-tabs">
+        <TabsList className="mb-4" data-testid="costs-tabs" data-tour="costs-tabs">
           {TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id} data-testid={`costs-tab-${t.id}`}>
               {t.label}
@@ -157,13 +235,15 @@ function CostsContent() {
         </TabsList>
 
         <ShadcnTabsContent value="budget" className="mt-0 space-y-8">
-          <BudgetVersionsPanel
-            projectId={projectId}
-            canEdit={canEdit}
-            canApprove={canApprove}
-            selectedVersionId={activeVersionId}
-            onSelectVersion={setSelectedVersionId}
-          />
+          <div data-tour="costs-versions-panel">
+            <BudgetVersionsPanel
+              projectId={projectId}
+              canEdit={canEdit}
+              canApprove={canApprove}
+              selectedVersionId={activeVersionId}
+              onSelectVersion={setSelectedVersionId}
+            />
+          </div>
           {activeVersionId && !gridLocked ? (
             <BudgetLineEditor
               projectId={projectId}
@@ -171,23 +251,27 @@ function CostsContent() {
               enabled={canEdit}
             />
           ) : null}
-          <BudgetGrid
-            projectId={projectId}
-            canEdit={canEdit}
-            versionId={activeVersionId}
-            locked={gridLocked}
-          />
+          <div data-tour="costs-budget-grid">
+            <BudgetGrid
+              projectId={projectId}
+              canEdit={canEdit}
+              versionId={activeVersionId}
+              locked={gridLocked}
+            />
+          </div>
           <RemainingAllocatablePanel
             projectId={projectId}
             canEdit={canEdit}
             versionId={activeVersion?.is_control ? activeVersionId : null}
           />
-          <BudgetChangeRequestPanel
-            projectId={projectId}
-            canEdit={canEdit}
-            canApprove={canApprove}
-            controlLineId={gridLocked ? controlLineId : null}
-          />
+          <div data-tour="costs-change-requests">
+            <BudgetChangeRequestPanel
+              projectId={projectId}
+              canEdit={canEdit}
+              canApprove={canApprove}
+              controlLineId={gridLocked ? controlLineId : null}
+            />
+          </div>
         </ShadcnTabsContent>
         <ShadcnTabsContent value="actual" className="mt-0">
           <ActualCostsTab projectId={projectId} canEdit={canEdit} />
