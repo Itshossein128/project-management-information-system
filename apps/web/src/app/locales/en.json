@@ -2000,6 +2000,19 @@
       "step3Desc": "Enter shift 1–3 headcount, work hours, and overtime. Row totals and the footer grand total update live.",
       "step4Title": "Save the Day",
       "step4Desc": "Add a custom job title when needed, then save the selected category for this date."
+    },
+    "projectCosts": {
+      "title": "Cost Control & Budget Tour",
+      "kpiTitle": "Budget & Cost KPIs",
+      "kpiDesc": "Review BAC budget summary, actual costs, commitments, and budget consumption percentage at a glance.",
+      "tabsTitle": "Financial Management Tabs",
+      "tabsDesc": "Switch between Budget, Actual Costs, Variance Analysis, Cost Pools, CBS Commitments, and Payments Ledger.",
+      "versionsTitle": "Budget Versions",
+      "versionsDesc": "Edit draft versions or select the approved control baseline version to compare project performance.",
+      "gridTitle": "Cost Breakdown Structure (CBS) Grid",
+      "gridDesc": "View multi-level budget lines and manage cost items grouped by work packages.",
+      "changeRequestsTitle": "Budget Change Requests (BCR)",
+      "changeRequestsDesc": "Submit budget change requests with impact rationale and track approval workflow."
     }
   },
   "dailyReports": {

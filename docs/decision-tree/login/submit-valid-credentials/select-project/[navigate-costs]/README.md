@@ -30,6 +30,7 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 
 ## Subsequent Decisions
 
+- [Start product tour](start-product-tour/README.md)
 - [Open Budget tab](open-budget-tab/README.md)
 - [Open Actual costs tab](open-actual-tab/README.md)
 - [Open Variance tab](open-variance-tab/README.md)

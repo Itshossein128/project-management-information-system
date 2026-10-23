@@ -1212,6 +1212,11 @@
       "kind": "mutation"
     },
     {
+      "path": "login/submit-valid-credentials/open-executive-dashboard",
+      "protected": false,
+      "kind": "page"
+    },
+    {
       "path": "login/submit-valid-credentials/open-mobile-navigation",
       "protected": false,
       "kind": "local"
@@ -1797,14 +1802,13 @@
       "kind": "local"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-costs]/start-product-tour",
+      "protected": false
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]",
       "protected": true,
       "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/open-by-date",
-      "protected": false,
-      "kind": "local"
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[create-report]",
@@ -2277,9 +2281,29 @@
       "kind": "local"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/open-by-date",
+      "protected": false,
+      "kind": "local"
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/retry-failed-load",
       "protected": false,
       "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-dashboard]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-decision-support]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-decisions-workflow]",
+      "protected": true,
+      "kind": "page"
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-documents]",
@@ -2917,6 +2941,11 @@
       "kind": "local"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-quality-hse]",
+      "protected": true,
+      "kind": "page"
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-resource-allocations]",
       "protected": true,
       "kind": "page"
@@ -3050,6 +3079,11 @@
       "path": "login/submit-valid-credentials/select-project/[navigate-stakeholders]/[create-stakeholder]",
       "protected": true,
       "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-standard-reports]",
+      "protected": true,
+      "kind": "page"
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-sub-reports]",
@@ -3340,36 +3374,6 @@
       "path": "login/toggle-theme",
       "protected": false,
       "kind": "local"
-    },
-    {
-      "path": "login/submit-valid-credentials/open-executive-dashboard",
-      "protected": false,
-      "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-dashboard]",
-      "protected": true,
-      "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-standard-reports]",
-      "protected": true,
-      "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-decision-support]",
-      "protected": true,
-      "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-quality-hse]",
-      "protected": true,
-      "kind": "page"
-    },
-    {
-      "path": "login/submit-valid-credentials/select-project/[navigate-decisions-workflow]",
-      "protected": true,
-      "kind": "page"
     }
   ]
 }
