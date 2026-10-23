@@ -9,8 +9,6 @@ from sub_reports.models import (
     DisciplineSubReport,
     DisciplineSubReportActivity,
     DisciplineSubReportLabor,
-    DisciplineSubReportMachinery,
-    DisciplineSubReportMaterial,
     SubReportStatus,
 )
 
@@ -62,19 +60,32 @@ def make_sub_report(
     )
 
 
-def add_activity(sub_report, *, description='Activity', shift='shift_1', workers=2, zone='Z1'):
+def add_activity(
+    sub_report,
+    *,
+    description='Activity',
+    shift='shift_1',
+    workers=2,
+    foreman=None,
+    zone='Z1',
+    parcel=None,
+    notes='',
+):
     return DisciplineSubReportActivity.objects.create(
         sub_report=sub_report,
         row_number=sub_report.activities.count() + 1,
         shift=shift,
         crew_name='Crew',
+        foreman_count=foreman,
         worker_count=workers,
         zone=zone,
+        parcel=parcel,
         block='B1',
         floor='1',
         activity_description=description,
         unit='m2',
         quantity=10,
+        notes=notes,
     )
 
 
@@ -88,18 +99,4 @@ def add_labor(sub_report, *, title='کارگر ساده', category=LaborCategory
     )
 
 
-def add_machinery(sub_report, *, name='Excavator', count=1, shift='shift_1'):
-    return DisciplineSubReportMachinery.objects.create(
-        sub_report=sub_report,
-        machinery_name=name,
-        count=count,
-        shift=shift,
-    )
 
-
-def add_material(sub_report, *, name='سیمان', quantity=100):
-    return DisciplineSubReportMaterial.objects.create(
-        sub_report=sub_report,
-        material_name=name,
-        quantity=quantity,
-    )

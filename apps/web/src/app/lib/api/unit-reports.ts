@@ -3,7 +3,7 @@
  * Not the legacy hr-forms helpers — this targets the canonical unit-report
  * contract under `/projects/{id}/units/{unit}/daily-reports/`.
  */
-import { apiJson } from "@/app/lib/api-client";
+import { apiJson, ApiRequestError } from "@/app/lib/api-client";
 
 export type CanonicalUnit =
   | "buildings"
@@ -12,6 +12,16 @@ export type CanonicalUnit =
   | "machinery"
   | "warehouse"
   | "security";
+
+export const ACTIVITY_ENABLED_UNITS: readonly CanonicalUnit[] = [
+  "buildings",
+  "electrical",
+  "mechanical",
+] as const;
+
+export function unitSupportsActivitiesSection(unit: CanonicalUnit | string): boolean {
+  return (ACTIVITY_ENABLED_UNITS as readonly string[]).includes(unit);
+}
 
 export type UnitReportStatus = "draft" | "submitted" | "approved" | "rejected";
 
@@ -165,3 +175,165 @@ export const rejectUnitReport = (p: string, u: CanonicalUnit, id: string, reject
 
 export const correctUnitReport = (p: string, u: CanonicalUnit, id: string) =>
   transition(p, u, id, "correct");
+
+// ---------------------------------------------------------------------------
+// Feature 033 §1 — Executed Activities Section CRUD & Validation Contract
+// ---------------------------------------------------------------------------
+
+export interface UnitReportActivityRow {
+  id: string;
+  row_number: number;
+  shift: string;
+  crew_name: string;
+  foreman_count: number | null;
+  worker_count: number | null;
+  headcount: number | null;
+  activity_ref: string;
+  activity_code?: string | null;
+  activity_name?: string | null;
+  activity_description: string;
+  contractor_ref: string;
+  contractor_name?: string | null;
+  parcel: string | null;
+  zone: string | null;
+  block: string | null;
+  floor: string | null;
+  quantity: string | null;
+  unit: string | null;
+  notes: string;
+}
+
+export interface UnitReportActivityPayload {
+  row_number?: number;
+  shift: string;
+  crew_name?: string;
+  foreman_count?: number | null;
+  worker_count?: number | null;
+  activity_ref: string | null;
+  activity_description: string;
+  contractor_ref: string | null;
+  parcel?: string | null;
+  zone?: string | null;
+  block?: string | null;
+  floor?: string | null;
+  quantity?: string | number | null;
+  unit?: string | null;
+  notes?: string;
+}
+
+export interface SectionFieldError {
+  row?: number;
+  field: string | null;
+  code: string;
+  message: string;
+}
+
+export interface ParsedSectionError {
+  topCode: string | null;
+  topMessage: string;
+  fieldErrors: Record<string, SectionFieldError[]>;
+  allErrors: SectionFieldError[];
+}
+
+export function extractSectionErrors(err: unknown): ParsedSectionError {
+  const fieldErrors: Record<string, SectionFieldError[]> = {};
+  const allErrors: SectionFieldError[] = [];
+  let topCode: string | null = null;
+  let topMessage = err instanceof Error ? err.message : String(err);
+
+  if (err instanceof ApiRequestError) {
+    topCode = err.code ?? null;
+    topMessage = err.message;
+    const details = err.details as { errors?: unknown[] } | undefined;
+    if (details && Array.isArray(details.errors)) {
+      for (const item of details.errors) {
+        if (item && typeof item === "object") {
+          const raw = item as Record<string, unknown>;
+          const code = typeof raw.code === "string" ? raw.code : topCode ?? "invalid";
+          const field = typeof raw.field === "string" ? raw.field : null;
+          const message = typeof raw.message === "string" ? raw.message : topMessage;
+          const entry: SectionFieldError = {
+            row: typeof raw.row === "number" ? raw.row : 0,
+            field,
+            code,
+            message,
+          };
+          allErrors.push(entry);
+          if (field) {
+            if (!fieldErrors[field]) fieldErrors[field] = [];
+            fieldErrors[field].push(entry);
+          }
+        }
+      }
+    }
+    if (allErrors.length === 0 && topCode) {
+      allErrors.push({
+        field: null,
+        code: topCode,
+        message: topMessage,
+      });
+    }
+  }
+
+  return {
+    topCode,
+    topMessage,
+    fieldErrors,
+    allErrors,
+  };
+}
+
+export function fetchUnitReportActivities(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+): Promise<UnitReportActivityRow[]> {
+  return apiJson<UnitReportActivityRow[]>(
+    `${base(projectId, unit)}/${reportId}/activities/`,
+  );
+}
+
+export function createUnitReportActivity(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  payload: UnitReportActivityPayload | UnitReportActivityPayload[],
+): Promise<UnitReportActivityRow[]> {
+  return apiJson<UnitReportActivityRow[]>(
+    `${base(projectId, unit)}/${reportId}/activities/`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function updateUnitReportActivity(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+  payload: Partial<UnitReportActivityPayload>,
+): Promise<UnitReportActivityRow> {
+  return apiJson<UnitReportActivityRow>(
+    `${base(projectId, unit)}/${reportId}/activities/${rowId}/`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export function deleteUnitReportActivity(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  rowId: string,
+): Promise<void> {
+  return apiJson<void>(
+    `${base(projectId, unit)}/${reportId}/activities/${rowId}/`,
+    {
+      method: "DELETE",
+    },
+  );
+}

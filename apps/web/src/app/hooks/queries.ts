@@ -13,6 +13,8 @@ import {
   type CanonicalUnit,
   type UnitReport,
   type UnitReportHistory,
+  type UnitReportActivityRow,
+  type UnitReportActivityPayload,
   fetchCurrentUnitReport,
   openUnitReport,
   submitUnitReport,
@@ -21,6 +23,10 @@ import {
   correctUnitReport,
   deleteUnitReport,
   fetchUnitReportHistory,
+  fetchUnitReportActivities,
+  createUnitReportActivity,
+  updateUnitReportActivity,
+  deleteUnitReportActivity,
 } from "@/app/lib/api/unit-reports";
 import { queryKeys } from "@/app/lib/react-query-keys";
 import { PATHS } from "@/app/routeVars";
@@ -509,6 +515,108 @@ export function useUnitReportHistoryQuery(
         unit as CanonicalUnit,
         reportId!,
       ),
+  });
+}
+
+export function useUnitReportActivitiesQuery(
+  businessId: number | string | undefined,
+  unit: CanonicalUnit | string | undefined,
+  reportId: string | undefined,
+  enabled = true,
+) {
+  return useQuery<UnitReportActivityRow[]>({
+    queryKey: queryKeys.unitReportActivities(businessId ?? "", unit ?? "", reportId ?? ""),
+    enabled: Boolean(enabled && businessId && unit && reportId),
+    queryFn: () =>
+      fetchUnitReportActivities(
+        String(businessId),
+        unit as CanonicalUnit,
+        reportId!,
+      ),
+  });
+}
+
+export function useCreateUnitReportActivity(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UnitReportActivityPayload) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return createUnitReportActivity(String(businessId), unit, reportId, payload);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportActivities(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useUpdateUnitReportActivity(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      rowId,
+      patch,
+    }: {
+      rowId: string;
+      patch: Partial<UnitReportActivityPayload>;
+    }) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return updateUnitReportActivity(
+        String(businessId),
+        unit,
+        reportId,
+        rowId,
+        patch,
+      );
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportActivities(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
+  });
+}
+
+export function useDeleteUnitReportActivity(
+  businessId: number | string,
+  unit: CanonicalUnit,
+  reportId: string | undefined,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (rowId: string) => {
+      if (!reportId) throw new Error("Missing reportId");
+      return deleteUnitReportActivity(String(businessId), unit, reportId, rowId);
+    },
+    onSuccess: () => {
+      if (reportId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.unitReportActivities(businessId, unit, reportId),
+        });
+      }
+      void qc.invalidateQueries({
+        queryKey: ["businesses", businessId, "unit-report", unit],
+      });
+    },
   });
 }
 

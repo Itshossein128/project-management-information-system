@@ -143,6 +143,11 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
         allow_null=True,
     )
     provenance = serializers.SerializerMethodField()
+    # Contract daily-summary-sections-api.md §1.1: contractor label and crew
+    # name are separate columns (never merged); `location` maps the zone and
+    # keeps unknown (null) distinct from empty ('').
+    contractor = serializers.SerializerMethodField()
+    location = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportActivity
@@ -155,10 +160,16 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'subcontractor_name',
             'subcontractor_ref',
             'contractor_ref',
+            'contractor',
+            'crew_name',
             'headcount',
+            'foreman_count',
+            'worker_count',
+            'parcel',
             'zone',
             'block',
             'floor',
+            'location',
             'location_detail',
             'quantity',
             'quantity_measured',
@@ -174,6 +185,13 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'provenance',
         ]
         read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+
+    def get_contractor(self, obj):
+        ref = getattr(obj, 'contractor_ref', None)
+        return ref.name if ref else None
+
+    def get_location(self, obj):
+        return obj.zone
 
     def get_provenance(self, obj):
         return _build_provenance_list(obj, 'activity', self.context)

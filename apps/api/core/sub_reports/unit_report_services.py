@@ -365,14 +365,18 @@ def correct_unit_report(report, *, user, unit=None):
             crew_name=act.crew_name,
             foreman_count=act.foreman_count,
             worker_count=act.worker_count,
+            headcount=act.headcount,
+            parcel=act.parcel,
             zone=act.zone,
             block=act.block,
             floor=act.floor,
             activity_description=act.activity_description,
+            notes=act.notes,
             unit=act.unit,
             quantity=act.quantity,
             execution_percentage=act.execution_percentage,
             activity_ref=act.activity_ref,
+            contractor_ref=act.contractor_ref,
         )
 
     for dar in locked.activity_records.all().order_by('id'):

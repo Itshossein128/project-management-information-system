@@ -13,10 +13,10 @@ from field_reports.tests.daily_report_summary_helpers import (
     SUMMARY_DATE,
     add_activity,
     add_labor,
-    add_machinery,
-    add_material,
 )
 from master_data.models import ProjectMember, ProjectMemberRole, Role, RolePermission
+from projects.models import Stakeholder
+from projects.services import create_project_with_creator
 from sub_reports.models import DisciplineSubReport, SubReportStatus
 
 
@@ -143,10 +143,13 @@ def test_serialized_provenance_disclosure_and_permissions(project, user):
 
 
 class TestSectionProvenance:
-    """Provenance contracts for machinery/materials/crew-hours (feature 033, T013).
+    """Provenance + full-site-column contracts for the derived activity row
+    (feature 033, T013).
 
-    Contracts/unit-report-sections-api.md §2: section rows whose values are
-    derived disclose source-report/version/row/unit per contibuting row.
+    Contracts/unit-report-sections-api.md §1 and daily-summary-sections-api.md
+    §1.1/§4: the derived activity row carries the full FR-001 column set, keeps
+    crew name and contractor distinct, and discloses source report/version/row
+    per contributing row. Cross-project rows never contribute.
     """
 
     def _reporter(self, project, user):
@@ -163,76 +166,80 @@ class TestSectionProvenance:
         return {'request': type('Request', (), {'user': user, 'project_id': project.id})()}
 
     @pytest.mark.django_db
-    def test_derived_machinery_rows_disclose_sources(self, project, user):
+    def test_derived_activity_row_exposes_full_site_columns(self, project, user):
+        """US1 mandatory scenario 1: an approved unit activity appears with all
+        required columns and a source link; crew never substituted for contractor.
+        """
         self._reporter(project, user)
-        r1 = make_unit_report(project, user, unit=SpecialtyUnit.BUILDINGS, version_number=1)
-        r2 = make_unit_report(project, user, unit=SpecialtyUnit.ELECTRICAL, version_number=1)
-        m1 = add_machinery(r1, name='Excavator', count=2)
-        m2 = add_machinery(r2, name='Excavator', count=1)
+        contractor = Stakeholder.objects.create(project=project, name='پارسیان', created_by=user)
+        r = make_unit_report(
+            project, user, unit=SpecialtyUnit.BUILDINGS,
+            status=SubReportStatus.APPROVED, version_number=1,
+        )
+        act = add_activity(
+            r, description='بلوک چینی', shift='shift_2', workers=4, foreman=1,
+            zone='Z2', parcel='P-7', notes='با جرثقیل',
+        )
+        act.contractor_ref = contractor
+        act.save()
 
         summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
-        row = next(r for r in summary.machinery_entries.all() if r.is_derived)
+        derived = summary.activities.get(is_derived=True)
 
-        data = DailyReportDetailSerializer(summary, context=self._request(project, user)).data
-        assert data['machinery_section'] is not None
-        row_data = next(
-            r for r in data['machinery_section']['rows'] if r['is_derived'] and r['machinery_name'] == 'Excavator',
+        # FR-001 column set; null-preserving: unknown stays null (never zeroed).
+        assert derived.activity_description == 'بلوک چینی'
+        assert derived.shift == 'shift_2'  # never silently remapped to shift_1
+        assert derived.parcel == 'P-7'
+        assert derived.block == 'B1'
+        assert derived.floor == '1'
+        assert derived.zone == 'Z2'
+        assert derived.location_detail is None  # unknown ≠ empty ≠ zero
+        assert derived.headcount == 5
+        assert derived.foreman_count == 1
+        assert derived.worker_count == 4
+        assert derived.crew_name == 'Crew'
+        assert derived.contractor_ref == contractor
+        assert derived.crew_name != derived.contractor_ref.name
+        assert derived.notes == 'با جرثقیل'
+
+        # Exactly one provenance row linking back to the source unit row.
+        src = DailyReportDerivedSource.objects.get(
+            daily_report=summary, derived_kind='activity',
+            derived_row_id=str(derived.id),
         )
-        assert row_data['total_count'] == 3
-        assert len(row_data['provenance']) == 2
-        units = {p['unit'] for p in row_data['provenance']}
-        assert units == {SpecialtyUnit.BUILDINGS, SpecialtyUnit.ELECTRICAL}
-        for p in row_data['provenance']:
-            assert p['report_id'] in {str(r1.id), str(r2.id)}
-            assert p['report_version'] == 1
-            assert p['source_row_kind'] == 'machinery'
-            assert p['source_row_id'] in {str(m1.id), str(m2.id)}
-            assert p['can_view_source'] is True
+        assert src.source_report == r
+        assert src.source_report_id_snapshot == r.id
+        assert src.source_report_version == 1
+        assert src.source_unit == SpecialtyUnit.BUILDINGS
+        assert src.source_row_kind == 'activity'
+        assert src.source_row_id == str(act.id)
+
+        # Serialized view keeps crew/contractor distinct and exposes provenance.
+        data = DailyReportDetailSerializer(summary, context=self._request(project, user)).data
+        row = next(a for a in data['activities'] if a['is_derived'])
+        assert row['crew_name'] == 'Crew'
+        assert row['contractor'] == 'پارسیان'
+        assert row['headcount'] == 5
+        assert row['parcel'] == 'P-7'
+        assert row['location'] == 'Z2'
+        assert row['notes'] == 'با جرثقیل'
+        assert len(row['provenance']) == 1
+        assert row['provenance'][0]['source_row_id'] == str(act.id)
+        assert row['provenance'][0]['report_id'] == str(r.id)
+        assert row['provenance'][0]['can_view_source'] is True
 
     @pytest.mark.django_db
-    def test_derived_material_totals_disclose_sources(self, project, user):
-        self._reporter(project, user)
-        r1 = make_unit_report(project, user, unit=SpecialtyUnit.BUILDINGS, version_number=3)
-        r2 = make_unit_report(project, user, unit=SpecialtyUnit.ELECTRICAL, version_number=1)
-        add_material(r1, name='سیمان', quantity=120)
-        add_material(r2, name='سیمان', quantity=80)
-
-        summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
-        row = next(r for r in summary.material_entries.all() if r.is_derived)
-
-        data = DailyReportDetailSerializer(summary, context=self._request(project, user)).data
-        row_data = next(
-            r for r in data['materials_section']['rows'] if r['is_derived'] and r['material_name'] == 'سیمان',
+    def test_cross_project_source_contributes_nothing(self, project, user):
+        other = create_project_with_creator(
+            creator=user, project_code='PRJ-OTHER', project_name='Other Project',
+            employer='Other Employer', start_date='2024-01-01',
         )
-        assert Decimal(str(row_data['total_quantity'])) == Decimal('200')
-        prov = {p['source_unit']: p for p in row_data['provenance']}
-        assert set(prov) == {SpecialtyUnit.BUILDINGS, SpecialtyUnit.ELECTRICAL}
-        b = prov[SpecialtyUnit.BUILDINGS]
-        assert b['report_id'] == str(r1.id)
-        assert b['report_version'] == 3
-        assert b['contribution_value'] is not None
-
-    @pytest.mark.django_db
-    def test_derived_crew_hours_disclose_shift_sources(self, project, user):
-        self._reporter(project, user)
-        r = make_unit_report(project, user, unit=SpecialtyUnit.BUILDINGS, version_number=1)
-        add_labor(r, title='اسکلت باز', present=6, leave=0)
-        add_activity(r, description='بلوک چینی', shift='shift_2', workers=4)
+        foreign = make_unit_report(other, user, unit=SpecialtyUnit.ELECTRICAL, version_number=1)
+        add_activity(foreign, description='Foreign work')
 
         summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
-        assert summary.crew_hours_rows is not None
-        rows = summary.crew_hours_rows.get('rows', [])
-        assert rows, 'crew-hours rows must exist for shift_2 activities'
-        row = next(r for r in rows if r.get('is_derived'))
 
-        data = DailyReportDetailSerializer(summary, context=self._request(project, user)).data
-        ch_rows = [
-            r for r in data['crew_hours_section']['rows']
-            if r.get('is_derived') and r.get('shift') == row['shift']
-        ]
-        assert ch_rows
-        for p in ch_rows[0]['provenance']:
-            assert p['unit'] == SpecialtyUnit.BUILDINGS
-            assert p['report_id'] == str(r.id)
-            assert p['source_row_kind'] in ('labor', 'activity')
-            assert p['can_view_source'] is True
+        assert list(summary.activities.filter(is_derived=True)) == []
+        assert not DailyReportDerivedSource.objects.filter(
+            daily_report=summary, source_report_id_snapshot=foreign.id,
+        ).exists()

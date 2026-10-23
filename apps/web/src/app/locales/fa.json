@@ -363,7 +363,70 @@
       "event": "رویداد",
       "actor": "اقدام‌کننده",
       "time": "زمان",
-      "reason": "توضیحات"
+      "reason": "توضیحات",
+      "sections": {
+        "activities": {
+          "tab": "فعالیت‌های اجرایی",
+          "title": "بخش ۲ — فعالیت‌های اجرا شده کارگاه",
+          "subtitle": "ثبت فعالیت‌های اجرایی مرتبط با ساختار شکست کار (WBS)، پیمانکار، اکیپ و احجام اجرا شده",
+          "rowCount": "{{count}} ردیف",
+          "addRow": "افزودن ردیف فعالیت",
+          "updateRow": "به‌روزرسانی ردیف",
+          "empty": "هنوز ردیف فعالیت اجرایی برای این گزارش ثبت نشده است.",
+          "shifts": {
+            "shift_1": "شیفت ۱ (روز)",
+            "shift_2": "شیفت ۲ (عصر)",
+            "shift_3": "شیفت ۳ (شب)"
+          },
+          "fields": {
+            "activityRef": "فعالیت WBS",
+            "activityRefPlaceholder": "انتخاب یا جستجوی فعالیت WBS...",
+            "activityRefSearch": "جستجوی کد یا عنوان فعالیت...",
+            "activityRefAdd": "+ افزودن فعالیت جدید به WBS",
+            "activityDescription": "شرح فعالیت اجرا شده",
+            "activityDescriptionPlaceholder": "شرح فعالیت اجرایی در کارگاه...",
+            "shift": "شیفت کاری",
+            "shiftPlaceholder": "انتخاب شیفت",
+            "contractor": "پیمانکار",
+            "contractorPlaceholder": "انتخاب یا جستجوی پیمانکار...",
+            "contractorSearch": "جستجوی نام پیمانکار...",
+            "contractorAdd": "+ افزودن پیمانکار جدید",
+            "crewName": "نام اکیپ / سرپرست اکیپ",
+            "crewNamePlaceholder": "مثال: اکیپ آرماتوربندی رضایی",
+            "foremanCount": "تعداد استادکار",
+            "workerCount": "تعداد کارگر",
+            "headcount": "جمع نفرات",
+            "parcel": "پارسل / قطعه",
+            "block": "بلوک",
+            "floor": "طبقه / تراز",
+            "location": "زون / جبهه کاری",
+            "quantity": "مقدار اجرا شده",
+            "unit": "واحد سنجش",
+            "notes": "توضیحات"
+          },
+          "columns": {
+            "wbsActivity": "فعالیت WBS",
+            "description": "شرح فعالیت",
+            "shift": "شیفت",
+            "contractor": "پیمانکار",
+            "crewName": "نام اکیپ",
+            "headcount": "نفرات (استادکار/کارگر)",
+            "parcel": "پارسل",
+            "blockFloorZone": "بلوک / طبقه / زون",
+            "quantity": "مقدار",
+            "unit": "واحد",
+            "notes": "توضیحات"
+          },
+          "errors": {
+            "quantity_must_be_positive": "مقدار فعالیت اجرایی باید بزرگتر از صفر باشد.",
+            "invalid_shift": "شیفت انتخاب‌شده معتبر نیست (فقط شیفت ۱ تا ۳ مجاز است).",
+            "activity_not_in_project_scope": "فعالیت انتخاب‌شده متعلق به ساختار شکست کار (WBS) این پروژه نیست.",
+            "contractor_not_in_project_scope": "پیمانکار انتخاب‌شده متعلق به این پروژه نیست.",
+            "contractor_required": "انتخاب پیمانکار یا وارد کردن نام پیمانکار الزامی است.",
+            "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد."
+          }
+        }
+      }
     }
   },
   "login": {
@@ -446,7 +509,13 @@
     "source_relation_project_mismatch": "پروژه ردیف با پروژه گزارش مطابقت ندارد.",
     "temp_max_must_be_gte_temp_min": "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.",
     "inactivity_reason_required": "در صورت تعطیلی کارگاه، انتخاب علت الزامی است.",
-    "auto_summary_only": "گزارش روزانه پروژه به صورت خودکار از گزارش‌های واحد تخصصی ایجاد می‌شود."
+    "auto_summary_only": "گزارش روزانه پروژه به صورت خودکار از گزارش‌های واحد تخصصی ایجاد می‌شود.",
+    "quantity_must_be_positive": "مقدار فعالیت اجرایی باید بزرگتر از صفر باشد.",
+    "invalid_shift": "شیفت انتخاب‌شده معتبر نیست (فقط شیفت ۱ تا ۳ مجاز است).",
+    "activity_not_in_project_scope": "فعالیت انتخاب‌شده متعلق به ساختار شکست کار (WBS) این پروژه نیست.",
+    "contractor_not_in_project_scope": "پیمانکار انتخاب‌شده متعلق به این پروژه نیست.",
+    "contractor_required": "انتخاب پیمانکار یا وارد کردن نام پیمانکار الزامی است.",
+    "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد."
   },
   "dashboard": {
     "portfolio": {
@@ -2138,7 +2207,18 @@
       "managementOpinion": "نظر مدیریت",
       "override": "لغو خودکار",
       "weatherOverride": "لغو خودکار شرایط جوی",
-      "siteOverride": "لغو خودکار وضعیت کارگاه"
+      "siteOverride": "لغو خودکار وضعیت کارگاه",
+      "colDescription": "شرح فعالیت",
+      "colShift": "شیفت",
+      "colContractor": "پیمانکار",
+      "colCrewName": "نام اکیپ",
+      "colHeadcount": "نفرات",
+      "colParcel": "پارسل",
+      "colLocation": "موقعیت (بلوک/طبقه/زون)",
+      "colQuantity": "مقدار",
+      "colUnit": "واحد",
+      "colDiscipline": "واحد تخصصی",
+      "colSources": "منابع"
     },
     "inactivityReason": "علت تعطیلی",
     "selectInactivityReason": "-- انتخاب علت تعطیلی --",

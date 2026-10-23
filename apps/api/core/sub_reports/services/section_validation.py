@@ -143,43 +143,7 @@ def validate_activity_rows(report, rows, context=None):
             continue
 
         validated = dict(serializer.validated_data)
-        if validated.get('quantity') is not None and validated['quantity'] <= 0:
-            errors.append({
-                'row': index,
-                'field': 'quantity',
-                'code': QUANTITY_POSITIVE_ERROR,
-                'message': str(ERROR_MESSAGES[QUANTITY_POSITIVE_ERROR]),
-            })
-            continue
-
-        ref = validated.get('activity_ref')
-        if ref is None or not _activity_active_and_within_project(ref, report.project_id):
-            errors.append({
-                'row': index,
-                'field': 'activity_ref',
-                'code': ACTIVITY_SCOPE_ERROR,
-                'message': str(ERROR_MESSAGES[ACTIVITY_SCOPE_ERROR]),
-            })
-            continue
-
-        contractor = validated.get('contractor_ref')
-        if contractor is None:
-            errors.append({
-                'row': index,
-                'field': 'contractor_ref',
-                'code': CONTRACTOR_REQUIRED_ERROR,
-                'message': str(ERROR_MESSAGES[CONTRACTOR_REQUIRED_ERROR]),
-            })
-            continue
-        if not _contractor_within_project(contractor, report.project_id):
-            errors.append({
-                'row': index,
-                'field': 'contractor_ref',
-                'code': CONTRACTOR_SCOPE_ERROR,
-                'message': str(ERROR_MESSAGES[CONTRACTOR_SCOPE_ERROR]),
-            })
-            continue
-
+        errors.extend(_contract_errors(report, validated, index))
         if errors:
             continue
 
@@ -190,6 +154,76 @@ def validate_activity_rows(report, rows, context=None):
     if errors:
         raise SectionContractError(field_errors=errors)
     return saved
+
+
+def _contract_errors(report, validated, index=0):
+    """§1 per-row contract checks shared by the create and update paths.
+
+    Only fields present in ``validated`` are checked: on PATCH an absent
+    field stays as persisted (the serializer already refuses missing
+    required fields on full writes), while every provided value runs the
+    full scope/positivity suite. Short-circuits on the first violation per
+    row so one row never emits duplicate codes (T012 expectations).
+    """
+    errors = []
+
+    def err(field, code):
+        return {
+            'row': index,
+            'field': field,
+            'code': code,
+            'message': str(ERROR_MESSAGES[code]),
+        }
+
+    if 'quantity' in validated:
+        quantity = validated['quantity']
+        if quantity is not None and quantity <= 0:
+            return [err('quantity', QUANTITY_POSITIVE_ERROR)]
+
+    if 'activity_ref' in validated:
+        ref = validated['activity_ref']
+        if ref is None or not _activity_active_and_within_project(ref, report.project_id):
+            return [err('activity_ref', ACTIVITY_SCOPE_ERROR)]
+
+    if 'contractor_ref' in validated:
+        contractor = validated['contractor_ref']
+        if contractor is None:
+            return [err('contractor_ref', CONTRACTOR_REQUIRED_ERROR)]
+        if not _contractor_within_project(contractor, report.project_id):
+            return [err('contractor_ref', CONTRACTOR_SCOPE_ERROR)]
+
+    return errors
+
+
+@transaction.atomic
+def update_activity_row(report, row, payload, context=None):
+    """Validate + apply a partial §1 update bound to this version (T017).
+
+    Instance-bound PATCH semantics: only provided fields change, but every
+    provided value re-runs the full section-contract suite. Raises
+    :class:`SectionContractError` with the fielded codes otherwise.
+    """
+    serializer = UnitReportActivitySectionSerializer(
+        instance=row, data=payload, context=context or {}, partial=True,
+    )
+    try:
+        serializer.is_valid(raise_exception=True)
+    except DRFValidationError as exc:
+        errors = []
+        for field, detail in exc.detail.items():
+            errors.extend(_error_from_drf(0, field, detail))
+        raise SectionContractError(field_errors=errors)
+
+    validated = dict(serializer.validated_data)
+    errors = _contract_errors(report, validated, 0)
+    if errors:
+        raise SectionContractError(field_errors=errors)
+
+    updated = serializer.save()
+    if 'row_number' in validated:
+        # row_number addresses ordering only; keep the persisted sequence.
+        updated.refresh_from_db(fields=['row_number'])
+    return updated
 
 
 def _next_row_number(report, related_name):

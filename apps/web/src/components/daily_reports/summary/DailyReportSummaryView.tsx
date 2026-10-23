@@ -388,24 +388,30 @@ export function DailyReportSummaryView({
       >
         <SimpleTable
           headers={[
-            "شرح",
-            "شیفت",
-            "پیمانکار",
-            "نفر",
-            "محل",
-            "مقدار",
-            "واحد",
-            "رشته",
-            "منابع",
+            t("dailyReports.summary.colDescription", "شرح"),
+            t("dailyReports.summary.colShift", "شیفت"),
+            t("dailyReports.summary.colContractor", "پیمانکار"),
+            t("dailyReports.summary.colCrewName", "اکیپ"),
+            t("dailyReports.summary.colHeadcount", "نفر"),
+            t("dailyReports.summary.colParcel", "پلاک"),
+            t("dailyReports.summary.colLocation", "محل"),
+            t("dailyReports.summary.colQuantity", "مقدار"),
+            t("dailyReports.summary.colUnit", "واحد"),
+            t("dailyReports.summary.colDiscipline", "رشته"),
+            t("dailyReports.summary.colSources", "منابع"),
           ]}
           rows={report.activities.map((r) => [
-            r.activity_description,
+            r.activity_code
+              ? `${r.activity_code} — ${r.activity_description}`
+              : r.activity_description,
             r.shift,
-            r.subcontractor_name,
-            r.headcount,
-            [r.zone, r.block, r.floor].filter(Boolean).join(" / "),
-            r.quantity,
-            r.unit,
+            r.contractor ?? (r.subcontractor_name || "—"),
+            r.crew_name || "—",
+            r.headcount ?? "—",
+            r.parcel || "—",
+            [r.location ?? r.zone, r.block, r.floor].filter(Boolean).join(" / ") || "—",
+            r.quantity ?? "—",
+            r.unit || "—",
             r.source_discipline ?? "",
             <ProvenanceCell
               key={`prov-${r.id}`}

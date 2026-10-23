@@ -27,6 +27,9 @@ export type CreatableSelectProps = {
   searchPlaceholder?: string;
   addPlaceholder?: string;
   addLabel?: string;
+  onCreateOption?: (
+    query: string,
+  ) => Promise<SelectOption | string | void> | SelectOption | string | void;
   disabled?: boolean;
   required?: boolean;
   id?: string;
@@ -49,6 +52,7 @@ export function CreatableSelect({
   searchPlaceholder,
   addPlaceholder,
   addLabel,
+  onCreateOption,
   disabled,
   required,
   id,
@@ -67,6 +71,7 @@ export function CreatableSelect({
   const [open, setOpen] = React.useState(false);
   const [customOptions, setCustomOptions] = React.useState<SelectOption[]>([]);
   const [query, setQuery] = React.useState("");
+  const [creating, setCreating] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
 
   const allOptions = React.useMemo(() => {
@@ -117,9 +122,30 @@ export function CreatableSelect({
     setQuery("");
   };
 
-  const commitCustom = () => {
+  const commitCustom = async () => {
     const next = query.trim();
-    if (!next || exactMatch) return;
+    if (!next || exactMatch || creating) return;
+    if (onCreateOption) {
+      setCreating(true);
+      try {
+        const result = await onCreateOption(next);
+        if (result) {
+          const opt: SelectOption =
+            typeof result === "string"
+              ? { value: result, label: result }
+              : result;
+          setCustomOptions((prev) =>
+            prev.some((o) => o.value === opt.value) ? prev : [...prev, opt],
+          );
+          selectOption(opt.value);
+          return;
+        }
+      } catch {
+        // Fallback to local custom option when remote creation fails
+      } finally {
+        setCreating(false);
+      }
+    }
     setCustomOptions((prev) =>
       prev.some((opt) => opt.value === next)
         ? prev
@@ -202,7 +228,7 @@ export function CreatableSelect({
                   if (e.key === "Enter") {
                     e.preventDefault();
                     if (canAddCustom) {
-                      commitCustom();
+                      void commitCustom();
                       return;
                     }
                     const only = filteredOptions[0];
@@ -270,8 +296,8 @@ export function CreatableSelect({
                 type="button"
                 size="sm"
                 variant="outline"
-                disabled={disabled || !canAddCustom}
-                onClick={commitCustom}
+                disabled={disabled || !canAddCustom || creating}
+                onClick={() => void commitCustom()}
                 className="w-full justify-start"
               >
                 <Plus className="size-3.5" aria-hidden />

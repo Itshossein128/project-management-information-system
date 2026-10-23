@@ -363,7 +363,70 @@
       "event": "Event",
       "actor": "Actor",
       "time": "Time",
-      "reason": "Reason"
+      "reason": "Reason",
+      "sections": {
+        "activities": {
+          "tab": "Executed activities",
+          "title": "Section 2 — Executed Site Activities",
+          "subtitle": "Record executed activities linked to WBS, contractor, crew, and measured quantities",
+          "rowCount": "{{count}} rows",
+          "addRow": "Add activity row",
+          "updateRow": "Update row",
+          "empty": "No executed activity rows recorded for this report yet.",
+          "shifts": {
+            "shift_1": "Shift 1 (Day)",
+            "shift_2": "Shift 2 (Evening)",
+            "shift_3": "Shift 3 (Night)"
+          },
+          "fields": {
+            "activityRef": "WBS Activity",
+            "activityRefPlaceholder": "Select or search WBS activity...",
+            "activityRefSearch": "Search activity code or name...",
+            "activityRefAdd": "+ Add new WBS activity",
+            "activityDescription": "Executed activity description",
+            "activityDescriptionPlaceholder": "Describe the executed work on site...",
+            "shift": "Work shift",
+            "shiftPlaceholder": "Select shift",
+            "contractor": "Contractor",
+            "contractorPlaceholder": "Select or search contractor...",
+            "contractorSearch": "Search contractor name...",
+            "contractorAdd": "+ Add new contractor",
+            "crewName": "Crew name / supervisor",
+            "crewNamePlaceholder": "e.g. Rebar crew A",
+            "foremanCount": "Foreman count",
+            "workerCount": "Worker count",
+            "headcount": "Total headcount",
+            "parcel": "Parcel",
+            "block": "Block",
+            "floor": "Floor / level",
+            "location": "Zone / work front",
+            "quantity": "Executed quantity",
+            "unit": "Unit",
+            "notes": "Notes"
+          },
+          "columns": {
+            "wbsActivity": "WBS Activity",
+            "description": "Description",
+            "shift": "Shift",
+            "contractor": "Contractor",
+            "crewName": "Crew name",
+            "headcount": "Headcount (Foreman/Worker)",
+            "parcel": "Parcel",
+            "blockFloorZone": "Block / Floor / Zone",
+            "quantity": "Quantity",
+            "unit": "Unit",
+            "notes": "Notes"
+          },
+          "errors": {
+            "quantity_must_be_positive": "Executed activity quantity must be strictly greater than zero.",
+            "invalid_shift": "Selected shift is invalid (only shifts 1 to 3 are allowed).",
+            "activity_not_in_project_scope": "Selected activity does not belong to this project's WBS scope.",
+            "contractor_not_in_project_scope": "Selected contractor does not belong to this project's scope.",
+            "contractor_required": "Selecting a contractor or entering a contractor name is required.",
+            "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors."
+          }
+        }
+      }
     }
   },
   "login": {
@@ -446,7 +509,13 @@
     "source_relation_project_mismatch": "Record project does not match the report project.",
     "temp_max_must_be_gte_temp_min": "Maximum temperature must be greater than or equal to minimum temperature.",
     "inactivity_reason_required": "An inactivity reason is required when the site is inactive.",
-    "auto_summary_only": "Daily reports are created from specialty reports."
+    "auto_summary_only": "Daily reports are created from specialty reports.",
+    "quantity_must_be_positive": "Executed activity quantity must be strictly greater than zero.",
+    "invalid_shift": "Selected shift is invalid (only shifts 1 to 3 are allowed).",
+    "activity_not_in_project_scope": "Selected activity does not belong to this project's WBS scope.",
+    "contractor_not_in_project_scope": "Selected contractor does not belong to this project's scope.",
+    "contractor_required": "Selecting a contractor or entering a contractor name is required.",
+    "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors."
   },
   "dashboard": {
     "portfolio": {
@@ -2138,7 +2207,18 @@
       "managementOpinion": "Management opinion",
       "override": "override",
       "weatherOverride": "Override derived weather",
-      "siteOverride": "Override derived site status"
+      "siteOverride": "Override derived site status",
+      "colDescription": "Activity description",
+      "colShift": "Shift",
+      "colContractor": "Contractor",
+      "colCrewName": "Crew name",
+      "colHeadcount": "Headcount",
+      "colParcel": "Parcel",
+      "colLocation": "Location (Block/Floor/Zone)",
+      "colQuantity": "Quantity",
+      "colUnit": "Unit",
+      "colDiscipline": "Specialty unit",
+      "colSources": "Sources"
     },
     "inactivityReason": "Inactivity reason",
     "selectInactivityReason": "-- Select inactivity reason --",

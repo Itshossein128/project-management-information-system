@@ -161,25 +161,6 @@ def build_aggregation_meta(
     }
 
 
-def _normalize_shift(raw: str) -> str:
-    value = (raw or '').strip().lower().replace(' ', '_')
-    mapping = {
-        'shift_1': ActivityRowShift.SHIFT_1,
-        'shift1': ActivityRowShift.SHIFT_1,
-        'شیفت1': ActivityRowShift.SHIFT_1,
-        'شیفت_1': ActivityRowShift.SHIFT_1,
-        'shift_2': ActivityRowShift.SHIFT_2,
-        'shift2': ActivityRowShift.SHIFT_2,
-        'shift_3': ActivityRowShift.SHIFT_3,
-        'shift3': ActivityRowShift.SHIFT_3,
-    }
-    if value in mapping:
-        return mapping[value]
-    if value in {c.value for c in ActivityRowShift}:
-        return value
-    return ActivityRowShift.SHIFT_1
-
-
 def _pick_weather(sub_reports) -> str | None:
     best = None
     best_score = -1
@@ -216,13 +197,18 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
                     a.activity_description or '',
                     a.shift or '',
                     a.worker_count,
+                    a.foreman_count,
+                    a.headcount,
                     str(a.quantity) if a.quantity is not None else '',
                     a.unit or '',
                     str(a.execution_percentage) if a.execution_percentage is not None else '',
                     a.crew_name or '',
+                    str(a.contractor_ref_id) if a.contractor_ref_id else '',
+                    a.parcel or '',
                     a.zone or '',
                     a.block or '',
                     a.floor or '',
+                    a.notes or '',
                 )
                 for a in sr.activities.filter(is_deleted=False).order_by('row_number', 'id')
             ],
@@ -443,8 +429,13 @@ def rebuild_daily_report_summary(
                 act_obj = DailyReportActivity.objects.create(
                     report=report,
                     activity_description=row.activity_description,
-                    shift=_normalize_shift(row.shift),
-                    headcount=row.worker_count,
+                    # FR-003: shift passes through verbatim — save-time
+                    # validation canonicalizes it; aggregation never coerces.
+                    shift=row.shift,
+                    headcount=row.headcount,
+                    foreman_count=row.foreman_count,
+                    worker_count=row.worker_count,
+                    parcel=row.parcel,
                     zone=row.zone,
                     block=row.block,
                     floor=row.floor,
@@ -453,16 +444,20 @@ def rebuild_daily_report_summary(
                     unit=row.unit,
                     execution_percentage=row.execution_percentage,
                     activity_ref=row.activity_ref,
-                    subcontractor_name=row.crew_name or '',
-                    notes='',
+                    crew_name=row.crew_name or '',
+                    contractor_ref=row.contractor_ref,
+                    notes=row.notes or '',
                     source_sub_report=sr,
                     source_discipline=sr.unit or sr.discipline,
                     is_derived=True,
                 )
             else:
                 act_obj.activity_description = row.activity_description
-                act_obj.shift = _normalize_shift(row.shift)
-                act_obj.headcount = row.worker_count
+                act_obj.shift = row.shift
+                act_obj.headcount = row.headcount
+                act_obj.foreman_count = row.foreman_count
+                act_obj.worker_count = row.worker_count
+                act_obj.parcel = row.parcel
                 act_obj.zone = row.zone
                 act_obj.block = row.block
                 act_obj.floor = row.floor
@@ -471,7 +466,9 @@ def rebuild_daily_report_summary(
                 act_obj.unit = row.unit
                 act_obj.execution_percentage = row.execution_percentage
                 act_obj.activity_ref = row.activity_ref
-                act_obj.subcontractor_name = row.crew_name or ''
+                act_obj.crew_name = row.crew_name or ''
+                act_obj.contractor_ref = row.contractor_ref
+                act_obj.notes = row.notes or ''
                 act_obj.source_sub_report = sr
                 act_obj.source_discipline = sr.unit or sr.discipline
                 act_obj.save()

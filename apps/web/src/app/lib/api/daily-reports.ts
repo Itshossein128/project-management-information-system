@@ -92,10 +92,17 @@ export interface ActivityRow {
   shift: RowShift;
   subcontractor_name: string;
   subcontractor_ref: string | null;
+  contractor_ref?: string | null;
+  contractor?: string | null;
+  crew_name?: string;
+  foreman_count?: number | null;
+  worker_count?: number | null;
   headcount: number | null;
+  parcel?: string | null;
   zone: string | null;
   block: string | null;
   floor: string | null;
+  location?: string | null;
   location_detail: string | null;
   quantity: string | null;
   quantity_measured: boolean;

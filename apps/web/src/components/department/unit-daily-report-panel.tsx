@@ -5,6 +5,7 @@ import {
   type CanonicalUnit,
   type UnitReport,
   type UnitReportStatus,
+  unitSupportsActivitiesSection,
 } from "@/app/lib/api/unit-reports";
 import {
   useApproveUnitReport,
@@ -20,7 +21,9 @@ import { ApiRequestError } from "@/app/lib/api-client";
 import { Button, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Modal } from "@/components/overlay/modal";
+import { SectionActivities } from "./section-activities";
 
 export interface UnitDailyReportPanelProps {
   businessId: string;
@@ -520,6 +523,35 @@ export function UnitDailyReportPanel({
               </Button>
             ) : null}
           </div>
+
+          {unitSupportsActivitiesSection(unit) ? (
+            <Tabs
+              defaultValue="activities"
+              dir={i18n.dir()}
+              className="w-full pt-2"
+              data-testid="unit-report-sections-tabs"
+            >
+              <TabsList
+                id="tablist-unitReportSections"
+                className="flex h-auto flex-wrap justify-start gap-1"
+              >
+                <TabsTrigger
+                  id="tab-unitReportSection-activities"
+                  data-testid="unit-section-tab-activities"
+                  value="activities"
+                >
+                  {t("businessDepartment.unitReport.sections.activities.tab")}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="activities" className="mt-3">
+                <SectionActivities
+                  businessId={businessId}
+                  unit={unit}
+                  report={report}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : null}
         </div>
       ) : null}
 

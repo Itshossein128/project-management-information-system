@@ -51,9 +51,11 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
     maintains it as foreman_count + worker_count in save().
     """
 
+    row_number = serializers.IntegerField(required=False, allow_null=True, min_value=1)
     # Not a ChoiceField: synonyms must resolve through validate_shift (no
     # silent fallback — anything unrecognized is refused, FR-003).
-    shift = serializers.CharField(required=True)
+    shift = serializers.CharField(required=True, allow_blank=True)
+    crew_name = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
     headcount = serializers.IntegerField(read_only=True)
     quantity = serializers.DecimalField(
         max_digits=18, decimal_places=4, required=False, allow_null=True,
@@ -63,17 +65,23 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
         required=True,
         allow_null=False,
     )
+    activity_code = serializers.CharField(source='activity_ref.activity_code', read_only=True)
+    activity_name = serializers.CharField(source='activity_ref.activity_name', read_only=True)
     contractor_ref = serializers.PrimaryKeyRelatedField(
         queryset=Stakeholder.objects.all(),
         required=True,
         allow_null=False,
     )
+    contractor_name = serializers.CharField(source='contractor_ref.name', read_only=True)
     foreman_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
     worker_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+    activity_description = serializers.CharField(required=False, allow_blank=True, default='')
+    notes = serializers.CharField(required=False, allow_blank=True, default='')
 
     class Meta:
         model = DisciplineSubReportActivity
         fields = [
+            'id',
             'row_number',
             'shift',
             'crew_name',
@@ -81,8 +89,11 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
             'worker_count',
             'headcount',
             'activity_ref',
+            'activity_code',
+            'activity_name',
             'activity_description',
             'contractor_ref',
+            'contractor_name',
             'parcel',
             'zone',
             'block',
@@ -100,6 +111,22 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
                 code='invalid_shift',
             )
         return resolved
+
+    def validate_quantity(self, value):
+        if value is not None and value <= 0:
+            raise serializers.ValidationError(
+                _('مقدار باید بزرگ‌تر از صفر باشد'),
+                code='quantity_must_be_positive',
+            )
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if not (attrs.get('activity_description') or '').strip():
+            act = attrs.get('activity_ref') or getattr(self.instance, 'activity_ref', None)
+            if act is not None and getattr(act, 'activity_name', None):
+                attrs['activity_description'] = act.activity_name
+        return attrs
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

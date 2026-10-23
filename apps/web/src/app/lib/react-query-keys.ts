@@ -39,5 +39,8 @@ export const queryKeys = {
 
   unitReportHistory: (businessId: number | string, unit: string, reportId: string) =>
     ["businesses", businessId, "unit-report", unit, reportId, "history"] as const,
+
+  unitReportActivities: (businessId: number | string, unit: string, reportId: string) =>
+    ["businesses", businessId, "unit-report", unit, reportId, "activities"] as const,
 };
 
