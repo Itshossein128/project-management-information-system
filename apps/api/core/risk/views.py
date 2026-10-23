@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from risk.services.event_service import validate_barrier_update, validate_risk_update
 
 from common.jalali import parse_date_optional
 from common.viewsets import ProjectScopedViewSet
@@ -96,13 +97,9 @@ class BarrierLogViewSet(ProjectScopedViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        new_status = serializer.validated_data.get('status')
-        if new_status in (RiskStatus.CLOSED, BarrierStatus.RESOLVED):
-            if not serializer.validated_data.get('resolved_date') and not instance.resolved_date:
-                return Response(
-                    {'error': {'message': 'برای وضعیت رفع شده، تاریخ رفع الزامی است.'}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+        validate_barrier_update(instance, serializer.validated_data)
+
         self.perform_update(serializer)
         return Response(serializer.data)
 
@@ -176,25 +173,13 @@ class RiskEventViewSet(ProjectScopedViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        new_status = serializer.validated_data.get('status')
-        if new_status == RiskStatus.CLOSED:
-            open_count = instance.actions.filter(
-                status=RiskActionStatus.OPEN,
-                is_deleted=False,
-            ).count()
-            ack = bool(request.data.get('acknowledge_open_actions'))
-            if open_count and not ack:
-                return Response(
-                    {
-                        'code': 'open_actions_warning',
-                        'error': {
-                            'code': 'open_actions_warning',
-                            'message': 'اقدامات باز وجود دارد. برای بستن، تأیید کنید.',
-                            'open_actions_count': open_count,
-                        },
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+
+        validate_risk_update(
+            instance,
+            serializer.validated_data,
+            acknowledge_open_actions=bool(request.data.get('acknowledge_open_actions'))
+        )
+
         self.perform_update(serializer)
         return Response(serializer.data)
 
