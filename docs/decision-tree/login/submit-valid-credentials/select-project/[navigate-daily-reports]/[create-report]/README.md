@@ -2,27 +2,47 @@
 
 ## Context & Screen
 
-- **Route**: `/projects/:projectId/daily-reports/new`
-- **Component**: `DailyReportNewPage`
-- **Initial State**: Continue from Daily reports. This node describes the state reached by the action below.
+- **Route**: `/projects/:projectId/daily-reports/new` (or `/projects/:projectId/daily-reports/:reportId/edit`)
+- **Component**: `DailyReportNewPage` / `DailyReportForm`
+- **Initial State**: Continue from Daily reports list.
 
-## Action Taken
+## Workflow & Features
 
-- **Trigger**: Click New Report.
-- **Inputs**: :projectId / :businessId and detail IDs are the selected records; query parameters are optional filters.
+- **Header Logging**: Set report date (Jalali picker), shift (day/night/full), site status (active/inactive), max/min temperatures, work front, location notes, weather conditions, and general notes.
+- **Autosave & Draft Handling**: Automatic offline/online debounced header draft saving. Click "Save Header" / "ایجاد گزارش" to create or update report draft explicitly.
+- **Field Section Tabs**: Detail logging across 7 tabs:
+  1. *Activities* (فعالیت‌ها)
+  2. *Labor* (نیروی انسانی)
+  3. *Equipment* (ماشین‌آلات)
+  4. *Materials* (مصالح)
+  5. *Concrete* (بتن‌ریزی)
+  6. *Labor Camp* (کمپ کارگری)
+  7. *Incidents* (حوادث)
+- **Approval Workflow**:
+  - `Submit`: Transition draft report to `submitted` status.
+  - `Review`: Change status to `under_review`.
+  - `Approve`: Transition status to `approved` and lock report (`is_locked`).
+  - `Reject`: Reject report with mandatory reason text.
+  - `Correction Request`: Create a new version for locked/approved reports.
+
+## Product Tour & User Onboarding
+
+- **Tour ID**: `project-daily-report-form`
+- **Data Tour Anchors**:
+  - `[data-tour='daily-report-header']`: Highlights report date, shift, weather, and general location fields.
+  - `[data-tour='daily-report-save-header']`: Highlights header save and initial draft creation button.
+  - `[data-tour='daily-report-tabs']`: Highlights section tabs for labor, activities, equipment, materials, and incidents.
+  - `[data-tour='daily-report-approval-status']`: Highlights approval status bar, version history, and workflow actions (submit, review, approve, reject).
 
 ## Authorization & Permissions
 
-- **Required Permissions**: edit_reports
-- **Required Roles / Groups**: Project roles and member overrides determine codenames; see the permission catalog.
+- **Required Permissions**: `edit_reports` (for creating and editing drafts), `approve_reports` (for review, approval, and rejection).
 - **Protection notation**: Special permission/role gate; directory uses brackets.
 
-## Desired Result
+## Recovery & Empty/Offline States
 
-- **API Call**: None; navigation-only screen.
-- **State Change**: Route loads; queries show loading, data or an empty/error state.
-- **Navigation**: `/projects/:projectId/daily-reports/new`
-- **UI Feedback**: Permission-gated components may show AccessDenied; APIs may return 403 even when navigation is visible.
+- **Offline Support**: Header and tab entries cache locally via IndexedDB (`useDailyReportForm`). When offline, an alert banner indicates local saving; changes automatically sync upon reconnecting.
+- **Locked State**: Approved or locked reports disable form fields and display a read-only notification banner with optional correction request trigger.
 
 ## Outcomes & Guards
 
