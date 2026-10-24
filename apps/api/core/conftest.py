@@ -187,3 +187,16 @@ def api_client():
 def auth_client(api_client, user):
     api_client.force_authenticate(user=user)
     return api_client
+
+@pytest.fixture
+def hr_user(db, django_user_model):
+    from django.contrib.auth.models import Group
+    hr_group, _ = Group.objects.get_or_create(name='hr')
+    u = django_user_model.objects.create_user(username='hruser', mobile='+989121234568', password='password')
+    u.groups.add(hr_group)
+    return u
+
+@pytest.fixture
+def hr_client(api_client, hr_user):
+    api_client.force_authenticate(user=hr_user)
+    return api_client
