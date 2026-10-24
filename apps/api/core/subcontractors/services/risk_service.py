@@ -9,6 +9,10 @@ from subcontractors.models import Subcontractor, SubcontractorStatus, WarningTyp
 
 
 def financial_summary(sub: Subcontractor) -> dict:
+    # ⚡ Bolt: Cache computed financial summary on instance to eliminate duplicate DB queries
+    if hasattr(sub, '_financial_summary_cache'):
+        return sub._financial_summary_cache
+
     empty = {
         'total_billed': 0,
         'total_paid': 0,
@@ -19,6 +23,7 @@ def financial_summary(sub: Subcontractor) -> dict:
         'advance_remaining': 0,
     }
     if not sub.contract_id:
+        sub._financial_summary_cache = empty
         return empty
 
     ipcs = IPC.objects.filter(contract_id=sub.contract_id, is_deleted=False)
@@ -48,7 +53,7 @@ def financial_summary(sub: Subcontractor) -> dict:
         ).aggregate(t=Sum('amount'))['t'] or 0
     )
 
-    return {
+    res = {
         'total_billed': total_billed,
         'total_paid': total_paid,
         'outstanding': total_billed - total_paid,
@@ -57,6 +62,8 @@ def financial_summary(sub: Subcontractor) -> dict:
         'advance_recovered': advance_recovered,
         'advance_remaining': max(advance_paid - advance_recovered, 0),
     }
+    sub._financial_summary_cache = res
+    return res
 
 
 def _compute_risk_flag_with_data(sub: Subcontractor, latest_progresses_by_activity: dict, contract_items_by_contract: dict) -> tuple[bool, list[str]]:
