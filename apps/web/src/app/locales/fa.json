@@ -365,6 +365,16 @@
       "time": "زمان",
       "reason": "توضیحات",
       "sections": {
+        "fields": {
+          "description": "شرح",
+          "location": "محل / زون",
+          "quantity": "مقدار",
+          "unit": "واحد",
+          "notes": "توضیحات",
+          "parcel": "پارسل",
+          "block": "بلوک",
+          "floor": "طبقه"
+        },
         "activities": {
           "tab": "فعالیت‌های اجرایی",
           "title": "بخش ۲ — فعالیت‌های اجرا شده کارگاه",
@@ -553,6 +563,16 @@
           "addRow": "افزودن ردیف",
           "empty": "بتن‌ریزی ثبت نشده است.",
           "sampling": "نمونه‌برداری اعلام شده",
+          "samplingNotTaken": "نمونه‌گیری نشده",
+          "fields": {
+            "volume": "حجم (مترمکعب)",
+            "structuralElement": "عضو سازه‌ای",
+            "batchingPlant": "بچینگ",
+            "deliveryNote": "شماره حواله کامیون",
+            "samplingState": "وضعیت نمونه‌گیری",
+            "labSampleCode": "کد نمونه آزمایشگاه",
+            "testSheetCount": "تعداد برگه آزمایش"
+          },
           "errors": {
             "volume_must_be_positive": "حجم بتن باید بزرگ‌تر از صفر باشد.",
             "sampling_requires_test_information": "نمونه‌برداری اعلام‌شده به کد آزمایشگاه و تعداد برگه آزمایش نیاز دارد.",
@@ -571,6 +591,10 @@
           "addRow": "افزودن ردیف",
           "empty": "مشکل یا مانعی ثبت نشده است.",
           "overdue": "سررسید گذشته",
+          "kindIssue": "مسئله",
+          "kindBarrier": "مانع",
+          "owner": "شناسه مسئول پیگیری",
+          "dueDate": "تاریخ سررسید",
           "errors": {
             "barrier_owner_and_due_date_required": "برای مانع، مسئول و تاریخ سررسید الزامی است."
           }
@@ -586,6 +610,11 @@
           "title": "حوادث ایمنی",
           "addRow": "افزودن حادثه",
           "empty": "حادثه ایمنی ثبت نشده است.",
+          "severity": "شدت",
+          "minor": "جزئی",
+          "moderate": "متوسط",
+          "major": "عمده",
+          "immediateAction": "اقدام فوری",
           "errors": {
             "hse_immediate_action_required": "اقدام فوری الزامی است.",
             "invalid_severity": "شدت باید جزئی، متوسط یا عمده باشد."
@@ -593,6 +622,10 @@
         },
         "attachments": {
           "label": "تصویر فعالیت",
+          "activity": "فعالیت",
+          "selectActivity": "انتخاب فعالیت",
+          "upload": "بارگذاری تصویر",
+          "saved": "تصویر ثبت شد؛ دریافت فایل به فضای ذخیره‌سازی پیکربندی‌شده وابسته است.",
           "hint": "JPEG یا PNG، حداکثر ۱۰ مگابایت.",
           "errors": {
             "unsupported_file_format": "فقط تصویر JPEG و PNG پذیرفته می‌شود.",

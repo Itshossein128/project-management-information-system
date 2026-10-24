@@ -538,12 +538,10 @@ class TestAttachmentContract:
 class TestAttachmentSummaryCounts:
     """Summary count tests for attachments (FR-036)."""
 
-    def test_per_section_accessible_counts(
-        self, db, user, project, material
-    ):
+    def test_per_section_accessible_counts(self, db, user, project):
         """Per-section accessible counts + link payloads derive from contributing units (FR-036)."""
         from projects.models import Project
-        from resources.models import Material
+        from wbs.services import create_wbs_node
 
         # Create project and report
         project = Project.objects.create(
@@ -551,6 +549,7 @@ class TestAttachmentSummaryCounts:
             project_name='Attachment Test',
             employer='Employer Co',
         )
+        wbs, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Attachment root')
 
         report = DisciplineSubReport.objects.create(
             project=project,
@@ -565,7 +564,7 @@ class TestAttachmentSummaryCounts:
         # Create activities with attachments across units
         activity1 = Activity.objects.create(
             project=project,
-            wbs=None,
+            wbs=wbs,
             activity_code='A1',
             activity_name='Activity 1',
             status='in_progress',
@@ -574,7 +573,7 @@ class TestAttachmentSummaryCounts:
 
         activity2 = Activity.objects.create(
             project=project,
-            wbs=None,
+            wbs=wbs,
             activity_code='A2',
             activity_name='Activity 2',
             status='in_progress',
@@ -663,6 +662,7 @@ class TestAttachmentSummaryCounts:
         """URLs never returned to users lacking project/unit view permission."""
         from projects.models import Project
         from django.contrib.auth import get_user_model
+        from wbs.services import create_wbs_node
 
         # Create project and report
         project = Project.objects.create(
@@ -670,6 +670,7 @@ class TestAttachmentSummaryCounts:
             project_name='Attachment Perm Test',
             employer='Employer Co',
         )
+        wbs, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Attachment permission root')
 
         report = DisciplineSubReport.objects.create(
             project=project,
@@ -683,7 +684,7 @@ class TestAttachmentSummaryCounts:
 
         activity = Activity.objects.create(
             project=project,
-            wbs=None,
+            wbs=wbs,
             activity_code='A1',
             activity_name='Activity 1',
             status='in_progress',
@@ -721,7 +722,6 @@ class TestAttachmentSummaryCounts:
         )
 
         # Create a user without project permission
-        from projects.models import ProjectMember
         unprivileged_user = get_user_model().objects.create_user(
             username='unprivileged',
             email='unpriv@example.com',

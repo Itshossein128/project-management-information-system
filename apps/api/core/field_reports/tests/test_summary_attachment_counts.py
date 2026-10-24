@@ -220,6 +220,76 @@ class TestSummaryAttachmentCounts:
         # Should not count attachments from other reports/projects
         assert counts['by_section']['activity'] == 2
 
+    def test_daily_summary_payload_groups_authorized_attachment_links(
+        self, db, user, project_with_attachments,
+    ):
+        """T069: summary payload groups current-unit attachments by section."""
+        from field_reports.serializers import DailyReportDetailSerializer
+        from field_reports.services.daily_report_aggregation import ensure_daily_report_summary
+
+        project, report, act1, _act2 = project_with_attachments
+        report.status = SubReportStatus.SUBMITTED
+        report.save(update_fields=['status'])
+        UnitReportAttachment.objects.create(
+            sub_report=report,
+            row_kind='activity',
+            row_id=str(act1.id),
+            storage_key='attachments/activity1/summary.jpg',
+            declared_content_type='image/jpeg',
+            size_bytes=1024,
+            checksum='summary-count',
+            capture_date=REPORT_DATE,
+            work_front='Tower A',
+        )
+
+        summary = ensure_daily_report_summary(project.id, REPORT_DATE, user=user)
+        payload = DailyReportDetailSerializer(summary).data
+
+        assert payload['attachment_counts'] == [
+            {
+                'section': 'activity',
+                'count': 1,
+                'first_links': [],
+            }
+        ]
+
+    def test_summary_attachment_links_require_a_project_member(
+        self, db, user, project_with_attachments,
+    ):
+        """T069: metadata navigation links require project membership, never storage access."""
+        from rest_framework.test import APIRequestFactory
+        from master_data.models import MemberStatus, ProjectMember
+        from field_reports.serializers import DailyReportDetailSerializer
+        from field_reports.services.daily_report_aggregation import ensure_daily_report_summary
+
+        project, report, act1, _ = project_with_attachments
+        report.status = SubReportStatus.SUBMITTED
+        report.save(update_fields=['status'])
+        UnitReportAttachment.objects.create(
+            sub_report=report, row_kind='activity', row_id=str(act1.id),
+            storage_key='local-unavailable/not-a-public-url',
+            declared_content_type='image/jpeg', size_bytes=1024,
+            checksum='membership-only', capture_date=REPORT_DATE,
+        )
+        summary = ensure_daily_report_summary(project.id, REPORT_DATE, user=user)
+        request = APIRequestFactory().get('/')
+        request.user = user
+
+        without_membership = DailyReportDetailSerializer(
+            summary, context={'request': request},
+        ).data['attachment_counts']
+        assert without_membership[0]['first_links'] == []
+
+        ProjectMember.objects.create(
+            project=project, user=user, status=MemberStatus.ACTIVE,
+        )
+        with_membership = DailyReportDetailSerializer(
+            summary, context={'request': request},
+        ).data['attachment_counts']
+        assert with_membership[0]['first_links']
+        assert 'local-unavailable' not in with_membership[0]['first_links'][0]
+        assert '/attachments/' in with_membership[0]['first_links'][0]
+
     def test_no_attachments_returns_zero_counts(self, db, user, project):
         """When there are no attachments, counts should be zero."""
         from projects.models import Project

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 
 import {
@@ -26,17 +26,24 @@ import {
   type UnitReport,
   type UnitReportActivityPayload,
   type UnitReportActivityRow,
+  uploadUnitReportAttachment,
 } from "@/app/lib/api/unit-reports";
 import { createWBSNode, fetchWBSFlat } from "@/app/lib/api/wbs";
 import { CONSTRUCTION_UNIT_OPTIONS } from "@/app/lib/construction-units";
 import {
   Button,
   CreatableSelect,
-  Field,
+  Field as BaseField,
+  type FieldProps,
   Input,
   TextArea,
 } from "@/components/form";
 import type { SelectOption } from "@/components/form/Select";
+
+function Field({ label, name, children, ...props }: Omit<FieldProps, "children" | "name"> & { name?: string; children: ReactNode | (() => ReactNode) }) {
+  const resolvedName = name ?? `section-${String(label).replace(/\s+/g, "-")}`;
+  return <BaseField {...props} name={resolvedName} label={label}>{typeof children === "function" ? children : () => children}</BaseField>;
+}
 
 export interface SectionActivitiesProps {
   businessId: string;
@@ -211,6 +218,34 @@ export function SectionActivities({
     code: string | null;
     message: string;
   } | null>(null);
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [attachmentRowId, setAttachmentRowId] = useState("");
+  const [attachmentMessage, setAttachmentMessage] = useState<string | null>(null);
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!attachmentFile || !attachmentRowId) throw new Error("attachment_selection_required");
+      if (!["image/jpeg", "image/png"].includes(attachmentFile.type)) {
+        throw new Error("unsupported_file_format");
+      }
+      if (attachmentFile.size > 10 * 1024 * 1024) throw new Error("file_too_large");
+      return uploadUnitReportAttachment(businessId, unit, report.id, {
+        file: attachmentFile,
+        rowId: attachmentRowId,
+      });
+    },
+    onSuccess: () => {
+      setAttachmentFile(null);
+      setAttachmentRowId("");
+      setAttachmentMessage(t("businessDepartment.unitReport.sections.attachments.saved", "تصویر ثبت شد؛ دریافت فایل به فضای ذخیره‌سازی پیکربندی‌شده وابسته است."));
+    },
+    onError: (err) => {
+      const code = err instanceof Error ? err.message : "upload_failed";
+      const parsed = extractSectionErrors(err);
+      setAttachmentMessage(t(`businessDepartment.unitReport.sections.attachments.errors.${code}`, {
+        defaultValue: parsed.topMessage || code,
+      }));
+    },
+  });
 
   const computedHeadcount = useMemo(() => {
     const f = parseOptionalInt(form.foreman_count) ?? 0;
@@ -1073,6 +1108,40 @@ export function SectionActivities({
           </tbody>
         </table>
       </div>
+      {canEdit && rows.length > 0 ? (
+        <form
+          className="grid gap-3 rounded-lg border border-border/60 bg-muted/15 p-3 sm:grid-cols-3"
+          onSubmit={(event) => { event.preventDefault(); uploadMutation.mutate(); }}
+          data-testid="unit-activity-attachment-form"
+        >
+          <Field label={t("businessDepartment.unitReport.sections.attachments.activity", "فعالیت") }>
+            <select
+              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+              value={attachmentRowId}
+              onChange={(event) => setAttachmentRowId(event.target.value)}
+              required
+            >
+              <option value="">{t("businessDepartment.unitReport.sections.attachments.selectActivity", "انتخاب فعالیت")}</option>
+              {rows.map((row) => <option key={row.id} value={row.id}>{row.activity_description}</option>)}
+            </select>
+          </Field>
+          <Field label={t("businessDepartment.unitReport.sections.attachments.label")}>
+            <Input
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(event) => setAttachmentFile(event.target.files?.[0] ?? null)}
+              required
+            />
+          </Field>
+          <div className="flex flex-col justify-end gap-1">
+            <Button type="submit" disabled={uploadMutation.isPending}>
+              {t("businessDepartment.unitReport.sections.attachments.upload", "بارگذاری تصویر")}
+            </Button>
+            <span className="text-xs text-muted-foreground">{t("businessDepartment.unitReport.sections.attachments.hint")}</span>
+          </div>
+          {attachmentMessage ? <p className="text-xs sm:col-span-3" role="status">{attachmentMessage}</p> : null}
+        </form>
+      ) : null}
     </div>
   );
 }

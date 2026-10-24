@@ -10,11 +10,13 @@ from field_reports.models import (
     DailyReportConcreteLog,
     DailyReportCorrectionRequest,
     DailyReportEquipment,
+    DailyReportGeneralActivity,
     DailyReportIncident,
     DailyReportLabor,
     DailyReportLaborCamp,
     DailyReportMachineryRow,
     DailyReportMaterial,
+    DailyReportVisit,
     LaborJobTitle,
     SiteStatus,
     WeatherCondition,
@@ -92,8 +94,10 @@ class LaborJobTitleSerializer(serializers.ModelSerializer):
 # ---------------------------------------------------------------------------
 
 
-def _build_provenance_list(obj, derived_kind, context):
-    if not getattr(obj, 'is_derived', False):
+def _build_provenance_list(obj, derived_kind, context, *, allow_source_report=False):
+    if not getattr(obj, 'is_derived', False) and not (
+        allow_source_report and getattr(obj, 'source_report_id', None)
+    ):
         return []
     from field_reports.models import DailyReportDerivedSource
 
@@ -837,8 +841,40 @@ class DailyReportLaborCampSerializer(BaseLaborCampEntrySerializer):
         model = DailyReportLaborCamp
 
 
+class DailyReportGeneralActivitySerializer(serializers.ModelSerializer):
+    provenance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DailyReportGeneralActivity
+        fields = [
+            'id', 'row_number', 'activity_description', 'location', 'quantity',
+            'unit', 'notes', 'source_sub_report', 'source_discipline',
+            'is_derived', 'provenance',
+        ]
+        read_only_fields = fields
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'general_activity', self.context)
+
+
+class DailyReportVisitSerializer(serializers.ModelSerializer):
+    provenance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DailyReportVisit
+        fields = [
+            'id', 'row_number', 'text', 'source_sub_report', 'source_discipline',
+            'is_derived', 'provenance',
+        ]
+        read_only_fields = fields
+
+    def get_provenance(self, obj):
+        return _build_provenance_list(obj, 'visit', self.context)
+
+
 class DailyReportIncidentSerializer(serializers.ModelSerializer):
     due_date = JalaliDateField(required=False, allow_null=True)
+    provenance = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportIncident
@@ -850,8 +886,25 @@ class DailyReportIncidentSerializer(serializers.ModelSerializer):
             'follow_up_owner_user',
             'follow_up_owner_name',
             'due_date',
+            'severity',
+            'notification_id',
+            'row_number',
+            'source_report',
+            'source_row_id',
+            'provenance',
         ]
-        read_only_fields = ['id']
+        read_only_fields = [
+            'id', 'notification_id', 'row_number', 'source_report', 'source_row_id',
+            'provenance',
+        ]
+
+    def get_provenance(self, obj):
+        # Incident rows predate the generic ``is_derived`` flag; their source
+        # report is the authoritative marker for summary-derived form.
+        kind = 'hse_incident' if obj.incident_type == 'safety' else 'issue'
+        return _build_provenance_list(
+            obj, kind, self.context, allow_source_report=True,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -939,6 +992,11 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
     concrete_logs = serializers.SerializerMethodField()
     labor_camp = serializers.SerializerMethodField()
     incidents = serializers.SerializerMethodField()
+    general_activities = serializers.SerializerMethodField()
+    visits = serializers.SerializerMethodField()
+    issues = serializers.SerializerMethodField()
+    hse_incidents = serializers.SerializerMethodField()
+    attachment_counts = serializers.SerializerMethodField()
     aggregation = serializers.SerializerMethodField()
 
     class Meta:
@@ -1001,6 +1059,11 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             'concrete_logs',
             'labor_camp',
             'incidents',
+            'general_activities',
+            'visits',
+            'issues',
+            'hse_incidents',
+            'attachment_counts',
         ]
 
     def get_aggregation(self, obj):
@@ -1184,7 +1247,64 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         return DailyReportLaborCampSerializer(self._active(obj.labor_camp_entries), many=True).data
 
     def get_incidents(self, obj):
-        return DailyReportIncidentSerializer(self._active(obj.incidents), many=True).data
+        return DailyReportIncidentSerializer(self._active(obj.incidents), many=True, context=self.context).data
+
+    def get_general_activities(self, obj):
+        return DailyReportGeneralActivitySerializer(
+            self._active(obj.general_activities), many=True, context=self.context,
+        ).data
+
+    def get_visits(self, obj):
+        return DailyReportVisitSerializer(self._active(obj.visits), many=True, context=self.context).data
+
+    def get_issues(self, obj):
+        rows = [
+            row for row in self._active(obj.incidents)
+            if row.incident_type in {'issue', 'barrier'}
+        ]
+        return DailyReportIncidentSerializer(rows, many=True, context=self.context).data
+
+    def get_hse_incidents(self, obj):
+        rows = [row for row in self._active(obj.incidents) if row.incident_type == 'safety']
+        return DailyReportIncidentSerializer(rows, many=True, context=self.context).data
+
+    def get_attachment_counts(self, obj):
+        """Expose counts for eligible source versions, never storage URLs.
+
+        Attachment bytes are MinIO-backed and may not be available locally. The
+        only links emitted here point at the permission-checked source attachment
+        collection, so clients can navigate to metadata without treating a
+        storage key as a public file URL.
+        """
+        from sub_reports.models import UnitReportAttachment
+        from field_reports.services.daily_report_aggregation import contributing_sub_reports
+
+        source_ids = contributing_sub_reports(obj.project_id, obj.report_date).values('id')
+        rows = UnitReportAttachment.objects.filter(
+            sub_report_id__in=source_ids, is_deleted=False,
+        ).select_related('sub_report').order_by('row_kind', 'id')
+
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        allowed = False
+        if user is not None and getattr(user, 'is_authenticated', False):
+            if getattr(user, 'is_superuser', False):
+                allowed = True
+            else:
+                from master_data.models import ProjectMember
+                allowed = ProjectMember.objects.filter(project_id=obj.project_id, user_id=user.id).exists()
+
+        grouped = {}
+        for row in rows:
+            section = row.row_kind or 'activity'
+            payload = grouped.setdefault(section, {'section': section, 'count': 0, 'first_links': []})
+            payload['count'] += 1
+            if allowed and len(payload['first_links']) < 3:
+                payload['first_links'].append(
+                    f'/api/v1/projects/{obj.project_id}/units/{row.sub_report.unit}/'
+                    f'daily-reports/{row.sub_report_id}/attachments/#attachment-{row.id}'
+                )
+        return list(grouped.values())
 
 
 class DailyReportListSerializer(serializers.ModelSerializer):

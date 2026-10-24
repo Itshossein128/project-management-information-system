@@ -3,7 +3,7 @@
  * Not the legacy hr-forms helpers — this targets the canonical unit-report
  * contract under `/projects/{id}/units/{unit}/daily-reports/`.
  */
-import { apiJson, ApiRequestError } from "@/app/lib/api-client";
+import { apiFormData, apiJson, ApiRequestError } from "@/app/lib/api-client";
 
 export type CanonicalUnit =
   | "buildings"
@@ -708,6 +708,41 @@ export interface UnitSectionRow {
   test_sheet_count?: number | null;
   batching_plant?: string;
   structural_element?: string;
+  parcel?: string | null;
+  zone?: string | null;
+  block?: string | null;
+  floor?: string | null;
+  truck_delivery_note_number?: string;
+}
+
+export interface UnitReportAttachment {
+  id: string;
+  row_kind: string;
+  row_id: string;
+  declared_content_type?: string;
+  size_bytes?: number | null;
+  capture_date?: string | null;
+  work_front?: string;
+}
+
+export function uploadUnitReportAttachment(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  { file, rowId, captureDate, workFront }: {
+    file: File;
+    rowId: string;
+    captureDate?: string;
+    workFront?: string;
+  },
+): Promise<UnitReportAttachment> {
+  const data = new FormData();
+  data.append("file", file);
+  data.append("row_id", rowId);
+  data.append("declared_content_type", file.type);
+  if (captureDate) data.append("capture_date", captureDate);
+  if (workFront) data.append("work_front", workFront);
+  return apiFormData<UnitReportAttachment>(`${base(projectId, unit)}/${reportId}/attachments/`, data);
 }
 
 export function fetchUnitSection(

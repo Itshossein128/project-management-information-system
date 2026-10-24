@@ -206,7 +206,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 .first()
             )
             if report is not None:
-                return Response(DailyReportDetailSerializer(report).data)
+                return Response(DailyReportDetailSerializer(report, context={'request': request}).data)
             from rest_framework.exceptions import NotFound
             raise NotFound({'detail': 'گزارشی برای این تاریخ یافت نشد', 'code': 'report_not_found'})
 
@@ -221,7 +221,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             project_id, report_date, user=request.user,
         )
         status_code = status.HTTP_200_OK if created_before else status.HTTP_201_CREATED
-        return Response(DailyReportDetailSerializer(report).data, status=status_code)
+        return Response(DailyReportDetailSerializer(report, context={'request': request}).data, status=status_code)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -242,13 +242,13 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 serializer.is_valid(raise_exception=True)
                 serializer.save(updated_by=request.user)
                 instance.refresh_from_db()
-                return Response(DailyReportDetailSerializer(instance).data)
+                return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
         elif instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
         serializer = DailyReportHeaderSerializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save(updated_by=request.user)
-        return Response(DailyReportDetailSerializer(instance).data)
+        return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.status != ReportStatus.DRAFT:
@@ -267,7 +267,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             )
         warnings = _validate_report_ready_for_submit(instance)
         services.submit_report(instance, request.user)
-        data = DailyReportDetailSerializer(instance).data
+        data = DailyReportDetailSerializer(instance, context={'request': request}).data
         if warnings:
             data['submit_warnings'] = warnings
         return Response(data)
@@ -283,7 +283,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
             )
         services.review_report(instance, request.user, request.data.get('notes', ''))
-        return Response(DailyReportDetailSerializer(instance).data)
+        return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
 
     def _approve(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
@@ -293,7 +293,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
             )
         services.approve_report(instance, request.user)
-        return Response(DailyReportDetailSerializer(instance).data)
+        return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
 
     def _reject(self, instance, request):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
@@ -302,7 +302,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         if len(reason) < 10:
             raise ValidationError({'reason': 'دلیل رد باید حداقل ۱۰ کاراکتر باشد'})
         services.reject_report(instance, request.user, reason)
-        return Response(DailyReportDetailSerializer(instance).data)
+        return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
 
     # -- Offline sync -------------------------------------------------------
 

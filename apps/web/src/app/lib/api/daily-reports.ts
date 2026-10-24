@@ -266,6 +266,15 @@ export interface ConcreteRow {
   block: string | null;
   floor: string | null;
   notes: string;
+  structural_element?: string;
+  parcel?: string | null;
+  batching_plant?: string;
+  truck_delivery_note_number?: string;
+  lab_sample_code?: string;
+  sampling_state?: "not_sampled" | "sampling_declared";
+  test_sheet_count?: number | null;
+  qc_inspection?: string | null;
+  qc_link?: { id: string; href: string } | null;
   source_discipline?: string;
   is_derived?: boolean;
   provenance?: DerivedSourceItem[];
@@ -290,12 +299,43 @@ export interface IncidentRow {
     | "stoppage"
     | "visitor"
     | "site_instruction"
-    | "barrier";
+    | "barrier"
+    | "issue";
   description: string;
   corrective_action: string;
   follow_up_owner_user?: string | null;
   follow_up_owner_name?: string;
   due_date?: string | null;
+  severity?: "minor" | "moderate" | "major" | null;
+  notification_id?: string;
+  row_number?: number;
+  source_report?: string | null;
+  source_row_id?: string;
+  provenance?: DerivedSourceItem[];
+}
+
+export interface GeneralActivityRow {
+  id: string;
+  row_number: number;
+  activity_description: string;
+  location: string;
+  quantity: string | null;
+  unit: string | null;
+  notes: string;
+  provenance?: DerivedSourceItem[];
+}
+
+export interface VisitRow {
+  id: string;
+  row_number: number;
+  text: string;
+  provenance?: DerivedSourceItem[];
+}
+
+export interface AttachmentCount {
+  section: string;
+  count: number;
+  first_links: string[];
 }
 
 export interface DailyReportDetail {
@@ -352,6 +392,11 @@ export interface DailyReportDetail {
   concrete_logs: ConcreteRow[];
   labor_camp: LaborCampRow[];
   incidents: IncidentRow[];
+  general_activities?: GeneralActivityRow[];
+  visits?: VisitRow[];
+  issues?: IncidentRow[];
+  hse_incidents?: IncidentRow[];
+  attachment_counts?: AttachmentCount[];
   submit_warnings?: string[];
 }
 

@@ -224,7 +224,7 @@
 **Purpose**: Deterministic parity, docs, and end-to-end evidence.
 
 - [X] T059 [P] Update API documentation: extend `apps/api/core/sub_reports/ENDPOINTS.md` + `apps/api/core/field_reports/ENDPOINTS.md` + `apps/api/core/project_templates/` docs with new endpoints, statuses, and error codes (documentation REQUIRED whenever behavior/permissions change per Constitution quality gates).
-- [ ] T060 [P] Run `pnpm typecheck` and fix any NEW frontend errors introduced by this feature (baseline unrelated failures stay documented in `specs/033-daily-sections-grid/baseline.md`; no blanket suppressions per Constitution VI).
+- [X] T060 [P] Run `pnpm typecheck` and fix any NEW frontend errors introduced by this feature (baseline unrelated failures stay documented in `specs/033-daily-sections-grid/baseline.md`; no blanket suppressions per Constitution VI).
 - [ ] T061 Run full backend suite vs baseline: `cd apps/api/core && set -a && source /workspace/.env && set +a && ../.venv/bin/python -m pytest sub_reports field_reports project_templates inventory risk -x` and add targeted suites for changed surfaces; record evidence categories in a verification report under `specs/033-daily-sections-grid/`.
 - [ ] T062 Create Playwright E2E `apps/web/e2e/tests/daily-sections-aggregation.spec.ts` + helpers per `specs/033-daily-sections-grid/quickstart.md` §5 covering the six mandatory view scenarios (activity+link, cross-project rejection, machinery dedupe, receipts-only, structured order, rebuild idempotence + correction) in BOTH locales; `pnpm e2e -- --grep "daily-sections"` GREEN.
 - [X] T063 Audit constitutional gates: bilingual fa/en parity table for all new strings, keyboard operability of all new editors, text-plus-color statuses, documentation updates, evidence-category naming — record in the verification report of T061.
@@ -274,3 +274,11 @@ US2 → labor totals + catalog; US3 → machinery table; US4 → receipts + reco
 - Section contracts NEVER import from or depend on the retired `/sub-reports` route; all UI lives on Specialty Units panels.
 - The sample workbook stays a read-only structural reference; no import tasks exist anywhere in this list.
 - Commit after each task or logical group; stop at checkpoints to validate the story independently.
+
+## Phase 12: Convergence
+
+- [ ] T065 CRITICAL: Create and run `apps/web/e2e/tests/daily-sections-aggregation.spec.ts` with the six required bilingual unit-to-summary scenarios (including rejection/correction, provenance, machinery dedupe, receipts-only details, and structured order) per Constitution III and VI, SC-001, and T062 (missing)
+- [X] T066 CRITICAL: Establish an isolated PostgreSQL test database, run the final-tree TypeScript, migration, and feature backend suites, then update `specs/033-daily-sections-grid/verification-report.md` with exact results and service/browser boundaries per Constitution VI and T060-T061 (partial)
+- [X] T067 Replace the generic concrete editor and abbreviated summary table with full contract fields, sampling/test-information controls, and the read-only QC link; cover the complete unit-to-summary flow per FR-025, FR-026, FR-027, and US5/AC1 (partial)
+- [X] T068 Replace the lossy generic narrative UI and legacy-note summary rendering with localized, full-contract structured editors and ordered read-only summary rows for general activities, issues/barriers, visits, and HSE incidents; include barrier owner/due date, HSE action/severity/notification state, source correction navigation, and regression coverage per FR-028 through FR-032, FR-041, FR-045, and US6 (partial)
+- [X] T069 Wire activity-image upload feedback and the authorized per-section count/link payload through the daily-summary API and `AttachmentCountLink`, with no gallery and explicit MinIO boundary tests, per FR-033 through FR-036 and US7 (missing)

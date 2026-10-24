@@ -365,6 +365,16 @@
       "time": "Time",
       "reason": "Reason",
       "sections": {
+        "fields": {
+          "description": "Description",
+          "location": "Location / zone",
+          "quantity": "Quantity",
+          "unit": "Unit",
+          "notes": "Notes",
+          "parcel": "Parcel",
+          "block": "Block",
+          "floor": "Floor"
+        },
         "activities": {
           "tab": "Executed activities",
           "title": "Section 2 — Executed Site Activities",
@@ -553,6 +563,16 @@
           "addRow": "Add pour",
           "empty": "No concrete pours recorded.",
           "sampling": "Sampling declared",
+          "samplingNotTaken": "Not sampled",
+          "fields": {
+            "volume": "Volume (m³)",
+            "structuralElement": "Structural element",
+            "batchingPlant": "Batching plant",
+            "deliveryNote": "Truck delivery note",
+            "samplingState": "Sampling state",
+            "labSampleCode": "Lab sample code",
+            "testSheetCount": "Test sheet count"
+          },
           "errors": {
             "volume_must_be_positive": "Concrete volume must be greater than zero.",
             "sampling_requires_test_information": "Declared sampling needs a lab sample code and test sheet count.",
@@ -571,6 +591,10 @@
           "addRow": "Add row",
           "empty": "No issues or barriers recorded.",
           "overdue": "Overdue",
+          "kindIssue": "Issue",
+          "kindBarrier": "Barrier",
+          "owner": "Follow-up owner ID",
+          "dueDate": "Due date",
           "errors": {
             "barrier_owner_and_due_date_required": "A barrier needs an owner and a due date."
           }
@@ -586,6 +610,11 @@
           "title": "HSE incidents",
           "addRow": "Add incident",
           "empty": "No HSE incidents recorded.",
+          "severity": "Severity",
+          "minor": "Minor",
+          "moderate": "Moderate",
+          "major": "Major",
+          "immediateAction": "Immediate action",
           "errors": {
             "hse_immediate_action_required": "An immediate action is required.",
             "invalid_severity": "Severity must be minor, moderate, or major."
@@ -593,6 +622,10 @@
         },
         "attachments": {
           "label": "Activity image",
+          "activity": "Activity",
+          "selectActivity": "Select activity",
+          "upload": "Upload image",
+          "saved": "Image metadata was saved; file retrieval depends on configured object storage.",
           "hint": "JPEG or PNG, 10 MB maximum.",
           "errors": {
             "unsupported_file_format": "Only JPEG and PNG images are accepted.",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
@@ -13,7 +13,12 @@ import {
   type UnitReport,
   type UnitSectionRow,
 } from "@/app/lib/api/unit-reports";
-import { Button, Field, Input, Select } from "@/components/form";
+import { Button, Field as BaseField, Input, Select, type FieldProps } from "@/components/form";
+
+function Field({ label, name, children, ...props }: Omit<FieldProps, "children" | "name"> & { name?: string; children: ReactNode | (() => ReactNode) }) {
+  const resolvedName = name ?? `section-${String(label).replace(/\s+/g, "-")}`;
+  return <BaseField {...props} name={resolvedName} label={label}>{typeof children === "function" ? children : () => children}</BaseField>;
+}
 
 export interface StructuredSectionProps {
   businessId: string;
@@ -42,9 +47,24 @@ export function StructuredSection({
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
   const [volume, setVolume] = useState("");
+  const [location, setLocation] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [unitName, setUnitName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [structuralElement, setStructuralElement] = useState("");
+  const [parcel, setParcel] = useState("");
+  const [zone, setZone] = useState("");
+  const [block, setBlock] = useState("");
+  const [floor, setFloor] = useState("");
+  const [batchingPlant, setBatchingPlant] = useState("");
+  const [deliveryNote, setDeliveryNote] = useState("");
+  const [labSampleCode, setLabSampleCode] = useState("");
+  const [samplingState, setSamplingState] = useState("not_sampled");
+  const [testSheetCount, setTestSheetCount] = useState("");
   const [severity, setSeverity] = useState("minor");
   const [action, setAction] = useState("");
   const [kind, setKind] = useState("issue");
+  const [ownerUser, setOwnerUser] = useState("");
   const [due, setDue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const queryKey = ["unit-section", businessId, unit, report.id, section];
@@ -60,12 +80,25 @@ export function StructuredSection({
       if (fields.includes("text")) payload.text = text;
       if (fields.includes("description")) {
         payload.activity_description = description;
-        payload.location = text;
+        payload.location = location;
+        payload.quantity = quantity || null;
+        payload.unit = unitName || null;
+        payload.notes = notes;
       }
       if (fields.includes("concrete")) {
         payload.concrete_description = description || text;
         payload.volume_m3 = volume;
-        payload.sampling_state = "not_sampled";
+        payload.structural_element = structuralElement;
+        payload.parcel = parcel || null;
+        payload.zone = zone || null;
+        payload.block = block || null;
+        payload.floor = floor || null;
+        payload.batching_plant = batchingPlant;
+        payload.truck_delivery_note_number = deliveryNote;
+        payload.lab_sample_code = labSampleCode;
+        payload.sampling_state = samplingState;
+        payload.test_sheet_count = testSheetCount || null;
+        payload.notes = notes;
       }
       if (fields.includes("hse")) {
         payload.text = text;
@@ -75,6 +108,7 @@ export function StructuredSection({
       if (fields.includes("barrier")) {
         payload.kind = kind;
         payload.text = text;
+        payload.owner_user = ownerUser || null;
         payload.due_date = due || null;
       }
       return createUnitSection(businessId, unit, report.id, section, payload);
@@ -83,7 +117,22 @@ export function StructuredSection({
       setText("");
       setDescription("");
       setVolume("");
+      setLocation("");
+      setQuantity("");
+      setUnitName("");
+      setNotes("");
+      setStructuralElement("");
+      setParcel("");
+      setZone("");
+      setBlock("");
+      setFloor("");
+      setBatchingPlant("");
+      setDeliveryNote("");
+      setLabSampleCode("");
+      setSamplingState("not_sampled");
+      setTestSheetCount("");
       setAction("");
+      setOwnerUser("");
       setError(null);
       await qc.invalidateQueries({ queryKey });
     },
@@ -134,14 +183,44 @@ export function StructuredSection({
           }}
         >
           {fields.includes("concrete") || fields.includes("description") ? (
-            <Field label={t(titleKey)}>
-              <Input value={description} onChange={(event) => setDescription(event.target.value)} />
+            <Field label={t("businessDepartment.unitReport.sections.fields.description", "شرح") }>
+              <Input value={description} onChange={(event) => setDescription(event.target.value)} required />
             </Field>
           ) : null}
           {fields.includes("concrete") ? (
-            <Field label={t("businessDepartment.unitReport.sections.concrete.tab")}>
+            <Field label={t("businessDepartment.unitReport.sections.concrete.fields.volume", "حجم (مترمکعب)")}>
               <Input inputMode="decimal" value={volume} onChange={(event) => setVolume(event.target.value)} required />
             </Field>
+          ) : null}
+          {fields.includes("description") ? (
+            <>
+              <Field label={t("businessDepartment.unitReport.sections.fields.location", "محل") }><Input value={location} onChange={(event) => setLocation(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.quantity", "مقدار") }><Input inputMode="decimal" value={quantity} onChange={(event) => setQuantity(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.unit", "واحد") }><Input value={unitName} onChange={(event) => setUnitName(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.notes", "توضیحات") }><Input value={notes} onChange={(event) => setNotes(event.target.value)} /></Field>
+            </>
+          ) : null}
+          {fields.includes("concrete") ? (
+            <>
+              <Field label={t("businessDepartment.unitReport.sections.concrete.fields.structuralElement", "عضو سازه‌ای") }><Input value={structuralElement} onChange={(event) => setStructuralElement(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.parcel", "پارسل") }><Input value={parcel} onChange={(event) => setParcel(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.location", "زون") }><Input value={zone} onChange={(event) => setZone(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.block", "بلوک") }><Input value={block} onChange={(event) => setBlock(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.fields.floor", "طبقه") }><Input value={floor} onChange={(event) => setFloor(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.concrete.fields.batchingPlant", "بچینگ") }><Input value={batchingPlant} onChange={(event) => setBatchingPlant(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.concrete.fields.deliveryNote", "شماره حواله") }><Input value={deliveryNote} onChange={(event) => setDeliveryNote(event.target.value)} /></Field>
+              <Field label={t("businessDepartment.unitReport.sections.concrete.fields.samplingState", "وضعیت نمونه‌گیری") }>
+                <Select name="samplingState" value={samplingState} onChange={(event) => setSamplingState(event.target.value)} options={[
+                  { value: "not_sampled", label: t("businessDepartment.unitReport.sections.concrete.samplingNotTaken", "نمونه‌گیری نشده") },
+                  { value: "sampling_declared", label: t("businessDepartment.unitReport.sections.concrete.sampling", "نمونه‌گیری اعلام شده") },
+                ]} />
+              </Field>
+              {samplingState === "sampling_declared" ? <>
+                <Field label={t("businessDepartment.unitReport.sections.concrete.fields.labSampleCode", "کد نمونه آزمایشگاه") }><Input value={labSampleCode} onChange={(event) => setLabSampleCode(event.target.value)} required /></Field>
+                <Field label={t("businessDepartment.unitReport.sections.concrete.fields.testSheetCount", "تعداد برگه آزمایش") }><Input inputMode="numeric" value={testSheetCount} onChange={(event) => setTestSheetCount(event.target.value)} required /></Field>
+              </> : null}
+              <Field label={t("businessDepartment.unitReport.sections.fields.notes", "توضیحات") }><Input value={notes} onChange={(event) => setNotes(event.target.value)} /></Field>
+            </>
           ) : null}
           {fields.includes("barrier") ? (
             <Field label={t("businessDepartment.unitReport.sections.issues.tab")}>
@@ -150,39 +229,44 @@ export function StructuredSection({
                 value={kind}
                 onChange={(event) => setKind(event.target.value)}
                 options={[
-                  { value: "issue", label: "issue" },
-                  { value: "barrier", label: "barrier" },
+                  { value: "issue", label: t("businessDepartment.unitReport.sections.issues.kindIssue", "مسئله") },
+                  { value: "barrier", label: t("businessDepartment.unitReport.sections.issues.kindBarrier", "مانع") },
                 ]}
               />
             </Field>
           ) : null}
-          {fields.includes("text") || fields.includes("hse") || fields.includes("barrier") || fields.includes("description") ? (
+          {fields.includes("text") || fields.includes("hse") || fields.includes("barrier") ? (
             <Field label={t(titleKey)}>
-              <Input value={text} onChange={(event) => setText(event.target.value)} />
+              <Input value={text} onChange={(event) => setText(event.target.value)} required />
             </Field>
           ) : null}
           {fields.includes("hse") ? (
             <>
-              <Field label="severity">
+              <Field label={t("businessDepartment.unitReport.sections.hse.severity", "شدت") }>
                 <Select
                   name="severity"
                   value={severity}
                   onChange={(event) => setSeverity(event.target.value)}
                   options={[
-                    { value: "minor", label: "minor" },
-                    { value: "moderate", label: "moderate" },
-                    { value: "major", label: "major" },
+                    { value: "minor", label: t("businessDepartment.unitReport.sections.hse.minor", "جزئی") },
+                    { value: "moderate", label: t("businessDepartment.unitReport.sections.hse.moderate", "متوسط") },
+                    { value: "major", label: t("businessDepartment.unitReport.sections.hse.major", "عمده") },
                   ]}
                 />
               </Field>
-              <Field label="immediate_action">
+              <Field label={t("businessDepartment.unitReport.sections.hse.immediateAction", "اقدام فوری") }>
                 <Input value={action} onChange={(event) => setAction(event.target.value)} required />
               </Field>
             </>
           ) : null}
           {fields.includes("barrier") ? (
-            <Field label="due_date">
+            <Field label={t("businessDepartment.unitReport.sections.issues.dueDate", "تاریخ سررسید") }>
               <Input type="date" value={due} onChange={(event) => setDue(event.target.value)} />
+            </Field>
+          ) : null}
+          {fields.includes("barrier") ? (
+            <Field label={t("businessDepartment.unitReport.sections.issues.owner", "شناسه مسئول پیگیری") }>
+              <Input value={ownerUser} onChange={(event) => setOwnerUser(event.target.value)} required={kind === "barrier"} />
             </Field>
           ) : null}
           {error ? (

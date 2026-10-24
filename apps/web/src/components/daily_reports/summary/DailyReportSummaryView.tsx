@@ -10,6 +10,7 @@ import { formatDisplayDate } from "@/app/lib/jalali-utils";
 import { PATHS } from "@/app/routeVars";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
 import { IncompletenessBanner } from "./IncompletenessBanner";
+import { AttachmentCountLink } from "./AttachmentCountLink";
 
 function Section({
   title,
@@ -161,37 +162,6 @@ function SimpleTable({
   );
 }
 
-function parseAutoNotes(generalNotes: string | null | undefined): {
-  issues: string;
-  visits: string;
-  general: string;
-  rest: string;
-} {
-  const raw = generalNotes ?? "";
-  const markerStart = "<!--auto-summary-notes-->";
-  const markerEnd = "<!--/auto-summary-notes-->";
-  let auto = "";
-  let rest = raw;
-  if (raw.includes(markerStart) && raw.includes(markerEnd)) {
-    const before = raw.split(markerStart)[0] ?? "";
-    const mid = raw.split(markerStart)[1]?.split(markerEnd)[0] ?? "";
-    const after = raw.split(markerEnd)[1] ?? "";
-    auto = mid.trim();
-    rest = `${before}${after}`.trim();
-  }
-  const pick = (label: string) => {
-    const re = new RegExp(`${label}:\\n([\\s\\S]*?)(?=\\n\\n[\\u0600-\\u06FF]+:|$)`);
-    const m = auto.match(re);
-    return m?.[1]?.trim() ?? "";
-  };
-  return {
-    general: pick("فعالیت‌های عمومی"),
-    issues: pick("ملاحظات"),
-    visits: pick("بازدیدها"),
-    rest,
-  };
-}
-
 export function DailyReportSummaryView({
   report,
   projectId,
@@ -224,7 +194,10 @@ export function DailyReportSummaryView({
       (r) => !(r.transaction_type === "receipt" && r.receipt_resolved === true),
     );
   const [showMaterialDetails, setShowMaterialDetails] = useState(false);
-  const notes = parseAutoNotes(report.general_notes);
+  const generalActivities = report.general_activities ?? [];
+  const issues = report.issues ?? report.incidents.filter((row) => row.incident_type === "issue" || row.incident_type === "barrier");
+  const visits = report.visits ?? [];
+  const hseIncidents = report.hse_incidents ?? report.incidents.filter((row) => row.incident_type === "safety");
 
   function renderReconciliationPill(
     status: MaterialReconciliationStatus | undefined,
@@ -669,13 +642,27 @@ export function DailyReportSummaryView({
         </div>
       </Section>
 
-      <Section title={t("dailyReports.summary.concrete", "حجم بتن ریخته‌شده")}>
+      <Section title={t("dailyReports.summary.concrete", "حجم بتن ریخته‌شده")} testId='summary-section-concrete'>
         <SimpleTable
-          headers={["شرح", "حجم (م۳)", "قطعه/بلوک/طبقه", "منابع"]}
+          headers={[
+            t("dailyReports.summary.colDescription", "شرح"),
+            t("dailyReports.summary.colQuantity", "حجم (م۳)"),
+            t("dailyReports.summary.concreteElement", "عضو سازه‌ای"),
+            t("dailyReports.summary.colParcel", "پلاک / محدوده"),
+            t("dailyReports.summary.concreteDelivery", "بچینگ / حواله"),
+            t("dailyReports.summary.concreteSampling", "نمونه‌گیری / آزمون"),
+            t("dailyReports.summary.concreteQc", "کنترل کیفیت"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
           rows={report.concrete_logs.map((r) => [
             r.concrete_description,
             r.volume_m3,
-            [r.zone, r.block, r.floor].filter(Boolean).join(" / "),
+            r.structural_element || [r.zone, r.block, r.floor].filter(Boolean).join(" / "),
+            [r.parcel, r.zone, r.block, r.floor].filter(Boolean).join(" / ") || "—",
+            [r.batching_plant, r.truck_delivery_note_number].filter(Boolean).join(" / ") || "—",
+            [r.sampling_state, r.lab_sample_code, r.test_sheet_count != null ? `${r.test_sheet_count}` : ""]
+              .filter(Boolean).join(" / ") || "—",
+            r.qc_link ? <a className='underline text-primary' href={r.qc_link.href}>{t("dailyReports.summary.openQc", "مشاهده کنترل کیفیت")}</a> : "—",
             <ProvenanceCell
               key={`prov-${r.id}`}
               provenance={r.provenance}
@@ -731,24 +718,80 @@ export function DailyReportSummaryView({
         title={t("dailyReports.summary.generalActivities", "فعالیت‌های عمومی کارگاه")}
         testId='summary-section-general'
       >
-        <pre className='whitespace-pre-wrap text-sm'>{notes.general || "—"}</pre>
+        <SimpleTable
+          headers={[
+            t("dailyReports.summary.colDescription", "شرح"),
+            t("dailyReports.summary.colLocation", "محل"),
+            t("dailyReports.summary.colQuantity", "مقدار"),
+            t("dailyReports.summary.colUnit", "واحد"),
+            t("dailyReports.summary.notes", "توضیحات"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
+          rows={generalActivities.map((row) => [
+            row.activity_description, row.location || "—", row.quantity ?? "—", row.unit ?? "—", row.notes || "—",
+            <ProvenanceCell key={`general-${row.id}`} provenance={row.provenance} projectId={resolvedProjectId} reportDate={report.report_date} />,
+          ])}
+        />
       </Section>
 
       <Section
         title={t("dailyReports.summary.issues", "ملاحظات / مسائل")}
         testId='summary-section-issues'
       >
-        <pre className='whitespace-pre-wrap text-sm'>
-          {[notes.issues, notes.rest].filter(Boolean).join("\n\n") || "—"}
-        </pre>
+        <SimpleTable
+          headers={[
+            t("dailyReports.summary.issueKind", "نوع"), t("dailyReports.summary.colDescription", "شرح"),
+            t("dailyReports.summary.issueOwner", "مسئول پیگیری"), t("dailyReports.summary.issueDue", "مهلت"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
+          rows={issues.map((row) => [
+            row.incident_type, row.description, row.follow_up_owner_name || "—", row.due_date || "—",
+            <ProvenanceCell key={`issue-${row.id}`} provenance={row.provenance} projectId={resolvedProjectId} reportDate={report.report_date} />,
+          ])}
+        />
       </Section>
 
       <Section
         title={t("dailyReports.summary.visits", "بازدیدها")}
         testId='summary-section-visits'
       >
-        <pre className='whitespace-pre-wrap text-sm'>{notes.visits || "—"}</pre>
+        <SimpleTable
+          headers={[t("dailyReports.summary.colDescription", "شرح بازدید"), t("dailyReports.summary.colSources", "منابع")]}
+          rows={visits.map((row) => [
+            row.text,
+            <ProvenanceCell key={`visit-${row.id}`} provenance={row.provenance} projectId={resolvedProjectId} reportDate={report.report_date} />,
+          ])}
+        />
       </Section>
+
+      <Section title={t("dailyReports.summary.hse", "رخدادهای HSE")} testId='summary-section-hse'>
+        <SimpleTable
+          headers={[
+            t("dailyReports.summary.colDescription", "شرح"), t("dailyReports.summary.hseSeverity", "شدت"),
+            t("dailyReports.summary.hseAction", "اقدام فوری"), t("dailyReports.summary.hseNotification", "شناسه اعلان"),
+            t("dailyReports.summary.colSources", "منابع"),
+          ]}
+          rows={hseIncidents.map((row) => [
+            row.description, row.severity || "—", row.corrective_action || "—", row.notification_id || "—",
+            <ProvenanceCell key={`hse-${row.id}`} provenance={row.provenance} projectId={resolvedProjectId} reportDate={report.report_date} />,
+          ])}
+        />
+      </Section>
+
+      {(report.attachment_counts ?? []).length > 0 ? (
+        <Section title={t("dailyReports.summary.attachments", "تصاویر فعالیت‌ها")} testId='summary-section-attachments'>
+          <div className='space-y-2'>
+            {(report.attachment_counts ?? []).map((entry) => (
+              <AttachmentCountLink
+                key={entry.section}
+                count={entry.count}
+                links={entry.first_links}
+                label={t("dailyReports.summary.attachmentsForSection", "تصاویر {{section}}", { section: entry.section })}
+              />
+            ))}
+          </div>
+        </Section>
+      ) : null}
 
       <Section title={t("dailyReports.summary.managementOpinion", "نظر مدیریت")}>
         <pre className='whitespace-pre-wrap text-sm'>

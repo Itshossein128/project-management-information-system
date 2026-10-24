@@ -295,3 +295,45 @@ class TestStructuredTransfer:
             assert derived_issues.count() <= 1, (
                 f"Expected at most 1 derived issue, got {derived_issues.count()}"
             )
+
+    def test_summary_payload_exposes_ordered_structured_sections(self, db, user, project_factory):
+        """T068: the read-only summary exposes structured rows, not legacy note text."""
+        from field_reports.serializers import DailyReportDetailSerializer
+        from field_reports.services.daily_report_aggregation import ensure_daily_report_summary
+
+        project = project_factory(code_suffix='05')
+        report = DisciplineSubReport.objects.create(
+            project=project,
+            report_date=REPORT_DATE,
+            unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil',
+            lineage_id=None,
+            status=SubReportStatus.SUBMITTED,
+            created_by=user,
+        )
+        DisciplineSubReportGeneralActivity.objects.create(
+            sub_report=report, row_number=2, activity_description='Structured general',
+            location='Tower A', quantity='0.0', unit='m3', notes='Measured zero',
+        )
+        DisciplineSubReportIssue.objects.create(
+            sub_report=report, row_number=3, kind='barrier', text='Access blocked',
+            owner_user=user, due_date=date(2024, 6, 15),
+        )
+        DisciplineSubReportVisit.objects.create(
+            sub_report=report, row_number=4, text='Consultant visit',
+        )
+        DisciplineSubReportHseIncident.objects.create(
+            sub_report=report, row_number=5, text='Helmet non-compliance',
+            severity='major', immediate_action='Stop work and brief crew',
+        )
+
+        summary = ensure_daily_report_summary(project.id, REPORT_DATE, user=user)
+        payload = DailyReportDetailSerializer(summary).data
+
+        assert payload['general_activities'][0]['activity_description'] == 'Structured general'
+        assert payload['general_activities'][0]['quantity'] == '0.0000'
+        assert payload['issues'][0]['incident_type'] == 'barrier'
+        assert payload['issues'][0]['due_date']
+        assert payload['visits'][0]['text'] == 'Consultant visit'
+        assert payload['hse_incidents'][0]['severity'] == 'major'
+        assert payload['hse_incidents'][0]['notification_id']
