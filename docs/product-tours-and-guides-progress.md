@@ -6,9 +6,9 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 
 ## Status Overview
 
-- **Completed**: 14 routes / workflows
-- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/costs`)
-- **Remaining**: 61 routes / workflows
+- **Completed**: 15 routes / workflows
+- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/contracts`)
+- **Remaining**: 60 routes / workflows
 
 ---
 
@@ -29,12 +29,13 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 | `/projects/:projectId/risk-register` | `project-risk-register` | Matrix, Filters, New Button, Event List | Decision Tree & Tour | Completed |
 | `/projects/:projectId/daily-reports` | `project-daily-reports` | Stats, Filters, New Button, Table | Decision Tree & Tour | Completed |
 | `/projects/:projectId/daily-reports/new` | `project-daily-report-form` | Header, Save Button, Tabs, Approval Status | Decision Tree & Tour | Completed |
-| `/projects/:projectId/costs` | `project-costs` | KPI Grid, Tabs, Versions Panel, Budget Grid, Change Requests | Decision Tree & Tour | **In Review (Today)** |
+| `/projects/:projectId/costs` | `project-costs` | KPI Grid, Tabs, Versions Panel, Budget Grid, Change Requests | Decision Tree & Tour | Completed |
+| `/projects/:projectId/contracts` | `project-contracts` | KPI Grid, Tabs, Contracts/IPC Table, Receivables Panel | Decision Tree & Tour | **In Review (Today)** |
 
 ---
 
 ## High-Priority Backlog (Next Slices)
 
-1. **Contracts & Payment Certificates (IPC)** (`/projects/:projectId/contracts` & `/ipcs/:ipcId`): Subcontractor/Client contract workflow, IPC submission, and approval chain.
+1. **Contracts Detail & IPCs** (`/projects/:projectId/contracts/:contractId` & `/ipcs/:ipcId`): Contract detail, change orders, BoQ grid, IPC wizard, and workflow bar.
 2. **Schedule & WBS** (`/projects/:projectId/wbs` & `/schedule/gantt`): Work breakdown structure, progress entry, and Gantt baseline comparison.
 3. **Quality & HSE / Barrier Log** (`/projects/:projectId/barriers`): Non-conformance reporting, site barrier escalation, and closure workflow.
