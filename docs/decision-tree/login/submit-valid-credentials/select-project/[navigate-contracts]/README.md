@@ -28,6 +28,15 @@
 
 ProjectProvider fetches the project. The registered route remains distinct from sidebar visibility; disabled capabilities hide matching menu entries without removing route registration.
 
+## Product Tour & User Guide
+
+- **Tour ID**: `project-contracts`
+- **Data Tour Anchors**:
+  - `contracts-kpi-grid`: Financial summary KPIs (Main contracts, subcontracts, overdue IPCs, expiring guarantees)
+  - `contracts-tabs`: Main navigation tabs (Contracts, IPCs, Receivables)
+  - `contracts-table`: Contracts & IPCs data table
+  - `contracts-receivables`: Outstanding collections and receivables panel
+
 ## Subsequent Decisions
 
 - [Filter or change the displayed view](filter-and-change-view/README.md)

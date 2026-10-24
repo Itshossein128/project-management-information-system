@@ -28,6 +28,7 @@ const TOURS = [
   { id: "project-alerts", path: "alerts" },
   { id: "project-manpower", path: "manpower" },
   { id: "project-costs", path: "costs" },
+  { id: "project-contracts", path: "contracts" },
 ] as const;
 
 /** An untranslated step renders the raw i18n key instead of a sentence. */

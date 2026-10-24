@@ -2300,6 +2300,17 @@
       "gridDesc": "View multi-level budget lines and manage cost items grouped by work packages.",
       "changeRequestsTitle": "Budget Change Requests (BCR)",
       "changeRequestsDesc": "Submit budget change requests with impact rationale and track approval workflow."
+    },
+    "projectContracts": {
+      "title": "Contracts & IPC Management Tour",
+      "kpiTitle": "Contract Financial Summary",
+      "kpiDesc": "View total effective amounts for main contracts, subcontracts, overdue IPC counts, and expiring guarantees.",
+      "tabsTitle": "Contract Management Tabs",
+      "tabsDesc": "Switch between Contracts list, Payment Certificates (IPC), and Overdue/Near-due Receivables.",
+      "tableTitle": "Contracts & IPCs Table",
+      "tableDesc": "Track counterparty details, contract types, amounts, and IPC approval states, or open detailed views.",
+      "receivablesTitle": "Receivables & Collections",
+      "receivablesDesc": "Monitor overdue or near-due IPC collections and record received payments against open invoices."
     }
   },
   "dailyReports": {

@@ -24,6 +24,8 @@ import {
   PageHeader,
 } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { Button } from "@/components/ui/sprint-button";
 
 type Tab = "contracts" | "ipcs" | "receivables";
@@ -60,6 +62,64 @@ function ContractsContent() {
     enabled: canViewIpcs && tab === "ipcs",
   });
 
+  const { startTour } = useProductTour({
+    tourId: "project-contracts",
+    steps: [
+      {
+        element: '[data-tour="contracts-kpi-grid"]',
+        popover: {
+          title: t("tour.projectContracts.kpiTitle", {
+            defaultValue: "خلاصه مالی قراردادها",
+          }),
+          description: t("tour.projectContracts.kpiDesc", {
+            defaultValue:
+              "مجموع مبالغ قراردادهای اصلی، پیمانکاران فرعی، تعداد IPCهای معوق و ضمانت‌نامه‌های در شرف انقضا را مشاهده کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contracts-tabs"]',
+        popover: {
+          title: t("tour.projectContracts.tabsTitle", {
+            defaultValue: "تب‌های مدیریت پیمان",
+          }),
+          description: t("tour.projectContracts.tabsDesc", {
+            defaultValue:
+              "بین فهرست قراردادها، صورت‌وضعیت‌های کارکرد (IPC) و مطالبات/دریافتی‌های معوق جابه‌جا شوید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contracts-table"]',
+        popover: {
+          title: t("tour.projectContracts.tableTitle", {
+            defaultValue: "فهرست قراردادها و صورت‌وضعیت‌ها",
+          }),
+          description: t("tour.projectContracts.tableDesc", {
+            defaultValue:
+              "مشخصات طرف مقابل، نوع قرارداد، مبالغ و وضعیت تایید صورت‌وضعیت‌ها را پیگیری نموده و وارد جزئیات شوید.",
+          }),
+          side: "top",
+        },
+      },
+      {
+        element: '[data-tour="contracts-receivables"]',
+        popover: {
+          title: t("tour.projectContracts.receivablesTitle", {
+            defaultValue: "مطالبات و دریافتی‌ها",
+          }),
+          description: t("tour.projectContracts.receivablesDesc", {
+            defaultValue:
+              "وضعیت مطالبات سررسیدشده و در شرف سررسید را مشاهده نموده و وصولی‌های مربوطه را ثبت کنید.",
+          }),
+          side: "top",
+        },
+      },
+    ],
+  });
+
   if (isLoading) return <LoadingSkeleton rows={8} />;
   if (!project) {
     return <EmptyState title={t("common.projectNotFound")} />;
@@ -91,15 +151,22 @@ function ContractsContent() {
         title={t("pages.contracts.title")}
         subtitle={project.project_name}
         actions={
-          canEdit ? (
-            <Link to={newContractHref}>
-              <Button variant='primary'>قرارداد جدید</Button>
-            </Link>
-          ) : undefined
+          <div className='flex items-center gap-2'>
+            <ProductTourButton onClick={startTour} />
+            {canEdit ? (
+              <Link to={newContractHref}>
+                <Button variant='primary'>قرارداد جدید</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
-      <div className='grid gap-4 md:grid-cols-4'>
+      <div
+        className='grid gap-4 md:grid-cols-4'
+        data-testid='contracts-kpi-grid'
+        data-tour='contracts-kpi-grid'
+      >
         <div className='rounded-lg border p-4'>
           <p className='text-sm text-muted-foreground'>قرارداد اصلی</p>
           <p className='text-lg font-semibold'>{formatFaAmount(mainTotal)}</p>
@@ -122,7 +189,13 @@ function ContractsContent() {
         </div>
       </div>
 
-      <div className='flex gap-2' role='tablist' aria-label='بخش‌های قرارداد'>
+      <div
+        className='flex gap-2'
+        role='tablist'
+        aria-label='بخش‌های قرارداد'
+        data-testid='contracts-tabs'
+        data-tour='contracts-tabs'
+      >
         <Button
           role='tab'
           aria-selected={tab === "contracts"}
@@ -168,7 +241,12 @@ function ContractsContent() {
             }
           />
         ) : (
-          <div className='overflow-x-auto rounded-lg border' role='tabpanel'>
+          <div
+            className='overflow-x-auto rounded-lg border'
+            role='tabpanel'
+            data-testid='contracts-table'
+            data-tour='contracts-table'
+          >
             <table className='w-full text-sm'>
               <thead className='bg-muted/50'>
                 <tr>
@@ -226,7 +304,12 @@ function ContractsContent() {
             description='صورت‌وضعیت‌ها پس از ثبت روی قراردادها اینجا نمایش داده می‌شوند.'
           />
         ) : (
-          <div className='overflow-x-auto rounded-lg border' role='tabpanel'>
+          <div
+            className='overflow-x-auto rounded-lg border'
+            role='tabpanel'
+            data-testid='contracts-table'
+            data-tour='contracts-table'
+          >
             <table className='w-full text-sm'>
               <thead className='bg-muted/50'>
                 <tr>
@@ -278,7 +361,11 @@ function ContractsContent() {
       ) : null}
 
       {tab === "receivables" ? (
-        canView ? <ReceivablesPanel projectId={projectId} /> : (
+        canView ? (
+          <div data-testid='contracts-receivables' data-tour='contracts-receivables'>
+            <ReceivablesPanel projectId={projectId} />
+          </div>
+        ) : (
           <EmptyState title={t("common.accessDenied")} />
         )
       ) : null}
