@@ -13,8 +13,8 @@
 
 ## Authorization & Permissions
 
-- **Required Permissions**: Sidebar roles admin/hr/business-setup; backend IsAuthenticated
-- **Required Roles / Groups**: Sidebar: admin, hr or business-setup. API only requires an authenticated user.
+- **Required Permissions**: Sidebar roles admin, hr, or business-setup. Catalog reads require `IsAuthenticated`. Creates and updates require `IsOrgRefWriterOrReadOnly`.
+- **Required Roles / Groups**: Navigation: `admin`, `hr`, or `business-setup`. Writes also allow staff and superuser. A signed-in user in none of those groups can read the catalogs and cannot create or update them.
 - **Protection notation**: Special permission/role gate; directory uses brackets.
 
 ## Desired Result
@@ -26,12 +26,12 @@
 
 ## Outcomes & Guards
 
-The route and reference APIs do not enforce the sidebar role list as a server role gate.
+Catalog reads stay open to any authenticated user so project setup can load them. Creates and updates require staff, superuser, or the `admin`, `hr`, or `business-setup` groups.
 
 ## Subsequent Decisions
 
-- [Create organization unit](create-unit/README.md)
-- [Create contract type](create-contract-type/README.md)
+- [Create organization unit](%5Bcreate-unit%5D/README.md)
+- [Create contract type](%5Bcreate-contract-type%5D/README.md)
 
 Continue / return links (the same state is documented once):
 
