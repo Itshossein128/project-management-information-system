@@ -12,7 +12,12 @@ from django.contrib.auth import get_user_model
 import pytest
 
 from projects.models import Activity, Project, Stakeholder, WBS
-from sub_reports.models import DisciplineSubReport, SubReportStatus
+from sub_reports.models import (
+    DisciplineSubReport,
+    DisciplineSubReportActivity,
+    SubReportStatus,
+    UnitReportAttachment,
+)
 from common.reporting_units import SpecialtyUnit
 from sub_reports.serializers import (
     UnitReportActivitySectionSerializer,
@@ -354,11 +359,11 @@ class TestLaborSectionContract:
 
 @pytest.mark.django_db
 class TestAttachmentContract:
-    """Attachment tests per contracts/unit-report-sections-api.md §7.
+    """Attachment tests per contracts/unit-report-sections-api.md §7."""
 
-    Tests verify content validation, size limits, project scope, and mutability
-    rules for activity image attachments.
-    """
+    @pytest.fixture(autouse=True)
+    def _persisted_activity(self, unit_report, section_activity_payload):
+        _save_rows(unit_report, [section_activity_payload])
 
     def test_unsupported_file_format(self, db, unit_report, section_activity_payload):
         """ZIP/EXE/content-misdeclared files are rejected at upload."""
@@ -421,11 +426,22 @@ class TestAttachmentContract:
             created_by=other_user,
         )
 
-        # Try to attach to a row from the other report
+        saved_other = DisciplineSubReportActivity.objects.create(
+            sub_report=other_report,
+            row_number=1,
+            shift='shift_1',
+            activity_ref=unit_report.activities.first().activity_ref,
+            activity_description='Other version',
+            crew_name='Other',
+            foreman_count=1,
+            worker_count=1,
+            quantity='1',
+            unit='m3',
+        )
         with pytest.raises(Exception) as excinfo:
             attach_image_to_activity(
                 report=unit_report,
-                activity_row_id=str(other_report.activities.first().id),
+                activity_row_id=str(saved_other.id),
                 file_content=b'fake-image-data',
                 declared_content_type='image/jpeg',
             )
@@ -435,18 +451,39 @@ class TestAttachmentContract:
             'not in version' in str(excinfo.value).lower() or \
             'cross-project' in str(excinfo.value).lower()
 
-    def test_reference_not_in_project_scope(self, db, unit_report, section_activity_payload, foreign_project, project):
+    def test_reference_not_in_project_scope(self, db, unit_report, section_activity_payload, foreign_project, project, user):
         """Cross-project attachment target is refused with no partial storage."""
         from sub_reports.services import attach_image_to_activity
 
-        # Try to attach to a row belonging to a different project
+        foreign_report = DisciplineSubReport.objects.create(
+            project=foreign_project['project'],
+            report_date=date(2024, 6, 10),
+            unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil',
+            status=SubReportStatus.DRAFT,
+            created_by=user,
+        )
+        foreign_row = DisciplineSubReportActivity.objects.create(
+            sub_report=foreign_report,
+            row_number=1,
+            shift='shift_1',
+            activity_ref=foreign_project['activity'],
+            activity_description='Foreign',
+            crew_name='Foreign crew',
+            foreman_count=1,
+            worker_count=1,
+            quantity='1',
+            unit='m3',
+        )
+        before = UnitReportAttachment.objects.count()
         with pytest.raises(Exception) as excinfo:
             attach_image_to_activity(
                 report=unit_report,
-                activity_row_id=str(unit_report.activities.first().id),
+                activity_row_id=str(foreign_row.id),
                 file_content=b'fake-image-data',
                 declared_content_type='image/jpeg',
             )
+        assert UnitReportAttachment.objects.count() == before
 
         # Should refuse cross-project attachment
         assert 'reference_not_in_project_scope' in str(excinfo.value).lower() or \
@@ -479,9 +516,10 @@ class TestAttachmentContract:
         """Provenance metadata (capture date, work front, source activity/unit/project) preserved."""
         from sub_reports.services import attach_image_to_activity
 
+        saved = _save_rows(unit_report, [section_activity_payload])
         attachment = attach_image_to_activity(
             report=unit_report,
-            activity_row_id=str(unit_report.activities.first().id),
+            activity_row_id=str(saved[0].id),
             file_content=b'fake-image-data',
             declared_content_type='image/jpeg',
             capture_date=date(2024, 6, 10),

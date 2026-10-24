@@ -17,9 +17,12 @@ from field_reports.models import (
     DailyReportActivity,
     DailyReportConcreteLog,
     DailyReportDerivedSource,
+    DailyReportGeneralActivity,
+    DailyReportIncident,
     DailyReportLabor,
     DailyReportMachineryRow,
     DailyReportMaterial,
+    DailyReportVisit,
     InactivityReason,
     MaterialTransactionType,
     ReportShift,
@@ -72,6 +75,10 @@ def contributing_sub_reports(project_id, report_date: date):
             'material_entries',
             'concrete_entries',
             'general_activities',
+            'issues',
+            'visits',
+            'hse_incidents',
+            'attachments',
             'notes',
             'activity_records',
         )
@@ -282,19 +289,57 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
                     c.block or '',
                     c.floor or '',
                     c.notes or '',
+                    c.structural_element or '',
+                    c.parcel or '',
+                    c.batching_plant or '',
+                    c.truck_delivery_note_number or '',
+                    c.lab_sample_code or '',
+                    c.sampling_state or '',
+                    c.test_sheet_count if c.test_sheet_count is not None else '',
+                    str(c.qc_inspection_id) if c.qc_inspection_id else '',
                 )
                 for c in sr.concrete_entries.filter(is_deleted=False).order_by('id')
             ],
             'general_activities': [
                 (
                     str(g.id),
+                    g.row_number,
                     g.activity_description,
                     g.location or '',
                     str(g.quantity) if g.quantity is not None else '',
                     g.unit or '',
                     g.notes or '',
                 )
-                for g in sr.general_activities.filter(is_deleted=False).order_by('id')
+                for g in sr.general_activities.filter(is_deleted=False).order_by('row_number', 'id')
+            ],
+            'issues': [
+                (
+                    str(i.id),
+                    i.row_number,
+                    i.kind,
+                    i.text,
+                    str(i.owner_user_id) if i.owner_user_id else '',
+                    str(i.due_date) if i.due_date else '',
+                )
+                for i in sr.issues.filter(is_deleted=False).order_by('row_number', 'id')
+            ],
+            'visits': [
+                (str(v.id), v.row_number, v.text)
+                for v in sr.visits.filter(is_deleted=False).order_by('row_number', 'id')
+            ],
+            'hse_incidents': [
+                (
+                    str(h.id),
+                    h.row_number,
+                    h.text,
+                    h.severity,
+                    h.immediate_action,
+                )
+                for h in sr.hse_incidents.filter(is_deleted=False).order_by('row_number', 'id')
+            ],
+            'attachments': [
+                (str(a.id), a.row_kind, a.row_id, a.checksum, a.size_bytes or 0)
+                for a in sr.attachments.filter(is_deleted=False).order_by('id')
             ],
             'notes': [
                 (
@@ -347,6 +392,128 @@ def ensure_daily_report_summary(project_id, report_date: date, user=None) -> Dai
         report.is_auto_summary = True
         report.save(update_fields=['is_auto_summary', 'updated_at'])
     return rebuild_daily_report_summary(project_id, report_date, user=user, report=report)
+
+
+def _wash(value) -> str:
+    import re
+    return re.sub(r'<[^>]*>', '', '' if value is None else str(value)).strip()
+
+
+def _upsert_provenance(report, sr, kind, derived_id, source_kind, source_id, ordinal, contribution=None):
+    DailyReportDerivedSource.objects.update_or_create(
+        daily_report=report,
+        derived_kind=kind,
+        derived_row_id=str(derived_id),
+        source_report_id_snapshot=sr.id,
+        source_row_kind=source_kind,
+        source_row_id=str(source_id),
+        defaults={
+            'source_report': sr,
+            'source_report_version': sr.version_number,
+            'source_unit': sr.unit or sr.discipline,
+            'contribution_value': contribution,
+            'ordinal': ordinal,
+        },
+    )
+
+
+def _rebuild_structured_narrative(report, sub_reports):
+    """Replace text-encoded narrative with ordered structured rows."""
+    from field_reports.services.hse_incident_notifications import ensure_hse_notification
+
+    current_general = set()
+    current_visits = set()
+    current_incidents = set()
+
+    for sr in sub_reports:
+        for row in sr.general_activities.filter(is_deleted=False).order_by('row_number', 'id'):
+            obj, _created = DailyReportGeneralActivity.objects.update_or_create(
+                report=report,
+                source_sub_report=sr,
+                row_number=row.row_number,
+                defaults={
+                    'activity_description': _wash(row.activity_description),
+                    'location': _wash(row.location),
+                    'quantity': row.quantity,
+                    'unit': row.unit,
+                    'notes': _wash(row.notes),
+                    'source_discipline': sr.unit or sr.discipline,
+                    'is_derived': True,
+                },
+            )
+            current_general.add(obj.id)
+            _upsert_provenance(
+                report, sr, 'general_activity', obj.id, 'general_activity', row.id, row.row_number,
+            )
+
+        for row in sr.visits.filter(is_deleted=False).order_by('row_number', 'id'):
+            obj, _created = DailyReportVisit.objects.update_or_create(
+                report=report,
+                source_sub_report=sr,
+                row_number=row.row_number,
+                defaults={
+                    'text': _wash(row.text),
+                    'source_discipline': sr.unit or sr.discipline,
+                    'is_derived': True,
+                },
+            )
+            current_visits.add(obj.id)
+            _upsert_provenance(report, sr, 'visit', obj.id, 'visit', row.id, row.row_number)
+
+        for row in sr.issues.filter(is_deleted=False).order_by('row_number', 'id'):
+            incident_type = 'barrier' if row.kind == 'barrier' else 'issue'
+            obj, _created = DailyReportIncident.objects.update_or_create(
+                report=report,
+                source_report=sr,
+                source_row_id=str(row.id),
+                defaults={
+                    'incident_type': incident_type,
+                    'description': _wash(row.text),
+                    'follow_up_owner_user': row.owner_user,
+                    'due_date': row.due_date,
+                    'row_number': row.row_number,
+                    'severity': None,
+                },
+            )
+            current_incidents.add(obj.id)
+            _upsert_provenance(report, sr, 'issue', obj.id, 'issue', row.id, row.row_number)
+
+        for row in sr.hse_incidents.filter(is_deleted=False).order_by('row_number', 'id'):
+            note = ensure_hse_notification(row, user=sr.created_by)
+            obj, _created = DailyReportIncident.objects.update_or_create(
+                report=report,
+                source_report=sr,
+                source_row_id=str(row.id),
+                defaults={
+                    'incident_type': 'safety',
+                    'description': _wash(row.text),
+                    'corrective_action': _wash(row.immediate_action),
+                    'severity': row.severity,
+                    'row_number': row.row_number,
+                    'notification_id': str(note.id) if note is not None else '',
+                },
+            )
+            current_incidents.add(obj.id)
+            _upsert_provenance(
+                report, sr, 'hse_incident', obj.id, 'hse_incident', row.id, row.row_number,
+            )
+
+    for obs in report.general_activities.filter(is_derived=True).exclude(id__in=current_general):
+        DailyReportDerivedSource.objects.filter(
+            daily_report=report, derived_kind='general_activity', derived_row_id=str(obs.id),
+        ).delete()
+        obs.delete()
+    for obs in report.visits.filter(is_derived=True).exclude(id__in=current_visits):
+        DailyReportDerivedSource.objects.filter(
+            daily_report=report, derived_kind='visit', derived_row_id=str(obs.id),
+        ).delete()
+        obs.delete()
+    for obs in report.incidents.exclude(id__in=current_incidents):
+        if obs.source_report_id:
+            DailyReportDerivedSource.objects.filter(
+                daily_report=report, derived_row_id=str(obs.id),
+            ).delete()
+            obs.delete()
 
 
 @transaction.atomic
@@ -1023,27 +1190,49 @@ def rebuild_daily_report_summary(
             if existing_id:
                 cnc_obj = DailyReportConcreteLog.objects.filter(id=existing_id, report=report).first()
 
+            if (
+                row.sampling_state == 'sampling_declared'
+                and (row.lab_sample_code or '').strip()
+                and row.test_sheet_count is not None
+                and not row.qc_inspection_id
+                and sr.created_by_id
+            ):
+                from sub_reports.services.qc_linkage import link_declared_concrete_sampling
+                from sub_reports.services.section_validation import SectionContractError
+
+                try:
+                    link_declared_concrete_sampling(sr, sr.created_by)
+                    row.refresh_from_db()
+                except SectionContractError:
+                    pass
+
+            concrete_fields = {
+                'concrete_description': row.concrete_description,
+                'volume_m3': row.volume_m3,
+                'zone': row.zone,
+                'block': row.block,
+                'floor': row.floor,
+                'notes': row.notes or '',
+                'structural_element': row.structural_element or '',
+                'parcel': row.parcel or '',
+                'batching_plant': row.batching_plant or '',
+                'truck_delivery_note_number': row.truck_delivery_note_number or '',
+                'lab_sample_code': row.lab_sample_code or '',
+                'sampling_state': row.sampling_state or '',
+                'test_sheet_count': row.test_sheet_count,
+                'qc_inspection': row.qc_inspection,
+                'source_sub_report': sr,
+                'source_discipline': sr.unit or sr.discipline,
+            }
             if cnc_obj is None:
                 cnc_obj = DailyReportConcreteLog.objects.create(
                     report=report,
-                    concrete_description=row.concrete_description,
-                    volume_m3=row.volume_m3,
-                    zone=row.zone,
-                    block=row.block,
-                    floor=row.floor,
-                    notes=row.notes or '',
-                    source_sub_report=sr,
-                    source_discipline=sr.unit or sr.discipline,
                     is_derived=True,
+                    **concrete_fields,
                 )
             else:
-                cnc_obj.concrete_description = row.concrete_description
-                cnc_obj.volume_m3 = row.volume_m3
-                cnc_obj.zone = row.zone
-                cnc_obj.block = row.block
-                cnc_obj.floor = row.floor
-                cnc_obj.source_sub_report = sr
-                cnc_obj.source_discipline = sr.unit or sr.discipline
+                for attr, value in concrete_fields.items():
+                    setattr(cnc_obj, attr, value)
                 cnc_obj.save()
 
             current_derived_concrete_ids.add(str(cnc_obj.id))
@@ -1073,52 +1262,27 @@ def rebuild_daily_report_summary(
         obs.delete()
 
     # -------------------------------------------------------------------------
-    # General activities & notes blocks
+    # Structured narrative (issues, visits, HSE, general activities)
     # -------------------------------------------------------------------------
-    general_parts: list[str] = []
-    issue_parts: list[str] = []
-    visit_parts: list[str] = []
+    _rebuild_structured_narrative(report, sub_reports)
 
+    other_notes = []
     for sr in sub_reports:
         tag = sr.unit or sr.discipline
-        for row in sr.general_activities.all().order_by('id'):
-            if row.is_deleted:
-                continue
-            loc = row.location or ''
-            general_parts.append(
-                f'[{tag}] {row.activity_description}'
-                + (f' @ {loc}' if loc else '')
-                + (f' ({row.quantity} {row.unit})' if row.quantity is not None else ''),
-            )
-
-        for row in sr.notes.all().order_by('id'):
-            if row.is_deleted:
-                continue
-            tagged = f'[{tag}] {row.text}'
-            if row.note_type == SubReportNoteType.VISIT:
-                visit_parts.append(tagged)
-            elif row.note_type == SubReportNoteType.ISSUE:
-                issue_parts.append(tagged)
-            else:
-                issue_parts.append(tagged)
-
-    auto_block_parts = []
-    if general_parts:
-        auto_block_parts.append('فعالیت‌های عمومی:\n' + '\n'.join(general_parts))
-    if issue_parts:
-        auto_block_parts.append('ملاحظات:\n' + '\n'.join(issue_parts))
-    if visit_parts:
-        auto_block_parts.append('بازدیدها:\n' + '\n'.join(visit_parts))
-    if auto_block_parts:
-        marker_start = '<!--auto-summary-notes-->'
-        marker_end = '<!--/auto-summary-notes-->'
-        existing = report.general_notes or ''
-        if marker_start in existing and marker_end in existing:
-            before = existing.split(marker_start)[0].rstrip()
-            after = existing.split(marker_end, 1)[1].lstrip()
-            existing = (before + ('\n' if before and after else '') + after).strip()
-        block = marker_start + '\n' + '\n\n'.join(auto_block_parts) + '\n' + marker_end
+        for row in sr.notes.filter(is_deleted=False, note_type=SubReportNoteType.OTHER).order_by('row_number', 'id'):
+            other_notes.append(f'[{tag}] {row.text}')
+    marker_start = '<!--auto-summary-notes-->'
+    marker_end = '<!--/auto-summary-notes-->'
+    existing = report.general_notes or ''
+    if marker_start in existing and marker_end in existing:
+        before = existing.split(marker_start)[0].rstrip()
+        after = existing.split(marker_end, 1)[1].lstrip()
+        existing = (before + ('\n' if before and after else '') + after).strip()
+    if other_notes:
+        block = marker_start + '\n' + '\n'.join(other_notes) + '\n' + marker_end
         report.general_notes = (existing + '\n\n' + block).strip() if existing else block
+    else:
+        report.general_notes = existing
 
     report.is_auto_summary = True
     report.aggregated_at = timezone.now()

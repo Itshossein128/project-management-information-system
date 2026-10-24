@@ -546,6 +546,60 @@
             "quantity_must_be_positive": "Material quantity must be strictly greater than zero.",
             "reference_not_in_project_scope": "Selected material does not belong to this project."
           }
+        },
+        "concrete": {
+          "tab": "Concrete",
+          "title": "Concrete pours",
+          "addRow": "Add pour",
+          "empty": "No concrete pours recorded.",
+          "sampling": "Sampling declared",
+          "errors": {
+            "volume_must_be_positive": "Concrete volume must be greater than zero.",
+            "sampling_requires_test_information": "Declared sampling needs a lab sample code and test sheet count.",
+            "reference_not_in_project_scope": "That reference is outside this project."
+          }
+        },
+        "general": {
+          "tab": "General activities",
+          "title": "General activities",
+          "addRow": "Add activity",
+          "empty": "No general activities recorded."
+        },
+        "issues": {
+          "tab": "Issues and barriers",
+          "title": "Issues and barriers",
+          "addRow": "Add row",
+          "empty": "No issues or barriers recorded.",
+          "overdue": "Overdue",
+          "errors": {
+            "barrier_owner_and_due_date_required": "A barrier needs an owner and a due date."
+          }
+        },
+        "visits": {
+          "tab": "Visits",
+          "title": "Visits",
+          "addRow": "Add visit",
+          "empty": "No visits recorded."
+        },
+        "hse": {
+          "tab": "HSE incidents",
+          "title": "HSE incidents",
+          "addRow": "Add incident",
+          "empty": "No HSE incidents recorded.",
+          "errors": {
+            "hse_immediate_action_required": "An immediate action is required.",
+            "invalid_severity": "Severity must be minor, moderate, or major."
+          }
+        },
+        "attachments": {
+          "label": "Activity image",
+          "hint": "JPEG or PNG, 10 MB maximum.",
+          "errors": {
+            "unsupported_file_format": "Only JPEG and PNG images are accepted.",
+            "file_too_large": "The file is larger than 10 MB.",
+            "attachment_row_not_in_version": "That row is not on this report version.",
+            "reference_not_in_project_scope": "That target is outside this project."
+          }
         }
       }
     }

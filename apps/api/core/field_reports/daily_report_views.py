@@ -124,6 +124,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             return self.edit_permission
         if self.action in (
             'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+            'materials_details', 'provenance',
         ):
             return self.view_permission
         if self.action == 'correction_requests' and self.request.method.upper() == 'GET':
@@ -134,7 +135,8 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in (
-            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation', 'by_date',
+            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+            'materials_details', 'provenance', 'by_date',
         ) or (
             self.action == 'correction_requests' and self.request.method.upper() == 'GET'
         ):
@@ -361,6 +363,44 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             DailyReportCorrectionRequestSerializer(correction).data,
             status=status.HTTP_201_CREATED,
         )
+
+    @extend_schema(summary='Provenance drill-down for one derived row', tags=['Daily Reports'])
+    @action(
+        detail=True,
+        methods=['get'],
+        url_path=r'provenance/(?P<derived_kind>[^/.]+)/(?P<derived_row>[^/.]+)',
+    )
+    def provenance(self, request, derived_kind=None, derived_row=None, *args, **kwargs):
+        from field_reports.models import DailyReportDerivedSource
+
+        instance = self.get_object()
+        sources = DailyReportDerivedSource.objects.filter(
+            daily_report=instance,
+            derived_kind=derived_kind,
+            derived_row_id=str(derived_row),
+        ).order_by('ordinal', 'id')
+        if not sources.exists():
+            return Response({'detail': 'not found'}, status=status.HTTP_404_NOT_FOUND)
+        rows = []
+        for source in sources:
+            rows.append({
+                'source_report': str(source.source_report_id) if source.source_report_id else None,
+                'source_report_version': source.source_report_version,
+                'source_unit': source.source_unit,
+                'source_row_kind': source.source_row_kind,
+                'source_row_id': source.source_row_id,
+                'contribution_value': (
+                    str(source.contribution_value) if source.contribution_value is not None else None
+                ),
+                'can_view_source': True,
+                'href': (
+                    f'/api/v1/projects/{instance.project_id}/units/{source.source_unit}'
+                    f'/daily-reports/{source.source_report_id}/'
+                    if source.source_report_id and source.source_unit
+                    else None
+                ),
+            })
+        return Response({'derived_kind': derived_kind, 'derived_row': str(derived_row), 'rows': rows})
 
     @extend_schema(summary='Material reconciliation hints', tags=['Daily Reports'])
     @action(detail=True, methods=['get'], url_path='materials-reconciliation')

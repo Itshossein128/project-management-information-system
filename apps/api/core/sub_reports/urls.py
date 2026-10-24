@@ -3,10 +3,16 @@ from django.urls import path
 # Canonical unit daily report API (feature 032).
 from sub_reports.unit_report_views import (
     UnitReportActivitySectionViewSet,
+    UnitReportAttachmentSectionViewSet,
+    UnitReportConcreteSectionViewSet,
+    UnitReportGeneralSectionViewSet,
+    UnitReportHseSectionViewSet,
+    UnitReportIssueSectionViewSet,
     UnitReportLaborSectionViewSet,
     UnitReportMachinerySectionViewSet,
     UnitReportMaterialSectionViewSet,
     UnitReportViewSet,
+    UnitReportVisitSectionViewSet,
 )
 
 unit_current_view = UnitReportViewSet.as_view({'get': 'current'})
@@ -49,6 +55,18 @@ material_section_list = UnitReportMaterialSectionViewSet.as_view(
 material_section_row = UnitReportMaterialSectionViewSet.as_view(
     {'patch': 'partial_update', 'delete': 'destroy'},
 )
+concrete_section_list = UnitReportConcreteSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+concrete_section_row = UnitReportConcreteSectionViewSet.as_view({'delete': 'destroy'})
+issue_section_list = UnitReportIssueSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+issue_section_row = UnitReportIssueSectionViewSet.as_view({'delete': 'destroy'})
+visit_section_list = UnitReportVisitSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+visit_section_row = UnitReportVisitSectionViewSet.as_view({'delete': 'destroy'})
+hse_section_list = UnitReportHseSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+hse_section_row = UnitReportHseSectionViewSet.as_view({'delete': 'destroy'})
+general_section_list = UnitReportGeneralSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+general_section_row = UnitReportGeneralSectionViewSet.as_view({'delete': 'destroy'})
+attachment_section_list = UnitReportAttachmentSectionViewSet.as_view({'get': 'list', 'post': 'create'})
+attachment_section_row = UnitReportAttachmentSectionViewSet.as_view({'delete': 'destroy'})
 
 # NOTE (FR-032 / US5 / research D2):
 # Legacy client endpoints under `/api/v1/projects/{project_id}/sub-reports/`
@@ -105,4 +123,16 @@ urlpatterns = [
         material_section_row,
         name='unit-report-material-row',
     ),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/concrete/', concrete_section_list, name='unit-report-concrete'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/concrete/<uuid:row_pk>/', concrete_section_row, name='unit-report-concrete-row'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/issues/', issue_section_list, name='unit-report-issues'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/issues/<uuid:row_pk>/', issue_section_row, name='unit-report-issue-row'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/visits/', visit_section_list, name='unit-report-visits'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/visits/<uuid:row_pk>/', visit_section_row, name='unit-report-visit-row'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/hse-incidents/', hse_section_list, name='unit-report-hse'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/hse-incidents/<uuid:row_pk>/', hse_section_row, name='unit-report-hse-row'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/general-activities/', general_section_list, name='unit-report-general'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/general-activities/<uuid:row_pk>/', general_section_row, name='unit-report-general-row'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/', attachment_section_list, name='unit-report-attachments'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/<uuid:row_pk>/', attachment_section_row, name='unit-report-attachment-row'),
 ]

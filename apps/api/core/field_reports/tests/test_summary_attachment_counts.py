@@ -54,11 +54,11 @@ def project_with_attachments(db, user):
         created_by=user,
     )
 
-    # Create activities
     from projects.models import Activity
+    wbs = WBS.add_root(project=project, wbs_code='1', wbs_name='Root')
     activity1 = Activity.objects.create(
         project=project,
-        wbs=None,
+        wbs=wbs,
         activity_code='A1',
         activity_name='Activity One',
         status='in_progress',
@@ -67,7 +67,7 @@ def project_with_attachments(db, user):
 
     activity2 = Activity.objects.create(
         project=project,
-        wbs=None,
+        wbs=wbs,
         activity_code='A2',
         activity_name='Activity Two',
         status='in_progress',
@@ -276,7 +276,7 @@ class TestSummaryAttachmentCounts:
 
         activity = Activity.objects.create(
             project=project,
-            wbs=None,
+            wbs=WBS.add_root(project=project, wbs_code='1', wbs_name='Root'),
             activity_code='A1',
             activity_name='Activity 1',
             status='in_progress',

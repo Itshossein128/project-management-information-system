@@ -700,12 +700,33 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
             'block',
             'floor',
             'notes',
+            'structural_element',
+            'parcel',
+            'batching_plant',
+            'truck_delivery_note_number',
+            'lab_sample_code',
+            'sampling_state',
+            'test_sheet_count',
+            'qc_inspection',
+            'qc_link',
             'source_sub_report',
             'source_discipline',
             'is_derived',
             'provenance',
         ]
-        read_only_fields = ['id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance']
+        read_only_fields = [
+            'id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance', 'qc_link',
+        ]
+
+    qc_link = serializers.SerializerMethodField()
+
+    def get_qc_link(self, obj):
+        if not obj.qc_inspection_id:
+            return None
+        return {
+            'id': str(obj.qc_inspection_id),
+            'href': f'/api/v1/projects/{obj.report.project_id}/inspections/{obj.qc_inspection_id}/',
+        }
 
     def get_provenance(self, obj):
         return _build_provenance_list(obj, 'concrete', self.context)

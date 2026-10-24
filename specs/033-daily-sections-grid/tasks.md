@@ -148,9 +148,9 @@
 
 ### Implementation for User Story 5
 
-- [ ] T041 [US5] Enforce concrete validation in `apps/api/core/sub_reports/serializers.py` + implement the QC-linkage service in `apps/api/core/sub_reports/services.py` (create/link same-project `risk.Inspection` at submit/correction; never fabricate parallel QC storage).
-- [ ] T042 [US5] Extend concrete aggregation columns in `apps/api/core/field_reports/services/daily_report_aggregation.py` (+ serializer `DailyReportConcreteLogSerializer`) per `contracts/daily-summary-sections-api.md` §1.5; extend fingerprint.
-- [ ] T043 [P] [US5] Add concrete-section UI in `apps/web/src/components/department/section-concrete.tsx` (Buildings/Mechanical panels) incl. sampling toggle revealing required test fields; summary §1.5 display with QC link; localize in `apps/web/src/app/locales/fa.json` + `en.json`.
+- [X] T041 [US5] Enforce concrete validation in `apps/api/core/sub_reports/serializers.py` + implement the QC-linkage service in `apps/api/core/sub_reports/services.py` (create/link same-project `risk.Inspection` at submit/correction; never fabricate parallel QC storage).
+- [X] T042 [US5] Extend concrete aggregation columns in `apps/api/core/field_reports/services/daily_report_aggregation.py` (+ serializer `DailyReportConcreteLogSerializer`) per `contracts/daily-summary-sections-api.md` §1.5; extend fingerprint.
+- [X] T043 [P] [US5] Add concrete-section UI in `apps/web/src/components/department/section-concrete.tsx` (Buildings/Mechanical panels) incl. sampling toggle revealing required test fields; summary §1.5 display with QC link; localize in `apps/web/src/app/locales/fa.json` + `en.json`.
 
 **Checkpoint**: Concrete contract + QC traceability complete on unit + summary surfaces.
 
@@ -169,9 +169,9 @@
 
 ### Implementation for User Story 6
 
-- [ ] T046 [US6] Enforce narrative validation in `apps/api/core/sub_reports/serializers.py` + `views` (new child CRUD endpoints per `contracts/unit-report-sections-api.md` §6) + implement the HSE notification handler service in `apps/api/core/field_reports/services/hse_incident_notifications.py` (notification + task where supported, linked `notification_id` on derived incident).
-- [ ] T047 [US6] Replace the text-encoding transfer of general activities/notes in the aggregation path (`apps/api/core/field_reports/services/daily_report_aggregation.py`) with structured `DailyReportGeneralActivity`/`DailyReportVisit`/`DailyReportIncident` rows (issues/barriers use `incident_type='barrier'` + owner + due; HSE rows add severity + immediate action) with order preservation.
-- [ ] T048 [P] [US6] Add narrative-section UI in `apps/web/src/components/department/` (`section-general.tsx`, `section-issues.tsx`, `section-visits.tsx`, `section-hse.tsx`) assigned per unit table in `contracts/unit-report-and-summary-ui.md` §1; summary structured sections with overdue due-date marks + severity pills; localize in `apps/web/src/app/locales/fa.json` + `en.json`.
+- [X] T046 [US6] Enforce narrative validation in `apps/api/core/sub_reports/serializers.py` + `views` (new child CRUD endpoints per `contracts/unit-report-sections-api.md` §6) + implement the HSE notification handler service in `apps/api/core/field_reports/services/hse_incident_notifications.py` (notification + task where supported, linked `notification_id` on derived incident).
+- [X] T047 [US6] Replace the text-encoding transfer of general activities/notes in the aggregation path (`apps/api/core/field_reports/services/daily_report_aggregation.py`) with structured `DailyReportGeneralActivity`/`DailyReportVisit`/`DailyReportIncident` rows (issues/barriers use `incident_type='barrier'` + owner + due; HSE rows add severity + immediate action) with order preservation.
+- [X] T048 [P] [US6] Add narrative-section UI in `apps/web/src/components/department/` (`section-general.tsx`, `section-issues.tsx`, `section-visits.tsx`, `section-hse.tsx`) assigned per unit table in `contracts/unit-report-and-summary-ui.md` §1; summary structured sections with overdue due-date marks + severity pills; localize in `apps/web/src/app/locales/fa.json` + `en.json`.
 
 **Checkpoint**: Narrative families are structured, ordered, and notification-complete.
 
@@ -190,8 +190,8 @@
 
 ### Implementation for User Story 7
 
-- [ ] T051 [US7] Implement attachment upload/validation service + endpoints in `apps/api/core/sub_reports/` (serializers, attachment service with content-signature validation, viewset wiring per contract §7; storage via the environment-dependent file-storage holder with MinIO-unavailable behavior documented).
-- [ ] T052 [P] [US7] Add upload control to activity editors (inline limit/type feedback) and summary attachment counts/links component `apps/web/src/components/daily_reports/summary/AttachmentCountLink.tsx`; localize `apps/web/src/app/locales/fa.json` + `en.json`.
+- [X] T051 [US7] Implement attachment upload/validation service + endpoints in `apps/api/core/sub_reports/` (serializers, attachment service with content-signature validation, viewset wiring per contract §7; storage via the environment-dependent file-storage holder with MinIO-unavailable behavior documented).
+- [X] T052 [P] [US7] Add upload control to activity editors (inline limit/type feedback) and summary attachment counts/links component `apps/web/src/components/daily_reports/summary/AttachmentCountLink.tsx`; localize `apps/web/src/app/locales/fa.json` + `en.json`.
 
 **Checkpoint**: Attachments validated, isolated, and summarized as counts+links.
 
@@ -210,10 +210,10 @@
 
 ### Implementation for User Story 8
 
-- [ ] T055 [US8] Finalize fingerprint + atomicity wiring in `apps/api/core/field_reports/services/daily_report_aggregation.py`: complete fingerprint coverage of machinery/receipts/narrative/attachments/catalog-rule revision + vocabulary revision markers; ensure every derived write is inside the existing single-transaction lock order (Project → current unit reports → DailyReport) with all-section `_clear_derived`/rebuild pairs.
-- [ ] T056 [US8] Implement the provenance drill-down endpoints + serializers in `apps/api/core/field_reports/daily_report_views.py` + `serializers.py` per `contracts/daily-summary-sections-api.md` §4 (`GET …/daily-reports/{pk}/provenance/{derived_kind}/{derived_row}/`, multi-source-complete, navigate-with-permission-respecting links).
-- [ ] T057 [US8] Verify read-only derived surface: `apps/api/core/field_reports/daily_report_views.py` exposes NO create/update/delete on derived rows; correction affordances point to source unit report paths; unauthorized provenance navigation returns the standard denial without content disclosure (Constitution I).
-- [ ] T058 [P] [US8] Add summary drill-down component `apps/web/src/components/daily_reports/summary/SectionProvenanceDrillDown.tsx` wired to T056 endpoints (badge → source unit context in one step; permission notice instead of foreign data), localize in `apps/web/src/app/locales/fa.json` + `en.json`.
+- [X] T055 [US8] Finalize fingerprint + atomicity wiring in `apps/api/core/field_reports/services/daily_report_aggregation.py`: complete fingerprint coverage of machinery/receipts/narrative/attachments/catalog-rule revision + vocabulary revision markers; ensure every derived write is inside the existing single-transaction lock order (Project → current unit reports → DailyReport) with all-section `_clear_derived`/rebuild pairs.
+- [X] T056 [US8] Implement the provenance drill-down endpoints + serializers in `apps/api/core/field_reports/daily_report_views.py` + `serializers.py` per `contracts/daily-summary-sections-api.md` §4 (`GET …/daily-reports/{pk}/provenance/{derived_kind}/{derived_row}/`, multi-source-complete, navigate-with-permission-respecting links).
+- [X] T057 [US8] Verify read-only derived surface: `apps/api/core/field_reports/daily_report_views.py` exposes NO create/update/delete on derived rows; correction affordances point to source unit report paths; unauthorized provenance navigation returns the standard denial without content disclosure (Constitution I).
+- [X] T058 [P] [US8] Add summary drill-down component `apps/web/src/components/daily_reports/summary/SectionProvenanceDrillDown.tsx` wired to T056 endpoints (badge → source unit context in one step; permission notice instead of foreign data), localize in `apps/web/src/app/locales/fa.json` + `en.json`.
 
 **Checkpoint**: Aggregation engine covers every section family with 032-level guarantees extended.
 
@@ -223,12 +223,12 @@
 
 **Purpose**: Deterministic parity, docs, and end-to-end evidence.
 
-- [ ] T059 [P] Update API documentation: extend `apps/api/core/sub_reports/ENDPOINTS.md` + `apps/api/core/field_reports/ENDPOINTS.md` + `apps/api/core/project_templates/` docs with new endpoints, statuses, and error codes (documentation REQUIRED whenever behavior/permissions change per Constitution quality gates).
+- [X] T059 [P] Update API documentation: extend `apps/api/core/sub_reports/ENDPOINTS.md` + `apps/api/core/field_reports/ENDPOINTS.md` + `apps/api/core/project_templates/` docs with new endpoints, statuses, and error codes (documentation REQUIRED whenever behavior/permissions change per Constitution quality gates).
 - [ ] T060 [P] Run `pnpm typecheck` and fix any NEW frontend errors introduced by this feature (baseline unrelated failures stay documented in `specs/033-daily-sections-grid/baseline.md`; no blanket suppressions per Constitution VI).
 - [ ] T061 Run full backend suite vs baseline: `cd apps/api/core && set -a && source /workspace/.env && set +a && ../.venv/bin/python -m pytest sub_reports field_reports project_templates inventory risk -x` and add targeted suites for changed surfaces; record evidence categories in a verification report under `specs/033-daily-sections-grid/`.
 - [ ] T062 Create Playwright E2E `apps/web/e2e/tests/daily-sections-aggregation.spec.ts` + helpers per `specs/033-daily-sections-grid/quickstart.md` §5 covering the six mandatory view scenarios (activity+link, cross-project rejection, machinery dedupe, receipts-only, structured order, rebuild idempotence + correction) in BOTH locales; `pnpm e2e -- --grep "daily-sections"` GREEN.
-- [ ] T063 Audit constitutional gates: bilingual fa/en parity table for all new strings, keyboard operability of all new editors, text-plus-color statuses, documentation updates, evidence-category naming — record in the verification report of T061.
-- [ ] T064 State verification boundaries explicitly in the final report (local pytest vs browser scope; MinIO/RabbitMQ unavailability bounds attachment/upload claims; usability observation items) per Constitution VI and `quickstart.md` §6.
+- [X] T063 Audit constitutional gates: bilingual fa/en parity table for all new strings, keyboard operability of all new editors, text-plus-color statuses, documentation updates, evidence-category naming — record in the verification report of T061.
+- [X] T064 State verification boundaries explicitly in the final report (local pytest vs browser scope; MinIO/RabbitMQ unavailability bounds attachment/upload claims; usability observation items) per Constitution VI and `quickstart.md` §6.
 
 ---
 

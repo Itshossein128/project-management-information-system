@@ -45,6 +45,26 @@ export const MATERIALS_ENABLED_UNITS: readonly CanonicalUnit[] = [
   "warehouse",
 ] as const;
 
+export function unitSupportsConcreteSection(unit: CanonicalUnit | string): boolean {
+  return unit === "buildings" || unit === "mechanical";
+}
+
+export function unitSupportsGeneralSection(_unit: CanonicalUnit | string): boolean {
+  return true;
+}
+
+export function unitSupportsIssuesSection(unit: CanonicalUnit | string): boolean {
+  return ["buildings", "electrical", "mechanical", "security"].includes(unit);
+}
+
+export function unitSupportsVisitsSection(unit: CanonicalUnit | string): boolean {
+  return unit === "buildings" || unit === "security";
+}
+
+export function unitSupportsHseSection(unit: CanonicalUnit | string): boolean {
+  return unit === "security";
+}
+
 export function unitSupportsMaterialsSection(unit: CanonicalUnit | string): boolean {
   return (MATERIALS_ENABLED_UNITS as readonly string[]).includes(unit);
 }
@@ -665,6 +685,63 @@ export function updateUnitReportMaterial(
       body: JSON.stringify(payload),
     },
   );
+}
+
+export interface UnitSectionRow {
+  id: string;
+  row_number?: number;
+  text?: string;
+  kind?: string;
+  owner_user?: string | null;
+  due_date?: string | null;
+  severity?: string;
+  immediate_action?: string;
+  activity_description?: string;
+  location?: string;
+  quantity?: string | null;
+  unit?: string | null;
+  notes?: string;
+  concrete_description?: string;
+  volume_m3?: string;
+  sampling_state?: string;
+  lab_sample_code?: string;
+  test_sheet_count?: number | null;
+  batching_plant?: string;
+  structural_element?: string;
+}
+
+export function fetchUnitSection(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  section: string,
+): Promise<UnitSectionRow[]> {
+  return apiJson<UnitSectionRow[]>(`${base(projectId, unit)}/${reportId}/${section}/`);
+}
+
+export function createUnitSection(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  section: string,
+  payload: Record<string, unknown>,
+): Promise<UnitSectionRow[]> {
+  return apiJson<UnitSectionRow[]>(`${base(projectId, unit)}/${reportId}/${section}/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteUnitSection(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+  section: string,
+  rowId: string,
+): Promise<void> {
+  return apiJson<void>(`${base(projectId, unit)}/${reportId}/${section}/${rowId}/`, {
+    method: "DELETE",
+  });
 }
 
 export function deleteUnitReportMaterial(

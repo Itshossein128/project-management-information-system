@@ -37,6 +37,13 @@ REFERENCE_SCOPE_ERROR = 'reference_not_in_project_scope'
 TRANSACTION_TYPE_REQUIRED_ERROR = 'transaction_type_required'
 RECEIPT_REQUIRES_DOCUMENT_REFERENCE_ERROR = 'receipt_requires_document_reference'
 CONSUMPTION_LOCATION_REQUIRED_ERROR = 'consumption_location_required_for_consumption'
+VOLUME_POSITIVE_ERROR = 'volume_must_be_positive'
+SAMPLING_REQUIRES_TEST_INFORMATION = 'sampling_requires_test_information'
+BARRIER_OWNER_DUE_ERROR = 'barrier_owner_and_due_date_required'
+HSE_IMMEDIATE_ACTION_ERROR = 'hse_immediate_action_required'
+UNSUPPORTED_FILE_FORMAT = 'unsupported_file_format'
+FILE_TOO_LARGE = 'file_too_large'
+ATTACHMENT_ROW_NOT_IN_VERSION = 'attachment_row_not_in_version'
 
 # Stable section error codes and their localized fa messages (T043 will wire
 # the web locale files; the API layer relies on the messages below).
@@ -57,6 +64,13 @@ ERROR_MESSAGES = {
     TRANSACTION_TYPE_REQUIRED_ERROR: _('انتخاب نوع تراکنش مصالح الزامی است'),
     RECEIPT_REQUIRES_DOCUMENT_REFERENCE_ERROR: _('برای رسید انبار، شماره برگه/سند انبار الزامی است'),
     CONSUMPTION_LOCATION_REQUIRED_ERROR: _('برای مصرف مصالح، محل مصرف الزامی است'),
+    VOLUME_POSITIVE_ERROR: _('حجم بتن باید بزرگ‌تر از صفر باشد'),
+    SAMPLING_REQUIRES_TEST_INFORMATION: _('نمونه‌برداری اعلام‌شده بدون کد آزمایشگاه یا تعداد برگه آزمایش قابل ارسال نیست'),
+    BARRIER_OWNER_DUE_ERROR: _('برای مانع، مسئول و تاریخ سررسید الزامی است'),
+    HSE_IMMEDIATE_ACTION_ERROR: _('اقدام فوری برای حادثه ایمنی الزامی است'),
+    UNSUPPORTED_FILE_FORMAT: _('فقط تصاویر JPEG و PNG پذیرفته می‌شوند'),
+    FILE_TOO_LARGE: _('حجم فایل نمی‌تواند بیش از ۱۰ مگابایت باشد'),
+    ATTACHMENT_ROW_NOT_IN_VERSION: _('ردیف پیوست متعلق به این نسخه گزارش نیست'),
 }
 
 
@@ -851,4 +865,241 @@ def update_material_row(report, row, payload, context=None):
         setattr(row, attr, val)
     row.save()
     return row
+
+
+def _plain_text(value) -> str:
+    """Strip markup so free text cannot drive structure (FR-041)."""
+    import re
+    text = '' if value is None else str(value)
+    return re.sub(r'<[^>]*>', '', text).strip()
+
+
+def _stakeholder_in_other_project(project_id, raw):
+    import uuid
+    from projects.models import Stakeholder
+
+    try:
+        parsed = uuid.UUID(str(raw))
+    except (TypeError, ValueError):
+        return False
+    stakeholder = Stakeholder.objects.filter(id=parsed).first()
+    if stakeholder is None:
+        return False
+    return str(stakeholder.project_id) != str(project_id)
+
+
+@transaction.atomic
+def validate_concrete_rows(report, rows, context=None):
+    """Validate + persist §2.5 concrete pour rows."""
+    from decimal import Decimal
+
+    from sub_reports.models import DisciplineSubReportConcrete, SamplingState
+    from sub_reports.serializers import UnitReportConcreteSectionSerializer
+
+    if context is None:
+        context = {}
+    context.setdefault('report', report)
+    errors = []
+    saved = []
+    rows = rows if rows is not None else []
+    if not isinstance(rows, list):
+        raise SectionContractError(code='invalid_row_payload')
+
+    for index, row in enumerate(rows):
+        payload = dict(row)
+        volume = payload.get('volume_m3')
+        try:
+            volume_value = Decimal(str(volume))
+        except Exception:
+            volume_value = None
+        if volume_value is None or volume_value <= 0:
+            errors.append({
+                'row': index,
+                'field': 'volume_m3',
+                'code': VOLUME_POSITIVE_ERROR,
+                'message': str(ERROR_MESSAGES[VOLUME_POSITIVE_ERROR]),
+            })
+            continue
+        plant = payload.get('batching_plant') or ''
+        if plant and _stakeholder_in_other_project(report.project_id, plant):
+            errors.append({
+                'row': index,
+                'field': 'batching_plant',
+                'code': REFERENCE_SCOPE_ERROR,
+                'message': str(ERROR_MESSAGES[REFERENCE_SCOPE_ERROR]),
+            })
+            continue
+        state = payload.get('sampling_state') or SamplingState.NOT_SAMPLED
+        if state == SamplingState.SAMPLING_DECLARED:
+            code = (payload.get('lab_sample_code') or '').strip()
+            sheets = payload.get('test_sheet_count')
+            if not code or sheets in (None, ''):
+                errors.append({
+                    'row': index,
+                    'field': 'lab_sample_code',
+                    'code': SAMPLING_REQUIRES_TEST_INFORMATION,
+                    'message': str(ERROR_MESSAGES[SAMPLING_REQUIRES_TEST_INFORMATION]),
+                })
+                continue
+        serializer = UnitReportConcreteSectionSerializer(data=payload, context=context)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except DRFValidationError as exc:
+            for field, detail in exc.detail.items():
+                errors.extend(_error_from_drf(index, field, detail))
+            continue
+        saved.append(
+            DisciplineSubReportConcrete.objects.create(
+                sub_report=report, **serializer.validated_data,
+            )
+        )
+    if errors:
+        raise SectionContractError(field_errors=errors)
+    return saved
+
+
+def _user_or_none(raw):
+    from django.contrib.auth import get_user_model
+
+    if not raw:
+        return None
+    return get_user_model().objects.filter(pk=raw).first()
+
+
+@transaction.atomic
+def validate_narrative_rows(report, rows, context=None):
+    """Persist structured narrative rows. General notes stay type ``other``."""
+    from datetime import date as date_cls
+
+    from sub_reports.models import (
+        DisciplineSubReportGeneralActivity,
+        DisciplineSubReportHseIncident,
+        DisciplineSubReportIssue,
+        DisciplineSubReportNote,
+        DisciplineSubReportVisit,
+        HseIncidentSeverity,
+        IssueKind,
+        SubReportNoteType,
+    )
+
+    rows = rows if rows is not None else []
+    if not isinstance(rows, list):
+        raise SectionContractError(code='invalid_row_payload')
+    errors = []
+    saved = []
+    severities = {choice for choice, _label in HseIncidentSeverity.choices}
+
+    for index, row in enumerate(rows):
+        payload = dict(row or {})
+        kind = (payload.get('kind') or '').strip()
+        if not kind:
+            if payload.get('severity') is not None or 'immediate_action' in payload:
+                kind = 'hse'
+            elif payload.get('activity_description'):
+                kind = 'general_activity'
+            else:
+                kind = 'visit'
+
+        if kind == 'barrier':
+            owner = _user_or_none(payload.get('owner_user'))
+            due = payload.get('due_date')
+            if owner is None or not due:
+                errors.append({
+                    'row': index,
+                    'field': 'owner_user',
+                    'code': BARRIER_OWNER_DUE_ERROR,
+                    'message': 'owner and due_date are required for a barrier',
+                })
+                continue
+            if isinstance(due, str):
+                due = date_cls.fromisoformat(due)
+            saved.append(DisciplineSubReportIssue.objects.create(
+                sub_report=report,
+                row_number=payload.get('row_number') or 1,
+                kind=IssueKind.BARRIER,
+                text=_plain_text(payload.get('text')),
+                owner_user=owner,
+                due_date=due,
+            ))
+            continue
+
+        if kind == 'issue':
+            owner = _user_or_none(payload.get('owner_user'))
+            due = payload.get('due_date') or None
+            if isinstance(due, str) and due:
+                due = date_cls.fromisoformat(due)
+            saved.append(DisciplineSubReportIssue.objects.create(
+                sub_report=report,
+                row_number=payload.get('row_number') or 1,
+                kind=IssueKind.ISSUE,
+                text=_plain_text(payload.get('text')),
+                owner_user=owner,
+                due_date=due,
+            ))
+            continue
+
+        if kind == 'visit':
+            visit = DisciplineSubReportVisit.objects.create(
+                sub_report=report,
+                row_number=payload.get('row_number') or 1,
+                text=_plain_text(payload.get('text')),
+            )
+            visit.kind = 'visit'
+            saved.append(visit)
+            continue
+
+        if kind == 'hse':
+            severity = (payload.get('severity') or '').strip()
+            action = (payload.get('immediate_action') or '').strip()
+            if severity not in severities:
+                errors.append({
+                    'row': index,
+                    'field': 'severity',
+                    'code': 'invalid_severity',
+                    'message': 'severity must be minor, moderate, or major',
+                })
+                continue
+            if not action:
+                errors.append({
+                    'row': index,
+                    'field': 'immediate_action',
+                    'code': HSE_IMMEDIATE_ACTION_ERROR,
+                    'message': 'immediate_action is required',
+                })
+                continue
+            saved.append(DisciplineSubReportHseIncident.objects.create(
+                sub_report=report,
+                row_number=payload.get('row_number') or 1,
+                text=_plain_text(payload.get('text')),
+                severity=severity,
+                immediate_action=_plain_text(action),
+            ))
+            continue
+
+        if kind == 'general_activity':
+            activity = DisciplineSubReportGeneralActivity.objects.create(
+                sub_report=report,
+                row_number=payload.get('row_number') or 1,
+                activity_description=_plain_text(payload.get('activity_description')),
+                location=_plain_text(payload.get('location') or ''),
+                quantity=payload.get('quantity') or None,
+                unit=payload.get('unit') or None,
+                notes=_plain_text(payload.get('notes') or ''),
+            )
+            activity.kind = 'general_activity'
+            saved.append(activity)
+            continue
+
+        note = DisciplineSubReportNote.objects.create(
+            sub_report=report,
+            note_type=SubReportNoteType.OTHER,
+            text=_plain_text(payload.get('text') or payload.get('activity_description') or ''),
+            row_number=payload.get('row_number') or 1,
+        )
+        note.kind = 'other'
+        saved.append(note)
+
+    if errors:
+        raise SectionContractError(field_errors=errors)
+    return saved
 

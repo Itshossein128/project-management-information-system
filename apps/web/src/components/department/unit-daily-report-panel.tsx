@@ -6,9 +6,14 @@ import {
   type UnitReport,
   type UnitReportStatus,
   unitSupportsActivitiesSection,
+  unitSupportsConcreteSection,
+  unitSupportsGeneralSection,
+  unitSupportsHseSection,
+  unitSupportsIssuesSection,
   unitSupportsLaborSection,
   unitSupportsMachinerySection,
   unitSupportsMaterialsSection,
+  unitSupportsVisitsSection,
 } from "@/app/lib/api/unit-reports";
 import {
   useApproveUnitReport,
@@ -27,9 +32,14 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Modal } from "@/components/overlay/modal";
 import { SectionActivities } from "./section-activities";
+import { SectionConcrete } from "./section-concrete";
+import { SectionGeneral } from "./section-general";
+import { SectionHse } from "./section-hse";
+import { SectionIssues } from "./section-issues";
 import { SectionLabor } from "./section-labor";
 import { SectionMachinery } from "./section-machinery";
 import { SectionMaterials } from "./section-materials";
+import { SectionVisits } from "./section-visits";
 
 export interface UnitDailyReportPanelProps {
   businessId: string;
@@ -588,6 +598,31 @@ export function UnitDailyReportPanel({
                     {t("businessDepartment.unitReport.sections.materials.tab")}
                   </TabsTrigger>
                 ) : null}
+                {unitSupportsConcreteSection(unit) ? (
+                  <TabsTrigger id="tab-unitReportSection-concrete" value="concrete">
+                    {t("businessDepartment.unitReport.sections.concrete.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsGeneralSection(unit) ? (
+                  <TabsTrigger id="tab-unitReportSection-general" value="general">
+                    {t("businessDepartment.unitReport.sections.general.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsIssuesSection(unit) ? (
+                  <TabsTrigger id="tab-unitReportSection-issues" value="issues">
+                    {t("businessDepartment.unitReport.sections.issues.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsVisitsSection(unit) ? (
+                  <TabsTrigger id="tab-unitReportSection-visits" value="visits">
+                    {t("businessDepartment.unitReport.sections.visits.tab")}
+                  </TabsTrigger>
+                ) : null}
+                {unitSupportsHseSection(unit) ? (
+                  <TabsTrigger id="tab-unitReportSection-hse" value="hse">
+                    {t("businessDepartment.unitReport.sections.hse.tab")}
+                  </TabsTrigger>
+                ) : null}
               </TabsList>
               {unitSupportsActivitiesSection(unit) ? (
                 <TabsContent value="activities" className="mt-3">
@@ -623,6 +658,31 @@ export function UnitDailyReportPanel({
                     unit={unit}
                     report={report}
                   />
+                </TabsContent>
+              ) : null}
+              {unitSupportsConcreteSection(unit) ? (
+                <TabsContent value="concrete" className="mt-3">
+                  <SectionConcrete businessId={businessId} unit={unit} report={report} />
+                </TabsContent>
+              ) : null}
+              {unitSupportsGeneralSection(unit) ? (
+                <TabsContent value="general" className="mt-3">
+                  <SectionGeneral businessId={businessId} unit={unit} report={report} />
+                </TabsContent>
+              ) : null}
+              {unitSupportsIssuesSection(unit) ? (
+                <TabsContent value="issues" className="mt-3">
+                  <SectionIssues businessId={businessId} unit={unit} report={report} />
+                </TabsContent>
+              ) : null}
+              {unitSupportsVisitsSection(unit) ? (
+                <TabsContent value="visits" className="mt-3">
+                  <SectionVisits businessId={businessId} unit={unit} report={report} />
+                </TabsContent>
+              ) : null}
+              {unitSupportsHseSection(unit) ? (
+                <TabsContent value="hse" className="mt-3">
+                  <SectionHse businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
             </Tabs>

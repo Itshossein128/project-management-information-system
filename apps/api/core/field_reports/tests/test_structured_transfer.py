@@ -86,7 +86,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -135,6 +135,8 @@ class TestStructuredTransfer:
             work_front='Site A',
             site_status='active',
             prepared_by=user,
+            created_by=user,
+            updated_by=user,
         )
 
         # First rebuild
@@ -170,7 +172,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -204,7 +206,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -260,7 +262,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 

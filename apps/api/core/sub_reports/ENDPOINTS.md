@@ -63,5 +63,20 @@ The base path for these endpoints typically looks like `/api/projects/<project_i
 - **Payload:** Requires a `rejection_reason` (minimum 10 characters).
 - **Permissions:** Requires `approve_reports` project permission.
 
+## Feature 033 section rows
+
+Canonical unit reports (`/api/v1/projects/{project_pk}/units/{unit}/daily-reports/{id}/…`) expose section collections. View requires `view_reports`. Create and delete require `edit_reports` and an editable draft or rejected current version.
+
+| Path | Error codes |
+|---|---|
+| `concrete/` | `volume_must_be_positive`, `sampling_requires_test_information`, `reference_not_in_project_scope` |
+| `issues/` | `barrier_owner_and_due_date_required` |
+| `visits/` | — |
+| `hse-incidents/` | `hse_immediate_action_required`, `invalid_severity` |
+| `general-activities/` | — |
+| `attachments/` | `unsupported_file_format`, `file_too_large`, `attachment_row_not_in_version`, `reference_not_in_project_scope`, `submitted_report_locked` |
+
+Submit of a version with declared concrete sampling creates or reuses a same-project `risk.Inspection`. Submit of a version with an HSE row creates one `notifications.Notification` per incident. Attachment bytes are not sent to MinIO when object storage is unavailable; the row stores a local storage key and checksum only.
+
 ## Operational Notes
 - **Weather Condition Standards:** `weather_condition` uses the five standardized Shiraz categories: `clear`, `cloudy`, `rainy`, `snowy`, `stormy`. Contributing sub-report weather conditions are automatically reconciled during daily-report summary generation using severity order `stormy > snowy > rainy > cloudy > clear`.

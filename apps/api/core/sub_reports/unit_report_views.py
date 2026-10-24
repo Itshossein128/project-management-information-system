@@ -18,19 +18,27 @@ from common.reporting_units import SpecialtyUnit, is_canonical_unit
 from permissions.project import HasProjectPermission, IsProjectMember
 from sub_reports.models import (
     DisciplineSubReportActivity,
+    DisciplineSubReportConcrete,
+    DisciplineSubReportGeneralActivity,
+    DisciplineSubReportHseIncident,
+    DisciplineSubReportIssue,
     DisciplineSubReportLabor,
     DisciplineSubReportMachinery,
     DisciplineSubReportMaterial,
+    DisciplineSubReportVisit,
     SubReportStatus,
+    UnitReportAttachment,
     UnitReportStatusEvent,
 )
 from sub_reports import unit_report_services as svc
 from sub_reports.serializers import (
     UnitReportActivitySectionSerializer,
+    UnitReportConcreteSectionSerializer,
     UnitReportLaborSectionSerializer,
     UnitReportMachinerySectionSerializer,
     UnitReportMaterialSectionSerializer,
 )
+from sub_reports.services.attachments import attach_image_to_activity
 from sub_reports.services.section_validation import (
     SectionContractError,
     resolve_stoppage_vocabulary,
@@ -38,6 +46,8 @@ from sub_reports.services.section_validation import (
     update_labor_row,
     update_machinery_row,
     update_material_row,
+    validate_concrete_rows,
+    validate_narrative_rows,
     validate_activity_rows,
     validate_labor_rows,
     validate_machinery_rows,
@@ -699,6 +709,178 @@ class UnitReportMaterialSectionViewSet(viewsets.GenericViewSet):
     def destroy(self, request, *args, **kwargs):
         report = self._editable_report()
         row = self._row(report)
+        row.is_deleted = True
+        row.deleted_at = timezone.now()
+        row.save(update_fields=['is_deleted', 'deleted_at'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UnitReportConcreteSectionViewSet(UnitReportMaterialSectionViewSet):
+    """§5 concrete pour rows (feature 033, T041)."""
+
+    def _row(self, report):
+        try:
+            return report.concrete_entries.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except DisciplineSubReportConcrete.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def _rows(self, report, saved, code=status.HTTP_200_OK):
+        data = UnitReportConcreteSectionSerializer(
+            saved, many=True, context={'request': self.request, 'report': report},
+        ).data
+        return Response(data, code)
+
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = report.concrete_entries.filter(is_deleted=False).order_by('id')
+        return self._rows(report, rows)
+
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        payload = request.data
+        rows = payload if isinstance(payload, list) else [payload]
+        try:
+            saved = validate_concrete_rows(
+                report, rows, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return self._rows(report, saved, status.HTTP_201_CREATED)
+
+
+class _NarrativeSectionViewSet(UnitReportMaterialSectionViewSet):
+    narrative_kind = 'issue'
+    row_model = DisciplineSubReportIssue
+    related = 'issues'
+
+    def _row(self, report):
+        try:
+            return getattr(report, self.related).get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except self.row_model.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+
+    def _present(self, rows, code=status.HTTP_200_OK):
+        data = []
+        for row in rows:
+            item = {
+                'id': str(row.id),
+                'row_number': getattr(row, 'row_number', 1),
+                'text': getattr(row, 'text', ''),
+                'kind': getattr(row, 'kind', self.narrative_kind),
+            }
+            if hasattr(row, 'owner_user_id'):
+                item['owner_user'] = str(row.owner_user_id) if row.owner_user_id else None
+                item['due_date'] = row.due_date.isoformat() if getattr(row, 'due_date', None) else None
+            if hasattr(row, 'severity'):
+                item['severity'] = row.severity
+                item['immediate_action'] = row.immediate_action
+            if hasattr(row, 'activity_description'):
+                item['activity_description'] = row.activity_description
+                item['location'] = row.location
+                item['quantity'] = str(row.quantity) if row.quantity is not None else None
+                item['unit'] = row.unit
+                item['notes'] = row.notes
+            data.append(item)
+        return Response(data, status=code)
+
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = getattr(report, self.related).filter(is_deleted=False).order_by('row_number', 'id')
+        return self._present(rows)
+
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        payload = request.data
+        rows = payload if isinstance(payload, list) else [payload]
+        stamped = []
+        for row in rows:
+            item = dict(row)
+            item['kind'] = self.narrative_kind
+            stamped.append(item)
+        try:
+            saved = validate_narrative_rows(
+                report, stamped, context={'request': request, 'report': report},
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return self._present(saved, status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+
+class UnitReportIssueSectionViewSet(_NarrativeSectionViewSet):
+    narrative_kind = 'issue'
+    row_model = DisciplineSubReportIssue
+    related = 'issues'
+
+
+class UnitReportVisitSectionViewSet(_NarrativeSectionViewSet):
+    narrative_kind = 'visit'
+    row_model = DisciplineSubReportVisit
+    related = 'visits'
+
+
+class UnitReportHseSectionViewSet(_NarrativeSectionViewSet):
+    narrative_kind = 'hse'
+    row_model = DisciplineSubReportHseIncident
+    related = 'hse_incidents'
+
+
+class UnitReportGeneralSectionViewSet(_NarrativeSectionViewSet):
+    narrative_kind = 'general_activity'
+    row_model = DisciplineSubReportGeneralActivity
+    related = 'general_activities'
+
+
+class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
+    """JPEG/PNG activity images (feature 033, T051). Local storage key when MinIO is absent."""
+
+    def list(self, request, *args, **kwargs):
+        report = self._report()
+        rows = report.attachments.filter(is_deleted=False).order_by('id')
+        return Response([
+            {
+                'id': str(row.id),
+                'row_kind': row.row_kind,
+                'row_id': row.row_id,
+                'declared_content_type': row.declared_content_type,
+                'size_bytes': row.size_bytes,
+                'capture_date': row.capture_date.isoformat() if row.capture_date else None,
+                'work_front': row.work_front,
+            }
+            for row in rows
+        ])
+
+    def create(self, request, *args, **kwargs):
+        report = self._editable_report()
+        upload = request.FILES.get('file')
+        content = upload.read() if upload is not None else b''
+        try:
+            saved = attach_image_to_activity(
+                report=report,
+                activity_row_id=request.data.get('row_id') or request.data.get('activity_row_id'),
+                file_content=content,
+                declared_content_type=(
+                    request.data.get('declared_content_type')
+                    or getattr(upload, 'content_type', '')
+                ),
+                capture_date=request.data.get('capture_date') or None,
+                work_front=request.data.get('work_front') or '',
+            )
+        except SectionContractError as exc:
+            return self._violation(exc)
+        return Response(
+            {'id': str(saved.id), 'row_kind': saved.row_kind, 'row_id': saved.row_id},
+            status=status.HTTP_201_CREATED,
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        report = self._editable_report()
+        try:
+            row = report.attachments.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except UnitReportAttachment.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
         row.is_deleted = True
         row.deleted_at = timezone.now()
         row.save(update_fields=['is_deleted', 'deleted_at'])

@@ -336,6 +336,7 @@ class DisciplineSubReportGeneralActivity(UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='general_activities',
     )
+    row_number = models.PositiveIntegerField(default=1)
     activity_description = models.TextField()
     location = models.CharField(max_length=120, blank=True, default='')
     quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)

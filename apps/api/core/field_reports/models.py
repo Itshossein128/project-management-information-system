@@ -209,6 +209,15 @@ class DailyReport(AuditSoftDeleteModel):
     )
     aggregation_fingerprint = models.CharField(max_length=64, blank=True, default='')
 
+    @property
+    def issues(self):
+        """Derived issue/barrier rows (feature 033). HSE rows stay on ``hse_incidents``."""
+        return self.incidents.filter(incident_type__in=['issue', 'barrier'])
+
+    @property
+    def hse_incidents(self):
+        return self.incidents.filter(incident_type='safety')
+
     class Meta:
         db_table = 'daily_reports'
         ordering = ['-report_date']
@@ -577,9 +586,19 @@ class DailyReportIncident(ChildRowModel):
     # for the source row lives in DailyReportDerivedSource.
     severity = models.CharField(max_length=10, choices=HseSeverity.choices, null=True, blank=True)
     notification_id = models.CharField(max_length=64, blank=True, default='')
+    row_number = models.PositiveIntegerField(default=1)
+    source_report = models.ForeignKey(
+        'sub_reports.DisciplineSubReport',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='derived_daily_incidents',
+    )
+    source_row_id = models.CharField(max_length=64, blank=True, default='')
 
     class Meta:
         db_table = 'daily_report_incidents'
+        ordering = ['row_number']
 
 
 class DailyReportMachineryRow(ChildRowModel):

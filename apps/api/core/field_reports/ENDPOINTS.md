@@ -135,3 +135,4 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 - **Progress side effect:** approving a report enqueues progress recalculation for linked activities.
 - **Auto costs:** approved labor entries with `daily_rate` feed `cost_control.ActualCost` (see `cost_control/ENDPOINTS.md`).
 - **Photo attachments:** activity photos require MinIO/S3 (`storage` app); not available in Docker-less cloud dev.
+- **Feature 033 provenance:** `GET daily-reports/{pk}/provenance/{derived_kind}/{derived_row}/` returns the source map for one derived row. Requires `view_reports` and project membership. Derived child rows on an auto-summary stay read-only (`derived_readonly`). Concrete payloads include `qc_link`. Narrative rows are rebuilt as structured general activities, visits, and incidents rather than formatted text.

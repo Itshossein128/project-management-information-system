@@ -551,13 +551,29 @@ class SubReportMaterialSerializer(UnitReportMaterialSectionSerializer):
     pass
 
 
-class SubReportConcreteSerializer(serializers.ModelSerializer):
+class UnitReportConcreteSectionSerializer(serializers.ModelSerializer):
+    """§2.5 concrete pour contract (feature 033, T041)."""
+
     class Meta:
         model = DisciplineSubReportConcrete
         fields = [
             'id', 'concrete_description', 'volume_m3', 'zone', 'block', 'floor', 'notes',
+            'structural_element', 'parcel', 'batching_plant', 'truck_delivery_note_number',
+            'lab_sample_code', 'sampling_state', 'test_sheet_count', 'qc_inspection',
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'qc_inspection']
+
+    def validate_volume_m3(self, value):
+        if value is None or value <= 0:
+            raise serializers.ValidationError(
+                _('حجم بتن باید بزرگ‌تر از صفر باشد'),
+                code='volume_must_be_positive',
+            )
+        return value
+
+
+class SubReportConcreteSerializer(UnitReportConcreteSectionSerializer):
+    """Nested compat serializer. QC linkage stays read-only."""
 
 
 class SubReportGeneralActivitySerializer(serializers.ModelSerializer):

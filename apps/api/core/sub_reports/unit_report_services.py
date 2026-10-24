@@ -227,6 +227,17 @@ def submit_unit_report(report, *, user, unit=None):
         raise UnitReportError(
             'فقط گزارش‌های پیش‌نویس یا ردشده قابل ارسال هستند', 'invalid_unit_report_transition',
         )
+    from sub_reports.services.qc_linkage import link_declared_concrete_sampling
+    from field_reports.services.hse_incident_notifications import (
+        ensure_hse_notifications_for_report,
+    )
+    from sub_reports.services.section_validation import SectionContractError
+
+    try:
+        link_declared_concrete_sampling(locked, user)
+    except SectionContractError as exc:
+        raise UnitReportError(str(exc), exc.codes[0] if exc.codes else 'section_contract_violation')
+    ensure_hse_notifications_for_report(locked, user)
     from_status = locked.status
     locked.status = SubReportStatus.SUBMITTED
     locked.submitted_by = user

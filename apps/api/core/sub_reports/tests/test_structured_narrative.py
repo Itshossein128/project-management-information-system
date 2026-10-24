@@ -166,7 +166,7 @@ class TestStructuredNarrativeContract:
         # Structured columns should be preserved
         assert rows[0].activity_description == 'Excavation work'
 
-    def test_issue_with_owner_and_due_date(self, db, unit_report, contractor):
+    def test_issue_with_owner_and_due_date(self, db, unit_report, user):
         """Issue rows can have owner and due_date (optional but accepted)."""
         from sub_reports.services.section_validation import validate_narrative_rows
 
@@ -174,13 +174,13 @@ class TestStructuredNarrativeContract:
             'row_number': 1,
             'kind': 'issue',
             'text': 'Potential trip hazard',
-            'owner_user': contractor.id,
+            'owner_user': user.id,
             'due_date': date(2024, 6, 20),
         }
         rows = validate_narrative_rows(unit_report, [issue_payload])
         assert len(rows) == 1
         assert rows[0].kind == 'issue'
-        assert rows[0].owner_user_id == contractor.id
+        assert rows[0].owner_user_id == user.id
         assert rows[0].due_date == date(2024, 6, 20)
 
     def test_visit_row_preserves_structure(self, db, unit_report):
@@ -239,7 +239,7 @@ class TestNotificationCreation:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -271,7 +271,7 @@ class TestNotificationCreation:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -288,8 +288,9 @@ class TestNotificationCreation:
         assert rows[0].kind == 'other'
 
         # The row should not be classified as an issue
-        db_note = DisciplineSubReportGeneralActivity.objects.get(id=rows[0].id)
-        assert db_note.kind == 'other'
+        from sub_reports.models import DisciplineSubReportNote
+        db_note = DisciplineSubReportNote.objects.get(id=rows[0].id)
+        assert db_note.note_type == SubReportNoteType.OTHER
 
 
 # ---------------------------------------------------------------------------
@@ -310,7 +311,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -370,6 +371,8 @@ class TestStructuredTransfer:
             work_front='Site A',
             site_status='active',
             prepared_by=user,
+            created_by=user,
+            updated_by=user,
         )
 
         # First rebuild
@@ -405,7 +408,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -439,7 +442,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 
@@ -502,7 +505,7 @@ class TestStructuredTransfer:
             unit=SpecialtyUnit.BUILDINGS,
             discipline='civil',
             lineage_id=None,
-            status=SubReportStatus.DRAFT,
+            status=SubReportStatus.SUBMITTED,
             created_by=user,
         )
 

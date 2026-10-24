@@ -546,6 +546,60 @@
             "quantity_must_be_positive": "مقدار مصالح باید بزرگ‌تر از صفر باشد.",
             "reference_not_in_project_scope": "مصالح انتخاب‌شده متعلق به این پروژه نیست."
           }
+        },
+        "concrete": {
+          "tab": "بتن",
+          "title": "بتن‌ریزی",
+          "addRow": "افزودن ردیف",
+          "empty": "بتن‌ریزی ثبت نشده است.",
+          "sampling": "نمونه‌برداری اعلام شده",
+          "errors": {
+            "volume_must_be_positive": "حجم بتن باید بزرگ‌تر از صفر باشد.",
+            "sampling_requires_test_information": "نمونه‌برداری اعلام‌شده به کد آزمایشگاه و تعداد برگه آزمایش نیاز دارد.",
+            "reference_not_in_project_scope": "این شناسه خارج از محدوده پروژه است."
+          }
+        },
+        "general": {
+          "tab": "فعالیت‌های عمومی",
+          "title": "فعالیت‌های عمومی",
+          "addRow": "افزودن فعالیت",
+          "empty": "فعالیت عمومی ثبت نشده است."
+        },
+        "issues": {
+          "tab": "مشکلات و موانع",
+          "title": "مشکلات و موانع",
+          "addRow": "افزودن ردیف",
+          "empty": "مشکل یا مانعی ثبت نشده است.",
+          "overdue": "سررسید گذشته",
+          "errors": {
+            "barrier_owner_and_due_date_required": "برای مانع، مسئول و تاریخ سررسید الزامی است."
+          }
+        },
+        "visits": {
+          "tab": "بازدیدها",
+          "title": "بازدیدها",
+          "addRow": "افزودن بازدید",
+          "empty": "بازدیدی ثبت نشده است."
+        },
+        "hse": {
+          "tab": "حوادث ایمنی",
+          "title": "حوادث ایمنی",
+          "addRow": "افزودن حادثه",
+          "empty": "حادثه ایمنی ثبت نشده است.",
+          "errors": {
+            "hse_immediate_action_required": "اقدام فوری الزامی است.",
+            "invalid_severity": "شدت باید جزئی، متوسط یا عمده باشد."
+          }
+        },
+        "attachments": {
+          "label": "تصویر فعالیت",
+          "hint": "JPEG یا PNG، حداکثر ۱۰ مگابایت.",
+          "errors": {
+            "unsupported_file_format": "فقط تصویر JPEG و PNG پذیرفته می‌شود.",
+            "file_too_large": "حجم فایل بیش از ۱۰ مگابایت است.",
+            "attachment_row_not_in_version": "این ردیف در این نسخه گزارش نیست.",
+            "reference_not_in_project_scope": "هدف پیوست خارج از پروژه است."
+          }
         }
       }
     }

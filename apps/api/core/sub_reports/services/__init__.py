@@ -3,6 +3,20 @@ from rest_framework.exceptions import ValidationError
 
 from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
 from sub_reports.models import SubReportStatus
+from sub_reports.services.attachments import (
+    attach_image_to_activity,
+    get_attachment_counts,
+    get_attachment_links,
+)
+
+__all__ = [
+    'attach_image_to_activity',
+    'get_attachment_counts',
+    'get_attachment_links',
+    'submit_sub_report',
+    'approve_sub_report',
+    'reject_sub_report',
+]
 
 
 def _trigger_rebuild(sub_report, user=None):
