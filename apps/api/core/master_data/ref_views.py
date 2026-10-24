@@ -7,11 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from master_data.models import ManagedContractType, OrganizationUnit
+from master_data.permissions import IsOrgRefWriterOrReadOnly
 from master_data.ref_serializers import ManagedContractTypeSerializer, OrganizationUnitSerializer
 
 
 class OrganizationUnitListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOrgRefWriterOrReadOnly]
 
     @extend_schema(summary='List organization units', tags=['Central Data'])
     def get(self, request):
@@ -34,7 +35,7 @@ class OrganizationUnitListCreateView(APIView):
 
 
 class OrganizationUnitDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOrgRefWriterOrReadOnly]
 
     @extend_schema(summary='Update organization unit', tags=['Central Data'])
     def patch(self, request, pk):
@@ -49,7 +50,7 @@ class OrganizationUnitDetailView(APIView):
 
 
 class ManagedContractTypeListCreateView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOrgRefWriterOrReadOnly]
 
     @extend_schema(summary='List managed contract types', tags=['Central Data'])
     def get(self, request):

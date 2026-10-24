@@ -8,8 +8,9 @@ Base: `/api/v1/organization-units/`
 
 | Method | Path | Permission |
 |--------|------|------------|
-| GET/POST | `/` | authenticated staff **or** users with global manage-refs; read open to authenticated project creators |
-| PATCH | `/{id}/` | same as write |
+| GET | `/` | any authenticated user |
+| POST | `/` | staff, superuser, or groups `admin`, `hr`, `business-setup` |
+| PATCH | `/{id}/` | same as POST |
 
 ```json
 {
@@ -50,6 +51,8 @@ Base: `/api/v1/projects/{project_id}/stakeholders/`
 ## Contract types (org-wide)
 
 Base: `/api/v1/contract-types/`
+
+Reads: any authenticated user. Writes: staff, superuser, or groups `admin`, `hr`, `business-setup`.
 
 CRUD for `{ code, name_fa, name_en, is_active }`. Contract create accepts `contract_type_ref` UUID (preferred) while legacy string `contract_type` remains readable.
 

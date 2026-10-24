@@ -13,9 +13,9 @@
 
 ## Authorization & Permissions
 
-- **Required Permissions**: IsAuthenticated.
-- **Required Roles / Groups**: Project roles and member overrides determine codenames; see the permission catalog.
-- **Protection notation**: Public, standard authenticated, or local action; any parent screen gate still applies.
+- **Required Permissions**: `IsAuthenticated`, `IsOrgRefWriterOrReadOnly`.
+- **Required Roles / Groups**: `admin`, `hr`, or `business-setup`. Staff and superuser may also write. Other authenticated users receive 403.
+- **Protection notation**: Special permission/role gate; directory uses brackets.
 
 ## Desired Result
 
