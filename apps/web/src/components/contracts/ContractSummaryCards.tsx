@@ -9,7 +9,11 @@ export function ContractSummaryCards({ contract }: { contract: ContractDetail })
   const effective = contract.effective_amount;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div
+      className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+      data-testid="contract-summary-cards"
+      data-tour="contract-summary-cards"
+    >
       <div className="rounded-lg border p-4">
         <p className="text-sm text-muted-foreground">نوع قرارداد</p>
         <p className="text-lg font-semibold">

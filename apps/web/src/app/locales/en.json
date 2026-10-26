@@ -2398,6 +2398,15 @@
       "tableDesc": "Track counterparty details, contract types, amounts, and IPC approval states, or open detailed views.",
       "receivablesTitle": "Receivables & Collections",
       "receivablesDesc": "Monitor overdue or near-due IPC collections and record received payments against open invoices."
+    },
+    "projectContractDetail": {
+      "title": "Contract Details Tour",
+      "summaryTitle": "Contract Financial Summary",
+      "summaryDesc": "Review contract type, effective amount, advance payment, and approved change order totals.",
+      "tabsTitle": "Contract Detail Tabs",
+      "tabsDesc": "Switch between General Info/Edit mode, Bill of Quantities (BoQ) grid, and Change Orders panel.",
+      "actionsTitle": "Operational Actions",
+      "actionsDesc": "Issue a new interim payment certificate (IPC), edit contract details, or return to the contracts list."
     }
   },
   "dailyReports": {
