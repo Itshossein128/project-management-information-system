@@ -11,3 +11,7 @@ In `apps/web/src/components/ui/table.tsx`, added `[&::-webkit-scrollbar]:hidden 
 ## 2026-07-28 - Logical Directional Classes for Form Middleware Elements
 **Learning:** Inputs with forced `dir="ltr"` inside an RTL application layout (e.g. `PasswordInput`) will cause action buttons positioned with physical classes (`right-1`, `pr-10`) to overlap or misalign in RTL viewports.
 **Action:** Use logical direction utilities (`end-1`, `pe-10`) so inner form elements align consistently across document text directions and language contexts.
+
+## 2026-07-29 - Logical Directional Classes for Radix Dialog Overlay Components
+**Learning:** Default Shadcn/Radix Dialog primitive overlays use physical classes (`right-4`, `sm:text-left`) for close buttons and headers. In RTL viewports (e.g. Persian), physical positioning causes the close button to overlap header text or align improperly.
+**Action:** Always convert physical directional classes (`right-4`, `sm:text-left`) to logical directional classes (`end-4`, `sm:text-start`) in shared overlay components to preserve layout symmetry in both LTR and RTL document directions.
