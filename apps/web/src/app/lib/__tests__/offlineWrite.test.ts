@@ -14,6 +14,93 @@ after(async () => {
 });
 
 describe("offlineWrite unit report operations and snapshots", () => {
+  it("never selects another account's legacy queue for replay", async () => {
+    const context = await browser.newContext();
+    try {
+      const page = await context.newPage();
+      await page.goto(origin, { waitUntil: "domcontentloaded" });
+      const pending = await page.evaluate(async () => {
+        const db = await import(/* @vite-ignore */ "/src/app/lib/offlineDB.ts");
+        localStorage.setItem("auth_user", JSON.stringify({ id: "actor-b" }));
+        await db.addToQueue({ queue_id: "other", entity_type: "daily_report", project_id: "project",
+          actor_id: "actor-a", unit: "electrical", method: "POST", endpoint: "/test/", payload: {},
+          created_at: new Date().toISOString(), status: "pending", retry_count: 0, error_message: null });
+        await db.addToQueue({ queue_id: "own", entity_type: "daily_report", project_id: "project",
+          actor_id: "actor-b", unit: "electrical", method: "POST", endpoint: "/test/", payload: {},
+          created_at: new Date().toISOString(), status: "pending", retry_count: 0, error_message: null });
+        return (await db.getPendingQueue()).map((item) => item.queue_id);
+      });
+      assert.deepEqual(pending, ["own"]);
+    } finally { await context.close(); }
+  });
+  it("uses the signed-in user for local scope and refuses missing identity", async () => {
+    const context = await browser.newContext();
+    try {
+      const page = await context.newPage();
+      await page.goto(origin, { waitUntil: "domcontentloaded" });
+      const result = await page.evaluate(async () => {
+        const auth = await import(/* @vite-ignore */ "/src/app/lib/auth-storage.ts");
+        localStorage.setItem("auth_user_id", "stale-account");
+        localStorage.setItem("auth_user", JSON.stringify({ id: "current-account" }));
+        const current = auth.getStoredActorId();
+        localStorage.removeItem("auth_user");
+        let refused = false;
+        try { auth.requireStoredActorId(); } catch { refused = true; }
+        return { current, refused };
+      });
+      assert.equal(result.current, "current-account");
+      assert.equal(result.refused, true);
+    } finally { await context.close(); }
+  });
+  it("does not reveal snapshots without a proven actor or across accounts", async () => {
+    const context = await browser.newContext();
+    try {
+      const page = await context.newPage();
+      await page.goto(origin, { waitUntil: "domcontentloaded" });
+      const result = await page.evaluate(async () => {
+        const db = await import(/* @vite-ignore */ "/src/app/lib/offlineDB.ts");
+        const writer = await import(/* @vite-ignore */ "/src/app/lib/offlineWrite.ts");
+        const { snapshot } = await writer.queueUnitReportOperation({
+          actorId: "actor-a", projectId: "shared-project", unit: "electrical",
+          reportDate: "2026-10-27", operationKind: "create_report", targetType: "header",
+          payload: { notes: "private" },
+        });
+        let crossAccountWriteRejected = false;
+        try {
+          await writer.queueUnitReportOperation({
+            actorId: "actor-b", projectId: "shared-project", unit: "electrical",
+            reportDate: "2026-10-27", localReportId: snapshot.local_report_id,
+            operationKind: "header_update", targetType: "header", payload: { notes: "wrong actor" },
+          });
+        } catch { crossAccountWriteRejected = true; }
+        let ownWriteAccepted = true;
+        try {
+          await writer.queueUnitReportOperation({
+            actorId: "actor-a", projectId: "shared-project", unit: "electrical",
+            reportDate: "", localReportId: snapshot.local_report_id,
+            operationKind: "create", targetType: "activities", payload: { activity_description: "own" },
+          });
+        } catch { ownWriteAccepted = false; }
+        return {
+          unscoped: await db.findLocalSnapshot("shared-project", "electrical", "2026-10-27"),
+          other: await db.findLocalSnapshot("shared-project", "electrical", "2026-10-27", "actor-b"),
+          list: await db.getLocalSnapshotsByProject("shared-project"),
+          own: await db.findLocalSnapshot("shared-project", "electrical", "2026-10-27", "actor-a"),
+          id: snapshot.local_report_id,
+          crossAccountWriteRejected,
+          ownWriteAccepted,
+        };
+      });
+      assert.equal(result.unscoped, undefined);
+      assert.equal(result.other, undefined);
+      assert.deepEqual(result.list, []);
+      assert.equal(result.own?.local_report_id, result.id);
+      assert.equal(result.crossAccountWriteRejected, true);
+      assert.equal(result.ownWriteAccepted, true);
+    } finally {
+      await context.close();
+    }
+  });
   it("atomically commits snapshot and operation with independent UUIDs and scope", async () => {
     const context = await browser.newContext();
     try {

@@ -1,0 +1,19 @@
+You are an expert software architect and gap-analysis specialist working on: /home/hossein/Desktop/projects/building-management
+
+Your task is to analyze `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-05-DISCIPLINE-SUB-REPORTS.md` and find the gaps between the project's current implementation and this specification document.
+
+Specifically:
+1. Thoroughly read and analyze:
+   - `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-05-DISCIPLINE-SUB-REPORTS.md`
+   - Existing codebase implementations in `apps/api/core/sub_reports/`, `apps/api/core/field_reports/`, `apps/web/src/components/department/`, `apps/web/src/app/routes/`, etc.
+   - Reference previous gap analyses like `reports_gaps/04/GAP-SPEC-04-DAILY-OFFLINE-SYNC.md` and `reports_gaps/04/speckit-specify-prompts/01-PROMPT-DAILY-OFFLINE-SYNC.md` for quality and structure.
+2. Identify all gaps:
+   - Check disciplines enum/constants (`CIVIL`, `ELECTRICAL`, `MECHANICAL`, `PLUMBING`, `HVAC`, `FINISHING`).
+   - Check User Stories US-SR-01 (Civil Sub-Report), US-SR-02 (Electrical Sub-Report), US-SR-03 (Mechanical/HVAC/Plumbing Sub-Report), US-SR-04 (Sub-Report lifecycle: Draft -> Submitted -> Approved, empty submission prevention, endpoints).
+   - Check contractor linking, daily_percent validation (0 to 100), hydrostatic pressure tests and quality control attachment.
+   - Note which parts are already present, partially implemented, or completely missing.
+3. Generate the artifacts in `/home/hossein/Desktop/projects/building-management/reports_gaps/05/`:
+   - Create `reports_gaps/05/GAP-SPEC-05-DISCIPLINE-SUB-REPORTS.md` documenting the findings, evidence, and missing capabilities.
+   - Create `reports_gaps/05/speckit-specify-prompts/01-PROMPT-DISCIPLINE-SUB-REPORTS.md` containing a comprehensive, structured Persian prompt for `speckit-specify` that starts with `/speckit-specify` and covers all identified gaps, acceptance criteria, boundaries, and required evidence.
+4. Also create a copy or link at `reports_gaps/05/PROMPT-SPEC-05.md` for easy access.
+5. Provide a summary of the discovered gaps and confirm the files created.

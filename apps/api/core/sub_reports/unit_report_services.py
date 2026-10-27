@@ -86,7 +86,7 @@ def current_report_queryset(project_id, unit: str, report_date: date):
 
 
 @transaction.atomic
-def open_unit_report(*, project, unit: str, report_date: date, user):
+def open_unit_report(*, project, unit: str, report_date: date, user, sub_discipline: str = ''):
     """Idempotently return the current report or create its first draft.
 
     Concurrent opens resolve to one current draft: the uniqueness constraint on
@@ -111,6 +111,7 @@ def open_unit_report(*, project, unit: str, report_date: date, user):
                 report_date=report_date,
                 unit=unit,
                 discipline=UNIT_TO_LEGACY_DISCIPLINE[unit],
+                sub_discipline=sub_discipline or '',
                 legacy_discipline='',
                 lineage_id=uuid.uuid4(),
                 version_number=1,
@@ -250,7 +251,20 @@ def submit_unit_report(report, *, user, unit=None, enforce_permission=False):
         raise UnitReportError(
             'فقط گزارش‌های پیش‌نویس یا ردشده قابل ارسال هستند', 'invalid_unit_report_transition',
         )
-    from sub_reports.services.qc_linkage import link_declared_concrete_sampling
+    active_rows_count = (
+        locked.activities.filter(is_deleted=False).count()
+        + locked.labor_entries.filter(is_deleted=False).count()
+        + locked.material_entries.filter(is_deleted=False).count()
+        + locked.concrete_entries.filter(is_deleted=False).count()
+        + locked.machinery_rows.filter(is_deleted=False).count()
+        + locked.general_activities.filter(is_deleted=False).count()
+    )
+    if active_rows_count == 0:
+        raise UnitReportError(
+            'امکان ارسال گزارش خالی وجود ندارد؛ حداقل یک ردیف فعالیت یا کارکرد وارد نمایید',
+            'cannot_submit_empty_sub_report',
+        )
+    from sub_reports.services.qc_linkage import link_declared_concrete_sampling, link_hydrostatic_tests
     from field_reports.services.hse_incident_notifications import (
         ensure_hse_notifications_for_report,
     )
@@ -258,6 +272,7 @@ def submit_unit_report(report, *, user, unit=None, enforce_permission=False):
 
     try:
         link_declared_concrete_sampling(locked, user)
+        link_hydrostatic_tests(locked, user)
     except SectionContractError as exc:
         raise UnitReportError(str(exc), exc.codes[0] if exc.codes else 'section_contract_violation')
     ensure_hse_notifications_for_report(locked, user)
@@ -305,6 +320,8 @@ def approve_unit_report(report, *, user, unit=None, sod_checker=None, enforce_pe
     locked.approved_at = timezone.now()
     locked.updated_by = user
     locked.save()
+    from sub_reports.services.labor_ledger import rollup_subcontractor_labor
+    rollup_subcontractor_labor(locked, user)
     _record_event(
         locked, UnitReportEventType.APPROVED, user,
         from_status=from_status, to_status=SubReportStatus.APPROVED,

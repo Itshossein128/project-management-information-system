@@ -74,3 +74,41 @@ def link_declared_concrete_sampling(report, user):
         row.save(update_fields=['qc_inspection'])
         linked.append(row)
     return linked
+
+
+def link_hydrostatic_tests(report, user):
+    """Create or reuse a project Inspection for each passed hydrostatic test on activities (feature 038, US5)."""
+    if user is None:
+        user = report.created_by
+    if user is None:
+        return []
+    linked = []
+    for row in report.activities.filter(
+        is_deleted=False,
+        is_hydrostatic_tested=True,
+        test_outcome='PASSED',
+    ).order_by('id'):
+        if row.qc_inspection_id and str(row.qc_inspection.project_id) == str(report.project_id):
+            linked.append(row)
+            continue
+        segment_desc = f" ({row.tested_segment})" if row.tested_segment else ""
+        pressure_desc = f"{row.test_pressure_bar} Bar" if row.test_pressure_bar else "N/A"
+        duration_desc = f", duration: {row.test_duration_minutes} min" if row.test_duration_minutes else ""
+        inspection = Inspection.objects.create(
+            project_id=report.project_id,
+            wbs=_project_wbs(report.project),
+            responsible_user=user,
+            inspection_date=report.report_date or timezone.now().date(),
+            stage=InspectionStage.RESULT,
+            description=(
+                f'Hydrostatic test PASSED: {pressure_desc}{duration_desc}{segment_desc} '
+                f'[{row.activity_description}]'
+            )[:1000],
+            created_by=user,
+            updated_by=user,
+        )
+        row.qc_inspection = inspection
+        row.save(update_fields=['qc_inspection'])
+        linked.append(row)
+    return linked
+

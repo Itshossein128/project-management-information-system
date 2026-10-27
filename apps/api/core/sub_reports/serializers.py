@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -43,6 +44,14 @@ class SubReportActivitySerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id']
 
+    def validate_execution_percentage(self, value):
+        if value is not None and (value < Decimal('0.00') or value > Decimal('100.00')):
+            raise serializers.ValidationError(
+                _('درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد / Execution percentage must be between 0.00 and 100.00'),
+                code='percent_must_be_between_0_and_100',
+            )
+        return value
+
 
 class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
     """Canonical unit-report §1 activity rows (feature 033, task T014).
@@ -72,14 +81,30 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
     activity_name = serializers.CharField(source='activity_ref.activity_name', read_only=True)
     contractor_ref = serializers.PrimaryKeyRelatedField(
         queryset=Stakeholder.objects.all(),
-        required=True,
-        allow_null=False,
+        required=False,
+        allow_null=True,
     )
     contractor_name = serializers.CharField(source='contractor_ref.name', read_only=True)
     foreman_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
     worker_count = serializers.IntegerField(required=False, allow_null=True, min_value=0)
     activity_description = serializers.CharField(required=False, allow_blank=True, default='')
     notes = serializers.CharField(required=False, allow_blank=True, default='')
+    execution_percentage = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True,
+    )
+    shift_hours = serializers.DecimalField(
+        max_digits=4, decimal_places=2, required=False, default=Decimal('8.00'),
+    )
+    is_hydrostatic_tested = serializers.BooleanField(required=False, default=False)
+    test_pressure_bar = serializers.DecimalField(
+        max_digits=6, decimal_places=2, required=False, allow_null=True,
+    )
+    test_duration_minutes = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+    test_outcome = serializers.ChoiceField(
+        choices=('PASSED', 'FAILED'), required=False, allow_blank=True, default='',
+    )
+    tested_segment = serializers.CharField(max_length=120, required=False, allow_blank=True, default='')
+    qc_inspection = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = DisciplineSubReportActivity
@@ -104,6 +129,14 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
             'floor',
             'quantity',
             'unit',
+            'execution_percentage',
+            'shift_hours',
+            'is_hydrostatic_tested',
+            'test_pressure_bar',
+            'test_duration_minutes',
+            'test_outcome',
+            'tested_segment',
+            'qc_inspection',
             'notes',
         ]
 
@@ -124,8 +157,33 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_execution_percentage(self, value):
+        if value is not None and (value < Decimal('0.00') or value > Decimal('100.00')):
+            raise serializers.ValidationError(
+                _('درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد / Execution percentage must be between 0.00 and 100.00'),
+                code='percent_must_be_between_0_and_100',
+            )
+        return value
+
     def validate(self, attrs):
         attrs = super().validate(attrs)
+        # Hydrostatic test check
+        is_tested = attrs.get('is_hydrostatic_tested')
+        if is_tested is None and self.instance:
+            is_tested = self.instance.is_hydrostatic_tested
+        if is_tested:
+            pressure = attrs.get('test_pressure_bar')
+            if pressure is None and self.instance:
+                pressure = self.instance.test_pressure_bar
+            if pressure is None or pressure <= Decimal('0.00'):
+                raise serializers.ValidationError(
+                    {
+                        'test_pressure_bar': serializers.ErrorDetail(
+                            _('فشار آزمون باید عددی مثبت باشد / Test pressure must be a positive number'),
+                            code='invalid_test_pressure_value',
+                        )
+                    }
+                )
         if not (attrs.get('activity_description') or '').strip():
             act = attrs.get('activity_ref') or getattr(self.instance, 'activity_ref', None)
             if act is not None and getattr(act, 'activity_name', None):

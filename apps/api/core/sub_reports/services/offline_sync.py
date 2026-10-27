@@ -323,6 +323,38 @@ def _resolve_report_id(operation, completed):
     return None
 
 
+def _resolve_row_dependency(operation, completed, report):
+    """Resolve a local row through an explicitly named, scoped receipt."""
+    target = operation.get('target') or {}
+    client_id = target.get('client_id')
+    if not client_id or operation.get('action') not in {'update', 'delete'}:
+        return operation, target
+    # Only a predecessor for this report, local row and section can supply the
+    # mapping and revision. Keep the original operation intact for its receipt.
+    for dependency in reversed(operation.get('depends_on') or []):
+        try:
+            result = completed.get(UUID(str(dependency)))
+        except (TypeError, ValueError):
+            continue
+        previous = (result or {}).get('target') or {}
+        if ((result or {}).get('outcome') != 'success'
+                or (result or {}).get('local_report_id') != operation.get('local_report_id')
+                or previous.get('client_id') != client_id
+                or previous.get('kind') != target.get('kind')
+                or str(previous.get('report_id')) != str(report.id)):
+            continue
+        resolved = dict(target)
+        if not resolved.get('server_id') or resolved['server_id'] == client_id:
+            resolved['server_id'] = previous.get('server_id')
+        if str(resolved.get('server_id')) != str(previous.get('server_id')):
+            return operation, target
+        effective = dict(operation)
+        if not effective.get('base_revision'):
+            effective['base_revision'] = previous.get('revision')
+        return effective, resolved
+    return operation, target
+
+
 def _load_project_report(project, report_id):
     from sub_reports.models import DisciplineSubReport
 
@@ -386,7 +418,8 @@ def _execute_operation(project, actor, operation, completed):
     if action == 'update' and kind == 'header':
         return _update_header(operation, report, payload)
     if kind in _SECTION_RELATED and action in {'create', 'update', 'delete'}:
-        return _mutate_section_row(operation, report, payload, target, action, kind)
+        effective, resolved_target = _resolve_row_dependency(operation, completed, report)
+        return _mutate_section_row(effective, report, payload, resolved_target, action, kind)
     return _error_result(operation, 'unsupported_target')
 
 
@@ -531,6 +564,7 @@ def _success_row(operation, report, row, target):
         operation, 'success', local_report_id=operation.get('local_report_id'),
         target={
             'client_id': target.get('client_id'),
+            'kind': target.get('kind'),
             'server_id': str(row.id),
             'report_id': str(report.id),
             'revision': str(getattr(row, 'sync_revision', '')),

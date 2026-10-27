@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/toast";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
-import { getStoredAccessToken } from "@/app/lib/auth-storage";
+import { getStoredAccessToken, getStoredActorId } from "@/app/lib/auth-storage";
 import { isOfflineDBAvailable } from "@/app/lib/offlineDB";
 import { syncPendingQueue, syncPendingUnitOperations } from "@/app/lib/syncService";
 
@@ -28,16 +28,7 @@ export function useAutoSync(): void {
     if (!justReconnected && running.current) return;
 
     running.current = true;
-    const storedUser = localStorage.getItem("auth_user");
-    let actorId = localStorage.getItem("auth_user_id") ?? "";
-    if (!actorId && storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser) as { id?: string | number };
-        actorId = parsed.id == null ? "" : String(parsed.id);
-      } catch {
-        actorId = "";
-      }
-    }
+    const actorId = getStoredActorId();
     void (actorId ? syncPendingUnitOperations(actorId) : Promise.resolve({ synced: 0, failed: 0, conflicts: 0 }))
       .then(async (unitResult) => {
         const legacy = await syncPendingQueue();

@@ -39,6 +39,22 @@ export const CONSTRUCTION_UNITS = [
   // Other
   "%",
   "LS",
+  // Electrical & Mechanical Standard Units (Shiraz FILE 5 & 6)
+  "متر طول",
+  "شعله / نقطه",
+  "دستگاه تابلو",
+  "شاخه",
+  "عدد",
+  "دستگاه",
+] as const;
+
+export const ELECTRICAL_MEASUREMENT_UNITS = [
+  "متر طول",
+  "شعله / نقطه",
+  "دستگاه تابلو",
+  "شاخه",
+  "عدد",
+  "دستگاه",
 ] as const;
 
 export type ConstructionUnit = (typeof CONSTRUCTION_UNITS)[number];

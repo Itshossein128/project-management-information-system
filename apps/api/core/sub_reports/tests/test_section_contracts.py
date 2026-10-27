@@ -186,11 +186,10 @@ class TestActivitySectionContract:
             'contractor_not_in_project_scope',
         ]
 
-    def test_contractor_required(self, db, unit_report, section_activity_payload):
+    def test_direct_company_labor_may_omit_contractor(self, db, unit_report, section_activity_payload):
         section_activity_payload.pop('contractor_ref')
-        with pytest.raises(SectionContractError) as excinfo:
-            _save_rows(unit_report, [section_activity_payload])
-        assert excinfo.value.field_errors('contractor_ref') == ['contractor_required']
+        rows = _save_rows(unit_report, [section_activity_payload])
+        assert rows[0].contractor_ref_id is None
 
     def test_crew_name_and_contractor_survive_as_separate_columns(
         self, db, unit_report, section_activity_payload, contractor,

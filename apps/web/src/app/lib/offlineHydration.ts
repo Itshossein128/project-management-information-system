@@ -1,4 +1,13 @@
-import type { LocalReportSnapshot } from "./offlineDB";
+import type { LocalReportSnapshot, OfflineOperation } from "./offlineDB";
+
+function rowStatus(row: Record<string, unknown>, section: string, operations: OfflineOperation[]) {
+  const matches = operations.filter((op) => op.target_type === section &&
+    ((op.client_id && op.client_id === row.client_id) ||
+      (op.target_server_id && op.target_server_id === row.id)));
+  const latest = matches.reduce<OfflineOperation | undefined>((a, b) => !a || b.created_at >= a.created_at ? b : a, undefined);
+  if (!latest) return "pending";
+  return latest.status === "syncing" ? "sending" : latest.status;
+}
 
 function fieldErrorFor(snapshot: LocalReportSnapshot, row: object) {
   const record = row as { client_id?: unknown; id?: unknown };
@@ -23,6 +32,7 @@ export function reconcileServerWithLocalSnapshot<
   serverRows: TRow[] = [],
   snapshot: LocalReportSnapshot | null | undefined,
   sectionKey?: string,
+  operations: OfflineOperation[] = [],
 ): ReconciledReportData<THeader, TRow> {
   const mergedHeader: THeader = {
     ...serverHeader,
@@ -64,7 +74,7 @@ export function reconcileServerWithLocalSnapshot<
         ...sRow,
         ...overlayRows[overlayIdx],
         ...fieldErrorFor(snapshot, overlayRows[overlayIdx]),
-        sync_status: "pending",
+        sync_status: rowStatus(overlayRows[overlayIdx], sectionKey, operations),
         _offline: true,
       });
     } else {
@@ -86,7 +96,7 @@ export function reconcileServerWithLocalSnapshot<
       reconciledRows.push({
         ...oRow,
         ...fieldErrorFor(snapshot, oRow),
-        sync_status: "pending",
+        sync_status: rowStatus(oRow, sectionKey, operations),
         _offline: true,
       });
     }

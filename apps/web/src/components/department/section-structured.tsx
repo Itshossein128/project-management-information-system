@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 
 import { ApiRequestError } from "@/app/lib/api-client";
-import { getLocalSnapshot } from "@/app/lib/offlineDB";
+import { getLocalSnapshot, getOperationsForReport } from "@/app/lib/offlineDB";
+import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
+import { queueUnitReportOperation } from "@/app/lib/offlineWrite";
 import { reconcileServerWithLocalSnapshot } from "@/app/lib/offlineHydration";
 import { RowSyncStatusBadge } from "./row-sync-status-badge";
 import {
@@ -73,16 +75,23 @@ export function StructuredSection({
   const queryKey = ["unit-section", businessId, unit, report.id, section];
 
   const query = useQuery({
+    networkMode: "always",
     queryKey,
     queryFn: async () => {
+      const scopedSnapshot = async () => {
+        const actor = getStoredActorId();
+        if (!actor) return undefined;
+        const snapshot = await getLocalSnapshot(report.id);
+        return snapshot?.actor_id === actor && snapshot.project_id === String(businessId) && snapshot.unit === unit ? snapshot : undefined;
+      };
       const applyLocal = async (rows: UnitSectionRow[]) => {
-        const local = await getLocalSnapshot(report.id);
+        const local = await scopedSnapshot();
         if (!local) return rows;
-        return reconcileServerWithLocalSnapshot({}, rows, local, section).rows as UnitSectionRow[];
+        return reconcileServerWithLocalSnapshot({}, rows, local, section, await getOperationsForReport(local.local_report_id)).rows as UnitSectionRow[];
       };
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const local = await getLocalSnapshot(report.id);
+        const local = await scopedSnapshot();
         const base = (local?.base_rows?.[section] ?? []) as UnitSectionRow[];
         return applyLocal(base);
       }
@@ -90,7 +99,7 @@ export function StructuredSection({
         const rows = await fetchUnitSection(businessId, unit, report.id, section);
         return applyLocal(rows);
       } catch (err) {
-        const local = await getLocalSnapshot(report.id);
+        const local = await scopedSnapshot();
         if (local) {
           const base = (local.base_rows?.[section] ?? []) as UnitSectionRow[];
           return applyLocal(base);
@@ -101,7 +110,8 @@ export function StructuredSection({
   });
 
   const create = useMutation({
-    mutationFn: () => {
+    networkMode: "always",
+    mutationFn: async () => {
       const payload: Record<string, unknown> = { row_number: (query.data?.length ?? 0) + 1 };
       if (fields.includes("text")) payload.text = text;
       if (fields.includes("description")) {
@@ -136,6 +146,10 @@ export function StructuredSection({
         payload.text = text;
         payload.owner_user = ownerUser || null;
         payload.due_date = due || null;
+      }
+      if (!navigator.onLine) {
+        return queueUnitReportOperation({ actorId: requireStoredActorId(), projectId: String(businessId), unit,
+          reportDate: report.report_date, localReportId: report.id, operationKind: "create", targetType: section, payload });
       }
       return createUnitSection(businessId, unit, report.id, section, payload);
     },
@@ -176,7 +190,16 @@ export function StructuredSection({
   });
 
   const remove = useMutation({
-    mutationFn: (rowId: string) => deleteUnitSection(businessId, unit, report.id, section, rowId),
+    networkMode: "always",
+    mutationFn: async (row: UnitSectionRow & { client_id?: string }) => {
+      if (!navigator.onLine) {
+        await queueUnitReportOperation({ actorId: requireStoredActorId(), projectId: String(businessId), unit,
+        reportDate: report.report_date, localReportId: report.id, operationKind: "delete", targetType: section,
+        clientId: row.client_id, targetServerId: row.id || null, payload: {} });
+        return;
+      }
+      await deleteUnitSection(businessId, unit, report.id, section, row.id);
+    },
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey });
     },
@@ -190,7 +213,7 @@ export function StructuredSection({
       {rows.length === 0 ? <p className="text-sm text-muted-foreground">{t(emptyKey)}</p> : null}
       <ul className="space-y-2">
         {rows.map((row) => (
-          <li key={row.id} className="flex items-start justify-between gap-2 rounded border p-2 text-sm">
+          <li key={row.id || (row as UnitSectionRow & { client_id?: string }).client_id} className="flex items-start justify-between gap-2 rounded border p-2 text-sm">
             <div className="flex min-w-0 flex-1 items-start gap-2">
               <RowSyncStatusBadge
                 status={(row as UnitSectionRow & { sync_status?: string }).sync_status ?? "synced"}
@@ -203,7 +226,7 @@ export function StructuredSection({
               <RowSummary row={row} overdueLabel={t("businessDepartment.unitReport.sections.issues.overdue")} />
             </div>
             {editable ? (
-              <Button type="button" variant="ghost" onClick={() => remove.mutate(row.id)} aria-label={t("common.delete", { defaultValue: "Delete" })}>
+              <Button type="button" variant="ghost" onClick={() => remove.mutate(row)} aria-label={t("common.delete", { defaultValue: "Delete" })}>
                 <Trash2 className="size-4" />
               </Button>
             ) : null}

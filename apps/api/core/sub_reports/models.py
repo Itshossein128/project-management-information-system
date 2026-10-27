@@ -130,6 +130,8 @@ class DisciplineSubReport(SyncRevisionMixin, AuditSoftDeleteModel):
     unit = models.CharField(max_length=20, choices=SpecialtyUnit.choices, null=True, blank=True, db_index=True)
     # Preserved original discipline evidence for migration trace/rollback.
     legacy_discipline = models.CharField(max_length=20, blank=True, default='')
+    # Feature 038: Secondary sub-discipline taxonomy tag under canonical unit
+    sub_discipline = models.CharField(max_length=20, blank=True, default='')
     # Version lineage: all versions of one project/date/unit report share a
     # lineage_id; version_number is monotonic within the lineage.
     lineage_id = models.UUIDField(null=True, blank=True, db_index=True)
@@ -246,6 +248,19 @@ class DisciplineSubReportActivity(SyncRevisionMixin, UUIDModel):
     unit = models.CharField(max_length=40, null=True, blank=True)
     quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    shift_hours = models.DecimalField(max_digits=4, decimal_places=2, default=8.00)
+    is_hydrostatic_tested = models.BooleanField(default=False)
+    test_pressure_bar = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    test_duration_minutes = models.PositiveIntegerField(null=True, blank=True)
+    test_outcome = models.CharField(max_length=10, blank=True, default='')
+    tested_segment = models.CharField(max_length=120, blank=True, default='')
+    qc_inspection = models.ForeignKey(
+        'risk.Inspection',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tested_sub_report_activities',
+    )
     activity_ref = models.ForeignKey(
         'projects.Activity',
         on_delete=models.SET_NULL,
@@ -630,3 +645,40 @@ class UnitReportMigrationQuarantine(UUIDModel):
     class Meta(UUIDModel.Meta):
         db_table = 'unit_report_migration_quarantines'
         ordering = ['detected_at']
+
+
+class SubcontractorLaborLedgerEntry(UUIDModel):
+    """
+    Feature 038: Derived person-hours credited to a contractor from approved daily sub-reports.
+    """
+    project = models.ForeignKey(
+        'projects.Project', on_delete=models.CASCADE, related_name='subcontractor_labor_ledger',
+    )
+    contractor = models.ForeignKey(
+        'projects.Stakeholder', on_delete=models.CASCADE, related_name='labor_ledger_entries',
+    )
+    sub_report = models.ForeignKey(
+        DisciplineSubReport, on_delete=models.CASCADE, related_name='contractor_labor_entries',
+    )
+    activity_row = models.ForeignKey(
+        DisciplineSubReportActivity, on_delete=models.CASCADE, related_name='labor_ledger_entries',
+    )
+    report_date = models.DateField(db_index=True)
+    discipline = models.CharField(max_length=20, blank=True, default='')
+    foreman_count = models.PositiveIntegerField(default=0)
+    worker_count = models.PositiveIntegerField(default=0)
+    shift_hours = models.DecimalField(max_digits=4, decimal_places=2, default=8.00)
+    total_person_hours = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    status = models.CharField(max_length=20, default='APPROVED')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'subcontractor_labor_ledger_entries'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['activity_row'],
+                name='unique_subcontractor_ledger_per_activity_row',
+            ),
+        ]
+

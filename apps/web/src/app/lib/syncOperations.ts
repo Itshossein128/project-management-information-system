@@ -11,6 +11,10 @@ const TARGET_KIND: Record<string, string> = {
   materials: "material",
   material: "material",
   machinery: "machinery",
+  "general-activities": "general_activity",
+  issues: "issue",
+  visits: "visit",
+  "hse-incidents": "hse",
 };
 
 export function operationToV2(operation: OfflineOperation, reportDate: string): SyncV2Operation {

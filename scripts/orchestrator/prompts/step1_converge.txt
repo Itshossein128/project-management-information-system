@@ -1,0 +1,20 @@
+You are an expert AI engineer executing the `speckit-converge` skill in this codebase: /home/hossein/Desktop/projects/building-management
+
+Follow the instructions in `.agents/skills/speckit-converge/SKILL.md` precisely:
+1. Initialize Convergence Context:
+   Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec --require-tasks --include-tasks` to inspect the active feature directory (which is `specs/037-daily-offline-sync`).
+2. Read the governing documents:
+   - `specs/037-daily-offline-sync/spec.md`
+   - `specs/037-daily-offline-sync/plan.md`
+   - `specs/037-daily-offline-sync/tasks.md`
+   - `.specify/memory/constitution.md`
+   - Check related contracts and verification files in `specs/037-daily-offline-sync/`.
+3. Assess the current state of the code in `apps/api/` and `apps/web/` relative to the feature artifacts:
+   - Check what tasks in `tasks.md` are marked `[X]` vs unchecked `[ ]`.
+   - Inspect the codebase to determine if any requirements or acceptance criteria from `spec.md` and decisions from `plan.md` are unmet, incomplete, or partially satisfied.
+4. Operating Constraints:
+   - APPEND-ONLY, NEVER REWRITE: If there is remaining unbuilt work that is not already covered by existing unchecked tasks, append a new `## Phase N: Convergence` section to `tasks.md` with concrete, actionable tasks following the format.
+   - Do NOT modify `spec.md` or `plan.md`.
+   - Do NOT rewrite or delete any existing tasks.
+   - If the existing `tasks.md` already captures all remaining work or if all requirements are met, leave `tasks.md` unchanged.
+5. Provide a summary of your convergence assessment and report findings clearly.

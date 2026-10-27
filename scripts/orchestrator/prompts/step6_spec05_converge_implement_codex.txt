@@ -1,0 +1,27 @@
+You are an expert full-stack AI engineer executing `speckit-converge` and `speckit-implement` in a single session in this codebase: /home/hossein/Desktop/projects/building-management
+
+The active feature is `specs/038-discipline-sub-reports` (refer to `.specify/feature.json`).
+
+============================================================
+STAGE 1: speckit-converge
+============================================================
+Follow `.agents/skills/speckit-converge/SKILL.md` precisely:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec --require-tasks --include-tasks` to inspect context.
+2. Read:
+   - `specs/038-discipline-sub-reports/spec.md`
+   - `specs/038-discipline-sub-reports/plan.md`
+   - `specs/038-discipline-sub-reports/tasks.md`
+   - `.specify/memory/constitution.md`
+3. Assess the current codebase state against the feature requirements:
+   - Check if any functional requirements (FR-001 through FR-020), user scenarios (US1 through US7), or plan decisions are unmet, incomplete, or partially satisfied.
+   - APPEND-ONLY rule: If any untracked or unmet work is discovered, append a new `## Phase N: Convergence` section to `tasks.md` with concrete actionable tasks. If everything is fully satisfied, leave `tasks.md` unchanged.
+
+============================================================
+STAGE 2: speckit-implement
+============================================================
+Follow `.agents/skills/speckit-implement/SKILL.md` precisely:
+1. If any tasks remain unchecked or were appended in Stage 1, execute them:
+   - Backend in `apps/api/core/`: update code and tests. Run tests with `cd apps/api/core && set -a && source ../../.env && set +a && ../.venv/bin/python -m pytest --reuse-db sub_reports/tests/test_discipline_sub_reports_lifecycle.py` (PostgreSQL is on port 5433, Redis on 6379).
+   - Frontend in `apps/web/`: verify components, run `pnpm --filter web build`.
+   - Mark completed tasks as `[X]` in `tasks.md`.
+2. Provide a clear summary of convergence findings, implemented items, and test results.

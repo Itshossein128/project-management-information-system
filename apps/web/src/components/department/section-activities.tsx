@@ -29,10 +29,14 @@ import {
   uploadUnitReportAttachment,
 } from "@/app/lib/api/unit-reports";
 import { createWBSNode, fetchWBSFlat } from "@/app/lib/api/wbs";
-import { CONSTRUCTION_UNIT_OPTIONS } from "@/app/lib/construction-units";
+import {
+  CONSTRUCTION_UNIT_OPTIONS,
+  ELECTRICAL_MEASUREMENT_UNITS,
+} from "@/app/lib/construction-units";
 import { RowSyncStatusBadge } from "./row-sync-status-badge";
 import {
   Button,
+  Checkbox,
   CreatableSelect,
   Field as BaseField,
   type FieldProps,
@@ -66,6 +70,13 @@ interface ActivityFormState {
   zone: string;
   quantity: string;
   unit: string;
+  execution_percentage: string;
+  shift_hours: string;
+  is_hydrostatic_tested: boolean;
+  test_pressure_bar: string;
+  test_duration_minutes: string;
+  test_outcome: string;
+  tested_segment: string;
   notes: string;
 }
 
@@ -83,6 +94,13 @@ const EMPTY_ACTIVITY_FORM: ActivityFormState = {
   zone: "",
   quantity: "",
   unit: "m3",
+  execution_percentage: "",
+  shift_hours: "8.00",
+  is_hydrostatic_tested: false,
+  test_pressure_bar: "",
+  test_duration_minutes: "",
+  test_outcome: "PASSED",
+  tested_segment: "",
   notes: "",
 };
 
@@ -386,6 +404,17 @@ export function SectionActivities({
       zone: row.zone ?? "",
       quantity: row.quantity != null ? String(row.quantity) : "",
       unit: row.unit ?? "",
+      execution_percentage:
+        row.execution_percentage != null ? String(row.execution_percentage) : "",
+      shift_hours:
+        row.shift_hours != null ? String(row.shift_hours) : "8.00",
+      is_hydrostatic_tested: Boolean(row.is_hydrostatic_tested),
+      test_pressure_bar:
+        row.test_pressure_bar != null ? String(row.test_pressure_bar) : "",
+      test_duration_minutes:
+        row.test_duration_minutes != null ? String(row.test_duration_minutes) : "",
+      test_outcome: row.test_outcome ?? "PASSED",
+      tested_segment: row.tested_segment ?? "",
       notes: row.notes ?? "",
     });
   };
@@ -411,6 +440,26 @@ export function SectionActivities({
       zone: form.zone.trim() || null,
       quantity: form.quantity.trim() !== "" ? form.quantity.trim() : null,
       unit: form.unit.trim() || null,
+      execution_percentage:
+        form.execution_percentage.trim() !== ""
+          ? form.execution_percentage.trim()
+          : null,
+      shift_hours:
+        form.shift_hours.trim() !== "" ? form.shift_hours.trim() : null,
+      is_hydrostatic_tested: form.is_hydrostatic_tested,
+      test_pressure_bar:
+        form.is_hydrostatic_tested && form.test_pressure_bar.trim() !== ""
+          ? form.test_pressure_bar.trim()
+          : null,
+      test_duration_minutes:
+        form.is_hydrostatic_tested && form.test_duration_minutes.trim() !== ""
+          ? parseOptionalInt(form.test_duration_minutes)
+          : null,
+      test_outcome: form.is_hydrostatic_tested ? form.test_outcome : null,
+      tested_segment:
+        form.is_hydrostatic_tested && form.tested_segment.trim() !== ""
+          ? form.tested_segment.trim()
+          : null,
       notes: form.notes.trim(),
     };
 
@@ -855,6 +904,88 @@ export function SectionActivities({
                 required
               />
               {renderFieldErrorChip("unit")}
+              {unit === "electrical" ? (
+                <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+                  <span className="text-xs text-muted-foreground">
+                    {t(
+                      "businessDepartment.unitReport.sections.activities.electricalUnits",
+                      "واحدهای برق:",
+                    )}
+                  </span>
+                  {ELECTRICAL_MEASUREMENT_UNITS.map((u) => (
+                    <button
+                      key={u}
+                      type="button"
+                      onClick={() => setFieldValue("unit", u)}
+                      className={`rounded border px-2 py-0.5 text-xs transition-colors ${
+                        form.unit === u
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-muted/50 hover:bg-muted"
+                      }`}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {/* Execution Percentage */}
+            <div id="container-unitActivityExecutionPercentage">
+              <Field
+                name="unitActivityExecutionPercentage"
+                label={t(
+                  "businessDepartment.unitReport.sections.activities.fields.executionPercentage",
+                  "درصد پیشرفت (%)",
+                )}
+                htmlFor="input-unitActivityExecutionPercentage"
+              >
+                {() => (
+                  <Input
+                    id="input-unitActivityExecutionPercentage"
+                    name="unitActivityExecutionPercentage"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step="0.01"
+                    value={form.execution_percentage}
+                    onChange={(e) =>
+                      setFieldValue("execution_percentage", e.target.value)
+                    }
+                    placeholder="0.00"
+                  />
+                )}
+              </Field>
+              {renderFieldErrorChip("execution_percentage")}
+            </div>
+
+            {/* Shift Hours */}
+            <div id="container-unitActivityShiftHours">
+              <Field
+                name="unitActivityShiftHours"
+                label={t(
+                  "businessDepartment.unitReport.sections.activities.fields.shiftHours",
+                  "ساعت شیفت",
+                )}
+                htmlFor="input-unitActivityShiftHours"
+              >
+                {() => (
+                  <Input
+                    id="input-unitActivityShiftHours"
+                    name="unitActivityShiftHours"
+                    type="number"
+                    min={0}
+                    max={24}
+                    step="0.25"
+                    value={form.shift_hours}
+                    onChange={(e) =>
+                      setFieldValue("shift_hours", e.target.value)
+                    }
+                    placeholder="8.00"
+                  />
+                )}
+              </Field>
+              {renderFieldErrorChip("shift_hours")}
             </div>
 
             {/* Notes */}
@@ -870,6 +1001,154 @@ export function SectionActivities({
                 value={form.notes}
                 onChange={(e) => setFieldValue("notes", e.target.value)}
               />
+            </div>
+
+            {/* Hydrostatic Test Panel */}
+            <div className="sm:col-span-2 lg:col-span-4 rounded-md border border-border/70 bg-background/50 p-3 space-y-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="checkbox-unitActivityHydrostatic"
+                  checked={form.is_hydrostatic_tested}
+                  onCheckedChange={(checked) =>
+                    setFieldValue("is_hydrostatic_tested", Boolean(checked))
+                  }
+                />
+                <label
+                  htmlFor="checkbox-unitActivityHydrostatic"
+                  className="text-xs font-semibold cursor-pointer select-none text-foreground"
+                >
+                  {t(
+                    "businessDepartment.unitReport.sections.activities.fields.isHydrostaticTested",
+                    "آزمون هیدرواستاتیک / تست فشار خطوط لوله (QC)",
+                  )}
+                </label>
+              </div>
+
+              {form.is_hydrostatic_tested ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-1">
+                  <div>
+                    <Field
+                      name="unitActivityTestPressure"
+                      label={t(
+                        "businessDepartment.unitReport.sections.activities.fields.testPressureBar",
+                        "فشار آزمون (bar)",
+                      )}
+                      htmlFor="input-unitActivityTestPressure"
+                    >
+                      {() => (
+                        <Input
+                          id="input-unitActivityTestPressure"
+                          name="unitActivityTestPressure"
+                          type="number"
+                          step="any"
+                          min={0}
+                          value={form.test_pressure_bar}
+                          onChange={(e) =>
+                            setFieldValue("test_pressure_bar", e.target.value)
+                          }
+                          placeholder="10.5"
+                        />
+                      )}
+                    </Field>
+                    {renderFieldErrorChip("test_pressure_bar")}
+                  </div>
+
+                  <div>
+                    <Field
+                      name="unitActivityTestDuration"
+                      label={t(
+                        "businessDepartment.unitReport.sections.activities.fields.testDurationMinutes",
+                        "مدت آزمون (دقیقه)",
+                      )}
+                      htmlFor="input-unitActivityTestDuration"
+                    >
+                      {() => (
+                        <Input
+                          id="input-unitActivityTestDuration"
+                          name="unitActivityTestDuration"
+                          type="number"
+                          min={1}
+                          step={1}
+                          value={form.test_duration_minutes}
+                          onChange={(e) =>
+                            setFieldValue(
+                              "test_duration_minutes",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="120"
+                        />
+                      )}
+                    </Field>
+                    {renderFieldErrorChip("test_duration_minutes")}
+                  </div>
+
+                  <div>
+                    <Field
+                      name="unitActivityTestOutcome"
+                      label={t(
+                        "businessDepartment.unitReport.sections.activities.fields.testOutcome",
+                        "نتیجه آزمون",
+                      )}
+                      htmlFor="select-unitActivityTestOutcome"
+                    >
+                      {() => (
+                        <select
+                          id="select-unitActivityTestOutcome"
+                          name="unitActivityTestOutcome"
+                          value={form.test_outcome}
+                          onChange={(e) =>
+                            setFieldValue("test_outcome", e.target.value)
+                          }
+                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <option value="PASSED">
+                            {t(
+                              "businessDepartment.unitReport.sections.activities.outcomes.pass",
+                              "قبول (Pass)",
+                            )}
+                          </option>
+                          <option value="FAILED">
+                            {t(
+                              "businessDepartment.unitReport.sections.activities.outcomes.fail",
+                              "مردود (Fail)",
+                            )}
+                          </option>
+                        </select>
+                      )}
+                    </Field>
+                    {renderFieldErrorChip("test_outcome")}
+                  </div>
+
+                  <div>
+                    <Field
+                      name="unitActivityTestedSegment"
+                      label={t(
+                        "businessDepartment.unitReport.sections.activities.fields.testedSegment",
+                        "قطعه / رایزر تحت آزمون",
+                      )}
+                      htmlFor="input-unitActivityTestedSegment"
+                    >
+                      {() => (
+                        <Input
+                          id="input-unitActivityTestedSegment"
+                          name="unitActivityTestedSegment"
+                          dir="auto"
+                          value={form.tested_segment}
+                          onChange={(e) =>
+                            setFieldValue("tested_segment", e.target.value)
+                          }
+                          placeholder={t(
+                            "businessDepartment.unitReport.sections.activities.fields.testedSegmentPlaceholder",
+                            "مثال: رایزر اصلی آب سرد",
+                          )}
+                        />
+                      )}
+                    </Field>
+                    {renderFieldErrorChip("tested_segment")}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -979,6 +1258,18 @@ export function SectionActivities({
               </th>
               <th className="p-2 text-start font-medium">
                 {t(
+                  "businessDepartment.unitReport.sections.activities.columns.executionPercentage",
+                  "% پیشرفت",
+                )}
+              </th>
+              <th className="p-2 text-start font-medium">
+                {t(
+                  "businessDepartment.unitReport.sections.activities.columns.hydrostaticTest",
+                  "تست QC / هیدرواستاتیک",
+                )}
+              </th>
+              <th className="p-2 text-start font-medium">
+                {t(
                   "businessDepartment.unitReport.sections.activities.columns.notes",
                 )}
               </th>
@@ -996,7 +1287,7 @@ export function SectionActivities({
             {activitiesSectionQuery.isLoading ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 14 : 13}
+                  colSpan={canEdit ? 16 : 15}
                   className="p-4 text-center text-muted-foreground"
                 >
                   {t("common.loading")}
@@ -1006,7 +1297,7 @@ export function SectionActivities({
               <tr>
                 <td
                   id="text-unitActivitiesEmpty"
-                  colSpan={canEdit ? 14 : 13}
+                  colSpan={canEdit ? 16 : 15}
                   className="p-4 text-center text-muted-foreground"
                 >
                   {t("businessDepartment.unitReport.sections.activities.empty")}
@@ -1071,6 +1362,34 @@ export function SectionActivities({
                     <td className="p-2 font-mono">{row.quantity ?? "—"}</td>
                     <td className="p-2" dir="auto">
                       {row.unit || "—"}
+                    </td>
+                    <td className="p-2 font-mono">
+                      {row.execution_percentage != null
+                        ? `${row.execution_percentage}%`
+                        : "—"}
+                    </td>
+                    <td className="p-2">
+                      {row.is_hydrostatic_tested ? (
+                        <span
+                          data-testid={`badge-hydrostatic-${row.id}`}
+                          className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold ${
+                            row.test_outcome === "PASSED"
+                              ? "border border-success/30 bg-success/15 text-success"
+                              : row.test_outcome === "FAILED"
+                                ? "border border-destructive/30 bg-destructive/15 text-destructive"
+                                : "border border-warning/30 bg-warning/15 text-warning"
+                          }`}
+                        >
+                          <span>
+                            {row.test_pressure_bar
+                              ? `${row.test_pressure_bar} bar`
+                              : "—"}
+                          </span>
+                          <span>({row.test_outcome || "PASSED"})</span>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="p-2" dir="auto">
                       {row.notes || "—"}

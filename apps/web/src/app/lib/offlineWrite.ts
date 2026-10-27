@@ -332,9 +332,15 @@ export async function queueUnitReportOperation(
     baseRows = {},
   } = params;
 
+  if (!actorId || actorId === "offline-user") throw new Error("offline_actor_unavailable");
+
   let snapshot: LocalReportSnapshot | undefined;
   if (params.localReportId) {
     snapshot = await getLocalSnapshot(params.localReportId);
+    if (snapshot && (snapshot.actor_id !== actorId || snapshot.project_id !== projectId ||
+      snapshot.unit !== unit || (reportDate && snapshot.report_date !== reportDate))) {
+      throw new Error("offline_scope_mismatch");
+    }
   }
   if (!snapshot) {
     snapshot = await findLocalSnapshot(projectId, unit, reportDate, actorId);
@@ -344,6 +350,7 @@ export async function queueUnitReportOperation(
   const now = new Date().toISOString();
 
   if (!snapshot) {
+    if (!reportDate) throw new Error("offline_report_date_unavailable");
     snapshot = {
       local_report_id: localReportId,
       actor_id: actorId,

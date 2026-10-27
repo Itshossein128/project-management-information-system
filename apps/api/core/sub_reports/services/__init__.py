@@ -32,6 +32,23 @@ def submit_sub_report(sub_report, user):
     if sub_report.status != SubReportStatus.DRAFT:
         raise ValidationError('فقط گزارش‌های پیش‌نویس قابل ارسال هستند')
 
+    active_rows_count = (
+        sub_report.activities.filter(is_deleted=False).count()
+        + sub_report.labor_entries.filter(is_deleted=False).count()
+        + sub_report.material_entries.filter(is_deleted=False).count()
+        + sub_report.concrete_entries.filter(is_deleted=False).count()
+        + sub_report.machinery_rows.filter(is_deleted=False).count()
+        + sub_report.general_activities.filter(is_deleted=False).count()
+    )
+    if active_rows_count == 0:
+        raise ValidationError(
+            {'detail': 'امکان ارسال گزارش خالی وجود ندارد؛ حداقل یک ردیف فعالیت یا کارکرد وارد نمایید', 'code': 'cannot_submit_empty_sub_report'},
+            code='cannot_submit_empty_sub_report',
+        )
+
+    from sub_reports.services.qc_linkage import link_hydrostatic_tests
+    link_hydrostatic_tests(sub_report, user)
+
     sub_report.status = SubReportStatus.SUBMITTED
     sub_report.submitted_by = user
     sub_report.submitted_at = timezone.now()
@@ -55,6 +72,8 @@ def approve_sub_report(sub_report, user):
     sub_report.approved_at = timezone.now()
     sub_report.updated_by = user
     sub_report.save(update_fields=['status', 'approved_by', 'approved_at', 'updated_by', 'updated_at'])
+    from sub_reports.services.labor_ledger import rollup_subcontractor_labor
+    rollup_subcontractor_labor(sub_report, user)
     _trigger_rebuild(sub_report, user=user)
     return sub_report
 

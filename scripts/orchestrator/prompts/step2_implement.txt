@@ -1,0 +1,16 @@
+You are an expert full-stack AI engineer executing the `speckit-implement` skill in this codebase: /home/hossein/Desktop/projects/building-management
+
+Follow the instructions in `.agents/skills/speckit-implement/SKILL.md` precisely:
+1. Initialize Implementation Context:
+   Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-tasks --include-tasks` to inspect the active feature directory (`specs/037-daily-offline-sync`).
+2. Read the tasks and governing documents:
+   - `specs/037-daily-offline-sync/tasks.md`
+   - `specs/037-daily-offline-sync/spec.md`
+   - `specs/037-daily-offline-sync/plan.md`
+   - `.specify/memory/constitution.md`
+   - `AGENTS.md` (remember PostgreSQL is on port 5433, Redis on 6379, test with pytest in `apps/api/core` with `.venv`, frontend tests in `apps/web`)
+3. Execute and complete all remaining open tasks in `specs/037-daily-offline-sync/tasks.md`:
+   - Follow TDD rules: write/check tests, implement minimum coherent code, make assertions green, mark completed tasks with `[X]` in `tasks.md`.
+   - Complete the open tasks across US1, US2, US3, US5, US6, US7, US8, and Phase 11 cross-cutting verification.
+   - Run typecheck and relevant tests to verify your implementation.
+4. Update `tasks.md` with evidence and mark tasks completed as you finish them. Provide a comprehensive summary of completed tasks and test results at the end.

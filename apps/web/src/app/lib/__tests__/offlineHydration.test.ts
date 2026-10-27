@@ -4,6 +4,16 @@ import { reconcileServerWithLocalSnapshot } from "../offlineHydration.ts";
 import type { LocalReportSnapshot } from "../offlineDB.ts";
 
 describe("offlineHydration — local overlay and tombstone reconciliation (US2 / T026)", () => {
+  it("derives each row status from its own most recent operation", () => {
+    const snapshot = { overlay_header: {}, tombstones: {}, field_errors: {},
+      overlay_rows: { activities: ["pending", "syncing", "synced", "failed", "conflict"].map((status) => ({ client_id: status })) } } as unknown as LocalReportSnapshot;
+    const operations = ["pending", "syncing", "synced", "failed", "conflict"].map((status, index) => ({
+      operation_id: `op-${index}`, client_id: status, target_type: "activities", status,
+      created_at: `2026-01-01T00:00:0${index}Z`,
+    }));
+    const result = reconcileServerWithLocalSnapshot({}, [], snapshot, "activities", operations as any);
+    assert.deepEqual(result.rows.map((row: any) => row.sync_status), ["pending", "sending", "synced", "failed", "conflict"]);
+  });
   it("preserves local header modifications over server header refetch", () => {
     const serverHeader = {
       form_code: "SRV-01",

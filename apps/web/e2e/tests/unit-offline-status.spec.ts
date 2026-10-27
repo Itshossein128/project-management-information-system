@@ -18,7 +18,7 @@ test.describe("US2 — accessible sync status (T027)", () => {
     const date = "2026-10-27";
     await page.goto(`${projectBase}/electrical?date=${date}`);
 
-    const actorId = await page.evaluate(() => localStorage.getItem("auth_user_id") ?? "");
+    const actorId = await page.evaluate(() => String(JSON.parse(localStorage.getItem("auth_user")!).id));
     const projectId = projectBase.split("/").filter(Boolean).at(-1) ?? "";
     await page.evaluate(
       async ({ actorId, projectId, date }) => {
@@ -34,17 +34,25 @@ test.describe("US2 — accessible sync status (T027)", () => {
           base_rows: { activities: [] },
           overlay_header: { notes: "status check" },
           overlay_rows: {
-            activities: [{ client_id: "pending-row", activity_description: "pending activity", quantity: 1, sync_status: "pending" }],
+            activities: ["pending", "sending", "synced", "failed", "conflict"].map((status) => ({ client_id: `${status}-row`, activity_description: `${status} activity`, quantity: 1 })),
           },
           tombstones: {},
           field_errors: {},
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
+        for (const status of ["pending", "sending", "synced", "failed", "conflict"]) {
+          await module.saveOperation({ operation_id: crypto.randomUUID(), local_report_id: "22222222-2222-4222-8222-222222222222",
+            client_id: `${status}-row`, actor_id: actorId, project_id: projectId, unit: "electrical", operation_kind: "create", target_type: "activities",
+            payload: {}, predecessor_ids: [], created_at: new Date().toISOString(), status: status === "sending" ? "syncing" : status });
+        }
       },
       { actorId, projectId, date },
     );
 
+    // Keep Vite reachable but emulate offline state so auto-sync does not
+    // recover the deliberately seeded in-flight operation during this UI test.
+    await page.addInitScript(() => Object.defineProperty(navigator, "onLine", { configurable: true, get: () => false }));
     await page.context().route("http://127.0.0.1:8000/**", (route) => route.abort());
     await page.reload();
 
@@ -57,12 +65,16 @@ test.describe("US2 — accessible sync status (T027)", () => {
     await badge.focus();
     await expect(badge).toBeFocused();
 
+    const persianLabels: string[] = [];
     for (const status of STATUSES) {
       const sample = page.locator(`[data-testid="row-sync-status"][data-status="${status}"]`);
-      if (status === "pending") {
-        await expect(sample.first()).toBeVisible();
-      }
+      await expect(sample.first()).toBeVisible();
+      await expect(sample.first()).toHaveAttribute("aria-label", /.+/);
+      persianLabels.push((await sample.first().getAttribute("aria-label"))!);
+      await sample.first().focus();
+      await expect(sample.first()).toBeFocused();
     }
+    expect(new Set(persianLabels).size).toBe(STATUSES.length);
 
     await page.evaluate(() => {
       localStorage.setItem("i18nextLng", "en");
@@ -70,5 +82,13 @@ test.describe("US2 — accessible sync status (T027)", () => {
     await page.reload();
     const english = await page.getByTestId("row-sync-status").first().getAttribute("aria-label");
     expect(english?.toLowerCase()).toContain("pending");
+    const englishLabels: string[] = [];
+    for (const status of STATUSES) {
+      const badgeForStatus = page.locator(`[data-testid="row-sync-status"][data-status="${status}"]`).first();
+      await expect(badgeForStatus).toBeVisible();
+      englishLabels.push((await badgeForStatus.getAttribute("aria-label"))!);
+    }
+    expect(new Set(englishLabels).size).toBe(STATUSES.length);
+    expect(englishLabels.every((value, index) => value !== persianLabels[index])).toBe(true);
   });
 });

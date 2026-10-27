@@ -1,3 +1,4 @@
+import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
@@ -84,6 +85,18 @@ function statusToLabelKey(status: UnitReportStatus | string): string {
   }
 }
 
+const SUB_DISCIPLINE_OPTIONS: Record<string, { value: string; labelKey: string }[]> = {
+  mechanical: [
+    { value: "MECHANICAL", labelKey: "businessDepartment.unitReport.subDisciplines.mechanical" },
+    { value: "PLUMBING", labelKey: "businessDepartment.unitReport.subDisciplines.plumbing" },
+    { value: "HVAC", labelKey: "businessDepartment.unitReport.subDisciplines.hvac" },
+  ],
+  buildings: [
+    { value: "CIVIL", labelKey: "businessDepartment.unitReport.subDisciplines.civil" },
+    { value: "FINISHING", labelKey: "businessDepartment.unitReport.subDisciplines.finishing" },
+  ],
+};
+
 export function UnitDailyReportPanel({
   businessId,
   unit,
@@ -159,6 +172,7 @@ export function UnitDailyReportPanel({
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionErrorCode, setActionErrorCode] = useState<string | null>(null);
   const [rejectionErrorCode, setRejectionErrorCode] = useState<string | null>(null);
+  const [selectedSubDiscipline, setSelectedSubDiscipline] = useState<string>("");
 
   const [headerNotes, setHeaderNotes] = useState("");
   useEffect(() => {
@@ -171,7 +185,7 @@ export function UnitDailyReportPanel({
     if (!report) return;
     setActionError(null);
     try {
-      const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+      const actorId = requireStoredActorId();
       await queueUnitReportOperation({
         actorId,
         projectId: String(businessId),
@@ -223,7 +237,10 @@ export function UnitDailyReportPanel({
     setActionError(null);
     setActionErrorCode(null);
     try {
-      await openMutation.mutateAsync(activeDate);
+      await openMutation.mutateAsync({
+        reportDate: activeDate,
+        subDiscipline: selectedSubDiscipline || undefined,
+      });
     } catch (e) {
       setActionErrorCode(getErrorCode(e));
       setActionError(formatError(e));
@@ -318,6 +335,17 @@ export function UnitDailyReportPanel({
                 variant={statusToVariant(report.status)}
                 label={t(statusToLabelKey(report.status))}
               />
+              {report.sub_discipline ? (
+                <Badge
+                  id="badge-unitReportSubDiscipline"
+                  data-testid="badge-unit-report-sub-discipline"
+                  variant="neutral"
+                  label={t(
+                    `businessDepartment.unitReport.subDisciplines.${report.sub_discipline.toLowerCase()}`,
+                    report.sub_discipline,
+                  )}
+                />
+              ) : null}
               <span id="text-unitReportVersion" className="text-xs font-mono text-muted-foreground">
                 {t("businessDepartment.unitReport.version")} {report.version_number}
               </span>
@@ -352,6 +380,27 @@ export function UnitDailyReportPanel({
             <span id="text-noUnitReport" className="text-sm text-muted-foreground">
               {t("businessDepartment.unitReport.noReport")}
             </span>
+            {SUB_DISCIPLINE_OPTIONS[unit] ? (
+              <select
+                id="select-unitReportSubDiscipline"
+                data-testid="select-sub-discipline"
+                value={selectedSubDiscipline}
+                onChange={(e) => setSelectedSubDiscipline(e.target.value)}
+                className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="">
+                  {t(
+                    "businessDepartment.unitReport.selectSubDisciplineDefault",
+                    "انتخاب زیررشته (اختیاری)",
+                  )}
+                </option>
+                {SUB_DISCIPLINE_OPTIONS[unit]?.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {t(opt.labelKey, opt.value)}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <Button
               id="button-createUnitReportDraft"
               type="button"
@@ -975,7 +1024,7 @@ function LocalDraftList({
 
   useEffect(() => {
     let cancelled = false;
-    const actorId = localStorage.getItem("auth_user_id") ?? "";
+    const actorId = getStoredActorId() ?? "";
     void getLocalSnapshotsByProject(businessId, actorId || undefined)
       .then((rows) => {
         if (cancelled) return;

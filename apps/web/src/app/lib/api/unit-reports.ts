@@ -43,6 +43,7 @@ export function unitSupportsMachinerySection(unit: CanonicalUnit | string): bool
 
 export const MATERIALS_ENABLED_UNITS: readonly CanonicalUnit[] = [
   "warehouse",
+  "mechanical",
 ] as const;
 
 export function unitSupportsConcreteSection(unit: CanonicalUnit | string): boolean {
@@ -104,6 +105,7 @@ export interface UnitReport {
   is_current: boolean;
   project_id: string;
   unit: CanonicalUnit;
+  sub_discipline?: string;
   report_date: string;
   status: UnitReportStatus;
   last_changed_at: string | null;
@@ -163,10 +165,14 @@ export function openUnitReport(
   projectId: string,
   unit: CanonicalUnit,
   reportDate: string,
+  subDiscipline?: string,
 ): Promise<UnitReport> {
   return apiJson<UnitReport>(`${base(projectId, unit)}/open/`, {
     method: "POST",
-    body: JSON.stringify({ report_date: reportDate }),
+    body: JSON.stringify({
+      report_date: reportDate,
+      ...(subDiscipline ? { sub_discipline: subDiscipline } : {}),
+    }),
   });
 }
 
@@ -251,6 +257,14 @@ export interface UnitReportActivityRow {
   floor: string | null;
   quantity: string | null;
   unit: string | null;
+  execution_percentage?: string | number | null;
+  shift_hours?: string | number | null;
+  is_hydrostatic_tested?: boolean;
+  test_pressure_bar?: string | number | null;
+  test_duration_minutes?: number | null;
+  test_outcome?: string | null;
+  tested_segment?: string | null;
+  qc_inspection?: string | null;
   notes: string;
 }
 
@@ -269,6 +283,13 @@ export interface UnitReportActivityPayload {
   floor?: string | null;
   quantity?: string | number | null;
   unit?: string | null;
+  execution_percentage?: string | number | null;
+  shift_hours?: string | number | null;
+  is_hydrostatic_tested?: boolean;
+  test_pressure_bar?: string | number | null;
+  test_duration_minutes?: number | null;
+  test_outcome?: string | null;
+  tested_segment?: string | null;
   notes?: string;
 }
 

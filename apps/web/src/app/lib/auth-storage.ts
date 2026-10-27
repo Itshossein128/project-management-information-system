@@ -55,6 +55,19 @@ export function getStoredUser(): AuthUser | null {
   }
 }
 
+/** Identity for actor-scoped local data, derived from the current session. */
+export function getStoredActorId(): string | null {
+  const user = getStoredUser();
+  if (!user || (typeof user.id !== "string" && typeof user.id !== "number") || String(user.id).trim() === "") return null;
+  return String(user.id);
+}
+
+export function requireStoredActorId(): string {
+  const actorId = getStoredActorId();
+  if (!actorId) throw new Error("offline_actor_unavailable");
+  return actorId;
+}
+
 /**
  * Parse access token from request Cookie header (for use in loaders).
  */

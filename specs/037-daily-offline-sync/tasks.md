@@ -51,7 +51,7 @@ For every behavior, write the named canonical test first and run it against the 
 
 ### Tests first
 
-- [ ] T018 [P] [US1] Write and run RED real-browser tests in `apps/web/e2e/tests/unit-offline-entry.spec.ts` for offline and interrupted request on current unit page, enabled/disabled section behavior, stable UUIDv4 client ID and independent operation IDs, durable-success-only feedback, storage failure retaining input and missing reference explanation.
+- [X] T018 [P] [US1] Write and run RED real-browser tests in `apps/web/e2e/tests/unit-offline-entry.spec.ts` for offline and interrupted request on current unit page, enabled/disabled section behavior, stable UUIDv4 client ID and independent operation IDs, durable-success-only feedback, storage failure retaining input and missing reference explanation.
 - [X] T019 [P] [US1] Write and run RED API tests in `apps/api/core/sub_reports/tests/test_offline_unit_draft.py` for local draft matching authorized project/unit/date current report, no duplicate current, no overwrite of divergent draft and rejection of raw project creation.
 
 ### Implementation
@@ -60,7 +60,7 @@ For every behavior, write the named canonical test first and run it against the 
 - [X] T021 [US1] Connect unit draft creation/lookup in `apps/web/src/components/department/unit-daily-report-panel.tsx` and `apps/web/src/app/hooks/queries.ts` to T015 local persistence and authoritative unit matching, without creating project summary or independent `/sub-reports` flow.
 - [X] T022 [US1] Route create/edit/delete of activities, labor and materials through scoped online/offline operations in `apps/web/src/components/department/section-activities.tsx`, `apps/web/src/components/department/section-labor.tsx`, `apps/web/src/components/department/section-materials.tsx` and `apps/web/src/app/lib/offlineWrite.ts`; persist before feedback and preserve input on failure.
 - [X] T023 [US1] Apply the same behavior to all other currently effective editable sections identified by T002 in `apps/web/src/components/department/section-machinery.tsx`, `section-concrete.tsx`, `section-general.tsx`, `section-structured.tsx`, `section-issues.tsx`, `section-visits.tsx` and `section-hse.tsx`; do not invent a new section or offline binary upload.
-- [ ] T024 [US1] Implement scoped unit report create-or-match in `apps/api/core/sub_reports/services/offline_sync.py` using existing `apps/api/core/sub_reports/unit_report_services.py`, validating header atomically, respecting current report and returning conflict on divergence; run T018–T019 GREEN and capture G01/G07 evidence.
+- [X] T024 [US1] Implement scoped unit report create-or-match in `apps/api/core/sub_reports/services/offline_sync.py` using existing `apps/api/core/sub_reports/unit_report_services.py`, validating header atomically, respecting current report and returning conflict on divergence; run T018–T019 GREEN and capture G01/G07 evidence.
 
 ## Phase 4: User Story 2 — مشاهده و بازیابی کامل داده محلی (P1)
 
@@ -68,15 +68,15 @@ For every behavior, write the named canonical test first and run it against the 
 
 ### Tests first
 
-- [ ] T025 [P] [US2] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-recovery.spec.ts` for refresh and actual close/reopen of a persistent profile offline, restoring header/rows/tombstones/IDs/status/errors and opening draft from the same unit list.
+- [X] T025 [P] [US2] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-recovery.spec.ts` for refresh and actual close/reopen of a persistent profile offline, restoring header/rows/tombstones/IDs/status/errors and opening draft from the same unit list.
 - [X] T026 [P] [US2] Write and run RED local tests in `apps/web/src/app/lib/__tests__/offlineHydration.test.ts` for server refetch/row reconstruction preserving local overlay and pending deletes, including unchanged unrelated server rows.
-- [ ] T027 [P] [US2] Write and run RED accessible bilingual status tests in `apps/web/e2e/tests/unit-offline-status.spec.ts` for yellow cloud and named pending text plus distinct sending/synced/failed/conflict, keyboard interaction and no color-only state.
+- [X] T027 [P] [US2] Write and run RED accessible bilingual status tests in `apps/web/e2e/tests/unit-offline-status.spec.ts` for yellow cloud and named pending text plus distinct sending/synced/failed/conflict, keyboard interaction and no color-only state.
 
 ### Implementation
 
 - [X] T028 [US2] Implement local report hydration, base/overlay and tombstone reconciliation in `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/hooks/queries.ts`; keep stored local modifications on refresh and server revalidation.
 - [X] T029 [US2] Expose full draft navigation and editing in `apps/web/src/components/department/unit-daily-report-panel.tsx` and `apps/web/src/components/department/department-page.tsx` with actor/project/unit scope.
-- [ ] T030 [US2] Render accessible per-row status and localize labels in `apps/web/src/components/department/section-activities.tsx`, `section-labor.tsx`, `section-materials.tsx`, remaining T002 sections, `apps/web/src/app/locales/fa.json` and `apps/web/src/app/locales/en.json`; run T025–T027 GREEN and record SC-02/G08.
+- [X] T030 [US2] Render accessible per-row status and localize labels in `apps/web/src/components/department/section-activities.tsx`, `section-labor.tsx`, `section-materials.tsx`, remaining T002 sections, `apps/web/src/app/locales/fa.json` and `apps/web/src/app/locales/en.json`; run T025–T027 GREEN and record SC-02/G08.
 
 ## Phase 5: User Story 3 — ارسال دقیق عملیات و تأیید قابل اعتماد (P1)
 
@@ -87,14 +87,14 @@ For every behavior, write the named canonical test first and run it against the 
 - [X] T031 [P] [US3] Write and run RED transformation/ack tests in `apps/web/src/app/lib/__tests__/syncOperations.test.ts` for POST collection with trailing slash, operation ID matching independent of order, missing/duplicate/unknown/malformed results, inconsistent `synced_ids`, exact client/server mapping and no unconfirmed queue removal.
 - [X] T032 [P] [US3] Write and run RED integration tests in `apps/api/core/sub_reports/tests/test_sync_operations_api.py` for v2 outcomes, safe legacy response compatibility, ten independent changes, authorized scope and invalid header/create leaving no shell or receipt, with other report operations succeeding.
 - [X] T033 [P] [US3] Write and run RED dependency/idempotency tests in `apps/api/core/sub_reports/tests/test_sync_operation_idempotency.py` for create→multiple edits→delete, blocked/missing/cyclic prerequisites, same-ID replay after lost response, altered payload rejection, server IDs and provenance without duplicate effects.
-- [ ] T034 [P] [US3] Write and run RED real-browser test in `apps/web/e2e/tests/unit-offline-ten-operations.spec.ts` for ten operations across activity/labor/material, automatic reconnect without refresh/manual action, exact values and identities, no unrelated delete or duplicate.
+- [X] T034 [P] [US3] Write and run RED real-browser test in `apps/web/e2e/tests/unit-offline-ten-operations.spec.ts` for ten operations across activity/labor/material, automatic reconnect without refresh/manual action, exact values and identities, no unrelated delete or duplicate.
 
 ### Implementation
 
 - [X] T035 [US3] Implement v2 operation dispatch in `apps/api/core/sub_reports/services/offline_sync.py` and endpoint in `apps/api/core/sub_reports/unit_report_views.py`: separate transaction per operation, validate dependency graph and target scope, commit receipt with effect, report four distinct outcomes, permit independent operations to succeed, and run the T006 API contract GREEN with v2 enabled only for the isolated test.
 - [X] T036 [US3] Integrate target-specific validation and mutations for all T002 section types in `apps/api/core/sub_reports/services/offline_sync.py` and `apps/api/core/sub_reports/services/section_validation.py`; preserve existing section validation, row IDs and attachments, never translate an omitted/empty snapshot into replacement.
 - [X] T037 [US3] Implement target-operation serialization and safe ID-based response reconciliation in `apps/web/src/app/lib/syncService.ts` and `apps/web/src/app/lib/api/unit-reports.ts`; `synced_ids` consists only of operation IDs and successful create includes distinct client/server row mapping.
-- [ ] T038 [US3] Start automatic sync on restored connection and valid session in `apps/web/src/app/hooks/useAutoSync.ts`, with predecessor receipt/revision ordering and no acknowledgment based on response position; run T031–T034 GREEN and record SC-01/G02/G09/G12.
+- [X] T038 [US3] Start automatic sync on restored connection and valid session in `apps/web/src/app/hooks/useAutoSync.ts`, with predecessor receipt/revision ordering and no acknowledgment based on response position; run T031–T034 GREEN and record SC-01/G02/G09/G12.
 
 ## Phase 6: User Story 4 — حفظ داده دیگران و منبع تجمیع (P1)
 
@@ -119,13 +119,13 @@ For every behavior, write the named canonical test first and run it against the 
 ### Tests first
 
 - [X] T045 [P] [US5] Write and run RED tests in `apps/web/src/app/lib/__tests__/offlineRowRetry.test.ts` for stable field error linked to actor/project/unit/report/section/client/operation, persistence after refresh, new operation linked to invalid predecessor, immutable old payload and retry of target only.
-- [ ] T046 [P] [US5] Write and run RED API/browser tests in `apps/api/core/sub_reports/tests/test_sync_operation_validation.py` and `apps/web/e2e/tests/unit-offline-row-retry.spec.ts` for nine successes plus one invalid, blocked dependent, localized field error and zero-success toast refusal.
+- [X] T046 [P] [US5] Write and run RED API/browser tests in `apps/api/core/sub_reports/tests/test_sync_operation_validation.py` and `apps/web/e2e/tests/unit-offline-row-retry.spec.ts` for nine successes plus one invalid, blocked dependent, localized field error and zero-success toast refusal.
 
 ### Implementation
 
 - [X] T047 [US5] Implement structured stable per-field validation outcomes in `apps/api/core/sub_reports/services/offline_sync.py` and `apps/api/core/sub_reports/unit_report_views.py` with localized message separate from stable code and target identity.
 - [X] T048 [US5] Persist error and operation supersession and implement target-only retry in `apps/web/src/app/lib/offlineDB.ts`, `apps/web/src/app/lib/offlineWrite.ts` and `apps/web/src/app/lib/syncService.ts`; send corrected payload only under new `operation_id`.
-- [ ] T049 [US5] Wire inline field errors, retry and truthful status messages in `apps/web/src/components/department/section-activities.tsx`, `section-labor.tsx`, `section-materials.tsx`, remaining T002 section components and `apps/web/src/app/locales/fa.json`, `apps/web/src/app/locales/en.json`; run T045–T046 GREEN and record SC-03/G06.
+- [X] T049 [US5] Wire inline field errors, retry and truthful status messages in `apps/web/src/components/department/section-activities.tsx`, `section-labor.tsx`, `section-materials.tsx`, remaining T002 section components and `apps/web/src/app/locales/fa.json`, `apps/web/src/app/locales/en.json`; run T045–T046 GREEN and record SC-03/G06.
 
 ## Phase 8: User Story 6 — احترام به قفل و نسخه جاری در رقابت (P1)
 
@@ -133,14 +133,14 @@ For every behavior, write the named canonical test first and run it against the 
 
 ### Tests first
 
-- [ ] T050 [P] [US6] Extend and run RED transactional race tests in `apps/api/core/sub_reports/tests/test_unit_report_concurrency.py` using two independent PostgreSQL connections and barriers for approve versus sync, current change between lookup/ensure and write, same-key concurrent draft, plus locked header/notes/rows and history assertions.
+- [X] T050 [P] [US6] Extend and run RED transactional race tests in `apps/api/core/sub_reports/tests/test_unit_report_concurrency.py` using two independent PostgreSQL connections and barriers for approve versus sync, current change between lookup/ensure and write, same-key concurrent draft, plus locked header/notes/rows and history assertions.
 - [X] T051 [P] [US6] Write and run RED integration tests in `apps/api/core/sub_reports/tests/test_sync_lock_contract.py` for `conflict_report_approved` plus `sync_conflict`, non-current/stale targets, unchanged local payload, denied permissions and no implicit submit/review/approve/reject/correction decision.
 
 ### Implementation
 
 - [X] T052 [US6] Complete common parent locking and final current/status/permission revalidation in `apps/api/core/sub_reports/unit_report_services.py`, `apps/api/core/sub_reports/unit_report_views.py` and `apps/api/core/sub_reports/services/offline_sync.py`; include all competing writers and consistent lock order, not only sync.
 - [X] T053 [US6] Handle missing-parent creation race and existing constraint violation deterministically in `apps/api/core/sub_reports/services/offline_sync.py` and `apps/api/core/sub_reports/models.py`; return conflict on divergent draft, never auto-retarget a locked/non-current version.
-- [ ] T054 [US6] Preserve approved/current state, lineage and stable conflict codes in `apps/api/core/field_reports/services/__init__.py` and `apps/web/src/app/lib/syncService.ts`; run T050–T051 GREEN with real PostgreSQL independent connections and record SC-04/G05.
+- [X] T054 [US6] Preserve approved/current state, lineage and stable conflict codes in `apps/api/core/field_reports/services/__init__.py` and `apps/web/src/app/lib/syncService.ts`; run T050–T051 GREEN with real PostgreSQL independent connections and record SC-04/G05.
 
 ## Phase 9: User Story 7 — رسیدگی به تعارض بدون از دست رفتن کار (P1)
 
@@ -148,7 +148,7 @@ For every behavior, write the named canonical test first and run it against the 
 
 ### Tests first
 
-- [ ] T055 [P] [US7] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-conflict.spec.ts` for full local/server header and rows, scope confirmation, server reconciliation without later resend, unrelated data preservation, bilingual accessible destination preview and correction failure/retry.
+- [X] T055 [P] [US7] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-conflict.spec.ts` for full local/server header and rows, scope confirmation, server reconciliation without later resend, unrelated data preservation, bilingual accessible destination preview and correction failure/retry.
 - [X] T056 [P] [US7] Write and run RED API tests in `apps/api/core/sub_reports/tests/test_offline_correction_transfer.py` for authorized unit/project formal correction intent, reason/lineage, retry without duplicate correction/row, denied permission, partial destination results and no direct approved PATCH.
 - [X] T057 [P] [US7] Write and run RED local reconciliation tests in `apps/web/src/app/lib/__tests__/offlineConflictResolution.test.ts` for selected-scope atomic cleanup, unsent unrelated operations, retained conflict until acknowledged destination, and no resurrection after reload.
 
@@ -157,7 +157,7 @@ For every behavior, write the named canonical test first and run it against the 
 - [X] T058 [US7] Implement idempotent correction transfer intent using existing official unit/project flows in `apps/api/core/sub_reports/unit_report_services.py`, `apps/api/core/field_reports/services/correction_service.py` and `apps/api/core/sub_reports/services/offline_sync.py`; verify permission and current destination, preserve reason/lineage and avoid duplicate intent effects.
 - [X] T059 [US7] Persist complete conflict snapshots and atomic scoped reconciliation/transfer progress in `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/lib/syncService.ts`; retain source until all relevant destination operations have matching receipts.
 - [X] T060 [US7] Replace scalar-only/direct-PATCH conflict flow in `apps/web/src/components/sync/ConflictMergeEditor.tsx`, `apps/web/src/components/daily_reports/ConflictCard.tsx` and `apps/web/src/app/routes/sync-conflicts.tsx` with full section comparison, explicit confirmation, formal correction destination preview and localized keyboard-accessible actions.
-- [ ] T061 [US7] Run T055–T057 GREEN and re-run correction/lineage suites in `apps/api/core/sub_reports/tests/test_unit_report_workflow.py` and `apps/api/core/field_reports/tests/`; capture SC-05/G10 without treating correction creation alone as successful transfer.
+- [X] T061 [US7] Run T055–T057 GREEN and re-run correction/lineage suites in `apps/api/core/sub_reports/tests/test_unit_report_workflow.py` and `apps/api/core/field_reports/tests/`; capture SC-05/G10 without treating correction creation alone as successful transfer.
 
 ## Phase 10: User Story 8 — ادامه پس از اختلال و اجرای همپوشان (P1)
 
@@ -165,26 +165,26 @@ For every behavior, write the named canonical test first and run it against the 
 
 ### Tests first
 
-- [ ] T062 [P] [US8] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-interruption.spec.ts` for close during syncing before/after commit, reopen and automatic recovery, simultaneous manual/auto and two-tab sends, network loss, expired session and revoked permission.
+- [X] T062 [P] [US8] Write and run RED browser tests in `apps/web/e2e/tests/unit-offline-interruption.spec.ts` for close during syncing before/after commit, reopen and automatic recovery, simultaneous manual/auto and two-tab sends, network loss, expired session and revoked permission.
 - [X] T063 [P] [US8] Write and run RED local tests in `apps/web/src/app/lib/__tests__/offlineClaims.test.ts` for actor-scoped lease expiry, fencing stale worker, atomic claim/ack and unknown/other-account data invisibility or non-replay.
-- [ ] T064 [P] [US8] Write and run RED browser migration tests in `apps/web/e2e/tests/unit-offline-legacy-upgrade.spec.ts` for prior IndexedDB schema with provable and ambiguous items, interrupted upgrade, account change and supported backup/restore; verify full data retained and no guessed target.
+- [X] T064 [P] [US8] Write and run RED browser migration tests in `apps/web/e2e/tests/unit-offline-legacy-upgrade.spec.ts` for prior IndexedDB schema with provable and ambiguous items, interrupted upgrade, account change and supported backup/restore; verify full data retained and no guessed target.
 - [X] T065 [P] [US8] Write and run RED two-connection replay tests in `apps/api/core/sub_reports/tests/test_sync_concurrent_replay.py` asserting single receipt, one business effect and preserved IDs when identical operations arrive concurrently.
 
 ### Implementation
 
 - [X] T066 [US8] Implement local claims with owner, expiry and fencing generation plus recovery of abandoned syncing in `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/lib/syncService.ts`; never rely on lease for server-side idempotency.
-- [ ] T067 [US8] Enforce actor/project/unit scope through authentication transitions, queue access and cache display in `apps/web/src/app/lib/auth-storage.ts`, `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/hooks/useAutoSync.ts`; expired/revoked credentials retain but do not send payload.
+- [X] T067 [US8] Enforce actor/project/unit scope through authentication transitions, queue access and cache display in `apps/web/src/app/lib/auth-storage.ts`, `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/hooks/useAutoSync.ts`; expired/revoked credentials retain but do not send payload.
 - [X] T068 [US8] Implement legacy record inventory, provable mapping and quarantine/review in `apps/web/src/app/lib/offlineDB.ts` and `apps/web/src/app/routes/sync-conflicts.tsx`; preserve raw data and require verified ownership; local deletion must identify scope and require confirmation.
 - [X] T069 [US8] Supply compatible IndexedDB reader/export/restore and server receipt retention rollback procedure in `apps/web/src/app/lib/offlineDB.ts` and `specs/037-daily-offline-sync/quickstart.md`; never assume version downgrade works or delete journal to roll back.
-- [ ] T070 [US8] Run T062–T065 GREEN, including real concurrent connections and same-profile browser restart; record SC-06/G11 and legacy/account evidence in `specs/037-daily-offline-sync/verification/recovery.md`.
+- [X] T070 [US8] Run T062–T065 GREEN, including real concurrent connections and same-profile browser restart; record SC-06/G11 and legacy/account evidence in `specs/037-daily-offline-sync/verification/recovery.md`.
 
 ## Phase 11: Polish and cross-cutting verification
 
 - [X] T071 Update legacy and v2 consumers, permissions, security refusal, `synced_ids`, stable codes and transition/rollout instructions in `reports_documentation/03-daily-field-reports-and-apis/field_reports_ENDPOINTS.md`, `apps/api/core/field_reports/ENDPOINTS.md` and `apps/api/core/sub_reports/ENDPOINTS.md`.
-- [ ] T072 Verify all FA/EN labels, field errors, failure/recovery paths, keyboard focus and accessible names in `apps/web/src/app/locales/fa.json`, `apps/web/src/app/locales/en.json` and `apps/web/e2e/tests/unit-offline-status.spec.ts`; include all six canonical units and active sections in representative configured projects, without treating route/banner as proof.
-- [ ] T073 Run migration apply/backfill, historical fixtures, rollback/restore, no-data-loss and `makemigrations --check --dry-run` against an isolated database, plus IndexedDB upgrade and recovery on a persistent browser profile; record exact commands/results in `specs/037-daily-offline-sync/verification/migration.md`.
-- [ ] T074 Run final-tree API integration, backend and PostgreSQL race suites with unique test DBs, frontend canonical tests, `pnpm typecheck` and applicable browser suites in `specs/037-daily-offline-sync/quickstart.md`; write counts, commands and failures separately to `specs/037-daily-offline-sync/verification/final-checks.md`.
-- [ ] T075 Map each G01–G13 and SC-01–SC-07 to actual RED/GREEN and final-tree browser/backend/race/migration evidence in `specs/037-daily-offline-sync/verification/traceability.md`; mark unexecuted tests/services/live checks explicitly and do not infer completion from old 17 tests, probes or checked tasks.
+- [X] T072 Verify all FA/EN labels, field errors, failure/recovery paths, keyboard focus and accessible names in `apps/web/src/app/locales/fa.json`, `apps/web/src/app/locales/en.json` and `apps/web/e2e/tests/unit-offline-status.spec.ts`; include all six canonical units and active sections in representative configured projects, without treating route/banner as proof.
+- [X] T073 Run migration apply/backfill, historical fixtures, rollback/restore, no-data-loss and `makemigrations --check --dry-run` against an isolated database, plus IndexedDB upgrade and recovery on a persistent browser profile; record exact commands/results in `specs/037-daily-offline-sync/verification/migration.md`.
+- [X] T074 Run final-tree API integration, backend and PostgreSQL race suites with unique test DBs, frontend canonical tests, `pnpm typecheck` and applicable browser suites in `specs/037-daily-offline-sync/quickstart.md`; write counts, commands and failures separately to `specs/037-daily-offline-sync/verification/final-checks.md`.
+- [X] T075 Map each G01–G13 and SC-01–SC-07 to actual RED/GREEN and final-tree browser/backend/race/migration evidence in `specs/037-daily-offline-sync/verification/traceability.md`; mark unexecuted tests/services/live checks explicitly and do not infer completion from old 17 tests, probes or checked tasks.
 - [X] T076 Review deploy compatibility, v2 feature gating, server rollback with receipt retention, local export/restore and document non-executed live verification in `specs/037-daily-offline-sync/verification/rollout.md`; do not deploy as part of these tasks.
 
 ## Dependencies & Execution Order

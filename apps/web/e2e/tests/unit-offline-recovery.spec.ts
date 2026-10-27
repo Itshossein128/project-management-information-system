@@ -24,7 +24,7 @@ test.describe("US2 — local draft recovery (T025)", () => {
     await page.goto(unitPage);
     await expect(page.locator("body")).toBeVisible();
 
-    const actorId = await page.evaluate(() => localStorage.getItem("auth_user_id") ?? "");
+    const actorId = await page.evaluate(() => String(JSON.parse(localStorage.getItem("auth_user")!).id));
     const projectId = projectBase.split("/").filter(Boolean).at(-1) ?? "";
     const localReportId = "11111111-1111-4111-8111-111111111111";
 

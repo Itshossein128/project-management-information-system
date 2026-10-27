@@ -356,6 +356,14 @@
       "version": "Version",
       "rejectReasonRequired": "A rejection reason is required",
       "readonlyState": "This report is read-only",
+      "selectSubDisciplineDefault": "Select sub-discipline (optional)",
+      "subDisciplines": {
+        "mechanical": "General Mechanical",
+        "plumbing": "Plumbing & Piping",
+        "hvac": "HVAC & Thermal",
+        "civil": "Civil & Structural",
+        "finishing": "Finishing & Architectural"
+      },
       "activityLogExport": "Activity log export",
       "rejectionModalTitle": "Reject unit report",
       "rejectionReasonPlaceholder": "Enter reason for rejection...",
@@ -412,7 +420,21 @@
             "location": "Zone / work front",
             "quantity": "Executed quantity",
             "unit": "Unit",
+            "executionPercentage": "Execution percentage (%)",
+            "shiftHours": "Shift hours",
+            "isHydrostaticTested": "Hydrostatic / Pipeline pressure test (QC)",
+            "testPressureBar": "Test pressure (bar)",
+            "testDurationMinutes": "Test duration (minutes)",
+            "testOutcome": "Test outcome",
+            "testedSegment": "Tested pipe segment / riser",
+            "testedSegmentPlaceholder": "e.g. Main cold water riser",
+            "electricalUnits": "Electrical units:",
             "notes": "Notes"
+          },
+          "outcomes": {
+            "pass": "Pass",
+            "fail": "Fail",
+            "conditional": "Conditional"
           },
           "columns": {
             "wbsActivity": "WBS Activity",
@@ -425,6 +447,8 @@
             "blockFloorZone": "Block / Floor / Zone",
             "quantity": "Quantity",
             "unit": "Unit",
+            "executionPercentage": "% Progress",
+            "hydrostaticTest": "QC / Hydrostatic test",
             "notes": "Notes"
           },
           "errors": {
@@ -433,7 +457,10 @@
             "activity_not_in_project_scope": "Selected activity does not belong to this project's WBS scope.",
             "contractor_not_in_project_scope": "Selected contractor does not belong to this project's scope.",
             "contractor_required": "Selecting a contractor or entering a contractor name is required.",
-            "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors."
+            "submission_blocked_by_section_contract": "Report submission is blocked due to section row validation errors.",
+            "percent_must_be_between_0_and_100": "Execution percentage must be between 0.00 and 100.00.",
+            "invalid_test_pressure_value": "Test pressure must be a positive number.",
+            "invalid_test_outcome": "Test outcome must be PASSED or FAILED."
           }
         },
         "labor": {
@@ -523,6 +550,7 @@
           "addRow": "Add material row",
           "editRow": "Edit material row",
           "empty": "No material rows recorded for this report yet.",
+          "mechanicalTemplates": "Frequent mechanical items:",
           "totalsSummary": "Summary: {{receipts}} receipt(s) · {{consumptions}} consumption row(s)",
           "transactionTypes": {
             "receipt": "Receipt (incoming)",
@@ -735,7 +763,10 @@
     "reference_not_in_project_scope": "Selected equipment or material does not belong to this project.",
     "transaction_type_required": "Selecting a material transaction type (receipt or consumption) is required.",
     "receipt_requires_document_reference": "A warehouse document reference is required for material receipt rows.",
-    "consumption_location_required_for_consumption": "A consumption location is required for material consumption rows."
+    "consumption_location_required_for_consumption": "A consumption location is required for material consumption rows.",
+    "percent_must_be_between_0_and_100": "Execution percentage must be between 0.00 and 100.00.",
+    "cannot_submit_empty_sub_report": "Cannot submit an empty sub-report; at least one activity or workforce row is required.",
+    "invalid_test_pressure_value": "Test pressure must be a positive number."
   },
   "dashboard": {
     "portfolio": {
@@ -2155,6 +2186,14 @@
       "version": "Version",
       "rejectReasonRequired": "A rejection reason is required",
       "readonlyState": "This report is read-only",
+      "selectSubDisciplineDefault": "Select sub-discipline (optional)",
+      "subDisciplines": {
+        "mechanical": "General Mechanical",
+        "plumbing": "Plumbing & Piping",
+        "hvac": "HVAC & Thermal",
+        "civil": "Civil & Structural",
+        "finishing": "Finishing & Architectural"
+      },
       "activityLogExport": "Activity log export",
       "rejectionModalTitle": "Reject unit report",
       "rejectionReasonPlaceholder": "Enter reason for rejection...",

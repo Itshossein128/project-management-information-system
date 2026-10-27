@@ -1,0 +1,39 @@
+You are an expert full-stack AI engineer executing `speckit-plan`, `speckit-tasks`, and `speckit-implement` sequentially in a single session in this codebase: /home/hossein/Desktop/projects/building-management
+
+The active feature is `specs/038-discipline-sub-reports` (refer to `.specify/feature.json`).
+
+============================================================
+STAGE 1: speckit-plan
+============================================================
+Follow `.agents/skills/speckit-plan/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec` to inspect context.
+2. Read `specs/038-discipline-sub-reports/spec.md`, `.specify/memory/constitution.md`, and `AGENTS.md`.
+3. Generate the required design artifacts in `specs/038-discipline-sub-reports/`:
+   - `plan.md` (Implementation architecture, tech decisions, schema additions, contracts)
+   - `research.md` (Design choices, alternatives considered)
+   - `data-model.md` (Entities, fields, relationships: `execution_percentage`, empty sub-report submission check, materials for mechanical, hydrostatic test fields/QC linkage, contractor hours computation)
+   - `contracts/` (API endpoint contracts, request/response payloads, error codes like `percent_must_be_between_0_and_100` and `cannot_submit_empty_sub_report`)
+   - `quickstart.md` (Verification commands, isolated DB setup, tests)
+
+============================================================
+STAGE 2: speckit-tasks
+============================================================
+Follow `.agents/skills/speckit-tasks/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec --require-plan` to verify prerequisites.
+2. Read `specs/038-discipline-sub-reports/plan.md`, `spec.md`, and related design artifacts.
+3. Generate `specs/038-discipline-sub-reports/tasks.md`:
+   - Structured by phases: Setup, Foundational safety, User Stories (US1 through US7), and Polish/Cross-Cutting Verification.
+   - Every task has an ID (`T001`, `T002`, ...), clear file path, exact action, and test verification rule.
+   - Ensure TDD workflow (tests first, make green).
+
+============================================================
+STAGE 3: speckit-implement
+============================================================
+Follow `.agents/skills/speckit-implement/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-tasks --include-tasks` to check tasks.
+2. Read `tasks.md` and execute the tasks in order:
+   - Backend in `apps/api/core/`: update models, migrations, serializers, views, services, tests. Run tests using `apps/api/.venv/bin/python -m pytest` with Postgres on 5433 and Redis on 6379.
+   - Frontend in `apps/web/src/`: update components, section editors, API clients, locales (`fa.json`, `en.json`), run unit/component tests.
+   - Run typecheck and tests to verify.
+   - Mark completed tasks with `[X]` in `tasks.md`.
+3. Provide a detailed final report of all implemented tasks, test outcomes, and verified features.

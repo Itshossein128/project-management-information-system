@@ -17,8 +17,30 @@ from sub_reports.models import (
 )
 
 
+SUB_DISCIPLINES_BY_UNIT = {
+    'mechanical': {'MECHANICAL', 'PLUMBING', 'HVAC'},
+    'buildings': {'CIVIL', 'FINISHING'},
+}
+
+
+def validate_sub_discipline_for_unit(value, unit):
+    value = (value or '').strip()
+    if not value:
+        return value
+    if value not in SUB_DISCIPLINES_BY_UNIT.get(str(unit), set()):
+        raise serializers.ValidationError(
+            'زیررشته برای واحد انتخاب‌شده معتبر نیست / Invalid sub-discipline for this canonical unit',
+            code='invalid_sub_discipline',
+        )
+    return value
+
+
 class UnitReportOpenSerializer(serializers.Serializer):
     report_date = JalaliDateField(required=True)
+    sub_discipline = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate_sub_discipline(self, value):
+        return validate_sub_discipline_for_unit(value, self.context.get('unit'))
 
 
 class UnitReportCurrentQuerySerializer(serializers.Serializer):
@@ -147,7 +169,7 @@ class UnitReportDetailSerializer(serializers.ModelSerializer):
         model = DisciplineSubReport
         fields = [
             'id', 'lineage_id', 'version_number', 'is_current', 'project_id',
-            'unit', 'report_date', 'status', 'last_changed_at', 'sync_revision',
+            'unit', 'sub_discipline', 'report_date', 'status', 'last_changed_at', 'sync_revision',
             'audit', 'capabilities', 'content',
         ]
         read_only_fields = fields

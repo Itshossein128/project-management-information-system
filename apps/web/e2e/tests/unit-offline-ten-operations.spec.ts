@@ -143,11 +143,28 @@ test.describe("US3 — ten operations (T034)", () => {
       `${API_BASE}/v1/projects/${projectId}/units/buildings/daily-reports/${report.id}/materials/`,
       { headers },
     );
-    const activityRows = (await activities.json()) as Array<{ activity_description: string }>;
-    const laborRows = (await labor.json()) as Array<{ present_count: number }>;
-    const materialRows = (await materials.json()) as Array<{ material_description: string }>;
+    const activityRows = (await activities.json()) as Array<{ id: string; activity_description: string }>;
+    const laborRows = (await labor.json()) as Array<{ id: string; present_count: number }>;
+    const materialRows = (await materials.json()) as Array<{ id: string; material_description: string }>;
     expect(activityRows.map((row) => row.activity_description).sort()).toEqual(["activity-1", "activity-2", "activity-3"]);
     expect(laborRows.map((row) => row.present_count).sort()).toEqual([1, 2, 3]);
     expect(materialRows.map((row) => row.material_description).sort()).toEqual(["material-1", "material-2", "material-3", "material-4"]);
+    const operations = await page.evaluate(async () => {
+      const db = await (await import("/src/app/lib/offlineDB.ts")).initDB();
+      return db.getAll("offline_operations");
+    });
+    expect(new Set(operations.map((op) => op.operation_id)).size).toBe(11);
+    const serverIds = new Set([...activityRows, ...laborRows, ...materialRows].map((row) => row.id));
+    const rowOperations = operations.filter((op) => op.operation_kind === "create");
+    expect(rowOperations).toHaveLength(10);
+    expect(new Set(rowOperations.map((op) => op.client_id)).size).toBe(10);
+    for (const op of rowOperations) {
+      const receipt = op.result as { operationId: string; clientId: string; serverId: string };
+      expect(receipt.operationId).toBe(op.operation_id);
+      expect(receipt.clientId).toBe(op.client_id);
+      expect(serverIds.has(receipt.serverId)).toBe(true);
+      serverIds.delete(receipt.serverId);
+    }
+    expect(serverIds.size).toBe(0);
   });
 });

@@ -30,4 +30,4 @@ The client posts `/v1/projects/{id}/daily-reports/sync-operations/v2/` through t
 
 `unit-offline-ten-operations.spec.ts` was strengthened to disconnect before seeding ten row operations and their report prerequisite, then reconnect without reloading. With a newly migrated and seeded disposable PostgreSQL database, a dedicated API process with v2 enabled, and the existing Vite server, Playwright reported **1 passed**. The test checked all 11 operations reached `synced` and verified the ten row values on the server.
 
-This is not full T034/SC-01 evidence: the test seeds IndexedDB instead of entering rows through the form, and does not compare each client/server identity and receipt or assert preservation of an unrelated row. T034 and T038 remain open.
+In the subsequent pass the same test additionally compared each of the ten operation IDs, client IDs and returned server IDs to the rows on the server; it passed in an isolated database and Redis instance. This is still not full T034/SC-01 evidence: the test seeds IndexedDB instead of entering rows through the form and does not assert preservation of an unrelated row. T034 and T038 remain open.

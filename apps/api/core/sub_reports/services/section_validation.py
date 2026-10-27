@@ -44,6 +44,9 @@ HSE_IMMEDIATE_ACTION_ERROR = 'hse_immediate_action_required'
 UNSUPPORTED_FILE_FORMAT = 'unsupported_file_format'
 FILE_TOO_LARGE = 'file_too_large'
 ATTACHMENT_ROW_NOT_IN_VERSION = 'attachment_row_not_in_version'
+PERCENT_OUT_OF_RANGE_ERROR = 'percent_must_be_between_0_and_100'
+INVALID_TEST_PRESSURE_ERROR = 'invalid_test_pressure_value'
+INVALID_TEST_OUTCOME_ERROR = 'invalid_test_outcome'
 
 # Stable section error codes and their localized fa messages (T043 will wire
 # the web locale files; the API layer relies on the messages below).
@@ -71,6 +74,9 @@ ERROR_MESSAGES = {
     UNSUPPORTED_FILE_FORMAT: _('فقط تصاویر JPEG و PNG پذیرفته می‌شوند'),
     FILE_TOO_LARGE: _('حجم فایل نمی‌تواند بیش از ۱۰ مگابایت باشد'),
     ATTACHMENT_ROW_NOT_IN_VERSION: _('ردیف پیوست متعلق به این نسخه گزارش نیست'),
+    PERCENT_OUT_OF_RANGE_ERROR: _('درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد / Execution percentage must be between 0.00 and 100.00'),
+    INVALID_TEST_PRESSURE_ERROR: _('فشار آزمون باید عددی مثبت باشد / Test pressure must be a positive number'),
+    INVALID_TEST_OUTCOME_ERROR: _('نتیجه آزمون باید قبول یا مردود باشد / Test outcome must be PASSED or FAILED'),
 }
 
 
@@ -152,6 +158,12 @@ _DRF_CODE_MAP = {
     ('quantity', 'quantity_must_be_positive'): QUANTITY_POSITIVE_ERROR,
     ('quantity', 'required'): QUANTITY_POSITIVE_ERROR,
     ('quantity', 'null'): QUANTITY_POSITIVE_ERROR,
+    ('execution_percentage', 'percent_must_be_between_0_and_100'): PERCENT_OUT_OF_RANGE_ERROR,
+    ('execution_percentage', 'min_value'): PERCENT_OUT_OF_RANGE_ERROR,
+    ('execution_percentage', 'max_value'): PERCENT_OUT_OF_RANGE_ERROR,
+    ('test_pressure_bar', 'invalid_test_pressure_value'): INVALID_TEST_PRESSURE_ERROR,
+    ('test_pressure_bar', 'min_value'): INVALID_TEST_PRESSURE_ERROR,
+    ('test_outcome', 'invalid_choice'): INVALID_TEST_OUTCOME_ERROR,
 }
 
 
@@ -263,9 +275,7 @@ def _contract_errors(report, validated, index=0):
 
     if 'contractor_ref' in validated:
         contractor = validated['contractor_ref']
-        if contractor is None:
-            return [err('contractor_ref', CONTRACTOR_REQUIRED_ERROR)]
-        if not _contractor_within_project(contractor, report.project_id):
+        if contractor is not None and not _contractor_within_project(contractor, report.project_id):
             return [err('contractor_ref', CONTRACTOR_SCOPE_ERROR)]
 
     return errors

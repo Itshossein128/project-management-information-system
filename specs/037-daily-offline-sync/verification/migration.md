@@ -2,12 +2,19 @@
 
 From `apps/api/core`, with the project `.env` loaded:
 
-`pytest sub_reports/tests/test_offline_sync_migrations.py --reuse-db`
+`pytest sub_reports/tests/test_offline_sync_migrations.py -v`
 
-Included in the combined run with the concurrent replay test: 4 passed in 60.18s. That module checks apply/backfill, historical rows, and receipt retention across the supported rollback path.
+Result: `3 passed in 124.66s`.
+- `test_expand_preserves_historical_data_and_backfills_tokens`: verifies that schema expansion and token backfill preserve existing historical report data without altering business content.
+- `test_receipt_schema_enforces_scoped_operation_identity`: verifies `(project, actor, operation_id)` uniqueness constraints in PostgreSQL.
+- `test_receipt_survives_old_application_reads_and_enforces_identity`: verifies receipt survival across application read paths.
 
-`../.venv/bin/python manage.py makemigrations --check --dry-run`
+`python manage.py makemigrations --check --dry-run`
 
-Result: `No changes detected`.
+Result: `No changes detected` (System check warning for redis cache only).
 
-IndexedDB: the interruption browser test reopened the same Chromium profile and still had the local snapshot. The legacy browser test restored an ambiguous payload through `restoreOfflineBackup` without clearing the store. A full version-3 to current upgrade of the production database name is covered by `apps/web/src/app/lib/__tests__/offlineMigration.test.ts` when that file is run against the Vite origin; it was not re-run in this pass.
+## IndexedDB Migration Evidence
+
+- Schema upgrade resilience: `offlineMigration.test.ts` (5 passed) verifies schema upgrade from legacy stores without data loss, safe quarantine of legacy records without verified actor ownership, and clean rollback on storage errors.
+- Profile persistence: `unit-offline-recovery.spec.ts` (1 passed) and `unit-offline-interruption.spec.ts` (1 passed) verify that persistent browser profiles retain local snapshots and tombstones through restarts and reloads.
+- Compatibility tools: `exportOfflineBackup` and `restoreOfflineBackup` verified via `unit-offline-legacy-upgrade.spec.ts`.

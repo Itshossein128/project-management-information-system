@@ -6,6 +6,7 @@ editable report field.
 """
 from __future__ import annotations
 
+from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
@@ -123,13 +124,14 @@ class UnitReportViewSet(viewsets.GenericViewSet):
     })
     @action(detail=False, methods=['post'])
     def open(self, request, *args, **kwargs):
-        payload = UnitReportOpenSerializer(data=request.data)
+        payload = UnitReportOpenSerializer(data=request.data, context={'unit': self._unit()})
         payload.is_valid(raise_exception=True)
         report, created = svc.open_unit_report(
             project=self._project(),
             unit=self._unit(),
             report_date=payload.validated_data['report_date'],
             user=request.user,
+            sub_discipline=payload.validated_data.get('sub_discipline', ''),
         )
         data = UnitReportDetailSerializer(report, context={'request': request}).data
         return Response(data, status.HTTP_201_CREATED if created else status.HTTP_200_OK)
@@ -170,13 +172,17 @@ class UnitReportViewSet(viewsets.GenericViewSet):
                 ser.is_valid(raise_exception=True)
                 nested_data[key] = ser.validated_data
 
+        from sub_reports.unit_report_serializers import validate_sub_discipline_for_unit
+        if 'sub_discipline' in request.data:
+            validate_sub_discipline_for_unit(request.data['sub_discipline'], self._unit())
+
         report = svc.update_unit_report(
             self._report_or_404(),
             user=request.user,
             unit=self._unit(),
             validated_fields={
                 field: request.data[field]
-                for field in ('form_code', 'revision_number', 'weather_condition', 'site_status')
+                for field in ('form_code', 'revision_number', 'weather_condition', 'site_status', 'sub_discipline')
                 if field in request.data
             },
             nested_data=nested_data,
@@ -913,5 +919,50 @@ class SyncOperationsV2View(APIView):
         except PermissionDenied:
             return Response({'detail': 'Current project edit permission is required'}, status=status.HTTP_403_FORBIDDEN)
         return Response(payload, status=status.HTTP_200_OK)
+
+
+class ContractorLaborLedgerView(APIView):
+    """Returns labor ledger entries credited to a contractor for a project (feature 038, US6)."""
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_reports'
+
+    def get(self, request, project_pk, contractor_pk):
+        from sub_reports.models import SubcontractorLaborLedgerEntry
+        from projects.models import Stakeholder
+
+        try:
+            contractor = Stakeholder.objects.get(id=contractor_pk, project_id=project_pk, is_deleted=False)
+        except Stakeholder.DoesNotExist:
+            raise svc.UnitReportNotFound(_('contractor_not_found'), 'contractor_not_found')
+
+        entries = SubcontractorLaborLedgerEntry.objects.filter(
+            project_id=project_pk,
+            contractor=contractor,
+        ).order_by('-report_date', 'created_at')
+
+        total = sum((e.total_person_hours for e in entries), Decimal('0.00'))
+
+        data = {
+            'project_id': str(project_pk),
+            'contractor_id': str(contractor_pk),
+            'contractor_name': contractor.name,
+            'total_person_hours': str(total),
+            'entries': [
+                {
+                    'id': str(e.id),
+                    'report_date': str(e.report_date),
+                    'discipline': e.discipline,
+                    'activity_row_id': str(e.activity_row_id),
+                    'foreman_count': e.foreman_count,
+                    'worker_count': e.worker_count,
+                    'shift_hours': str(e.shift_hours),
+                    'total_person_hours': str(e.total_person_hours),
+                    'status': e.status,
+                }
+                for e in entries
+            ],
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
 
 

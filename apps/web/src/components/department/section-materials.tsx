@@ -49,6 +49,14 @@ const EMPTY_MATERIAL_FORM: MaterialFormState = {
   consumption_location: "",
 };
 
+const MECHANICAL_MATERIAL_TEMPLATES = [
+  { description: "لوله ۵ لایه", unit: "متر طول" },
+  { description: "لوله پلیکا / فاضلابی", unit: "شاخه" },
+  { description: "اتصالات جوشی گاز", unit: "عدد" },
+  { description: "عایق الاستومری حرارتی/برودتی", unit: "متر" },
+  { description: "لوله گالوانیزه", unit: "شاخه" },
+] as const;
+
 function parseQuantityField(raw: string): number {
   const trimmed = raw.trim();
   if (!trimmed) return 0;
@@ -405,6 +413,38 @@ export function SectionMaterials({
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {unit === "mechanical" ? (
+              <div
+                data-testid="mechanical-materials-quick-picks"
+                className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-1.5 rounded-md border border-border/60 bg-muted/30 p-2.5"
+              >
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t(
+                    "businessDepartment.unitReport.sections.materials.mechanicalTemplates",
+                    "اقلام پرتکرار مکانیک:",
+                  )}
+                </span>
+                {MECHANICAL_MATERIAL_TEMPLATES.map((tmpl) => (
+                  <button
+                    key={tmpl.description}
+                    type="button"
+                    onClick={() => {
+                      clearErrorsForField("material_description");
+                      clearErrorsForField("unit");
+                      setFormState((prev) => ({
+                        ...prev,
+                        material_description: tmpl.description,
+                        unit: tmpl.unit,
+                      }));
+                    }}
+                    className="rounded border border-border bg-background hover:bg-primary/10 hover:border-primary/50 px-2 py-0.5 text-xs text-foreground transition-colors"
+                  >
+                    {tmpl.description} ({tmpl.unit})
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
             <div>
               <Select
                 id="select-unitMaterialTransactionType"

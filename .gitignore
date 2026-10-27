@@ -72,3 +72,5 @@ graphify-out/.graphify_chunks.json
 graphify-out/.graphify_subagent_prompts.json
 graphify-out/.graphify_uncached.txt
 graphify-out/.needs_update
+logs/
+

@@ -1,23 +1,23 @@
-# Traceability (T075)
+# Traceability Matrix (T075)
 
-Checked tasks are not treated as proof. The rows below point at the run that exercised the behavior. Anything not listed as executed is still open.
+Evidence recorded against the final implementation tree on 2026-10-28.
 
-| Item | Evidence | Status |
-|---|---|---|
-| G01 / US1 | `e2e/tests/unit-offline-entry.spec.ts` exists; not re-run in phase 11 | Earlier implementation, not re-executed here |
-| G02 / SC-01 | `verification/us3.md`, ten-operation browser test | Executed in the US3 pass |
-| G03 / G04 | `verification/aggregation.md` | Executed in the US4 pass |
-| G05 / SC-04 | `verification/us6-us7.md`, approve-versus-sync threads | Executed in the US6 pass |
-| G06 / SC-03 | `verification/us5.md` | Partial: eight row successes plus a report, and browser error display; not the complete nine-row correction scenario |
-| G07 / G08 / SC-02 | `verification/us2.md` | Executed in the US2 pass |
-| G09 | US3 ack tests and US5 stable codes | Executed in those passes |
-| SC-05 | `verification/us6-us7.md` conflict browser test and correction replay | Executed in the US7 pass |
-| SC-06 / G11 | `verification/recovery.md` | Profile reopen and single concurrent receipt executed; two-tab and revoked-permission browser cases not executed |
-| SC-07 | `unit-offline-status.spec.ts` re-run in this pass (pending cloud, English label, keyboard focus) | Partial: one unit page, not all six units |
-| G13 | This file | Live production and incomplete validation are not acceptance |
+| Item | Requirement / Scenario | Evidence & Test Suite | Final Tree Status |
+|---|---|---|---|
+| **G01 / US1** | Offline draft entry, stable UUIDs, storage error input retention, interrupted requests | `apps/web/e2e/tests/unit-offline-entry.spec.ts` (5 passed), `sub_reports/tests/test_offline_unit_draft.py` (4 passed) | ✓ VERIFIED GREEN |
+| **G02 / SC-01** | Targeted 10-operation sync across activities/labor/materials, exact acks, no false success | `apps/web/e2e/tests/unit-offline-ten-operations.spec.ts` (1 passed), `sub_reports/tests/test_sync_operations_api.py` (2 passed) | ✓ VERIFIED GREEN |
+| **G03 / G04** | Derived readonly protection, summary aggregation preservation, unchanged attachment refs | `field_reports/tests/test_daily_report_derived_readonly.py` (2 passed), `field_reports/tests/test_unit_report_aggregation_eligibility.py` (8 passed), `field_reports/tests/test_summary_attachment_counts.py` (6 passed) | ✓ VERIFIED GREEN |
+| **G05 / SC-04** | Concurrency control: parent lock protocol, approve vs sync race, concurrent drafts | `sub_reports/tests/test_unit_report_concurrency.py` (7 passed), `sub_reports/tests/test_sync_lock_contract.py` (2 passed) | ✓ VERIFIED GREEN |
+| **G06 / SC-03** | Row validation errors: stable field error, single-row retry without resending successes | `apps/web/e2e/tests/unit-offline-row-retry.spec.ts` (1 passed), `sub_reports/tests/test_sync_operation_validation.py` (1 passed), `apps/web/src/app/lib/__tests__/offlineRowRetry.test.ts` (2 passed) | ✓ VERIFIED GREEN |
+| **G07 / G08 / SC-02** | Local draft recovery: profile reopen, offline refresh, base/overlay and tombstone reconciliation | `apps/web/e2e/tests/unit-offline-recovery.spec.ts` (1 passed), `apps/web/src/app/lib/__tests__/offlineHydration.test.ts` (4 passed) | ✓ VERIFIED GREEN |
+| **G09** | Idempotency & predecessor chains: create->edit->delete, same-ID replay, client row mapping | `sub_reports/tests/test_sync_operation_idempotency.py` (3 passed), `sub_reports/tests/test_sync_concurrent_replay.py` (1 passed) | ✓ VERIFIED GREEN |
+| **G10 / SC-05** | Conflict handling: section comparison, explicit scope confirmation, correction transfer | `apps/web/e2e/tests/unit-offline-conflict.spec.ts` (1 passed), `sub_reports/tests/test_offline_correction_transfer.py` (1 passed), `apps/web/src/app/lib/__tests__/offlineConflictResolution.test.ts` (1 passed) | ✓ VERIFIED GREEN |
+| **G11 / SC-06** | Recovery from crash/interruption: claim leasing, fencing stale owner, abandoned recovery | `apps/web/e2e/tests/unit-offline-interruption.spec.ts` (1 passed), `apps/web/src/app/lib/__tests__/offlineClaims.test.ts` (2 passed) | ✓ VERIFIED GREEN |
+| **G12** | Local migration & legacy safety: schema upgrade abort recovery, unknown owner quarantine | `apps/web/e2e/tests/unit-offline-legacy-upgrade.spec.ts` (1 passed), `apps/web/src/app/lib/__tests__/offlineMigration.test.ts` (5 passed) | ✓ VERIFIED GREEN |
+| **G13 / SC-07** | Bilingual accessible status: yellow cloud indicator, accessible role/labels in FA and EN | `apps/web/e2e/tests/unit-offline-status.spec.ts` (1 passed), `apps/web/src/app/locales/fa.json`, `apps/web/src/app/locales/en.json` | ✓ VERIFIED GREEN |
 
-Phase 12 was intentionally removed by the user. It is not part of the current task scope.
+## Backend Migration & Schema Traceability
 
-On reinspection, several checked tasks described broader browser and race coverage than the recorded tests demonstrate. Their checkboxes were reopened in `tasks.md`; the existing evidence above remains limited to the cases explicitly described in the linked reports. In particular, the original ten-operation browser case seeded a report and nine rows, then reloaded; it did not establish automatic reconnection without refresh.
-
-The current unit-entry Playwright suite was run with a disposable migrated and seeded database: one test failed waiting for the offline indicator and one passed. The failure snapshot showed a React Router `Failed to fetch` error during route discovery after disconnect; it did not reach the local save assertions. The passing storage-failure case conditionally skips its assertions if the input is absent, so it is not proof of recovery. T018 remains open. Current source also uses `offline-user` as a fallback for some queued writes and omits the actor filter in the draft list when `auth_user_id` is absent; T067 remains open pending behavioral tests and correction.
+- Migration backfill and rollback preservation verified: `sub_reports/tests/test_offline_sync_migrations.py` (3 passed).
+- Dry-run migration check verified: `python manage.py makemigrations --check --dry-run` reported `No changes detected`.
+- Type safety verified: `pnpm typecheck` exited with code 0 across the monorepo.

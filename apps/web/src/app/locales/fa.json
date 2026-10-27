@@ -356,6 +356,14 @@
       "version": "نسخه",
       "rejectReasonRequired": "ذکر علت رد الزامی است",
       "readonlyState": "این گزارش فقط‌خواندنی است",
+      "selectSubDisciplineDefault": "انتخاب زیررشته (اختیاری)",
+      "subDisciplines": {
+        "mechanical": "مکانیک عمومی",
+        "plumbing": "تاسیسات بهداشتی و لوله‌کشی",
+        "hvac": "تهویه مطبوع و حرارت برودت",
+        "civil": "ابنیه و سازه",
+        "finishing": "نازک‌کاری و معماری"
+      },
       "activityLogExport": "خروجی گزارش فعالیت",
       "rejectionModalTitle": "رد گزارش روزانه واحد",
       "rejectionReasonPlaceholder": "علت رد را وارد کنید...",
@@ -412,7 +420,21 @@
             "location": "زون / جبهه کاری",
             "quantity": "مقدار اجرا شده",
             "unit": "واحد سنجش",
+            "executionPercentage": "درصد پیشرفت (%)",
+            "shiftHours": "ساعت شیفت",
+            "isHydrostaticTested": "آزمون هیدرواستاتیک / تست فشار خطوط لوله (QC)",
+            "testPressureBar": "فشار آزمون (bar)",
+            "testDurationMinutes": "مدت آزمون (دقیقه)",
+            "testOutcome": "نتیجه آزمون",
+            "testedSegment": "قطعه / رایزر تحت آزمون",
+            "testedSegmentPlaceholder": "مثال: رایزر اصلی آب سرد",
+            "electricalUnits": "واحدهای برق:",
             "notes": "توضیحات"
+          },
+          "outcomes": {
+            "pass": "قبول (Pass)",
+            "fail": "مردود (Fail)",
+            "conditional": "مشروط (Conditional)"
           },
           "columns": {
             "wbsActivity": "فعالیت WBS",
@@ -425,6 +447,8 @@
             "blockFloorZone": "بلوک / طبقه / زون",
             "quantity": "مقدار",
             "unit": "واحد",
+            "executionPercentage": "% پیشرفت",
+            "hydrostaticTest": "تست QC / هیدرواستاتیک",
             "notes": "توضیحات"
           },
           "errors": {
@@ -433,7 +457,10 @@
             "activity_not_in_project_scope": "فعالیت انتخاب‌شده متعلق به ساختار شکست کار (WBS) این پروژه نیست.",
             "contractor_not_in_project_scope": "پیمانکار انتخاب‌شده متعلق به این پروژه نیست.",
             "contractor_required": "انتخاب پیمانکار یا وارد کردن نام پیمانکار الزامی است.",
-            "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد."
+            "submission_blocked_by_section_contract": "ارسال گزارش به دلیل خطاهای اعتبارسنجی در ردیف‌های بخش متوقف شد.",
+            "percent_must_be_between_0_and_100": "درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد.",
+            "invalid_test_pressure_value": "فشار آزمون باید عددی مثبت باشد.",
+            "invalid_test_outcome": "نتیجه آزمون باید قبول یا مردود باشد."
           }
         },
         "labor": {
@@ -523,6 +550,7 @@
           "addRow": "افزودن ردیف مصالح",
           "editRow": "ویرایش ردیف مصالح",
           "empty": "هنوز ردیف مصالحی برای این گزارش ثبت نشده است.",
+          "mechanicalTemplates": "اقلام پرتکرار مکانیک:",
           "totalsSummary": "جمع ردیف‌ها: {{receipts}} رسید انبار · {{consumptions}} مصرف مصالح",
           "transactionTypes": {
             "receipt": "ورود به انبار (رسید)",
@@ -735,7 +763,10 @@
     "reference_not_in_project_scope": "تجهیز یا مصالح انتخاب‌شده متعلق به این پروژه نیست.",
     "transaction_type_required": "انتخاب نوع تراکنش مصالح (ورود یا مصرف) الزامی است.",
     "receipt_requires_document_reference": "برای ثبت ورود مصالح (رسید)، وارد کردن شماره سند انبار الزامی است.",
-    "consumption_location_required_for_consumption": "برای ثبت مصرف مصالح، وارد کردن محل مصرف الزامی است."
+    "consumption_location_required_for_consumption": "برای ثبت مصرف مصالح، وارد کردن محل مصرف الزامی است.",
+    "percent_must_be_between_0_and_100": "درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد.",
+    "cannot_submit_empty_sub_report": "امکان ارسال گزارش خالی وجود ندارد؛ حداقل یک ردیف فعالیت یا کارکرد وارد نمایید.",
+    "invalid_test_pressure_value": "فشار آزمون باید عددی مثبت باشد."
   },
   "dashboard": {
     "portfolio": {

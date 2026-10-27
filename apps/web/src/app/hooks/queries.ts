@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
 import { apiJson, ApiRequestError } from "@/app/lib/api-client";
 import type {
   Business,
@@ -51,12 +52,20 @@ import {
 import {
   findLocalSnapshot,
   generateUUID,
-  getLocalSnapshot,
+  getLocalSnapshot as getUnscopedLocalSnapshot,
+  getOperationsForReport,
 } from "@/app/lib/offlineDB";
 import { reconcileServerWithLocalSnapshot } from "@/app/lib/offlineHydration";
 import { queueUnitReportOperation } from "@/app/lib/offlineWrite";
 import { queryKeys } from "@/app/lib/react-query-keys";
 import { PATHS } from "@/app/routeVars";
+
+async function getLocalSnapshot(reportId: string) {
+  const actorId = getStoredActorId();
+  if (!actorId) return undefined;
+  const snapshot = await getUnscopedLocalSnapshot(reportId);
+  return snapshot?.actor_id === actorId ? snapshot : undefined;
+}
 
 export interface HrUserRow {
   id: number;
@@ -394,12 +403,13 @@ export function useCurrentUnitReportQuery(
   enabled = true,
 ) {
   return useQuery<UnitReport | null>({
+    networkMode: "always",
     queryKey: queryKeys.unitReportCurrent(businessId ?? "", unit ?? "", date ?? ""),
     enabled: Boolean(enabled && businessId && unit && date),
     queryFn: async () => {
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+        const local = await findLocalSnapshot(String(businessId), String(unit), date!, getStoredActorId() ?? undefined);
         if (local) {
           return {
             id: local.local_report_id,
@@ -448,7 +458,7 @@ export function useCurrentUnitReportQuery(
           date!,
         );
         if (serverReport) {
-          const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+          const local = await findLocalSnapshot(String(businessId), String(unit), date!, getStoredActorId() ?? undefined);
           if (local && (Object.keys(local.overlay_header || {}).length > 0 || Object.keys(local.overlay_rows || {}).length > 0)) {
             return {
               ...serverReport,
@@ -462,7 +472,7 @@ export function useCurrentUnitReportQuery(
         }
         return serverReport;
       } catch (err) {
-        const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+        const local = await findLocalSnapshot(String(businessId), String(unit), date!, getStoredActorId() ?? undefined);
         if (local) {
           return {
             id: local.local_report_id,
@@ -517,21 +527,27 @@ export function useOpenUnitReport(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (reportDate: string) => {
-      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
-      if (isOffline) {
-        let existing = await findLocalSnapshot(String(businessId), unit, reportDate);
+    networkMode: "always",
+    mutationFn: async (
+      args: string | { reportDate: string; subDiscipline?: string },
+    ) => {
+      const reportDate = typeof args === "string" ? args : args.reportDate;
+      const subDiscipline =
+        typeof args === "string" ? undefined : args.subDiscipline;
+
+      const openLocally = async () => {
+        let existing = await findLocalSnapshot(String(businessId), unit, reportDate, requireStoredActorId());
         if (!existing) {
           const localId = generateUUID();
           const { snapshot } = await queueUnitReportOperation({
-            actorId: localStorage.getItem("auth_user_id") ?? "offline-user",
+            actorId: requireStoredActorId(),
             projectId: String(businessId),
             unit,
             reportDate,
             localReportId: localId,
             operationKind: "create_report",
             targetType: "header",
-            payload: { form_code: "" },
+            payload: { form_code: "", sub_discipline: subDiscipline ?? "" },
           });
           existing = snapshot;
         }
@@ -539,6 +555,7 @@ export function useOpenUnitReport(
           id: existing.local_report_id,
           project_id: existing.project_id,
           unit: existing.unit as CanonicalUnit,
+          sub_discipline: subDiscipline,
           report_date: existing.report_date,
           status: existing.status as any,
           version_number: existing.server_version ?? 1,
@@ -569,8 +586,29 @@ export function useOpenUnitReport(
           },
           _offline: true,
         } as unknown as UnitReport;
+      };
+
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        return openLocally();
       }
-      return openUnitReport(String(businessId), unit, reportDate);
+      try {
+        return await openUnitReport(
+          String(businessId),
+          unit,
+          reportDate,
+          subDiscipline,
+        );
+      } catch (err) {
+        if (typeof window !== "undefined") {
+          try {
+            return await openLocally();
+          } catch {
+            // Re-throw original network error if local storage fails
+          }
+        }
+        throw err;
+      }
     },
     onSuccess: () => {
       void qc.invalidateQueries({
@@ -703,6 +741,7 @@ export function useUnitReportActivitiesQuery(
   enabled = true,
 ) {
   return useQuery<UnitReportActivityRow[]>({
+    networkMode: "always",
     queryKey: queryKeys.unitReportActivities(businessId ?? "", unit ?? "", reportId ?? ""),
     enabled: Boolean(enabled && businessId && unit && reportId),
     queryFn: async () => {
@@ -711,7 +750,7 @@ export function useUnitReportActivitiesQuery(
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.activities ?? []) as UnitReportActivityRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "activities").rows as UnitReportActivityRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "activities", await getOperationsForReport(local.local_report_id)).rows as UnitReportActivityRow[];
         }
       }
       try {
@@ -723,7 +762,7 @@ export function useUnitReportActivitiesQuery(
         if (reportId) {
           const local = await getLocalSnapshot(reportId);
           if (local) {
-            return reconcileServerWithLocalSnapshot({}, rows, local, "activities").rows as UnitReportActivityRow[];
+            return reconcileServerWithLocalSnapshot({}, rows, local, "activities", await getOperationsForReport(local.local_report_id)).rows as UnitReportActivityRow[];
           }
         }
         return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
@@ -732,7 +771,7 @@ export function useUnitReportActivitiesQuery(
           const local = await getLocalSnapshot(reportId);
           if (local) {
             const base = (local.base_rows?.activities ?? []) as UnitReportActivityRow[];
-            return reconcileServerWithLocalSnapshot({}, base, local, "activities").rows as UnitReportActivityRow[];
+            return reconcileServerWithLocalSnapshot({}, base, local, "activities", await getOperationsForReport(local.local_report_id)).rows as UnitReportActivityRow[];
           }
         }
         throw err;
@@ -748,11 +787,12 @@ export function useCreateUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (payload: UnitReportActivityPayload) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         const { operation } = await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -793,6 +833,7 @@ export function useUpdateUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async ({
       rowId,
       patch,
@@ -803,7 +844,7 @@ export function useUpdateUnitReportActivity(
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -851,11 +892,12 @@ export function useDeleteUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -915,6 +957,7 @@ export function useUnitReportLaborQuery(
   reportId: string | undefined,
 ) {
   return useQuery<UnitReportLaborRow[]>({
+    networkMode: "always",
     queryKey: queryKeys.unitReportLabor(businessId ?? "", unit, reportId ?? ""),
     queryFn: async () => {
       if (!businessId || !reportId) {
@@ -925,21 +968,21 @@ export function useUnitReportLaborQuery(
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.labor ?? []) as UnitReportLaborRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "labor").rows as UnitReportLaborRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "labor", await getOperationsForReport(local.local_report_id)).rows as UnitReportLaborRow[];
         }
       }
       try {
         const rows = await fetchUnitReportLabor(String(businessId), unit, reportId);
         const local = await getLocalSnapshot(reportId);
         if (local) {
-          return reconcileServerWithLocalSnapshot({}, rows, local, "labor").rows as UnitReportLaborRow[];
+          return reconcileServerWithLocalSnapshot({}, rows, local, "labor", await getOperationsForReport(local.local_report_id)).rows as UnitReportLaborRow[];
         }
         return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
       } catch (err) {
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.labor ?? []) as UnitReportLaborRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "labor").rows as UnitReportLaborRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "labor", await getOperationsForReport(local.local_report_id)).rows as UnitReportLaborRow[];
         }
         throw err;
       }
@@ -955,11 +998,12 @@ export function useCreateUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (payload: UnitReportLaborPayload) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         const { operation } = await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -1000,6 +1044,7 @@ export function useUpdateUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async ({
       rowId,
       patch,
@@ -1010,7 +1055,7 @@ export function useUpdateUnitReportLabor(
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -1058,11 +1103,12 @@ export function useDeleteUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -1102,6 +1148,7 @@ export function useUnitReportMachineryQuery(
   reportId: string | undefined,
 ) {
   return useQuery<UnitReportMachineryRow[]>({
+    networkMode: "always",
     queryKey: queryKeys.unitReportMachinery(businessId ?? "", unit, reportId ?? ""),
     queryFn: async () => {
       if (!businessId || !reportId) {
@@ -1112,21 +1159,21 @@ export function useUnitReportMachineryQuery(
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.machinery ?? []) as UnitReportMachineryRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "machinery").rows as UnitReportMachineryRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "machinery", await getOperationsForReport(local.local_report_id)).rows as UnitReportMachineryRow[];
         }
       }
       try {
         const rows = await fetchUnitReportMachinery(String(businessId), unit, reportId);
         const local = await getLocalSnapshot(reportId);
         if (local) {
-          return reconcileServerWithLocalSnapshot({}, rows, local, "machinery").rows as UnitReportMachineryRow[];
+          return reconcileServerWithLocalSnapshot({}, rows, local, "machinery", await getOperationsForReport(local.local_report_id)).rows as UnitReportMachineryRow[];
         }
         return rows.map((row) => ({ ...row, sync_status: (row as { sync_status?: string }).sync_status ?? "synced" }));
       } catch (err) {
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.machinery ?? []) as UnitReportMachineryRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "machinery").rows as UnitReportMachineryRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "machinery", await getOperationsForReport(local.local_report_id)).rows as UnitReportMachineryRow[];
         }
         throw err;
       }
@@ -1142,8 +1189,16 @@ export function useCreateUnitReportMachinery(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: UnitReportMachineryPayload) => {
+    networkMode: "always",
+    mutationFn: async (payload: UnitReportMachineryPayload) => {
       if (!reportId) throw new Error("Missing reportId");
+      if (!navigator.onLine) {
+        const local = await getLocalSnapshot(reportId);
+        if (!local) throw new Error("offline_report_unavailable");
+        const { operation } = await queueUnitReportOperation({ actorId: requireStoredActorId(), projectId: String(businessId), unit,
+          reportDate: local.report_date, localReportId: reportId, operationKind: "create", targetType: "machinery", payload: payload as unknown as Record<string, unknown> });
+        return [{ ...payload, id: operation.client_id, client_id: operation.client_id, _offline: true }] as unknown as UnitReportMachineryRow[];
+      }
       return createUnitReportMachinery(String(businessId), unit, reportId, payload);
     },
     onSuccess: () => {
@@ -1166,7 +1221,8 @@ export function useUpdateUnitReportMachinery(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    networkMode: "always",
+    mutationFn: async ({
       rowId,
       patch,
     }: {
@@ -1174,6 +1230,14 @@ export function useUpdateUnitReportMachinery(
       patch: Partial<UnitReportMachineryPayload>;
     }) => {
       if (!reportId) throw new Error("Missing reportId");
+      if (!navigator.onLine) {
+        const local = await getLocalSnapshot(reportId);
+        if (!local) throw new Error("offline_report_unavailable");
+        await queueUnitReportOperation({ actorId: requireStoredActorId(), projectId: String(businessId), unit,
+          reportDate: local.report_date, localReportId: reportId, operationKind: "update", targetType: "machinery", clientId: rowId, targetServerId: rowId,
+          payload: patch as Record<string, unknown> });
+        return { ...patch, id: rowId, _offline: true } as UnitReportMachineryRow;
+      }
       return updateUnitReportMachinery(
         String(businessId),
         unit,
@@ -1202,9 +1266,17 @@ export function useDeleteUnitReportMachinery(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rowId: string) => {
+    networkMode: "always",
+    mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
-      return deleteUnitReportMachinery(String(businessId), unit, reportId, rowId);
+      if (!navigator.onLine) {
+        const local = await getLocalSnapshot(reportId);
+        if (!local) throw new Error("offline_report_unavailable");
+        await queueUnitReportOperation({ actorId: requireStoredActorId(), projectId: String(businessId), unit,
+          reportDate: local.report_date, localReportId: reportId, operationKind: "delete", targetType: "machinery", clientId: rowId, targetServerId: rowId, payload: {} });
+        return;
+      }
+      await deleteUnitReportMachinery(String(businessId), unit, reportId, rowId);
     },
     onSuccess: () => {
       if (reportId) {
@@ -1229,6 +1301,7 @@ export function useUnitReportMaterialsQuery(
   reportId: string | undefined,
 ) {
   return useQuery<UnitReportMaterialRow[]>({
+    networkMode: "always",
     queryKey: queryKeys.unitReportMaterials(businessId ?? "", unit, reportId ?? ""),
     queryFn: async () => {
       if (!businessId || !reportId) {
@@ -1239,21 +1312,21 @@ export function useUnitReportMaterialsQuery(
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.materials ?? []) as UnitReportMaterialRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "materials").rows as UnitReportMaterialRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "materials", await getOperationsForReport(local.local_report_id)).rows as UnitReportMaterialRow[];
         }
       }
       try {
         const rows = await fetchUnitReportMaterials(String(businessId), unit, reportId);
         const local = await getLocalSnapshot(reportId);
         if (local) {
-          return reconcileServerWithLocalSnapshot({}, rows, local, "materials").rows as UnitReportMaterialRow[];
+          return reconcileServerWithLocalSnapshot({}, rows, local, "materials", await getOperationsForReport(local.local_report_id)).rows as UnitReportMaterialRow[];
         }
         return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
       } catch (err) {
         const local = await getLocalSnapshot(reportId);
         if (local) {
           const base = (local.base_rows?.materials ?? []) as UnitReportMaterialRow[];
-          return reconcileServerWithLocalSnapshot({}, base, local, "materials").rows as UnitReportMaterialRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "materials", await getOperationsForReport(local.local_report_id)).rows as UnitReportMaterialRow[];
         }
         throw err;
       }
@@ -1269,11 +1342,12 @@ export function useCreateUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (payload: UnitReportMaterialPayload) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         const { operation } = await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -1314,6 +1388,7 @@ export function useUpdateUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async ({
       rowId,
       patch,
@@ -1324,7 +1399,7 @@ export function useUpdateUnitReportMaterial(
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),
@@ -1372,11 +1447,12 @@ export function useDeleteUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
+    networkMode: "always",
     mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
       const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
       if (isOffline) {
-        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const actorId = requireStoredActorId();
         await queueUnitReportOperation({
           actorId,
           projectId: String(businessId),

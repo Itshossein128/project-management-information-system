@@ -474,9 +474,18 @@ export async function addToQueue(entry: QueueItem): Promise<void> {
 }
 
 export async function getPendingQueue(): Promise<QueueItem[]> {
+  let actorId: string | null = null;
+  try {
+    const user = JSON.parse(localStorage.getItem("auth_user") ?? "null") as { id?: unknown } | null;
+    if (typeof user?.id === "string" || typeof user?.id === "number") actorId = String(user.id);
+  } catch {
+    // Malformed or missing session data is never enough to establish ownership.
+  }
+  if (!actorId) return [];
   const db = await getDB();
   const all = await db.getAllFromIndex("offline_queue", "status", "pending");
-  return all.filter(isEligibleForReplay).sort((a, b) => a.created_at.localeCompare(b.created_at));
+  return all.filter((item) => item.actor_id === actorId && isEligibleForReplay(item))
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
 export async function getQuarantinedLegacyQueue(): Promise<QueueItem[]> {
@@ -738,6 +747,7 @@ export async function findLocalSnapshot(
   reportDate: string,
   actorId?: string,
 ): Promise<LocalReportSnapshot | undefined> {
+  if (!actorId) return undefined;
   const db = await getDB();
   try {
     const all = await db.getAllFromIndex("local_snapshots", "project_id", projectId);
@@ -765,6 +775,7 @@ export async function getLocalSnapshotsByProject(
   projectId: string,
   actorId?: string,
 ): Promise<LocalReportSnapshot[]> {
+  if (!actorId) return [];
   const db = await getDB();
   const all = await db.getAllFromIndex("local_snapshots", "project_id", projectId);
   if (actorId) {
