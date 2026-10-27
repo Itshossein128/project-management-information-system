@@ -22,6 +22,8 @@ import { IPCWizard } from "@/components/contracts/IPCWizard";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -42,6 +44,51 @@ function ContractDetailContent() {
   const [editing, setEditing] = useState(false);
   const [values, setValues] = useState<ContractFormValues | null>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
+
+  const { startTour } = useProductTour({
+    tourId: "project-contract-detail",
+    steps: [
+      {
+        element: '[data-tour="contract-summary-cards"]',
+        popover: {
+          title: t("tour.projectContractDetail.summaryTitle", {
+            defaultValue: "خلاصه اطلاعات قرارداد",
+          }),
+          description: t("tour.projectContractDetail.summaryDesc", {
+            defaultValue:
+              "نوع قرارداد، مبلغ کل، پیش‌پرداخت و مجموع تغییرات مقادیر مصوب را در این کارت‌ها بررسی کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contract-tabs"]',
+        popover: {
+          title: t("tour.projectContractDetail.tabsTitle", {
+            defaultValue: "بخش‌های جزییات قرارداد",
+          }),
+          description: t("tour.projectContractDetail.tabsDesc", {
+            defaultValue:
+              "بین اطلاعات عمومی/ویرایش، جدول فهرست بها (BoQ) و دستورکار تغییر مقادیر جابه‌جا شوید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contract-actions"]',
+        popover: {
+          title: t("tour.projectContractDetail.actionsTitle", {
+            defaultValue: "اقدام‌های عملیاتی",
+          }),
+          description: t("tour.projectContractDetail.actionsDesc", {
+            defaultValue:
+              "صورت‌وضعیت کارکرد جدید (IPC) صدور کنید، مشخصات اصلی را ویرایش کنید یا به لیست قراردادها بازگردید.",
+          }),
+          side: "bottom",
+        },
+      },
+    ],
+  });
 
   const {
     data: contract,
@@ -93,7 +140,12 @@ function ContractDetailContent() {
         title={contract.contract_number || contract.counterparty}
         subtitle={project.project_name}
         actions={
-          <div className='flex flex-wrap gap-2'>
+          <div
+            className='flex flex-wrap gap-2'
+            data-testid='contract-actions'
+            data-tour='contract-actions'
+          >
+            <ProductTourButton onClick={startTour} />
             {canEditIpc ? (
               <Button variant='primary' onClick={() => setWizardOpen(true)}>
                 صدور موقت جدید
@@ -115,7 +167,11 @@ function ContractDetailContent() {
 
       <ContractSummaryCards contract={contract} />
 
-      <div className='flex flex-wrap gap-2'>
+      <div
+        className='flex flex-wrap gap-2'
+        data-testid='contract-tabs'
+        data-tour='contract-tabs'
+      >
         {(
           [
             ["info", "اطلاعات"],

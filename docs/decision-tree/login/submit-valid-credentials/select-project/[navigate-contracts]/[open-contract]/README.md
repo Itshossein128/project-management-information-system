@@ -28,6 +28,14 @@
 
 Loading, empty results and unavailable permissions are states, not evidence of a successful write. Screen/backend guards remain authoritative.
 
+## Product Tour & User Guide
+
+- **Tour ID**: `project-contract-detail`
+- **Data Tour Anchors**:
+  - `contract-summary-cards`: Financial summary cards (contract type, effective amount, advance payment, approved change orders)
+  - `contract-tabs`: Detail section tabs (General info / edit, BoQ grid, change orders)
+  - `contract-actions`: Page header actions (Issue new IPC, Edit contract, Back to contracts list)
+
 ## Subsequent Decisions
 
 - [Filter or change the displayed view](filter-and-change-view/README.md)
