@@ -210,3 +210,9 @@ Task: "T020 [P] [US4] Create reusable localized badge component in apps/web/src/
 4. US4: Stable workflow error codes and zero vs unset visual distinction
 5. US3: Jalali-aware version lineage inspection
 6. Polish: Full gate verification (schema, pytest, playwright, typecheck, bilingual pass)
+
+## Phase 8: Convergence
+
+- [X] T034 Prevent the cancelled correction draft from being refetched after successful cancellation, and add a browser regression assertion that navigation to `source_report_id` produces no request/response for the deleted result report, per T009/T013 (partial)
+- [X] T035 Strengthen `apps/web/e2e/tests/daily-report.spec.ts` with cell-scoped assertions proving `ثبت‌نشده`/`Not recorded` and explicit numeric `0` in editable, read-only, and summary activity-table states per FR-014/SC-004 (partial)
+- [X] T036 Strengthen the version-history browser scenario to assert the actual modifier value, result-bound correction reason with an unavailable root fallback, readable Jalali approval date-time, and unavailable approval metadata for an unapproved version per FR-014/T024 (partial)

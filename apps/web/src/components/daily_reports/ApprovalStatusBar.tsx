@@ -59,6 +59,7 @@ export function ApprovalStatusBar({
   const [showVersions, setShowVersions] = useState(false);
   const [confirmingCancellation, setConfirmingCancellation] = useState(false);
   const [cancellingCorrection, setCancellingCorrection] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
   const status = report.status;
@@ -76,7 +77,7 @@ export function ApprovalStatusBar({
   const correctionRequests = useQuery({
     queryKey: ["daily-report-correction-requests", projectId, report.report_id],
     queryFn: () => fetchCorrectionRequests(projectId, report.report_id),
-    enabled: Boolean(projectId && report.report_id && (report.version_number ?? 1) > 1),
+    enabled: Boolean(projectId && report.report_id && (report.version_number ?? 1) > 1 && !isCancelled),
   });
   const openCorrection = correctionRequests.data?.find(
     (item) =>
@@ -293,17 +294,21 @@ export function ApprovalStatusBar({
                 data-testid="report-correction-cancel-confirm-btn"
                 onClick={async () => {
                   setCancellingCorrection(true);
+                  setIsCancelled(true);
                   try {
+                    void queryClient.cancelQueries({ queryKey: ["daily-report-correction-requests", projectId, report.report_id] });
                     const cancelled = await cancelCorrectionRequest(projectId, openCorrection.id);
-                    queryClient.removeQueries({ queryKey: ["daily-report-corrections", projectId, report.report_id] });
-                    queryClient.removeQueries({ queryKey: ["daily-report-versions", projectId, report.report_id] });
-                    queryClient.removeQueries({ queryKey: ["daily-report", projectId, report.report_id] });
-                    queryClient.invalidateQueries({ queryKey: ["daily-report", projectId, cancelled.source_report_id] });
-                    queryClient.invalidateQueries({ queryKey: ["daily-report-corrections", projectId, cancelled.source_report_id] });
-                    queryClient.invalidateQueries({ queryKey: ["daily-report-versions", projectId, cancelled.source_report_id] });
-                    toast.success(t("dailyReports.correctionCancelledSuccess"));
                     navigate(`/projects/${projectId}/daily-reports/${cancelled.source_report_id}/view`);
+                    void queryClient.cancelQueries({ queryKey: ["daily-report", projectId, report.report_id] });
+                    void queryClient.cancelQueries({ queryKey: ["daily-report-correction-requests", projectId, report.report_id] });
+                    void queryClient.cancelQueries({ queryKey: ["daily-report-versions", projectId, report.report_id] });
+                    void queryClient.invalidateQueries({ queryKey: ["daily-report", projectId, cancelled.source_report_id] });
+                    void queryClient.invalidateQueries({ queryKey: ["daily-report-correction-requests", projectId, cancelled.source_report_id] });
+                    void queryClient.invalidateQueries({ queryKey: ["daily-report-versions", projectId, cancelled.source_report_id] });
+                    void queryClient.invalidateQueries({ queryKey: ["daily-reports", projectId] });
+                    toast.success(t("dailyReports.correctionCancelledSuccess"));
                   } catch (err) {
+                    setIsCancelled(false);
                     toast.error(err instanceof Error ? err.message : t("dailyReports.correctionCancelError"));
                   } finally {
                     setCancellingCorrection(false);

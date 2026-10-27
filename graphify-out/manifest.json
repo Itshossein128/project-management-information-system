@@ -3552,9 +3552,9 @@
     "semantic_hash": "ff59e33ab798157fae1a2294ac41c633"
   },
   "apps/web/e2e/tests/daily-report.spec.ts": {
-    "mtime": 1793061792.5098171,
-    "seen": 1793062093.754346,
-    "ast_hash": "8fe36a5e149ea1391fa16defa7544025",
+    "mtime": 1793087548.4834726,
+    "seen": 1793087865.7794242,
+    "ast_hash": "3e659f80c21add4bd367490a5eda6d95",
     "semantic_hash": ""
   },
   "apps/web/e2e/tests/members-wbs.spec.ts": {
@@ -4650,9 +4650,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/ApprovalStatusBar.tsx": {
-    "mtime": 1793061315.6675818,
-    "seen": 1793062093.7703154,
-    "ast_hash": "6261b817613e16e30209daf0a9e2963a",
+    "mtime": 1793087414.736433,
+    "seen": 1793087865.7938898,
+    "ast_hash": "4ada3b9021fd75bf52b874b59d914bbe",
     "semantic_hash": ""
   },
   "apps/web/src/components/daily_reports/ConcreteTab.tsx": {
@@ -7176,9 +7176,9 @@
     "semantic_hash": "8fe7c880d17216dbc9e02c12ad288519"
   },
   "apps/web/playwright-report/index.html": {
-    "mtime": 1793071241.3670306,
-    "seen": 1793071469.1545937,
-    "ast_hash": "9ef109e5712cfc77db3f313f9795fb81",
+    "mtime": 1793087608.4885504,
+    "seen": 1793087865.8217726,
+    "ast_hash": "580bacba46c4b3ed0b33b14fe0a07fe1",
     "semantic_hash": ""
   },
   "apps/web/public/robots.txt": {
@@ -18180,9 +18180,9 @@
     "semantic_hash": ""
   },
   "specs/034-daily-lifecycle-lock/tasks.md": {
-    "mtime": 1793071310.4966297,
-    "seen": 1793071469.22872,
-    "ast_hash": "edf957956886054a6efea7482fc75443",
+    "mtime": 1793087688.3016093,
+    "seen": 1793087865.8841233,
+    "ast_hash": "dae2a4ec051de7c00d42119d4d62a9ba",
     "semantic_hash": ""
   },
   "specs/035-correction-lineage-cloning/checklists/requirements.md": {
@@ -18249,6 +18249,54 @@
     "mtime": 1793060171.9092135,
     "seen": 1793062093.8723302,
     "ast_hash": "132c780ed2abddab6cb0015211d20e92",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/probe_backend.py": {
+    "mtime": 1793073970.1722083,
+    "seen": 1793087865.8070328,
+    "ast_hash": "fed79221cc36e5e540370de8fd7e3c74",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/probe_frontend.cjs": {
+    "mtime": 1793074003.7810135,
+    "seen": 1793087865.807036,
+    "ast_hash": "96f5f147a93b29fc7921ce1caf7f710a",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/GAP-SPEC-04-DAILY-OFFLINE-SYNC.md": {
+    "mtime": 1793074300.7042918,
+    "seen": 1793087865.8601067,
+    "ast_hash": "f89538628da0f0c22bee73b79392df8e",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/README.md": {
+    "mtime": 1793074300.703292,
+    "seen": 1793087865.8601093,
+    "ast_hash": "05acb92ff4d2f866a69cd7760df6dbba",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/probe-backend.txt": {
+    "mtime": 1793074107.3984127,
+    "seen": 1793087865.8601105,
+    "ast_hash": "2eb9bf814c9779b503caf66a227638a0",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/probe-frontend.txt": {
+    "mtime": 1793074004.4220097,
+    "seen": 1793087865.8601124,
+    "ast_hash": "428108b5839a868789cd2b7ddd6798b0",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/evidence/pytest-sync-batch.txt": {
+    "mtime": 1793073969.9632096,
+    "seen": 1793087865.8601136,
+    "ast_hash": "853f2101271763d43bdb06f556e53fcf",
+    "semantic_hash": ""
+  },
+  "reports_gaps/04/speckit-specify-prompts/01-PROMPT-DAILY-OFFLINE-SYNC.md": {
+    "mtime": 1793074585.8186388,
+    "seen": 1793087865.860115,
+    "ast_hash": "4de6b8b73e4c144144d217fb94a6d30d",
     "semantic_hash": ""
   }
 }

@@ -197,18 +197,35 @@ test.describe("Daily reports — auto summary", () => {
     const versionsPanel = page.getByTestId("report-versions-panel");
     await expect(versionsPanel).toBeVisible();
     await expect(versionsPanel).toContainText(/نسخه|Version/i);
+    await expect(versionsPanel).toContainText("Admin");
     await expect(versionsPanel).toContainText(/ثبت اولیه|Initial submission/);
-    await expect(versionsPanel).toContainText(/تأیید:|Approved:/i);
+    await expect(versionsPanel).toContainText(/تأیید:\s*(?:۱۴۰\d|\d{4})|Approved:/i);
+    await page.getByTestId("report-versions-btn").click();
 
     await page.getByTestId("report-correction-btn").click();
     await page.getByTestId("report-correction-reason").fill("اصلاح برای پوشش آزمون چرخه عمر گزارش");
     await page.getByTestId("report-correction-confirm-btn").click();
     await expect(page).toHaveURL(new RegExp(`/daily-reports/.+/edit`));
+    const cancelDraftUrl = page.url();
+    const cancelDraftId = cancelDraftUrl.match(/daily-reports\/([^/]+)\/edit/)?.[1]!;
+
+    let cancelledDraftRequested = false;
+    const requestListener = (req: import("@playwright/test").Request) => {
+      if (req.url().includes(`/daily-reports/${cancelDraftId}/`)) {
+        cancelledDraftRequested = true;
+      }
+    };
+
     await expect(page.getByTestId("report-correction-cancel-btn")).toBeVisible({ timeout: 15_000 });
     await page.getByTestId("report-correction-cancel-btn").click();
     await expect(page.getByTestId("report-correction-cancel-confirmation")).toBeVisible();
+
+    page.on("request", requestListener);
     await page.getByTestId("report-correction-cancel-confirm-btn").click();
     await expect(page).toHaveURL(new RegExp(`/daily-reports/${reportId}/view`));
+    page.off("request", requestListener);
+
+    expect(cancelledDraftRequested).toBe(false);
     await expect(page.getByTestId("report-correction-cancel-btn")).toHaveCount(0);
 
     // T038: Full approved correction cycle with enriched version history lineage
@@ -219,6 +236,18 @@ test.describe("Daily reports — auto summary", () => {
     const v2EditUrl = page.url();
     const v2ReportId = v2EditUrl.match(/daily-reports\/([^/]+)\/edit/)?.[1]!;
 
+    // T036: Assert lineage metadata while v2 is still an unapproved draft
+    await page.getByTestId("report-versions-btn").click();
+    const draftV2History = page.getByTestId("report-versions-panel");
+    await expect(draftV2History).toBeVisible();
+    await expect(draftV2History).toContainText(/نسخه 2|Version 2/i, { timeout: 15_000 });
+    await expect(draftV2History).toContainText("Admin");
+    await expect(draftV2History).toContainText("اصلاح نهایی برای ثبت نسخه دوم");
+    await expect(draftV2History).toContainText(/ثبت اولیه|Initial submission/);
+    await expect(draftV2History).toContainText(/تأیید:\s*ثبت‌نشده|Approved:\s*Not available/);
+    await expect(draftV2History).toContainText(/تأیید:\s*(?:۱۴۰\d|\d{4})|Approved:/i);
+    await page.getByTestId("report-versions-btn").click();
+
     await page.getByTestId("report-submit-btn").click();
     await expect(page.getByTestId("report-status-badge")).toContainText(/ارسال|submitted/i, { timeout: 15_000 });
 
@@ -228,10 +257,12 @@ test.describe("Daily reports — auto summary", () => {
     await page.getByTestId("report-versions-btn").click();
     const vHistoryPanel = page.getByTestId("report-versions-panel");
     await expect(vHistoryPanel).toBeVisible();
+    await expect(vHistoryPanel).toContainText(/نسخه 2|Version 2/i, { timeout: 15_000 });
+    await expect(vHistoryPanel).toContainText("Admin");
     await expect(vHistoryPanel).toContainText("اصلاح نهایی برای ثبت نسخه دوم");
     await expect(vHistoryPanel).toContainText(/ثبت اولیه|Initial submission/);
     await expect(vHistoryPanel).toContainText(/نسخه فعلی|جاری|Current version/);
-    await expect(vHistoryPanel).toContainText(/تأیید:|Approved:/i);
+    await expect(vHistoryPanel).toContainText(/تأیید:\s*(?:۱۴۰\d|\d{4})|Approved:/i);
 
     // Navigate to v1 read-only historical view
     await page.getByTestId("report-version-open-1").click();
@@ -284,7 +315,7 @@ test.describe("Daily reports — auto summary", () => {
             row_number: 1,
             shift: "shift_1",
             activity_ref: activityId,
-            activity_description: "Qty Activity",
+            activity_description: "Qty Activity Unset",
             unit: "m3",
             quantity: null,
             quantity_measured: false,
@@ -305,15 +336,39 @@ test.describe("Daily reports — auto summary", () => {
     await page.goto(`${base}/daily-reports/${reportId}/view`);
     await expect(page.getByTestId("daily-report-summary-view")).toBeVisible({ timeout: 15_000 });
     const summaryView = page.getByTestId("daily-report-summary-view");
-    await expect(summaryView.getByTestId("unset-quantity-badge")).toBeVisible();
-    await expect(summaryView.getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
-    await expect(summaryView).toContainText("0");
+    const unsetSummaryRow = summaryView.locator("tr", { hasText: "Qty Activity Unset" });
+    await expect(unsetSummaryRow.getByTestId("unset-quantity-badge")).toBeVisible();
+    await expect(unsetSummaryRow.getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+
+    const zeroSummaryRow = summaryView.locator("tr", { hasText: "Qty Activity Zero" });
+    await expect(zeroSummaryRow.getByTestId("unset-quantity-badge")).toHaveCount(0);
+    await expect(zeroSummaryRow).toContainText("0");
 
     await page.goto(`${base}/daily-reports/${reportId}/edit`);
     await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
-    const editableCell = page.getByTestId("activity-quantity-editable");
-    await expect(editableCell).toBeVisible();
-    await expect(editableCell.getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+    const unsetEditRow = page.locator("tbody tr").first();
+    await expect(unsetEditRow.getByTestId("activity-quantity-editable")).toBeVisible();
+    await expect(unsetEditRow.getByTestId("activity-quantity-editable").getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+
+    const zeroEditRow = page.locator("tbody tr").nth(1);
+    await expect(zeroEditRow.getByTestId("activity-quantity-editable")).toHaveCount(0);
+    const zeroInput = zeroEditRow.locator('input[type="number"]').last();
+    await expect(zeroInput).toHaveValue(/^0(\.0+)?$/);
     await expect(page.getByTestId("activity-quantity-readonly")).toHaveCount(0);
+
+    // Read-only activity grid on approved report
+    await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/submit/`, { headers });
+    await page.request.post(`${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/approve/`, { headers });
+
+    await page.goto(`${base}/daily-reports/${reportId}/edit`);
+    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
+    const unsetReadOnlyRow = page.locator("tbody tr").first();
+    await expect(unsetReadOnlyRow.getByTestId("activity-quantity-readonly")).toBeVisible();
+    await expect(unsetReadOnlyRow.getByTestId("activity-quantity-readonly").getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+
+    const zeroReadOnlyRow = page.locator("tbody tr").nth(1);
+    await expect(zeroReadOnlyRow.getByTestId("activity-quantity-readonly")).toBeVisible();
+    await expect(zeroReadOnlyRow.getByTestId("activity-quantity-readonly")).toContainText(/0/);
+    await expect(zeroReadOnlyRow.getByTestId("activity-quantity-readonly").getByTestId("unset-quantity-badge")).toHaveCount(0);
   });
 });

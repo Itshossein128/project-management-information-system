@@ -1,0 +1,7 @@
+POST_COLLECTION: parser=null; batch omits activities; client_id absent; row-status map empty
+PATCH_WITHOUT_SNAPSHOT: activities=[] despite queued quantity=3
+POST_FALSE_SUCCESS: synced=1; queue cleared although new row omitted
+FAILED_ROW: field error not stored; syncPendingQueue() makes zero requests for failed-only queue
+INTERRUPTED_SYNC: syncing-only queue makes zero requests on next run
+LABOR_SNAPSHOT: latest cached labor does reach builder when an active queue entry exists (control)
+6 audit scenarios completed; storage/network mocked; no browser persistence claim.
