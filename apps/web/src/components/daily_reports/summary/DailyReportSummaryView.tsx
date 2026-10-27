@@ -733,7 +733,16 @@ export function DailyReportSummaryView({
             t("dailyReports.summary.colSources", "منابع"),
           ]}
           rows={generalActivities.map((row) => [
-            row.activity_description, row.location || "—", row.quantity ?? "—", row.unit ?? "—", row.notes || "—",
+            row.activity_description,
+            row.location || "—",
+            // General activities carry no measurable flag: nullability only.
+            <UnsetQuantityBadge
+              key={`general-quantity-${row.id}`}
+              quantity={row.quantity}
+              quantityMeasured={undefined}
+            />,
+            row.unit ?? "—",
+            row.notes || "—",
             <ProvenanceCell key={`general-${row.id}`} provenance={row.provenance} projectId={resolvedProjectId} reportDate={report.report_date} />,
           ])}
         />

@@ -2465,7 +2465,13 @@
     "reviewedAtBy": "Reviewed: {{date}} — {{user}}",
     "approvedAtBy": "Locked: {{date}} — {{user}}",
     "correctionReason": "Correction reason",
-    "unsetQuantity": "Not recorded",
+    "unsetQuantity": "Unset",
+    "validationErrors": {
+      "report_not_in_submittable_state": "Only draft or rejected reports can be submitted.",
+      "rejection_reason_required": "Rejection reason is required.",
+      "rejection_reason_min_length_10": "Rejection reason must be at least 10 characters.",
+      "quantity_unset_invalid": "Work quantity must be specified; enter zero if no work was performed."
+    },
     "reconciliation": "Material reconciliation",
     "match": "Match",
     "mismatch": "Mismatch",

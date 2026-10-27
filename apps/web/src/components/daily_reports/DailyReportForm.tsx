@@ -6,6 +6,8 @@ import { CloudOff, Save } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useDailyReportForm } from "@/app/hooks/useDailyReportForm";
 import { usePermission } from "@/app/contexts/project-context";
+import { dailyReportWorkflowErrorMessage } from "./workflow-error-message";
+
 import { PATHS } from "@/app/routeVars";
 import { apiJson } from "@/app/lib/api-client";
 import { asList, fetchProjectContractors } from "@/app/lib/api/central-data";
@@ -85,7 +87,7 @@ export function DailyReportForm({
   projectId: string;
   reportId?: string;
 }) {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -251,7 +253,7 @@ export function DailyReportForm({
       }
       refetch();
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => toast.error(dailyReportWorkflowErrorMessage(e, t)),
   });
 
   const tabProps = {

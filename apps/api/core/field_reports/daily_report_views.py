@@ -344,15 +344,30 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل رد هستند')
         reason = (request.data.get('reason') or '').strip()
         if not reason:
-            raise ValidationError({'reason': [lifecycle_error_detail(
-                'rejection_reason_required',
-                request=request,
-            )]})
+            # Same localized ErrorDetail under both `detail` and `reason`: the
+            # exception handler picks `detail` for an unprefixed error.message
+            # while the reason field error survives in error.details.
+            raise ValidationError({
+                'detail': [lifecycle_error_detail(
+                    'rejection_reason_required',
+                    request=request,
+                )],
+                'reason': [lifecycle_error_detail(
+                    'rejection_reason_required',
+                    request=request,
+                )],
+            })
         if len(reason) < 10:
-            raise ValidationError({'reason': [lifecycle_error_detail(
-                'rejection_reason_min_length_10',
-                request=request,
-            )]})
+            raise ValidationError({
+                'detail': [lifecycle_error_detail(
+                    'rejection_reason_min_length_10',
+                    request=request,
+                )],
+                'reason': [lifecycle_error_detail(
+                    'rejection_reason_min_length_10',
+                    request=request,
+                )],
+            })
         services.reject_report(instance, request.user, reason)
         return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
 

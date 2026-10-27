@@ -2466,6 +2466,12 @@
     "approvedAtBy": "قفل: {{date}} — {{user}}",
     "correctionReason": "دلیل درخواست اصلاح",
     "unsetQuantity": "ثبت‌نشده",
+    "validationErrors": {
+      "report_not_in_submittable_state": "فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند",
+      "rejection_reason_required": "دلیل رد الزامی است",
+      "rejection_reason_min_length_10": "دلیل رد باید حداقل ۱۰ کاراکتر باشد",
+      "quantity_unset_invalid": "مقدار کارکرد باید مشخص شود؛ در صورت عدم کارکرد عدد صفر وارد شود"
+    },
     "reconciliation": "تطبیق مصالح",
     "match": "مطابق",
     "mismatch": "مغایرت",

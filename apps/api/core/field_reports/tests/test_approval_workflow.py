@@ -1,4 +1,6 @@
 import pytest
+from decimal import Decimal
+from django.utils import timezone
 from rest_framework import status
 
 from field_reports.models import (
@@ -191,7 +193,7 @@ class TestApprovalWorkflow:
         )
         assert rej_missing_en.status_code == status.HTTP_400_BAD_REQUEST
         assert rej_missing_en.data['error']['code'] == 'rejection_reason_required'
-        assert 'Rejection reason is required.' in rej_missing_en.data['error']['message']
+        assert rej_missing_en.data['error']['message'] == 'Rejection reason is required.'
 
         rej_short_en = auth_client.post(
             f'{base_url}{draft_report.id}/reject/',
@@ -201,7 +203,7 @@ class TestApprovalWorkflow:
         )
         assert rej_short_en.status_code == status.HTTP_400_BAD_REQUEST
         assert rej_short_en.data['error']['code'] == 'rejection_reason_min_length_10'
-        assert 'Rejection reason must be at least 10 characters.' in rej_short_en.data['error']['message']
+        assert rej_short_en.data['error']['message'] == 'Rejection reason must be at least 10 characters.'
 
     def test_submit_blocks_incomplete_equipment_times(
         self, auth_client, base_url, draft_report,
@@ -233,3 +235,339 @@ class TestApprovalWorkflow:
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert 'submit_validation' in str(response.data)
+
+
+FA_QUANTITY_UNSET_MSG = 'مقدار کارکرد باید مشخص شود؛ در صورت عدم کارکرد عدد صفر وارد شود'
+EN_QUANTITY_UNSET_MSG = 'Work quantity must be specified; enter zero if no work was performed.'
+
+
+def _add_measured_row(report, quantity, measured=True, description='کار اجرایی'):
+    kwargs = {}
+    if quantity is not None:
+        kwargs['quantity'] = quantity
+    return DailyReportActivity.objects.create(
+        report=report,
+        activity_description=description,
+        shift=ActivityRowShift.SHIFT_1,
+        quantity_measured=measured,
+        **kwargs,
+    )
+
+
+def _lifecycle_snapshot(report):
+    report.refresh_from_db()
+    return {
+        'status': report.status,
+        'submitted_by': report.submitted_by,
+        'submitted_at': report.submitted_at,
+        'reviewed_by': report.reviewed_by,
+        'reviewed_at': report.reviewed_at,
+        'rejection_reason': report.rejection_reason,
+    }
+
+
+def _assert_lifecycle_unchanged(report, snapshot, *, expected_status=None, message='failed action must not mutate lifecycle fields'):
+    report.refresh_from_db()
+    if expected_status is not None:
+        assert report.status == expected_status, f'failed action changed report status: {report.status} != {expected_status}'
+    assert _lifecycle_snapshot(report) == snapshot, message
+
+
+@pytest.mark.django_db
+class TestMeasuredNullRefusal:
+    """US1 (feature 036): submit refuses live measured-but-unset rows, accepts explicit zero."""
+
+    def test_measured_null_among_zero_and_positive_rows_blocks_submit(self, auth_client, base_url, draft_report):
+        zero_row = _add_measured_row(draft_report, Decimal('0.00'), description='صفر')
+        positive_row = _add_measured_row(draft_report, Decimal('3.5'), description='مثبت')
+        null_row = _add_measured_row(draft_report, None, description='نامشخص')
+        lifecycle = _lifecycle_snapshot(draft_report)
+
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error']['code'] == 'quantity_unset_invalid'
+        assert response.data['error']['message'] == FA_QUANTITY_UNSET_MSG
+
+        # A failed submit must not mutate stored quantity state or lifecycle fields.
+        _assert_lifecycle_unchanged(draft_report, lifecycle)
+        zero_row.refresh_from_db()
+        positive_row.refresh_from_db()
+        null_row.refresh_from_db()
+        assert zero_row.quantity == Decimal('0.0000') and zero_row.quantity_measured is True
+        assert positive_row.quantity == Decimal('3.5000') and positive_row.quantity_measured is True
+        assert null_row.quantity is None and null_row.quantity_measured is True
+
+    def test_measured_null_in_rejected_state_blocks_resubmit(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, Decimal('2'), description='اولیه')
+        assert auth_client.post(f'{base_url}{draft_report.id}/submit/').status_code == status.HTTP_200_OK
+        reject = auth_client.post(
+            f'{base_url}{draft_report.id}/reject/',
+            {'reason': 'اطلاعات ناقص است و باید اصلاح شود'},
+            format='json',
+        )
+        assert reject.status_code == status.HTTP_200_OK
+        _add_measured_row(draft_report, None, description='بازگشایی بدون مقدار')
+        lifecycle = _lifecycle_snapshot(draft_report)
+
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error']['code'] == 'quantity_unset_invalid'
+        assert response.data['error']['message'] == FA_QUANTITY_UNSET_MSG
+        # Rejected lifecycle fields (including the persisted reason) stay unchanged.
+        _assert_lifecycle_unchanged(draft_report, lifecycle, expected_status=ReportStatus.REJECTED)
+
+    def test_multiple_measured_null_rows_block_submit(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, None, description='فقدان ۱', measured=True)
+        _add_measured_row(draft_report, None, description='فقدان ۲', measured=True)
+        lifecycle = _lifecycle_snapshot(draft_report)
+
+        response = auth_client.post(
+            f'{base_url}{draft_report.id}/submit/', HTTP_ACCEPT_LANGUAGE='en-US,en;q=0.9',
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error']['code'] == 'quantity_unset_invalid'
+        assert response.data['error']['message'] == EN_QUANTITY_UNSET_MSG
+        _assert_lifecycle_unchanged(draft_report, lifecycle, expected_status=ReportStatus.DRAFT)
+
+    def test_deleted_measured_null_row_does_not_block(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, Decimal('4'), description='معتبر')
+        stub_row = _add_measured_row(draft_report, None, description='حذف‌شده')
+        stub_row.is_deleted = True
+        stub_row.deleted_at = timezone.now()
+        stub_row.save(update_fields=['is_deleted', 'deleted_at'])
+
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['status'] == 'submitted'
+
+    def test_explicit_zero_forms_pass_and_persist(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, Decimal('0'), description='صفر ۰')
+        _add_measured_row(draft_report, Decimal('0.0'), description='صفر ۰٫۰')
+        _add_measured_row(draft_report, Decimal('0.00'), description='صفر ۰٫۰۰')
+
+        response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['status'] == 'submitted'
+
+        draft_report.refresh_from_db()
+        assert draft_report.status == ReportStatus.SUBMITTED
+        quantities = list(
+            DailyReportActivity.objects.filter(report=draft_report).values_list('quantity', flat=True),
+        )
+        assert all(q == Decimal('0.0000') for q in quantities), quantities
+
+
+def _create_foreign_report(user):
+    """Second project owned by ``user`` with a draft daily report (US1 T009)."""
+    from projects.services import create_project_with_creator
+
+    foreign_project = create_project_with_creator(
+        creator=user,
+        project_code='PRJ-FGN-036',
+        project_name='Foreign Project 036',
+        employer='Other Employer',
+        start_date='2024-01-01',
+    )
+    return DailyReport.objects.create(
+        project=foreign_project, report_date='2024-08-02', created_by=user, updated_by=user,
+        prepared_by=user,
+    )
+
+
+@pytest.mark.django_db
+class TestWorkflowPermissionBoundaries:
+    """US1 T009: denial statuses and cross-project no-mutation guarantees."""
+
+    def test_caller_without_edit_reports_cannot_submit(self, api_client, member, base_url, draft_report):
+        # ``member`` (other_user, viewer role) has no edit_reports permission.
+        _add_measured_row(draft_report, Decimal('1'), description='مجاز')
+        snapshot = _lifecycle_snapshot(draft_report)
+
+        api_client.force_authenticate(user=member.user)
+        response = api_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        _assert_lifecycle_unchanged(draft_report, snapshot, expected_status=ReportStatus.DRAFT)
+
+    def test_caller_without_approve_reports_cannot_reject(self, api_client, viewer_member, base_url, draft_report):
+        # site_supervisor (viewer_member) has edit_reports but NOT approve_reports.
+        _add_measured_row(draft_report, Decimal('1'), description='مجاز')
+        auth_sub = api_client  # same user; submit succeeds (edit_reports), reject must fail
+        auth_sub.force_authenticate(user=viewer_member.user)
+        submit = api_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert submit.status_code == status.HTTP_200_OK
+        snapshot = _lifecycle_snapshot(draft_report)
+
+        response = api_client.post(
+            f'{base_url}{draft_report.id}/reject/',
+            {'reason': 'اطلاعات ناقص است و باید اصلاح شود'},
+            format='json',
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        _assert_lifecycle_unchanged(draft_report, snapshot, expected_status=ReportStatus.SUBMITTED)
+
+    def test_foreign_project_report_is_denied_and_untouched(self, auth_client, other_user, base_url):
+        foreign_report = _create_foreign_report(other_user)
+        foreign_project_id = foreign_report.project_id
+        snapshot = _lifecycle_snapshot(foreign_report)
+
+        response = auth_client.post(
+            f'/api/v1/projects/{foreign_project_id}/daily-reports/{foreign_report.id}/submit/',
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        _assert_lifecycle_unchanged(foreign_report, snapshot, expected_status=ReportStatus.DRAFT)
+
+
+FA_REPORT_NOT_SUBMITTABLE_MSG = 'فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند'
+EN_REPORT_NOT_SUBMITTABLE_MSG = 'Only draft or rejected reports can be submitted.'
+FA_REASON_REQUIRED_MSG = 'دلیل رد الزامی است'
+EN_REASON_REQUIRED_MSG = 'Rejection reason is required.'
+FA_REASON_MIN_MSG = 'دلیل رد باید حداقل ۱۰ کاراکتر باشد'
+EN_REASON_MIN_MSG = 'Rejection reason must be at least 10 characters.'
+REJECT_REASON_VALID = 'اطلاعات ناقص است و باید اصلاح شود'
+
+
+def _reject(auth_client, base_url, report_id, payload, accept_language=None):
+    kwargs = {'format': 'json'}
+    if accept_language:
+        kwargs['HTTP_ACCEPT_LANGUAGE'] = accept_language
+    return auth_client.post(f'{base_url}{report_id.id if hasattr(report_id, "id") else report_id}/reject/', payload, **kwargs)
+
+
+@pytest.mark.django_db
+class TestRejectionFeedbackContract:
+    """US2 (feature 036): stable codes and exact localized workflow feedback."""
+
+    def _submitted_report(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, Decimal('1'), description='پاسخ')
+        assert auth_client.post(f'{base_url}{draft_report.id}/submit/').status_code == status.HTTP_200_OK
+        return draft_report
+
+    def test_submit_refused_from_every_later_state(self, auth_client, base_url, draft_report):
+        _add_measured_row(draft_report, Decimal('1'))
+        auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        auth_client.post(f'{base_url}{draft_report.id}/review/')
+
+        for accept_language, expected in (
+            ('fa,en;q=0.9', FA_REPORT_NOT_SUBMITTABLE_MSG),
+            ('en-US,en;q=0.9', EN_REPORT_NOT_SUBMITTABLE_MSG),
+        ):
+            response = auth_client.post(
+                f'{base_url}{draft_report.id}/submit/', HTTP_ACCEPT_LANGUAGE=accept_language,
+            )
+            assert response.status_code == status.HTTP_400_BAD_REQUEST
+            assert response.data['error']['code'] == 'report_not_in_submittable_state'
+            assert response.data['error']['message'] == expected
+
+        draft_report.refresh_from_db()
+        assert draft_report.status == ReportStatus.UNDER_REVIEW
+
+        # Approved state is also not submittable.
+        auth_client.post(f'{base_url}{draft_report.id}/approve/')
+        approved = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert approved.status_code == status.HTTP_400_BAD_REQUEST
+        assert approved.data['error']['code'] == 'report_not_in_submittable_state'
+
+    def test_reject_mandatory_in_both_valid_source_states(self, auth_client, base_url, draft_report):
+        # submitted → rejected
+        self._submitted_report(auth_client, base_url, draft_report)
+        rejected = _reject(auth_client, base_url, draft_report, {'reason': ' کوتاه‌ها '})  # trimmed 8 → min length
+        assert rejected.status_code == status.HTTP_400_BAD_REQUEST
+        assert rejected.data['error']['code'] == 'rejection_reason_min_length_10'
+        assert rejected.data['error']['message'] == FA_REASON_MIN_MSG
+        assert rejected.data['error']['details']['reason'][0] == FA_REASON_MIN_MSG
+
+        ok = _reject(auth_client, base_url, draft_report, {'reason': REJECT_REASON_VALID})
+        assert ok.status_code == status.HTTP_200_OK
+        assert ok.data['status'] == 'rejected'
+
+        # under_review → rejected (second copy: submit → review → reject)
+        _add_measured_row(draft_report, Decimal('2'), description='سطر دوم')
+        resubmit = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert resubmit.status_code == status.HTTP_200_OK
+        review = auth_client.post(f'{base_url}{draft_report.id}/review/')
+        assert review.status_code == status.HTTP_200_OK
+        ok2 = _reject(auth_client, base_url, draft_report, {'reason': 'دلیل کوتاه'})
+        assert ok2.status_code == status.HTTP_200_OK
+        assert ok2.data['status'] == 'rejected'
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason == 'دلیل کوتاه'
+
+    def test_reason_whitespace_and_boundary_cases_en(self, auth_client, base_url, draft_report):
+        self._submitted_report(auth_client, base_url, draft_report)
+        required_cases = [
+            ('missing', None),
+            ('null', None),
+            ('empty', ''),
+            ('spaces', '   '),
+            ('tabs/newlines', ' \t\n\r '),
+        ]
+        for case_name, payload_reason in required_cases:
+            payload = {'reason': payload_reason} if case_name != 'missing' else {}
+            response = _reject(
+                auth_client, base_url, draft_report, payload, accept_language='en-US,en;q=0.9',
+            )
+            assert response.status_code == status.HTTP_400_BAD_REQUEST, case_name
+            assert response.data['error']['code'] == 'rejection_reason_required', case_name
+            assert response.data['error']['message'] == EN_REASON_REQUIRED_MSG, case_name
+            assert response.data['error']['details']['reason'][0] == EN_REASON_REQUIRED_MSG, case_name
+
+        for short in ('rejsNine9', 'shortmsg7', 'کوتاهی'):
+            trimmed_len = len(short.strip())
+            assert trimmed_len < 10
+            response = _reject(
+                auth_client, base_url, draft_report, {'reason': short}, accept_language='en-US,en;q=0.9',
+            )
+            assert response.status_code == status.HTTP_400_BAD_REQUEST, short
+            assert response.data['error']['code'] == 'rejection_reason_min_length_10', short
+            assert response.data['error']['message'] == EN_REASON_MIN_MSG, short
+
+        # Internal whitespace counts normally; exactly-10 trimmed reason passes.
+        exactly_ten = 'exactlyten'
+        ok_en = _reject(
+            auth_client, base_url, draft_report, {'reason': f'  {exactly_ten}  '},
+            accept_language='en-US,en;q=0.9',
+        )
+        assert ok_en.status_code == status.HTTP_200_OK
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason == exactly_ten
+
+    def test_reason_exact_bilingual_messages_fa(self, auth_client, base_url, draft_report):
+        self._submitted_report(auth_client, base_url, draft_report)
+        required = _reject(auth_client, base_url, draft_report, {}, accept_language='fa,en;q=0.9')
+        assert required.status_code == status.HTTP_400_BAD_REQUEST
+        assert required.data['error']['code'] == 'rejection_reason_required'
+        assert required.data['error']['message'] == FA_REASON_REQUIRED_MSG
+        assert required.data['error']['details']['reason'][0] == FA_REASON_REQUIRED_MSG
+
+        short = _reject(auth_client, base_url, draft_report, {'reason': 'کوتاه'}, accept_language='fa,en;q=0.9')
+        assert short.data['error']['code'] == 'rejection_reason_min_length_10'
+        assert short.data['error']['message'] == FA_REASON_MIN_MSG
+
+        exactly_ten_fa = 'دلیل کوتاه'
+        ok_fa = _reject(auth_client, base_url, draft_report, {'reason': exactly_ten_fa}, accept_language='fa,en;q=0.9')
+        assert ok_fa.status_code == status.HTTP_200_OK
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason == exactly_ten_fa
+
+        # Cycle back so the long-reason reject runs from under_review again.
+        resubmit = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert resubmit.status_code == status.HTTP_200_OK
+        assert auth_client.post(f'{base_url}{draft_report.id}/review/').status_code == status.HTTP_200_OK
+
+        long_reason = 'این دلیل رد کامل طولانی‌تر از ده کاراکتر است'
+        ok_long_fa = _reject(auth_client, base_url, draft_report, {'reason': long_reason})
+        assert ok_long_fa.status_code == status.HTTP_200_OK
+        draft_report.refresh_from_db()
+        assert draft_report.rejection_reason == long_reason
+
+    def test_invalid_reason_leaves_report_untouched(self, auth_client, base_url, draft_report):
+        self._submitted_report(auth_client, base_url, draft_report)
+        snapshot = _lifecycle_snapshot(draft_report)
+
+        short = _reject(auth_client, base_url, draft_report, {'reason': 'کوتاه'})
+        assert short.status_code == status.HTTP_400_BAD_REQUEST
+        _assert_lifecycle_unchanged(draft_report, snapshot)
+
+        missing = _reject(auth_client, base_url, draft_report, {})
+        assert missing.status_code == status.HTTP_400_BAD_REQUEST
+        _assert_lifecycle_unchanged(draft_report, snapshot)

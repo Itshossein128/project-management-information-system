@@ -17,5 +17,15 @@ export function UnsetQuantityBadge({
 }) {
   const { t } = useTranslation();
   if (!isUnsetQuantity(quantity, quantityMeasured)) return <>{quantity}</>;
-  return <Badge variant="neutral" label={t("dailyReports.unsetQuantity", "ثبت‌نشده")} data-testid="unset-quantity-badge" />;
+  // Snapshot (feature 036): unset quantity earns a local caution outline over
+  // the shared neutral Badge styling — the muted background/compact text stay,
+  // only this badge gains the warning-colored ring in both themes.
+  return (
+    <Badge
+      variant="neutral"
+      label={t("dailyReports.unsetQuantity", "ثبت‌نشده")}
+      data-testid="unset-quantity-badge"
+      className="ring-2 ring-inset ring-warning-500 dark:ring-warning-400 border-0"
+    />
+  );
 }

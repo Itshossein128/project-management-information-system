@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router";
 import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { usePermission } from "@/app/contexts/project-context";
+import { dailyReportWorkflowErrorMessage } from "@/components/daily_reports/workflow-error-message";
 import { PATHS } from "@/app/routeVars";
 import { fetchActivities } from "@/app/lib/api/activities";
 import { fetchProject } from "@/app/lib/api/projects";
@@ -136,7 +137,7 @@ export default function DailyReportViewPage() {
       toast.success("عملیات انجام شد");
       void refetch();
     },
-    onError: (e) => toast.error((e as Error).message),
+    onError: (e) => toast.error(dailyReportWorkflowErrorMessage(e, t)),
   });
 
   const exportPdf = async () => {
