@@ -152,8 +152,12 @@ class BudgetVersionSerializer(serializers.ModelSerializer):
         ]
 
     def _get_active_lines(self, obj):
+        if hasattr(obj, '_cached_active_lines'):
+            return obj._cached_active_lines
         if hasattr(obj, '_prefetched_objects_cache') and 'lines' in obj._prefetched_objects_cache:
-            return [line for line in obj.lines.all() if not line.is_deleted]
+            # ⚡ Bolt: Cache filtered active lines on instance to eliminate duplicate filtering in get_line_count & get_total_amount
+            obj._cached_active_lines = [line for line in obj.lines.all() if not line.is_deleted]
+            return obj._cached_active_lines
         return None
 
     def get_line_count(self, obj):
