@@ -73,8 +73,10 @@ def approve_report(report: DailyReport, user) -> DailyReport:
     )
 
     from field_reports.services.correction_service import mark_correction_approved_for_report
+    from field_reports.services.activity_log import invalidate_activity_log_cache
 
     mark_correction_approved_for_report(report, user)
+    invalidate_activity_log_cache(report.project_id)
     _publish_approved(report)
     _enqueue_progress_recalc(report)
     _notify_approved(report)
@@ -92,6 +94,8 @@ def reject_report(report: DailyReport, user, reason: str) -> DailyReport:
             'status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_by', 'updated_at',
         ],
     )
+    from field_reports.services.activity_log import invalidate_activity_log_cache
+    invalidate_activity_log_cache(report.project_id)
     _notify_rejected(report)
     return report
 

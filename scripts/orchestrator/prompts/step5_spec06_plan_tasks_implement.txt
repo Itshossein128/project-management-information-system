@@ -1,0 +1,49 @@
+You are an expert full-stack AI engineer executing `speckit-plan`, `speckit-tasks`, and `speckit-implement` sequentially in a single session in this codebase: /home/hossein/Desktop/projects/building-management
+
+The active feature is `specs/039-auto-daily-rollup` (refer to `.specify/feature.json`).
+
+============================================================
+STAGE 1: speckit-plan
+============================================================
+Follow `.agents/skills/speckit-plan/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec` to inspect context.
+2. Read `specs/039-auto-daily-rollup/spec.md`, `.specify/memory/constitution.md`, and `AGENTS.md`.
+3. Generate the required design artifacts in `specs/039-auto-daily-rollup/`:
+   - `plan.md` (Implementation architecture, tech decisions, schema additions, contracts)
+   - `research.md` (Design choices, alternatives considered)
+   - `data-model.md` (Entities, fields, relationships: `contractor_ref` and `contractor_name` on `DailyReportLabor`, `is_auto_summary`, `weather_source`, `aggregated_at_jalali`)
+   - `contracts/` (API endpoint contracts for `GET /by-date/`, child collection 400 `derived_collection_read_only`, activity log serialization with `source_discipline` and `parcel`)
+   - `quickstart.md` (Verification commands, isolated DB setup, tests)
+
+============================================================
+STAGE 2: speckit-tasks
+============================================================
+Follow `.agents/skills/speckit-tasks/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec --require-plan` to verify prerequisites.
+2. Read `specs/039-auto-daily-rollup/plan.md`, `spec.md`, and related design artifacts.
+3. Generate `specs/039-auto-daily-rollup/tasks.md`:
+   - Structured by phases: Setup, Foundational safety, User Stories (US1 through US7), and Polish/Cross-Cutting Verification.
+   - Every task has an ID (`T001`, `T002`, ...), clear file path, exact action, and test verification rule.
+   - Ensure TDD workflow (tests first, make green).
+
+============================================================
+STAGE 3: speckit-implement
+============================================================
+Follow `.agents/skills/speckit-implement/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-tasks --include-tasks` to check tasks.
+2. Read `tasks.md` and execute the tasks in order:
+   - Backend in `apps/api/core/`:
+     - Update `by_date` endpoint: automatically provision draft shell with `is_auto_summary=True`, requested shift, and 200 OK when report does not exist.
+     - Update manpower aggregation to bucket by `(labor_category, resolved_job_title, contractor_ref)` and persist contractor on `DailyReportLabor`.
+     - Ensure derived collections return 400 `derived_collection_read_only` on direct POST/DELETE.
+     - Ensure weather rollup hierarchy and `weather_source='overridden_by_manager'` audit tag.
+     - Update activity-log serialization to include `source_discipline` and `parcel`, add multi-select filters, and invalidate cache on report approval.
+     - Create and apply any necessary database migrations.
+     - Run backend tests with `apps/api/.venv/bin/python -m pytest` with Postgres (5433) and Redis (6379).
+   - Frontend in `apps/web/src/`:
+     - Update `IncompletenessBanner.tsx` to render green success banner when all required disciplines submitted.
+     - Ensure `DailyReportForm.tsx` locks or redirects auto-summary reports.
+     - Update activity-log table with discipline and parcel columns/filters.
+     - Run `pnpm --filter web build` to verify clean build.
+   - Mark completed tasks with `[X]` in `tasks.md`.
+3. Provide a detailed final report of all implemented tasks, test outcomes, and verified features.

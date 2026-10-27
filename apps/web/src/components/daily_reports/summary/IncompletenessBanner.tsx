@@ -33,10 +33,27 @@ export function IncompletenessBanner({
 
   const completeness = aggregation.completeness;
 
+  const renderCompleteBanner = () => (
+    <div
+      role='status'
+      className='mb-4 rounded-lg border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-950 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-100'
+      data-testid='daily-report-complete-banner'
+    >
+      <div className='font-semibold flex items-center gap-2'>
+        <span>
+          {t(
+            "dailyReports.summary.completeTitle",
+            "تمام گزارش‌های دیسیپلین دریافت و تجمیع شدند",
+          )}
+        </span>
+      </div>
+    </div>
+  );
+
   // Modern canonical completeness handling (Feature 032, US3)
   if (completeness) {
     if (completeness.state === "complete") {
-      return null;
+      return renderCompleteBanner();
     }
 
     if (completeness.state === "configuration_incomplete") {
@@ -133,7 +150,7 @@ export function IncompletenessBanner({
   }
 
   // Fallback for legacy format
-  if (!aggregation.is_partial) return null;
+  if (!aggregation.is_partial) return renderCompleteBanner();
   const missing = (aggregation.missing_disciplines || [])
     .map((d) => LEGACY_DISCIPLINE_LABELS[d] ?? d)
     .join("، ");

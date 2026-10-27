@@ -302,11 +302,18 @@ export function DailyReportSummaryView({
           </div>
           <div>
             <dt className='text-muted-foreground'>شرایط جوی</dt>
-            <dd>
-              {report.weather_condition_label ?? "—"}
-              {report.aggregation?.weather_source === "override"
-                ? ` (${t("dailyReports.summary.override", "لغو خودکار")})`
-                : ""}
+            <dd className='flex items-center gap-1.5 flex-wrap'>
+              <span>{report.weather_condition_label ?? "—"}</span>
+              {report.aggregation?.weather_source === "overridden_by_manager" ||
+              report.aggregation?.weather_source === "override" ||
+              report.weather_override ? (
+                <span
+                  data-testid='weather-manager-override-badge'
+                  className='inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200'
+                >
+                  {t("dailyReports.summary.managerOverrideBadge", "بازنویسی توسط مدیر")}
+                </span>
+              ) : null}
             </dd>
           </div>
           <div>
@@ -353,6 +360,7 @@ export function DailyReportSummaryView({
         <SimpleTable
           headers={[
             t("dailyReports.summary.colJobTitle", "عنوان شغلی"),
+            t("dailyReports.summary.colContractor", "پیمانکار"),
             t("dailyReports.summary.colPresent", "حاضر"),
             t("dailyReports.summary.colLeave", "مرخصی"),
             t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
@@ -362,6 +370,7 @@ export function DailyReportSummaryView({
           ]}
           rows={indirect.map((r) => [
             r.job_title,
+            r.contractor_name || "—",
             r.present_count ?? r.shift_1_count,
             r.leave_count ?? r.absence_count ?? 0,
             r.overtime_hours ?? 0,
@@ -419,6 +428,7 @@ export function DailyReportSummaryView({
         <SimpleTable
           headers={[
             t("dailyReports.summary.colJobTitle", "عنوان شغلی"),
+            t("dailyReports.summary.colContractor", "پیمانکار"),
             t("dailyReports.summary.colPresent", "حاضر"),
             t("dailyReports.summary.colLeave", "مرخصی"),
             t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
@@ -428,6 +438,7 @@ export function DailyReportSummaryView({
           ]}
           rows={direct.map((r) => [
             r.job_title,
+            r.contractor_name || "—",
             r.present_count ?? r.shift_1_count,
             r.leave_count ?? r.absence_count ?? 0,
             r.overtime_hours ?? 0,

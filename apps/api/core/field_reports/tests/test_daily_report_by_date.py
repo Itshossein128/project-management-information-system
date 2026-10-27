@@ -41,11 +41,21 @@ def test_by_date_get_existing_returns_200(auth_client, by_date_url, project, use
 
 
 @pytest.mark.django_db
-def test_by_date_get_missing_returns_404_without_mutating(auth_client, by_date_url, project):
+def test_by_date_get_missing_provisions_draft_shell_and_returns_200(auth_client, by_date_url, project):
     initial_count = DailyReport.objects.filter(project=project).count()
     response = auth_client.get(by_date_url, {'date': '2026-07-01'})
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert DailyReport.objects.filter(project=project).count() == initial_count
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['is_auto_summary'] is True
+    assert response.data['status'] == 'draft'
+    assert DailyReport.objects.filter(project=project, report_date='2026-07-01').count() == initial_count + 1
+
+
+@pytest.mark.django_db
+def test_by_date_get_with_custom_shift_provisions_shift(auth_client, by_date_url, project):
+    response = auth_client.get(by_date_url, {'date': '2026-07-02', 'shift': 'night'})
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data['shift'] == 'night'
+    assert DailyReport.objects.filter(project=project, report_date='2026-07-02', shift='night').exists()
 
 
 @pytest.mark.django_db

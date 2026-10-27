@@ -292,6 +292,10 @@ class TestReceiptsOnlySummary:
         assert main_item['reconciliation_document_id'] == str(doc.id)
 
         assert len(data['materials_summary']['details']) == 2
+        assert 'grouped_summary' in data['materials_summary']
+        assert len(data['materials_summary']['grouped_summary']) >= 1
+        assert 'aggregated_at_jalali' in data['aggregation']
+        assert data['aggregation']['aggregated_at_jalali'] is not None
 
         # Provenance recorded for all 3 derived material rows
         sources = DailyReportDerivedSource.objects.filter(

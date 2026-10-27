@@ -38,6 +38,8 @@ function ActivityLogContent() {
     from: monthStartIso(),
     to: todayIso(),
   });
+  const [discipline, setDiscipline] = useState<string[]>([]);
+  const [parcel, setParcel] = useState<string[]>([]);
   const [zone, setZone] = useState("");
   const [block, setBlock] = useState("");
   const [subcontractor, setSubcontractor] = useState("");
@@ -54,6 +56,8 @@ function ActivityLogContent() {
       "activity-log",
       projectId,
       dateRange,
+      discipline,
+      parcel,
       zone,
       block,
       subcontractor,
@@ -63,6 +67,8 @@ function ActivityLogContent() {
       fetchActivityLog(projectId, {
         date_from: dateRange.from,
         date_to: dateRange.to,
+        source_discipline: discipline.length ? discipline : undefined,
+        parcel: parcel.length ? parcel : undefined,
         zone: zone || undefined,
         block: block || undefined,
         subcontractor: subcontractor || undefined,
@@ -105,6 +111,42 @@ function ActivityLogContent() {
             }}
           />
         </div>
+        <label className='flex flex-col gap-1 text-sm'>
+          <span>دیسیپلین</span>
+          <select
+            className='rounded-md border border-input bg-background px-3 py-2'
+            multiple
+            value={discipline}
+            onChange={(e) => {
+              setDiscipline(Array.from(e.target.selectedOptions, (option) => option.value));
+              setPage(1);
+            }}
+          >
+            {(filters?.disciplines ?? []).map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className='flex flex-col gap-1 text-sm'>
+          <span>قطعه</span>
+          <select
+            className='rounded-md border border-input bg-background px-3 py-2'
+            multiple
+            value={parcel}
+            onChange={(e) => {
+              setParcel(Array.from(e.target.selectedOptions, (option) => option.value));
+              setPage(1);
+            }}
+          >
+            {(filters?.parcels ?? []).map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className='flex flex-col gap-1 text-sm'>
           <span>زون</span>
           <select
@@ -171,6 +213,10 @@ function ActivityLogContent() {
                 <tr>
                   {[
                     "تاریخ",
+                    "روز",
+                    "دیسیپلین",
+                    "قطعه",
+                    "شیفت",
                     "فعالیت",
                     "شرح",
                     "زون",
@@ -179,6 +225,8 @@ function ActivityLogContent() {
                     "پیمانکار",
                     "نفر",
                     "مقدار",
+                    "واحد",
+                    "مکان",
                     "گزارش",
                   ].map((h) => (
                     <th key={h} className='px-3 py-2 text-start'>
@@ -191,7 +239,7 @@ function ActivityLogContent() {
                 {rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={10}
+                      colSpan={16}
                       className='px-3 py-6 text-center text-muted-foreground'
                     >
                       فعالیتی یافت نشد
@@ -203,6 +251,14 @@ function ActivityLogContent() {
                       <td className='px-3 py-2 whitespace-nowrap'>
                         {r.report_date}
                       </td>
+                      <td className='px-3 py-2 whitespace-nowrap'>{r.day_name}</td>
+                      <td className='px-3 py-2 whitespace-nowrap font-medium'>
+                        {r.source_discipline || "—"}
+                      </td>
+                      <td className='px-3 py-2 whitespace-nowrap'>
+                        {r.parcel || "—"}
+                      </td>
+                      <td className='px-3 py-2 whitespace-nowrap'>{r.shift || "—"}</td>
                       <td className='px-3 py-2'>
                         {r.activity_code ? (
                           <span title={r.activity_name ?? ""}>
@@ -225,8 +281,12 @@ function ActivityLogContent() {
                       <td className='px-3 py-2'>{r.headcount ?? "—"}</td>
                       <td className='px-3 py-2'>
                         {r.quantity != null
-                          ? `${r.quantity} ${r.unit || ""}`
+                          ? r.quantity
                           : "—"}
+                      </td>
+                      <td className='px-3 py-2'>{r.unit || "—"}</td>
+                      <td className='px-3 py-2 max-w-[180px] truncate' title={r.location}>
+                        {r.location || "—"}
                       </td>
                       <td className='px-3 py-2'>
                         <Link

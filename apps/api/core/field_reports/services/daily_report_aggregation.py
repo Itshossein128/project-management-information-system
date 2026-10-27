@@ -71,7 +71,7 @@ def contributing_sub_reports(project_id, report_date: date):
         .exclude(migration_traces__quarantine__isnull=False)
         .prefetch_related(
             'activities',
-            'labor_entries',
+            'labor_entries__contractor_ref',
             'machinery_rows',
             'material_entries',
             'concrete_entries',
@@ -156,9 +156,14 @@ def build_aggregation_meta(
         d for d in expected_disciplines if d not in contributing_disciplines
     ]
 
+    from common.jalali import gregorian_to_jalali_datetime
+
     return {
         'is_auto_summary': bool(report.is_auto_summary) if report else True,
         'aggregated_at': report.aggregated_at.isoformat().replace('+00:00', 'Z')
+        if report and report.aggregated_at
+        else None,
+        'aggregated_at_jalali': gregorian_to_jalali_datetime(report.aggregated_at)
         if report and report.aggregated_at
         else None,
         'is_partial': completeness_state != 'complete',
@@ -166,7 +171,7 @@ def build_aggregation_meta(
         'contributing_disciplines': contributing_disciplines,
         'missing_disciplines': missing_disciplines,
         'completeness': completeness,
-        'weather_source': 'override' if report and report.weather_override else 'derived',
+        'weather_source': 'overridden_by_manager' if report and report.weather_override else 'derived',
         'site_status_source': 'override' if report and report.site_status_override else 'derived',
     }
 
@@ -372,15 +377,16 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
 
 
 @transaction.atomic
-def ensure_daily_report_summary(project_id, report_date: date, user=None) -> DailyReport:
+def ensure_daily_report_summary(project_id, report_date: date, user=None, shift=None) -> DailyReport:
     from projects.models import Project
 
+    target_shift = shift or ReportShift.FULL
     Project.objects.select_for_update().filter(id=project_id).first()
     report = (
         DailyReport.objects.filter(
             project_id=project_id,
             report_date=report_date,
-            shift=ReportShift.FULL,
+            shift=target_shift,
             is_deleted=False,
             is_current=True,
         )
@@ -392,7 +398,7 @@ def ensure_daily_report_summary(project_id, report_date: date, user=None) -> Dai
         kwargs = {
             'project_id': project_id,
             'report_date': report_date,
-            'shift': ReportShift.FULL,
+            'shift': target_shift,
             'is_auto_summary': True,
             'is_current': True,
             'reporting_configuration': config,
@@ -408,7 +414,7 @@ def ensure_daily_report_summary(project_id, report_date: date, user=None) -> Dai
     elif not report.is_auto_summary:
         report.is_auto_summary = True
         report.save(update_fields=['is_auto_summary', 'updated_at'])
-    return rebuild_daily_report_summary(project_id, report_date, user=user, report=report)
+    return rebuild_daily_report_summary(project_id, report_date, user=user, report=report, shift=target_shift)
 
 
 def _wash(value) -> str:
@@ -539,9 +545,11 @@ def rebuild_daily_report_summary(
     report_date: date,
     user=None,
     report: DailyReport | None = None,
+    shift=None,
 ) -> DailyReport:
     from projects.models import Project
 
+    target_shift = shift or ReportShift.FULL
     # 1. Lock Order: Project -> current unit report(s) -> full-shift DailyReport
     Project.objects.select_for_update().filter(id=project_id).first()
 
@@ -554,14 +562,14 @@ def rebuild_daily_report_summary(
             .filter(
                 project_id=project_id,
                 report_date=report_date,
-                shift=ReportShift.FULL,
+                shift=target_shift,
                 is_deleted=False,
                 is_current=True,
             )
             .first()
         )
         if report is None:
-            return ensure_daily_report_summary(project_id, report_date, user=user)
+            return ensure_daily_report_summary(project_id, report_date, user=user, shift=target_shift)
     else:
         # Reload with lock
         report = DailyReport.objects.select_for_update().get(id=report.id)
@@ -789,12 +797,14 @@ def rebuild_daily_report_summary(
     )
     has_catalog = bool(effective_config and effective_config.labor_titles.exists())
 
-    labor_buckets: dict[tuple[str, str], dict] = defaultdict(
+    labor_buckets: dict[tuple[str, str, str | None], dict] = defaultdict(
         lambda: {
             'present': 0,
             'leave': 0,
             'overtime': Decimal('0.00'),
             'canonical_title': '',
+            'contractor_ref': None,
+            'contractor_name': '',
             'sources': [],
         },
     )
@@ -812,8 +822,8 @@ def rebuild_daily_report_summary(
                 if has_catalog
                 else None
             )
+            resolved_key = f"code:{resolved.title_code}" if resolved is not None else raw_title
             if resolved is not None:
-                bucket_key = (row.labor_category, f"code:{resolved.title_code}")
                 if raw_title in (resolved.title_label, resolved.title_label_fa):
                     display_title = raw_title
                 else:
@@ -823,12 +833,19 @@ def rebuild_daily_report_summary(
                         or raw_title
                     )
             else:
-                bucket_key = (row.labor_category, raw_title)
                 display_title = raw_title
+
+            c_ref = row.contractor_ref
+            c_ref_id = row.contractor_ref_id
+            c_name = c_ref.name if c_ref else 'نفر شرکت'
+
+            bucket_key = (row.labor_category, resolved_key, str(c_ref_id) if c_ref_id else None)
 
             bucket = labor_buckets[bucket_key]
             if not bucket['canonical_title']:
                 bucket['canonical_title'] = display_title
+            bucket['contractor_ref'] = c_ref
+            bucket['contractor_name'] = c_name
             bucket['present'] += row.present_count or 0
             bucket['leave'] += row.leave_count or 0
             bucket['overtime'] += Decimal(str(row.overtime_hours or 0))
@@ -838,7 +855,7 @@ def rebuild_daily_report_summary(
             })
 
     current_derived_labor_ids = set()
-    for (category, _bucket_id), bucket in labor_buckets.items():
+    for (category, _bucket_id, _c_id), bucket in labor_buckets.items():
         title = bucket['canonical_title']
         bucket_man_hours = compute_man_hours(
             rule_code,
@@ -862,6 +879,7 @@ def rebuild_daily_report_summary(
             is_derived=True,
             labor_category=category,
             job_title=title,
+            contractor_ref=bucket['contractor_ref'],
         ).first()
 
         if labor_row is None:
@@ -871,6 +889,8 @@ def rebuild_daily_report_summary(
                 report_date=report_date,
                 labor_category=category,
                 job_title=title,
+                contractor_ref=bucket['contractor_ref'],
+                contractor_name=bucket['contractor_name'],
                 shift_1_count=bucket['present'],
                 shift_2_count=0,
                 shift_3_count=0,
@@ -883,6 +903,7 @@ def rebuild_daily_report_summary(
                 is_derived=True,
             )
         else:
+            labor_row.contractor_name = bucket['contractor_name']
             labor_row.shift_1_count = bucket['present']
             labor_row.absence_count = bucket['leave']
             labor_row.overtime_hours = bucket['overtime']

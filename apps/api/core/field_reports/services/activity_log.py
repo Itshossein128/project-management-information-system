@@ -32,7 +32,31 @@ def activity_log_queryset(project_id, params):
     if params.get('activity_id'):
         qs = qs.filter(activity_ref_id=params['activity_id'])
 
-    return qs.order_by('-report__report_date', '-created_at')
+    disc_param = params.get('source_discipline') or params.get('discipline')
+    if disc_param:
+        discs = [d.strip() for d in disc_param.split(',') if d.strip()]
+        if len(discs) == 1:
+            qs = qs.filter(source_discipline__iexact=discs[0])
+        elif len(discs) > 1:
+            from django.db.models import Q
+            q_obj = Q()
+            for d in discs:
+                q_obj |= Q(source_discipline__iexact=d)
+            qs = qs.filter(q_obj)
+
+    parcel_param = params.get('parcel')
+    if parcel_param:
+        parcels = [p.strip() for p in parcel_param.split(',') if p.strip()]
+        if len(parcels) == 1:
+            qs = qs.filter(parcel__iexact=parcels[0])
+        elif len(parcels) > 1:
+            from django.db.models import Q
+            q_obj = Q()
+            for p in parcels:
+                q_obj |= Q(parcel__iexact=p)
+            qs = qs.filter(q_obj)
+
+    return qs.order_by('-report__report_date', 'id')
 
 
 def serialize_activity_log_row(row: DailyReportActivity) -> dict:
@@ -44,6 +68,8 @@ def serialize_activity_log_row(row: DailyReportActivity) -> dict:
         'report_id': str(report.id),
         'report_date': gregorian_to_jalali(report.report_date),
         'day_name': report.report_date.strftime('%A'),
+        'source_discipline': row.source_discipline or '',
+        'parcel': row.parcel or '',
         'activity_description': row.activity_description,
         'shift': row.shift,
         'subcontractor': row.subcontractor_name,
@@ -58,3 +84,29 @@ def serialize_activity_log_row(row: DailyReportActivity) -> dict:
         'activity_name': row.activity_ref.activity_name if row.activity_ref_id else None,
         'report_status': report.status,
     }
+
+
+def invalidate_activity_log_cache(project_id):
+    from django.conf import settings
+    from django.core.cache import cache
+    from django.utils import timezone
+
+    version_key = f'activity_log_version:{project_id}'
+    try:
+        if cache.get(version_key) is None:
+            cache.set(version_key, 1, 86400 * 30)
+        else:
+            cache.incr(version_key)
+    except Exception:
+        cache.set(version_key, int(timezone.now().timestamp()), 86400 * 30)
+
+    try:
+        import redis
+        redis_url = getattr(settings, 'CELERY_BROKER_URL', 'redis://localhost:6379/0')
+        client = redis.from_url(redis_url, decode_responses=True)
+        pattern = f'*activity_log:{project_id}:*'
+        keys = list(client.scan_iter(match=pattern, count=100))
+        if keys:
+            client.delete(*keys)
+    except Exception:
+        pass

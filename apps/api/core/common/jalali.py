@@ -56,3 +56,21 @@ def persian_day_of_week(value: datetime.date | str) -> str:
         value = parse_jalali_or_gregorian(value)
     jdate = jdatetime.date.fromgregorian(date=value)
     return JALALI_WEEKDAYS[jdate.weekday()]
+
+
+def to_persian_digits(value: str) -> str:
+    persian_digits = '۰۱۲۳۴۵۶۷۸۹'
+    english_digits = '0123456789'
+    return str(value).translate(str.maketrans(english_digits, persian_digits))
+
+
+def gregorian_to_jalali_datetime(value: datetime.datetime | None, to_persian: bool = True) -> str:
+    if value is None:
+        return ''
+    from django.utils import timezone
+
+    if timezone.is_aware(value):
+        value = timezone.localtime(value)
+    jdt = jdatetime.datetime.fromgregorian(datetime=value)
+    formatted = jdt.strftime('%Y/%m/%d - %H:%M')
+    return to_persian_digits(formatted) if to_persian else formatted

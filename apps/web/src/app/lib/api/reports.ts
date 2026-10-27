@@ -16,6 +16,8 @@ export interface ActivityLogRow {
   report_id: string;
   report_date: string;
   day_name: string;
+  source_discipline?: string;
+  parcel?: string;
   activity_description: string;
   shift: string;
   subcontractor: string;
@@ -35,6 +37,14 @@ export interface ActivityLogFilterOptions {
   zones: string[];
   blocks: string[];
   subcontractors: string[];
+  disciplines?: string[];
+  parcels?: string[];
+}
+
+export type ActivityLogMultiValue = string | string[];
+
+export function serializeActivityLogMultiValue(value?: ActivityLogMultiValue) {
+  return Array.isArray(value) ? value.join(",") : value;
 }
 
 export interface PaginatedActivityLog {
@@ -69,6 +79,8 @@ export function fetchActivityLog(
   params: {
     date_from?: string;
     date_to?: string;
+    source_discipline?: ActivityLogMultiValue;
+    parcel?: ActivityLogMultiValue;
     subcontractor?: string;
     zone?: string;
     block?: string;
@@ -82,7 +94,8 @@ export function fetchActivityLog(
 ) {
   const search = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
-    if (v != null && v !== "") search.set(k, String(v));
+    const serialized = serializeActivityLogMultiValue(v as ActivityLogMultiValue | undefined);
+    if (serialized != null && serialized !== "") search.set(k, serialized);
   }
   const qs = search.toString();
   return apiJson<PaginatedActivityLog>(

@@ -1,0 +1,21 @@
+You are an expert software architect and gap-analysis specialist working on: /home/hossein/Desktop/projects/building-management
+
+Your task is to analyze `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-06-AUTO-DAILY-ROLLUP.md` and find the gaps between the project's current implementation and this specification document.
+
+Specifically:
+1. Thoroughly read and analyze:
+   - `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-06-AUTO-DAILY-ROLLUP.md`
+   - Existing codebase implementations in `apps/api/core/field_reports/`, `apps/api/core/sub_reports/`, `apps/web/src/components/daily_reports/`, `apps/web/src/app/routes/`, etc.
+   - Reference previous gap analyses like `reports_gaps/05/GAP-SPEC-05-DISCIPLINE-SUB-REPORTS.md` and `reports_gaps/05/speckit-specify-prompts/01-PROMPT-DISCIPLINE-SUB-REPORTS.md`.
+2. Identify all gaps:
+   - Check US-AG-01: Removal of manual "New Report" button; ensure daily report by date endpoint `GET /api/v1/projects/{pk}/daily-reports/by-date/?date={YYYY-MM-DD}&shift={1|2|3}` and 400 Bad Request if manual POST without sub-report body.
+   - Check US-AG-02: Auto-Rollup (union of activities with source discipline, labor aggregation by `(job_title, contractor)`, materials aggregation, `aggregated_at` timestamp).
+   - Check US-AG-03: Read-Only Derived Rows (reject manual additions to auto-summary report with `400 derived_collection_read_only` or similar error, hide Add/Delete buttons in frontend).
+   - Check US-AG-04: Weather rollup hierarchy (`clear < cloudy < rainy < snowy < stormy`) and `weather_override` preservation.
+   - Check US-AG-05: Missing disciplines banner (`missing_disciplines` list in API, orange warning banner, green banner when complete).
+   - Check US-AG-06: Activity Master Log (`/projects/:projectId/activity-log` and underlying endpoint mirroring Shiraz ACTIVITY sheet).
+3. Generate the artifacts in `/home/hossein/Desktop/projects/building-management/reports_gaps/06/`:
+   - Create `reports_gaps/06/GAP-SPEC-06-AUTO-DAILY-ROLLUP.md` documenting the findings, evidence, and missing capabilities.
+   - Create `reports_gaps/06/speckit-specify-prompts/01-PROMPT-AUTO-DAILY-ROLLUP.md` containing a comprehensive, structured Persian prompt for `speckit-specify` that starts with `/speckit-specify` and covers all identified gaps, acceptance criteria, boundaries, and required evidence.
+   - Also create a copy or link at `reports_gaps/06/PROMPT-SPEC-06.md` for easy access.
+4. Provide a summary of the discovered gaps and confirm the files created.

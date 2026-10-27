@@ -300,6 +300,8 @@ class DailyReportLaborSerializer(serializers.ModelSerializer):
             'labor_category',
             'job_title',
             'custom_title',
+            'contractor_ref',
+            'contractor_name',
             'title_code',
             'display_order',
             'present_count',
@@ -1295,9 +1297,54 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             r for r in rows
             if not (r.get('transaction_type') == 'receipt' and r.get('receipt_resolved') is True)
         ]
+
+        from collections import defaultdict
+        from decimal import Decimal
+
+        groups = defaultdict(lambda: {
+            'material_ref_id': None,
+            'material_description': '',
+            'unit': '',
+            'total_received': Decimal('0'),
+            'total_consumed': Decimal('0'),
+        })
+
+        for r in rows:
+            mat_ref = r.get('material_ref')
+            mat_desc = (r.get('material_description') or '').strip()
+            unit = (r.get('unit') or '').strip()
+            key = (str(mat_ref) if mat_ref else '', mat_desc.lower(), unit.lower())
+
+            item = groups[key]
+            if not item['material_description']:
+                item['material_description'] = mat_desc
+            if not item['unit']:
+                item['unit'] = unit
+            item['material_ref_id'] = mat_ref
+
+            qty = Decimal(str(r.get('quantity') or 0))
+            tx_type = r.get('transaction_type')
+            if tx_type == 'receipt':
+                item['total_received'] += qty
+            elif tx_type in ('issue', 'consumption'):
+                item['total_consumed'] += qty
+
+        grouped_summary = []
+        for item in groups.values():
+            net = item['total_received'] - item['total_consumed']
+            grouped_summary.append({
+                'material_ref_id': item['material_ref_id'],
+                'material_description': item['material_description'],
+                'unit': item['unit'],
+                'total_received': float(item['total_received']),
+                'total_consumed': float(item['total_consumed']),
+                'net_quantity': float(net),
+            })
+
         return {
             'main_table': main_table,
             'details': details,
+            'grouped_summary': grouped_summary,
         }
 
     def get_concrete_logs(self, obj):

@@ -114,6 +114,7 @@ urlpatterns = [
     path('labor-productivity/', LaborProductivityView.as_view(), name='labor-productivity'),
     path('activity-log/', ActivityLogView.as_view(), name='activity-log'),
     path('activity-log/filters/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filters'),
+    path('activity-log/filter-options/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filter-options'),
 
     path(f'{DR}/', report_list, name='daily-report-list'),
     path(f'{DR}/by-date/', report_by_date, name='daily-report-by-date'),

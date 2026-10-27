@@ -110,11 +110,24 @@ export function DailyReportForm({
 
   useEffect(() => {
     if (report) {
+      if (report.is_auto_summary && reportId) {
+        toast.info(
+          t(
+            "dailyReports.form.autoSummaryRedirect",
+            "گزارش‌های تجمیعی خودکار از طریق نمای جمع‌بندی مشاهده می‌شوند.",
+          ),
+        );
+        navigate(
+          `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${reportId}`,
+          { replace: true },
+        );
+        return;
+      }
       const nextHeader = headerFromDetail(report);
       setHeader(nextHeader);
       lastSavedHeaderRef.current = JSON.stringify(headerToPayload(nextHeader));
     }
-  }, [report]);
+  }, [report, reportId, projectId, navigate, t, toast]);
 
   useEffect(() => {
     if (projectId) void warmProjectCache(projectId);

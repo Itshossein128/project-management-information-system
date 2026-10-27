@@ -75,12 +75,13 @@ export interface DerivedSourceItem {
 export interface AggregationMeta {
   is_auto_summary: boolean;
   aggregated_at: string | null;
+  aggregated_at_jalali?: string | null;
   is_partial: boolean;
   expected_disciplines?: string[];
   contributing_disciplines?: string[];
   missing_disciplines?: string[];
   completeness?: CompletenessMeta;
-  weather_source: "derived" | "override";
+  weather_source: "derived" | "override" | "overridden_by_manager";
   site_status_source: "derived" | "override";
 }
 
@@ -132,6 +133,8 @@ export interface LaborRow {
   labor_category: LaborCategory;
   job_title: string;
   custom_title: string;
+  contractor_ref?: string | null;
+  contractor_name?: string;
   title_code?: string | null;
   display_order?: number;
   shift_1_count: number;

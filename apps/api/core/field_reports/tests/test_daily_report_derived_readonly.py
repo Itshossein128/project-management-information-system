@@ -28,7 +28,21 @@ def test_cannot_post_activity_on_auto_summary(auth_client, project, user):
         format='json',
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert 'تخصصی' in str(response.data) or 'derived' in str(response.data).lower()
+    assert response.data.get('code') == 'derived_collection_read_only' or response.data.get('error', {}).get('code') == 'derived_collection_read_only'
+    assert 'ساب‌ریپورت' in str(response.data) or 'مشتق' in str(response.data)
+
+
+@pytest.mark.django_db
+def test_cannot_delete_activity_on_auto_summary(auth_client, project, user):
+    sr = make_sub_report(project, user, status=SubReportStatus.SUBMITTED)
+    add_activity(sr)
+    report = ensure_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    act = report.activities.first()
+    assert act is not None
+    url = f'/api/v1/projects/{project.id}/daily-reports/{report.id}/activities/{act.id}/'
+    response = auth_client.delete(url)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data.get('code') == 'derived_collection_read_only' or response.data.get('error', {}).get('code') == 'derived_collection_read_only'
 
 
 @pytest.mark.django_db

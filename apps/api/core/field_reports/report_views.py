@@ -91,7 +91,8 @@ class ActivityLogView(APIView):
 
         fp = params_fingerprint(dict(request.query_params))
         page_num = request.query_params.get('page', '1')
-        cache_k = cache_key('activity_log', project_pk, fp, page_num)
+        ver = cache.get(f'activity_log_version:{project_pk}') or 0
+        cache_k = cache_key('activity_log', project_pk, ver, fp, page_num)
         cached = cache.get(cache_k)
         if cached is not None:
             return Response(cached)
@@ -117,5 +118,7 @@ class ActivityLogFilterOptionsView(APIView):
                 'zones': sorted({z for z in qs.values_list('zone', flat=True) if z}),
                 'blocks': sorted({b for b in qs.values_list('block', flat=True) if b}),
                 'subcontractors': sorted({s for s in qs.values_list('subcontractor_name', flat=True) if s}),
+                'disciplines': sorted({d for d in qs.values_list('source_discipline', flat=True) if d}),
+                'parcels': sorted({p for p in qs.values_list('parcel', flat=True) if p}),
             }
         )

@@ -57,7 +57,7 @@ AUTO_SUMMARY_CREATE_MSG = (
     'گزارش روزانه پروژه به‌صورت خودکار از گزارش‌های واحد تخصصی ساخته می‌شود. '
     'از مسیر by-date استفاده کنید.'
 )
-DERIVED_READONLY_MSG = 'ردیف‌های تجمیعی فقط از طریق گزارش واحد تخصصی قابل تغییر هستند'
+DERIVED_READONLY_MSG = 'این ردیف‌ها از ساب‌ریپورت‌های دیسیپلین مشتق شده‌اند؛ لطفاً از طریق ساب‌ریپورت مربوطه اقدام نمایید'
 
 
 def _validate_report_ready_for_submit(report: DailyReport, request=None) -> list[str]:
@@ -202,33 +202,48 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         if report_date is None:
             raise ValidationError({'date': 'تاریخ الزامی است', 'code': 'date_required'})
 
+        raw_shift = request.query_params.get('shift') or request.data.get('shift')
+        shift = ReportShift.FULL
+        if raw_shift:
+            shift_map = {
+                '1': ReportShift.DAY,
+                '2': ReportShift.NIGHT,
+                'day': ReportShift.DAY,
+                'night': ReportShift.NIGHT,
+                'full': ReportShift.FULL,
+                'shift_1': ReportShift.DAY,
+                'shift_2': ReportShift.NIGHT,
+            }
+            shift = shift_map.get(str(raw_shift).lower(), raw_shift)
+
         project_id = self.get_project_id()
         if request.method.upper() == 'GET':
             report = (
                 DailyReport.objects.filter(
                     project_id=project_id,
                     report_date=report_date,
-                    shift=ReportShift.FULL,
+                    shift=shift,
                     is_deleted=False,
                     is_current=True,
                 )
                 .order_by('-created_at')
                 .first()
             )
-            if report is not None:
-                return Response(DailyReportDetailSerializer(report, context={'request': request}).data)
-            from rest_framework.exceptions import NotFound
-            raise NotFound({'detail': 'گزارشی برای این تاریخ یافت نشد', 'code': 'report_not_found'})
+            if report is None:
+                report = ensure_daily_report_summary(
+                    project_id, report_date, user=request.user, shift=shift,
+                )
+            return Response(DailyReportDetailSerializer(report, context={'request': request}).data)
 
         created_before = DailyReport.objects.filter(
             project_id=project_id,
             report_date=report_date,
-            shift=ReportShift.FULL,
+            shift=shift,
             is_deleted=False,
             is_current=True,
         ).exists()
         report = ensure_daily_report_summary(
-            project_id, report_date, user=request.user,
+            project_id, report_date, user=request.user, shift=shift,
         )
         status_code = status.HTTP_200_OK if created_before else status.HTTP_201_CREATED
         return Response(DailyReportDetailSerializer(report, context={'request': request}).data, status=status_code)
@@ -587,7 +602,7 @@ class DailyReportChildViewSet(viewsets.ModelViewSet):
     def _assert_editable(self):
         report = self.get_report()
         if report.is_auto_summary:
-            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_readonly'})
+            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_collection_read_only'})
         if report.status == ReportStatus.APPROVED:
             raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
         if report.status not in EDITABLE_STATUSES:

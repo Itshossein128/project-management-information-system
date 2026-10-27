@@ -351,6 +351,14 @@ class DailyReportLabor(ChildRowModel):
     labor_category = models.CharField(max_length=10, choices=LaborCategory.choices)
     job_title = models.CharField(max_length=120)
     custom_title = models.CharField(max_length=120, blank=True, default='')
+    contractor_ref = models.ForeignKey(
+        'projects.Stakeholder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='daily_report_labor_entries',
+    )
+    contractor_name = models.CharField(max_length=120, blank=True, default='')
     shift_1_count = models.PositiveIntegerField(default=0)
     shift_2_count = models.PositiveIntegerField(default=0)
     shift_3_count = models.PositiveIntegerField(default=0)
@@ -377,12 +385,12 @@ class DailyReportLabor(ChildRowModel):
         db_table = 'daily_report_labor'
         constraints = [
             models.UniqueConstraint(
-                fields=['report', 'labor_category', 'job_title'],
+                fields=['report', 'labor_category', 'job_title', 'contractor_ref'],
                 condition=models.Q(is_deleted=False, report__isnull=False),
                 name='unique_active_labor_row',
             ),
             models.UniqueConstraint(
-                fields=['project', 'report_date', 'labor_category', 'job_title'],
+                fields=['project', 'report_date', 'labor_category', 'job_title', 'contractor_ref'],
                 condition=models.Q(is_deleted=False, report__isnull=True),
                 name='unique_standalone_labor_row',
             ),

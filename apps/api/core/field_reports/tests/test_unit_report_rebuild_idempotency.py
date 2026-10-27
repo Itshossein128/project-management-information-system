@@ -400,7 +400,7 @@ class TestOverridePreservation:
 
         # Check metadata indicates override source
         meta = build_aggregation_meta(project.id, SUMMARY_DATE, rebuilt)
-        assert meta['weather_source'] == 'override'
+        assert meta['weather_source'] in ('override', 'overridden_by_manager')
         assert meta['site_status_source'] == 'override'
 
         # 4. Another rebuild with unchanged inputs also preserves everything
