@@ -7,7 +7,9 @@ import { PATHS } from "@/app/routeVars";
 import {
   type ConflictEntry,
   getFailedQueue,
+  getQuarantinedRecords,
   getUnresolvedConflicts,
+  type LegacyQuarantine,
   isOfflineDBAvailable,
   type QueueItem,
 } from "@/app/lib/offlineDB";
@@ -25,6 +27,7 @@ export default function SyncConflictsPage() {
   const toast = useToast();
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const [failedItems, setFailedItems] = useState<QueueItem[]>([]);
+  const [quarantine, setQuarantine] = useState<LegacyQuarantine[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
   const navigatedRef = useRef(false);
@@ -38,12 +41,14 @@ export default function SyncConflictsPage() {
       return;
     }
     try {
-      const [next, failed] = await Promise.all([
+      const [next, failed, held] = await Promise.all([
         getUnresolvedConflicts(projectId),
         getFailedQueue(),
+        getQuarantinedRecords(projectId),
       ]);
       setConflicts(next.filter((c) => !removingIds.has(c.conflict_id)));
       setFailedItems(failed.filter((f) => f.project_id === projectId));
+      setQuarantine(held);
     } catch {
       /* db not ready */
     } finally {
@@ -153,6 +158,8 @@ export default function SyncConflictsPage() {
                   variant="danger"
                   size="sm"
                   onClick={() => {
+                    const scope = `${item.entity_type} / ${item.queue_id}`;
+                    if (!window.confirm(t("offline.confirmLocalDelete", { scope }))) return;
                     void discardFailedQueueItem(item.queue_id).then(() => load());
                   }}
                 >
@@ -162,6 +169,18 @@ export default function SyncConflictsPage() {
               </div>
             </div>
           ))}
+        </section>
+      ) : null}
+      {quarantine.length > 0 ? (
+        <section aria-label={t("offline.quarantineTitle")} data-testid="legacy-quarantine">
+          <h2 className="mb-2 text-sm font-semibold">{t("offline.quarantineTitle")}</h2>
+          <ul className="space-y-2 text-sm">
+            {quarantine.map((record) => (
+              <li key={record.queue_id}>
+                {record.queue_id} — {record.quarantine_reason}
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
     </main>

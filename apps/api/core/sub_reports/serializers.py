@@ -85,6 +85,7 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
         model = DisciplineSubReportActivity
         fields = [
             'id',
+            'sync_revision',
             'row_number',
             'shift',
             'crew_name',
@@ -180,6 +181,7 @@ class UnitReportLaborSectionSerializer(serializers.ModelSerializer):
         model = DisciplineSubReportLabor
         fields = [
             'id',
+            'sync_revision',
             'labor_category',
             'job_title',
             'custom_title',
@@ -297,6 +299,7 @@ class UnitReportMachinerySectionSerializer(serializers.ModelSerializer):
         model = DisciplineSubReportMachinery
         fields = [
             'id',
+            'sync_revision',
             'row_number',
             'equipment_type',
             'equipment_ref',
@@ -397,6 +400,7 @@ class UnitReportMaterialSectionSerializer(serializers.ModelSerializer):
         model = DisciplineSubReportMaterial
         fields = [
             'id',
+            'sync_revision',
             'transaction_type',
             'material_description',
             'material_ref',
@@ -557,7 +561,7 @@ class UnitReportConcreteSectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DisciplineSubReportConcrete
         fields = [
-            'id', 'concrete_description', 'volume_m3', 'zone', 'block', 'floor', 'notes',
+            'id', 'sync_revision', 'concrete_description', 'volume_m3', 'zone', 'block', 'floor', 'notes',
             'structural_element', 'parcel', 'batching_plant', 'truck_delivery_note_number',
             'lab_sample_code', 'sampling_state', 'test_sheet_count', 'qc_inspection',
         ]

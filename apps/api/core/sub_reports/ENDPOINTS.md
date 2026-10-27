@@ -78,5 +78,11 @@ Canonical unit reports (`/api/v1/projects/{project_pk}/units/{unit}/daily-report
 
 Submit of a version with declared concrete sampling creates or reuses a same-project `risk.Inspection`. Submit of a version with an HSE row creates one `notifications.Notification` per incident. Attachment bytes are not sent to MinIO when object storage is unavailable; the row stores a local storage key and checksum only.
 
+## Versioned offline sync
+
+`POST /api/v1/projects/{project_id}/daily-reports/sync-operations/v2/` is disabled unless `V2_OFFLINE_SYNC_ENABLED` is true. It requires `edit_reports` for the current actor. Each operation commits alone. `synced_ids` lists only operation ids whose outcome is `success`. Stable outcomes are `success`, `validation_error`, `conflict` (`sync_conflict`, including `conflict_report_approved` and `non_current_report`), and `blocked_dependency`. An empty list is `snapshot_replacement_forbidden`. The same operation id and payload replays the stored receipt. A changed payload returns `operation_id_reused`. `correct_transfer` opens the official correction draft and does not patch an approved row. Legacy `sync-batch/` still rejects derived summary writes with `derived_readonly`.
+
+Rolling a server release back must keep the receipt table. Do not delete receipts to undo a sync, and do not downgrade IndexedDB. Clients export a backup and restore it with a reader that understands the current schema.
+
 ## Operational Notes
 - **Weather Condition Standards:** `weather_condition` uses the five standardized Shiraz categories: `clear`, `cloudy`, `rainy`, `snowy`, `stormy`. Contributing sub-report weather conditions are automatically reconciled during daily-report summary generation using severity order `stormy > snowy > rainy > cloudy > clear`.

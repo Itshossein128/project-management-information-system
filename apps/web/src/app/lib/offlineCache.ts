@@ -16,9 +16,20 @@ import {
   cacheProject,
   cacheSubcontractors,
   cacheWBS,
+  getCachedActivities,
+  getCachedManpowerTitles,
+  getCachedProject,
+  getCachedSubcontractors,
+  getCachedWBS,
   isOfflineDBAvailable,
   type CachedManpowerTitle,
 } from "@/app/lib/offlineDB";
+import {
+  unitSupportsActivitiesSection,
+  unitSupportsLaborSection,
+  unitSupportsMaterialsSection,
+  type CanonicalUnit,
+} from "@/app/lib/api/unit-reports";
 
 interface JobTitleDTO {
   id: string;
@@ -61,3 +72,60 @@ export async function warmProjectCache(projectId: string): Promise<void> {
     }),
   ]);
 }
+
+export async function warmUnitReferenceCache(
+  projectId: string,
+  _unit?: CanonicalUnit | string,
+  _actorId?: string,
+): Promise<void> {
+  return warmProjectCache(projectId);
+}
+
+export interface UnitPrerequisitesCheck {
+  isReady: boolean;
+  missing: string[];
+}
+
+/**
+ * Check if the required offline reference data for a given canonical unit is cached.
+ * Returns what is missing so the UI can explain without clearing any user edits.
+ */
+export async function checkUnitPrerequisites(
+  projectId: string,
+  unit: CanonicalUnit | string,
+): Promise<UnitPrerequisitesCheck> {
+  if (!isOfflineDBAvailable()) {
+    return { isReady: false, missing: ["indexed_db_unavailable"] };
+  }
+
+  const missing: string[] = [];
+
+  const project = await getCachedProject(projectId);
+  if (!project) {
+    missing.push("project_configuration");
+  }
+
+  if (unitSupportsActivitiesSection(unit)) {
+    const activities = await getCachedActivities(projectId);
+    if (!activities || activities.length === 0) {
+      missing.push("activities");
+    }
+    const wbs = await getCachedWBS(projectId);
+    if (!wbs || wbs.length === 0) {
+      missing.push("wbs");
+    }
+  }
+
+  if (unitSupportsLaborSection(unit)) {
+    const titles = await getCachedManpowerTitles();
+    if (!titles || titles.length === 0) {
+      missing.push("manpower_job_titles");
+    }
+  }
+
+  return {
+    isReady: missing.length === 0,
+    missing,
+  };
+}
+

@@ -10,7 +10,7 @@ import { type DBSchema, type IDBPDatabase, openDB } from "idb";
 
 // Keep the historical IndexedDB name so existing offline caches stay readable.
 export const OFFLINE_DB_NAME = "ipcas-offline";
-export const OFFLINE_DB_VERSION = 3;
+export const OFFLINE_DB_VERSION = 4;
 
 export function normalizeWeatherValue(val: unknown): string {
   if (val === "sunny") return "clear";
@@ -54,6 +54,9 @@ export interface QueueItem {
   error_message: string | null;
   local_id: string;
   server_id: string | null;
+  actor_id?: string;
+  unit?: string;
+  canonical_unit?: string;
 }
 
 export interface OfflineReport {
@@ -131,6 +134,85 @@ export interface PendingPhoto {
   data: ArrayBuffer;
 }
 
+export type OperationKind = "create_report" | "create" | "update" | "delete" | "header_update";
+export type OperationStatus = "pending" | "syncing" | "synced" | "failed" | "conflict";
+
+export interface LocalReportSnapshot {
+  local_report_id: string;
+  actor_id: string;
+  project_id: string;
+  unit: string;
+  report_date: string;
+  status: string;
+  server_report_id?: string | null;
+  server_version?: number | null;
+  base_revision?: string | null;
+  base_header: Record<string, unknown>;
+  base_rows: Record<string, unknown[]>;
+  overlay_header: Record<string, unknown>;
+  overlay_rows: Record<string, unknown[]>;
+  tombstones: Record<string, string[]>;
+  field_errors: Record<string, Record<string, string>>;
+  cached_config?: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OfflineOperation {
+  operation_id: string;
+  local_report_id: string;
+  client_id?: string;
+  actor_id: string;
+  project_id: string;
+  unit: string;
+  operation_kind: OperationKind;
+  target_type: string;
+  target_server_id?: string | null;
+  base_target_revision?: string | null;
+  payload: unknown;
+  predecessor_ids: string[];
+  supersedes_operation_id?: string | null;
+  created_at: string;
+  status: OperationStatus;
+  error_code?: string | null;
+  error_message?: string | null;
+  result?: unknown;
+}
+
+export interface OfflineClaim {
+  claim_id: string;
+  scope: string;
+  actor_id: string;
+  project_id: string;
+  owner_tab: string;
+  fencing_token: number;
+  acquired_at: string;
+  expires_at: string;
+}
+
+export interface OfflineConflict {
+  conflict_id: string;
+  source_operation_ids: string[];
+  local_report_id: string;
+  actor_id: string;
+  project_id: string;
+  unit: string;
+  reason_code: string;
+  local_snapshot: unknown;
+  server_snapshot: unknown;
+  status: "unresolved" | "resolved_server" | "resolved_correction";
+  destination_transfer_id?: string | null;
+  created_at: string;
+}
+
+export interface LegacyQuarantine {
+  queue_id: string;
+  raw_record: unknown;
+  quarantine_reason: string;
+  quarantined_at: string;
+  project_id: string;
+}
+
 interface VeloraDB extends DBSchema {
   offline_queue: {
     key: string;
@@ -177,6 +259,39 @@ interface VeloraDB extends DBSchema {
     key: string;
     value: PendingPhoto;
   };
+  local_snapshots: {
+    key: string;
+    value: LocalReportSnapshot;
+    indexes: {
+      actor_id: string;
+      project_id: string;
+    };
+  };
+  offline_operations: {
+    key: string;
+    value: OfflineOperation;
+    indexes: {
+      status: string;
+      local_report_id: string;
+      actor_id: string;
+      project_id: string;
+      created_at: string;
+    };
+  };
+  offline_claims: {
+    key: string;
+    value: OfflineClaim;
+  };
+  offline_conflicts: {
+    key: string;
+    value: OfflineConflict;
+    indexes: { project_id: string; local_report_id: string };
+  };
+  legacy_quarantine: {
+    key: string;
+    value: LegacyQuarantine;
+    indexes: { project_id: string; quarantined_at: string };
+  };
 }
 
 let dbPromise: Promise<IDBPDatabase<VeloraDB>> | null = null;
@@ -195,6 +310,18 @@ export function generateUUID(): string {
 
 export function isOfflineDBAvailable(): boolean {
   return typeof window !== "undefined" && typeof indexedDB !== "undefined";
+}
+
+export function isEligibleForReplay(item: QueueItem): boolean {
+  if (item.status !== "pending") return false;
+  // An item must have a proven actor/owner and proven unit scope to be eligible for automatic replay.
+  // Legacy queue records that lack proven actor or canonical unit are quarantined from automatic replay.
+  const hasProvenActor = Boolean(item.actor_id || (item as any).actor || (item as any).user_id);
+  const hasProvenUnit = Boolean(item.unit || item.canonical_unit || (item as any).discipline);
+  if (!hasProvenActor || !hasProvenUnit) {
+    return false;
+  }
+  return true;
 }
 
 export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
@@ -283,10 +410,54 @@ export function initDB(): Promise<IDBPDatabase<VeloraDB>> {
             });
           }
         }
+        if (oldVersion < 4) {
+          if (!db.objectStoreNames.contains("local_snapshots")) {
+            const snapshots = db.createObjectStore("local_snapshots", { keyPath: "local_report_id" });
+            snapshots.createIndex("actor_id", "actor_id");
+            snapshots.createIndex("project_id", "project_id");
+          }
+          if (!db.objectStoreNames.contains("offline_operations")) {
+            const ops = db.createObjectStore("offline_operations", { keyPath: "operation_id" });
+            ops.createIndex("status", "status");
+            ops.createIndex("local_report_id", "local_report_id");
+            ops.createIndex("actor_id", "actor_id");
+            ops.createIndex("project_id", "project_id");
+            ops.createIndex("created_at", "created_at");
+          }
+          if (!db.objectStoreNames.contains("offline_claims")) {
+            db.createObjectStore("offline_claims", { keyPath: "claim_id" });
+          }
+          if (!db.objectStoreNames.contains("offline_conflicts")) {
+            const conflicts = db.createObjectStore("offline_conflicts", { keyPath: "conflict_id" });
+            conflicts.createIndex("project_id", "project_id");
+            conflicts.createIndex("local_report_id", "local_report_id");
+          }
+          if (!db.objectStoreNames.contains("legacy_quarantine")) {
+            const quarantine = db.createObjectStore("legacy_quarantine", { keyPath: "queue_id" });
+            quarantine.createIndex("project_id", "project_id");
+            quarantine.createIndex("quarantined_at", "quarantined_at");
+          }
+        }
       },
+    }).catch((err) => {
+      dbPromise = null;
+      throw err;
     });
   }
   return dbPromise;
+}
+
+export async function closeDB(): Promise<void> {
+  if (dbPromise) {
+    try {
+      const db = await dbPromise;
+      db.close();
+    } catch {
+      // ignore
+    } finally {
+      dbPromise = null;
+    }
+  }
 }
 
 function getDB(): Promise<IDBPDatabase<VeloraDB>> {
@@ -305,7 +476,13 @@ export async function addToQueue(entry: QueueItem): Promise<void> {
 export async function getPendingQueue(): Promise<QueueItem[]> {
   const db = await getDB();
   const all = await db.getAllFromIndex("offline_queue", "status", "pending");
-  return all.sort((a, b) => a.created_at.localeCompare(b.created_at));
+  return all.filter(isEligibleForReplay).sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export async function getQuarantinedLegacyQueue(): Promise<QueueItem[]> {
+  const db = await getDB();
+  const all = await db.getAll("offline_queue");
+  return all.filter((item) => item.status === "pending" && !isEligibleForReplay(item));
 }
 
 export async function getQueueByProject(projectId: string): Promise<QueueItem[]> {
@@ -529,3 +706,159 @@ export async function getConflictQueueEndpoint(
   if (!item) return null;
   return { endpoint: item.endpoint, method: item.method };
 }
+
+// ---------------------------------------------------------------------------
+// local_snapshots & offline_operations (v2 specialty unit sync)
+// ---------------------------------------------------------------------------
+
+export async function saveSnapshotAndOperation(
+  snapshot: LocalReportSnapshot,
+  operation?: OfflineOperation,
+): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction(
+    operation ? ["local_snapshots", "offline_operations"] : ["local_snapshots"],
+    "readwrite",
+  );
+  await tx.objectStore("local_snapshots").put(snapshot);
+  if (operation) {
+    await tx.objectStore("offline_operations").put(operation);
+  }
+  await tx.done;
+}
+
+export async function getLocalSnapshot(localReportId: string): Promise<LocalReportSnapshot | undefined> {
+  const db = await getDB();
+  return db.get("local_snapshots", localReportId);
+}
+
+export async function findLocalSnapshot(
+  projectId: string,
+  unit: string,
+  reportDate: string,
+  actorId?: string,
+): Promise<LocalReportSnapshot | undefined> {
+  const db = await getDB();
+  try {
+    const all = await db.getAllFromIndex("local_snapshots", "project_id", projectId);
+    const match = all.find(
+      (s) =>
+        s.unit === unit &&
+        s.report_date === reportDate &&
+        (!actorId || s.actor_id === actorId),
+    );
+    if (match) return match;
+  } catch {
+    // Index fallback
+  }
+  const allSnapshots = await db.getAll("local_snapshots");
+  return allSnapshots.find(
+    (s) =>
+      String(s.project_id) === String(projectId) &&
+      s.unit === unit &&
+      s.report_date === reportDate &&
+      (!actorId || s.actor_id === actorId),
+  );
+}
+
+export async function getLocalSnapshotsByProject(
+  projectId: string,
+  actorId?: string,
+): Promise<LocalReportSnapshot[]> {
+  const db = await getDB();
+  const all = await db.getAllFromIndex("local_snapshots", "project_id", projectId);
+  if (actorId) {
+    return all.filter((s) => s.actor_id === actorId);
+  }
+  return all;
+}
+
+export async function saveLocalSnapshot(snapshot: LocalReportSnapshot): Promise<void> {
+  const db = await getDB();
+  await db.put("local_snapshots", snapshot);
+}
+
+export async function deleteLocalSnapshot(localReportId: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("local_snapshots", localReportId);
+}
+
+export async function saveOperation(operation: OfflineOperation): Promise<void> {
+  const db = await getDB();
+  await db.put("offline_operations", operation);
+}
+
+export async function getOperation(operationId: string): Promise<OfflineOperation | undefined> {
+  const db = await getDB();
+  return db.get("offline_operations", operationId);
+}
+
+export async function getPendingOperations(
+  actorId?: string,
+  projectId?: string,
+): Promise<OfflineOperation[]> {
+  const db = await getDB();
+  let ops = await db.getAllFromIndex("offline_operations", "status", "pending");
+  if (actorId) {
+    ops = ops.filter((o) => o.actor_id === actorId);
+  }
+  if (projectId) {
+    ops = ops.filter((o) => o.project_id === projectId);
+  }
+  return ops.sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export async function getOperationsForReport(localReportId: string): Promise<OfflineOperation[]> {
+  const db = await getDB();
+  const ops = await db.getAllFromIndex("offline_operations", "local_report_id", localReportId);
+  return ops.sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+export async function updateOperation(
+  operationId: string,
+  updates: Partial<OfflineOperation>,
+): Promise<void> {
+  const db = await getDB();
+  const existing = await db.get("offline_operations", operationId);
+  if (!existing) return;
+  await db.put("offline_operations", { ...existing, ...updates });
+}
+
+export async function quarantineLegacyRecord(quarantine: LegacyQuarantine): Promise<void> {
+  const db = await getDB();
+  await db.put("legacy_quarantine", quarantine);
+}
+
+export async function getQuarantinedRecords(projectId?: string): Promise<LegacyQuarantine[]> {
+  const db = await getDB();
+  if (projectId) {
+    return db.getAllFromIndex("legacy_quarantine", "project_id", projectId);
+  }
+  return db.getAll("legacy_quarantine");
+}
+
+export interface OfflineBackup {
+  local_snapshots: LocalReportSnapshot[];
+  offline_operations: OfflineOperation[];
+  legacy_quarantine: LegacyQuarantine[];
+}
+
+/** Copy the durable stores. This does not delete them and cannot downgrade IndexedDB. */
+export async function exportOfflineBackup(): Promise<OfflineBackup> {
+  const db = await getDB();
+  return {
+    local_snapshots: await db.getAll("local_snapshots"),
+    offline_operations: await db.getAll("offline_operations"),
+    legacy_quarantine: await db.getAll("legacy_quarantine"),
+  };
+}
+
+export async function restoreOfflineBackup(backup: OfflineBackup): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction(["local_snapshots", "offline_operations", "legacy_quarantine"], "readwrite");
+  for (const snapshot of backup.local_snapshots) await tx.objectStore("local_snapshots").put(snapshot);
+  for (const operation of backup.offline_operations) await tx.objectStore("offline_operations").put(operation);
+  for (const record of backup.legacy_quarantine) await tx.objectStore("legacy_quarantine").put(record);
+  await tx.done;
+}
+

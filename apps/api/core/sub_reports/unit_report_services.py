@@ -12,7 +12,7 @@ from datetime import date
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 
 from common.reporting_units import SpecialtyUnit, is_canonical_unit
 from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
@@ -180,6 +180,29 @@ def assert_editable(report, user, *, unit=None):
         raise UnitReportNotFound('گزارش واحد یافت نشد', 'unit_report_not_found')
 
 
+def _check_mutation_permission(report, user, codename, enabled):
+    if enabled:
+        from permissions.project import member_has_codename
+        if not member_has_codename(user, report.project_id, codename):
+            raise PermissionDenied('Current project permission is required')
+
+
+def _lock_project_for_rebuild(report):
+    """Match aggregation's project-before-unit lock order within a transaction."""
+    from projects.models import Project
+    Project.objects.select_for_update().get(pk=report.project_id)
+
+
+def lock_editable_report(report, user, *, unit=None, enforce_permission=False):
+    """Lock and revalidate the precise report version in the caller's transaction."""
+    locked = lock_current_version(report)
+    if locked.id != report.id:
+        raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
+    assert_editable(locked, user, unit=unit)
+    _check_mutation_permission(locked, user, 'edit_reports', enforce_permission)
+    return locked
+
+
 @transaction.atomic
 def update_unit_report(
     report,
@@ -188,11 +211,9 @@ def update_unit_report(
     unit=None,
     validated_fields: dict,
     nested_data: dict | None = None,
+    enforce_permission: bool = False,
 ):
-    locked = lock_current_version(report)
-    if report.id != locked.id:
-        raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
-    assert_editable(locked, user, unit=unit)
+    locked = lock_editable_report(report, user, unit=unit, enforce_permission=enforce_permission)
     for field, value in validated_fields.items():
         setattr(locked, field, value)
     locked.updated_by = user
@@ -210,15 +231,17 @@ def update_unit_report(
             if rows is None or key not in managers:
                 continue
             manager, model = managers[key]
-            manager.filter(is_deleted=False).update(is_deleted=True)
+            manager.filter(is_deleted=False).update(is_deleted=True, sync_revision=uuid.uuid4())
             for row in rows:
                 model.objects.create(sub_report=locked, **row)
     return locked
 
 
 @transaction.atomic
-def submit_unit_report(report, *, user, unit=None):
+def submit_unit_report(report, *, user, unit=None, enforce_permission=False):
+    _lock_project_for_rebuild(report)
     locked = lock_current_version(report)
+    _check_mutation_permission(locked, user, 'edit_reports', enforce_permission)
     if not locked.is_current or report.id != locked.id:
         raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
     if unit is not None and (locked.unit != unit or report.unit != unit):
@@ -253,8 +276,10 @@ def submit_unit_report(report, *, user, unit=None):
 
 
 @transaction.atomic
-def approve_unit_report(report, *, user, unit=None, sod_checker=None):
+def approve_unit_report(report, *, user, unit=None, sod_checker=None, enforce_permission=False):
+    _lock_project_for_rebuild(report)
     locked = lock_current_version(report)
+    _check_mutation_permission(locked, user, 'approve_reports', enforce_permission)
     if not locked.is_current or report.id != locked.id:
         raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
     if unit is not None and (locked.unit != unit or report.unit != unit):
@@ -289,8 +314,10 @@ def approve_unit_report(report, *, user, unit=None, sod_checker=None):
 
 
 @transaction.atomic
-def reject_unit_report(report, *, user, rejection_reason, unit=None):
+def reject_unit_report(report, *, user, rejection_reason, unit=None, enforce_permission=False):
+    _lock_project_for_rebuild(report)
     locked = lock_current_version(report)
+    _check_mutation_permission(locked, user, 'approve_reports', enforce_permission)
     if not locked.is_current or report.id != locked.id:
         raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
     if unit is not None and (locked.unit != unit or report.unit != unit):
@@ -318,7 +345,7 @@ def reject_unit_report(report, *, user, rejection_reason, unit=None):
 
 
 @transaction.atomic
-def correct_unit_report(report, *, user, unit=None):
+def correct_unit_report(report, *, user, unit=None, enforce_permission=False):
     """Explicit correction action (feature 032, US4, T048).
 
     Requires approved status and is_current=True.
@@ -332,7 +359,9 @@ def correct_unit_report(report, *, user, unit=None):
     Creates UnitReportStatusEvent with event_type='corrected'.
     Triggers summary rebuild so obsolete contributions are removed.
     """
+    _lock_project_for_rebuild(report)
     locked = lock_current_version(report)
+    _check_mutation_permission(locked, user, 'edit_reports', enforce_permission)
     if not locked.is_current or report.id != locked.id:
         raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
     if unit is not None and (locked.unit != unit or report.unit != unit):
@@ -495,8 +524,10 @@ def correct_unit_report(report, *, user, unit=None):
 
 
 @transaction.atomic
-def soft_delete_unit_report(report, *, user, unit=None):
+def soft_delete_unit_report(report, *, user, unit=None, enforce_permission=False):
+    _lock_project_for_rebuild(report)
     locked = lock_current_version(report)
+    _check_mutation_permission(locked, user, 'edit_reports', enforce_permission)
     if not locked.is_current or report.id != locked.id:
         raise UnitReportError('این نسخه جاری نیست', 'unit_report_not_current')
     if unit is not None and (locked.unit != unit or report.unit != unit):

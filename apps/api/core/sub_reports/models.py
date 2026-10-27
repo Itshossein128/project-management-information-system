@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.conf import settings
 from django.db import models
 
@@ -77,7 +79,44 @@ class MigrationDisposition(models.TextChoices):
     QUARANTINED = 'quarantined', 'Quarantined'
 
 
-class DisciplineSubReport(AuditSoftDeleteModel):
+class SyncRevisionMixin(models.Model):
+    """Opaque revision used to detect stale offline edits of this target."""
+
+    sync_revision = models.UUIDField(default=uuid4, editable=False)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        # Every persisted change to a versioned target invalidates stale bases.
+        if not self._state.adding:
+            self.sync_revision = uuid4()
+            if kwargs.get('update_fields') is not None:
+                kwargs['update_fields'] = set(kwargs['update_fields']) | {'sync_revision'}
+        return super().save(*args, **kwargs)
+
+
+class OfflineOperationReceipt(UUIDModel):
+    """Durable result for a project- and actor-scoped idempotent operation."""
+
+    project = models.ForeignKey('projects.Project', on_delete=models.PROTECT)
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    operation_id = models.UUIDField()
+    fingerprint = models.CharField(max_length=64)
+    outcome = models.CharField(max_length=32)
+    result = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['project', 'actor', 'operation_id'],
+                name='unique_offline_actor_operation',
+            ),
+        ]
+
+
+class DisciplineSubReport(SyncRevisionMixin, AuditSoftDeleteModel):
     """
     Represents a discipline-specific sub-report within a project, which can optionally
     be linked to a daily report. It tracks the status of the report (draft, submitted,
@@ -186,7 +225,7 @@ class DisciplineSubReport(AuditSoftDeleteModel):
         ]
 
 
-class DisciplineSubReportActivity(UUIDModel):
+class DisciplineSubReportActivity(SyncRevisionMixin, UUIDModel):
     """
     Represents an individual work activity tracked within a specific discipline sub-report.
     It captures details about the workforce (crew, foreman, workers), location (zone, block, floor),
@@ -241,7 +280,7 @@ class DisciplineSubReportActivity(UUIDModel):
         super().save(*args, **kwargs)
 
 
-class DisciplineSubReportLabor(UUIDModel):
+class DisciplineSubReportLabor(SyncRevisionMixin, UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='labor_entries',
     )
@@ -266,7 +305,7 @@ class DisciplineSubReportLabor(UUIDModel):
         db_table = 'discipline_sub_report_labor'
 
 
-class DisciplineSubReportMaterial(UUIDModel):
+class DisciplineSubReportMaterial(SyncRevisionMixin, UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='material_entries',
     )
@@ -298,7 +337,7 @@ class DisciplineSubReportMaterial(UUIDModel):
         db_table = 'discipline_sub_report_materials'
 
 
-class DisciplineSubReportConcrete(UUIDModel):
+class DisciplineSubReportConcrete(SyncRevisionMixin, UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='concrete_entries',
     )
@@ -332,7 +371,7 @@ class DisciplineSubReportConcrete(UUIDModel):
         db_table = 'discipline_sub_report_concrete'
 
 
-class DisciplineSubReportGeneralActivity(UUIDModel):
+class DisciplineSubReportGeneralActivity(SyncRevisionMixin, UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='general_activities',
     )
@@ -349,7 +388,7 @@ class DisciplineSubReportGeneralActivity(UUIDModel):
         db_table = 'discipline_sub_report_general_activities'
 
 
-class DisciplineSubReportMachinery(UUIDModel):
+class DisciplineSubReportMachinery(SyncRevisionMixin, UUIDModel):
     """Machinery status-grid row (feature 033, data-model §2.3).
 
     Rows that declare a stable ``equipment_ref`` identity are item rows
@@ -386,7 +425,7 @@ class DisciplineSubReportMachinery(UUIDModel):
         ordering = ['row_number']
 
 
-class DisciplineSubReportIssue(UUIDModel):
+class DisciplineSubReportIssue(SyncRevisionMixin, UUIDModel):
     """Structured issue/barrier row (feature 033, data-model §2.6).
 
     Barriers require an owner and a due date; issues keep them optional with a
@@ -415,7 +454,7 @@ class DisciplineSubReportIssue(UUIDModel):
         ordering = ['row_number']
 
 
-class DisciplineSubReportVisit(UUIDModel):
+class DisciplineSubReportVisit(SyncRevisionMixin, UUIDModel):
     """Structured visit row (feature 033, data-model §2.6)."""
 
     sub_report = models.ForeignKey(
@@ -431,7 +470,7 @@ class DisciplineSubReportVisit(UUIDModel):
         ordering = ['row_number']
 
 
-class DisciplineSubReportHseIncident(UUIDModel):
+class DisciplineSubReportHseIncident(SyncRevisionMixin, UUIDModel):
     """Structured HSE incident row (feature 033, data-model §2.6).
 
     ``immediate_action`` is required at creation (serializer validation); a
@@ -481,7 +520,7 @@ class UnitReportAttachment(UUIDModel):
         ordering = ['id']
 
 
-class DisciplineSubReportNote(UUIDModel):
+class DisciplineSubReportNote(SyncRevisionMixin, UUIDModel):
     sub_report = models.ForeignKey(
         DisciplineSubReport, on_delete=models.CASCADE, related_name='notes',
     )

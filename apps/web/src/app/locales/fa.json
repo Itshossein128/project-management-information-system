@@ -2217,7 +2217,21 @@
     "queuedCount": "در صف: {{count}} مورد",
     "failedQueued": "{{failed}} مورد ناموفق — {{pending}} در صف",
     "pendingSync": "{{count}} مورد در انتظار همگام‌سازی",
-    "manageQueue": "مدیریت صف"
+    "manageQueue": "مدیریت صف",
+    "statusPending": "در انتظار همگام‌سازی",
+    "statusSending": "در حال ارسال…",
+    "statusSynced": "همگام‌سازی‌شده",
+    "statusFailed": "خطا در همگام‌سازی",
+    "statusConflict": "تعارض همگام‌سازی",
+    "localDrafts": "پیش‌نویس‌های محلی",
+    "fieldError": "{{field}}: {{code}}",
+    "useServer": "نسخه سرور",
+    "keepMine": "کار خودم بماند",
+    "confirmConflictScope": "می‌دانم این انتخاب فقط ردیف‌های مقایسه‌شده را عوض می‌کند.",
+    "serverSection": "سرور {{section}}",
+    "localSection": "{{section}} من",
+    "confirmLocalDelete": "حذف محلی {{scope}} فقط از همین دستگاه؟",
+    "quarantineTitle": "رکوردهای قدیمی در انتظار بررسی"
   },
   "toast": {
     "saved": "با موفقیت ذخیره شد",

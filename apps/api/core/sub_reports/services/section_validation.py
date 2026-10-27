@@ -483,7 +483,7 @@ def resolve_stoppage_vocabulary(report, context=None) -> list[dict]:
             for r in config.stoppage_reasons.all().order_by('display_order', 'reason_code')
         ]
 
-    from project_templates.models import DEFAULT_STOPPAGE_REASONS
+    from project_templates.services import DEFAULT_STOPPAGE_REASONS
 
     return [
         {

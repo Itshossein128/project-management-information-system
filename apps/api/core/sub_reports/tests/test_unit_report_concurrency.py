@@ -378,3 +378,50 @@ class TestUnitReportConcurrency:
         assert summary.management_opinion != ''
         assert summary.weather_override is True
         assert summary.weather_condition == 'rainy'
+
+    def test_approve_and_sync_keep_the_locked_row(self, conc_project, conc_user, conc_reviewer):
+        """Approve and a sync write share the parent lock. The sync cannot change the row."""
+        from uuid import uuid4
+
+        from sub_reports.services.offline_sync import dispatch_operations
+
+        conc_user.is_superuser = True
+        conc_user.save(update_fields=['is_superuser'])
+        report = DisciplineSubReport.objects.create(
+            project=conc_project, unit=SpecialtyUnit.BUILDINGS, discipline='civil',
+            report_date=date(2026, 10, 21), status=SubReportStatus.SUBMITTED, is_current=True,
+            created_by=conc_user, submitted_by=conc_user, lineage_id=uuid4(), version_number=1,
+        )
+        row = DisciplineSubReportActivity.objects.create(
+            sub_report=report, row_number=1, shift='shift_1', crew_name='Crew',
+            activity_description='original',
+        )
+        barrier = threading.Barrier(2)
+
+        def do_approve():
+            barrier.wait(timeout=10)
+            return approve_unit_report(report, user=conc_reviewer)
+
+        def do_sync():
+            barrier.wait(timeout=10)
+            return dispatch_operations(project=conc_project, actor=conc_user, body={
+                'contract_version': 2,
+                'operations': [{
+                    'operation_id': str(uuid4()), 'local_report_id': str(uuid4()),
+                    'scope': {'kind': 'unit', 'unit': 'buildings', 'report_date': '2026-10-21', 'report_id': str(report.id)},
+                    'action': 'update',
+                    'target': {'kind': 'activity', 'client_id': str(uuid4()), 'server_id': str(row.id)},
+                    'base_revision': None, 'depends_on': [],
+                    'payload': {'activity_description': 'raced'},
+                }],
+            })
+
+        results, errors = _run_in_threads(do_approve, do_sync)
+        assert errors == [], errors
+        report.refresh_from_db()
+        row.refresh_from_db()
+        assert report.status == SubReportStatus.APPROVED
+        assert row.activity_description == 'original'
+        assert results[1]['results'][0]['outcome'] == 'conflict'
+        assert results[1]['results'][0]['status'] == 'sync_conflict'
+        assert UnitReportStatusEvent.objects.filter(report_version=report, event_type=UnitReportEventType.APPROVED).exists()

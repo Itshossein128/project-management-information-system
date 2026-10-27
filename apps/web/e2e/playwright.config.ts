@@ -39,6 +39,7 @@ export default defineConfig({
         ...process.env,
         CELERY_TASK_ALWAYS_EAGER: "true",
         AUDIT_LOG_ASYNC: "false",
+        V2_OFFLINE_SYNC_ENABLED: "true",
       },
     },
     {

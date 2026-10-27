@@ -189,10 +189,14 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
     # -- CRUD ---------------------------------------------------------------
 
     def create(self, request, *args, **kwargs):
+        if services._derived_sections_in_payload(request.data):
+            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_readonly'})
         raise ValidationError({'detail': AUTO_SUMMARY_CREATE_MSG, 'code': 'auto_summary_only'})
 
     @action(detail=False, methods=['get', 'post'], url_path='by-date')
     def by_date(self, request, *args, **kwargs):
+        if request.method.upper() == 'POST' and services._derived_sections_in_payload(request.data):
+            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_readonly'})
         raw = request.query_params.get('date') or request.data.get('report_date') or request.data.get('date')
         report_date = parse_date_optional(raw)
         if report_date is None:
@@ -229,8 +233,19 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         status_code = status.HTTP_200_OK if created_before else status.HTTP_201_CREATED
         return Response(DailyReportDetailSerializer(report, context={'request': request}).data, status=status_code)
 
+    @transaction.atomic
     def partial_update(self, request, *args, **kwargs):
+        from permissions.project import member_has_codename
+        from projects.models import Project
+        from rest_framework.exceptions import PermissionDenied
+
+        Project.objects.select_for_update().get(pk=self.get_project_id())
         instance = self.get_object()
+        instance = DailyReport.objects.select_for_update().get(pk=instance.pk, project_id=self.get_project_id())
+        if not member_has_codename(request.user, self.get_project_id(), 'edit_reports'):
+            raise PermissionDenied('Current project edit permission is required')
+        if instance.is_auto_summary and services._derived_sections_in_payload(request.data):
+            raise ValidationError({'detail': DERIVED_READONLY_MSG, 'code': 'derived_readonly'})
         if instance.status == ReportStatus.APPROVED:
             raise ValidationError({'detail': 'گزارش قفل‌شده است', 'code': 'report_locked'})
         # Auto-summary allows metadata/overrides even when not draft if still editable workflow.

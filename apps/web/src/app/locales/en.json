@@ -2217,7 +2217,21 @@
     "queuedCount": "Queued: {{count}}",
     "failedQueued": "{{failed}} failed — {{pending}} queued",
     "pendingSync": "{{count}} items waiting to sync",
-    "manageQueue": "Manage queue"
+    "manageQueue": "Manage queue",
+    "statusPending": "Pending sync",
+    "statusSending": "Sending…",
+    "statusSynced": "Synced",
+    "statusFailed": "Sync failed",
+    "statusConflict": "Sync conflict",
+    "localDrafts": "Local drafts",
+    "fieldError": "{{field}}: {{code}}",
+    "useServer": "Use server",
+    "keepMine": "Keep my work",
+    "confirmConflictScope": "I understand this choice applies only to the compared rows.",
+    "serverSection": "Server {{section}}",
+    "localSection": "My {{section}}",
+    "confirmLocalDelete": "Delete local item {{scope}} from this device only?",
+    "quarantineTitle": "Legacy records held for review"
   },
   "toast": {
     "saved": "Saved successfully",

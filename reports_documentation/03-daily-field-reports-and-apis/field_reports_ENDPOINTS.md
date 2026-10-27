@@ -128,4 +128,5 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 - **Shift values:** `day`, `night`, `full` (default `full`).
 - **Progress side effect:** approving a report enqueues progress recalculation for linked activities.
 - **Auto costs:** approved labor entries with `daily_rate` feed `cost_control.ActualCost` (see `cost_control/ENDPOINTS.md`).
+- **Versioned sync:** `POST daily-reports/sync-operations/v2/` stays off unless `V2_OFFLINE_SYNC_ENABLED` is true and the actor has `edit_reports`. `synced_ids` lists successful operation ids only. Legacy batch and summary writes that author derived rows return `derived_readonly`. Receipts are kept if the server release is rolled back. Local recovery uses export/restore, not an IndexedDB downgrade.
 - **Photo attachments:** activity photos require MinIO/S3 (`storage` app); not available in Docker-less cloud dev.

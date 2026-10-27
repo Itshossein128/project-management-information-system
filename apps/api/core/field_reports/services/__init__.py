@@ -199,6 +199,17 @@ def _child_sections_in_payload(payload) -> list[str]:
     return [key for key in CHILD_SERIALIZER_MAP if key in payload]
 
 
+def _derived_sections_in_payload(payload) -> list[str]:
+    """Find attempts to author summary sections, including empty arrays."""
+    derived = set(CHILD_SERIALIZER_MAP) | {
+        'labor_entries', 'equipment_entries', 'material_entries',
+        'labor_camp_entries', 'machinery', 'machinery_rows', 'concrete_entries',
+        'general_activities', 'issues', 'visits', 'hse_incidents', 'provenance',
+        'labor_summary', 'materials_summary', 'attachment_counts', 'aggregation',
+    }
+    return sorted(derived.intersection(payload))
+
+
 def _clear_child_sections(report, section_keys: list[str]) -> None:
     for key in section_keys:
         related = getattr(report, CHILD_RELATED_NAMES[key])
@@ -310,13 +321,11 @@ def sync_batch(project_id, user, reports: list) -> dict:
                 is_current=True,
             ).first()
         elif not existing.is_current:
-            existing = DailyReport.objects.filter(
-                project_id=project_id,
-                report_date=report_date,
-                shift=shift,
-                is_deleted=False,
-                is_current=True,
-            ).first() or existing
+            results.append(_conflict_result(
+                local_id, existing, item, 'نسخه گزارش جاری نیست',
+            ))
+            counts['conflicts'] += 1
+            continue
 
         if existing and existing.status == ReportStatus.APPROVED:
             results.append(_conflict_result(
@@ -334,7 +343,67 @@ def sync_batch(project_id, user, reports: list) -> dict:
             counts['conflicts'] += 1
             continue
 
+        if (existing is None or existing.is_auto_summary) and _derived_sections_in_payload(item):
+            results.append({
+                'local_id': local_id,
+                'status': 'error',
+                'server_id': str(existing.id) if existing else None,
+                'conflict_reason': 'ردیف‌های تجمیعی قابل تغییر مستقیم نیستند',
+                'server_payload': None,
+                'conflict_fields': [],
+                'child_errors': [
+                    {'section': section, 'code': 'derived_readonly'}
+                    for section in _derived_sections_in_payload(item)
+                ],
+            })
+            counts['errors'] += 1
+            continue
+
         with transaction.atomic():
+            # Aggregation and unit workflow lock project before report. Re-read
+            # authorization and the target under that same transaction; the
+            # earlier lookup is only a hint and may have raced approval.
+            from projects.models import Project
+            from permissions.project import member_has_codename
+            from rest_framework.exceptions import PermissionDenied
+
+            Project.objects.select_for_update().get(pk=project_id)
+            if not member_has_codename(user, project_id, 'edit_reports'):
+                raise PermissionDenied('Current project edit permission is required')
+            if existing is not None:
+                selected_id = existing.pk
+                existing = DailyReport.objects.select_for_update().filter(
+                    pk=selected_id, project_id=project_id, is_deleted=False,
+                ).first()
+                if existing is None:
+                    results.append({
+                        'local_id': local_id, 'status': 'conflict', 'server_id': None,
+                        'conflict_reason': 'گزارش هدف دیگر موجود نیست',
+                        'server_payload': None, 'conflict_fields': [], 'child_errors': [],
+                    })
+                    counts['conflicts'] += 1
+                    continue
+            else:
+                existing = DailyReport.objects.select_for_update().filter(
+                    project_id=project_id, report_date=report_date, shift=shift,
+                    is_deleted=False, is_current=True,
+                ).first()
+            if existing is not None and (not existing.is_current or existing.status not in MERGEABLE_STATUSES):
+                reason = ('نسخه گزارش جاری نیست' if not existing.is_current else
+                          'گزارش در وضعیت غیرقابل ادغام است')
+                results.append(_conflict_result(local_id, existing, item, reason))
+                counts['conflicts'] += 1
+                continue
+            if existing is not None and existing.is_auto_summary and _derived_sections_in_payload(item):
+                results.append({
+                    'local_id': local_id, 'status': 'error', 'server_id': str(existing.id),
+                    'conflict_reason': 'ردیف‌های تجمیعی قابل تغییر مستقیم نیستند',
+                    'server_payload': None, 'conflict_fields': [],
+                    'child_errors': [{'section': section, 'code': 'derived_readonly'}
+                                     for section in _derived_sections_in_payload(item)],
+                })
+                counts['errors'] += 1
+                continue
             if existing:
                 # Validate children before mutating so a bad replace cannot wipe rows,
                 # and so a failed child sync rolls back any header merge in this block.
@@ -356,6 +425,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
 
                 header_errors = _apply_header_merge(existing, item, user, local_id)
                 if header_errors is not None:
+                    transaction.set_rollback(True)
                     results.append({
                         'local_id': local_id,
                         'status': 'error',
@@ -428,8 +498,16 @@ def sync_batch(project_id, user, reports: list) -> dict:
                     continue
 
                 report = ensure_daily_report_summary(project_id, report_date, user=user)
+                report = DailyReport.objects.select_for_update().get(pk=report.pk)
+                if not report.is_current or report.status not in MERGEABLE_STATUSES:
+                    results.append(_conflict_result(
+                        local_id, report, item, 'گزارش در وضعیت غیرقابل ادغام است',
+                    ))
+                    counts['conflicts'] += 1
+                    continue
                 header_errors = _apply_header_merge(report, item, user, local_id)
                 if header_errors is not None:
+                    transaction.set_rollback(True)
                     results.append({
                         'local_id': local_id,
                         'status': 'error',

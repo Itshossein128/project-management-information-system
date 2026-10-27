@@ -220,6 +220,8 @@ CORS_ALLOWED_ORIGINS = [
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@velora.local')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+# Feature 037: versioned unit sync stays off until an isolated test or rollout enables it.
+V2_OFFLINE_SYNC_ENABLED = os.environ.get('V2_OFFLINE_SYNC_ENABLED', 'false').lower() in ('1', 'true', 'yes')
 
 # Alert notification channels (K-04): in_app, email, sms
 ALERT_NOTIFY_CHANNELS = os.environ.get('ALERT_NOTIFY_CHANNELS', 'in_app,email')

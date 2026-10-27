@@ -48,6 +48,13 @@ import {
   updateUnitReportMaterial,
   deleteUnitReportMaterial,
 } from "@/app/lib/api/unit-reports";
+import {
+  findLocalSnapshot,
+  generateUUID,
+  getLocalSnapshot,
+} from "@/app/lib/offlineDB";
+import { reconcileServerWithLocalSnapshot } from "@/app/lib/offlineHydration";
+import { queueUnitReportOperation } from "@/app/lib/offlineWrite";
 import { queryKeys } from "@/app/lib/react-query-keys";
 import { PATHS } from "@/app/routeVars";
 
@@ -390,13 +397,111 @@ export function useCurrentUnitReportQuery(
     queryKey: queryKeys.unitReportCurrent(businessId ?? "", unit ?? "", date ?? ""),
     enabled: Boolean(enabled && businessId && unit && date),
     queryFn: async () => {
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+        if (local) {
+          return {
+            id: local.local_report_id,
+            project_id: local.project_id,
+            unit: local.unit as CanonicalUnit,
+            report_date: local.report_date,
+            status: local.status as any,
+            version_number: local.server_version ?? 1,
+            is_current: true,
+            notes: (local.overlay_header?.notes ?? local.base_header?.notes ?? (local as any).notes ?? "") as string,
+            form_code: (local.overlay_header?.form_code ?? local.base_header?.form_code ?? "") as string,
+            weather_condition: (local.overlay_header?.weather_condition ?? local.base_header?.weather_condition ?? null) as any,
+            site_status: (local.overlay_header?.site_status ?? local.base_header?.site_status ?? "active") as any,
+            audit: {
+              prepared_by: null,
+              submitted_by: null,
+              submitted_at: null,
+              approved_by: null,
+              approved_at: null,
+              rejected_by: null,
+              rejected_at: null,
+              rejection_reason: "",
+            },
+            capabilities: {
+              can_edit: true,
+              can_submit: false,
+              can_approve: false,
+              can_reject: false,
+              can_correct: false,
+              can_delete: true,
+              can_view_history: false,
+            },
+            content: {
+              activity_records: [],
+              legacy_contributions: [],
+            },
+            _offline: true,
+          } as unknown as UnitReport;
+        }
+        return null;
+      }
       try {
-        return await fetchCurrentUnitReport(
+        const serverReport = await fetchCurrentUnitReport(
           String(businessId),
           unit as CanonicalUnit,
           date!,
         );
+        if (serverReport) {
+          const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+          if (local && (Object.keys(local.overlay_header || {}).length > 0 || Object.keys(local.overlay_rows || {}).length > 0)) {
+            return {
+              ...serverReport,
+              notes: (local.overlay_header?.notes ?? serverReport.notes) as string,
+              form_code: (local.overlay_header?.form_code ?? serverReport.form_code) as string,
+              weather_condition: (local.overlay_header?.weather_condition ?? serverReport.weather_condition) as any,
+              site_status: (local.overlay_header?.site_status ?? serverReport.site_status) as any,
+              _offline: true,
+            };
+          }
+        }
+        return serverReport;
       } catch (err) {
+        const local = await findLocalSnapshot(String(businessId), String(unit), date!);
+        if (local) {
+          return {
+            id: local.local_report_id,
+            project_id: local.project_id,
+            unit: local.unit as CanonicalUnit,
+            report_date: local.report_date,
+            status: local.status as any,
+            version_number: local.server_version ?? 1,
+            is_current: true,
+            notes: (local.overlay_header?.notes ?? local.base_header?.notes ?? (local as any).notes ?? "") as string,
+            form_code: (local.overlay_header?.form_code ?? local.base_header?.form_code ?? "") as string,
+            weather_condition: (local.overlay_header?.weather_condition ?? local.base_header?.weather_condition ?? null) as any,
+            site_status: (local.overlay_header?.site_status ?? local.base_header?.site_status ?? "active") as any,
+            audit: {
+              prepared_by: null,
+              submitted_by: null,
+              submitted_at: null,
+              approved_by: null,
+              approved_at: null,
+              rejected_by: null,
+              rejected_at: null,
+              rejection_reason: "",
+            },
+            capabilities: {
+              can_edit: true,
+              can_submit: false,
+              can_approve: false,
+              can_reject: false,
+              can_correct: false,
+              can_delete: true,
+              can_view_history: false,
+            },
+            content: {
+              activity_records: [],
+              legacy_contributions: [],
+            },
+            _offline: true,
+          } as unknown as UnitReport;
+        }
         if (err instanceof ApiRequestError && err.status === 404) {
           return null;
         }
@@ -412,8 +517,61 @@ export function useOpenUnitReport(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (reportDate: string) =>
-      openUnitReport(String(businessId), unit, reportDate),
+    mutationFn: async (reportDate: string) => {
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        let existing = await findLocalSnapshot(String(businessId), unit, reportDate);
+        if (!existing) {
+          const localId = generateUUID();
+          const { snapshot } = await queueUnitReportOperation({
+            actorId: localStorage.getItem("auth_user_id") ?? "offline-user",
+            projectId: String(businessId),
+            unit,
+            reportDate,
+            localReportId: localId,
+            operationKind: "create_report",
+            targetType: "header",
+            payload: { form_code: "" },
+          });
+          existing = snapshot;
+        }
+        return {
+          id: existing.local_report_id,
+          project_id: existing.project_id,
+          unit: existing.unit as CanonicalUnit,
+          report_date: existing.report_date,
+          status: existing.status as any,
+          version_number: existing.server_version ?? 1,
+          is_current: true,
+          form_code: (existing.overlay_header?.form_code ?? existing.base_header?.form_code ?? "") as string,
+          audit: {
+            prepared_by: null,
+            submitted_by: null,
+            submitted_at: null,
+            approved_by: null,
+            approved_at: null,
+            rejected_by: null,
+            rejected_at: null,
+            rejection_reason: "",
+          },
+          capabilities: {
+            can_edit: true,
+            can_submit: false,
+            can_approve: false,
+            can_reject: false,
+            can_correct: false,
+            can_delete: true,
+            can_view_history: false,
+          },
+          content: {
+            activity_records: [],
+            legacy_contributions: [],
+          },
+          _offline: true,
+        } as unknown as UnitReport;
+      }
+      return openUnitReport(String(businessId), unit, reportDate);
+    },
     onSuccess: () => {
       void qc.invalidateQueries({
         queryKey: ["businesses", businessId, "unit-report", unit],
@@ -547,12 +705,39 @@ export function useUnitReportActivitiesQuery(
   return useQuery<UnitReportActivityRow[]>({
     queryKey: queryKeys.unitReportActivities(businessId ?? "", unit ?? "", reportId ?? ""),
     enabled: Boolean(enabled && businessId && unit && reportId),
-    queryFn: () =>
-      fetchUnitReportActivities(
-        String(businessId),
-        unit as CanonicalUnit,
-        reportId!,
-      ),
+    queryFn: async () => {
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline && reportId) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.activities ?? []) as UnitReportActivityRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "activities").rows as UnitReportActivityRow[];
+        }
+      }
+      try {
+        const rows = await fetchUnitReportActivities(
+          String(businessId),
+          unit as CanonicalUnit,
+          reportId!,
+        );
+        if (reportId) {
+          const local = await getLocalSnapshot(reportId);
+          if (local) {
+            return reconcileServerWithLocalSnapshot({}, rows, local, "activities").rows as UnitReportActivityRow[];
+          }
+        }
+        return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
+      } catch (err) {
+        if (reportId) {
+          const local = await getLocalSnapshot(reportId);
+          if (local) {
+            const base = (local.base_rows?.activities ?? []) as UnitReportActivityRow[];
+            return reconcileServerWithLocalSnapshot({}, base, local, "activities").rows as UnitReportActivityRow[];
+          }
+        }
+        throw err;
+      }
+    },
   });
 }
 
@@ -563,8 +748,29 @@ export function useCreateUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: UnitReportActivityPayload) => {
+    mutationFn: async (payload: UnitReportActivityPayload) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const { operation } = await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          operationKind: "create",
+          targetType: "activities",
+          payload: payload as unknown as Record<string, unknown>,
+        });
+        return [{
+          ...payload,
+          id: operation.client_id,
+          client_id: operation.client_id,
+          _offline: true,
+          status: "pending",
+        }] as unknown as UnitReportActivityRow[];
+      }
       return createUnitReportActivity(String(businessId), unit, reportId, payload);
     },
     onSuccess: () => {
@@ -587,7 +793,7 @@ export function useUpdateUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       rowId,
       patch,
     }: {
@@ -595,6 +801,28 @@ export function useUpdateUnitReportActivity(
       patch: Partial<UnitReportActivityPayload>;
     }) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "update",
+          targetType: "activities",
+          payload: patch as unknown as Record<string, unknown>,
+        });
+        return {
+          ...patch,
+          id: rowId,
+          _offline: true,
+          status: "pending",
+        } as unknown as UnitReportActivityRow;
+      }
       return updateUnitReportActivity(
         String(businessId),
         unit,
@@ -623,8 +851,25 @@ export function useDeleteUnitReportActivity(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rowId: string) => {
+    mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "delete",
+          targetType: "activities",
+          payload: {},
+        });
+        return;
+      }
       return deleteUnitReportActivity(String(businessId), unit, reportId, rowId);
     },
     onSuccess: () => {
@@ -671,11 +916,33 @@ export function useUnitReportLaborQuery(
 ) {
   return useQuery<UnitReportLaborRow[]>({
     queryKey: queryKeys.unitReportLabor(businessId ?? "", unit, reportId ?? ""),
-    queryFn: () => {
+    queryFn: async () => {
       if (!businessId || !reportId) {
         throw new Error("Missing unit report labor parameters");
       }
-      return fetchUnitReportLabor(String(businessId), unit, reportId);
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.labor ?? []) as UnitReportLaborRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "labor").rows as UnitReportLaborRow[];
+        }
+      }
+      try {
+        const rows = await fetchUnitReportLabor(String(businessId), unit, reportId);
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          return reconcileServerWithLocalSnapshot({}, rows, local, "labor").rows as UnitReportLaborRow[];
+        }
+        return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
+      } catch (err) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.labor ?? []) as UnitReportLaborRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "labor").rows as UnitReportLaborRow[];
+        }
+        throw err;
+      }
     },
     enabled: Boolean(businessId && reportId),
   });
@@ -688,8 +955,29 @@ export function useCreateUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: UnitReportLaborPayload) => {
+    mutationFn: async (payload: UnitReportLaborPayload) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const { operation } = await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          operationKind: "create",
+          targetType: "labor",
+          payload: payload as unknown as Record<string, unknown>,
+        });
+        return [{
+          ...payload,
+          id: operation.client_id,
+          client_id: operation.client_id,
+          _offline: true,
+          status: "pending",
+        }] as unknown as UnitReportLaborRow[];
+      }
       return createUnitReportLabor(String(businessId), unit, reportId, payload);
     },
     onSuccess: () => {
@@ -712,7 +1000,7 @@ export function useUpdateUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       rowId,
       patch,
     }: {
@@ -720,6 +1008,28 @@ export function useUpdateUnitReportLabor(
       patch: Partial<UnitReportLaborPayload>;
     }) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "update",
+          targetType: "labor",
+          payload: patch as unknown as Record<string, unknown>,
+        });
+        return {
+          ...patch,
+          id: rowId,
+          _offline: true,
+          status: "pending",
+        } as unknown as UnitReportLaborRow;
+      }
       return updateUnitReportLabor(
         String(businessId),
         unit,
@@ -748,8 +1058,25 @@ export function useDeleteUnitReportLabor(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rowId: string) => {
+    mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "delete",
+          targetType: "labor",
+          payload: {},
+        });
+        return;
+      }
       return deleteUnitReportLabor(String(businessId), unit, reportId, rowId);
     },
     onSuccess: () => {
@@ -776,11 +1103,33 @@ export function useUnitReportMachineryQuery(
 ) {
   return useQuery<UnitReportMachineryRow[]>({
     queryKey: queryKeys.unitReportMachinery(businessId ?? "", unit, reportId ?? ""),
-    queryFn: () => {
+    queryFn: async () => {
       if (!businessId || !reportId) {
         throw new Error("Missing unit report machinery parameters");
       }
-      return fetchUnitReportMachinery(String(businessId), unit, reportId);
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.machinery ?? []) as UnitReportMachineryRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "machinery").rows as UnitReportMachineryRow[];
+        }
+      }
+      try {
+        const rows = await fetchUnitReportMachinery(String(businessId), unit, reportId);
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          return reconcileServerWithLocalSnapshot({}, rows, local, "machinery").rows as UnitReportMachineryRow[];
+        }
+        return rows.map((row) => ({ ...row, sync_status: (row as { sync_status?: string }).sync_status ?? "synced" }));
+      } catch (err) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.machinery ?? []) as UnitReportMachineryRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "machinery").rows as UnitReportMachineryRow[];
+        }
+        throw err;
+      }
     },
     enabled: Boolean(businessId && reportId),
   });
@@ -881,11 +1230,33 @@ export function useUnitReportMaterialsQuery(
 ) {
   return useQuery<UnitReportMaterialRow[]>({
     queryKey: queryKeys.unitReportMaterials(businessId ?? "", unit, reportId ?? ""),
-    queryFn: () => {
+    queryFn: async () => {
       if (!businessId || !reportId) {
         throw new Error("Missing unit report materials parameters");
       }
-      return fetchUnitReportMaterials(String(businessId), unit, reportId);
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.materials ?? []) as UnitReportMaterialRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "materials").rows as UnitReportMaterialRow[];
+        }
+      }
+      try {
+        const rows = await fetchUnitReportMaterials(String(businessId), unit, reportId);
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          return reconcileServerWithLocalSnapshot({}, rows, local, "materials").rows as UnitReportMaterialRow[];
+        }
+        return rows.map((r) => ({ ...r, sync_status: (r as any).sync_status ?? "synced" }));
+      } catch (err) {
+        const local = await getLocalSnapshot(reportId);
+        if (local) {
+          const base = (local.base_rows?.materials ?? []) as UnitReportMaterialRow[];
+          return reconcileServerWithLocalSnapshot({}, base, local, "materials").rows as UnitReportMaterialRow[];
+        }
+        throw err;
+      }
     },
     enabled: Boolean(businessId && reportId),
   });
@@ -898,8 +1269,29 @@ export function useCreateUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: UnitReportMaterialPayload) => {
+    mutationFn: async (payload: UnitReportMaterialPayload) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        const { operation } = await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          operationKind: "create",
+          targetType: "materials",
+          payload: payload as unknown as Record<string, unknown>,
+        });
+        return [{
+          ...payload,
+          id: operation.client_id,
+          client_id: operation.client_id,
+          _offline: true,
+          status: "pending",
+        }] as unknown as UnitReportMaterialRow[];
+      }
       return createUnitReportMaterial(String(businessId), unit, reportId, payload);
     },
     onSuccess: () => {
@@ -922,7 +1314,7 @@ export function useUpdateUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       rowId,
       patch,
     }: {
@@ -930,6 +1322,28 @@ export function useUpdateUnitReportMaterial(
       patch: Partial<UnitReportMaterialPayload>;
     }) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "update",
+          targetType: "materials",
+          payload: patch as unknown as Record<string, unknown>,
+        });
+        return {
+          ...patch,
+          id: rowId,
+          _offline: true,
+          status: "pending",
+        } as unknown as UnitReportMaterialRow;
+      }
       return updateUnitReportMaterial(
         String(businessId),
         unit,
@@ -958,8 +1372,25 @@ export function useDeleteUnitReportMaterial(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (rowId: string) => {
+    mutationFn: async (rowId: string) => {
       if (!reportId) throw new Error("Missing reportId");
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+        await queueUnitReportOperation({
+          actorId,
+          projectId: String(businessId),
+          unit,
+          reportDate: "",
+          localReportId: reportId,
+          clientId: rowId,
+          targetServerId: rowId,
+          operationKind: "delete",
+          targetType: "materials",
+          payload: {},
+        });
+        return;
+      }
       return deleteUnitReportMaterial(String(businessId), unit, reportId, rowId);
     },
     onSuccess: () => {

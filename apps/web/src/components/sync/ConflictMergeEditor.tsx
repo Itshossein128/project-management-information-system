@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -41,8 +42,11 @@ export function ConflictMergeEditor({
   onCancel,
   busy = false,
 }: ConflictMergeEditorProps) {
+  const { t } = useTranslation();
   const local = asRecord(localPayload);
   const server = asRecord(serverPayload);
+  const [confirmed, setConfirmed] = useState(false);
+  const sections = ["activities", "labor", "materials"] as const;
   const conflictSet = useMemo(() => new Set(conflictFields), [conflictFields]);
 
   const allKeys = useMemo(() => {
@@ -132,7 +136,55 @@ export function ConflictMergeEditor({
         );
       })}
 
+      {sections.map((section) => {
+        const localRows = Array.isArray(local[section]) ? local[section] as Array<Record<string, unknown>> : [];
+        const serverRows = Array.isArray(server[section]) ? server[section] as Array<Record<string, unknown>> : [];
+        if (localRows.length === 0 && serverRows.length === 0) return null;
+        return (
+          <div key={section} data-testid={`conflict-section-${section}`} className="grid grid-cols-2 gap-2 text-sm">
+            <ul aria-label={t("offline.serverSection", { section })}>
+              {serverRows.map((row, index) => (
+                <li key={`server-${index}`}>{String(row.activity_description ?? row.job_title ?? row.material_description ?? "")}</li>
+              ))}
+            </ul>
+            <ul aria-label={t("offline.localSection", { section })}>
+              {localRows.map((row, index) => (
+                <li key={`local-${index}`}>{String(row.activity_description ?? row.job_title ?? row.material_description ?? "")}</li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          data-testid="conflict-scope-confirm"
+          checked={confirmed}
+          onChange={(event) => setConfirmed(event.target.checked)}
+        />
+        {t("offline.confirmConflictScope", "I understand this choice applies only to the compared rows.")}
+      </label>
+
       <div className="flex justify-end gap-2 pt-2">
+        <button
+          type="button"
+          data-testid="conflict-use-server"
+          disabled={busy || !confirmed}
+          onClick={() => onSave({ ...server, resolution: "server" })}
+          className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted disabled:opacity-50"
+        >
+          {t("offline.useServer", "Use server")}
+        </button>
+        <button
+          type="button"
+          data-testid="conflict-keep-mine"
+          disabled={busy || !confirmed}
+          onClick={() => onSave({ ...local, resolution: "correction" })}
+          className="rounded-md border border-border px-4 py-2 text-sm hover:bg-muted disabled:opacity-50"
+        >
+          {t("offline.keepMine", "Keep my work")}
+        </button>
         <button
           type="button"
           data-testid="conflict-merge-cancel-btn"
@@ -145,7 +197,7 @@ export function ConflictMergeEditor({
         <button
           type="button"
           data-testid="conflict-merge-save-btn"
-          disabled={busy}
+          disabled={busy || !confirmed}
           aria-busy={busy}
           onClick={() => onSave(merged)}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"

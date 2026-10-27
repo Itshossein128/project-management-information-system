@@ -30,6 +30,7 @@ import {
 } from "@/app/lib/api/unit-reports";
 import { createWBSNode, fetchWBSFlat } from "@/app/lib/api/wbs";
 import { CONSTRUCTION_UNIT_OPTIONS } from "@/app/lib/construction-units";
+import { RowSyncStatusBadge } from "./row-sync-status-badge";
 import {
   Button,
   CreatableSelect,
@@ -981,6 +982,9 @@ export function SectionActivities({
                   "businessDepartment.unitReport.sections.activities.columns.notes",
                 )}
               </th>
+              <th className="p-2 text-start font-medium">
+                {t("common.status", "وضعیت")}
+              </th>
               {canEdit ? (
                 <th className="p-2 text-end font-medium">
                   {t("common.actions")}
@@ -992,7 +996,7 @@ export function SectionActivities({
             {activitiesSectionQuery.isLoading ? (
               <tr>
                 <td
-                  colSpan={canEdit ? 13 : 12}
+                  colSpan={canEdit ? 14 : 13}
                   className="p-4 text-center text-muted-foreground"
                 >
                   {t("common.loading")}
@@ -1002,7 +1006,7 @@ export function SectionActivities({
               <tr>
                 <td
                   id="text-unitActivitiesEmpty"
-                  colSpan={canEdit ? 13 : 12}
+                  colSpan={canEdit ? 14 : 13}
                   className="p-4 text-center text-muted-foreground"
                 >
                   {t("businessDepartment.unitReport.sections.activities.empty")}
@@ -1070,6 +1074,16 @@ export function SectionActivities({
                     </td>
                     <td className="p-2" dir="auto">
                       {row.notes || "—"}
+                    </td>
+                    <td className="p-2">
+                      <RowSyncStatusBadge
+                        status={(row as { sync_status?: string; _offline?: boolean }).sync_status ?? ((row as { _offline?: boolean })._offline ? "pending" : "synced")}
+                      />
+                      {(row as { field_error?: { field: string; code: string } }).field_error ? (
+                        <p role="alert" data-testid="row-field-error" className="mt-1 text-xs text-destructive">
+                          {t("offline.fieldError", (row as unknown as { field_error: { field: string; code: string } }).field_error)}
+                        </p>
+                      ) : null}
                     </td>
                     {canEdit ? (
                       <td className="p-2 text-end">

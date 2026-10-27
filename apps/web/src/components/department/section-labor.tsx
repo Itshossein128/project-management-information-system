@@ -33,6 +33,7 @@ import {
   Select,
 } from "@/components/form";
 import type { SelectOption } from "@/components/form/Select";
+import { RowSyncStatusBadge } from "./row-sync-status-badge";
 
 export interface SectionLaborProps {
   businessId: string;
@@ -693,6 +694,9 @@ export function SectionLabor({
                     "businessDepartment.unitReport.sections.labor.columns.contractor",
                   )}
                 </th>
+                <th className="px-2.5 py-2 text-start font-medium">
+                  {t("common.status", "وضعیت")}
+                </th>
                 {canEdit ? (
                   <th className="px-2.5 py-2 text-end font-medium">
                     {t("common.actions")}
@@ -736,6 +740,16 @@ export function SectionLabor({
                       {row.overtime_hours}
                     </td>
                     <td className="px-2.5 py-2">{contractorDisplay}</td>
+                    <td className="px-2.5 py-2">
+                      <RowSyncStatusBadge
+                        status={(row as { sync_status?: string; _offline?: boolean }).sync_status ?? ((row as { _offline?: boolean })._offline ? "pending" : "synced")}
+                      />
+                      {(row as { field_error?: { field: string; code: string } }).field_error ? (
+                        <p role="alert" data-testid="row-field-error" className="mt-1 text-xs text-destructive">
+                          {t("offline.fieldError", (row as unknown as { field_error: { field: string; code: string } }).field_error)}
+                        </p>
+                      ) : null}
+                    </td>
                     {canEdit ? (
                       <td className="px-2.5 py-2 text-end">
                         <div className="inline-flex items-center gap-1">
@@ -792,7 +806,7 @@ export function SectionLabor({
                 <td className="px-2.5 py-1.5 font-mono">
                   {totals.indirectOvertime.toFixed(2)}
                 </td>
-                <td colSpan={canEdit ? 2 : 1} className="px-2.5 py-1.5 font-mono">
+                <td colSpan={canEdit ? 3 : 2} className="px-2.5 py-1.5 font-mono">
                   {totals.indirectManHours.toFixed(2)} h
                 </td>
               </tr>
@@ -811,7 +825,7 @@ export function SectionLabor({
                 <td className="px-2.5 py-1.5 font-mono">
                   {totals.directOvertime.toFixed(2)}
                 </td>
-                <td colSpan={canEdit ? 2 : 1} className="px-2.5 py-1.5 font-mono">
+                <td colSpan={canEdit ? 3 : 2} className="px-2.5 py-1.5 font-mono">
                   {totals.directManHours.toFixed(2)} h
                 </td>
               </tr>
@@ -830,7 +844,7 @@ export function SectionLabor({
                 <td className="px-2.5 py-1.5 font-mono">
                   {totals.overallOvertime.toFixed(2)}
                 </td>
-                <td colSpan={canEdit ? 2 : 1} className="px-2.5 py-1.5 font-mono">
+                <td colSpan={canEdit ? 3 : 2} className="px-2.5 py-1.5 font-mono">
                   {totals.overallManHours.toFixed(2)} h
                 </td>
               </tr>

@@ -6,6 +6,9 @@ editable report field.
 """
 from __future__ import annotations
 
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
@@ -13,6 +16,7 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from common.reporting_units import SpecialtyUnit, is_canonical_unit
 from permissions.project import HasProjectPermission, IsProjectMember
@@ -30,7 +34,9 @@ from sub_reports.models import (
     UnitReportAttachment,
     UnitReportStatusEvent,
 )
+from projects.models import Project
 from sub_reports import unit_report_services as svc
+from sub_reports.services.offline_sync import dispatch_operations
 from sub_reports.serializers import (
     UnitReportActivitySectionSerializer,
     UnitReportConcreteSectionSerializer,
@@ -885,4 +891,27 @@ class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
         row.deleted_at = timezone.now()
         row.save(update_fields=['is_deleted', 'deleted_at'])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SyncOperationsV2View(APIView):
+    """Versioned targeted synchronization endpoint (v2, Feature 037).
+
+    Scoped under /api/v1/projects/{project_pk}/daily-reports/sync-operations/v2/.
+    Kept disabled until full foundation and reader/writer deployment verification.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_pk):
+        if not getattr(settings, 'V2_OFFLINE_SYNC_ENABLED', False):
+            raise Http404('v2 sync operations endpoint is disabled')
+        try:
+            project = Project.objects.get(pk=project_pk)
+        except Project.DoesNotExist:
+            raise Http404('project not found')
+        try:
+            payload = dispatch_operations(project=project, actor=request.user, body=request.data)
+        except PermissionDenied:
+            return Response({'detail': 'Current project edit permission is required'}, status=status.HTTP_403_FORBIDDEN)
+        return Response(payload, status=status.HTTP_200_OK)
+
 

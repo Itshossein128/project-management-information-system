@@ -107,6 +107,11 @@ export interface UnitReport {
   report_date: string;
   status: UnitReportStatus;
   last_changed_at: string | null;
+  form_code?: string;
+  weather_condition?: string | null;
+  site_status?: string | null;
+  notes?: string;
+  _offline?: boolean;
   audit: UnitReportAudit;
   capabilities: UnitReportCapabilities;
   content: {
@@ -789,6 +794,86 @@ export function deleteUnitReportMaterial(
     `${base(projectId, unit)}/${reportId}/materials/${rowId}/`,
     {
       method: "DELETE",
+    },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Versioned offline sync v2 contract types and API (Feature 037)
+// ---------------------------------------------------------------------------
+
+export interface SyncV2Scope {
+  kind: "unit" | "project_metadata";
+  unit?: CanonicalUnit | string;
+  report_date?: string;
+  report_id?: string | null;
+}
+
+export interface SyncV2Target {
+  kind: string;
+  client_id?: string | null;
+  server_id?: string | null;
+}
+
+export interface SyncV2Operation {
+  operation_id: string;
+  local_report_id: string;
+  scope: SyncV2Scope;
+  action: "create_report" | "create" | "update" | "delete" | string;
+  target: SyncV2Target;
+  base_revision: string | null;
+  depends_on: string[];
+  supersedes_operation_id?: string | null;
+  payload: Record<string, unknown>;
+}
+
+export interface SyncV2Request {
+  contract_version: 2;
+  operations: SyncV2Operation[];
+}
+
+export type SyncV2Outcome =
+  | "success"
+  | "validation_error"
+  | "conflict"
+  | "retryable_failure";
+
+export interface SyncV2TargetResult {
+  client_id?: string | null;
+  server_id?: string | null;
+  report_id?: string | null;
+  revision?: string | null;
+}
+
+export interface SyncV2Error {
+  code: string;
+  field?: string;
+  message?: string;
+}
+
+export interface SyncV2ResultItem {
+  operation_id: string;
+  outcome: SyncV2Outcome;
+  status?: string;
+  target?: SyncV2TargetResult;
+  error?: SyncV2Error;
+}
+
+export interface SyncV2Response {
+  contract_version: 2;
+  synced_ids: string[];
+  results: SyncV2ResultItem[];
+}
+
+export function syncOperationsV2(
+  projectId: string,
+  request: SyncV2Request,
+): Promise<SyncV2Response> {
+  return apiJson<SyncV2Response>(
+    `/v1/projects/${projectId}/daily-reports/sync-operations/v2/`,
+    {
+      method: "POST",
+      body: JSON.stringify(request),
     },
   );
 }

@@ -209,6 +209,19 @@ def test_overrides_untouched_by_rebuild(project, user):
     assert rebuilt_again.management_opinion == 'ادستور توقف موقت بخش easternheProviders enacted.'
 
 
+@pytest.mark.django_db
+def test_repeated_rebuild_keeps_one_contribution_per_source_row(project, user):
+    source = make_unit_report(project, user, unit=SpecialtyUnit.BUILDINGS, status=SubReportStatus.SUBMITTED)
+    add_activity(source, description='Once')
+    other = make_unit_report(project, user, unit=SpecialtyUnit.ELECTRICAL, status=SubReportStatus.APPROVED)
+    add_activity(other, description='Also once')
+    first = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    second = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    assert first.id == second.id
+    assert list(first.activities.filter(is_derived=True).order_by('activity_description').values_list('activity_description', flat=True)) == ['Also once', 'Once']
+    assert list(second.activities.filter(is_derived=True).order_by('activity_description').values_list('activity_description', flat=True)) == ['Also once', 'Once']
+
+
 def make_unit_report(
     project,
     user,

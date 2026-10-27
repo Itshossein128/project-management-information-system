@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
 
 import { ApiRequestError } from "@/app/lib/api-client";
+import { getLocalSnapshot } from "@/app/lib/offlineDB";
+import { reconcileServerWithLocalSnapshot } from "@/app/lib/offlineHydration";
+import { RowSyncStatusBadge } from "./row-sync-status-badge";
 import {
   createUnitSection,
   deleteUnitSection,
@@ -71,7 +74,30 @@ export function StructuredSection({
 
   const query = useQuery({
     queryKey,
-    queryFn: () => fetchUnitSection(businessId, unit, report.id, section),
+    queryFn: async () => {
+      const applyLocal = async (rows: UnitSectionRow[]) => {
+        const local = await getLocalSnapshot(report.id);
+        if (!local) return rows;
+        return reconcileServerWithLocalSnapshot({}, rows, local, section).rows as UnitSectionRow[];
+      };
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const local = await getLocalSnapshot(report.id);
+        const base = (local?.base_rows?.[section] ?? []) as UnitSectionRow[];
+        return applyLocal(base);
+      }
+      try {
+        const rows = await fetchUnitSection(businessId, unit, report.id, section);
+        return applyLocal(rows);
+      } catch (err) {
+        const local = await getLocalSnapshot(report.id);
+        if (local) {
+          const base = (local.base_rows?.[section] ?? []) as UnitSectionRow[];
+          return applyLocal(base);
+        }
+        throw err;
+      }
+    },
   });
 
   const create = useMutation({
@@ -165,7 +191,17 @@ export function StructuredSection({
       <ul className="space-y-2">
         {rows.map((row) => (
           <li key={row.id} className="flex items-start justify-between gap-2 rounded border p-2 text-sm">
-            <RowSummary row={row} overdueLabel={t("businessDepartment.unitReport.sections.issues.overdue")} />
+            <div className="flex min-w-0 flex-1 items-start gap-2">
+              <RowSyncStatusBadge
+                status={(row as UnitSectionRow & { sync_status?: string }).sync_status ?? "synced"}
+              />
+              {(row as UnitSectionRow & { field_error?: { field: string; code: string } }).field_error ? (
+                <p role="alert" data-testid="row-field-error" className="text-xs text-destructive">
+                  {t("offline.fieldError", (row as unknown as { field_error: { field: string; code: string } }).field_error)}
+                </p>
+              ) : null}
+              <RowSummary row={row} overdueLabel={t("businessDepartment.unitReport.sections.issues.overdue")} />
+            </div>
             {editable ? (
               <Button type="button" variant="ghost" onClick={() => remove.mutate(row.id)} aria-label={t("common.delete", { defaultValue: "Delete" })}>
                 <Trash2 className="size-4" />

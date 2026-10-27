@@ -147,7 +147,7 @@ class UnitReportDetailSerializer(serializers.ModelSerializer):
         model = DisciplineSubReport
         fields = [
             'id', 'lineage_id', 'version_number', 'is_current', 'project_id',
-            'unit', 'report_date', 'status', 'last_changed_at',
+            'unit', 'report_date', 'status', 'last_changed_at', 'sync_revision',
             'audit', 'capabilities', 'content',
         ]
         read_only_fields = fields

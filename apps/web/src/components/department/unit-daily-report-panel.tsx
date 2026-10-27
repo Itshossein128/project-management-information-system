@@ -31,6 +31,11 @@ import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Modal } from "@/components/overlay/modal";
+import { queueUnitReportOperation } from "@/app/lib/offlineWrite";
+import {
+  getLocalSnapshotsByProject,
+  type LocalReportSnapshot,
+} from "@/app/lib/offlineDB";
 import { SectionActivities } from "./section-activities";
 import { SectionConcrete } from "./section-concrete";
 import { SectionGeneral } from "./section-general";
@@ -154,6 +159,34 @@ export function UnitDailyReportPanel({
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionErrorCode, setActionErrorCode] = useState<string | null>(null);
   const [rejectionErrorCode, setRejectionErrorCode] = useState<string | null>(null);
+
+  const [headerNotes, setHeaderNotes] = useState("");
+  useEffect(() => {
+    if (report && "notes" in report && typeof (report as any).notes === "string") {
+      setHeaderNotes((report as any).notes);
+    }
+  }, [report]);
+
+  const handleSaveHeaderNotes = async () => {
+    if (!report) return;
+    setActionError(null);
+    try {
+      const actorId = localStorage.getItem("auth_user_id") ?? "offline-user";
+      await queueUnitReportOperation({
+        actorId,
+        projectId: String(businessId),
+        unit,
+        reportDate: activeDate,
+        localReportId: report.id,
+        operationKind: "header_update",
+        targetType: "header",
+        payload: { notes: headerNotes },
+      });
+      void currentQuery.refetch();
+    } catch (e) {
+      setActionError(formatError(e));
+    }
+  };
 
   const getErrorCode = (err: unknown): string | null => {
     if (err instanceof ApiRequestError && err.code) {
@@ -296,6 +329,13 @@ export function UnitDailyReportPanel({
         ) : null}
       </div>
 
+      <LocalDraftList
+        businessId={businessId}
+        unit={unit}
+        activeDate={activeDate}
+        onOpen={handleDateChange}
+      />
+
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full sm:w-64">
           <JalaliDatePicker
@@ -347,6 +387,29 @@ export function UnitDailyReportPanel({
 
       {report ? (
         <div className="space-y-4">
+          <div className="space-y-2 rounded-lg border border-border/40 p-3 bg-muted/10">
+            <TextArea
+              id="input-unitReportGeneralNotes"
+              data-testid="unit-report-general-notes"
+              name="unitReportNotes"
+              label={t("businessDepartment.unitReport.generalNotes", "یادداشت‌های عمومی واحد")}
+              value={headerNotes}
+              onChange={(e) => setHeaderNotes(e.target.value)}
+              rows={2}
+            />
+            <div className="flex justify-end">
+              <Button
+                id="button-saveUnitReportNotes"
+                data-testid="unit-report-save-btn"
+                size="sm"
+                type="button"
+                onClick={() => void handleSaveHeaderNotes()}
+              >
+                {t("common.save", "ذخیره")}
+              </Button>
+            </div>
+          </div>
+
           <dl
             id="dl-unitReportAudit"
             className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 rounded-lg border border-border/60 bg-muted/20 p-4"
@@ -625,7 +688,7 @@ export function UnitDailyReportPanel({
                 ) : null}
               </TabsList>
               {unitSupportsActivitiesSection(unit) ? (
-                <TabsContent value="activities" className="mt-3">
+                <TabsContent value="activities" data-testid="unit-section-activities" className="mt-3">
                   <SectionActivities
                     businessId={businessId}
                     unit={unit}
@@ -634,7 +697,7 @@ export function UnitDailyReportPanel({
                 </TabsContent>
               ) : null}
               {unitSupportsLaborSection(unit) ? (
-                <TabsContent value="labor" className="mt-3">
+                <TabsContent value="labor" data-testid="unit-section-labor" className="mt-3">
                   <SectionLabor
                     businessId={businessId}
                     unit={unit}
@@ -643,7 +706,7 @@ export function UnitDailyReportPanel({
                 </TabsContent>
               ) : null}
               {unitSupportsMachinerySection(unit) ? (
-                <TabsContent value="machinery" className="mt-3">
+                <TabsContent value="machinery" data-testid="unit-section-machinery" className="mt-3">
                   <SectionMachinery
                     businessId={businessId}
                     unit={unit}
@@ -652,7 +715,7 @@ export function UnitDailyReportPanel({
                 </TabsContent>
               ) : null}
               {unitSupportsMaterialsSection(unit) ? (
-                <TabsContent value="materials" className="mt-3">
+                <TabsContent value="materials" data-testid="unit-section-materials" className="mt-3">
                   <SectionMaterials
                     businessId={businessId}
                     unit={unit}
@@ -661,27 +724,27 @@ export function UnitDailyReportPanel({
                 </TabsContent>
               ) : null}
               {unitSupportsConcreteSection(unit) ? (
-                <TabsContent value="concrete" className="mt-3">
+                <TabsContent value="concrete" data-testid="unit-section-concrete" className="mt-3">
                   <SectionConcrete businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
               {unitSupportsGeneralSection(unit) ? (
-                <TabsContent value="general" className="mt-3">
+                <TabsContent value="general" data-testid="unit-section-general" className="mt-3">
                   <SectionGeneral businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
               {unitSupportsIssuesSection(unit) ? (
-                <TabsContent value="issues" className="mt-3">
+                <TabsContent value="issues" data-testid="unit-section-issues" className="mt-3">
                   <SectionIssues businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
               {unitSupportsVisitsSection(unit) ? (
-                <TabsContent value="visits" className="mt-3">
+                <TabsContent value="visits" data-testid="unit-section-visits" className="mt-3">
                   <SectionVisits businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
               {unitSupportsHseSection(unit) ? (
-                <TabsContent value="hse" className="mt-3">
+                <TabsContent value="hse" data-testid="unit-section-hse" className="mt-3">
                   <SectionHse businessId={businessId} unit={unit} report={report} />
                 </TabsContent>
               ) : null}
@@ -893,5 +956,58 @@ export function UnitDailyReportPanel({
         </div>
       </Modal>
     </section>
+  );
+}
+
+function LocalDraftList({
+  businessId,
+  unit,
+  activeDate,
+  onOpen,
+}: {
+  businessId: string;
+  unit: CanonicalUnit;
+  activeDate: string;
+  onOpen: (date: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [drafts, setDrafts] = useState<LocalReportSnapshot[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const actorId = localStorage.getItem("auth_user_id") ?? "";
+    void getLocalSnapshotsByProject(businessId, actorId || undefined)
+      .then((rows) => {
+        if (cancelled) return;
+        setDrafts(rows.filter((row) => row.unit === unit));
+      })
+      .catch(() => {
+        if (!cancelled) setDrafts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, unit, activeDate]);
+
+  if (drafts.length === 0) return null;
+
+  return (
+    <nav aria-label={t("offline.localDrafts", "Local drafts")} data-testid="local-draft-list">
+      <ul className="flex flex-wrap gap-2">
+        {drafts.map((draft) => (
+          <li key={draft.local_report_id}>
+            <button
+              type="button"
+              data-testid={`local-draft-${draft.report_date}`}
+              className="rounded-md border px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              aria-current={draft.report_date === activeDate ? "date" : undefined}
+              onClick={() => onOpen(draft.report_date)}
+            >
+              {draft.report_date}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

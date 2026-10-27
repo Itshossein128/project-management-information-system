@@ -19,6 +19,7 @@ import {
   type UnitReportMachineryRow,
 } from "@/app/lib/api/unit-reports";
 import { Button, Field, Input, Select } from "@/components/form";
+import { RowSyncStatusBadge } from "./row-sync-status-badge";
 import type { SelectOption } from "@/components/form/Select";
 
 export interface SectionMachineryProps {
@@ -1000,7 +1001,19 @@ export function SectionMachinery({
                     data-testid={`unit-machinery-row-${row.id}`}
                     className="border-b last:border-b-0 hover:bg-muted/20"
                   >
-                    <td className="p-2 font-mono">{row.row_number}</td>
+                    <td className="p-2 font-mono">
+                      <div className="flex items-center gap-2">
+                        <RowSyncStatusBadge
+                          status={(row as UnitReportMachineryRow & { sync_status?: string }).sync_status ?? "synced"}
+                        />
+                        {(row as UnitReportMachineryRow & { field_error?: { field: string; code: string } }).field_error ? (
+                          <p role="alert" data-testid="row-field-error" className="text-xs text-destructive">
+                            {t("offline.fieldError", (row as unknown as { field_error: { field: string; code: string } }).field_error)}
+                          </p>
+                        ) : null}
+                        <span>{row.row_number}</span>
+                      </div>
+                    </td>
                     <td className="p-2 font-medium" dir="auto">
                       {row.equipment_type}
                     </td>

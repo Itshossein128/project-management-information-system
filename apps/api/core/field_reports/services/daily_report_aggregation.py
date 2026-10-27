@@ -26,6 +26,7 @@ from field_reports.models import (
     InactivityReason,
     MaterialTransactionType,
     ReportShift,
+    ReportStatus,
     SiteStatus,
     WeatherCondition,
 )
@@ -401,6 +402,9 @@ def ensure_daily_report_summary(project_id, report_date: date, user=None) -> Dai
             kwargs['created_by'] = user
             kwargs['updated_by'] = user
         report = DailyReport.objects.create(**kwargs)
+    elif report.status == ReportStatus.APPROVED:
+        # Approved summaries are immutable; correction is a separate workflow.
+        return report
     elif not report.is_auto_summary:
         report.is_auto_summary = True
         report.save(update_fields=['is_auto_summary', 'updated_at'])
@@ -561,6 +565,9 @@ def rebuild_daily_report_summary(
     else:
         # Reload with lock
         report = DailyReport.objects.select_for_update().get(id=report.id)
+
+    if report.status == ReportStatus.APPROVED:
+        return report
 
     # Bind configuration if not yet bound
     config = None

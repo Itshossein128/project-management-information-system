@@ -6,6 +6,7 @@
  */
 import { apiFetch } from "@/app/lib/api-client";
 import { syncBatch, type SyncBatchResult } from "@/app/lib/api/daily-reports";
+import { syncOperationsV2 } from "@/app/lib/api/unit-reports";
 import {
   addConflict,
   addToQueue,
@@ -13,14 +14,25 @@ import {
   deletePendingPhoto,
   generateUUID,
   getOfflineReportsByProject,
+  getOperationsForReport,
   getPendingPhoto,
+  getLocalSnapshot,
+  getOperation,
+  initDB,
+  getPendingOperations,
   getPendingQueue,
   normalizePayloadWeather,
   type QueueItem,
   removeQueueItem,
   updateOfflineReport,
+  saveLocalSnapshot,
+  updateOperation,
   updateQueueItem,
 } from "@/app/lib/offlineDB";
+import { getStoredAccessToken } from "@/app/lib/auth-storage";
+import { ackAllowed, CLAIM_LEASE_MS, decideClaim, recoverAbandonedSyncing } from "@/app/lib/offlineClaims";
+import { buildSyncRequest, operationToV2, reconcileOperationAcks } from "@/app/lib/syncOperations";
+import { reconcileServerChoice, retainUntilReceipts } from "@/app/lib/offlineConflictResolution";
 import { confirmUpload, requestUploadUrl } from "@/app/lib/api/files";
 
 export interface SyncResult {
@@ -364,6 +376,107 @@ async function syncRemainingItems(pending: QueueItem[]): Promise<SyncResult> {
   return { synced, failed, conflicts };
 }
 
+async function persistFieldError(
+  operationId: string,
+  error: { field?: string; code?: string } | undefined,
+): Promise<void> {
+  if (!error?.field || !error.code) return;
+  const operation = await getOperation(operationId);
+  if (!operation?.client_id) return;
+  const snapshot = await getLocalSnapshot(operation.local_report_id);
+  if (!snapshot) return;
+  const current = snapshot.field_errors[operation.client_id] ?? {};
+  snapshot.field_errors = {
+    ...snapshot.field_errors,
+    [operation.client_id]: { ...current, [error.field]: error.code },
+  };
+  await saveLocalSnapshot(snapshot);
+}
+
+async function recoverOwnSyncing(actorId: string): Promise<void> {
+  const db = await initDB();
+  const syncing = await db.getAllFromIndex("offline_operations", "status", "syncing");
+  for (const operation of recoverAbandonedSyncing(syncing.filter((item) => item.actor_id === actorId))) {
+    if (operation.status === "pending") {
+      await updateOperation(operation.operation_id, { status: "pending" });
+    }
+  }
+}
+
+async function claimProject(actorId: string, projectId: string, ownerTab: string) {
+  const db = await initDB();
+  const claimId = `${actorId}:${projectId}`;
+  const existing = await db.get("offline_claims", claimId);
+  const now = Date.now();
+  const decision = decideClaim(existing, {
+    claim_id: claimId,
+    scope: projectId,
+    actor_id: actorId,
+    project_id: projectId,
+    owner_tab: ownerTab,
+    acquired_at: new Date(now).toISOString(),
+    expires_at: new Date(now + CLAIM_LEASE_MS).toISOString(),
+  }, now);
+  if (!decision.acquired) return null;
+  await db.put("offline_claims", decision.claim);
+  return decision.claim.fencing_token;
+}
+
+export async function syncPendingUnitOperations(actorId: string): Promise<SyncResult> {
+  if (!getStoredAccessToken()) return { synced: 0, failed: 0, conflicts: 0 };
+  await recoverOwnSyncing(actorId);
+  const pending = await getPendingOperations(actorId);
+  let synced = 0;
+  let failed = 0;
+  let conflicts = 0;
+  const byProject = new Map<string, typeof pending>();
+  for (const operation of pending) {
+    const list = byProject.get(operation.project_id) ?? [];
+    list.push(operation);
+    byProject.set(operation.project_id, list);
+  }
+  const ownerTab = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "tab";
+  for (const [projectId, operations] of byProject) {
+    const fencingToken = await claimProject(actorId, projectId, ownerTab);
+    if (fencingToken == null) continue;
+    const ready = [];
+    for (const operation of operations) {
+      const snapshot = await getLocalSnapshot(operation.local_report_id);
+      if (!snapshot) {
+        failed += 1;
+        continue;
+      }
+      ready.push(operationToV2(operation, snapshot.report_date));
+    }
+    if (ready.length === 0) continue;
+    const response = await syncOperationsV2(projectId, buildSyncRequest(ready));
+    const db = await initDB();
+    const currentClaim = await db.get("offline_claims", `${actorId}:${projectId}`);
+    if (!currentClaim || !ackAllowed(currentClaim, fencingToken)) continue;
+    const decision = reconcileOperationAcks(ready.map((item) => item.operation_id), response);
+    for (const operationId of decision.acknowledged) {
+      await updateOperation(operationId, { status: "synced", result: decision.mappings.find((item) => item.operationId === operationId) ?? null });
+      synced += 1;
+    }
+    for (const operationId of decision.retained) {
+      const match = response.results.find((item) => item.operation_id === operationId);
+      if (match?.outcome === "conflict") {
+        conflicts += 1;
+        await updateOperation(operationId, { status: "conflict", error_code: match.error?.code ?? null });
+      } else if (match && match.outcome !== "retryable_failure") {
+        failed += 1;
+        await updateOperation(operationId, {
+          status: "failed",
+          error_code: match.error?.code ?? null,
+          error_message: match.error?.message ?? null,
+        });
+        await persistFieldError(operationId, match.error);
+      }
+    }
+  }
+  return { synced, failed, conflicts };
+}
+
 export async function syncPendingQueue(): Promise<SyncResult> {
   const pending = await getPendingQueue();
   if (pending.length === 0) return { synced: 0, failed: 0, conflicts: 0 };
@@ -398,4 +511,16 @@ export async function retryFailedQueueItem(queueId: string): Promise<void> {
 
 export async function discardFailedQueueItem(queueId: string): Promise<void> {
   await removeQueueItem(queueId);
+}
+
+export async function acceptServerConflictScope(localReportId: string, selectedOperationIds: string[]): Promise<boolean> {
+  const snapshot = await getLocalSnapshot(localReportId);
+  if (!snapshot) return false;
+  const operations = await getOperationsForReport(localReportId);
+  const resolved = reconcileServerChoice(snapshot, operations, selectedOperationIds);
+  if (retainUntilReceipts(selectedOperationIds, [])) {
+    snapshot.overlay_rows = resolved.snapshot.overlay_rows;
+    await saveLocalSnapshot(snapshot);
+  }
+  return true;
 }

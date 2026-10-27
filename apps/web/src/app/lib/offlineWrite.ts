@@ -6,17 +6,27 @@ import { PATHS } from "@/app/routeVars";
 import {
   addToQueue,
   type EntityType,
+  findLocalSnapshot,
   generateUUID,
+  getLocalSnapshot,
   getOfflineReport,
+  getOperationsForReport,
   getQueueByProject,
   getUnresolvedConflicts,
   isOfflineDBAvailable,
+  type LocalReportSnapshot,
+  type OfflineOperation,
   type OfflineReport,
+  type OperationKind,
   type QueueMethod,
+  saveLocalSnapshot,
   saveOfflineReport,
+  saveOperation,
+  saveSnapshotAndOperation,
   updateOfflineReport,
 } from "@/app/lib/offlineDB";
 import type { ChildResource, HeaderPayload } from "@/app/lib/api/daily-reports";
+import { buildSupersedingRetry } from "@/app/lib/offlineRowRetry";
 import { validateTemperatures } from "@/app/lib/temperatureValidation";
 
 export type RowSyncStatus = "synced" | "pending" | "failed" | "conflict";
@@ -278,4 +288,185 @@ export async function queueChildWrite(
     local_id: reportRef,
     server_id: null,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Scope-aware unit report operations and snapshots (v2)
+// ---------------------------------------------------------------------------
+
+export interface QueueUnitReportOperationParams {
+  actorId: string;
+  projectId: string;
+  unit: string;
+  reportDate: string;
+  localReportId?: string;
+  operationKind: OperationKind;
+  targetType: string;
+  clientId?: string;
+  targetServerId?: string | null;
+  baseTargetRevision?: string | null;
+  payload: unknown;
+  baseHeader?: Record<string, unknown>;
+  baseRows?: Record<string, unknown[]>;
+}
+
+export interface QueueUnitReportOperationResult {
+  operation: OfflineOperation;
+  snapshot: LocalReportSnapshot;
+}
+
+export async function queueUnitReportOperation(
+  params: QueueUnitReportOperationParams,
+): Promise<QueueUnitReportOperationResult> {
+  const {
+    actorId,
+    projectId,
+    unit,
+    reportDate,
+    operationKind,
+    targetType,
+    targetServerId = null,
+    baseTargetRevision = null,
+    payload,
+    baseHeader = {},
+    baseRows = {},
+  } = params;
+
+  let snapshot: LocalReportSnapshot | undefined;
+  if (params.localReportId) {
+    snapshot = await getLocalSnapshot(params.localReportId);
+  }
+  if (!snapshot) {
+    snapshot = await findLocalSnapshot(projectId, unit, reportDate, actorId);
+  }
+
+  const localReportId = snapshot?.local_report_id ?? params.localReportId ?? generateUUID();
+  const now = new Date().toISOString();
+
+  if (!snapshot) {
+    snapshot = {
+      local_report_id: localReportId,
+      actor_id: actorId,
+      project_id: projectId,
+      unit,
+      report_date: reportDate,
+      status: "draft",
+      base_header: structuredClone(baseHeader),
+      base_rows: structuredClone(baseRows),
+      overlay_header: {},
+      overlay_rows: {},
+      tombstones: {},
+      field_errors: {},
+      created_at: now,
+      updated_at: now,
+    };
+  }
+
+  const clientId =
+    targetType === "header"
+      ? undefined
+      : params.clientId ?? generateUUID();
+
+  const existingOps = await getOperationsForReport(localReportId);
+  const pendingOrSyncing = existingOps.filter((o) => o.status === "pending" || o.status === "syncing");
+  const predecessorIds = pendingOrSyncing.map((o) => o.operation_id);
+
+  if (operationKind === "header_update") {
+    snapshot.overlay_header = {
+      ...snapshot.overlay_header,
+      ...(payload as Record<string, unknown>),
+    };
+  } else if (operationKind === "create") {
+    const list = [...(snapshot.overlay_rows[targetType] ?? [])];
+    list.push({ ...(payload as Record<string, unknown>), client_id: clientId });
+    snapshot.overlay_rows = {
+      ...snapshot.overlay_rows,
+      [targetType]: list,
+    };
+  } else if (operationKind === "update") {
+    const list = [...(snapshot.overlay_rows[targetType] ?? [])];
+    const idx = list.findIndex(
+      (r: any) =>
+        (clientId && r.client_id === clientId) ||
+        (targetServerId && r.id === targetServerId),
+    );
+    if (idx >= 0) {
+      list[idx] = { ...(list[idx] as Record<string, unknown>), ...(payload as Record<string, unknown>), client_id: clientId };
+    } else {
+      list.push({ ...(payload as Record<string, unknown>), client_id: clientId, id: targetServerId });
+    }
+    snapshot.overlay_rows = {
+      ...snapshot.overlay_rows,
+      [targetType]: list,
+    };
+  } else if (operationKind === "delete") {
+    const list = (snapshot.overlay_rows[targetType] ?? []).filter(
+      (r: any) =>
+        (clientId ? r.client_id !== clientId : true) &&
+        (targetServerId ? r.id !== targetServerId : true),
+    );
+    snapshot.overlay_rows = {
+      ...snapshot.overlay_rows,
+      [targetType]: list,
+    };
+    const tombstoneKey = clientId || targetServerId;
+    if (tombstoneKey) {
+      const tombstones = snapshot.tombstones[targetType] ?? [];
+      if (!tombstones.includes(tombstoneKey)) {
+        snapshot.tombstones = {
+          ...snapshot.tombstones,
+          [targetType]: [...tombstones, tombstoneKey],
+        };
+      }
+    }
+  }
+
+  snapshot.updated_at = now;
+
+  const operation: OfflineOperation = {
+    operation_id: generateUUID(),
+    local_report_id: localReportId,
+    client_id: clientId,
+    actor_id: actorId,
+    project_id: projectId,
+    unit,
+    operation_kind: operationKind,
+    target_type: targetType,
+    target_server_id: targetServerId,
+    base_target_revision: baseTargetRevision,
+    payload: structuredClone(payload),
+    predecessor_ids: predecessorIds,
+    created_at: now,
+    status: "pending",
+  };
+
+  await saveSnapshotAndOperation(snapshot, operation);
+
+  return { operation, snapshot };
+}
+
+export async function retryFailedTarget(
+  failed: OfflineOperation,
+  correctedPayload: unknown,
+): Promise<OfflineOperation> {
+  const original = structuredClone(failed.payload);
+  const retry = buildSupersedingRetry(
+    failed,
+    correctedPayload,
+    generateUUID(),
+    new Date().toISOString(),
+  );
+  if (JSON.stringify(failed.payload) !== JSON.stringify(original)) {
+    throw new Error("failed operation payload was changed");
+  }
+  await saveOperation(retry);
+  const snapshot = await getLocalSnapshot(failed.local_report_id);
+  if (snapshot && failed.client_id) {
+    const errors = { ...snapshot.field_errors };
+    delete errors[failed.client_id];
+    snapshot.field_errors = errors;
+    snapshot.updated_at = retry.created_at;
+    await saveLocalSnapshot(snapshot);
+  }
+  return retry;
 }

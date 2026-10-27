@@ -13,6 +13,7 @@ from sub_reports.unit_report_views import (
     UnitReportMaterialSectionViewSet,
     UnitReportViewSet,
     UnitReportVisitSectionViewSet,
+    SyncOperationsV2View,
 )
 
 unit_current_view = UnitReportViewSet.as_view({'get': 'current'})
@@ -135,4 +136,5 @@ urlpatterns = [
     path('units/<str:unit>/daily-reports/<uuid:pk>/general-activities/<uuid:row_pk>/', general_section_row, name='unit-report-general-row'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/', attachment_section_list, name='unit-report-attachments'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/<uuid:row_pk>/', attachment_section_row, name='unit-report-attachment-row'),
+    path('daily-reports/sync-operations/v2/', SyncOperationsV2View.as_view(), name='sync-operations-v2'),
 ]
