@@ -13,6 +13,7 @@ import {
 import { getDownloadUrl } from "@/app/lib/api/files";
 import { cn } from "@/app/lib/utils";
 import type { RowSyncStatus } from "@/app/lib/offlineWrite";
+import { isUnsetQuantity, UnsetQuantityBadge } from "./UnsetQuantityBadge";
 
 export type CellType =
   | "text"
@@ -348,6 +349,42 @@ function renderCell(
   }
   const value = row[col.key];
   const disabled = readOnly;
+
+  if (col.key === "quantity") {
+    const quantityMeasured = row.quantity_measured as boolean | null | undefined;
+    const quantityValue = value as string | number | null | undefined;
+    if (readOnly) {
+      return (
+        <span className="block px-1" data-testid="activity-quantity-readonly">
+          <UnsetQuantityBadge quantity={quantityValue} quantityMeasured={quantityMeasured} />
+        </span>
+      );
+    }
+    if (isUnsetQuantity(quantityValue, quantityMeasured)) {
+      return (
+        <div
+          className="flex min-w-0 items-center gap-1 px-1"
+          data-testid="activity-quantity-editable"
+        >
+          <UnsetQuantityBadge quantity={quantityValue} quantityMeasured={quantityMeasured} />
+          <input
+            type="number"
+            className={inputClass}
+            value=""
+            placeholder=""
+            disabled={disabled}
+            onChange={(e) =>
+              setCell(
+                row._key,
+                col.key,
+                e.target.value === "" ? null : Number(e.target.value),
+              )
+            }
+          />
+        </div>
+      );
+    }
+  }
 
   if (col.type === "checkbox") {
     return (

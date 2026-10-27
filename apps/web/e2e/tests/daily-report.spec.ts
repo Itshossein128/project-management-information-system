@@ -89,7 +89,7 @@ test.describe("Daily reports — auto summary", () => {
     await expect(page.getByTestId("approval-status-bar")).toContainText(/قفل/);
   });
 
-  test("gap closure smoke: specialty seed, by-date, approve, versions", async ({ page }) => {
+  test("daily report lifecycle: correction cancellation and version history", async ({ page }) => {
     const base = await createProjectViaApi(page);
     const projectId = base.split("/").pop()!;
     const wbsId = await createRootWbs(page, base, { code: "1", name: "DR Gaps Root" });
@@ -139,6 +139,8 @@ test.describe("Daily reports — auto summary", () => {
           ],
           material_entries: [
             {
+              transaction_type: "receipt",
+              warehouse_document_reference: "REC-001",
               material_description: "سیمان",
               quantity: 2,
               unit: "کیسه",
@@ -192,7 +194,126 @@ test.describe("Daily reports — auto summary", () => {
     await expect(page.getByTestId("report-correction-btn")).toBeVisible();
 
     await page.getByTestId("report-versions-btn").click();
-    await expect(page.getByTestId("report-versions-panel")).toBeVisible();
-    await expect(page.getByTestId("report-versions-panel")).toContainText(/نسخه/);
+    const versionsPanel = page.getByTestId("report-versions-panel");
+    await expect(versionsPanel).toBeVisible();
+    await expect(versionsPanel).toContainText(/نسخه|Version/i);
+    await expect(versionsPanel).toContainText(/ثبت اولیه|Initial submission/);
+    await expect(versionsPanel).toContainText(/تأیید:|Approved:/i);
+
+    await page.getByTestId("report-correction-btn").click();
+    await page.getByTestId("report-correction-reason").fill("اصلاح برای پوشش آزمون چرخه عمر گزارش");
+    await page.getByTestId("report-correction-confirm-btn").click();
+    await expect(page).toHaveURL(new RegExp(`/daily-reports/.+/edit`));
+    await expect(page.getByTestId("report-correction-cancel-btn")).toBeVisible({ timeout: 15_000 });
+    await page.getByTestId("report-correction-cancel-btn").click();
+    await expect(page.getByTestId("report-correction-cancel-confirmation")).toBeVisible();
+    await page.getByTestId("report-correction-cancel-confirm-btn").click();
+    await expect(page).toHaveURL(new RegExp(`/daily-reports/${reportId}/view`));
+    await expect(page.getByTestId("report-correction-cancel-btn")).toHaveCount(0);
+
+    // T038: Full approved correction cycle with enriched version history lineage
+    await page.getByTestId("report-correction-btn").click();
+    await page.getByTestId("report-correction-reason").fill("اصلاح نهایی برای ثبت نسخه دوم");
+    await page.getByTestId("report-correction-confirm-btn").click();
+    await expect(page).toHaveURL(new RegExp(`/daily-reports/.+/edit`));
+    const v2EditUrl = page.url();
+    const v2ReportId = v2EditUrl.match(/daily-reports\/([^/]+)\/edit/)?.[1]!;
+
+    await page.getByTestId("report-submit-btn").click();
+    await expect(page.getByTestId("report-status-badge")).toContainText(/ارسال|submitted/i, { timeout: 15_000 });
+
+    await page.getByTestId("report-approve-btn").click();
+    await expect(page.getByTestId("report-status-badge")).toContainText(/قفل|locked|تأیید|approved/i, { timeout: 15_000 });
+
+    await page.getByTestId("report-versions-btn").click();
+    const vHistoryPanel = page.getByTestId("report-versions-panel");
+    await expect(vHistoryPanel).toBeVisible();
+    await expect(vHistoryPanel).toContainText("اصلاح نهایی برای ثبت نسخه دوم");
+    await expect(vHistoryPanel).toContainText(/ثبت اولیه|Initial submission/);
+    await expect(vHistoryPanel).toContainText(/نسخه فعلی|جاری|Current version/);
+    await expect(vHistoryPanel).toContainText(/تأیید:|Approved:/i);
+
+    // Navigate to v1 read-only historical view
+    await page.getByTestId("report-version-open-1").click();
+    await expect(page).toHaveURL(new RegExp(`/daily-reports/${reportId}/view`));
+    await expect(page.getByTestId("report-status-badge")).toContainText(/قفل|locked|تأیید|approved/i);
+    await expect(page.getByTestId("report-correction-cancel-btn")).toHaveCount(0);
+  });
+
+  test("daily report lifecycle: draft v1 has no correction cancel control", async ({ page }) => {
+    const base = await createProjectViaApi(page);
+    const wbsId = await createRootWbs(page, base, { code: "1", name: "DR Draft Root" });
+    const activityId = await createActivityViaApi(page, base, {
+      code: "DR-D1",
+      name: "Draft Activity",
+      wbsId,
+      totalQuantity: 10,
+    });
+    const reportId = await createDailyReportViaApi(page, base, {
+      activityId,
+      activityDescription: "Draft Activity",
+      quantity: 5,
+    });
+    await page.goto(`${base}/daily-reports/${reportId}/edit`);
+    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("report-correction-cancel-btn")).toHaveCount(0);
+  });
+
+  test("daily report lifecycle: unset and zero quantity presentation", async ({ page }) => {
+    const base = await createProjectViaApi(page);
+    const projectId = base.split("/").pop()!;
+    const wbsId = await createRootWbs(page, base, { code: "1", name: "DR Qty Root" });
+    const activityId = await createActivityViaApi(page, base, {
+      code: "DR-Q1",
+      name: "Qty Activity",
+      wbsId,
+      totalQuantity: 20,
+    });
+    const headers = await authHeaders(page);
+    const reportId = await createDailyReportViaApi(page, base, {
+      activityId,
+      activityDescription: "Qty Activity",
+      quantity: 0,
+    });
+
+    await page.request.patch(`${API_BASE}/v1/projects/${projectId}/daily-reports/${reportId}/`, {
+      headers,
+      data: {
+        activities: [
+          {
+            row_number: 1,
+            shift: "shift_1",
+            activity_ref: activityId,
+            activity_description: "Qty Activity",
+            unit: "m3",
+            quantity: null,
+            quantity_measured: false,
+          },
+          {
+            row_number: 2,
+            shift: "shift_1",
+            activity_ref: activityId,
+            activity_description: "Qty Activity Zero",
+            unit: "m3",
+            quantity: 0,
+            quantity_measured: true,
+          },
+        ],
+      },
+    });
+
+    await page.goto(`${base}/daily-reports/${reportId}/view`);
+    await expect(page.getByTestId("daily-report-summary-view")).toBeVisible({ timeout: 15_000 });
+    const summaryView = page.getByTestId("daily-report-summary-view");
+    await expect(summaryView.getByTestId("unset-quantity-badge")).toBeVisible();
+    await expect(summaryView.getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+    await expect(summaryView).toContainText("0");
+
+    await page.goto(`${base}/daily-reports/${reportId}/edit`);
+    await expect(page.getByTestId("daily-report-form")).toBeVisible({ timeout: 15_000 });
+    const editableCell = page.getByTestId("activity-quantity-editable");
+    await expect(editableCell).toBeVisible();
+    await expect(editableCell.getByTestId("unset-quantity-badge")).toContainText(/ثبت‌نشده|Not recorded/);
+    await expect(page.getByTestId("activity-quantity-readonly")).toHaveCount(0);
   });
 });

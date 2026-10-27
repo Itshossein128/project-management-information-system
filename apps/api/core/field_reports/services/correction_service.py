@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from django.db import transaction
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ErrorDetail, ValidationError
 
-from config.exceptions import ConflictError
+from field_reports.services.lifecycle_errors import get_lifecycle_msg, lifecycle_error_detail
+
 from field_reports.models import (
     CorrectionRequestStatus,
     DailyReport,
@@ -16,7 +17,10 @@ from field_reports.models import (
     DailyReportIncident,
     DailyReportLabor,
     DailyReportLaborCamp,
+    DailyReportMachineryRow,
     DailyReportMaterial,
+    DailyReportGeneralActivity,
+    DailyReportVisit,
     ReportStatus,
 )
 
@@ -31,11 +35,14 @@ CHILD_CLONE_SPECS = (
         'subcontractor_ref_id', 'headcount', 'zone', 'block', 'floor', 'location_detail',
         'quantity', 'quantity_measured', 'unit', 'execution_percentage',
         'responsible_user_id', 'responsible_name', 'notes', 'photo_file_id',
+        'contractor_ref_id', 'crew_name', 'foreman_count', 'worker_count', 'parcel',
+        'source_sub_report_id', 'source_discipline', 'is_derived',
     }),
     (DailyReportLabor, 'labor_entries', {
         'project_id', 'report_date', 'labor_category', 'job_title', 'custom_title',
         'shift_1_count', 'shift_2_count', 'shift_3_count', 'total_count',
         'work_hours', 'overtime_hours', 'daily_rate', 'absence_count',
+        'source_set_complete', 'source_sub_report_id', 'source_discipline', 'is_derived',
     }),
     (DailyReportEquipment, 'equipment_entries', {
         'equipment_id', 'equipment_name', 'equipment_ref', 'shift', 'status',
@@ -45,19 +52,39 @@ CHILD_CLONE_SPECS = (
     }),
     (DailyReportMaterial, 'material_entries', {
         'material_ref_id', 'material_description', 'quantity', 'unit_cost', 'unit',
-        'transaction_type', 'consumption_location', 'activity_ref_id', 'notes',
+        'transaction_type', 'consumption_location', 'supplier',
+        'warehouse_document_reference', 'receipt_resolved', 'reconciliation_status',
+        'reconciliation_document_id', 'reconciliation_checked_at',
+        'activity_ref_id', 'notes', 'source_sub_report_id', 'source_discipline', 'is_derived',
     }),
     (DailyReportConcreteLog, 'concrete_logs', {
         'concrete_description', 'volume_m3', 'activity_ref_id', 'zone', 'block',
-        'floor', 'notes',
+        'floor', 'notes', 'structural_element', 'parcel', 'batching_plant',
+        'truck_delivery_note_number', 'lab_sample_code', 'sampling_state',
+        'test_sheet_count', 'qc_inspection_id', 'source_sub_report_id',
+        'source_discipline', 'is_derived',
     }),
     (DailyReportLaborCamp, 'labor_camp_entries', {
-        'connex_number', 'subcontractor_name', 'total_residents', 'present_count',
-        'on_leave_count', 'capacity',
+        'connex_number', 'subcontractor_name', 'contractor_ref_id', 'total_residents',
+        'present_count', 'on_leave_count', 'capacity',
     }),
     (DailyReportIncident, 'incidents', {
         'incident_type', 'description', 'corrective_action',
         'follow_up_owner_user_id', 'follow_up_owner_name', 'due_date',
+        'severity', 'notification_id', 'row_number', 'source_report_id', 'source_row_id',
+    }),
+    (DailyReportMachineryRow, 'machinery_rows', {
+        'equipment_type', 'equipment_ref_id', 'status_total', 'status_active',
+        'status_ready', 'status_inactive', 'status_under_repair', 'operating_hours',
+        'stoppage_hours', 'repair_hours', 'stoppage_reason_code',
+        'source_sub_report_id', 'source_discipline', 'is_derived',
+    }),
+    (DailyReportGeneralActivity, 'general_activities', {
+        'row_number', 'activity_description', 'location', 'quantity', 'unit', 'notes',
+        'source_sub_report_id', 'source_discipline', 'is_derived',
+    }),
+    (DailyReportVisit, 'visits', {
+        'row_number', 'text', 'source_sub_report_id', 'source_discipline', 'is_derived',
     }),
 )
 
@@ -71,13 +98,22 @@ def _clone_children(source: DailyReport, target: DailyReport) -> None:
 
 
 @transaction.atomic
-def open_correction(*, source_report: DailyReport, user, reason: str) -> DailyReportCorrectionRequest:
+def open_correction(*, source_report: DailyReport, user, reason: str, request=None) -> DailyReportCorrectionRequest:
     reason = (reason or '').strip()
     if len(reason) < 10:
-        raise ValidationError({'reason': 'دلیل اصلاح باید حداقل ۱۰ کاراکتر باشد', 'code': 'reason_required'})
+        raise ValidationError({
+            'reason': lifecycle_error_detail('reason_required', request=request),
+            'code': 'reason_required',
+        })
 
-    if source_report.status != ReportStatus.APPROVED or not source_report.is_current:
-        raise ValidationError({'detail': 'فقط گزارش قفل‌شده جاری قابل اصلاح است', 'code': 'report_not_locked'})
+    # Lock the authoritative source row before checking for another open request
+    # or replacing the current version.  The view instance may be stale when two
+    # users click the correction action at nearly the same time.
+    source_report = DailyReport.objects.select_for_update().get(
+        pk=source_report.pk,
+        project_id=source_report.project_id,
+        is_deleted=False,
+    )
 
     lineage_id = source_report.lineage_id or source_report.id
     open_exists = DailyReportCorrectionRequest.objects.filter(
@@ -87,7 +123,14 @@ def open_correction(*, source_report: DailyReport, user, reason: str) -> DailyRe
         is_deleted=False,
     ).exists()
     if open_exists:
-        raise ConflictError(detail='درخواست اصلاح باز برای این گزارش وجود دارد', code='correction_already_open')
+        raise ValidationError({
+            'detail': lifecycle_error_detail('correction_already_open', request=request),
+        })
+
+    if source_report.status != ReportStatus.APPROVED or not source_report.is_current:
+        raise ValidationError({'detail': lifecycle_error_detail(
+            'report_not_locked', request=request,
+        )})
 
     result = DailyReport(
         project_id=source_report.project_id,
@@ -132,14 +175,38 @@ def open_correction(*, source_report: DailyReport, user, reason: str) -> DailyRe
 
 
 @transaction.atomic
-def cancel_correction(*, correction: DailyReportCorrectionRequest, user) -> DailyReportCorrectionRequest:
+def cancel_correction(*, correction: DailyReportCorrectionRequest, user, request=None) -> DailyReportCorrectionRequest:
+    correction = DailyReportCorrectionRequest.objects.select_for_update().get(
+        pk=correction.pk,
+        is_deleted=False,
+    )
     if correction.status not in OPEN_CORRECTION_STATUSES:
-        raise ValidationError({'detail': 'فقط درخواست اصلاح باز قابل لغو است'})
+        raise ValidationError({
+            'detail': lifecycle_error_detail('correction_not_open', request=request),
+        })
 
-    result = correction.result_report
-    source = correction.source_report
-    if result is not None and result.status != ReportStatus.DRAFT:
-        raise ValidationError({'detail': 'گزارش نتیجه دیگر پیش‌نویس نیست و قابل لغو نیست'})
+    result = (
+        DailyReport.objects.select_for_update().filter(pk=correction.result_report_id).first()
+        if correction.result_report_id else None
+    )
+    source = DailyReport.objects.select_for_update().get(pk=correction.source_report_id)
+    if (
+        result is None
+        or result.status != ReportStatus.DRAFT
+        or not result.is_current
+        or result.version_number <= 1
+        or result.project_id != source.project_id
+        or (source.lineage_id and result.lineage_id != source.lineage_id)
+        or result.supersedes_id != source.id
+        or result.version_number != source.version_number + 1
+    ):
+        raise ValidationError({
+            'detail': lifecycle_error_detail('result_not_cancellable', request=request),
+        })
+    if source.status != ReportStatus.APPROVED or source.is_current:
+        raise ValidationError({
+            'detail': lifecycle_error_detail('source_not_restorable', request=request),
+        })
 
     if result is not None:
         result.is_current = False
@@ -185,4 +252,6 @@ def list_versions(report: DailyReport):
         project_id=report.project_id,
         lineage_id=lineage_id,
         is_deleted=False,
+    ).select_related('created_by', 'updated_by').prefetch_related(
+        'correction_requests_as_result',
     ).order_by('version_number')

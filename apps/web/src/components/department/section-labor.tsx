@@ -157,7 +157,7 @@ export function SectionLabor({
   }, [catalogTitles, formState.labor_category, i18n.language]);
 
   const contractorOptions: SelectOption[] = useMemo(() => {
-    const list = projectContractorsQuery.data ?? [];
+    const list = asList(projectContractorsQuery.data);
     return list.map((c) => ({
       value: String(c.id),
       label: c.name,
@@ -166,7 +166,7 @@ export function SectionLabor({
 
   const contractorMap = useMemo(() => {
     const map = new Map<string, string>();
-    for (const c of projectContractorsQuery.data ?? []) {
+    for (const c of asList(projectContractorsQuery.data)) {
       map.set(String(c.id), c.name);
     }
     return map;

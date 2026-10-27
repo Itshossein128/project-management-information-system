@@ -99,6 +99,27 @@ class TestDailyReportGapsStatusUnset:
         assert response.data['quantity'] is None
         assert response.data['quantity_measured'] is False
 
+    def test_draft_allows_measured_unset_and_preserves_explicit_zero(
+        self, auth_client, reports_url, project, user,
+    ):
+        report = DailyReport.objects.create(
+            project=project, report_date='2024-11-05', created_by=user, updated_by=user,
+        )
+        unset_response = auth_client.post(
+            f'{reports_url}{report.id}/activities/',
+            {'activity_description': 'اندازه‌گیری نشده', 'shift': 'shift_1', 'quantity_measured': True, 'quantity': None},
+            format='json',
+        )
+        assert unset_response.status_code == status.HTTP_201_CREATED
+        assert unset_response.data['quantity'] is None
+        zero_response = auth_client.post(
+            f'{reports_url}{report.id}/activities/',
+            {'activity_description': 'صفر واقعی', 'shift': 'shift_1', 'quantity_measured': True, 'quantity': 0},
+            format='json',
+        )
+        assert zero_response.status_code == status.HTTP_201_CREATED
+        assert zero_response.data['quantity'] == '0.0000'
+
     def test_submit_soft_warns_when_work_front_empty(self, auth_client, reports_url, project, user):
         report = DailyReport.objects.create(
             project=project,

@@ -47,13 +47,24 @@ export async function createRootWbs(
 ): Promise<string> {
   const projectId = projectBasePath.split("/").pop();
   if (!projectId) throw new Error("invalid projectBasePath");
-  const res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/wbs/`, {
-    headers: await authHeaders(page),
+  const headers = await authHeaders(page);
+  let res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/wbs/`, {
+    headers,
     data: {
       wbs_code: opts.code ?? "1",
       wbs_name: opts.name ?? "Root Phase",
     },
   });
+  if (!res.ok()) {
+    await new Promise((r) => setTimeout(r, 200));
+    res = await page.request.post(`${API_BASE}/v1/projects/${projectId}/wbs/`, {
+      headers,
+      data: {
+        wbs_code: opts.code ?? "1",
+        wbs_name: opts.name ?? "Root Phase",
+      },
+    });
+  }
   if (!res.ok()) {
     throw new Error(`createRootWbs failed: ${res.status()} ${await res.text()}`);
   }

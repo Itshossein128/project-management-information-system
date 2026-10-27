@@ -21,6 +21,7 @@ from common.reporting_units import SpecialtyUnit
 from field_reports.models import (
     DailyReport,
     DailyReportDerivedSource,
+    DailyReportLabor,
     InactivityReason,
     LaborCategory,
     ReportShift,
@@ -404,9 +405,65 @@ class TestOverridePreservation:
 
         # 4. Another rebuild with unchanged inputs also preserves everything
         rebuilt_again = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
-        rebuilt_again.management_opinion == '\u062f\u0634\u0648\u0641\u0642 \u0644\u0645\u0642 \u062f\u0631\u0642\u0645\u06cc\u06cc\u06cc \u0628\u0644 \u0645\u06cc\u0635\u062f\u0627\u0646 \u0628\u062d\u062f\u0648\u062f \u062c\u0627\u0646\u062f\u0647\u0646.\n'
+        assert rebuilt_again.management_opinion == 'دستور توقف موقت بخش شرقی به دلیل وزش باد شدید صادر گردید.'
         assert rebuilt_again.weather_condition == 'stormy'
         assert rebuilt_again.site_status == 'inactive'
+
+    def test_mid_rebuild_failure_leaves_prior_summary_intact(self, project, user, monkeypatch):
+        """FR-038: a failed rebuild must not partially replace the last good summary."""
+        r_b = make_unit_report(
+            project, user, unit=SpecialtyUnit.BUILDINGS, status=SubReportStatus.APPROVED,
+        )
+        add_activity(r_b, description='فعالیت قبل از خطا', workers=2)
+        add_labor(r_b, title='کارگر ساده', category=LaborCategory.DIRECT, present=2, leave=0)
+        summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+        act_count = summary.activities.filter(is_derived=True).count()
+        assert act_count == 1
+        summary.labor_entries.filter(is_derived=True).delete()
+        DailyReportDerivedSource.objects.filter(daily_report=summary, derived_kind='labor').delete()
+
+        def poisoned_create(*args, **kwargs):
+            raise RuntimeError('simulated mid-rebuild failure')
+
+        monkeypatch.setattr(DailyReportLabor.objects, 'create', poisoned_create)
+        summary.aggregation_fingerprint = 'force-rebuild'
+        summary.save(update_fields=['aggregation_fingerprint'])
+
+        with pytest.raises(RuntimeError, match='simulated mid-rebuild'):
+            rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+
+        summary.refresh_from_db()
+        assert summary.activities.filter(is_derived=True).count() == act_count
+
+    def test_rejecting_one_unit_removes_only_that_units_machinery_rows(self, project, user):
+        """FR-044: rejection drops only the rejected unit's machinery contribution."""
+        from field_reports.tests.test_machinery_derivation import add_machinery
+        from sub_reports.unit_report_services import reject_unit_report
+
+        r_mach = make_unit_report(
+            project, user, unit=SpecialtyUnit.MACHINERY, status=SubReportStatus.SUBMITTED,
+        )
+        add_machinery(r_mach, equipment_type='جرثقیل تلسکوپی', status_total=2, status_active=1)
+        r_b = make_unit_report(
+            project, user, unit=SpecialtyUnit.BUILDINGS, status=SubReportStatus.SUBMITTED,
+        )
+        add_activity(r_b, description='فعالیت باقی‌مانده', workers=2)
+
+        summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+        assert summary.machinery_rows.filter(is_derived=True).count() == 1
+        assert summary.activities.filter(is_derived=True).count() == 1
+        activity_desc = summary.activities.filter(is_derived=True).first().activity_description
+
+        reject_unit_report(
+            r_mach,
+            user=user,
+            rejection_reason='رد آزمایش ماشین‌آلات برای تست تجمیع',
+            unit=SpecialtyUnit.MACHINERY,
+        )
+        rebuilt = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+        assert rebuilt.machinery_rows.filter(is_derived=True).count() == 0
+        assert rebuilt.activities.filter(is_derived=True).count() == 1
+        assert rebuilt.activities.filter(is_derived=True).first().activity_description == activity_desc
 
 
 @pytest.mark.django_db

@@ -169,3 +169,34 @@ def test_fingerprint_changes_when_machinery_payload_changes(project, user):
     second = compute_aggregation_fingerprint(None, [report])
 
     assert first != second
+
+
+@pytest.mark.django_db
+def test_declared_identity_hours_summed_across_contributing_reports(project, user):
+    equipment = Equipment.objects.create(
+        project=project,
+        equipment_code='EX-HOURS',
+        equipment_name='Excavator Hours',
+        equipment_type='excavator',
+        created_by=user,
+    )
+    first = make_machinery_report(project, user, version_number=1)
+    second = make_machinery_report(project, user, version_number=2)
+    add_machinery(first, equipment_ref=equipment, operating_hours=Decimal('4.5'), stoppage_hours=Decimal('1.0'), stoppage_reason_code='breakdown')
+    add_machinery(second, equipment_ref=equipment, operating_hours=Decimal('3.5'), stoppage_hours=Decimal('0.5'), stoppage_reason_code='breakdown')
+
+    summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    row = summary.machinery_rows.get(equipment_ref=equipment)
+    assert row.operating_hours == Decimal('8.00')
+    assert row.stoppage_hours == Decimal('1.50')
+    assert row.stoppage_reason_code == 'breakdown'
+
+    # Verify type-level presentation rows
+    from field_reports.serializers import DailyReportDetailSerializer
+    data = DailyReportDetailSerializer(summary).data
+    assert 'machinery' in data
+    assert 'type_summaries' in data['machinery']
+    ts = next(t for t in data['machinery']['type_summaries'] if t['equipment_type'] == 'excavator')
+    assert ts['status_total'] == 1
+    assert ts['operating_hours'] == '8.00'
+    assert ts['stoppage_hours'] == '1.50'

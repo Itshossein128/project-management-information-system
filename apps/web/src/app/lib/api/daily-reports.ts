@@ -427,6 +427,17 @@ export interface CorrectionRequest {
   requested_at: string | null;
 }
 
+export interface DailyReportVersion {
+  report_id: string;
+  version_number: number;
+  is_current: boolean;
+  status: ReportStatus;
+  is_locked: boolean;
+  modifier_name: string | null;
+  correction_reason: string | null;
+  approved_at: string | null;
+}
+
 export interface JobTitle {
   id: string;
   category: LaborCategory;
@@ -634,16 +645,19 @@ export function openCorrectionRequest(projectId: string, reportId: string, reaso
   });
 }
 
+export function fetchCorrectionRequests(projectId: string, reportId: string) {
+  return apiJson<CorrectionRequest[]>(`${base(projectId)}/${reportId}/correction-requests/`);
+}
+
+export function cancelCorrectionRequest(projectId: string, correctionId: string) {
+  return apiJson<CorrectionRequest>(
+    `/${PATHS.API_PROJECTS}/${projectId}/correction-requests/${correctionId}/cancel/`,
+    { method: "POST" },
+  );
+}
+
 export function fetchReportVersions(projectId: string, reportId: string) {
-  return apiJson<
-    Array<{
-      report_id: string;
-      version_number: number;
-      is_current: boolean;
-      status: ReportStatus;
-      is_locked: boolean;
-    }>
-  >(`${base(projectId)}/${reportId}/versions/`);
+  return apiJson<DailyReportVersion[]>(`${base(projectId)}/${reportId}/versions/`);
 }
 
 export function fetchMaterialReconciliation(projectId: string, reportId: string) {

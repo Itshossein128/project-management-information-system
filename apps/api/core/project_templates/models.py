@@ -1,3 +1,4 @@
+import hashlib
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -206,6 +207,16 @@ class ProjectReportingConfiguration(UUIDModel, TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=['project', 'effective_from'], name='unique_project_configuration_effective_from'),
         ]
+
+    @property
+    def snapshot_revision_marker(self) -> str:
+        """Stable revision marker reflecting effective date, activation time, and stoppage vocabulary."""
+        reasons = list(self.stoppage_reasons.values_list('reason_code', flat=True).order_by('display_order', 'reason_code'))
+        ts = self.activated_at.isoformat() if self.activated_at else str(self.effective_from)
+        if reasons:
+            reasons_digest = hashlib.sha256(','.join(reasons).encode('utf-8')).hexdigest()[:12]
+            return f"{self.effective_from}_{ts}_{reasons_digest}"
+        return f"{self.effective_from}_{ts}"
 
 
 class ProjectReportingConfigurationUnit(UUIDModel):

@@ -275,6 +275,17 @@ def activate_project_reporting_configuration(
         .order_by('-created_at')
         .first()
     )
+    if latest_catalog is None:
+        from project_templates.labor_catalog_seeds import (
+            seed_default_catalogs_for_owner,
+            seed_default_catalogs_for_template,
+        )
+
+        if template is not None:
+            latest_catalog = seed_default_catalogs_for_template(template)
+        else:
+            latest_catalog = seed_default_catalogs_for_owner()
+
     if latest_catalog is not None:
         for title in latest_catalog.titles.filter(active=True).order_by('display_order', 'id'):
             ProjectReportingConfigurationLaborTitle.objects.create(
@@ -464,6 +475,42 @@ def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title:
         ).order_by('display_order', 'title_code')
     )
     if not titles:
+        from project_templates.labor_catalog_seeds import (
+            seed_default_catalogs_for_owner,
+            seed_default_catalogs_for_template,
+        )
+
+        template = getattr(configuration, 'source_template', None)
+        latest_catalog = None
+        if template is not None:
+            latest_catalog = (
+                LaborTitleCatalog.objects.filter(template=template)
+                .order_by('-created_at')
+                .first()
+            )
+            if latest_catalog is None:
+                latest_catalog = seed_default_catalogs_for_template(template)
+        if latest_catalog is None:
+            latest_catalog = seed_default_catalogs_for_owner()
+
+        if latest_catalog:
+            for t in latest_catalog.titles.filter(active=True).order_by('display_order', 'id'):
+                ProjectReportingConfigurationLaborTitle.objects.create(
+                    configuration=configuration,
+                    title_code=t.title_code,
+                    title_label=t.title_label,
+                    title_label_fa=t.title_label_fa,
+                    category=t.category,
+                    display_order=t.display_order,
+                    legacy_alias=t.legacy_alias,
+                    source_catalog_version=latest_catalog.version_name,
+                )
+            titles = list(
+                ProjectReportingConfigurationLaborTitle.objects.filter(
+                    configuration=configuration,
+                ).order_by('display_order', 'title_code')
+            )
+    if not titles:
         return None
 
     # Determine which title_codes in this snapshot came from project_specific=True
@@ -479,8 +526,10 @@ def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title:
 
     # 1) legacy alias first: keeps historical rows' original evidence meaningful
     for title in titles:
-        if title.legacy_alias and title.legacy_alias.strip().lower() == needle:
-            return title
+        if title.legacy_alias:
+            aliases = [a.strip().lower() for a in title.legacy_alias.split(',')]
+            if needle in aliases:
+                return title
     # 2) exact label match on standard (non-project-specific) titles
     for title in titles:
         if title.title_code in project_specific_codes:
@@ -502,4 +551,16 @@ def resolve_labor_title(configuration: ProjectReportingConfiguration, job_title:
         if title.title_code and title.title_code.strip().lower() == needle:
             return title
     return None
+
+
+def resolve_stoppage_reason(configuration, reason_code: str):
+    """Resolve a stoppage reason code against the effective configuration snapshot."""
+    if configuration is None or not (reason_code or '').strip():
+        return None
+    from project_templates.models import ProjectReportingConfigurationStoppageReason
+
+    return ProjectReportingConfigurationStoppageReason.objects.filter(
+        configuration=configuration,
+        reason_code=reason_code.strip(),
+    ).first()
 

@@ -345,6 +345,7 @@ export function deleteCommunicationPlan(projectId: string, planId: string) {
   );
 }
 
-export function asList<T>(data: T[] | { results: T[] }): T[] {
+export function asList<T>(data?: T[] | { results?: T[] } | null): T[] {
+  if (!data) return [];
   return Array.isArray(data) ? data : (data.results ?? []);
 }

@@ -108,3 +108,14 @@ export function formatDisplayDateTime(iso: string | null | undefined): string {
   const time = iso.slice(11, 16);
   return time ? `${date} ${time}` : date;
 }
+
+/** Format an ISO datetime according to locale: Jalali for Persian, Gregorian for English. */
+export function formatLocaleDateTime(iso: string | null | undefined, lang?: string | null): string {
+  if (!iso) return "—";
+  if (isPersianLanguage(lang ?? "fa")) {
+    return formatDisplayDateTime(iso);
+  }
+  const date = iso.slice(0, 10);
+  const time = iso.slice(11, 16);
+  return time ? `${date} ${time}` : date;
+}

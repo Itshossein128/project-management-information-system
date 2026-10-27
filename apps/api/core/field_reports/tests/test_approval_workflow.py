@@ -110,7 +110,98 @@ class TestApprovalWorkflow:
         )
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'submit_validation' in str(response.data)
+        assert response.data['error']['code'] == 'quantity_unset_invalid'
+        assert response.data['error']['message'] == 'مقدار کارکرد باید مشخص شود؛ در صورت عدم کارکرد عدد صفر وارد شود'
+
+    def test_workflow_validation_codes_and_explicit_zero(self, auth_client, base_url, draft_report):
+        DailyReportActivity.objects.create(
+            report=draft_report,
+            activity_description='صفر معتبر',
+            shift=ActivityRowShift.SHIFT_1,
+            quantity_measured=True,
+            quantity=0,
+        )
+        assert auth_client.post(f'{base_url}{draft_report.id}/submit/').status_code == status.HTTP_200_OK
+
+        submitted = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert submitted.status_code == status.HTTP_400_BAD_REQUEST
+        assert submitted.data['error']['code'] == 'report_not_in_submittable_state'
+
+        missing = auth_client.post(f'{base_url}{draft_report.id}/reject/', {'reason': '  '}, format='json')
+        assert missing.status_code == status.HTTP_400_BAD_REQUEST
+        assert missing.data['error']['code'] == 'rejection_reason_required'
+
+        short = auth_client.post(f'{base_url}{draft_report.id}/reject/', {'reason': ' کوتاه '}, format='json')
+        assert short.status_code == status.HTTP_400_BAD_REQUEST
+        assert short.data['error']['code'] == 'rejection_reason_min_length_10'
+
+    def test_lifecycle_validation_errors_accept_language_bilingual(
+        self, auth_client, base_url, draft_report,
+    ):
+        """Lifecycle errors return English messages when Accept-Language: en is sent."""
+        # 1. Unset quantity error in English and Persian
+        activity = DailyReportActivity.objects.create(
+            report=draft_report,
+            activity_description='بتن‌ریزی',
+            shift=ActivityRowShift.SHIFT_1,
+            quantity_measured=True,
+            quantity=None,
+        )
+        # English
+        res_en = auth_client.post(
+            f'{base_url}{draft_report.id}/submit/',
+            HTTP_ACCEPT_LANGUAGE='en-US,en;q=0.9',
+        )
+        assert res_en.status_code == status.HTTP_400_BAD_REQUEST
+        assert res_en.data['error']['code'] == 'quantity_unset_invalid'
+        assert res_en.data['error']['message'] == 'Work quantity must be specified; enter zero if no work was performed.'
+
+        # Persian
+        res_fa = auth_client.post(
+            f'{base_url}{draft_report.id}/submit/',
+            HTTP_ACCEPT_LANGUAGE='fa,en;q=0.5',
+        )
+        assert res_fa.status_code == status.HTTP_400_BAD_REQUEST
+        assert res_fa.data['error']['code'] == 'quantity_unset_invalid'
+        assert res_fa.data['error']['message'] == 'مقدار کارکرد باید مشخص شود؛ در صورت عدم کارکرد عدد صفر وارد شود'
+
+        # Fix quantity to zero
+        activity.quantity = 0
+        activity.save(update_fields=['quantity'])
+
+        # 2. Submit success -> transitions to SUBMITTED
+        sub_res = auth_client.post(f'{base_url}{draft_report.id}/submit/')
+        assert sub_res.status_code == status.HTTP_200_OK
+
+        # 3. Report not in submittable state in English
+        dup_sub_en = auth_client.post(
+            f'{base_url}{draft_report.id}/submit/',
+            HTTP_ACCEPT_LANGUAGE='en-US,en;q=0.9',
+        )
+        assert dup_sub_en.status_code == status.HTTP_400_BAD_REQUEST
+        assert dup_sub_en.data['error']['code'] == 'report_not_in_submittable_state'
+        assert dup_sub_en.data['error']['message'] == 'Only draft or rejected reports can be submitted.'
+
+        # 4. Rejection errors in English
+        rej_missing_en = auth_client.post(
+            f'{base_url}{draft_report.id}/reject/',
+            {'reason': '   '},
+            format='json',
+            HTTP_ACCEPT_LANGUAGE='en-US,en;q=0.9',
+        )
+        assert rej_missing_en.status_code == status.HTTP_400_BAD_REQUEST
+        assert rej_missing_en.data['error']['code'] == 'rejection_reason_required'
+        assert 'Rejection reason is required.' in rej_missing_en.data['error']['message']
+
+        rej_short_en = auth_client.post(
+            f'{base_url}{draft_report.id}/reject/',
+            {'reason': 'short'},
+            format='json',
+            HTTP_ACCEPT_LANGUAGE='en-US,en;q=0.9',
+        )
+        assert rej_short_en.status_code == status.HTTP_400_BAD_REQUEST
+        assert rej_short_en.data['error']['code'] == 'rejection_reason_min_length_10'
+        assert 'Rejection reason must be at least 10 characters.' in rej_short_en.data['error']['message']
 
     def test_submit_blocks_incomplete_equipment_times(
         self, auth_client, base_url, draft_report,

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
@@ -219,14 +221,8 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             quantity = self.instance.quantity
         else:
             quantity = None
-        touching_qty = ('quantity' in attrs) or ('quantity_measured' in attrs) or (not self.partial)
         if not measured:
             attrs['quantity'] = None
-        elif touching_qty and quantity is None:
-            raise serializers.ValidationError({
-                'quantity': 'در حالت اندازه‌گیری‌شده مقدار الزامی است',
-                'code': 'quantity_unset_invalid',
-            })
 
         from django.core.exceptions import ValidationError as DjangoValidationError
         from projects.contractor_utils import resolve_active_contractor
@@ -1192,6 +1188,24 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
                 'source_count': len(all_provenance),
                 'has_multiple_sources': len(all_provenance) > 1,
                 'provenance': all_provenance,
+                'indirect': {
+                    'present_count': indirect_total_count,
+                    'leave_count': indirect_leave_count,
+                    'overtime_hours': f"{indirect_overtime:.2f}",
+                    'man_hours': f"{indirect_mh:.2f}",
+                },
+                'direct': {
+                    'present_count': direct_total_count,
+                    'leave_count': direct_leave_count,
+                    'overtime_hours': f"{direct_overtime:.2f}",
+                    'man_hours': f"{direct_mh:.2f}",
+                },
+                'overall': {
+                    'present_count': overall_total_count,
+                    'leave_count': overall_leave_count,
+                    'overtime_hours': f"{overall_overtime:.2f}",
+                    'man_hours': f"{overall_mh:.2f}",
+                },
             },
         }
 
@@ -1215,8 +1229,54 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         marker = ''
         if config is not None:
             marker = f"{config.id}:{getattr(config, 'snapshot_revision_marker', '') or config.effective_from}"
+
+        # Type-level presentation rows per contract daily-summary-sections-api.md §1.3
+        type_summaries_map = {}
+        for r in rows:
+            eq_type = r.get('equipment_type') or ''
+            if eq_type not in type_summaries_map:
+                type_summaries_map[eq_type] = {
+                    'equipment_type': eq_type,
+                    'status_total': 0,
+                    'status_active': 0,
+                    'status_ready': 0,
+                    'status_inactive': 0,
+                    'status_under_repair': 0,
+                    'operating_hours': Decimal('0.00'),
+                    'stoppage_hours': Decimal('0.00'),
+                    'repair_hours': Decimal('0.00'),
+                }
+            ts = type_summaries_map[eq_type]
+            ts['status_total'] += r.get('status_total') or 0
+            ts['status_active'] += r.get('status_active') or 0
+            ts['status_ready'] += r.get('status_ready') or 0
+            ts['status_inactive'] += r.get('status_inactive') or 0
+            ts['status_under_repair'] += r.get('status_under_repair') or 0
+            if r.get('operating_hours'):
+                ts['operating_hours'] += Decimal(str(r['operating_hours']))
+            if r.get('stoppage_hours'):
+                ts['stoppage_hours'] += Decimal(str(r['stoppage_hours']))
+            if r.get('repair_hours'):
+                ts['repair_hours'] += Decimal(str(r['repair_hours']))
+
+        type_summaries = [
+            {
+                'equipment_type': eq_type,
+                'status_total': ts['status_total'],
+                'status_active': ts['status_active'],
+                'status_ready': ts['status_ready'],
+                'status_inactive': ts['status_inactive'],
+                'status_under_repair': ts['status_under_repair'],
+                'operating_hours': f"{ts['operating_hours']:.2f}",
+                'stoppage_hours': f"{ts['stoppage_hours']:.2f}",
+                'repair_hours': f"{ts['repair_hours']:.2f}",
+            }
+            for eq_type, ts in sorted(type_summaries_map.items())
+        ]
+
         return {
             'rows': rows,
+            'type_summaries': type_summaries,
             'vocabulary_revision_marker': marker,
         }
 
@@ -1421,6 +1481,21 @@ class DailyReportVersionSerializer(serializers.ModelSerializer):
     report_id = serializers.UUIDField(source='id', read_only=True)
     report_date = JalaliDateField(read_only=True)
     is_locked = serializers.BooleanField(read_only=True)
+    modifier_name = serializers.SerializerMethodField()
+    correction_reason = serializers.SerializerMethodField()
+
+    def get_modifier_name(self, obj):
+        return _user_name(obj.updated_by or obj.created_by)
+
+    def get_correction_reason(self, obj):
+        request = next(
+            (
+                item for item in obj.correction_requests_as_result.all()
+                if not item.is_deleted
+            ),
+            None,
+        )
+        return request.reason if request else None
 
     class Meta:
         model = DailyReport
@@ -1432,6 +1507,8 @@ class DailyReportVersionSerializer(serializers.ModelSerializer):
             'is_current',
             'status',
             'is_locked',
+            'modifier_name',
+            'correction_reason',
             'approved_at',
             'created_at',
         ]

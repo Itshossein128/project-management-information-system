@@ -188,8 +188,21 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
     """Compute a stable deterministic sha256 fingerprint over contributing unit report
     versions, source rows, configuration ID, and aggregation-owned inputs (data-model §7, T050).
     """
+    rule_code = ''
+    vocab_revision = ''
+    if config_id:
+        from project_templates.models import ProjectReportingConfiguration
+        cfg = config_id if isinstance(config_id, ProjectReportingConfiguration) else None
+        if cfg is None:
+            cfg = ProjectReportingConfiguration.objects.filter(id=config_id).first()
+        if cfg:
+            rule_code = cfg.man_hours_rule_code or ''
+            vocab_revision = getattr(cfg, 'snapshot_revision_marker', '') or str(cfg.effective_from)
+
     payload = {
-        'configuration_id': str(config_id) if config_id else '',
+        'configuration_id': str(config_id.id if hasattr(config_id, 'id') else config_id) if config_id else '',
+        'catalog_rule_code': rule_code,
+        'machinery_vocabulary_revision': vocab_revision,
         'sub_reports': [],
     }
     for sr in sub_reports:
@@ -940,39 +953,73 @@ def rebuild_daily_report_summary(
         primary_sr, primary_row = contribs[0]
         primary_disc = primary_sr.unit or primary_sr.discipline or ''
 
+        # Sum hours across all contributing unit reports for this declared identity
+        tot_operating = Decimal('0.00')
+        tot_stoppage = Decimal('0.00')
+        tot_repair = Decimal('0.00')
+        has_operating = False
+        has_stoppage = False
+        has_repair = False
+        stoppage_reason = ''
+
+        for _, r in contribs:
+            if r.operating_hours is not None:
+                tot_operating += Decimal(str(r.operating_hours))
+                has_operating = True
+            if r.stoppage_hours is not None:
+                tot_stoppage += Decimal(str(r.stoppage_hours))
+                has_stoppage = True
+            if r.repair_hours is not None:
+                tot_repair += Decimal(str(r.repair_hours))
+                has_repair = True
+            if not stoppage_reason and r.stoppage_reason_code:
+                stoppage_reason = r.stoppage_reason_code
+
+        # For a declared stable identity (single physical equipment item), status counts deduplicate across reports:
+        # We take max across contributing reports for this item
+        status_total = max(r.status_total for _, r in contribs)
+        status_active = max(r.status_active for _, r in contribs)
+        status_ready = max(r.status_ready for _, r in contribs)
+        status_inactive = max(r.status_inactive for _, r in contribs)
+        status_under_repair = max(r.status_under_repair for _, r in contribs)
+
         mach_obj = report.machinery_rows.filter(
             is_derived=True, equipment_ref_id=eq_ref_id,
         ).first()
+
+        op_hours = tot_operating if has_operating else None
+        stop_hours = tot_stoppage if has_stoppage else None
+        rep_hours = tot_repair if has_repair else None
 
         if mach_obj is None:
             mach_obj = DailyReportMachineryRow.objects.create(
                 report=report,
                 equipment_type=primary_row.equipment_type,
                 equipment_ref_id=eq_ref_id,
-                status_total=primary_row.status_total,
-                status_active=primary_row.status_active,
-                status_ready=primary_row.status_ready,
-                status_inactive=primary_row.status_inactive,
-                status_under_repair=primary_row.status_under_repair,
-                operating_hours=primary_row.operating_hours,
-                stoppage_hours=primary_row.stoppage_hours,
-                repair_hours=primary_row.repair_hours,
-                stoppage_reason_code=primary_row.stoppage_reason_code or '',
+                status_total=status_total,
+                status_active=status_active,
+                status_ready=status_ready,
+                status_inactive=status_inactive,
+                status_under_repair=status_under_repair,
+                operating_hours=op_hours,
+                stoppage_hours=stop_hours,
+                repair_hours=rep_hours,
+                stoppage_reason_code=stoppage_reason or primary_row.stoppage_reason_code or '',
                 source_sub_report=primary_sr,
                 source_discipline=primary_disc,
                 is_derived=True,
             )
         else:
             mach_obj.equipment_type = primary_row.equipment_type
-            mach_obj.status_total = primary_row.status_total
-            mach_obj.status_active = primary_row.status_active
-            mach_obj.status_ready = primary_row.status_ready
-            mach_obj.status_inactive = primary_row.status_inactive
-            mach_obj.status_under_repair = primary_row.status_under_repair
-            mach_obj.operating_hours = primary_row.operating_hours
-            mach_obj.stoppage_hours = primary_row.stoppage_hours
-            mach_obj.repair_hours = primary_row.repair_hours
-            mach_obj.stoppage_reason_code = primary_row.stoppage_reason_code or ''
+            mach_obj.status_total = status_total
+            mach_obj.status_active = status_active
+            mach_obj.status_ready = status_ready
+            mach_obj.status_inactive = status_inactive
+            mach_obj.status_under_repair = status_under_repair
+            mach_obj.operating_hours = op_hours
+            mach_obj.stoppage_hours = stop_hours
+            mach_obj.repair_hours = rep_hours
+            mach_obj.stoppage_reason_code = stoppage_reason or primary_row.stoppage_reason_code or ''
             mach_obj.source_sub_report = primary_sr
             mach_obj.source_discipline = primary_disc
             mach_obj.save()

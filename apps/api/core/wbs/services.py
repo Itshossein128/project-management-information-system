@@ -1,7 +1,7 @@
 """WBS tree operations using django-treebeard."""
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 from projects.models import Activity, Project, WBS
 
@@ -151,7 +151,17 @@ def create_wbs_node(
         node = parent.add_child(**create_kwargs)
         warnings = check_weight_warnings(parent, project_id)
     else:
-        node = WBS.add_root(**create_kwargs)
+        node = None
+        for attempt in range(3):
+            try:
+                with transaction.atomic():
+                    node = WBS.add_root(**create_kwargs)
+                break
+            except IntegrityError:
+                if attempt == 2:
+                    raise
+                import time
+                time.sleep(0.05 * (attempt + 1))
         warnings = check_weight_warnings(None, project_id)
 
     propagate_project_wbs_codes(project_id)

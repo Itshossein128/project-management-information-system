@@ -155,6 +155,11 @@ urlpatterns = [
         DailyReportCorrectionCancelView.as_view(),
         name='daily-report-correction-cancel',
     ),
+    path(
+        f'{DR}/correction-requests/<uuid:correction_id>/cancel/',
+        DailyReportCorrectionCancelView.as_view(),
+        name='daily-report-correction-cancel-alias',
+    ),
 
     path(f'{DR}/{RID}/activities/', activity_list, name='daily-report-activities'),
     path(f'{DR}/{RID}/activities/<uuid:pk>/', activity_detail, name='daily-report-activity-detail'),

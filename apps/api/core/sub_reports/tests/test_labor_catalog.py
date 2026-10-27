@@ -511,3 +511,37 @@ class TestLaborCatalogSnapshotAndResolution:
             f'/api/v1/projects/{project_b.id}/reporting-configuration/?date=2024-06-10',
         )
         assert resp_cross.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+def test_fresh_project_resolves_legacy_catalog_titles(admin_user):
+    from projects.services import create_project_with_creator
+    from project_templates.models import ProjectTemplate
+    from project_templates.services import activate_project_reporting_configuration, resolve_labor_title
+
+    fresh_project = create_project_with_creator(
+        creator=admin_user,
+        project_code='PRJ-FRESH-CAT',
+        project_name='Fresh Project With Default Catalog',
+        employer='Employer Co',
+        start_date='2024-01-01',
+    )
+    template = ProjectTemplate.objects.create(
+        template_name='Fresh System Template',
+        project_type='residential',
+        is_system=True,
+        created_by=admin_user,
+    )
+    config = activate_project_reporting_configuration(
+        project=fresh_project,
+        template=template,
+        effective_from=date(2024, 6, 1),
+        user=admin_user,
+    )
+    resolved_0002 = resolve_labor_title(config, 'مهندس عمران')
+    assert resolved_0002 is not None
+    assert resolved_0002.category == 'indirect'
+
+    resolved_0010 = resolve_labor_title(config, 'مدیرشعبه')
+    assert resolved_0010 is not None
+    assert resolved_0010.category == 'indirect'

@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from django.http import HttpResponse
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ErrorDetail, ValidationError
+from rest_framework.exceptions import ErrorDetail, NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -45,6 +45,7 @@ from field_reports.serializers import (
 )
 from field_reports import services
 from field_reports.services import correction_service
+from field_reports.services.lifecycle_errors import lifecycle_error_detail, get_lifecycle_msg
 from field_reports.services.daily_report_aggregation import (
     build_aggregation_meta,
     ensure_daily_report_summary,
@@ -59,7 +60,7 @@ AUTO_SUMMARY_CREATE_MSG = (
 DERIVED_READONLY_MSG = 'ردیف‌های تجمیعی فقط از طریق گزارش واحد تخصصی قابل تغییر هستند'
 
 
-def _validate_report_ready_for_submit(report: DailyReport) -> list[str]:
+def _validate_report_ready_for_submit(report: DailyReport, request=None) -> list[str]:
     """Return soft warnings. Raises ValidationError for hard failures."""
     errors: list[str] = []
     warnings: list[str] = []
@@ -72,7 +73,12 @@ def _validate_report_ready_for_submit(report: DailyReport) -> list[str]:
         errors.append('گزارش باید حداقل یک فعالیت داشته باشد')
     for idx, row in enumerate(activities, start=1):
         if row.quantity_measured and row.quantity is None:
-            errors.append(f'ردیف فعالیت {idx}: در حالت اندازه‌گیری شده، مقدار باید ثبت شود')
+            raise ValidationError({
+                'detail': [lifecycle_error_detail(
+                    'quantity_unset_invalid',
+                    request=request,
+                )],
+            })
         if (not row.quantity_measured) and row.quantity is not None:
             errors.append(f'ردیف فعالیت {idx}: مقدار ثبت‌نشده نباید عدد داشته باشد')
 
@@ -245,9 +251,44 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
         elif instance.status not in EDITABLE_STATUSES:
             raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ویرایش هستند')
-        serializer = DailyReportHeaderSerializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(updated_by=request.user)
+
+        if instance.status in EDITABLE_STATUSES and 'activities' in request.data:
+            activities_data = request.data['activities']
+            if isinstance(activities_data, list):
+                instance.activities.all().delete()
+                for row in activities_data:
+                    qm = row.get('quantity_measured')
+                    if qm is None:
+                        qm = row.get('quantity') is not None
+                    DailyReportActivity.objects.create(
+                        report=instance,
+                        activity_ref_id=row.get('activity_ref'),
+                        activity_description=row.get('activity_description', ''),
+                        shift=row.get('shift', 'shift_1'),
+                        unit=row.get('unit', ''),
+                        quantity=row.get('quantity'),
+                        quantity_measured=bool(qm),
+                        subcontractor_name=row.get('subcontractor_name', ''),
+                        subcontractor_ref_id=row.get('subcontractor_ref'),
+                        contractor_ref_id=row.get('contractor_ref'),
+                        crew_name=row.get('crew_name', ''),
+                        headcount=row.get('headcount'),
+                        foreman_count=row.get('foreman_count'),
+                        worker_count=row.get('worker_count'),
+                        parcel=row.get('parcel'),
+                        zone=row.get('zone'),
+                        block=row.get('block'),
+                        floor=row.get('floor'),
+                        location_detail=row.get('location_detail'),
+                        notes=row.get('notes', ''),
+                    )
+
+        header_data = {k: v for k, v in request.data.items() if k != 'activities'}
+        if header_data:
+            serializer = DailyReportHeaderSerializer(instance, data=header_data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(updated_by=request.user)
+        instance.refresh_from_db()
         return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -260,12 +301,15 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     def _submit(self, instance, request):
         if instance.status not in EDITABLE_STATUSES:
-            raise ValidationError('فقط گزارش‌های پیش‌نویس یا رد شده قابل ارسال هستند')
+            raise ValidationError({'detail': [lifecycle_error_detail(
+                'report_not_in_submittable_state',
+                request=request,
+            )]})
         if instance.site_status == SiteStatus.INACTIVE and not instance.inactivity_reason:
             raise ValidationError(
                 {'inactivity_reason': [ErrorDetail('در صورت تعطیلی کارگاه، انتخاب علت الزامی است.', code='inactivity_reason_required')]},
             )
-        warnings = _validate_report_ready_for_submit(instance)
+        warnings = _validate_report_ready_for_submit(instance, request=request)
         services.submit_report(instance, request.user)
         data = DailyReportDetailSerializer(instance, context={'request': request}).data
         if warnings:
@@ -299,8 +343,16 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         if instance.status not in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
             raise ValidationError('فقط گزارش‌های ارسال شده یا در حال بررسی قابل رد هستند')
         reason = (request.data.get('reason') or '').strip()
+        if not reason:
+            raise ValidationError({'reason': [lifecycle_error_detail(
+                'rejection_reason_required',
+                request=request,
+            )]})
         if len(reason) < 10:
-            raise ValidationError({'reason': 'دلیل رد باید حداقل ۱۰ کاراکتر باشد'})
+            raise ValidationError({'reason': [lifecycle_error_detail(
+                'rejection_reason_min_length_10',
+                request=request,
+            )]})
         services.reject_report(instance, request.user, reason)
         return Response(DailyReportDetailSerializer(instance, context={'request': request}).data)
 
@@ -358,6 +410,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             source_report=instance,
             user=request.user,
             reason=request.data.get('reason', ''),
+            request=request,
         )
         return Response(
             DailyReportCorrectionRequestSerializer(correction).data,
@@ -374,6 +427,15 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
         from field_reports.models import DailyReportDerivedSource
 
         instance = self.get_object()
+        user = request.user
+        can_view = False
+        if user and user.is_authenticated:
+            if user.is_superuser or user.groups.filter(name='admin').exists():
+                can_view = True
+            else:
+                from permissions.project import member_has_codename
+                can_view = member_has_codename(user, instance.project_id, 'view_reports')
+
         sources = DailyReportDerivedSource.objects.filter(
             daily_report=instance,
             derived_kind=derived_kind,
@@ -383,23 +445,35 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
             return Response({'detail': 'not found'}, status=status.HTTP_404_NOT_FOUND)
         rows = []
         for source in sources:
-            rows.append({
-                'source_report': str(source.source_report_id) if source.source_report_id else None,
-                'source_report_version': source.source_report_version,
-                'source_unit': source.source_unit,
-                'source_row_kind': source.source_row_kind,
-                'source_row_id': source.source_row_id,
-                'contribution_value': (
-                    str(source.contribution_value) if source.contribution_value is not None else None
-                ),
-                'can_view_source': True,
-                'href': (
-                    f'/api/v1/projects/{instance.project_id}/units/{source.source_unit}'
-                    f'/daily-reports/{source.source_report_id}/'
-                    if source.source_report_id and source.source_unit
-                    else None
-                ),
-            })
+            if can_view:
+                rows.append({
+                    'source_report': str(source.source_report_id) if source.source_report_id else None,
+                    'source_report_version': source.source_report_version,
+                    'source_unit': source.source_unit,
+                    'source_row_kind': source.source_row_kind,
+                    'source_row_id': source.source_row_id,
+                    'contribution_value': (
+                        str(source.contribution_value) if source.contribution_value is not None else None
+                    ),
+                    'can_view_source': True,
+                    'href': (
+                        f'/api/v1/projects/{instance.project_id}/units/{source.source_unit}'
+                        f'/daily-reports/{source.source_report_id}/'
+                        if source.source_report_id and source.source_unit
+                        else None
+                    ),
+                })
+            else:
+                rows.append({
+                    'source_report': None,
+                    'source_report_version': None,
+                    'source_unit': None,
+                    'source_row_kind': None,
+                    'source_row_id': None,
+                    'contribution_value': None,
+                    'can_view_source': False,
+                    'href': None,
+                })
         return Response({'derived_kind': derived_kind, 'derived_row': str(derived_row), 'rows': rows})
 
     @extend_schema(summary='Material reconciliation hints', tags=['Daily Reports'])
@@ -431,8 +505,12 @@ class DailyReportCorrectionCancelView(generics.GenericAPIView):
             is_deleted=False,
         ).first()
         if correction is None:
-            raise ValidationError('درخواست اصلاح یافت نشد')
-        correction_service.cancel_correction(correction=correction, user=request.user)
+            raise NotFound('درخواست اصلاح یافت نشد')
+        correction = correction_service.cancel_correction(
+            correction=correction,
+            user=request.user,
+            request=request,
+        )
         return Response(DailyReportCorrectionRequestSerializer(correction).data)
 
 

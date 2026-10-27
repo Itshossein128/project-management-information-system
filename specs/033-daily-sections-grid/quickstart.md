@@ -82,7 +82,8 @@ Expected: comparison against the specific referenced document; equal → `match`
 pnpm typecheck   # expect: pre-existing unrelated DailyReportForm baseline only; no new errors
 pnpm dev:api &   # 8000 (start after Postgres/Redis)
 pnpm dev:web &   # 5173
-pnpm e2e -- --grep "daily-sections"
+cd apps/web/e2e
+pnpm exec playwright test -c playwright.config.ts tests/daily-sections-aggregation.spec.ts -g "daily-sections"
 ```
 
 Browser E2E (`apps/web/e2e/tests/daily-sections-aggregation.spec.ts`) walkthrough per unit page:

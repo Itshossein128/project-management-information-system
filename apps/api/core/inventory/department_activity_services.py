@@ -54,8 +54,10 @@ def get_department_activity_queryset(
         else:
             return qs.none()
 
-    date_from = query_params.get('date_from')
-    date_to = query_params.get('date_to')
+    from common.jalali import parse_date_optional
+
+    date_from = parse_date_optional(query_params.get('date_from'))
+    date_to = parse_date_optional(query_params.get('date_to'))
     if date_from:
         qs = qs.filter(date__gte=date_from)
     if date_to:

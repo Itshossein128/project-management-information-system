@@ -11,6 +11,7 @@ import { PATHS } from "@/app/routeVars";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
 import { IncompletenessBanner } from "./IncompletenessBanner";
 import { AttachmentCountLink } from "./AttachmentCountLink";
+import { UnsetQuantityBadge } from "../UnsetQuantityBadge";
 
 function Section({
   title,
@@ -386,25 +387,25 @@ export function DailyReportSummaryView({
             <span>
               {t("dailyReports.summary.colPresent", "حاضر")}:{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.indirect.present_count}
+                {report.labor_summary.totals.indirect?.present_count ?? 0}
               </strong>
             </span>
             <span>
               {t("dailyReports.summary.colLeave", "مرخصی")}:{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.indirect.leave_count}
+                {report.labor_summary.totals.indirect?.leave_count ?? 0}
               </strong>
             </span>
             <span>
               {t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)")}:{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.indirect.overtime_hours}
+                {report.labor_summary.totals.indirect?.overtime_hours ?? "0.00"}
               </strong>
             </span>
             <span>
               {t("dailyReports.summary.colManHours", "نفر-ساعت")}:{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.indirect.man_hours}
+                {report.labor_summary.totals.indirect?.man_hours ?? "0.00"}
               </strong>
             </span>
           </div>
@@ -455,15 +456,15 @@ export function DailyReportSummaryView({
               </span>
               {t("dailyReports.summary.colPresent", "حاضر")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.direct.present_count}
+                {report.labor_summary.totals.direct?.present_count ?? 0}
               </strong>{" "}
               · {t("dailyReports.summary.colLeave", "مرخصی")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.direct.leave_count}
+                {report.labor_summary.totals.direct?.leave_count ?? 0}
               </strong>{" "}
               · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.direct.man_hours}
+                {report.labor_summary.totals.direct?.man_hours ?? "0.00"}
               </strong>
             </div>
             <div>
@@ -472,15 +473,15 @@ export function DailyReportSummaryView({
               </span>
               {t("dailyReports.summary.colPresent", "حاضر")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.overall.present_count}
+                {report.labor_summary.totals.overall?.present_count ?? 0}
               </strong>{" "}
               · {t("dailyReports.summary.colLeave", "مرخصی")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.overall.leave_count}
+                {report.labor_summary.totals.overall?.leave_count ?? 0}
               </strong>{" "}
               · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.overall.man_hours}
+                {report.labor_summary.totals.overall?.man_hours ?? "0.00"}
               </strong>
             </div>
           </div>
@@ -701,7 +702,11 @@ export function DailyReportSummaryView({
             r.headcount ?? "—",
             r.parcel || "—",
             [r.location ?? r.zone, r.block, r.floor].filter(Boolean).join(" / ") || "—",
-            r.quantity ?? "—",
+            <UnsetQuantityBadge
+              key={`quantity-${r.id}`}
+              quantity={r.quantity}
+              quantityMeasured={r.quantity_measured}
+            />,
             r.unit || "—",
             r.source_discipline ?? "",
             <ProvenanceCell

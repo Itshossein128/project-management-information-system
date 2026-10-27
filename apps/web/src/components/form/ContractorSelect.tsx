@@ -56,7 +56,7 @@ export function ContractorSelect({
 
   const { data, isLoading } = useQuery({
     queryKey: ["project-contractors", projectId],
-    queryFn: () => fetchProjectContractors(projectId),
+    queryFn: async () => asList(await fetchProjectContractors(projectId)),
     enabled: Boolean(projectId),
   });
 

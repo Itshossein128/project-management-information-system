@@ -243,3 +243,41 @@ class TestSectionProvenance:
         assert not DailyReportDerivedSource.objects.filter(
             daily_report=summary, source_report_id_snapshot=foreign.id,
         ).exists()
+
+
+@pytest.mark.django_db
+def test_provenance_drilldown_endpoint_enforces_view_reports(project, user, other_user, api_client):
+    member, _ = ProjectMember.objects.get_or_create(project=project, user=user, defaults={'status': 'active'})
+    member.status = 'active'
+    member.save()
+    role, _ = Role.objects.get_or_create(role_name='Viewer')
+    RolePermission.objects.get_or_create(role=role, permission_codename='view_reports')
+    ProjectMemberRole.objects.create(member=member, role=role)
+
+    r = make_unit_report(project, user, unit=SpecialtyUnit.BUILDINGS, version_number=1)
+    act = add_activity(r, description='Provenance check')
+    summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    derived_act = summary.activities.get(is_derived=True)
+
+    url = f'/api/v1/projects/{project.id}/daily-reports/{summary.id}/provenance/activity/{derived_act.id}/'
+
+    # 1. Authorized user with view_reports gets can_view_source=True and source metadata
+    api_client.force_authenticate(user=user)
+    res_auth = api_client.get(url)
+    assert res_auth.status_code == 200
+    rows = res_auth.data['rows']
+    assert len(rows) == 1
+    assert rows[0]['can_view_source'] is True
+    assert rows[0]['source_report'] == str(r.id)
+    assert rows[0]['source_row_id'] == str(act.id)
+    assert rows[0]['href'] is not None
+
+    # 2. Member without view_reports is rejected by permission check (HTTP 403)
+    no_rep_member = ProjectMember.objects.create(project=project, user=other_user, status='active')
+    view_proj_role, _ = Role.objects.get_or_create(role_name='ProjectViewerOnly')
+    RolePermission.objects.get_or_create(role=view_proj_role, permission_codename='view_project')
+    ProjectMemberRole.objects.create(member=no_rep_member, role=view_proj_role)
+
+    api_client.force_authenticate(user=other_user)
+    res_unauth = api_client.get(url)
+    assert res_unauth.status_code == 403
