@@ -24,6 +24,16 @@
 - **Navigation**: `/projects/:projectId/contracts/:contractId`
 - **UI Feedback**: Permission-gated components may show AccessDenied; APIs may return 403 even when navigation is visible.
 
+## Product Tour & Data Anchors
+
+- **Tour ID**: `project-contract-detail`
+- **Driver.js Anchors**:
+  - `contract-detail-header`: Contract title, project subtitle, and quick action bar (`ProductTourButton`, `Button` Issue IPC, Edit, Back).
+  - `contract-summary-cards`: Financial KPI summary (gross/effective values, net paid, retention held, guarantee alert).
+  - `contract-detail-tabs`: Tab bar navigation (`info`, `boq`, `changes`).
+  - `contract-info-tab`: General contract information panel and form fields.
+  - `contract-issue-ipc`: Primary action button to launch the IPC creation wizard.
+
 ## Outcomes & Guards
 
 Loading, empty results and unavailable permissions are states, not evidence of a successful write. Screen/backend guards remain authoritative.

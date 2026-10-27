@@ -2398,6 +2398,19 @@
       "tableDesc": "Track counterparty details, contract types, amounts, and IPC approval states, or open detailed views.",
       "receivablesTitle": "Receivables & Collections",
       "receivablesDesc": "Monitor overdue or near-due IPC collections and record received payments against open invoices."
+    },
+    "projectContractDetail": {
+      "title": "Contract Detail Tour",
+      "headerTitle": "Contract Header & Actions",
+      "headerDesc": "Manage contract number, project context, and quick actions like issuing a new IPC or editing contract metadata.",
+      "summaryTitle": "Contract Financial Summary",
+      "summaryDesc": "View effective amount, gross/net paid totals, retention held, and performance guarantee status.",
+      "tabsTitle": "Contract Detail Tabs",
+      "tabsDesc": "Switch between contract metadata, Bill of Quantities (BoQ) grid, and change order / variation panels.",
+      "infoTitle": "Contract Metadata & Terms",
+      "infoDesc": "View or update contractor details, start/end dates, base amounts, and payment terms.",
+      "issueIpcTitle": "Issue New Interim Payment Certificate",
+      "issueIpcDesc": "Launch the IPC wizard to record a new interim work certificate for this contract."
     }
   },
   "dailyReports": {

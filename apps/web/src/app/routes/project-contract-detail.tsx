@@ -22,6 +22,8 @@ import { IPCWizard } from "@/components/contracts/IPCWizard";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
 
@@ -87,35 +89,115 @@ function ContractDetailContent() {
     setEditing(true);
   };
 
+  const { startTour } = useProductTour({
+    tourId: "project-contract-detail",
+    steps: [
+      {
+        element: '[data-tour="contract-detail-header"]',
+        popover: {
+          title: t("tour.projectContractDetail.headerTitle", {
+            defaultValue: "شناسنامه و اقدامات قرارداد",
+          }),
+          description: t("tour.projectContractDetail.headerDesc", {
+            defaultValue:
+              "شماره قرارداد، پروژه مربوطه و کلیدهای اقدام سریع مانند صدور موقت جدید یا ویرایش اطلاعات را مدیریت کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contract-summary-cards"]',
+        popover: {
+          title: t("tour.projectContractDetail.summaryTitle", {
+            defaultValue: "خلاصه وضعیت مالی",
+          }),
+          description: t("tour.projectContractDetail.summaryDesc", {
+            defaultValue:
+              "ارزش موثر، مبالغ ناخالص/خالص پرداخت‌شده، سپرده حسن انجام کار و وضعیت ضمانت‌نامه را مشاهده کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contract-detail-tabs"]',
+        popover: {
+          title: t("tour.projectContractDetail.tabsTitle", {
+            defaultValue: "تب‌های جزئیات قرارداد",
+          }),
+          description: t("tour.projectContractDetail.tabsDesc", {
+            defaultValue:
+              "بین اطلاعات شناسنامه‌ای، جدول فهرست بها (BoQ) و تغییر مقادیر/دستورکارها جابه‌جا شوید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="contract-info-tab"]',
+        popover: {
+          title: t("tour.projectContractDetail.infoTitle", {
+            defaultValue: "اطلاعات شناسنامه‌ای و شرایط پیمان",
+          }),
+          description: t("tour.projectContractDetail.infoDesc", {
+            defaultValue:
+              "مشخصات پیمانکار، تاریخ‌های شروع/پایان، مبالغ اولیه و شرایط پرداخت را مشاهده یا ویرایش کنید.",
+          }),
+          side: "top",
+        },
+      },
+      {
+        element: '[data-tour="contract-issue-ipc"]',
+        popover: {
+          title: t("tour.projectContractDetail.issueIpcTitle", {
+            defaultValue: "صدور موقت جدید",
+          }),
+          description: t("tour.projectContractDetail.issueIpcDesc", {
+            defaultValue:
+              "جهت ثبت صورت‌وضعیت کارکرد جدید برای این قرارداد، از wizard صدور موقت استفاده نمایید.",
+          }),
+          side: "bottom",
+        },
+      },
+    ],
+  });
+
   return (
     <div className='space-y-6'>
-      <PageHeader
-        title={contract.contract_number || contract.counterparty}
-        subtitle={project.project_name}
-        actions={
-          <div className='flex flex-wrap gap-2'>
-            {canEditIpc ? (
-              <Button variant='primary' onClick={() => setWizardOpen(true)}>
-                صدور موقت جدید
-              </Button>
-            ) : null}
-            {canEdit && !editing ? (
-              <Button variant='secondary' onClick={startEdit}>
-                ویرایش
-              </Button>
-            ) : null}
-            <Link
-              to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_CONTRACTS}`}
-            >
-              <Button variant='secondary'>بازگشت</Button>
-            </Link>
-          </div>
-        }
-      />
+      <div data-tour='contract-detail-header'>
+        <PageHeader
+          title={contract.contract_number || contract.counterparty}
+          subtitle={project.project_name}
+          actions={
+            <div className='flex flex-wrap gap-2 items-center'>
+              <ProductTourButton onClick={startTour} />
+              {canEditIpc ? (
+                <Button
+                  variant='primary'
+                  onClick={() => setWizardOpen(true)}
+                  data-tour='contract-issue-ipc'
+                >
+                  صدور موقت جدید
+                </Button>
+              ) : null}
+              {canEdit && !editing ? (
+                <Button variant='secondary' onClick={startEdit}>
+                  ویرایش
+                </Button>
+              ) : null}
+              <Link
+                to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_CONTRACTS}`}
+              >
+                <Button variant='secondary'>بازگشت</Button>
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
-      <ContractSummaryCards contract={contract} />
+      <div data-tour='contract-summary-cards'>
+        <ContractSummaryCards contract={contract} />
+      </div>
 
-      <div className='flex flex-wrap gap-2'>
+      <div className='flex flex-wrap gap-2' data-tour='contract-detail-tabs'>
         {(
           [
             ["info", "اطلاعات"],
@@ -135,7 +217,7 @@ function ContractDetailContent() {
       </div>
 
       {tab === "info" && (
-        <div className='space-y-4'>
+        <div className='space-y-4' data-tour='contract-info-tab'>
           {editing && values ? (
             <>
               <ContractForm
