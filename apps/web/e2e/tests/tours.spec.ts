@@ -29,6 +29,7 @@ const TOURS = [
   { id: "project-manpower", path: "manpower" },
   { id: "project-costs", path: "costs" },
   { id: "project-contracts", path: "contracts" },
+  { id: "project-contract-detail", path: "contracts/mock-contract-id" },
 ] as const;
 
 /** An untranslated step renders the raw i18n key instead of a sentence. */
@@ -61,6 +62,24 @@ test.describe("Product tours", () => {
       localStorage.setItem("auth_user", s.user);
       document.cookie = `auth_token=${encodeURIComponent(s.access)}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
     }, session);
+
+    await page.route(/\/api\/v1\/projects\/[^\/]+\/contracts\/mock-contract-id\//, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "mock-contract-id",
+          contract_number: "CNT-101",
+          counterparty: "Acme Contracting",
+          contract_type: "main",
+          status: "active",
+          effective_amount: 500000000,
+          gross_amount: 500000000,
+          items: [],
+          change_orders: [],
+        }),
+      });
+    });
   });
 
   async function openTour(page: Page, tour: (typeof TOURS)[number]) {

@@ -6,9 +6,9 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 
 ## Status Overview
 
-- **Completed**: 15 routes / workflows
-- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/contracts`)
-- **Remaining**: 60 routes / workflows
+- **Completed**: 16 routes / workflows
+- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/contracts/:contractId`)
+- **Remaining**: 59 routes / workflows
 
 ---
 
@@ -30,12 +30,13 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 | `/projects/:projectId/daily-reports` | `project-daily-reports` | Stats, Filters, New Button, Table | Decision Tree & Tour | Completed |
 | `/projects/:projectId/daily-reports/new` | `project-daily-report-form` | Header, Save Button, Tabs, Approval Status | Decision Tree & Tour | Completed |
 | `/projects/:projectId/costs` | `project-costs` | KPI Grid, Tabs, Versions Panel, Budget Grid, Change Requests | Decision Tree & Tour | Completed |
-| `/projects/:projectId/contracts` | `project-contracts` | KPI Grid, Tabs, Contracts/IPC Table, Receivables Panel | Decision Tree & Tour | **In Review (Today)** |
+| `/projects/:projectId/contracts` | `project-contracts` | KPI Grid, Tabs, Contracts/IPC Table, Receivables Panel | Decision Tree & Tour | Completed |
+| `/projects/:projectId/contracts/:contractId` | `project-contract-detail` | Header, Summary Cards, Tabs, Info Panel, Issue IPC | Decision Tree & Tour | **In Review (Today)** |
 
 ---
 
 ## High-Priority Backlog (Next Slices)
 
-1. **Contracts Detail & IPCs** (`/projects/:projectId/contracts/:contractId` & `/ipcs/:ipcId`): Contract detail, change orders, BoQ grid, IPC wizard, and workflow bar.
+1. **IPC Detail** (`/projects/:projectId/ipcs/:ipcId`): IPC gross/net amounts, workflow status bar, line items table, deductions table, and collections panel.
 2. **Schedule & WBS** (`/projects/:projectId/wbs` & `/schedule/gantt`): Work breakdown structure, progress entry, and Gantt baseline comparison.
 3. **Quality & HSE / Barrier Log** (`/projects/:projectId/barriers`): Non-conformance reporting, site barrier escalation, and closure workflow.
