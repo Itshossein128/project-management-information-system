@@ -922,7 +922,8 @@ class SyncOperationsV2View(APIView):
     Scoped under /api/v1/projects/{project_pk}/daily-reports/sync-operations/v2/.
     Kept disabled until full foundation and reader/writer deployment verification.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'edit_reports'
 
     def post(self, request, project_pk):
         if not getattr(settings, 'V2_OFFLINE_SYNC_ENABLED', False):
