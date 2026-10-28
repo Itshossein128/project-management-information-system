@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 
 from common.models import TimeStampedModel
@@ -59,6 +60,7 @@ class SpaceMaterialRequest(TimeStampedModel):
 
 class Department(models.TextChoices):
     BUILDINGS = 'buildings', 'ابنیه'
+    CIVIL = 'civil', 'ابنیه (سیویل)'
     MECHANICAL = 'mechanical', 'مکانیک'
     SECURITY = 'security', 'حراست'
     MACHINERY = 'machinery', 'ماشین آلات'
@@ -93,6 +95,13 @@ class DepartmentActivityRecord(TimeStampedModel):
         null=True,
         blank=True,
         related_name='department_activity_records',
+    )
+    executed_quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=3,
+        null=True,
+        blank=True,
+        default=Decimal('0.000'),
     )
     unit = models.CharField(max_length=64, blank=True, default='')
     description = models.TextField(blank=True, default='')

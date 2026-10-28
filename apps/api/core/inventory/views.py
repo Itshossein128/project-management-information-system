@@ -307,6 +307,8 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
         '-activity_description',
         'contractor',
         '-contractor',
+        'executed_quantity',
+        '-executed_quantity',
         'unit',
         '-unit',
         'material_type',
@@ -351,11 +353,12 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
         project_pk = self.kwargs.get('project_pk')
         if project_pk is None:
             return None
+        target_units = ['civil', 'buildings'] if department in ('civil', 'buildings') else [department]
         return (
             DisciplineSubReport.objects
             .filter(
                 project_id=project_pk,
-                unit=department,
+                unit__in=target_units,
                 report_date=record_date,
                 is_current=True,
                 is_deleted=False,

@@ -6,6 +6,7 @@ from django.db import models
 from common.models import AuditSoftDeleteModel, UUIDModel
 from common.reporting_units import SpecialtyUnit
 from field_reports.models import LaborCategory, SiteStatus, WeatherCondition
+from inventory.models import DepartmentActivityRecord
 
 
 class Discipline(models.TextChoices):

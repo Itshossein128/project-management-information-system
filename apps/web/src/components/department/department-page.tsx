@@ -14,10 +14,12 @@ import {
   ContractorSelect,
   Input,
 } from "@/components/form";
+import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import {
   JalaliDateRangePicker,
   type DateRangeValue,
 } from "@/components/form/JalaliDateRangePicker";
+import { Modal } from "@/components/overlay/modal";
 import { DataTable, useGridState } from "@/components/grid";
 import { DepartmentActivityRecordModal } from "@/components/department/department-activity-record-modal";
 import { UnitDailyReportPanel } from "@/components/department/unit-daily-report-panel";
@@ -129,6 +131,16 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
   const [reporting, setReporting] = useState<"daily" | "weekly" | null>(null);
+  const [dailyModalOpen, setDailyModalOpen] = useState(false);
+  const [dailyDate, setDailyDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [weeklyModalOpen, setWeeklyModalOpen] = useState(false);
+  const [weeklyStart, setWeeklyStart] = useState(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = (day + 1) % 7;
+    d.setDate(d.getDate() - diff);
+    return d.toISOString().slice(0, 10);
+  });
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
@@ -210,51 +222,72 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
     try {
       const result = await apiUploadFile<{
         created: number;
-        errors: { row: number; errors: Record<string, string> }[];
+        detail?: string;
+        errors?: { row: number; errors: Record<string, string> }[];
       }>(
         `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/import/?department=${department}`,
         file,
       );
-      if (result.errors.length > 0) {
-        setActionMessage(
-          t("businessDepartment.activityLog.importPartial", {
-            created: result.created,
-            errorCount: result.errors.length,
-          }),
-        );
-      } else {
-        setActionMessage(
+      setActionMessage(
+        result.detail ||
           t("businessDepartment.activityLog.importSuccess", {
             count: result.created,
           }),
-        );
-      }
+      );
       if (result.created > 0) {
         grid.resetPage();
         void queryClient.invalidateQueries({
           queryKey: queryKeys.departmentActivityRecords(businessId, department),
         });
       }
-    } catch (err) {
-      setActionMessage(
-        err instanceof Error
-          ? err.message
-          : t("businessDepartment.activityLog.importFailed"),
-      );
+    } catch (err: unknown) {
+      let message = t("businessDepartment.activityLog.importFailed");
+      if (typeof err === "object" && err !== null) {
+        const errorObj = err as {
+          response?: { data?: { detail?: string; error?: string } };
+          message?: string;
+        };
+        message =
+          errorObj.response?.data?.detail ||
+          errorObj.response?.data?.error ||
+          errorObj.message ||
+          message;
+      }
+      setActionMessage(message);
     } finally {
       setImporting(false);
     }
   };
 
-  const handleDownloadReport = async (period: "daily" | "weekly") => {
+  const handleDownloadDailyReport = async () => {
     if (!businessId) return;
-    setReporting(period);
+    setReporting("daily");
     setActionMessage(null);
     try {
       const blob = await apiBlob(
-        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/${period}/?department=${department}`,
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/daily/?department=${department}&date=${dailyDate}`,
       );
-      downloadBlob(blob, `${department}_${period}_report.pdf`);
+      downloadBlob(blob, `${department}_daily_report_${dailyDate}.xlsx`);
+      setDailyModalOpen(false);
+    } catch (e) {
+      setActionMessage(
+        e instanceof Error ? e.message : t("businessDepartment.activityLog.reportFailed"),
+      );
+    } finally {
+      setReporting(null);
+    }
+  };
+
+  const handleDownloadWeeklyReport = async () => {
+    if (!businessId) return;
+    setReporting("weekly");
+    setActionMessage(null);
+    try {
+      const blob = await apiBlob(
+        `/${PATHS.API_PROJECTS}/${businessId}/${DEPARTMENT_ACTIVITY_RECORDS_PATH}/reports/weekly/?department=${department}&week_start=${weeklyStart}`,
+      );
+      downloadBlob(blob, `${department}_weekly_report_${weeklyStart}.xlsx`);
+      setWeeklyModalOpen(false);
     } catch (e) {
       setActionMessage(
         e instanceof Error ? e.message : t("businessDepartment.activityLog.reportFailed"),
@@ -417,6 +450,16 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
           </span>
         ),
       },
+      {
+        id: "executed_quantity",
+        header: "مقدار اجرا",
+        accessorKey: "executed_quantity",
+        cell: ({ row }) => (
+          <span id={`text-departmentActivityExecutedQuantity-${row.index}`}>
+            {row.original.executed_quantity ?? "—"}
+          </span>
+        ),
+      },
     ];
 
     if (showsUnit) {
@@ -520,7 +563,11 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         {actionMessage ? (
           <p
             id="text-departmentActivityActionMessage"
-            className="mb-4 text-muted-foreground text-sm"
+            className={
+              actionMessage.includes("خطا") || actionMessage.includes("نامعتبر")
+                ? "mb-4 text-destructive bg-destructive/10 border border-destructive/20 p-3 rounded-md text-sm font-medium"
+                : "mb-4 text-emerald-700 bg-emerald-50 border border-emerald-200 p-3 rounded-md text-sm font-medium"
+            }
           >
             {actionMessage}
           </p>
@@ -727,7 +774,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   size="sm"
                   variant="outline"
                   disabled={reporting !== null}
-                  onClick={() => void handleDownloadReport("daily")}
+                  onClick={() => setDailyModalOpen(true)}
                 >
                   {reporting === "daily"
                     ? t("businessDepartment.activityLog.generatingReport")
@@ -739,7 +786,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                   size="sm"
                   variant="outline"
                   disabled={reporting !== null}
-                  onClick={() => void handleDownloadReport("weekly")}
+                  onClick={() => setWeeklyModalOpen(true)}
                 >
                   {reporting === "weekly"
                     ? t("businessDepartment.activityLog.generatingReport")
@@ -758,6 +805,73 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
             }
           />
         </section>
+
+        <Modal
+          open={dailyModalOpen}
+          onOpenChange={setDailyModalOpen}
+          title="دانلود گزارش روزانه دپارتمان"
+          idBase="dailyReportModal"
+        >
+          <div className="space-y-4">
+            <JalaliDatePicker
+              name="dailyReportDate"
+              label="تاریخ گزارش"
+              value={dailyDate}
+              onChange={setDailyDate}
+            />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDailyModalOpen(false)}
+              >
+                انصراف
+              </Button>
+              <Button
+                type="button"
+                disabled={reporting === "daily" || !dailyDate}
+                onClick={() => void handleDownloadDailyReport()}
+              >
+                {reporting === "daily" ? "در حال دریافت..." : "دانلود فایل اکسل (.xlsx)"}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+          open={weeklyModalOpen}
+          onOpenChange={setWeeklyModalOpen}
+          title="دانلود گزارش هفتگی دپارتمان (۸ شیت)"
+          idBase="weeklyReportModal"
+        >
+          <div className="space-y-4">
+            <JalaliDatePicker
+              name="weeklyReportStart"
+              label="تاریخ شروع هفته (شنبه)"
+              value={weeklyStart}
+              onChange={setWeeklyStart}
+            />
+            <p className="text-xs text-muted-foreground">
+              این فایل اکسل شامل ۷ شیت روزانه از شنبه تا جمعه همراه با ۱ شیت جمع‌بندی با فرمول‌های بومی محاسباتی (=SUM) می‌باشد.
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setWeeklyModalOpen(false)}
+              >
+                انصراف
+              </Button>
+              <Button
+                type="button"
+                disabled={reporting === "weekly" || !weeklyStart}
+                onClick={() => void handleDownloadWeeklyReport()}
+              >
+                {reporting === "weekly" ? "در حال تولید..." : "دانلود ورک‌بوک اکسل (.xlsx)"}
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </main>
     </div>
   );

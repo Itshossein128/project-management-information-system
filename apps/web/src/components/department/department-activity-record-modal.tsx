@@ -33,6 +33,7 @@ const EMPTY_FORM: {
   activity_description: string;
   contractor: string;
   contractor_ref: string;
+  executed_quantity: string;
   unit: string;
   description: string;
   material_type: string;
@@ -46,6 +47,7 @@ const EMPTY_FORM: {
   activity_description: "",
   contractor: "",
   contractor_ref: "",
+  executed_quantity: "",
   unit: "",
   description: "",
   material_type: "",
@@ -121,6 +123,7 @@ export function DepartmentActivityRecordModal({
         material_type: form.material_type,
         quantity_in: form.quantity_in === "" ? "0" : form.quantity_in,
         quantity_out: form.quantity_out === "" ? "0" : form.quantity_out,
+        executed_quantity: "0.000",
         unit: form.unit,
         consumption_location: form.consumption_location,
         supplier: form.supplier,
@@ -138,6 +141,7 @@ export function DepartmentActivityRecordModal({
       activity_description: form.activity_description,
       contractor: "",
       contractor_ref: form.contractor_ref || null,
+      executed_quantity: form.executed_quantity === "" ? "0.000" : form.executed_quantity,
       unit: showsUnit ? form.unit : "",
       description: form.description,
       material_type: "",
@@ -403,6 +407,31 @@ export function DepartmentActivityRecordModal({
                   />
                 </div>
               ) : null}
+
+              <div
+                id="container-departmentActivityExecutedQuantity"
+                className="sm:col-span-1"
+              >
+                <Field
+                  name="departmentActivityExecutedQuantity"
+                  label="مقدار اجرا"
+                  htmlFor="input-departmentActivityExecutedQuantity"
+                  {...stickyFieldProps("executed_quantity")}
+                >
+                  {() => (
+                    <Input
+                      id="input-departmentActivityExecutedQuantity"
+                      name="departmentActivityExecutedQuantity"
+                      type="number"
+                      step="0.001"
+                      min="0"
+                      value={form.executed_quantity}
+                      onChange={(e) => setField("executed_quantity", e.target.value)}
+                      placeholder="0.000"
+                    />
+                  )}
+                </Field>
+              </div>
 
               <div
                 id="container-departmentActivityLocation"

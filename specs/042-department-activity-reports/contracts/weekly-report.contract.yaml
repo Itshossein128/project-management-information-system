@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: Department Activity Weekly Report API
+  version: 1.0.0
+  description: Downloads an 8-sheet department activity workbook in Office Open XML format (.xlsx) containing 7 daily tabs (Saturday to Friday) and 1 consolidated Summary tab with live calculation formulas.
+paths:
+  /api/v1/projects/{project_id}/department-activity-records/reports/weekly/:
+    get:
+      summary: Download weekly department activity multi-sheet report (.xlsx)
+      operationId: downloadDepartmentWeeklyReport
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [buildings, civil, electrical, mechanical, machinery, warehouse]
+        - name: week_start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Week starting Saturday date in YYYY-MM-DD format (defaults to current week Saturday).
+      responses:
+        '200':
+          description: Formatted multi-sheet .xlsx workbook stream.
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid department slug or unparseable week_start parameter.
+        '403':
+          description: User lacks view_reports permission.
+        '404':
+          description: Project not found.

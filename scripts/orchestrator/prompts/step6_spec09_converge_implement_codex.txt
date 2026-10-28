@@ -1,0 +1,41 @@
+You are an expert QA and convergence engineer executing Step 6: `speckit-converge` and `speckit-implement` in one continuous session using Codex with model `gpt-5.6-luna`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/042-department-activity-reports`)
+- `specs/042-department-activity-reports/spec.md`
+- `specs/042-department-activity-reports/plan.md`
+- `specs/042-department-activity-reports/tasks.md`
+- `reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md`
+- `reports_gaps/09/GAP-SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md`
+- Decision tree rules: `.agents/rules/decision-tree.md`
+- Graphify rules: `.agents/rules/graphify.md`
+- Skills: `.agents/skills/speckit-converge/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-CONVERGE ===
+1. Compare `spec.md`, `plan.md`, and `tasks.md` against the actual codebase.
+2. Check for any gaps, edge cases, or documentation requirements:
+   - Decision Tree: Verify that `docs/decision-tree/` accurately reflects user flows and permission gates for department activities:
+     - `[import-department-activities]` requiring `edit_reports` permission.
+     - `export-department-activities` (standard authenticated).
+     - `download-daily-activity-report` (standard authenticated).
+     - `download-weekly-activity-report` (standard authenticated).
+     - Follow `.agents/rules/decision-tree.md` strictly (bracket naming for permission gates, README.md with Required Permissions, Desired Result, Resulting Route).
+   - Backend Edge Cases:
+     - Verify handling when a week spans month boundaries or has zero records for some days (sheets should still generate cleanly with 0 sums or empty tables without crashing).
+     - Verify that `civil` and `buildings` filters work consistently across list, daily report, weekly report, export, and import.
+     - Verify Persian digits (`۰-۹`) and Arabic digits (`٠-٩`) conversion in numeric input columns for import.
+   - Test Coverage:
+     - Ensure thorough pytest coverage for all edge cases mentioned above.
+3. If any gaps or remaining tasks exist, append them as Phase 10 / Convergence Tasks to `specs/042-department-activity-reports/tasks.md`.
+
+=== PART 2: SPECKIT-IMPLEMENT ===
+1. Implement all appended convergence tasks.
+2. Update/create required files, decision tree directories, and backend/frontend code if needed.
+3. Run tests to confirm zero regressions:
+   `cd apps/api/core && ../.venv/bin/python -m pytest sub_reports/tests/test_department_reports.py inventory/tests.py`
+4. Verify frontend build:
+   `pnpm --filter web build`
+5. Update `graphify update .` if code files were modified.
+6. Mark all completed convergence tasks with `[x]` in `tasks.md`.
+7. Provide a detailed summary of convergence findings and verification results.

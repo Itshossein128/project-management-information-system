@@ -24,6 +24,8 @@ _ALLOWED_ORDERING_FIELDS = {
     '-activity_description',
     'contractor',
     '-contractor',
+    'executed_quantity',
+    '-executed_quantity',
     'unit',
     '-unit',
     'material_type',
@@ -39,6 +41,15 @@ _ALLOWED_ORDERING_FIELDS = {
 }
 
 
+def normalize_department(department: str | None) -> str | None:
+    if not department:
+        return None
+    dept_clean = str(department).strip().lower()
+    if dept_clean in ('civil', 'buildings'):
+        return 'buildings'
+    return dept_clean
+
+
 def get_department_activity_queryset(
     project_pk: int,
     query_params: Any,
@@ -48,11 +59,15 @@ def get_department_activity_queryset(
 
     department = query_params.get('department')
     if department:
-        valid_departments = {choice[0] for choice in Department.choices}
-        if department in valid_departments:
-            qs = qs.filter(department=department)
+        dept_clean = str(department).strip().lower()
+        if dept_clean in ('civil', 'buildings'):
+            qs = qs.filter(department__in=['buildings', 'civil'])
         else:
-            return qs.none()
+            valid_departments = {choice[0] for choice in Department.choices}
+            if dept_clean in valid_departments:
+                qs = qs.filter(department=dept_clean)
+            else:
+                return qs.none()
 
     from common.jalali import parse_date_optional
 
@@ -114,17 +129,26 @@ def get_department_activity_queryset(
 def require_valid_department(department: str | None) -> str | None:
     if not department:
         return None
+    dept_clean = str(department).strip().lower()
+    if dept_clean in ('civil', 'buildings'):
+        return 'buildings'
     valid = {choice[0] for choice in Department.choices}
-    return department if department in valid else None
+    return dept_clean if dept_clean in valid else None
 
 
-def get_report_date_range(period: str) -> tuple[date, date]:
+def get_report_date_range(period: str, anchor_date: date | None = None) -> tuple[date, date]:
     """
-    Daily: previous calendar day. Weekly: rolling last 7 days including today.
+    Daily: given date or previous calendar day.
+    Weekly: given week_start through week_start + 6 days, or rolling last 7 days including today.
     """
     today = timezone.localdate()
     if period == 'daily':
+        if anchor_date:
+            return anchor_date, anchor_date
         yesterday = today - timedelta(days=1)
         return yesterday, yesterday
+
+    if anchor_date:
+        return anchor_date, anchor_date + timedelta(days=6)
     start = today - timedelta(days=6)
     return start, today

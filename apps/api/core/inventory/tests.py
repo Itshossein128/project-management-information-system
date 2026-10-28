@@ -177,8 +177,20 @@ class DepartmentActivityIOTests(TestCase):
         self.assertEqual(ws.title, 'Activity log')
         rows = list(ws.iter_rows(values_only=True))
         self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[0], ('date', 'location', 'activity_description', 'contractor', 'unit', 'description'))
-        self.assertEqual(rows[1], ('2023-01-01', 'Location A', 'Activity A', 'Contractor A', 'm2', 'Desc A'))
+        self.assertTrue(ws.sheet_view.rightToLeft)
+        self.assertEqual(
+            rows[0],
+            (
+                'تاریخ',
+                'موقعیت / جبهه کاری',
+                'شرح فعالیت',
+                'پیمانکار',
+                'مقدار اجرا',
+                'واحد',
+                'توضیحات',
+            ),
+        )
+        self.assertEqual(rows[1], ('2023-01-01', 'Location A', 'Activity A', 'Contractor A', 0.0, 'm2', 'Desc A'))
 
     def test_export_activities_to_xlsx_security_omits_unit(self):
         record = DepartmentActivityRecord.objects.create(
@@ -193,14 +205,16 @@ class DepartmentActivityIOTests(TestCase):
         )
         xlsx_bytes = export_activities_to_xlsx([record], department=Department.SECURITY)
         wb = load_workbook(io.BytesIO(xlsx_bytes))
-        rows = list(wb.active.iter_rows(values_only=True))
+        ws = wb.active
+        self.assertTrue(ws.sheet_view.rightToLeft)
+        rows = list(ws.iter_rows(values_only=True))
         self.assertEqual(
             rows[0],
-            ('date', 'location', 'activity_description', 'contractor', 'description'),
+            ('تاریخ', 'موقعیت / جبهه کاری', 'شرح فعالیت', 'پیمانکار', 'مقدار اجرا', 'توضیحات'),
         )
         self.assertEqual(
             rows[1],
-            ('2023-01-05', 'Gate', 'Patrol', 'SecCo', 'Night shift'),
+            ('2023-01-05', 'Gate', 'Patrol', 'SecCo', 0.0, 'Night shift'),
         )
 
     def test_map_header_row(self):
@@ -414,7 +428,12 @@ class DepartmentActivityDataViewsTests(TestCase):
         # Valid request
         response = self.client.get(url, {'department': Department.BUILDINGS})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        wb = load_workbook(io.BytesIO(response.content))
+        self.assertTrue(wb.active.sheet_view.rightToLeft)
 
     def test_weekly_report_view(self):
         url = reverse('project-department-activity-record-weekly-report', kwargs={'project_pk': self.project.id})
@@ -426,7 +445,12 @@ class DepartmentActivityDataViewsTests(TestCase):
         # Valid request
         response = self.client.get(url, {'department': Department.BUILDINGS})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Content-Type'], 'application/pdf')
+        self.assertEqual(
+            response['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        wb = load_workbook(io.BytesIO(response.content))
+        self.assertEqual(len(wb.sheetnames), 8)
 
 class ViewsTests(TestCase):
     def setUp(self):
@@ -1111,21 +1135,21 @@ class WarehouseIOTests(TestCase):
         self.assertEqual(
             rows[0],
             (
-                'date',
-                'material_type',
-                'quantity_in',
-                'unit',
-                'quantity_out',
-                'consumption_location',
-                'supplier',
-                'description',
+                'تاریخ',
+                'نوع مصالح',
+                'مقدار ورودی',
+                'واحد',
+                'مقدار خروجی',
+                'محل مصرف',
+                'تامین‌کننده',
+                'توضیحات',
             ),
         )
         self.assertEqual(rows[1][0], '2026-10-01')
         self.assertEqual(rows[1][1], 'Cement')
-        self.assertEqual(str(rows[1][2]), '10.000')
+        self.assertEqual(float(rows[1][2]), 10.0)
         self.assertEqual(rows[1][3], 'ton')
-        self.assertEqual(str(rows[1][4]), '2.500')
+        self.assertEqual(float(rows[1][4]), 2.5)
         self.assertEqual(rows[1][5], 'Block A')
         self.assertEqual(rows[1][6], 'Supplier X')
         self.assertEqual(rows[1][7], 'Note')

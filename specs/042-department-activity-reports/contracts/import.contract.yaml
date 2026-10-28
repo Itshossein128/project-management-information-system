@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: Department Activity Atomic Batch Import API
+  version: 1.0.0
+  description: Uploads and validates an Excel workbook with activity records under strict all-or-nothing atomic guarantees, returning row-specific Persian error diagnostics upon failure.
+paths:
+  /api/v1/projects/{project_id}/department-activity-records/import/:
+    post:
+      summary: Upload Excel workbook for atomic batch import
+      operationId: importDepartmentActivities
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: All rows committed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                    example: 25
+                  detail:
+                    type: string
+                    example: تعداد ۲۵ رکورد فعالیت با موفقیت ثبت شد.
+        '400':
+          description: Validation failure on one or more rows. Entire transaction is rolled back (0 rows committed).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "خطا در سطر ۴: مقدار اجرا باید عددی معتبر و مثبت باشد"
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        row:
+                          type: integer
+                          example: 4
+                        field:
+                          type: string
+                          example: executed_quantity
+                        message:
+                          type: string
+                          example: مقدار اجرا باید عددی معتبر و مثبت باشد
+        '403':
+          description: Forbidden (requires edit_reports permission).

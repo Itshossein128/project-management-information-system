@@ -873,23 +873,23 @@
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[daily-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/download-daily-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[export-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/export-department-activities",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[import-activity-excel]",
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[import-department-activities]",
       "protected": true,
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[weekly-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/download-weekly-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
@@ -938,23 +938,23 @@
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[daily-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/download-daily-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[export-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/export-department-activities",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[import-activity-excel]",
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[import-department-activities]",
       "protected": true,
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[weekly-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/download-weekly-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
@@ -988,23 +988,23 @@
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[daily-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/download-daily-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[export-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/export-department-activities",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[import-activity-excel]",
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[import-department-activities]",
       "protected": true,
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[weekly-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/download-weekly-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
@@ -1023,23 +1023,23 @@
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[daily-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/download-daily-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[export-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/export-department-activities",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[import-activity-excel]",
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[import-department-activities]",
       "protected": true,
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[weekly-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/download-weekly-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
@@ -1118,23 +1118,23 @@
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[daily-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/download-daily-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[export-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/export-department-activities",
+      "protected": false,
       "kind": "local"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[import-activity-excel]",
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[import-department-activities]",
       "protected": true,
       "kind": "mutation"
     },
     {
-      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[weekly-report]",
-      "protected": true,
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/download-weekly-activity-report",
+      "protected": false,
       "kind": "local"
     },
     {

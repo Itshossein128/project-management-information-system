@@ -1,0 +1,54 @@
+You are an expert full-stack engineer and software architect.
+You are executing Step 5: `speckit-plan`, `speckit-tasks`, and `speckit-implement` in one continuous session for feature `specs/042-department-activity-reports`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/042-department-activity-reports`)
+- `specs/042-department-activity-reports/spec.md`
+- `reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md`
+- `reports_gaps/09/GAP-SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md`
+- `.specify/memory/constitution.md`
+- Skills: `.agents/skills/speckit-plan/SKILL.md`, `.agents/skills/speckit-tasks/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-PLAN ===
+1. Follow `.agents/skills/speckit-plan/SKILL.md` to design the feature.
+2. Create design artifacts in `specs/042-department-activity-reports/`:
+   - `plan.md`: Technical context, architecture decisions, component diagrams, test strategy.
+   - `research.md`: Technology choices (openpyxl for workbook generation with formulas, Persian RTL alignment, openpyxl styles), edge cases, transaction safety.
+   - `data-model.md`:
+     - Model: `DepartmentActivityRecord` (in `apps/api/core/sub_reports/models.py`).
+     - Add `executed_quantity`: DecimalField(max_digits=12, decimal_places=3, null=True, blank=True, default=0.000) for non-warehouse departments (`civil`/`buildings`, `electrical`, `mechanical`, `machinery`).
+     - Alias support: Handle `civil` and `buildings` interchangeably in filters, serializers, and endpoints so queries for either work seamlessly.
+     - Excel daily report: `GET .../reports/daily/?department={dept}&date={YYYY-MM-DD}` generating an `.xlsx` file with RTL, project title, date, contractor, item rows with executed_quantity, and total row with `=SUM(...)` formula.
+     - Excel weekly report: `GET .../reports/weekly/?department={dept}&week_start={YYYY-MM-DD}` generating an 8-sheet `.xlsx` file (7 daily sheets for Saturday through Friday + 1 Summary sheet) with live `=SUM(...)` formulas linking/aggregating the days.
+     - Filtered export: `GET .../export/?department=...` with RTL, Persian headers, and executed_quantity.
+     - Batch import: `POST .../import/` with `@transaction.atomic`. If any row fails validation (e.g., negative executed_quantity, non-numeric value, invalid date, invalid contractor), trigger complete rollback and return structured Persian error message (e.g. `{"detail": "خطا در سطر ۴: مقدار اجرا باید عددی مثبت باشد"}`).
+     - Authorization: Batch import must require `edit_reports` permission (users with only `view_reports` get HTTP 403 Forbidden).
+   - `contracts/`: OpenAPI contracts for daily report, weekly report, export, and import endpoints.
+   - `quickstart.md`: Developer guide and verification instructions.
+
+=== PART 2: SPECKIT-TASKS ===
+1. Follow `.agents/skills/speckit-tasks/SKILL.md` to generate `tasks.md` in `specs/042-department-activity-reports/tasks.md`.
+2. Tasks must cover:
+   - Phase 1: Setup & Data Model (`executed_quantity` field migration in `sub_reports`).
+   - Phase 2: Serializers and Department Slug Normalization (`civil` <-> `buildings` alias).
+   - Phase 3: Daily Excel Report Service & Endpoint (`reports/daily/` with openpyxl, RTL, `=SUM`).
+   - Phase 4: Weekly Multi-Sheet Excel Report Service & Endpoint (`reports/weekly/` with 7 day sheets + 1 Summary sheet, `=SUM`).
+   - Phase 5: Filtered Excel Export & Atomic Batch Import with Rollback and Persian Error Messages.
+   - Phase 6: Permission Elevation (`edit_reports` requirement for import).
+   - Phase 7: Frontend UI (`department-activity-record-modal.tsx` with `executed_quantity`, Excel report download triggers, import dialog with Persian error handling).
+   - Phase 8: Automated Tests (Backend pytest unit & integration tests, frontend build check).
+
+=== PART 3: SPECKIT-IMPLEMENT ===
+1. Follow `.agents/skills/speckit-implement/SKILL.md` to execute all tasks in `tasks.md`.
+2. Generate Django migration:
+   - Run `apps/api/.venv/bin/python apps/api/core/manage.py makemigrations sub_reports`
+   - Run `apps/api/.venv/bin/python apps/api/core/manage.py migrate` (or via `DATABASE_URL` from `.env`).
+3. Implement backend services, serializers, views, and url routes.
+4. Implement frontend modal inputs, export/import components, and API client methods.
+5. Write and execute backend pytest tests:
+   `cd apps/api/core && ../.venv/bin/python -m pytest sub_reports/tests/test_department_reports.py` (or corresponding test suite).
+6. Verify frontend build:
+   `pnpm --filter web build` must pass cleanly.
+7. Mark all completed tasks in `tasks.md` with `[x]`.
+8. Provide a comprehensive summary of all implemented files and test results.

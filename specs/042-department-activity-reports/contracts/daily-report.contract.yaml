@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Department Activity Daily Report API
+  version: 1.0.0
+  description: Downloads a single-day department activity workbook in Office Open XML format (.xlsx) with RTL alignment and live =SUM() formulas.
+paths:
+  /api/v1/projects/{project_id}/department-activity-records/reports/daily/:
+    get:
+      summary: Download daily department activity report (.xlsx)
+      operationId: downloadDepartmentDailyReport
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [buildings, civil, electrical, mechanical, machinery, warehouse]
+          description: Target department slug (civil and buildings are accepted interchangeably).
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Report date in YYYY-MM-DD format (defaults to previous calendar day if omitted).
+      responses:
+        '200':
+          description: Formatted .xlsx workbook stream.
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid department slug or unparseable date parameter.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '403':
+          description: User lacks view_reports permission on the project.
+        '404':
+          description: Project not found.

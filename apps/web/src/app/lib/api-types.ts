@@ -50,6 +50,7 @@ export interface UserBusinessAssignment {
 /** Department slug used by `DepartmentActivityRecord.department`. Matches frontend route segments. */
 export type DepartmentSlug =
   | "buildings"
+  | "civil"
   | "mechanical"
   | "security"
   | "machinery"
@@ -77,6 +78,8 @@ export interface DepartmentActivityRecord {
   contractor: string;
   /** Stakeholder UUID when selected from ذینفعان contractors. */
   contractor_ref?: string | null;
+  /** Executed quantity for non-warehouse departments. */
+  executed_quantity?: string | number;
   /** Empty for security department. */
   unit: string;
   description: string;
@@ -116,6 +119,7 @@ export type DepartmentActivityRecordPayload = Pick<
   | "activity_description"
   | "contractor"
   | "contractor_ref"
+  | "executed_quantity"
   | "unit"
   | "description"
   | "material_type"

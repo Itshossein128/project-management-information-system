@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Department Activity Filtered Export API
+  version: 1.0.0
+  description: Downloads filtered activity records as a RTL-styled Excel (.xlsx) file with Persian headers.
+paths:
+  /api/v1/projects/{project_id}/department-activity-records/export/:
+    get:
+      summary: Export filtered department activity records (.xlsx)
+      operationId: exportDepartmentActivities
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: contractor
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: RTL Excel spreadsheet stream.
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Forbidden (requires view_reports).

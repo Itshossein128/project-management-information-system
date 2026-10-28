@@ -81,6 +81,7 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             'activity_description',
             'contractor',
             'contractor_ref',
+            'executed_quantity',
             'unit',
             'description',
             'material_type',
@@ -93,6 +94,7 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'project_id', 'created_at', 'updated_at']
         extra_kwargs = {
+            'executed_quantity': {'required': False, 'allow_null': True},
             'unit': {'required': False, 'allow_blank': True},
             'location': {'required': False, 'allow_blank': True},
             'activity_description': {'required': False, 'allow_blank': True},
@@ -116,6 +118,11 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
         department = attrs.get('department')
         if department is None and self.instance is not None:
             department = self.instance.department
+        if department:
+            dept_str = str(department).strip().lower()
+            if dept_str == 'civil':
+                attrs['department'] = 'buildings'
+                department = 'buildings'
 
         errors: dict[str, str] = {}
 
@@ -203,6 +210,7 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
             attrs['activity_description'] = ''
             attrs['contractor'] = ''
             attrs['contractor_ref'] = None
+            attrs['executed_quantity'] = Decimal('0.000')
             return attrs
 
         # Non-warehouse: preserve prior required rules; clear warehouse fields.
@@ -265,6 +273,21 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
                 }
                 for key, vals in messages.items():
                     errors[key] = vals[0] if isinstance(vals, (list, tuple)) else vals
+
+        executed_qty = attrs.get('executed_quantity', serializers.empty)
+        if executed_qty is serializers.empty and self.instance is not None:
+            executed_qty = self.instance.executed_quantity
+        if executed_qty not in (None, '', serializers.empty):
+            try:
+                dec_val = Decimal(str(executed_qty))
+                if dec_val < 0:
+                    errors['executed_quantity'] = _('Executed quantity must be greater than or equal to zero.')
+                else:
+                    attrs['executed_quantity'] = dec_val
+            except (InvalidOperation, TypeError, ValueError):
+                errors['executed_quantity'] = _('Enter a valid number.')
+        else:
+            attrs['executed_quantity'] = Decimal('0.000')
 
         if errors:
             raise serializers.ValidationError(errors)

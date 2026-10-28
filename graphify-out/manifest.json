@@ -2208,21 +2208,21 @@
     "semantic_hash": "5676528f6269f20e235747ede073e1c1"
   },
   "apps/api/core/inventory/department_activity_data_views.py": {
-    "mtime": 1792267480.0022283,
-    "seen": 1792294651.8534052,
-    "ast_hash": "595464bc81826afe38a24a3a107c1cdf",
-    "semantic_hash": "595464bc81826afe38a24a3a107c1cdf"
+    "mtime": 1793151826.0720563,
+    "seen": 1793152004.4731927,
+    "ast_hash": "5ace4b7592c7809ce23b503f201b2b89",
+    "semantic_hash": ""
   },
   "apps/api/core/inventory/department_activity_io.py": {
-    "mtime": 1792267480.0022283,
-    "seen": 1792294651.8534095,
-    "ast_hash": "320fe04a93a3a4cdca5908eae2db0c8e",
-    "semantic_hash": "320fe04a93a3a4cdca5908eae2db0c8e"
+    "mtime": 1793152203.56193,
+    "seen": 1793152647.9560568,
+    "ast_hash": "68f784b91fe4e03a1454e389fb89ce8c",
+    "semantic_hash": ""
   },
   "apps/api/core/inventory/department_activity_services.py": {
-    "mtime": 1793048943.775317,
-    "seen": 1793050418.0602562,
-    "ast_hash": "99fcbdbe530cd79e25dd004fed6465a3",
+    "mtime": 1793151007.5780256,
+    "seen": 1793152004.4731965,
+    "ast_hash": "a73d047ab878c9ead21400ea46abf115",
     "semantic_hash": ""
   },
   "apps/api/core/inventory/item_services.py": {
@@ -2250,9 +2250,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "apps/api/core/inventory/models.py": {
-    "mtime": 1792693988.7127702,
-    "seen": 1792697324.5159698,
-    "ast_hash": "e47ac06f31350799dba3760c2586c54f",
+    "mtime": 1793150957.5082586,
+    "seen": 1793152004.4732163,
+    "ast_hash": "7a151b05c8b2c443bc55288952d2c334",
     "semantic_hash": ""
   },
   "apps/api/core/inventory/project_urls.py": {
@@ -2262,10 +2262,10 @@
     "semantic_hash": "1c2a3416380fb8f3948607285ff04cfa"
   },
   "apps/api/core/inventory/serializers.py": {
-    "mtime": 1792267480.0042284,
-    "seen": 1792294651.853872,
-    "ast_hash": "454fb13f8b4b8a8b372e99d06ebc6d45",
-    "semantic_hash": "454fb13f8b4b8a8b372e99d06ebc6d45"
+    "mtime": 1793151065.7788363,
+    "seen": 1793152004.4732199,
+    "ast_hash": "2a8a12b86fc783196924e6aba7be908b",
+    "semantic_hash": ""
   },
   "apps/api/core/inventory/test_item_services.py": {
     "mtime": 1783875970.4170215,
@@ -2274,9 +2274,9 @@
     "semantic_hash": "da042cf4502086434865db656de436eb"
   },
   "apps/api/core/inventory/tests.py": {
-    "mtime": 1792706051.539585,
-    "seen": 1792709763.0981946,
-    "ast_hash": "da1625161059241de8c0f0f1fff82317",
+    "mtime": 1793151687.413395,
+    "seen": 1793152004.4732268,
+    "ast_hash": "a571a3a5cfec4e092a827370b7edfcd5",
     "semantic_hash": ""
   },
   "apps/api/core/inventory/urls.py": {
@@ -2286,9 +2286,9 @@
     "semantic_hash": "9cdf3c11a0a872ab13099883ace8050c"
   },
   "apps/api/core/inventory/views.py": {
-    "mtime": 1792695876.7701392,
-    "seen": 1792697324.5163038,
-    "ast_hash": "2d1c282779e675be32c90ea0b0672c50",
+    "mtime": 1793151083.5018625,
+    "seen": 1793152004.47323,
+    "ast_hash": "402cc4e52746f2c81ed05fa7543859d3",
     "semantic_hash": ""
   },
   "apps/api/core/manage.py": {
@@ -3054,9 +3054,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "apps/api/core/schedule/models.py": {
-    "mtime": 1793148550.7290614,
-    "seen": 1793149378.3868225,
-    "ast_hash": "25bda8a859d846189a19fdce9050eb23",
+    "mtime": 1793149539.1225371,
+    "seen": 1793152004.4740717,
+    "ast_hash": "ee70cf4599c6282d36f72b91e91de722",
     "semantic_hash": ""
   },
   "apps/api/core/schedule/progress_views.py": {
@@ -3276,9 +3276,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "apps/api/core/sub_reports/models.py": {
-    "mtime": 1793147237.908136,
-    "seen": 1793149378.3869734,
-    "ast_hash": "eb5b944cfb2b93bf75319b0522c2958d",
+    "mtime": 1793150969.2692037,
+    "seen": 1793152004.4742386,
+    "ast_hash": "3702481419a440b58b87986fb8f61a3f",
     "semantic_hash": ""
   },
   "apps/api/core/sub_reports/serializers.py": {
@@ -3708,9 +3708,9 @@
     "semantic_hash": "f9882b169867310fb0dc1c43254e54d6"
   },
   "apps/web/src/app/lib/api-types.ts": {
-    "mtime": 1792696849.537777,
-    "seen": 1792697324.5444365,
-    "ast_hash": "aeb21f459672b4193f41139e256c3bc3",
+    "mtime": 1793151369.0079103,
+    "seen": 1793152004.4745755,
+    "ast_hash": "14242af986331cf45665913587b5272b",
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/api/activities.ts": {
@@ -3852,9 +3852,9 @@
     "semantic_hash": "5ffb3232dc4cc98ecbbc8e7c2cfa8dca"
   },
   "apps/web/src/app/lib/api/progress.ts": {
-    "mtime": 1793149098.2007508,
-    "seen": 1793149378.3873398,
-    "ast_hash": "4839aa7643a7b7c1e3e18332da198dee",
+    "mtime": 1793149572.7883277,
+    "seen": 1793152004.4746335,
+    "ast_hash": "8e9a30be2546a068299533dc6457a772",
     "semantic_hash": ""
   },
   "apps/web/src/app/lib/api/projects.ts": {
@@ -4728,15 +4728,15 @@
     "semantic_hash": "0df2471fe236c8d428447979756cfcab"
   },
   "apps/web/src/components/department/department-activity-record-modal.tsx": {
-    "mtime": 1792696959.5573537,
-    "seen": 1792697324.5621228,
-    "ast_hash": "443b6b57cc066bee104e24dcf151ee97",
+    "mtime": 1793151416.699863,
+    "seen": 1793152004.4750762,
+    "ast_hash": "35eaad88bb2bbcb29d30f4b157321fd9",
     "semantic_hash": ""
   },
   "apps/web/src/components/department/department-page.tsx": {
-    "mtime": 1792697041.039679,
-    "seen": 1792697324.5621262,
-    "ast_hash": "99be3b5d8fc6003f575a0f29c6215c40",
+    "mtime": 1793151577.2946212,
+    "seen": 1793152004.4750779,
+    "ast_hash": "0317bacb5f795d773928192581259f58",
     "semantic_hash": ""
   },
   "apps/web/src/components/economic/EconomicHistoryChart.tsx": {
@@ -9084,9 +9084,9 @@
     "semantic_hash": "7b43de2d4b558885b718d66da3229932"
   },
   "apps/api/core/schedule/period_report_views.py": {
-    "mtime": 1793148685.275644,
-    "seen": 1793149378.3868237,
-    "ast_hash": "1ed5b604b10a1051a17abfe0f0348a7e",
+    "mtime": 1793149539.1225371,
+    "seen": 1793152004.4740734,
+    "ast_hash": "5fce9c328732d280808a44e78e3323f1",
     "semantic_hash": ""
   },
   "apps/api/core/schedule/services/activity_validation.py": {
@@ -9138,15 +9138,15 @@
     "semantic_hash": "a9ab012b2182e37b311912c63cb784b9"
   },
   "apps/api/core/schedule/services/measurement_service.py": {
-    "mtime": 1793147237.918136,
-    "seen": 1793149378.3868499,
-    "ast_hash": "0f419e288b6bb3e50e6a01ce618cf9d2",
+    "mtime": 1793149539.1215372,
+    "seen": 1793152004.4741023,
+    "ast_hash": "95f256afb78d58030a015be7d65c4ad0",
     "semantic_hash": ""
   },
   "apps/api/core/schedule/services/period_report_service.py": {
-    "mtime": 1793148911.2429085,
-    "seen": 1793149378.3868577,
-    "ast_hash": "e28276d22b3c3ed4d6977fcc2febcfec",
+    "mtime": 1793149539.123537,
+    "seen": 1793152004.4741113,
+    "ast_hash": "58de10475673b054567b38818ee31014",
     "semantic_hash": ""
   },
   "apps/api/core/schedule/services/status_report_service.py": {
@@ -9228,9 +9228,9 @@
     "semantic_hash": ""
   },
   "apps/api/core/schedule/tests/test_period_reports.py": {
-    "mtime": 1793149010.1845438,
-    "seen": 1793149378.386899,
-    "ast_hash": "49e69d9bbcbc3d36fb545c103fe8b0bf",
+    "mtime": 1793149557.2144241,
+    "seen": 1793152004.4741569,
+    "ast_hash": "915a3825d414a59dc49a1f0ac1e5c3d0",
     "semantic_hash": ""
   },
   "apps/api/core/schedule/tests/test_progress_four_way.py": {
@@ -9798,9 +9798,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/progress/PeriodReportsPanel.tsx": {
-    "mtime": 1793149169.7641523,
-    "seen": 1793149378.3879697,
-    "ast_hash": "9f893587b3a7a9f8fb232a6b3aada31d",
+    "mtime": 1793149582.2012699,
+    "seen": 1793152004.4752314,
+    "ast_hash": "800d82c3a87182cf330684dea647c387",
     "semantic_hash": ""
   },
   "apps/web/src/components/projects/KickoffCharterPanel.tsx": {
@@ -10314,39 +10314,15 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/README.md": {
-    "mtime": 1791579285.2066593,
-    "seen": 1791660194.097228,
-    "ast_hash": "87198bf784d4301468094c03964ee265",
+    "mtime": 1793152321.9525359,
+    "seen": 1793152647.9592571,
+    "ast_hash": "ed75b9506130a4bac3d649b75c8026bc",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[create-activity-record]/README.md": {
     "mtime": 1791579285.2086592,
     "seen": 1791660194.0972292,
     "ast_hash": "5537e1e3a657bb2e373a73f0b4117876",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[daily-report]/README.md": {
-    "mtime": 1792707639.7897496,
-    "seen": 1792709763.157145,
-    "ast_hash": "8f8dedbb20d1f70c1ebf1f33eedeb7e2",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[export-report]/README.md": {
-    "mtime": 1791579285.209659,
-    "seen": 1791660194.0972316,
-    "ast_hash": "cff16d5cd183a649714cad76332ea628",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[import-activity-excel]/README.md": {
-    "mtime": 1791579285.209659,
-    "seen": 1791660194.097233,
-    "ast_hash": "568b5f603cc2e92fc64c347c240f09c1",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[weekly-report]/README.md": {
-    "mtime": 1791579285.209659,
-    "seen": 1791660194.0972342,
-    "ast_hash": "d467ac7c026f88d4ae65d8479c013279",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/filter-and-change-view/README.md": {
@@ -10392,39 +10368,15 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/README.md": {
-    "mtime": 1791579285.2106593,
-    "seen": 1791660194.0972426,
-    "ast_hash": "85a498e6a632e6a0b192af7950dedaca",
+    "mtime": 1793152321.9595358,
+    "seen": 1793152647.9592845,
+    "ast_hash": "722dd6e1ccd3df56f72288e7f1411de3",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[create-activity-record]/README.md": {
     "mtime": 1791579285.2116592,
     "seen": 1791660194.0972438,
     "ast_hash": "961b865eb04723640cd2cc7605dc79ea",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[daily-report]/README.md": {
-    "mtime": 1792707639.7897496,
-    "seen": 1792709763.1578093,
-    "ast_hash": "6fadf4497c925a45d8b734413261d262",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[export-report]/README.md": {
-    "mtime": 1791579285.2116592,
-    "seen": 1791660194.0972462,
-    "ast_hash": "d65da55c50d7280d41dc9a706cd09001",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[import-activity-excel]/README.md": {
-    "mtime": 1791579285.2116592,
-    "seen": 1791660194.0972471,
-    "ast_hash": "815f4a6d9218d0cfd544e9ffb9bafdb5",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[weekly-report]/README.md": {
-    "mtime": 1791579285.2116592,
-    "seen": 1791660194.0972486,
-    "ast_hash": "f5fb6dcdc9cf1614513320717c22d76d",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/filter-and-change-view/README.md": {
@@ -10452,39 +10404,15 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/README.md": {
-    "mtime": 1791579285.2126591,
-    "seen": 1791660194.097254,
-    "ast_hash": "5acd8596bc08049195edcf0c0fb256e5",
+    "mtime": 1793152321.9805357,
+    "seen": 1793152647.959309,
+    "ast_hash": "d1cd6a4b1905db2f3f2a6bb0b36961d6",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[create-activity-record]/README.md": {
     "mtime": 1791579285.2126591,
     "seen": 1791660194.0972552,
     "ast_hash": "cdaf77872db11361b2a1d39bfdfd768e",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[daily-report]/README.md": {
-    "mtime": 1792707639.7907498,
-    "seen": 1792709763.1583543,
-    "ast_hash": "0345c8dd8dc87f0549fbc6ff3ae6f227",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[export-report]/README.md": {
-    "mtime": 1791579285.213659,
-    "seen": 1791660194.097258,
-    "ast_hash": "50e8223d7ee33a0b1ce026fd4afcfa04",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[import-activity-excel]/README.md": {
-    "mtime": 1791579285.213659,
-    "seen": 1791660194.097259,
-    "ast_hash": "4ec665af5b5607023b2786b40328f018",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[weekly-report]/README.md": {
-    "mtime": 1791579285.213659,
-    "seen": 1791660194.09726,
-    "ast_hash": "8035f7b8fe6c39c85396a77b9b89352b",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/filter-and-change-view/README.md": {
@@ -10494,39 +10422,15 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/README.md": {
-    "mtime": 1791579285.213659,
-    "seen": 1791660194.097262,
-    "ast_hash": "515ff79c18dff1d47f0d046f76a3a1a6",
+    "mtime": 1793152321.9715357,
+    "seen": 1793152647.9593296,
+    "ast_hash": "e3b1a124731c12aef5dc297912df55d6",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[create-activity-record]/README.md": {
     "mtime": 1791579285.2146592,
     "seen": 1791660194.097263,
     "ast_hash": "e461bfa67938456507a0b5fbb5926794",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[daily-report]/README.md": {
-    "mtime": 1792707639.7907498,
-    "seen": 1792709763.1586578,
-    "ast_hash": "0803ca68160e7c6f8b6985bfc13143a9",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[export-report]/README.md": {
-    "mtime": 1791579285.2146592,
-    "seen": 1791660194.0972655,
-    "ast_hash": "85e5a9c37ccdcba6309705a39882b822",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[import-activity-excel]/README.md": {
-    "mtime": 1791579285.2146592,
-    "seen": 1791660194.0972664,
-    "ast_hash": "8b7882f440928f773890f3d0ed4bd9e0",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[weekly-report]/README.md": {
-    "mtime": 1791579285.2146592,
-    "seen": 1791660194.0972674,
-    "ast_hash": "f965aa5b9da978fd9f4b28b8076ae516",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/filter-and-change-view/README.md": {
@@ -10608,39 +10512,15 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/README.md": {
-    "mtime": 1791579285.2186592,
-    "seen": 1791660194.0972848,
-    "ast_hash": "e25c0d7f875cd46e947e18d5d01cf3d7",
+    "mtime": 1793152321.9905357,
+    "seen": 1793152647.9593935,
+    "ast_hash": "388ed119ef1f2c67321982bc8422fde2",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[create-activity-record]/README.md": {
     "mtime": 1791579285.2186592,
     "seen": 1791660194.0972862,
     "ast_hash": "fc74f2296876b28286680a3ecf09f82e",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[daily-report]/README.md": {
-    "mtime": 1792707639.7907498,
-    "seen": 1792709763.1595793,
-    "ast_hash": "e278ea348623fc84e56a14c041cb31b2",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[export-report]/README.md": {
-    "mtime": 1791579285.2186592,
-    "seen": 1791660194.0972888,
-    "ast_hash": "b43807ae48a94b9499c3e93cbb64465d",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[import-activity-excel]/README.md": {
-    "mtime": 1791579285.2186592,
-    "seen": 1791660194.09729,
-    "ast_hash": "c94891cc29dac9569420e042f81310e0",
-    "semantic_hash": ""
-  },
-  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[weekly-report]/README.md": {
-    "mtime": 1791579285.219659,
-    "seen": 1791660194.0972915,
-    "ast_hash": "1d26cdd1cd29d7098ee7f6b331397b04",
     "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/filter-and-change-view/README.md": {
@@ -12474,16 +12354,16 @@
     "semantic_hash": "dcef70d452065d07c538c1f453d822a8"
   },
   "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/README.md": {
-    "mtime": 1791579285.2856586,
-    "seen": 1792294651.8810186,
-    "ast_hash": "baaeebec4b29dd1d98d2f2fe8424210f",
-    "semantic_hash": "baaeebec4b29dd1d98d2f2fe8424210f"
+    "mtime": 1793149596.2801838,
+    "seen": 1793152004.4776213,
+    "ast_hash": "66d1de216b800dda292880a4e8e60784",
+    "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[override-report-figure]/README.md": {
-    "mtime": 1791579285.2856586,
-    "seen": 1792294651.8810198,
-    "ast_hash": "f9ad4055820bdcd63bcc8ef5e744e4ec",
-    "semantic_hash": "f9ad4055820bdcd63bcc8ef5e744e4ec"
+    "mtime": 1793149596.2811837,
+    "seen": 1793152004.4776316,
+    "ast_hash": "9fac76c026399e1bf2998eca46158ed9",
+    "semantic_hash": ""
   },
   "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-progress]/[record-manual-progress]/README.md": {
     "mtime": 1791579285.2856586,
@@ -16260,9 +16140,9 @@
     "semantic_hash": ""
   },
   "docs/decision-tree/inventory.json": {
-    "mtime": 1792756150.6785028,
-    "seen": 1793137086.5945892,
-    "ast_hash": "a15f0fe988f8d40b99e52565868c82cc",
+    "mtime": 1793152302.4146018,
+    "seen": 1793152647.9582012,
+    "ast_hash": "f28ad8d8f867ddf0229110e7efbe31d4",
     "semantic_hash": ""
   },
   "specs/023-decision-ism/evidence/convergence-completion.json": {
@@ -19434,9 +19314,273 @@
     "semantic_hash": ""
   },
   "specs/041-periodic-reports-rollup/tasks.md": {
-    "mtime": 1793149287.6032422,
-    "seen": 1793149378.3908527,
-    "ast_hash": "4d67e99e0a876a5a00f9181cee5b506b",
+    "mtime": 1793149656.056825,
+    "seen": 1793152004.4802773,
+    "ast_hash": "9fc76c19f6d5c2b840296416564aa107",
+    "semantic_hash": ""
+  },
+  "apps/api/core/inventory/migrations/0007_departmentactivityrecord_executed_quantity_and_more.py": {
+    "mtime": 1793150975.8161733,
+    "seen": 1793152004.4732122,
+    "ast_hash": "7b28e94690b62d31bf599ec6f7c0b1bc",
+    "semantic_hash": ""
+  },
+  "apps/api/core/schedule/migrations/0015_periodreportfigure_version.py": {
+    "mtime": 1793149544.4915035,
+    "seen": 1793152004.4740677,
+    "ast_hash": "abfcf66e2b0d02518e0a7ba8e1790604",
+    "semantic_hash": ""
+  },
+  "apps/api/core/sub_reports/tests/test_department_reports.py": {
+    "mtime": 1793152430.830162,
+    "seen": 1793152647.9570959,
+    "ast_hash": "9df705f6c10cc81eab4ed203e6157388",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/contracts/daily-report.contract.yaml": {
+    "mtime": 1793150845.1267831,
+    "seen": 1793152004.4755325,
+    "ast_hash": "be7ad2eb6a31f0997a5fe386ee107690",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/contracts/export.contract.yaml": {
+    "mtime": 1793150855.4687347,
+    "seen": 1793152004.4755344,
+    "ast_hash": "8b333e9e70e691186d86135b770eb8bd",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/contracts/import.contract.yaml": {
+    "mtime": 1793150861.816705,
+    "seen": 1793152004.4755359,
+    "ast_hash": "3469ba372ec70d7623a2379414e7210d",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/contracts/weekly-report.contract.yaml": {
+    "mtime": 1793150850.527758,
+    "seen": 1793152004.4755373,
+    "ast_hash": "55957d28b6e0befde8e3afea2245d41b",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[approve-official-report]/README.md": {
+    "mtime": 1793149600.19716,
+    "seen": 1793152004.4776247,
+    "ast_hash": "6e4a1c716a92b47566ada2bed3a561fe",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[inspect-figure-provenance]/README.md": {
+    "mtime": 1793149600.19716,
+    "seen": 1793152004.477628,
+    "ast_hash": "0f19b49d43cbb1b5d807d6ea7e2526a8",
+    "semantic_hash": ""
+  },
+  "reports_gaps/09/GAP-SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md": {
+    "mtime": 1793150085.2744737,
+    "seen": 1793152004.4783475,
+    "ast_hash": "41941cc70529fec17c63b1fc701963b9",
+    "semantic_hash": ""
+  },
+  "reports_gaps/09/PROMPT-SPEC-09.md": {
+    "mtime": 1793150140.3111925,
+    "seen": 1793152004.4783504,
+    "ast_hash": "2b75d547a27c7472fe07c88a5b39118e",
+    "semantic_hash": ""
+  },
+  "reports_gaps/09/speckit-specify-prompts/01-PROMPT-DEPARTMENT-ACTIVITY-REPORTS.md": {
+    "mtime": 1793150115.844317,
+    "seen": 1793152004.4783528,
+    "ast_hash": "2b75d547a27c7472fe07c88a5b39118e",
+    "semantic_hash": ""
+  },
+  "scripts/orchestrator/prompts/step3_spec09_gaps.txt": {
+    "mtime": 1793149743.0543191,
+    "seen": 1793152004.4783783,
+    "ast_hash": "e34f8432d9e306283b80768c9c84f145",
+    "semantic_hash": ""
+  },
+  "scripts/orchestrator/prompts/step4_spec09_specify.txt": {
+    "mtime": 1793150188.6669478,
+    "seen": 1793152004.478394,
+    "ast_hash": "78a3f40bbb32d0a8c151e73707e048d5",
+    "semantic_hash": ""
+  },
+  "scripts/orchestrator/prompts/step5_spec09_plan_tasks_implement.txt": {
+    "mtime": 1793150418.7178118,
+    "seen": 1793152004.4784107,
+    "ast_hash": "1de324a71617c8dc2a64de370a1c627b",
+    "semantic_hash": ""
+  },
+  "scripts/orchestrator/prompts/step6_spec08_converge_implement_codex.txt": {
+    "mtime": 1793149433.8782177,
+    "seen": 1793152004.478423,
+    "ast_hash": "c41a42b85bffd0a3f6a17ef598075d37",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/checklists/requirements.md": {
+    "mtime": 1793150377.396013,
+    "seen": 1793152004.4802814,
+    "ast_hash": "5d5394c80fd084db0cd51a3cf2eb3f2c",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/data-model.md": {
+    "mtime": 1793150838.2618153,
+    "seen": 1793152004.4802966,
+    "ast_hash": "8ca2a68dbbe5c3f91ca9f87a52da1c88",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/plan.md": {
+    "mtime": 1793150892.9345596,
+    "seen": 1793152004.480299,
+    "ast_hash": "48400779a486f758f324cdd4816aac05",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/quickstart.md": {
+    "mtime": 1793150868.3666744,
+    "seen": 1793152004.4803019,
+    "ast_hash": "f17ef406da9c534b96d8406e794dd9ed",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/research.md": {
+    "mtime": 1793150825.6388745,
+    "seen": 1793152004.4803045,
+    "ast_hash": "927e639e6ffe12853c2f739495f7f7b0",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/spec.md": {
+    "mtime": 1793150361.3250916,
+    "seen": 1793152004.4803073,
+    "ast_hash": "1df1e53a8e283a6bd4b50874add2c6f3",
+    "semantic_hash": ""
+  },
+  "specs/042-department-activity-reports/tasks.md": {
+    "mtime": 1793152197.7799487,
+    "seen": 1793152647.9617255,
+    "ast_hash": "29fdb3c34d39ce23da269568ff7c6b74",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/[import-department-activities]/README.md": {
+    "mtime": 1793152316.6675537,
+    "seen": 1793152647.9592621,
+    "ast_hash": "015c50ce38b49ee06da7c08c15e40570",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/download-daily-activity-report/README.md": {
+    "mtime": 1793152316.6675537,
+    "seen": 1793152647.9592645,
+    "ast_hash": "5b3038b9e816900380ffe0ec013c51fa",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/download-weekly-activity-report/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.959267,
+    "ast_hash": "ae2b60d5a8328aa39f2d5bfb24293a1b",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-buildings-department]/export-department-activities/README.md": {
+    "mtime": 1793152316.6675537,
+    "seen": 1793152647.9592686,
+    "ast_hash": "3b9063cb99a12c328ca09bbca361200c",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/[import-department-activities]/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.9592915,
+    "ast_hash": "147a719128a3d6b67b6701df0ca1c529",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/download-daily-activity-report/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.9592934,
+    "ast_hash": "116216d44407b8997ab813c382e8ebf2",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/download-weekly-activity-report/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.9592953,
+    "ast_hash": "65fb0f6390ce2f2f66ce98495b9b450d",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-electrical-department]/export-department-activities/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.9592974,
+    "ast_hash": "aa981f6695591542c2d535fcef20d625",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/[import-department-activities]/README.md": {
+    "mtime": 1793152316.6695538,
+    "seen": 1793152647.959313,
+    "ast_hash": "25eff5db82cb117cbae8ec35c77f4a1b",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/download-daily-activity-report/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.959315,
+    "ast_hash": "0c3fb1f91463cb71b73aec49b9695a4e",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/download-weekly-activity-report/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.959318,
+    "ast_hash": "c6d6856247313d23a18571f6656a308c",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-machinery-department]/export-department-activities/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.9593217,
+    "ast_hash": "a842bd14415670cc0190188dd073dca2",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/[import-department-activities]/README.md": {
+    "mtime": 1793152316.6685536,
+    "seen": 1793152647.959336,
+    "ast_hash": "c03d86568e0d873748f8add6bd5839ae",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/download-daily-activity-report/README.md": {
+    "mtime": 1793152316.6695538,
+    "seen": 1793152647.9593384,
+    "ast_hash": "070a4374b4cab9d4c485bc27f140bfd7",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/download-weekly-activity-report/README.md": {
+    "mtime": 1793152316.6695538,
+    "seen": 1793152647.9593406,
+    "ast_hash": "17a00fc7172605c8b6ff6c63233fd213",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-mechanical-department]/export-department-activities/README.md": {
+    "mtime": 1793152316.6695538,
+    "seen": 1793152647.959344,
+    "ast_hash": "5e1ffb9f190e70b5d521d4b6c52c5b32",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[import-department-activities]/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.9593978,
+    "ast_hash": "cf96491cfb2f1a27215d77b0a48c8d41",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/download-daily-activity-report/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.9593997,
+    "ast_hash": "7a1a31d3b7c606b2277db69fb98f3a14",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/download-weekly-activity-report/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.9594011,
+    "ast_hash": "193cba933874a8ddcda9f77d67b61fed",
+    "semantic_hash": ""
+  },
+  "docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/export-department-activities/README.md": {
+    "mtime": 1793152316.6705537,
+    "seen": 1793152647.9594028,
+    "ast_hash": "af37e0fbf158c51ba50e7f0ebab25efe",
+    "semantic_hash": ""
+  },
+  "scripts/orchestrator/prompts/step6_spec09_converge_implement_codex.txt": {
+    "mtime": 1793152046.3584275,
+    "seen": 1793152647.9606256,
+    "ast_hash": "bbe71e048a57cf7150aa6b1c0d1e7861",
     "semantic_hash": ""
   },
   "pnpm-lock.yaml": {

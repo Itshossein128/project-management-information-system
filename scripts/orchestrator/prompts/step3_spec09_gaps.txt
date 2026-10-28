@@ -1,0 +1,18 @@
+You are an expert software architect and gap-analysis specialist working on: /home/hossein/Desktop/projects/building-management
+
+Your task is to analyze `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md` and find the gaps between the project's current implementation and this specification document.
+
+Specifically:
+1. Thoroughly read and analyze:
+   - `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md`
+   - Existing codebase implementations in `apps/api/core/sub_reports/`, `apps/api/core/field_reports/`, `apps/api/core/inventory/`, `apps/web/src/components/department/`, `apps/web/src/app/routes/`, etc.
+   - Reference previous gap analyses in `reports_gaps/08/GAP-SPEC-08-PERIODIC-REPORTS-ROLLUP.md` and `reports_gaps/08/speckit-specify-prompts/01-PROMPT-PERIODIC-REPORTS-ROLLUP.md`.
+2. Identify all gaps:
+   - Check US-DP-01: Department daily activity recording and daily Excel workbook download endpoint (`GET .../reports/daily/?department={dept}&date={YYYY-MM-DD}`) across the 5 departments (`civil`, `electrical`, `mechanical`, `machinery`, `warehouse`).
+   - Check US-DP-02: Department weekly Excel report generation (`GET .../reports/weekly/?department={dept}&week_start={YYYY-MM-DD}`) with daily tabs, summary tab, and native Excel `=SUM(...)` formulas.
+   - Check US-DP-03: Filtered Excel export and Excel template batch import with column validation, contractor validation, atomic transaction rollback on invalid row, and exact row error reporting.
+3. Generate the artifacts in `/home/hossein/Desktop/projects/building-management/reports_gaps/09/`:
+   - Create `reports_gaps/09/GAP-SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md` documenting findings, evidence, and missing capabilities.
+   - Create `reports_gaps/09/speckit-specify-prompts/01-PROMPT-DEPARTMENT-ACTIVITY-REPORTS.md` containing a comprehensive, structured Persian prompt for `speckit-specify` that starts with `/speckit-specify` and covers all identified gaps, acceptance criteria, boundaries, and required evidence.
+   - Also create a copy or link at `reports_gaps/09/PROMPT-SPEC-09.md` for easy access.
+4. Provide a summary of the discovered gaps and confirm the files created.

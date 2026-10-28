@@ -32,10 +32,10 @@ DepartmentPage consumes :businessId. Warehouse uses material/consumption/supplie
 
 - [Filter or change the displayed view](filter-and-change-view/README.md)
 - [Create department activity record](%5Bcreate-activity-record%5D/README.md)
-- [Import department activity records](%5Bimport-activity-excel%5D/README.md)
-- [Download export workbook](%5Bexport-report%5D/README.md)
-- [Download daily workbook](%5Bdaily-report%5D/README.md)
-- [Download weekly workbook](%5Bweekly-report%5D/README.md)
+- [Import department activities](%5Bimport-department-activities%5D/README.md)
+- [Export department activities](export-department-activities/README.md)
+- [Download daily activity report](download-daily-activity-report/README.md)
+- [Download weekly activity report](download-weekly-activity-report/README.md)
 
 Continue / return links (the same state is documented once):
 

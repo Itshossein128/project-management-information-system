@@ -1,33 +1,63 @@
 """
-Excel import/export and PDF report endpoints for department activity records.
+Excel import/export and XLSX report endpoints for department activity records.
 """
-from rest_framework.exceptions import ValidationError
+from datetime import date, timedelta
+from typing import Any
+
+from django.http import HttpResponse
+from django.utils import timezone
+from django.utils.dateparse import parse_date
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.http import HttpResponse
-from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from business_meta.models import Project
-from common.validators import validate_xlsx_upload
 from business_meta.permissions import CanViewBusinessAssignments, IsHrOrAdminOrReadOnly, IsVisitorReadOnly
+from common.jalali import parse_jalali_or_gregorian
+from common.validators import validate_xlsx_upload
 from permissions.project import HasProjectPermission, IsProjectMember
 
 from .department_activity_io import (
     department_display_label,
     export_activities_to_xlsx,
     generate_activity_report_pdf,
+    generate_daily_activity_report_xlsx,
+    generate_weekly_activity_report_xlsx,
     import_activities_from_xlsx,
+    normalize_persian_numbers,
 )
 from .department_activity_services import (
     get_department_activity_queryset,
-    get_report_date_range,
+    normalize_department,
     require_valid_department,
 )
 from .models import DepartmentActivityRecord
+
+
+def to_persian_digits(val: Any) -> str:
+    s = str(val)
+    for e, p in zip('0123456789', '۰۱۲۳۴۵۶۷۸۹'):
+        s = s.replace(e, p)
+    return s
+
+
+def _parse_query_date(raw_date: str | None) -> date | None:
+    if not raw_date:
+        return None
+    cleaned = normalize_persian_numbers(raw_date).strip()
+    try:
+        return parse_jalali_or_gregorian(cleaned)
+    except Exception:
+        pass
+    parsed = parse_date(cleaned)
+    if parsed:
+        return parsed
+    raise ValueError('فرمت تاریخ نامعتبر است (الگوی معتبر: YYYY-MM-DD)')
 
 
 class _DepartmentActivityDataBase(APIView):
@@ -65,10 +95,8 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
     @extend_schema(
         summary='Export department activity records to Excel',
         description=(
-            'Download activity rows as .xlsx. Requires `department`. '
-            'Supports the same optional filters as the list endpoint. '
-            'Warehouse exports headers: date, material_type, quantity_in, unit, '
-            'quantity_out, consumption_location, supplier, description.'
+            'Download activity rows as .xlsx with RTL alignment and Persian headers. '
+            'Requires `department`. Supports the same optional filters as the list endpoint.'
         ),
         parameters=[
             OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True),
@@ -97,25 +125,25 @@ class DepartmentActivityExportView(_DepartmentActivityDataBase):
             return department
 
         qs = get_department_activity_queryset(project_pk, request.query_params)
-        xlsx_bytes = export_activities_to_xlsx(list(qs), department=department)
+        xlsx_bytes = export_activities_to_xlsx(list(qs), department=department, persian_headers=True)
         filename = f'{department}_activity_export.xlsx'
         response = HttpResponse(
             xlsx_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
-        response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
 
 class DepartmentActivityImportView(_DepartmentActivityDataBase):
     parser_classes = [MultiPartParser, FormParser]
+    required_permission = 'edit_reports'
 
     @extend_schema(
         summary='Import department activity records from Excel',
         description=(
-            'Upload .xlsx with activity columns. Requires `department` query parameter. '
-            'Warehouse required columns: date, material_type, quantity_in, unit, quantity_out, '
-            'consumption_location, supplier (description optional). Persian/English aliases accepted.'
+            'Upload .xlsx with activity columns. Requires `department` query parameter and `edit_reports` permission. '
+            'Atomic execution: if any row fails validation, entire batch is rolled back.'
         ),
         parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
         tags=['Project activity records'],
@@ -146,14 +174,47 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
             )
 
         created, errors = import_activities_from_xlsx(business, department, file_bytes)
-        return Response({'created': created, 'errors': errors})
+        if errors:
+            first_err = errors[0]
+            row_num = first_err.get('row')
+            err_dict = first_err.get('errors', {})
+            first_field, first_msg = (
+                next(iter(err_dict.items())) if err_dict else ('', 'خطای اعتبارسنجی داده‌ها')
+            )
+            if row_num:
+                detail = f'خطا در سطر {to_persian_digits(row_num)}: {first_msg}'
+            else:
+                detail = str(first_msg)
+            return Response(
+                {
+                    'detail': detail,
+                    'error': detail,
+                    'created': 0,
+                    'errors': errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({
+            'created': created,
+            'detail': f'تعداد {created} رکورد فعالیت با موفقیت ثبت شد.',
+            'errors': [],
+        })
 
 
-class _DepartmentActivityReportView(_DepartmentActivityDataBase):
-    period: str = 'daily'
-    period_label: str = 'Daily report'
-
-    @extend_schema(tags=['Project activity records'])
+class DepartmentActivityDailyReportView(_DepartmentActivityDataBase):
+    @extend_schema(
+        summary='Download daily department activity Excel workbook (.xlsx)',
+        description=(
+            'Single-day Excel report with official project header, RTL layout, '
+            'and live dynamic =SUM() total formula.'
+        ),
+        parameters=[
+            OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True),
+            OpenApiParameter(name='date', type=OpenApiTypes.DATE, required=False),
+        ],
+        tags=['Project activity records'],
+    )
     def get(self, request, project_pk: int):
         business = self._get_business(project_pk)
         if business is None:
@@ -163,59 +224,94 @@ class _DepartmentActivityReportView(_DepartmentActivityDataBase):
         if isinstance(department, Response):
             return department
 
-        date_from, date_to = get_report_date_range(self.period)
+        date_param = request.query_params.get('date')
+        try:
+            target_date = _parse_query_date(date_param)
+        except ValueError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not target_date:
+            target_date = timezone.localdate() - timedelta(days=1)
+
+        dept_norm = normalize_department(department) or department
+        dept_filter = ['buildings', 'civil'] if dept_norm in ('civil', 'buildings') else [dept_norm]
+
         qs = DepartmentActivityRecord.objects.filter(
             project_id=project_pk,
-            department=department,
-            date__gte=date_from,
-            date__lte=date_to,
-        ).order_by('date', '-created_at')
-        records = list(qs)
+            department__in=dept_filter,
+            date=target_date,
+        ).order_by('-created_at')
 
-        pdf_bytes = generate_activity_report_pdf(
+        xlsx_bytes = generate_daily_activity_report_xlsx(
             business=business,
             department=department,
-            department_label=department_display_label(department),
-            period_label=self.period_label,
-            date_from=date_from,
-            date_to=date_to,
-            records=records,
+            report_date=target_date,
+            records=list(qs),
         )
-        filename = f'{department}_{self.period}_report_{date_from}_{date_to}.pdf'
-        response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
+        filename = f'{department}_daily_report_{target_date}.xlsx'
+        response = HttpResponse(
+            xlsx_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
 
-class DepartmentActivityDailyReportView(_DepartmentActivityReportView):
-    period = 'daily'
-    period_label = 'Daily report'
-
+class DepartmentActivityWeeklyReportView(_DepartmentActivityDataBase):
     @extend_schema(
-        summary='Download daily department activity PDF',
+        summary='Download weekly department activity multi-sheet Excel workbook (.xlsx)',
         description=(
-            'PDF for the previous calendar day for the given department. '
-            'Warehouse columns: Date | Material type | In | Unit | Out | Consumption location | Supplier | Description.'
+            'Eight-sheet Excel report containing 7 daily tabs (Saturday to Friday) '
+            'and 1 Summary sheet with live dynamic =SUM() calculation formulas.'
         ),
-        parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
+        parameters=[
+            OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True),
+            OpenApiParameter(name='week_start', type=OpenApiTypes.DATE, required=False),
+        ],
         tags=['Project activity records'],
     )
     def get(self, request, project_pk: int):
-        return super().get(request, project_pk)
+        business = self._get_business(project_pk)
+        if business is None:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+        department = self._require_department(request)
+        if isinstance(department, Response):
+            return department
 
-class DepartmentActivityWeeklyReportView(_DepartmentActivityReportView):
-    period = 'weekly'
-    period_label = 'Weekly report'
+        week_start_param = request.query_params.get('week_start')
+        try:
+            week_start = _parse_query_date(week_start_param)
+        except ValueError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(
-        summary='Download weekly department activity PDF',
-        description=(
-            'PDF for the rolling last 7 days (including today) for the given department. '
-            'Warehouse columns: Date | Material type | In | Unit | Out | Consumption location | Supplier | Description.'
-        ),
-        parameters=[OpenApiParameter(name='department', type=OpenApiTypes.STR, required=True)],
-        tags=['Project activity records'],
-    )
-    def get(self, request, project_pk: int):
-        return super().get(request, project_pk)
+        if not week_start:
+            today = timezone.localdate()
+            # Saturday is weekday 5 in Python (Monday=0 ... Sunday=6)
+            days_since_saturday = (today.weekday() - 5) % 7
+            week_start = today - timedelta(days=days_since_saturday)
+
+        week_end = week_start + timedelta(days=6)
+        dept_norm = normalize_department(department) or department
+        dept_filter = ['buildings', 'civil'] if dept_norm in ('civil', 'buildings') else [dept_norm]
+
+        qs = DepartmentActivityRecord.objects.filter(
+            project_id=project_pk,
+            department__in=dept_filter,
+            date__gte=week_start,
+            date__lte=week_end,
+        ).order_by('date', '-created_at')
+
+        xlsx_bytes = generate_weekly_activity_report_xlsx(
+            business=business,
+            department=department,
+            week_start=week_start,
+            records=list(qs),
+        )
+        filename = f'{department}_weekly_report_{week_start}_{week_end}.xlsx'
+        response = HttpResponse(
+            xlsx_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
