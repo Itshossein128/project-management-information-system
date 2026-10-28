@@ -25,6 +25,7 @@ from field_reports.equipment_views import (
     EquipmentViewSet,
 )
 from field_reports.report_views import (
+    ActivityLogExcelView,
     ActivityLogFilterOptionsView,
     ActivityLogView,
     LaborProductivityView,
@@ -48,6 +49,7 @@ report_review = DailyReportViewSet.as_view({'post': 'review'})
 report_approve = DailyReportViewSet.as_view({'post': 'approve'})
 report_reject = DailyReportViewSet.as_view({'post': 'reject'})
 report_pdf = DailyReportViewSet.as_view({'get': 'pdf'})
+report_excel = DailyReportViewSet.as_view({'get': 'excel'})
 report_versions = DailyReportViewSet.as_view({'get': 'versions'})
 report_corrections = DailyReportViewSet.as_view({'get': 'correction_requests', 'post': 'correction_requests'})
 report_materials_reconciliation = DailyReportViewSet.as_view({'get': 'materials_reconciliation'})
@@ -113,6 +115,7 @@ urlpatterns = [
     path('personnel-summary/', PersonnelSummaryView.as_view(), name='personnel-summary'),
     path('labor-productivity/', LaborProductivityView.as_view(), name='labor-productivity'),
     path('activity-log/', ActivityLogView.as_view(), name='activity-log'),
+    path('activity-log/excel/', ActivityLogExcelView.as_view(), name='activity-log-excel'),
     path('activity-log/filters/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filters'),
     path('activity-log/filter-options/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filter-options'),
 
@@ -130,6 +133,7 @@ urlpatterns = [
     path(f'{DR}/<uuid:pk>/approve/', report_approve, name='daily-report-approve'),
     path(f'{DR}/<uuid:pk>/reject/', report_reject, name='daily-report-reject'),
     path(f'{DR}/<uuid:pk>/pdf/', report_pdf, name='daily-report-pdf'),
+    path(f'{DR}/<uuid:pk>/excel/', report_excel, name='daily-report-excel'),
     path(f'{DR}/<uuid:pk>/versions/', report_versions, name='daily-report-versions'),
     path(
         f'{DR}/<uuid:pk>/correction-requests/',

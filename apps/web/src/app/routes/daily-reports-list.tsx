@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import {
   CloudOff,
   Eye,
@@ -84,10 +84,38 @@ export default function DailyReportsListPage() {
   const canEdit = has("edit_reports");
 
   const isOnline = useOnlineStatus();
-  const [filters, setFilters] = useState<DailyReportListParams>({
-    page: 1,
-    per_page: 20,
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filters = useMemo<DailyReportListParams>(() => {
+    const page = Number(searchParams.get("page")) || 1;
+    const date_from = searchParams.get("date_from") || undefined;
+    const date_to = searchParams.get("date_to") || undefined;
+    const status = (searchParams.get("status") || undefined) as ReportStatus | undefined;
+    return {
+      page,
+      per_page: 20,
+      date_from,
+      date_to,
+      status,
+    };
+  }, [searchParams]);
+
+  const setFilter = useCallback((patch: Partial<DailyReportListParams>) => {
+    setSearchParams((prev) => {
+      const sp = new URLSearchParams(prev);
+      Object.entries(patch).forEach(([k, v]) => {
+        if (v === undefined || v === null || v === "" || v === "all") {
+          sp.delete(k);
+        } else {
+          sp.set(k, String(v));
+        }
+      });
+      if (patch.date_from !== undefined || patch.date_to !== undefined || patch.status !== undefined) {
+        sp.delete("page");
+      }
+      return sp;
+    }, { replace: true });
+  }, [setSearchParams]);
   const [openDate, setOpenDate] = useState("");
   const [openingDate, setOpeningDate] = useState(false);
   const [offlineRows, setOfflineRows] = useState<OfflineReport[]>([]);
@@ -166,8 +194,6 @@ export default function DailyReportsListPage() {
   });
 
   const base = `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}`;
-  const setFilter = (patch: Partial<DailyReportListParams>) =>
-    setFilters((prev) => ({ ...prev, page: 1, ...patch }));
 
   return (
     <main className='page-main page-shell mx-auto  px-4 py-6' data-testid="daily-reports-list">
@@ -447,7 +473,7 @@ export default function DailyReportsListPage() {
             type='button'
             disabled={(filters.page ?? 1) <= 1}
             onClick={() =>
-              setFilters((p) => ({ ...p, page: (p.page ?? 1) - 1 }))
+              setFilter({ page: (filters.page ?? 1) - 1 })
             }
             className='rounded-md border border-border px-3 py-1 text-sm disabled:opacity-40'
           >
@@ -460,7 +486,7 @@ export default function DailyReportsListPage() {
             type='button'
             disabled={(filters.page ?? 1) * (filters.per_page ?? 20) >= total}
             onClick={() =>
-              setFilters((p) => ({ ...p, page: (p.page ?? 1) + 1 }))
+              setFilter({ page: (filters.page ?? 1) + 1 })
             }
             className='rounded-md border border-border px-3 py-1 text-sm disabled:opacity-40'
           >

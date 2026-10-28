@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: Daily Report Shiraz FILE 4 Excel & PDF Export API
+  version: 1.0.0
+paths:
+  /api/v1/projects/{project_pk}/daily-reports/{id}/excel/:
+    get:
+      summary: Export daily report as Shiraz FILE 4 Excel workbook
+      operationId: exportDailyReportExcel
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Excel spreadsheet file matching Shiraz FILE 4
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="daily-report-1403-11-14-full.xlsx"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthenticated
+        '403':
+          description: Permission denied (requires view_reports and project membership)
+        '404':
+          description: Report or project not found
+
+  /api/v1/projects/{project_pk}/daily-reports/{id}/pdf/:
+    get:
+      summary: Export daily report as official standardized PDF with signature boxes, audit hash, and watermark
+      operationId: exportDailyReportPdf
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Official PDF report document
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="daily-report-1403-11-14-full.pdf"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthenticated
+        '403':
+          description: Permission denied
+        '404':
+          description: Report not found
+
+  /api/v1/projects/{project_pk}/activity-log/excel/:
+    get:
+      summary: Export filtered cumulative activity log as Shiraz FILE 1 Excel workbook
+      operationId: exportActivityLogExcel
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: date_from
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date_to
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: discipline
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: parcel
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: zone
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: block
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: subcontractor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Excel spreadsheet file matching Shiraz FILE 1 (ACTIVITY sheet)
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="activity-database.xlsx"
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary

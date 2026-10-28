@@ -1,0 +1,42 @@
+You are an expert QA and convergence engineer executing Step 6: `speckit-converge` and `speckit-implement` in one continuous session using Codex with model `gpt-5.6-luna`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/044-shiraz-excel-parity-pdf`)
+- `specs/044-shiraz-excel-parity-pdf/spec.md`
+- `specs/044-shiraz-excel-parity-pdf/plan.md`
+- `specs/044-shiraz-excel-parity-pdf/tasks.md`
+- `reports_documentation/atomic-specs/SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`
+- `reports_gaps/11/GAP-SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`
+- Decision tree rules: `.agents/rules/decision-tree.md`
+- Graphify rules: `.agents/rules/graphify.md`
+- Skills: `.agents/skills/speckit-converge/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-CONVERGE ===
+1. Compare `spec.md`, `plan.md`, and `tasks.md` against the actual codebase.
+2. Check for any gaps, edge cases, or documentation requirements:
+   - Decision Tree:
+     - Verify that `docs/decision-tree/inventory.json` is completely updated and indexed with all new nodes:
+       - `[export-report-excel]`
+       - `[export-report-pdf]`
+       - `[export-sub-report-excel]`
+       - `filter-and-change-view`
+     - Verify READMEs adhere to `.agents/rules/decision-tree.md`.
+   - Backend & Excel Edge Cases:
+     - Multi-page PDF watermark: Ensure watermark is drawn on all pages (first page and later pages) without blocking text readability.
+     - Direct approval without review: If a report was approved without passing through `under_review`, ensure the reviewer signature box handles this gracefully (e.g. "بدون نیاز به بررسی دفتر فنی").
+     - Empty daily report: Ensure FILE 4 Excel generator generates valid openpyxl formulas and rows even when no labor or activities exist.
+     - Sub-report FILE 5: Ensure execution percentage format `0.0%` works with null or zero values.
+   - Test Coverage:
+     - Add pytest tests for these edge cases in `field_reports/tests/` and `sub_reports/tests/`.
+3. Append any identified gaps as Phase 10 / Convergence Tasks to `specs/044-shiraz-excel-parity-pdf/tasks.md`.
+
+=== PART 2: SPECKIT-IMPLEMENT ===
+1. Implement all appended convergence tasks.
+2. Run backend test suite:
+   `cd apps/api/core && ../.venv/bin/python -m pytest field_reports/tests/test_shiraz_file4_excel.py field_reports/tests/test_pdf_signatures_watermark.py field_reports/tests/test_shiraz_file1_excel.py sub_reports/tests/test_shiraz_subreport_excel.py`
+3. Verify frontend build:
+   `pnpm --filter web build`
+4. Update `graphify update .` if code files were modified.
+5. Mark all completed convergence tasks with `[x]` in `tasks.md`.
+6. Provide a detailed summary of convergence findings and verification results.

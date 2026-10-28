@@ -1,0 +1,52 @@
+You are an expert software architect and systems analyst.
+Your task is to execute Step 3 for SPEC-11:
+SPEC-11: `reports_documentation/atomic-specs/SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`
+Codebase: `/home/hossein/Desktop/projects/building-management`
+
+Perform a deep gap analysis between the existing codebase and `SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`.
+Also review:
+- `reports_documentation/01-core-requirements-and-excel-blueprints/مستندات فرم‌های اکسل شیراز (Shiraz Excel Forms Documentation).md`
+- `reports_documentation/03-daily-field-reports-and-apis/field_reports_ENDPOINTS.md`
+- `apps/api/core/field_reports/models.py`
+- `apps/api/core/field_reports/pdf.py`
+- `apps/api/core/field_reports/daily_report_views.py`
+- `apps/api/core/sub_reports/models.py`
+- `apps/api/core/sub_reports/unit_report_views.py`
+- `apps/web/src/components/daily_reports/`
+- `apps/web/src/components/department/`
+- `docs/decision-tree/`
+
+Analyze the following critical areas:
+1. Shiraz FILE 4 Daily Report Excel Generation (G01):
+   - Current state: Daily reports have no Excel (.xlsx) export at all (`GET .../daily-reports/{id}/excel/` or `xlsx/` does not exist).
+   - Target state: Complete openpyxl builder replicating the official FILE 4 template:
+     - Header block: Project name, contract number, Jalali date, day of week, shifts, site status, weather conditions.
+     - Section A: Staff / Indirect Labor (34 fixed roles: مدیر شعبه، سرپرست کارگاه، دفتر فنی، ...) with counts and subtotal formula `=SUM(...)`.
+     - Section B: Direct Labor (32 fixed worker types: کارگر ساده، ماهر، بنا، آرماتوربند، جوشکار، ...) with counts and subtotal formula `=SUM(...)`.
+     - Section C: Incoming Materials.
+     - Section D: Concrete volume and pouring locations.
+     - Section E: Machinery and Equipment (active, standby, repair counts).
+     - Section F: Executed Activities table.
+     - RTL layout, Persian typography, native Excel formulas.
+2. FILE 5 (Civil) and FILE 6 (Electrical) Sub-report Parity (G02):
+   - FILE 5 (Civil): Columns for `شرح فعالیت`, `قطعه`, `بلوک`, `طبقه`, `استادکار`, `کارگر`, `واحد`, `مقدار`, and `درصد اجرا` with Excel percentage format (`0.0%`).
+   - FILE 6 (Electrical): Columns for electrical installation activities, electricians/apprentices, block, floor, unit, quantity.
+   - Dedicated Excel export for Civil and Electrical sub-reports.
+3. Official PDF Export with Digital Signature & Audit Hash Block (G03):
+   - Current `field_reports/pdf.py` lacks the 3 official signature blocks at the end of the report:
+     1. `تنظیم‌کننده (سرپرست کارگاه)`
+     2. `بررسی‌کننده (دفتر فنی)`
+     3. `تأییدکننده (مدیر پروژه / ناظر مقیم)`
+   - Must include user name, exact approval date/time, and digital security hash (SHA-256 / UUID audit fingerprint).
+   - Filename standard: `daily-report-{report_date}-{shift}.pdf`.
+   - Watermark for draft / unapproved reports.
+4. Multi-dimensional Filtering & URL State Persistence (G04):
+   - Frontend activity table and report filters across: date range, contractor, discipline, status, and location/block.
+   - Synchronization of filter state with URL search params (`useSearchParams`) so URLs are shareable.
+5. Decision Tree Synchronization (G05):
+   - Update `docs/decision-tree/` to document PDF download with signatures, FILE 4 Excel download, and multi-dimensional filter actions.
+
+Deliverables:
+1. Write the comprehensive gap analysis to `reports_gaps/11/GAP-SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`.
+2. Write a comprehensive prompt for `speckit-specify` to `reports_gaps/11/PROMPT-SPEC-11.md` and copy it to `scripts/orchestrator/prompts/step4_spec11_specify.txt`.
+3. Provide a clear summary of findings and next steps.

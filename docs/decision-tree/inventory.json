@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-10-09",
-  "verification": "Current checkout source inspection; no browser/backend runtime validation.",
+  "verified_on": "2026-10-28",
+  "verification": "Current checkout source inspection for Shiraz FILE 1/4/5/6 exports, PDF signatures/watermark, URL filters, and decision-tree nodes; no browser/backend runtime validation.",
   "routes": [
     {
       "key": "INDEX",
@@ -1812,6 +1812,11 @@
       "kind": "mutation"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[export-sub-report-excel]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[edit-report]",
       "protected": true,
       "kind": "page"
@@ -2048,6 +2053,11 @@
     },
     {
       "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[export-report-pdf]",
+      "protected": true,
+      "kind": "local"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-daily-reports]/[view-report]/[export-report-excel]",
       "protected": true,
       "kind": "local"
     },

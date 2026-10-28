@@ -25,6 +25,7 @@ unit_submit_view = UnitReportViewSet.as_view({'post': 'submit'})
 unit_approve_view = UnitReportViewSet.as_view({'post': 'approve'})
 unit_reject_view = UnitReportViewSet.as_view({'post': 'reject'})
 unit_correct_view = UnitReportViewSet.as_view({'post': 'correct'})
+unit_excel_view = UnitReportViewSet.as_view({'get': 'excel'})
 
 # §1 executed-activity section rows (feature 033, T017).
 activity_section_list = UnitReportActivitySectionViewSet.as_view(
@@ -85,6 +86,7 @@ urlpatterns = [
     path('units/<str:unit>/daily-reports/<uuid:pk>/approve/', unit_approve_view, name='unit-report-approve'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/reject/', unit_reject_view, name='unit-report-reject'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/correct/', unit_correct_view, name='unit-report-correct'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/excel/', unit_excel_view, name='unit-report-excel'),
     path(
         'units/<str:unit>/daily-reports/<uuid:pk>/activities/',
         activity_section_list,

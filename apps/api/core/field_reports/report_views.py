@@ -122,3 +122,24 @@ class ActivityLogFilterOptionsView(APIView):
                 'parcels': sorted({p for p in qs.values_list('parcel', flat=True) if p}),
             }
         )
+
+
+class ActivityLogExcelView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'view_reports'
+
+    @extend_schema(summary='Export filtered activity log as Shiraz FILE 1 Excel', tags=['Reports'])
+    def get(self, request, project_pk=None):
+        from django.http import HttpResponse
+        from field_reports.shiraz_file1_excel import ShirazFile1ExcelBuilder
+
+        qs = activity_log_queryset(project_pk, request.query_params)
+        builder = ShirazFile1ExcelBuilder(qs)
+        excel_bytes, filename = builder.build()
+
+        response = HttpResponse(
+            excel_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response

@@ -79,7 +79,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
 
     @property
     def required_permission(self):
-        if self.action in ('retrieve', 'history', 'current'):
+        if self.action in ('retrieve', 'history', 'current', 'excel'):
             return 'view_reports'
         if self.action in ('approve', 'reject'):
             return 'approve_reports'
@@ -192,6 +192,23 @@ class UnitReportViewSet(viewsets.GenericViewSet):
     def destroy(self, request, *args, **kwargs):
         svc.soft_delete_unit_report(self._report_or_404(), user=request.user, unit=self._unit())
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(summary='Export sub-report as Shiraz Excel spreadsheet (FILE 5 / FILE 6)', tags=['Unit Daily Reports'])
+    @action(detail=True, methods=['get'])
+    def excel(self, request, *args, **kwargs):
+        from django.http import HttpResponse
+        from sub_reports.shiraz_subreport_excel import ShirazSubReportExcelBuilder
+
+        report = self._report_or_404()
+        builder = ShirazSubReportExcelBuilder(report)
+        excel_bytes, filename = builder.build()
+
+        response = HttpResponse(
+            excel_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
     @extend_schema(methods=['GET'], responses=UnitReportHistorySerializer)
     @action(detail=True, methods=['get'])

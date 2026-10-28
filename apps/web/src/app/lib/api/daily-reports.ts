@@ -599,6 +599,30 @@ export function fetchReportPdf(projectId: string, reportId: string) {
   return apiBlob(`${base(projectId)}/${reportId}/pdf/`);
 }
 
+export function fetchReportExcel(projectId: string, reportId: string) {
+  return apiBlob(`${base(projectId)}/${reportId}/excel/`);
+}
+
+export function fetchActivityLogExcel(
+  projectId: string,
+  params?: Record<string, string | number | string[] | undefined>
+) {
+  const query = new URLSearchParams();
+  if (params) {
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== "") {
+        if (Array.isArray(val)) {
+          val.forEach((item) => query.append(key, String(item)));
+        } else {
+          query.set(key, String(val));
+        }
+      }
+    });
+  }
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  return apiBlob(`/${PATHS.API_PROJECTS}/${projectId}/activity-log/excel/${qs}`);
+}
+
 export interface SyncBatchResult {
   results: Array<{
     local_id: string | null;

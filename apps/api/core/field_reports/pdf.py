@@ -216,11 +216,130 @@ def generate_daily_report_pdf(report) -> Tuple[bytes, str]:
         story.append(Paragraph(_fa('توضیحات کلی'), head_style))
         story.append(Paragraph(_fa(report.general_notes), normal))
 
-    doc.build(story)
+    # Concluding 3-tier digital signatures block
+    story.append(Spacer(1, 14))
+    story.append(_signatures_block(report, font))
+
+    # Watermark for unapproved / draft reports
+    is_approved = getattr(report, 'status', '') == 'approved'
+    if not is_approved:
+        watermark_fn = _make_watermark('پیش‌نویس — غیرقابل استناد رسمی (DRAFT)', font)
+        doc.build(story, onFirstPage=watermark_fn, onLaterPages=watermark_fn)
+    else:
+        doc.build(story)
+
     pdf_bytes = buf.getvalue()
 
-    filename = f'report_{jalali.replace("/", "-") or report.id}.pdf'
+    shift_str = report.shift or 'full'
+    date_str = jalali.replace('/', '-') if jalali else str(report.report_date)
+    filename = f'daily-report-{date_str}-{shift_str}.pdf'
     return pdf_bytes, filename
+
+
+def generate_report_audit_hash(report) -> str:
+    import hashlib
+    raw = (
+        f"{report.id}:{getattr(report, 'lineage_id', '')}:{report.report_date}:"
+        f"{report.shift}:{report.status}:{getattr(report, 'approved_at', '')}:"
+        f"{getattr(report, 'approved_by_id', '')}"
+    )
+    return hashlib.sha256(raw.encode('utf-8')).hexdigest()[:16].upper()
+
+
+def _make_watermark(text: str, font_name: str):
+    def _draw(canvas, doc):
+        canvas.saveState()
+        canvas.setFont(font_name, 28)
+        canvas.setFillColor(colors.Color(0.75, 0.75, 0.75, alpha=0.25))
+        canvas.translate(A4[0] / 2.0, A4[1] / 2.0)
+        canvas.rotate(45)
+        canvas.drawCentredString(0, 0, _fa(text))
+        canvas.restoreState()
+    return _draw
+
+
+def _signatures_block(report, font: str) -> Table:
+    audit_hash = generate_report_audit_hash(report)
+    box_style = ParagraphStyle('SigBox', fontName=font, fontSize=8, alignment=TA_RIGHT, leading=11)
+    title_style = ParagraphStyle('SigTitle', fontName=font, fontSize=8, fontBold=True, alignment=TA_RIGHT, leading=12)
+
+    # Box 1: Preparer / Submitter
+    prep_user = getattr(report, 'submitted_by', None) or getattr(report, 'prepared_by', None)
+    prep_name = _full_name(prep_user)
+    prep_time = ''
+    sub_at = getattr(report, 'submitted_at', None)
+    if sub_at:
+        j_d = gregorian_to_jalali(sub_at.date())
+        prep_time = f'{j_d} {sub_at.strftime("%H:%M")}'
+    elif getattr(report, 'created_at', None):
+        c_at = report.created_at
+        j_d = gregorian_to_jalali(c_at.date())
+        prep_time = f'{j_d} {c_at.strftime("%H:%M")}'
+
+    b1_content = [
+        Paragraph(_fa('<b>تنظیم‌کننده (سرپرست کارگاه)</b>'), title_style),
+        Spacer(1, 3),
+        Paragraph(_fa(f'نام: {prep_name}'), box_style),
+        Paragraph(_fa('سمت: سرپرست کارگاه'), box_style),
+        Paragraph(_fa(f'زمان ثبت: {prep_time or "—"}'), box_style),
+    ]
+
+    # Box 2: Reviewer
+    rev_by = getattr(report, 'reviewed_by', None)
+    rev_at = getattr(report, 'reviewed_at', None)
+    if rev_by or rev_at:
+        rev_name = _full_name(rev_by)
+        rev_time = ''
+        if rev_at:
+            j_d = gregorian_to_jalali(rev_at.date())
+            rev_time = f'{j_d} {rev_at.strftime("%H:%M")}'
+        b2_content = [
+            Paragraph(_fa('<b>بررسی‌کننده (دفتر فنی)</b>'), title_style),
+            Spacer(1, 3),
+            Paragraph(_fa(f'نام: {rev_name}'), box_style),
+            Paragraph(_fa('سمت: مسئول دفتر فنی'), box_style),
+            Paragraph(_fa(f'زمان بررسی: {rev_time or "—"}'), box_style),
+        ]
+    else:
+        b2_content = [
+            Paragraph(_fa('<b>بررسی‌کننده (دفتر فنی)</b>'), title_style),
+            Spacer(1, 3),
+            Paragraph(_fa('بدون نیاز به بررسی دفتر فنی / تأیید مستقیم'), box_style),
+        ]
+
+    # Box 3: Approver
+    app_by = getattr(report, 'approved_by', None)
+    app_at = getattr(report, 'approved_at', None)
+    app_name = _full_name(app_by)
+    app_time = ''
+    if app_at:
+        j_d = gregorian_to_jalali(app_at.date())
+        app_time = f'{j_d} {app_at.strftime("%H:%M")}'
+    b3_content = [
+        Paragraph(_fa('<b>تأییدکننده (مدیر پروژه / ناظر مقیم)</b>'), title_style),
+        Spacer(1, 3),
+        Paragraph(_fa(f'نام: {app_name}'), box_style),
+        Paragraph(_fa('سمت: مدیر پروژه / دستگاه نظارت'), box_style),
+        Paragraph(_fa(f'زمان تأیید: {app_time or "—"}'), box_style),
+        Spacer(1, 3),
+        Paragraph(_fa(f'کد رهگیری امنیتی: {audit_hash}'), box_style),
+    ]
+
+    data = [[b1_content, b2_content, b3_content]]
+    table = Table(data, colWidths=[175, 175, 189])
+    table.setStyle(
+        TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), font),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#2F5597')),
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8FAFC')),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ])
+    )
+    return table
 
 
 def _full_name(user) -> str:

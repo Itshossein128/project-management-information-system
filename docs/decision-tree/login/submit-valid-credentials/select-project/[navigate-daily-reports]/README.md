@@ -36,6 +36,7 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 - [Edit daily report](%5Bedit-report%5D/README.md) — metadata/overrides only for auto-summary
 - [View daily report](%5Bview-report%5D/README.md)
 - [Delete a daily report](%5Bdelete-report%5D/README.md)
+- [Export specialty sub-report Excel](%5Bexport-sub-report-excel%5D/README.md)
 - [Synchronize queued reports](%5Bsync-now%5D/README.md)
 - [Retry failed load](retry-failed-load/README.md)
 - [Discipline subreports](../%5Bnavigate-sub-reports%5D/README.md) — authoring surface

@@ -12,6 +12,7 @@ import { fetchProject } from "@/app/lib/api/projects";
 import {
   approveReport,
   fetchDailyReport,
+  fetchReportExcel,
   fetchReportPdf,
   rejectReport,
   reviewReport,
@@ -52,6 +53,7 @@ export default function DailyReportViewPage() {
   const canApprove = has("approve_reports");
   const canEdit = has("edit_reports");
   const [downloading, setDownloading] = useState(false);
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
   const [opinion, setOpinion] = useState("");
   const [weatherOverride, setWeatherOverride] = useState(false);
   const [siteOverride, setSiteOverride] = useState(false);
@@ -147,7 +149,9 @@ export default function DailyReportViewPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `daily-report-${reportId}.pdf`;
+      const pdfDate = report?.report_date ?? reportId;
+      const pdfShift = report?.shift ?? "full";
+      a.download = `daily-report-${pdfDate}-${pdfShift}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -156,6 +160,27 @@ export default function DailyReportViewPage() {
       toast.error((e as Error).message);
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const exportExcel = async () => {
+    setDownloadingExcel(true);
+    try {
+      const blob = await fetchReportExcel(projectId, reportId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const xlDate = report?.report_date ?? reportId;
+      const xlShift = report?.shift ?? "full";
+      a.download = `daily-report-${xlDate}-${xlShift}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDownloadingExcel(false);
     }
   };
 
@@ -240,6 +265,15 @@ export default function DailyReportViewPage() {
                 ویرایش
               </Link>
             ) : null}
+            <button
+              type='button'
+              onClick={exportExcel}
+              disabled={downloadingExcel}
+              className='inline-flex items-center gap-1 rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50'
+            >
+              <Download className='size-4' />
+              خروجی اکسل (FILE 4)
+            </button>
             <button
               type='button'
               onClick={exportPdf}

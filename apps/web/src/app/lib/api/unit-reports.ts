@@ -3,7 +3,7 @@
  * Not the legacy hr-forms helpers — this targets the canonical unit-report
  * contract under `/projects/{id}/units/{unit}/daily-reports/`.
  */
-import { apiFormData, apiJson, ApiRequestError } from "@/app/lib/api-client";
+import { apiBlob, apiFormData, apiJson, ApiRequestError } from "@/app/lib/api-client";
 
 export type CanonicalUnit =
   | "buildings"
@@ -232,6 +232,14 @@ export const rejectUnitReport = (p: string, u: CanonicalUnit, id: string, reject
 
 export const correctUnitReport = (p: string, u: CanonicalUnit, id: string) =>
   transition(p, u, id, "correct");
+
+export function fetchSubReportExcel(
+  projectId: string,
+  unit: CanonicalUnit,
+  reportId: string,
+): Promise<Blob> {
+  return apiBlob(`${base(projectId, unit)}/${reportId}/excel/`);
+}
 
 // ---------------------------------------------------------------------------
 // Feature 033 §1 — Executed Activities Section CRUD & Validation Contract

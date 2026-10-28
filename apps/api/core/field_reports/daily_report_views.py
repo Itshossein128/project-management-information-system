@@ -129,7 +129,7 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
                 return self.view_permission
             return self.edit_permission
         if self.action in (
-            'list', 'retrieve', 'pdf', 'versions', 'materials_reconciliation',
+            'list', 'retrieve', 'pdf', 'excel', 'versions', 'materials_reconciliation',
             'materials_details', 'provenance',
         ):
             return self.view_permission
@@ -428,6 +428,22 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response["Content-Disposition"] = f"attachment; filename=\"{filename}\""
+        return response
+
+    @extend_schema(summary='Export report as Shiraz FILE 4 Excel', tags=['Daily Reports'])
+    @action(detail=True, methods=['get'])
+    def excel(self, request, *args, **kwargs):
+        from field_reports.shiraz_file4_excel import ShirazFile4ExcelBuilder
+
+        instance = self.get_object()
+        builder = ShirazFile4ExcelBuilder(instance)
+        excel_bytes, filename = builder.build()
+
+        response = HttpResponse(
+            excel_bytes,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
     # -- Versions / correction / reconciliation -----------------------------

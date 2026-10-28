@@ -2,7 +2,9 @@ import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
+import { Download } from "lucide-react";
 import {
+  fetchSubReportExcel,
   type CanonicalUnit,
   type UnitReport,
   type UnitReportStatus,
@@ -180,6 +182,34 @@ export function UnitDailyReportPanel({
       setHeaderNotes((report as any).notes);
     }
   }, [report]);
+
+  const [downloadingExcel, setDownloadingExcel] = useState(false);
+
+  const handleExportExcel = async () => {
+    if (!report?.id) return;
+    setDownloadingExcel(true);
+    try {
+      const blob = await fetchSubReportExcel(businessId, unit, report.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const fileLabel =
+        unit === "buildings"
+          ? "civil-subreport"
+          : unit === "electrical"
+            ? "electrical-subreport"
+            : `${unit}-subreport`;
+      a.download = `${fileLabel}-${report.report_date || report.id}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setActionError("خطا در دانلود فایل اکسل ساب‌ریپورت");
+    } finally {
+      setDownloadingExcel(false);
+    }
+  };
 
   const handleSaveHeaderNotes = async () => {
     if (!report) return;
@@ -650,6 +680,22 @@ export function UnitDailyReportPanel({
                 {t("businessDepartment.unitReport.actionHistory")}
               </Button>
             ) : null}
+
+            <Button
+              id="button-exportUnitReportExcel"
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={downloadingExcel}
+              onClick={() => void handleExportExcel()}
+            >
+              <Download className="size-4 ml-1" />
+              {unit === "buildings"
+                ? "خروجی اکسل ابنیه (FILE 5)"
+                : unit === "electrical"
+                  ? "خروجی اکسل برق (FILE 6)"
+                  : "خروجی اکسل ساب‌ریپورت"}
+            </Button>
           </div>
 
           {unitSupportsActivitiesSection(unit) ||

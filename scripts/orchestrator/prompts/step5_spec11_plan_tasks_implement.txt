@@ -1,0 +1,65 @@
+You are an expert full-stack engineer and software architect.
+You are executing Step 5: `speckit-plan`, `speckit-tasks`, and `speckit-implement` in one continuous session for feature `specs/044-shiraz-excel-parity-pdf`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/044-shiraz-excel-parity-pdf`)
+- `specs/044-shiraz-excel-parity-pdf/spec.md`
+- `reports_documentation/atomic-specs/SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`
+- `reports_gaps/11/GAP-SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md`
+- `reports_documentation/01-core-requirements-and-excel-blueprints/مستندات فرم‌های اکسل شیراز (Shiraz Excel Forms Documentation).md`
+- `.specify/memory/constitution.md`
+- Skills: `.agents/skills/speckit-plan/SKILL.md`, `.agents/skills/speckit-tasks/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-PLAN ===
+1. Follow `.agents/skills/speckit-plan/SKILL.md` to design the feature.
+2. Create design artifacts in `specs/044-shiraz-excel-parity-pdf/`:
+   - `plan.md`: Technical context, architecture decisions, component diagrams, test strategy.
+   - `research.md`: openpyxl layout for Shiraz FILE 4, 34 staff roles, 32 direct labor worker types, openpyxl percentage formatting `0.0%`, ReportLab signature block drawing, canvas watermark for draft reports, `useSearchParams` synchronization.
+   - `data-model.md`:
+     - Entities, services, and endpoints:
+       - `ShirazFile4ExcelBuilder` in `apps/api/core/field_reports/shiraz_file4_excel.py`:
+         - Replicates Shiraz FILE 4 layout: Header with project name, contract number, Jalali date, day of week, weather conditions, shift hours.
+         - Staff labor block (34 fixed roles from FILE 4) with `=SUM(...)` subtotal formula.
+         - Direct labor block (32 fixed worker types from FILE 4) with `=SUM(...)` subtotal formula and Grand Total `=SUM(...)`.
+         - Incoming materials, concrete pouring volumes, machinery table, and executed site activities table.
+         - RTL layout (`ws.sheet_view.rightToLeft = True`), Tahoma font, clean styling.
+       - Endpoint: `GET /api/v1/projects/{project_pk}/daily-reports/{id}/excel/` in `DailyReportViewSet` (`apps/api/core/field_reports/daily_report_views.py`), returning attachment `daily-report-{report_date}-{shift}.xlsx`.
+       - Sub-report Excel builder in `apps/api/core/sub_reports/shiraz_subreport_excel.py`:
+         - FILE 5 (Civil): `ردیف`, `شیفت`, `پیمانکار`, `استادکار`, `کارگر`, `قطعه`, `بلوک`, `طبقه`, `شرح فعالیت`, `واحد`, `مقدار`, `درصد اجرا` (percentage formatted `0.0%`).
+         - FILE 6 (Electrical): `ردیف`, `شیفت`, `پیمانکار`, `استادکار`, `کارگر`, `بلوک`, `طبقه`, `شرح فعالیت`, `واحد`, `مقدار`.
+       - Endpoint: `GET /api/v1/projects/{project_pk}/units/{unit}/daily-reports/{id}/excel/` in `DisciplineSubReportViewSet` (`apps/api/core/sub_reports/unit_report_views.py`).
+       - PDF Export with Digital Signature Block & Audit Hash in `apps/api/core/field_reports/pdf.py`:
+         - 3 official signature boxes at the end of the report:
+           1. `تنظیم‌کننده (سرپرست کارگاه)` (creator, submitted_at)
+           2. `بررسی‌کننده (دفتر فنی)` (reviewer, reviewed_at)
+           3. `تأییدکننده (مدیر پروژه / ناظر مقیم)` (approver, approved_at)
+         - SHA-256 / UUID digital security hash fingerprint.
+         - Diagonal semi-transparent watermark for non-approved reports («پیش‌نویس — غیرقابل استناد رسمی (DRAFT)»).
+         - Filename: `daily-report-{report_date}-{shift}.pdf`.
+       - Multi-dimensional Filtering & URL State Persistence:
+         - Sync filters with `useSearchParams` in `daily-reports-list.tsx` and `project-activity-log.tsx`.
+         - FILE 1 Excel export button for cumulative activities database.
+   - `contracts/`: OpenAPI contracts for daily report Excel export and sub-report Excel exports.
+   - `quickstart.md`: Developer verification guide.
+
+=== PART 2: SPECKIT-TASKS ===
+1. Follow `.agents/skills/speckit-tasks/SKILL.md` to generate `tasks.md` in `specs/044-shiraz-excel-parity-pdf/tasks.md`.
+2. Tasks must cover:
+   - Phase 1: Shiraz FILE 4 Daily Report Excel Generator & Endpoint.
+   - Phase 2: Shiraz FILE 5 (Civil) and FILE 6 (Electrical) Sub-report Excel Generator & Endpoint.
+   - Phase 3: Enhanced PDF Generator with Signature Boxes, Audit Hash, and Draft Watermark.
+   - Phase 4: Frontend Multi-dimensional Filter URL Synchronization (`useSearchParams`) & FILE 1 Activity Export.
+   - Phase 5: Frontend UI Buttons for Excel & PDF downloads in daily report and sub-report views.
+   - Phase 6: Automated backend tests and frontend build validation.
+
+=== PART 3: SPECKIT-IMPLEMENT ===
+1. Follow `.agents/skills/speckit-implement/SKILL.md` to execute all tasks in `tasks.md`.
+2. Implement backend services, views, and url endpoints.
+3. Implement frontend components, URL sync, and download actions.
+4. Write and execute backend pytest tests:
+   `cd apps/api/core && ../.venv/bin/python -m pytest field_reports/tests/ sub_reports/tests/`
+5. Verify frontend build:
+   `pnpm --filter web build` must pass cleanly without errors.
+6. Mark all completed tasks in `tasks.md` with `[x]`.
+7. Provide a comprehensive summary of all implemented files and test results.

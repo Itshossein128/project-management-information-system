@@ -37,6 +37,7 @@ Loading, empty results and unavailable permissions are states, not evidence of a
 - [Request correction of locked report](%5Brequest-correction%5D/README.md)
 - [Inspect report versions](inspect-report-versions/README.md)
 - [Export daily report PDF](%5Bexport-report-pdf%5D/README.md)
+- [Export daily report Excel (FILE 4)](%5Bexport-report-excel%5D/README.md)
 - [Retry failed load](retry-failed-load/README.md)
 
 Continue / return links (the same state is documented once):

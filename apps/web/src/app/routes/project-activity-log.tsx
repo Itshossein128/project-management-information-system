@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink } from "lucide-react";
-import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { BarChart3, Download, ExternalLink, Users } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router";
 import {
   ProjectProvider,
   usePermission,
@@ -12,6 +12,8 @@ import {
   fetchActivityLog,
   fetchActivityLogFilters,
 } from "@/app/lib/api/reports";
+import { fetchActivityLogExcel } from "@/app/lib/api/daily-reports";
+import { useToast } from "@/components/ui/toast";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
@@ -29,21 +31,64 @@ function todayIso() {
 
 function ActivityLogContent() {
   const { t } = useTranslation();
+  const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
 
-  const [dateRange, setDateRange] = useState({
-    from: monthStartIso(),
-    to: todayIso(),
-  });
-  const [discipline, setDiscipline] = useState<string[]>([]);
-  const [parcel, setParcel] = useState<string[]>([]);
-  const [zone, setZone] = useState("");
-  const [block, setBlock] = useState("");
-  const [subcontractor, setSubcontractor] = useState("");
-  const [page, setPage] = useState(1);
+  const [exportingExcel, setExportingExcel] = useState(false);
+
+  const dateRange = useMemo(
+    () => ({
+      from: searchParams.get("date_from") || monthStartIso(),
+      to: searchParams.get("date_to") || todayIso(),
+    }),
+    [searchParams]
+  );
+
+  const discipline = useMemo(() => {
+    const raw = searchParams.get("discipline");
+    return raw ? raw.split(",").filter(Boolean) : [];
+  }, [searchParams]);
+
+  const parcel = useMemo(() => {
+    const raw = searchParams.get("parcel");
+    return raw ? raw.split(",").filter(Boolean) : [];
+  }, [searchParams]);
+
+  const zone = searchParams.get("zone") || "";
+  const block = searchParams.get("block") || "";
+  const subcontractor = searchParams.get("subcontractor") || "";
+  const page = Number(searchParams.get("page")) || 1;
+
+  const updateFilters = useCallback(
+    (updates: Record<string, string | string[] | number | undefined>) => {
+      setSearchParams(
+        (prev) => {
+          const sp = new URLSearchParams(prev);
+          Object.entries(updates).forEach(([k, v]) => {
+            if (
+              v === undefined ||
+              v === null ||
+              v === "" ||
+              (Array.isArray(v) && v.length === 0)
+            ) {
+              sp.delete(k);
+            } else if (Array.isArray(v)) {
+              sp.set(k, v.join(","));
+            } else {
+              sp.set(k, String(v));
+            }
+          });
+          return sp;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const { data: filters } = useQuery({
     queryKey: ["activity-log-filters", projectId],
@@ -78,6 +123,51 @@ function ActivityLogContent() {
     enabled: canView && Boolean(projectId),
   });
 
+  const rows = data?.results ?? [];
+  const totalPages = data ? Math.ceil(data.count / 50) : 1;
+
+  const totalHeadcount = useMemo(() => {
+    return rows.reduce((acc, r) => acc + (Number(r.headcount) || 0), 0);
+  }, [rows]);
+
+  const quantitiesByUnit = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const r of rows) {
+      if (r.unit && r.quantity != null && !isNaN(Number(r.quantity))) {
+        map[r.unit] = (map[r.unit] || 0) + Number(r.quantity);
+      }
+    }
+    return map;
+  }, [rows]);
+
+  const handleExportExcel = async () => {
+    if (!projectId) return;
+    setExportingExcel(true);
+    try {
+      const blob = await fetchActivityLogExcel(projectId, {
+        date_from: dateRange.from,
+        date_to: dateRange.to,
+        discipline: discipline.length ? discipline.join(",") : undefined,
+        parcel: parcel.length ? parcel.join(",") : undefined,
+        zone: zone || undefined,
+        block: block || undefined,
+        subcontractor: subcontractor || undefined,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `activity-database-${dateRange.from}-to-${dateRange.to}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error((e as Error).message || "خطا در دانلود اکسل دیتابیس فعالیت‌ها");
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
   if (projectLoading) return <LoadingSkeleton rows={10} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
@@ -92,22 +182,19 @@ function ActivityLogContent() {
     );
   }
 
-  const rows = data?.results ?? [];
-  const totalPages = data ? Math.ceil(data.count / 50) : 1;
-
   return (
     <div className='space-y-6'>
       <PageHeader title={t("pages.activityLog.title")} subtitle={project.project_name} />
 
-      <div className='flex flex-wrap items-end gap-3'>
+      {/* Multidimensional Filters */}
+      <div className='flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4'>
         <div className='min-w-[260px] flex-1'>
           <JalaliDateRangePicker
             name='activity_log_range'
             label='بازه تاریخ'
             value={dateRange}
             onChange={(v) => {
-              setDateRange(v);
-              setPage(1);
+              updateFilters({ date_from: v.from, date_to: v.to, page: undefined });
             }}
           />
         </div>
@@ -118,8 +205,8 @@ function ActivityLogContent() {
             multiple
             value={discipline}
             onChange={(e) => {
-              setDiscipline(Array.from(e.target.selectedOptions, (option) => option.value));
-              setPage(1);
+              const selected = Array.from(e.target.selectedOptions, (option) => option.value);
+              updateFilters({ discipline: selected, page: undefined });
             }}
           >
             {(filters?.disciplines ?? []).map((d) => (
@@ -136,8 +223,8 @@ function ActivityLogContent() {
             multiple
             value={parcel}
             onChange={(e) => {
-              setParcel(Array.from(e.target.selectedOptions, (option) => option.value));
-              setPage(1);
+              const selected = Array.from(e.target.selectedOptions, (option) => option.value);
+              updateFilters({ parcel: selected, page: undefined });
             }}
           >
             {(filters?.parcels ?? []).map((p) => (
@@ -153,8 +240,7 @@ function ActivityLogContent() {
             className='rounded-md border border-input bg-background px-3 py-2'
             value={zone}
             onChange={(e) => {
-              setZone(e.target.value);
-              setPage(1);
+              updateFilters({ zone: e.target.value, page: undefined });
             }}
           >
             <option value=''>همه</option>
@@ -171,8 +257,7 @@ function ActivityLogContent() {
             className='rounded-md border border-input bg-background px-3 py-2'
             value={block}
             onChange={(e) => {
-              setBlock(e.target.value);
-              setPage(1);
+              updateFilters({ block: e.target.value, page: undefined });
             }}
           >
             <option value=''>همه</option>
@@ -189,8 +274,7 @@ function ActivityLogContent() {
             className='rounded-md border border-input bg-background px-3 py-2'
             value={subcontractor}
             onChange={(e) => {
-              setSubcontractor(e.target.value);
-              setPage(1);
+              updateFilters({ subcontractor: e.target.value, page: undefined });
             }}
           >
             <option value=''>همه</option>
@@ -201,6 +285,44 @@ function ActivityLogContent() {
             ))}
           </select>
         </label>
+      </div>
+
+      {/* Prominent Aggregate Summary Bar & FILE 1 Export Button */}
+      <div className='flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4'>
+        <div className='flex flex-wrap items-center gap-6 text-sm'>
+          <div className='flex items-center gap-2'>
+            <Users className='size-5 text-primary' />
+            <span className='text-muted-foreground'>مجموع نفرات (نفر-روز):</span>
+            <span className='font-bold text-foreground'>{totalHeadcount}</span>
+          </div>
+          {Object.keys(quantitiesByUnit).length > 0 ? (
+            <div className='flex flex-wrap items-center gap-2'>
+              <BarChart3 className='size-5 text-primary' />
+              <span className='text-muted-foreground'>احجام اجرایی:</span>
+              {Object.entries(quantitiesByUnit).map(([unitName, totalQty]) => (
+                <span
+                  key={unitName}
+                  className='inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-foreground'
+                >
+                  <span>{unitName}:</span>
+                  <span className='font-bold'>
+                    {Number(totalQty.toFixed(2)).toLocaleString()}
+                  </span>
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <Button
+          variant='outline'
+          size='sm'
+          disabled={exportingExcel}
+          onClick={handleExportExcel}
+          className='inline-flex items-center gap-1.5'
+        >
+          <Download className='size-4' />
+          خروجی اکسل دیتابیس جامع فعالیت‌ها (FILE 1)
+        </Button>
       </div>
 
       {isLoading ? (
@@ -310,7 +432,7 @@ function ActivityLogContent() {
                 variant='secondary'
                 size='sm'
                 disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
+                onClick={() => updateFilters({ page: page - 1 })}
               >
                 قبلی
               </Button>
@@ -321,7 +443,7 @@ function ActivityLogContent() {
                 variant='secondary'
                 size='sm'
                 disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
+                onClick={() => updateFilters({ page: page + 1 })}
               >
                 بعدی
               </Button>
