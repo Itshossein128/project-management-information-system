@@ -2,8 +2,11 @@
 Excel import/export and XLSX report endpoints for department activity records.
 """
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Any
 
+from django.db.models import Max, Sum, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -178,6 +181,16 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
             first_err = errors[0]
             row_num = first_err.get('row')
             err_dict = first_err.get('errors', {})
+            err_code = first_err.get('code')
+            if not err_code:
+                # Check inside any error entry for code
+                for e in errors:
+                    if e.get('code'):
+                        err_code = e.get('code')
+                        break
+            if not err_code:
+                err_code = 'validation_error'
+
             first_field, first_msg = (
                 next(iter(err_dict.items())) if err_dict else ('', 'خطای اعتبارسنجی داده‌ها')
             )
@@ -187,8 +200,12 @@ class DepartmentActivityImportView(_DepartmentActivityDataBase):
                 detail = str(first_msg)
             return Response(
                 {
+                    'error': {
+                        'code': err_code,
+                        'message': detail,
+                        'details': errors,
+                    },
                     'detail': detail,
-                    'error': detail,
                     'created': 0,
                     'errors': errors,
                 },
@@ -302,11 +319,31 @@ class DepartmentActivityWeeklyReportView(_DepartmentActivityDataBase):
             date__lte=week_end,
         ).order_by('date', '-created_at')
 
+        opening_balances = None
+        if dept_norm == 'warehouse':
+            prior_agg = (
+                DepartmentActivityRecord.objects.filter(
+                    project_id=project_pk,
+                    department__in=dept_filter,
+                    date__lt=week_start,
+                )
+                .values('material_type', 'unit')
+                .annotate(
+                    total_in=Coalesce(Sum('quantity_in'), Value(Decimal('0'))),
+                    total_out=Coalesce(Sum('quantity_out'), Value(Decimal('0'))),
+                )
+            )
+            opening_balances = {
+                ((item['material_type'] or '').strip(), (item['unit'] or '').strip()): float(item['total_in'] - item['total_out'])
+                for item in prior_agg
+            }
+
         xlsx_bytes = generate_weekly_activity_report_xlsx(
             business=business,
             department=department,
             week_start=week_start,
             records=list(qs),
+            opening_balances=opening_balances,
         )
         filename = f'{department}_weekly_report_{week_start}_{week_end}.xlsx'
         response = HttpResponse(
@@ -315,3 +352,65 @@ class DepartmentActivityWeeklyReportView(_DepartmentActivityDataBase):
         )
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
+
+
+class WarehouseBalanceView(_DepartmentActivityDataBase):
+    @extend_schema(
+        summary='Query warehouse material balance summary',
+        description=(
+            'Returns stock balance aggregated by (material_type, unit) up to the specified date. '
+            'Requires `view_reports` permission.'
+        ),
+        parameters=[
+            OpenApiParameter(name='as_of_date', type=OpenApiTypes.DATE, required=False, description='Cutoff date (defaults to today)'),
+            OpenApiParameter(name='search', type=OpenApiTypes.STR, required=False, description='Case-insensitive search on material_type'),
+        ],
+        tags=['Project warehouse records'],
+    )
+    def get(self, request, project_pk: int):
+        business = self._get_business(project_pk)
+        if business is None:
+            return Response({'error': 'Project not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        raw_as_of = request.query_params.get('as_of_date')
+        try:
+            as_of_date = _parse_query_date(raw_as_of)
+        except ValueError as exc:
+            return Response({'error': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not as_of_date:
+            as_of_date = timezone.localdate()
+
+        search_term = (request.query_params.get('search') or '').strip()
+
+        qs = DepartmentActivityRecord.objects.filter(
+            project_id=project_pk,
+            department='warehouse',
+            date__lte=as_of_date,
+        )
+        if search_term:
+            qs = qs.filter(material_type__icontains=search_term)
+
+        aggregates = (
+            qs.values('material_type', 'unit')
+            .annotate(
+                total_in=Coalesce(Sum('quantity_in'), Value(Decimal('0'))),
+                total_out=Coalesce(Sum('quantity_out'), Value(Decimal('0'))),
+                last_movement_date=Max('date'),
+            )
+            .order_by('material_type', 'unit')
+        )
+
+        results = []
+        for item in aggregates:
+            tot_in = float(item['total_in'])
+            tot_out = float(item['total_out'])
+            results.append({
+                'material_type': item['material_type'],
+                'unit': item['unit'],
+                'total_in': tot_in,
+                'total_out': tot_out,
+                'current_balance': round(tot_in - tot_out, 3),
+                'last_movement_date': item['last_movement_date'].isoformat() if item['last_movement_date'] else None,
+            })
+        return Response(results, status=status.HTTP_200_OK)

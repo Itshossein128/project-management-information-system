@@ -1,0 +1,44 @@
+You are an expert QA and convergence engineer executing Step 6: `speckit-converge` and `speckit-implement` in one continuous session using Codex with model `gpt-5.6-luna`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/043-warehouse-department-reports`)
+- `specs/043-warehouse-department-reports/spec.md`
+- `specs/043-warehouse-department-reports/plan.md`
+- `specs/043-warehouse-department-reports/tasks.md`
+- `reports_documentation/atomic-specs/SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`
+- `reports_gaps/10/GAP-SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`
+- Decision tree rules: `.agents/rules/decision-tree.md`
+- Graphify rules: `.agents/rules/graphify.md`
+- Skills: `.agents/skills/speckit-converge/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-CONVERGE ===
+1. Compare `spec.md`, `plan.md`, and `tasks.md` against the actual codebase.
+2. Check for any gaps, edge cases, or documentation requirements:
+   - Decision Tree:
+     - Verify that `docs/decision-tree/` and `docs/decision-tree/inventory.json` are completely synchronized with the warehouse department user flows:
+       - `[open-warehouse-department]`
+       - `[create-activity-record]` with error gate `at_least_one_quantity_must_be_positive`
+       - `[query-warehouse-balance]` with `view_reports` permission
+       - `download-daily-activity-report`
+       - `download-weekly-activity-report`
+       - `[import-department-activities]`
+       - `export-department-activities`
+     - Follow `.agents/rules/decision-tree.md` strictly (bracket naming for permission gates, README.md with Required Permissions, Desired Result, Resulting Route).
+   - Backend & Excel Edge Cases:
+     - Verify opening balance calculation when a material has multiple movements in the past, or when `quantity_out` > `quantity_in` (negative running balance handled gracefully).
+     - Verify that material type whitespace differences (e.g. "سیمان " vs "سیمان") are stripped/normalized during grouping for the Cumulative Material Balance sheet.
+     - Verify behavior when zero records exist in the week (ensure Sheet 8 «بالانس تجمعی مصالح» generates cleanly with 0 sums without openpyxl formula syntax errors).
+   - Test Coverage:
+     - Add pytest test cases in `inventory/tests.py` covering edge cases: empty warehouse week, trimmed material type grouping, and balance query with `search` and `as_of_date`.
+3. Append any identified gaps as Phase 10 / Convergence Tasks to `specs/043-warehouse-department-reports/tasks.md`.
+
+=== PART 2: SPECKIT-IMPLEMENT ===
+1. Implement all appended convergence tasks.
+2. Run backend test suite:
+   `cd apps/api/core && ../.venv/bin/python -m pytest inventory/tests.py`
+3. Verify frontend build:
+   `pnpm --filter web build`
+4. Update `graphify update .` if code files were modified.
+5. Mark all completed convergence tasks with `[x]` in `tasks.md`.
+6. Provide a detailed summary of convergence findings and verification results.

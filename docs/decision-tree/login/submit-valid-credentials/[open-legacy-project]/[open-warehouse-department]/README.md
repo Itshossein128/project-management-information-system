@@ -36,6 +36,7 @@ DepartmentPage consumes :businessId. Warehouse uses material/consumption/supplie
 - [Export department activities](export-department-activities/README.md)
 - [Download daily activity report](download-daily-activity-report/README.md)
 - [Download weekly activity report](download-weekly-activity-report/README.md)
+- [Query warehouse stock balance](%5Bquery-warehouse-balance%5D/README.md)
 
 Continue / return links (the same state is documented once):
 

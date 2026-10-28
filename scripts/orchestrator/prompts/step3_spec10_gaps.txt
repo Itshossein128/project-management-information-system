@@ -1,0 +1,39 @@
+You are an expert software architect and systems analyst.
+Your task is to execute Step 3 for SPEC-10:
+SPEC-10: `reports_documentation/atomic-specs/SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`
+Codebase: `/home/hossein/Desktop/projects/building-management`
+
+Perform a deep gap analysis between the existing codebase and `SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`.
+Also review:
+- `reports_documentation/05-department-and-warehouse-reports/spec_001_warehouse.md`
+- `apps/api/core/inventory/models.py`
+- `apps/api/core/inventory/serializers.py`
+- `apps/api/core/inventory/department_activity_io.py`
+- `apps/api/core/inventory/department_activity_data_views.py`
+- `apps/web/src/components/department/department-activity-record-modal.tsx`
+- `apps/web/src/components/department/department-page.tsx`
+- `docs/decision-tree/`
+
+Identify all gaps and architectural improvements needed for:
+1. Cumulative Material Balance Sheet (شیت بالانس تجمعی مصالح):
+   - In weekly reports (`generate_weekly_activity_report_xlsx`), the 8th sheet currently only sums `quantity_in` and groups by supplier. It lacks true material balance accounting:
+     - Grouping by `(material_type, unit)` across the project.
+     - Opening balance (`موجودی اول دوره`): Calculated dynamically as `sum(quantity_in) - sum(quantity_out)` before `week_start`.
+     - Total inbound during week (`کل ورودی دوره`).
+     - Total outbound during week (`کل خروجی دوره`).
+     - Closing balance (`مانده پای کار / موجودی پایان دوره`): Excel formula `=Opening + Total_In - Total_Out` (e.g. `=D5+E5-F5`).
+2. Server-side validation error code `at_least_one_quantity_must_be_positive`:
+   - Enforce exact error code `at_least_one_quantity_must_be_positive` when both `quantity_in <= 0` and `quantity_out <= 0` in serializers and import routines, with Persian error description «حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد».
+3. Daily Report Shiraz Format & Balances:
+   - Ensure the daily report Excel sheet has proper formulas for Total Inbound, Total Outbound, and Net Balance for the day.
+4. Material Balance API endpoint (optional/recommended):
+   - `GET /api/v1/projects/{project_id}/sub-reports/department-activities/warehouse-balance/` to query current running stock by material and unit.
+5. Frontend Warehouse UX:
+   - Ensure warehouse page properly formats quantities, displays the 8 warehouse fields, and offers clear triggers for downloading daily and weekly Excel reports with balance sheets.
+6. Decision Tree:
+   - Verify and update `docs/decision-tree/login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/` to reflect warehouse flows.
+
+Deliverables:
+1. Write the gap analysis to `reports_gaps/10/GAP-SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`.
+2. Write a comprehensive prompt for `speckit-specify` to `reports_gaps/10/PROMPT-SPEC-10.md` and copy it to `scripts/orchestrator/prompts/step4_spec10_specify.txt`.
+3. Provide a clear summary of findings and next steps.

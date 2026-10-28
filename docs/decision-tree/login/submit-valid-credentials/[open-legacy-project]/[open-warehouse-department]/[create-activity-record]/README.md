@@ -26,9 +26,9 @@
 
 ## Outcomes & Guards
 
-Use only the controls available for the current record status. Required form fields and server validation can prevent the success outcome.
-
-A pending request uses the component’s busy/disabled state where implemented. Validation, permission or network failure follows its error handler; do not infer rollback or idempotency for a sequence of requests. Correct the input or access issue before retrying. Cancel/close on an unsent form makes no API write; closing after submission does not undo a request.
+Use only the controls available for the current record status. Required form fields and server validation can prevent the success outcome:
+- **Positive Quantity Validation**: For the `warehouse` department, at least one of `quantity_in` or `quantity_out` must be strictly positive (> 0), and neither may be negative (< 0). If both are zero or negative, the server halts mutation and returns HTTP 400 with structured code `at_least_one_quantity_must_be_positive` and Persian message «حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد».
+- A pending request uses the component’s busy/disabled state where implemented. Validation, permission or network failure follows its error handler; do not infer rollback or idempotency for a sequence of requests. Correct the input or access issue before retrying. Cancel/close on an unsent form makes no API write; closing after submission does not undo a request.
 
 ## Subsequent Decisions
 

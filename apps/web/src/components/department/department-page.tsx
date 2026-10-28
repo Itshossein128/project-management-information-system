@@ -47,6 +47,16 @@ export interface DepartmentPageProps {
   slug: string;
 }
 
+function formatQuantityNumber(val: string | number | null | undefined): string {
+  if (val === null || val === undefined || val === "") return "—";
+  const num = Number(val);
+  if (isNaN(num)) return String(val);
+  return num.toLocaleString("fa-IR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  });
+}
+
 export function DepartmentPage({ slug }: DepartmentPageProps) {
   const { t } = useTranslation();
   const { businessId } = useParams();
@@ -350,7 +360,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
           accessorKey: "quantity_in",
           cell: ({ row }) => (
             <span id={`text-departmentActivityQuantityIn-${row.index}`}>
-              {row.original.quantity_in ?? "—"}
+              {formatQuantityNumber(row.original.quantity_in)}
             </span>
           ),
         },
@@ -370,7 +380,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
           accessorKey: "quantity_out",
           cell: ({ row }) => (
             <span id={`text-departmentActivityQuantityOut-${row.index}`}>
-              {row.original.quantity_out ?? "—"}
+              {formatQuantityNumber(row.original.quantity_out)}
             </span>
           ),
         },
@@ -778,7 +788,9 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                 >
                   {reporting === "daily"
                     ? t("businessDepartment.activityLog.generatingReport")
-                    : t("businessDepartment.unitReport.activityLogExport")}
+                    : isWarehouse
+                      ? "دانلود گزارش روزانه انبار (شیراز)"
+                      : t("businessDepartment.unitReport.activityLogExport")}
                 </Button>
                 <Button
                   id="button-departmentActivityWeeklyReport"
@@ -790,7 +802,9 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
                 >
                   {reporting === "weekly"
                     ? t("businessDepartment.activityLog.generatingReport")
-                    : t("businessDepartment.activityLog.weeklyReport")}
+                    : isWarehouse
+                      ? "دانلود گزارش هفتگی و بالانس تجمعی مصالح (۸ شیت)"
+                      : t("businessDepartment.activityLog.weeklyReport")}
                 </Button>
                 <Button
                   id="button-openDepartmentActivityCreateModal"
@@ -809,7 +823,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         <Modal
           open={dailyModalOpen}
           onOpenChange={setDailyModalOpen}
-          title="دانلود گزارش روزانه دپارتمان"
+          title={isWarehouse ? "دانلود گزارش روزانه انبار (شیراز)" : "دانلود گزارش روزانه دپارتمان"}
           idBase="dailyReportModal"
         >
           <div className="space-y-4">
@@ -841,7 +855,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         <Modal
           open={weeklyModalOpen}
           onOpenChange={setWeeklyModalOpen}
-          title="دانلود گزارش هفتگی دپارتمان (۸ شیت)"
+          title={isWarehouse ? "دانلود گزارش هفتگی و بالانس تجمعی مصالح (۸ شیت)" : "دانلود گزارش هفتگی دپارتمان (۸ شیت)"}
           idBase="weeklyReportModal"
         >
           <div className="space-y-4">

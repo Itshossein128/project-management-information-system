@@ -5,6 +5,7 @@ from .department_activity_data_views import (
     DepartmentActivityExportView,
     DepartmentActivityImportView,
     DepartmentActivityWeeklyReportView,
+    WarehouseBalanceView,
 )
 from .views import SpaceMaterialRequestViewSet, DepartmentActivityRecordViewSet
 
@@ -37,6 +38,11 @@ urlpatterns = [
         'department-activity-records/',
         department_activity_record_list,
         name='project-department-activity-record-list',
+    ),
+    path(
+        'department-activity-records/warehouse-balance/',
+        WarehouseBalanceView.as_view(),
+        name='project-department-activity-record-warehouse-balance',
     ),
     path(
         'department-activity-records/<int:pk>/',

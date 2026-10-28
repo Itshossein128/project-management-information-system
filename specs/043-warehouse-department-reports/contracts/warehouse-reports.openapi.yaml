@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Warehouse Department Reports API
+  version: 1.0.0
+  description: API contracts for daily and weekly warehouse department reports.
+paths:
+  /api/v1/projects/{project_pk}/department-activity-records/reports/daily/:
+    get:
+      summary: Download daily department activity Excel workbook (.xlsx)
+      description: Single-day Excel report formatted according to Shiraz construction site standards with live =SUM() and Net Daily Balance formulas.
+      operationId: getDailyReport
+      tags:
+        - Project activity records
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+          example: warehouse
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Excel spreadsheet file
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid department or date parameter
+        '403':
+          description: Permission denied (requires view_reports)
+        '404':
+          description: Project not found
+
+  /api/v1/projects/{project_pk}/department-activity-records/reports/weekly/:
+    get:
+      summary: Download weekly department activity multi-sheet Excel workbook (.xlsx)
+      description: Eight-sheet Excel report containing 7 daily tabs and 1 Cumulative Material Balance sheet for warehouse with dynamic opening balances and live accounting formulas.
+      operationId: getWeeklyReport
+      tags:
+        - Project activity records
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+          example: warehouse
+        - name: week_start
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Multi-sheet Excel workbook (.xlsx)
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid department or week_start parameter
+        '403':
+          description: Permission denied (requires view_reports)
+        '404':
+          description: Project not found

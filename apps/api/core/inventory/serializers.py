@@ -3,7 +3,9 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
 
+from config.exceptions import CodedValidationError
 from projects.contractor_utils import resolve_active_contractor
 
 from .models import (
@@ -191,13 +193,23 @@ class DepartmentActivityRecordSerializer(serializers.ModelSerializer):
                 and quantity_in <= 0
                 and quantity_out <= 0
             ):
-                msg = _(
-                    'At least one of quantity_in or quantity_out must be greater than zero.'
+                msg = ErrorDetail(
+                    'حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد',
+                    code='at_least_one_quantity_must_be_positive',
                 )
-                errors['quantity_in'] = msg
-                errors['quantity_out'] = msg
+                errors['quantity_in'] = [msg]
+                errors['quantity_out'] = [msg]
 
             if errors:
+                if any(
+                    getattr(err, 'code', None) == 'at_least_one_quantity_must_be_positive'
+                    for err_list in errors.values()
+                    for err in (err_list if isinstance(err_list, list) else [err_list])
+                ):
+                    raise CodedValidationError(
+                        errors,
+                        code='at_least_one_quantity_must_be_positive',
+                    )
                 raise serializers.ValidationError(errors)
 
             attrs['material_type'] = material_type

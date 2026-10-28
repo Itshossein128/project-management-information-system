@@ -8,18 +8,30 @@
 
 ## Action Taken
 
-- **Trigger**: Choose a Saturday week start and click Download Weekly Report.
-- **Inputs**: Department, current filters, and the selected workbook date/range where applicable.
+- **Trigger**: Choose a Saturday week start date and click "دانلود گزارش هفتگی و بالانس تجمعی مصالح (۸ شیت)" (Download Weekly Report).
+- **Inputs**: Department (`warehouse`), current filters, and the selected Saturday `week_start` date.
 
 ## Authorization & Permissions
 
-- **Required Permissions**: Standard authenticated project member with the normal read/assignment guards; no special write permission.
-- **Required Roles / Groups**: Project membership and the standard project-assignment guards.
+- **Required Permissions**: `view_reports` alongside standard authenticated project membership (`IsProjectMember`, `HasProjectPermission`, `CanViewBusinessAssignments`).
+- **Required Roles / Groups**: Project membership and standard project-assignment guards.
 - **Protection notation**: Standard authenticated action; directory is unbracketed.
 
 ## Desired Result
 
-- **API Call**: GET `/api/v1/projects/:businessId/department-activity-records/reports/weekly/?department=warehouse&week_start=YYYY-MM-DD` downloads eight RTL worksheets with native `=SUM(...)` formulas and clean empty days.
+- **API Call**: GET `/api/v1/projects/:businessId/department-activity-records/reports/weekly/?department=warehouse&week_start=YYYY-MM-DD` downloads an 8-worksheet RTL Excel workbook (.xlsx):
+  - Sheets 1 to 7: Daily activity sheets for Saturday through Friday.
+  - Sheet 8: **Cumulative Material Balance Sheet** («بالانس تجمعی مصالح») aggregating movements by `(material_type, unit)`:
+    - Column A: ردیف (Row index)
+    - Column B: نوع مصالح (Material Type)
+    - Column C: واحد (Unit)
+    - Column D: موجودی اول دوره (Opening balance before `week_start`)
+    - Column E: کل ورودی دوره (Total weekly inbound)
+    - Column F: کل خروجی دوره (Total weekly outbound)
+    - Column G: مانده پای کار / موجودی پایان دوره (Closing balance with native formula `=D{row}+E{row}-F{row}`)
+    - Column H: توضیحات و وضعیت اقلام (Item notes/status)
+    - Summary Row: Native `=SUM(...)` formulas for Opening Balance, Inbound, Outbound, and Closing Balance.
+  - Materials with historical balances prior to the week appear even if zero transactions took place during the week.
 - **State Change**: The workbook download completes; imports refresh the table only after an atomic success and display row-level failures otherwise.
 - **Navigation**: `/projects/:businessId/warehouse`
 - **UI Feedback**: Download feedback or localized validation errors are shown by `DepartmentPage`.

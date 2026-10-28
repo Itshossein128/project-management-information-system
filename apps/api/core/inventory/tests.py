@@ -798,12 +798,12 @@ class WarehouseCreateAPITests(TestCase):
             self._warehouse_payload(quantity_in='0', quantity_out='0'),
         )
         self.assertEqual(response.status_code, 400)
-        details = response.data.get('error', {}).get('details', {})
-        self.assertTrue(
-            'quantity_in' in details
-            or 'quantity_out' in details
-            or 'non_field_errors' in details
+        self.assertEqual(
+            response.data.get('error', {}).get('code'),
+            'at_least_one_quantity_must_be_positive',
         )
+        msg = response.data.get('error', {}).get('message', '')
+        self.assertIn('حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد', msg)
 
     def test_warehouse_create_rejects_negative_quantities(self):
         response = self.client.post(
@@ -1216,10 +1216,9 @@ class WarehouseIOTests(TestCase):
         )
         self.assertEqual(created, 0)
         self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].get('code'), 'at_least_one_quantity_must_be_positive')
         err = errors[0]['errors']
-        self.assertTrue(
-            'quantity_in' in err or 'quantity_out' in err or 'non_field_errors' in err
-        )
+        self.assertIn('حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد', err.get('quantity_in', ''))
 
     def test_warehouse_pdf_uses_warehouse_columns(self):
         pdf_bytes = generate_activity_report_pdf(
@@ -1238,3 +1237,291 @@ class WarehouseIOTests(TestCase):
         self.assertIn(b'Cement', pdf_bytes)
         self.assertNotIn(b'Contractor', pdf_bytes)
         self.assertNotIn(b'Activity', pdf_bytes)
+
+
+class WarehouseReportsAndBalanceTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='wh_balance_user', password='password', mobile='09120000088'
+        )
+        self.user.is_superuser = True
+        self.user.save()
+        self.project = Project.objects.create(
+            project_code='WH-PRJ-01',
+            project_name='پروژه برج شیراز',
+            employer='کارفرمای تست',
+            start_date=date(2026, 1, 1),
+        )
+        from master_data.models import ProjectMemberRole
+
+        self.role, _ = Role.objects.get_or_create(role_name='project_manager')
+        self.member = ProjectMember.objects.create(project=self.project, user=self.user)
+        ProjectMemberRole.objects.create(member=self.member, role=self.role)
+        self.client.force_authenticate(user=self.user)
+
+        # Historical record prior to 2026-10-24
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 20),
+            material_type='سیمان تیپ 2',
+            unit='کیسه',
+            quantity_in=Decimal('500.000'),
+            quantity_out=Decimal('100.000'),
+            supplier='کارخانه سیمان',
+            consumption_location='کارگاه',
+        )
+        # Prior record for gravel (no movements in current week)
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 21),
+            material_type='شن نخودی',
+            unit='تن',
+            quantity_in=Decimal('40.000'),
+            quantity_out=Decimal('10.000'),
+            supplier='معدن سنگ',
+            consumption_location='کارگاه',
+        )
+        # Current week record (Saturday 2026-10-24)
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 24),
+            material_type='سیمان تیپ 2',
+            unit='کیسه',
+            quantity_in=Decimal('200.000'),
+            quantity_out=Decimal('50.000'),
+            supplier='کارخانه سیمان',
+            consumption_location='فونداسیون',
+        )
+        # Current week record (Sunday 2026-10-25)
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 25),
+            material_type='میلگرد 16',
+            unit='شاخه',
+            quantity_in=Decimal('100.000'),
+            quantity_out=Decimal('0.000'),
+            supplier='فولاد',
+            consumption_location='کارگاه',
+        )
+
+    def test_warehouse_balance_endpoint(self):
+        url = reverse(
+            'project-department-activity-record-warehouse-balance',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = {item['material_type']: item for item in response.data}
+        self.assertIn('سیمان تیپ 2', data)
+        self.assertIn('شن نخودی', data)
+        self.assertIn('میلگرد 16', data)
+
+        cement = data['سیمان تیپ 2']
+        self.assertEqual(cement['total_in'], 700.0)
+        self.assertEqual(cement['total_out'], 150.0)
+        self.assertEqual(cement['current_balance'], 550.0)
+        self.assertEqual(cement['unit'], 'کیسه')
+
+        gravel = data['شن نخودی']
+        self.assertEqual(gravel['total_in'], 40.0)
+        self.assertEqual(gravel['total_out'], 10.0)
+        self.assertEqual(gravel['current_balance'], 30.0)
+
+    def test_warehouse_balance_as_of_date_filter(self):
+        url = reverse(
+            'project-department-activity-record-warehouse-balance',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url, {'as_of_date': '2026-10-22'})
+        self.assertEqual(response.status_code, 200)
+        data = {item['material_type']: item for item in response.data}
+        self.assertIn('سیمان تیپ 2', data)
+        # On 2026-10-22, only the 500 in and 100 out occurred
+        self.assertEqual(data['سیمان تیپ 2']['total_in'], 500.0)
+        self.assertEqual(data['سیمان تیپ 2']['total_out'], 100.0)
+        self.assertEqual(data['سیمان تیپ 2']['current_balance'], 400.0)
+        self.assertNotIn('میلگرد 16', data)
+
+    def test_warehouse_balance_search_filter(self):
+        url = reverse(
+            'project-department-activity-record-warehouse-balance',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url, {'search': 'میلگرد'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['material_type'], 'میلگرد 16')
+
+    def test_warehouse_balance_combined_search_and_as_of_date_filters(self):
+        url = reverse(
+            'project-department-activity-record-warehouse-balance',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(
+            url,
+            {'search': 'سیمان', 'as_of_date': '2026-10-22'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['material_type'], 'سیمان تیپ 2')
+        self.assertEqual(response.data[0]['total_in'], 500.0)
+        self.assertEqual(response.data[0]['total_out'], 100.0)
+        self.assertEqual(response.data[0]['current_balance'], 400.0)
+
+    def test_warehouse_weekly_report_empty_week_uses_zero_sum_formulas(self):
+        empty_project = Project.objects.create(
+            project_code='WH-EMPTY',
+            project_name='انبار خالی',
+            employer='کارفرمای تست',
+            start_date=date(2026, 1, 1),
+        )
+        url = reverse(
+            'project-department-activity-record-weekly-report',
+            kwargs={'project_pk': empty_project.id},
+        )
+        response = self.client.get(
+            url,
+            {'department': 'warehouse', 'week_start': '2026-10-24'},
+        )
+        self.assertEqual(response.status_code, 200)
+        wb = load_workbook(io.BytesIO(response.content), data_only=False)
+        ws = wb['بالانس تجمعی مصالح']
+        self.assertEqual(ws.cell(row=6, column=4).value, '=SUM(D5:D5)')
+        self.assertEqual(ws.cell(row=6, column=5).value, '=SUM(E5:E5)')
+        self.assertEqual(ws.cell(row=6, column=6).value, '=SUM(F5:F5)')
+        self.assertEqual(ws.cell(row=6, column=7).value, '=SUM(G5:G5)')
+        self.assertNotIn('#REF!', str(ws.cell(row=6, column=4).value))
+
+    def test_warehouse_weekly_report_trims_material_type_and_preserves_negative_balance(self):
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 20),
+            material_type='سیمان ',
+            unit='کیسه',
+            quantity_in=Decimal('10.000'),
+            quantity_out=Decimal('0.000'),
+            supplier='کارخانه سیمان',
+            consumption_location='کارگاه',
+        )
+        DepartmentActivityRecord.objects.create(
+            project=self.project,
+            department=Department.WAREHOUSE,
+            date=date(2026, 10, 24),
+            material_type='سیمان',
+            unit='کیسه',
+            quantity_in=Decimal('0.000'),
+            quantity_out=Decimal('15.000'),
+            supplier='کارخانه سیمان',
+            consumption_location='کارگاه',
+        )
+        url = reverse(
+            'project-department-activity-record-weekly-report',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(
+            url,
+            {'department': 'warehouse', 'week_start': '2026-10-24'},
+        )
+        self.assertEqual(response.status_code, 200)
+        ws = load_workbook(io.BytesIO(response.content), data_only=False)['بالانس تجمعی مصالح']
+        rows = [
+            row for row in ws.iter_rows(min_row=5, max_col=8, values_only=True)
+            if row[1] == 'سیمان' and row[2] == 'کیسه'
+        ]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0][3], 10.0)
+        self.assertEqual(rows[0][4], 0.0)
+        self.assertEqual(rows[0][5], 15.0)
+        self.assertLess(rows[0][3] + rows[0][4] - rows[0][5], 0)
+
+    def test_warehouse_daily_report_shiraz_format(self):
+        url = reverse(
+            'project-department-activity-record-daily-report',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url, {'department': 'warehouse', 'date': '2026-10-24'})
+        self.assertEqual(response.status_code, 200)
+        wb = load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        self.assertTrue(ws.sheet_view.rightToLeft)
+        # Title banner check
+        title = ws.cell(row=1, column=1).value
+        self.assertIn('گزارش روزانه گردش مصالح و انبار کارگاه', title)
+        self.assertIn('پروژه برج شیراز', title)
+
+        # Total Tier 1
+        sum_in = ws.cell(row=6, column=4).value
+        sum_out = ws.cell(row=6, column=6).value
+        self.assertEqual(sum_in, '=SUM(D5:D5)')
+        self.assertEqual(sum_out, '=SUM(F5:F5)')
+
+        # Tier 2 Net Balance
+        net_lbl = ws.cell(row=7, column=1).value
+        net_formula = ws.cell(row=7, column=6).value
+        self.assertIn('تراز خالص گردش مصالح روز', net_lbl)
+        self.assertEqual(net_formula, '=D6-F6')
+
+    def test_warehouse_weekly_report_cumulative_balance_sheet(self):
+        url = reverse(
+            'project-department-activity-record-weekly-report',
+            kwargs={'project_pk': self.project.id},
+        )
+        response = self.client.get(url, {'department': 'warehouse', 'week_start': '2026-10-24'})
+        self.assertEqual(response.status_code, 200)
+        wb = load_workbook(io.BytesIO(response.content))
+        self.assertEqual(len(wb.sheetnames), 8)
+        self.assertEqual(wb.sheetnames[7], 'بالانس تجمعی مصالح')
+
+        ws = wb['بالانس تجمعی مصالح']
+        self.assertTrue(ws.sheet_view.rightToLeft)
+        title = ws.cell(row=1, column=1).value
+        self.assertIn('گزارش بالانس تجمعی مصالح کارگاه', title)
+
+        # Check headers
+        headers = [ws.cell(row=4, column=c).value for c in range(1, 9)]
+        self.assertEqual(
+            headers,
+            [
+                'ردیف',
+                'نوع مصالح',
+                'واحد',
+                'موجودی اول دوره',
+                'کل ورودی دوره',
+                'کل خروجی دوره',
+                'مانده پای کار / موجودی پایان دوره',
+                'توضیحات و وضعیت اقلام',
+            ],
+        )
+
+        # Rows check: cement, gravel (prior only), rebar
+        materials = {ws.cell(row=r, column=2).value: r for r in range(5, 8)}
+        self.assertIn('سیمان تیپ 2', materials)
+        self.assertIn('شن نخودی', materials)
+        self.assertIn('میلگرد 16', materials)
+
+        # Cement row check: opening = 400, in = 200, out = 50, formula = =D5+E5-F5
+        c_row = materials['سیمان تیپ 2']
+        self.assertEqual(ws.cell(row=c_row, column=4).value, 400.0)
+        self.assertEqual(ws.cell(row=c_row, column=5).value, 200.0)
+        self.assertEqual(ws.cell(row=c_row, column=6).value, 50.0)
+        self.assertEqual(ws.cell(row=c_row, column=7).value, f'=D{c_row}+E{c_row}-F{c_row}')
+
+        # Gravel row check: opening = 30, in = 0, out = 0, formula = =D+E-F
+        g_row = materials['شن نخودی']
+        self.assertEqual(ws.cell(row=g_row, column=4).value, 30.0)
+        self.assertEqual(ws.cell(row=g_row, column=5).value, 0.0)
+        self.assertEqual(ws.cell(row=g_row, column=6).value, 0.0)
+        self.assertEqual(ws.cell(row=g_row, column=7).value, f'=D{g_row}+E{g_row}-F{g_row}')
+
+        # Summary total row formulas
+        tot_row = 8
+        self.assertEqual(ws.cell(row=tot_row, column=4).value, f'=SUM(D5:D7)')
+        self.assertEqual(ws.cell(row=tot_row, column=5).value, f'=SUM(E5:E7)')
+        self.assertEqual(ws.cell(row=tot_row, column=6).value, f'=SUM(F5:F7)')
+        self.assertEqual(ws.cell(row=tot_row, column=7).value, f'=SUM(G5:G7)')

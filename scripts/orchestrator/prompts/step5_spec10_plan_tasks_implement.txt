@@ -1,0 +1,47 @@
+You are an expert full-stack engineer and software architect.
+You are executing Step 5: `speckit-plan`, `speckit-tasks`, and `speckit-implement` in one continuous session for feature `specs/043-warehouse-department-reports`.
+Working directory: /home/hossein/Desktop/projects/building-management
+
+Refer to:
+- `.specify/feature.json` (currently pointing to `specs/043-warehouse-department-reports`)
+- `specs/043-warehouse-department-reports/spec.md`
+- `reports_documentation/atomic-specs/SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`
+- `reports_gaps/10/GAP-SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md`
+- `.specify/memory/constitution.md`
+- Skills: `.agents/skills/speckit-plan/SKILL.md`, `.agents/skills/speckit-tasks/SKILL.md`, `.agents/skills/speckit-implement/SKILL.md`
+
+=== PART 1: SPECKIT-PLAN ===
+1. Follow `.agents/skills/speckit-plan/SKILL.md` to design the feature.
+2. Create design artifacts in `specs/043-warehouse-department-reports/`:
+   - `plan.md`: Technical context, architecture decisions, component diagrams, test strategy.
+   - `research.md`: Technology choices, openpyxl formula syntax (`=D{row}+E{row}-F{row}`), dynamic opening balance calculation, error handling.
+   - `data-model.md`:
+     - Entities, queries, and calculations for:
+       - Cumulative Material Balance Sheet (شیت هشتم بالانس تجمعی مصالح در گزارش هفتگی انبار)
+       - Dynamic Opening Stock query: `sum(quantity_in) - sum(quantity_out)` before `week_start` for `(project, material_type, unit)`
+       - Error code `at_least_one_quantity_must_be_positive` in `DepartmentActivityRecordSerializer` and `import_activities_from_xlsx`
+       - Daily report Shiraz format with Net Balance formula (`تراز خالص روزانه`)
+       - `WarehouseBalanceView` endpoint: `GET /api/v1/projects/{project_pk}/department-activity-records/warehouse-balance/`
+   - `contracts/`: OpenAPI contract for `warehouse-balance/` endpoint, updated daily/weekly report contracts.
+   - `quickstart.md`: Verification instructions and testing guide.
+
+=== PART 2: SPECKIT-TASKS ===
+1. Follow `.agents/skills/speckit-tasks/SKILL.md` to generate `tasks.md` in `specs/043-warehouse-department-reports/tasks.md`.
+2. Tasks must cover:
+   - Phase 1: Serializer and Import Validation (code `at_least_one_quantity_must_be_positive` with approved Persian error message).
+   - Phase 2: Warehouse Daily Report (Shiraz format, header, total in/out formulas, net daily balance formula).
+   - Phase 3: Warehouse Weekly Report Cumulative Material Balance Sheet (8th sheet `بالانس تجمعی مصالح`, grouping by `material_type, unit`, dynamic opening balance before `week_start`, total in, total out, closing balance formula `=D+E-F`, grand totals `=SUM(...)`).
+   - Phase 4: Warehouse Balance Query Endpoint (`GET .../department-activity-records/warehouse-balance/` or under sub-reports endpoint with permission `view_reports`).
+   - Phase 5: Frontend UI enhancements (thousand separator formatting for quantities, dedicated warehouse report download triggers, error code handling).
+   - Phase 6: Automated backend tests and frontend build validation.
+
+=== PART 3: SPECKIT-IMPLEMENT ===
+1. Follow `.agents/skills/speckit-implement/SKILL.md` to execute all tasks in `tasks.md`.
+2. Implement backend services, serializers, views, and url routes.
+3. Implement frontend components, formats, and API client calls.
+4. Write and execute backend pytest tests:
+   `cd apps/api/core && ../.venv/bin/python -m pytest sub_reports/tests/ inventory/tests.py`
+5. Verify frontend build:
+   `pnpm --filter web build` must pass cleanly without any errors.
+6. Mark all completed tasks in `tasks.md` with `[x]`.
+7. Provide a comprehensive summary of all implemented files and test results.

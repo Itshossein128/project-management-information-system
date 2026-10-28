@@ -1,5 +1,6 @@
 import { useStickyFormFields } from "@/app/hooks/use-sticky-form-fields";
 import { useCreateDepartmentActivityRecord } from "@/app/hooks/queries";
+import { ApiRequestError } from "@/app/lib/api-client";
 import type {
   DepartmentActivityRecordPayload,
   DepartmentSlug,
@@ -192,7 +193,7 @@ export function DepartmentActivityRecordModal({
                 (quantityIn <= 0 && quantityOut <= 0))
             ) {
               setSubmitError(
-                t("businessDepartment.activityLog.validationQuantityRequired"),
+                "حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد",
               );
             } else {
               setSubmitError(
@@ -205,6 +206,16 @@ export function DepartmentActivityRecordModal({
             .mutateAsync(payload)
             .then(() => closeAndReset())
             .catch((err) => {
+              if (
+                err instanceof ApiRequestError &&
+                (err.code === "at_least_one_quantity_must_be_positive" ||
+                  err.message.includes("حداقل یکی از مقادیر"))
+              ) {
+                setSubmitError(
+                  "حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد",
+                );
+                return;
+              }
               setSubmitError(
                 err instanceof Error
                   ? err.message

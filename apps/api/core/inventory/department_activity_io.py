@@ -351,7 +351,10 @@ def generate_daily_activity_report_xlsx(
     # Row 1: Merged Title
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=num_cols)
     title_cell = ws.cell(row=1, column=1)
-    title_cell.value = f'گزارش روزانه فعالیت دپارتمان {dept_label} — {proj_name}'
+    if warehouse:
+        title_cell.value = f'گزارش روزانه گردش مصالح و انبار کارگاه — پروژه {proj_name}'
+    else:
+        title_cell.value = f'گزارش روزانه فعالیت دپارتمان {dept_label} — {proj_name}'
     title_cell.font = FONT_TITLE
     title_cell.fill = FILL_TITLE
     title_cell.alignment = ALIGN_CENTER
@@ -426,11 +429,11 @@ def generate_daily_activity_report_xlsx(
                     cell.alignment = ALIGN_RIGHT
             current_row += 1
 
-    # Total Row
+    # Total Row (Tier 1)
     ws.row_dimensions[current_row].height = 24
     if warehouse:
         ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=3)
-        lbl_in = ws.cell(row=current_row, column=1, value='مجموع ورودی:')
+        lbl_in = ws.cell(row=current_row, column=1, value='مجموع ورودی روز:')
         lbl_in.font = FONT_TOTAL
         lbl_in.alignment = ALIGN_RIGHT
         lbl_in.fill = FILL_TOTAL
@@ -441,7 +444,7 @@ def generate_daily_activity_report_xlsx(
         sum_in.fill = FILL_TOTAL
         sum_in.alignment = ALIGN_CENTER
 
-        lbl_out = ws.cell(row=current_row, column=5, value='مجموع خروجی:')
+        lbl_out = ws.cell(row=current_row, column=5, value='مجموع خروجی روز:')
         lbl_out.font = FONT_TOTAL
         lbl_out.alignment = ALIGN_RIGHT
         lbl_out.fill = FILL_TOTAL
@@ -454,6 +457,26 @@ def generate_daily_activity_report_xlsx(
 
         for c in range(1, num_cols + 1):
             cell = ws.cell(row=current_row, column=c)
+            cell.border = BORDER_ALL
+            cell.fill = FILL_TOTAL
+
+        # Tier 2: Net Daily Balance
+        net_row = current_row + 1
+        ws.row_dimensions[net_row].height = 24
+        ws.merge_cells(start_row=net_row, start_column=1, end_row=net_row, end_column=5)
+        net_lbl = ws.cell(row=net_row, column=1, value='تراز خالص گردش مصالح روز (خالص افزایش / کاهش موجودی):')
+        net_lbl.font = FONT_TOTAL
+        net_lbl.alignment = ALIGN_RIGHT
+        net_lbl.fill = FILL_TOTAL
+
+        net_val = ws.cell(row=net_row, column=6)
+        net_val.value = f'=D{current_row}-F{current_row}' if records else 0
+        net_val.font = FONT_TOTAL
+        net_val.fill = FILL_TOTAL
+        net_val.alignment = ALIGN_CENTER
+
+        for c in range(1, num_cols + 1):
+            cell = ws.cell(row=net_row, column=c)
             cell.border = BORDER_ALL
             cell.fill = FILL_TOTAL
     else:
@@ -487,6 +510,7 @@ def generate_weekly_activity_report_xlsx(
     department: str,
     week_start: date,
     records: list[DepartmentActivityRecord],
+    opening_balances: dict[tuple[str, str], float | Decimal] | None = None,
 ) -> bytes:
     resolved_dept = normalize_department(department) or department
     dept_label = department_display_label(department)
@@ -642,131 +666,261 @@ def generate_weekly_activity_report_xlsx(
 
         _adjust_column_widths(ws, num_cols)
 
-    # 8th Sheet: Summary Sheet (خلاصه هفتگی)
-    summary_ws = wb.create_sheet(title='خلاصه هفتگی')
-    summary_ws.sheet_view.rightToLeft = True
+    # 8th Sheet: Summary Sheet (خلاصه هفتگی یا بالانس تجمعی مصالح)
+    if warehouse:
+        summary_ws = wb.create_sheet(title='بالانس تجمعی مصالح')
+        summary_ws.sheet_view.rightToLeft = True
 
-    sum_headers = [
-        'ردیف',
-        'شرح فعالیت / آیتم' if not warehouse else 'نوع مصالح',
-        'پیمانکار' if not warehouse else 'تامین‌کننده',
-        'واحد',
-        'شنبه',
-        'یکشنبه',
-        'دوشنبه',
-        'سه‌شنبه',
-        'چهارشنبه',
-        'پنجشنبه',
-        'جمعه',
-        'مجموع کل هفته',
-    ]
-    s_cols = len(sum_headers)
+        sum_headers = [
+            'ردیف',
+            'نوع مصالح',
+            'واحد',
+            'موجودی اول دوره',
+            'کل ورودی دوره',
+            'کل خروجی دوره',
+            'مانده پای کار / موجودی پایان دوره',
+            'توضیحات و وضعیت اقلام',
+        ]
+        s_cols = len(sum_headers)
 
-    summary_ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=s_cols)
-    s_title = summary_ws.cell(row=1, column=1)
-    s_title.value = f'گزارش جمع‌بندی هفتگی دپارتمان {dept_label} — {proj_name}'
-    s_title.font = FONT_TITLE
-    s_title.fill = FILL_TITLE
-    s_title.alignment = ALIGN_CENTER
-    summary_ws.row_dimensions[1].height = 32
+        summary_ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=s_cols)
+        s_title = summary_ws.cell(row=1, column=1)
+        s_title.value = f'گزارش بالانس تجمعی مصالح کارگاه — {proj_name}'
+        s_title.font = FONT_TITLE
+        s_title.fill = FILL_TITLE
+        s_title.alignment = ALIGN_CENTER
+        summary_ws.row_dimensions[1].height = 32
 
-    week_end_date = week_start + timedelta(days=6)
-    summary_ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=s_cols)
-    s_sub = summary_ws.cell(row=2, column=1)
-    s_sub.value = f'هفته کاری از {gregorian_to_jalali(week_start)} تا {gregorian_to_jalali(week_end_date)} | کد کارگاه: {proj_code}'
-    s_sub.font = FONT_SUBTITLE
-    s_sub.alignment = ALIGN_RIGHT
-    summary_ws.row_dimensions[2].height = 20
-    summary_ws.row_dimensions[3].height = 8
+        week_end_date = week_start + timedelta(days=6)
+        summary_ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=s_cols)
+        s_sub = summary_ws.cell(row=2, column=1)
+        s_sub.value = f'هفته کاری از {gregorian_to_jalali(week_start)} تا {gregorian_to_jalali(week_end_date)} | کد کارگاه: {proj_code}'
+        s_sub.font = FONT_SUBTITLE
+        s_sub.alignment = ALIGN_RIGHT
+        summary_ws.row_dimensions[2].height = 20
+        summary_ws.row_dimensions[3].height = 8
 
-    # Summary table header
-    summary_ws.row_dimensions[4].height = 24
-    for col_idx, h in enumerate(sum_headers, start=1):
-        cell = summary_ws.cell(row=4, column=col_idx, value=h)
-        cell.font = FONT_HEADER
-        cell.fill = FILL_HEADER
-        cell.alignment = ALIGN_CENTER
-        cell.border = BORDER_ALL
+        # Summary table header
+        summary_ws.row_dimensions[4].height = 24
+        for col_idx, h in enumerate(sum_headers, start=1):
+            cell = summary_ws.cell(row=4, column=col_idx, value=h)
+            cell.font = FONT_HEADER
+            cell.fill = FILL_HEADER
+            cell.alignment = ALIGN_CENTER
+            cell.border = BORDER_ALL
 
-    # Group records by (item_desc, entity_name, unit)
-    grouped: dict[tuple[str, str, str], dict[int, float]] = {}
-    for rec in records:
-        if warehouse:
-            key = (rec.material_type, rec.supplier, rec.unit)
-            qty = float(rec.quantity_in or 0)
+        # Collect unique (material_type, unit) keys from both opening_balances and records
+        all_keys: set[tuple[str, str]] = set()
+        if opening_balances:
+            for k in opening_balances.keys():
+                all_keys.add((k[0].strip(), k[1].strip()))
+
+        weekly_in: dict[tuple[str, str], float] = {}
+        weekly_out: dict[tuple[str, str], float] = {}
+        material_notes: dict[tuple[str, str], list[str]] = {}
+
+        for rec in records:
+            k = ((rec.material_type or '').strip(), (rec.unit or '').strip())
+            all_keys.add(k)
+            weekly_in[k] = weekly_in.get(k, 0.0) + float(rec.quantity_in or 0)
+            weekly_out[k] = weekly_out.get(k, 0.0) + float(rec.quantity_out or 0)
+            if rec.description:
+                desc = rec.description.strip()
+                if desc and desc not in material_notes.setdefault(k, []):
+                    material_notes[k].append(desc)
+
+        sorted_keys = sorted(all_keys, key=lambda x: (x[0], x[1]))
+
+        s_row = 5
+        if not sorted_keys:
+            summary_ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=s_cols)
+            empty_c = summary_ws.cell(row=5, column=1, value='رکوردی در این هفته ثبت نشده است')
+            empty_c.font = FONT_DATA
+            empty_c.alignment = ALIGN_CENTER
+            for c in range(1, s_cols + 1):
+                summary_ws.cell(row=5, column=c).border = BORDER_ALL
+            s_row = 6
         else:
+            for idx, key in enumerate(sorted_keys, start=1):
+                summary_ws.row_dimensions[s_row].height = 20
+                row_fill = FILL_ZEBRA if idx % 2 == 0 else PatternFill(fill_type=None)
+
+                op_balance = float(opening_balances.get(key, 0.0)) if opening_balances else 0.0
+                tot_in = weekly_in.get(key, 0.0)
+                tot_out = weekly_out.get(key, 0.0)
+                notes_str = '؛ '.join(material_notes.get(key, []))
+
+                row_data = [
+                    idx,
+                    key[0],
+                    key[1],
+                    op_balance,
+                    tot_in,
+                    tot_out,
+                    f'=D{s_row}+E{s_row}-F{s_row}',
+                    notes_str,
+                ]
+
+                for col_idx, val in enumerate(row_data, start=1):
+                    cell = summary_ws.cell(row=s_row, column=col_idx, value=val)
+                    cell.font = FONT_DATA
+                    if row_fill.fill_type:
+                        cell.fill = row_fill
+                    cell.border = BORDER_ALL
+                    if col_idx in (1, 3):
+                        cell.alignment = ALIGN_CENTER
+                    elif col_idx in (4, 5, 6, 7):
+                        cell.alignment = ALIGN_CENTER
+                    else:
+                        cell.alignment = ALIGN_RIGHT
+                s_row += 1
+
+        # Warehouse Summary Total Row
+        summary_ws.row_dimensions[s_row].height = 24
+        summary_ws.merge_cells(start_row=s_row, start_column=1, end_row=s_row, end_column=3)
+        tot_lbl = summary_ws.cell(row=s_row, column=1, value='مجموع کل بالانس مصالح انبار:')
+        tot_lbl.font = FONT_TOTAL
+        tot_lbl.alignment = ALIGN_RIGHT
+        tot_lbl.fill = FILL_TOTAL
+
+        for c_idx, c_letter in enumerate(['D', 'E', 'F', 'G'], start=4):
+            sum_c = summary_ws.cell(row=s_row, column=c_idx)
+            # Keep native formulas even when the week has no material rows.  The
+            # placeholder row is intentionally included so Excel evaluates a
+            # valid zero total without producing an invalid/empty range.
+            sum_c.value = f'=SUM({c_letter}5:{c_letter}{s_row - 1})'
+            sum_c.font = FONT_TOTAL
+            sum_c.fill = FILL_TOTAL
+            sum_c.alignment = ALIGN_CENTER
+
+        for c in range(1, s_cols + 1):
+            summary_ws.cell(row=s_row, column=c).border = BORDER_ALL
+            summary_ws.cell(row=s_row, column=c).fill = FILL_TOTAL
+
+        _adjust_column_widths(summary_ws, s_cols)
+    else:
+        summary_ws = wb.create_sheet(title='خلاصه هفتگی')
+        summary_ws.sheet_view.rightToLeft = True
+
+        sum_headers = [
+            'ردیف',
+            'شرح فعالیت / آیتم',
+            'پیمانکار',
+            'واحد',
+            'شنبه',
+            'یکشنبه',
+            'دوشنبه',
+            'سه‌شنبه',
+            'چهارشنبه',
+            'پنجشنبه',
+            'جمعه',
+            'مجموع کل هفته',
+        ]
+        s_cols = len(sum_headers)
+
+        summary_ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=s_cols)
+        s_title = summary_ws.cell(row=1, column=1)
+        s_title.value = f'گزارش جمع‌بندی هفتگی دپارتمان {dept_label} — {proj_name}'
+        s_title.font = FONT_TITLE
+        s_title.fill = FILL_TITLE
+        s_title.alignment = ALIGN_CENTER
+        summary_ws.row_dimensions[1].height = 32
+
+        week_end_date = week_start + timedelta(days=6)
+        summary_ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=s_cols)
+        s_sub = summary_ws.cell(row=2, column=1)
+        s_sub.value = f'هفته کاری از {gregorian_to_jalali(week_start)} تا {gregorian_to_jalali(week_end_date)} | کد کارگاه: {proj_code}'
+        s_sub.font = FONT_SUBTITLE
+        s_sub.alignment = ALIGN_RIGHT
+        summary_ws.row_dimensions[2].height = 20
+        summary_ws.row_dimensions[3].height = 8
+
+        # Summary table header
+        summary_ws.row_dimensions[4].height = 24
+        for col_idx, h in enumerate(sum_headers, start=1):
+            cell = summary_ws.cell(row=4, column=col_idx, value=h)
+            cell.font = FONT_HEADER
+            cell.fill = FILL_HEADER
+            cell.alignment = ALIGN_CENTER
+            cell.border = BORDER_ALL
+
+        # Group records by (item_desc, entity_name, unit)
+        grouped: dict[tuple[str, str, str], dict[int, float]] = {}
+        for rec in records:
             key = (rec.activity_description, rec.contractor, rec.unit)
             qty = float(rec.executed_quantity or 0)
 
-        if key not in grouped:
-            grouped[key] = {d_idx: 0.0 for d_idx in range(7)}
+            if key not in grouped:
+                grouped[key] = {d_idx: 0.0 for d_idx in range(7)}
 
-        for d_idx, day_d in enumerate(day_dates):
-            if rec.date == day_d:
-                grouped[key][d_idx] += qty
+            for d_idx, day_d in enumerate(day_dates):
+                if rec.date == day_d:
+                    grouped[key][d_idx] += qty
 
-    s_row = 5
-    if not grouped:
-        summary_ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=s_cols)
-        empty_c = summary_ws.cell(row=5, column=1, value='رکوردی در این هفته ثبت نشده است')
-        empty_c.font = FONT_DATA
-        empty_c.alignment = ALIGN_CENTER
+        s_row = 5
+        if not grouped:
+            summary_ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=s_cols)
+            empty_c = summary_ws.cell(row=5, column=1, value='رکوردی در این هفته ثبت نشده است')
+            empty_c.font = FONT_DATA
+            empty_c.alignment = ALIGN_CENTER
+            for c in range(1, s_cols + 1):
+                summary_ws.cell(row=5, column=c).border = BORDER_ALL
+            s_row = 6
+        else:
+            for idx, (key, days_dict) in enumerate(grouped.items(), start=1):
+                summary_ws.row_dimensions[s_row].height = 20
+                row_fill = FILL_ZEBRA if idx % 2 == 0 else PatternFill(fill_type=None)
+
+                row_data = [
+                    idx,
+                    key[0],
+                    key[1],
+                    key[2],
+                    days_dict[0],
+                    days_dict[1],
+                    days_dict[2],
+                    days_dict[3],
+                    days_dict[4],
+                    days_dict[5],
+                    days_dict[6],
+                    f'=SUM(E{s_row}:K{s_row})',
+                ]
+
+                for col_idx, val in enumerate(row_data, start=1):
+                    cell = summary_ws.cell(row=s_row, column=col_idx, value=val)
+                    cell.font = FONT_DATA
+                    if row_fill.fill_type:
+                        cell.fill = row_fill
+                    cell.border = BORDER_ALL
+                    if col_idx in (1, 4):
+                        cell.alignment = ALIGN_CENTER
+                    elif col_idx in range(5, 13):
+                        cell.alignment = ALIGN_CENTER
+                    else:
+                        cell.alignment = ALIGN_RIGHT
+                s_row += 1
+
+        # Weekly Summary Total Row
+        summary_ws.row_dimensions[s_row].height = 24
+        summary_ws.merge_cells(start_row=s_row, start_column=1, end_row=s_row, end_column=4)
+        tot_lbl = summary_ws.cell(row=s_row, column=1, value='مجموع احجام کل روزانه:')
+        tot_lbl.font = FONT_TOTAL
+        tot_lbl.alignment = ALIGN_RIGHT
+        tot_lbl.fill = FILL_TOTAL
+
+        # Daily columns E through K and grand total L
+        for c_idx, c_letter in enumerate(['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'], start=5):
+            sum_c = summary_ws.cell(row=s_row, column=c_idx)
+            sum_c.value = f'=SUM({c_letter}5:{c_letter}{s_row - 1})'
+            sum_c.font = FONT_TOTAL
+            sum_c.fill = FILL_TOTAL
+            sum_c.alignment = ALIGN_CENTER
+
         for c in range(1, s_cols + 1):
-            summary_ws.cell(row=5, column=c).border = BORDER_ALL
-        s_row = 6
-    else:
-        for idx, (key, days_dict) in enumerate(grouped.items(), start=1):
-            summary_ws.row_dimensions[s_row].height = 20
-            row_fill = FILL_ZEBRA if idx % 2 == 0 else PatternFill(fill_type=None)
+            summary_ws.cell(row=s_row, column=c).border = BORDER_ALL
+            summary_ws.cell(row=s_row, column=c).fill = FILL_TOTAL
 
-            row_data = [
-                idx,
-                key[0],
-                key[1],
-                key[2],
-                days_dict[0],
-                days_dict[1],
-                days_dict[2],
-                days_dict[3],
-                days_dict[4],
-                days_dict[5],
-                days_dict[6],
-                f'=SUM(E{s_row}:K{s_row})',
-            ]
-
-            for col_idx, val in enumerate(row_data, start=1):
-                cell = summary_ws.cell(row=s_row, column=col_idx, value=val)
-                cell.font = FONT_DATA
-                if row_fill.fill_type:
-                    cell.fill = row_fill
-                cell.border = BORDER_ALL
-                if col_idx in (1, 4):
-                    cell.alignment = ALIGN_CENTER
-                elif col_idx in range(5, 13):
-                    cell.alignment = ALIGN_CENTER
-                else:
-                    cell.alignment = ALIGN_RIGHT
-            s_row += 1
-
-    # Weekly Summary Total Row
-    summary_ws.row_dimensions[s_row].height = 24
-    summary_ws.merge_cells(start_row=s_row, start_column=1, end_row=s_row, end_column=4)
-    tot_lbl = summary_ws.cell(row=s_row, column=1, value='مجموع احجام کل روزانه:')
-    tot_lbl.font = FONT_TOTAL
-    tot_lbl.alignment = ALIGN_RIGHT
-    tot_lbl.fill = FILL_TOTAL
-
-    # Daily columns E through K and grand total L
-    for c_idx, c_letter in enumerate(['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'], start=5):
-        sum_c = summary_ws.cell(row=s_row, column=c_idx)
-        sum_c.value = f'=SUM({c_letter}5:{c_letter}{s_row - 1})'
-        sum_c.font = FONT_TOTAL
-        sum_c.fill = FILL_TOTAL
-        sum_c.alignment = ALIGN_CENTER
-
-    for c in range(1, s_cols + 1):
-        summary_ws.cell(row=s_row, column=c).border = BORDER_ALL
-        summary_ws.cell(row=s_row, column=c).fill = FILL_TOTAL
+        _adjust_column_widths(summary_ws, s_cols)
 
     _adjust_column_widths(summary_ws, s_cols)
 
@@ -932,22 +1086,23 @@ def import_activities_from_xlsx(
                     row_errors['quantity_out'] = str(
                         _('Quantity must be greater than or equal to zero.')
                     )
+                row_code = None
                 if (
                     'quantity_in' not in row_errors
                     and 'quantity_out' not in row_errors
                     and quantity_in <= 0
                     and quantity_out <= 0
                 ):
-                    msg = str(
-                        _(
-                            'At least one of quantity_in or quantity_out must be greater than zero.'
-                        )
-                    )
+                    msg = 'حداقل یکی از مقادیر ورودی یا خروجی باید بزرگتر از صفر باشد'
                     row_errors['quantity_in'] = msg
                     row_errors['quantity_out'] = msg
+                    row_code = 'at_least_one_quantity_must_be_positive'
 
                 if row_errors:
-                    errors.append({'row': row_index, 'errors': row_errors})
+                    err_entry: dict[str, Any] = {'row': row_index, 'errors': row_errors}
+                    if row_code:
+                        err_entry['code'] = row_code
+                    errors.append(err_entry)
                     continue
 
                 records_to_create.append(

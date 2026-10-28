@@ -1138,6 +1138,11 @@
       "kind": "local"
     },
     {
+      "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/[query-warehouse-balance]",
+      "protected": true,
+      "kind": "query"
+    },
+    {
       "path": "login/submit-valid-credentials/[open-legacy-project]/[open-warehouse-department]/filter-and-change-view",
       "protected": false,
       "kind": "local"

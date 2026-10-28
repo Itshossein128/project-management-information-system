@@ -8,18 +8,21 @@
 
 ## Action Taken
 
-- **Trigger**: Choose a report date and click Download Daily Report.
-- **Inputs**: Department, current filters, and the selected workbook date/range where applicable.
+- **Trigger**: Choose a report date and click "دانلود گزارش روزانه انبار (شیراز)" (Download Daily Report).
+- **Inputs**: Department (`warehouse`), current filters, and the selected report date (`YYYY-MM-DD`).
 
 ## Authorization & Permissions
 
-- **Required Permissions**: Standard authenticated project member with the normal read/assignment guards; no special write permission.
-- **Required Roles / Groups**: Project membership and the standard project-assignment guards.
+- **Required Permissions**: `view_reports` alongside standard authenticated project membership (`IsProjectMember`, `HasProjectPermission`, `CanViewBusinessAssignments`).
+- **Required Roles / Groups**: Project membership and standard project-assignment guards.
 - **Protection notation**: Standard authenticated action; directory is unbracketed.
 
 ## Desired Result
 
-- **API Call**: GET `/api/v1/projects/:businessId/department-activity-records/reports/daily/?department=warehouse&date=YYYY-MM-DD` downloads the official RTL `.xlsx` workbook with a native `=SUM(...)` total.
+- **API Call**: GET `/api/v1/projects/:businessId/department-activity-records/reports/daily/?department=warehouse&date=YYYY-MM-DD` downloads the Shiraz-standard RTL `.xlsx` workbook featuring:
+  - Header Banner: `گزارش روزانه گردش مصالح و انبار کارگاه — پروژه {proj_name}`
+  - Tier 1 Summary: Total Inbound (`=SUM(D5:D{n})`) and Total Outbound (`=SUM(F5:F{n})`)
+  - Tier 2 Summary: Net Daily Balance («تراز خالص گردش مصالح روز (خالص افزایش / کاهش موجودی):») with native formula `=D{sum_row}-F{sum_row}`.
 - **State Change**: The workbook download completes; imports refresh the table only after an atomic success and display row-level failures otherwise.
 - **Navigation**: `/projects/:businessId/warehouse`
 - **UI Feedback**: Download feedback or localized validation errors are shown by `DepartmentPage`.

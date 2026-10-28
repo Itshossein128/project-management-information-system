@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: Warehouse Department Balance API
+  version: 1.0.0
+  description: API contract for real-time warehouse stock balance queries.
+paths:
+  /api/v1/projects/{project_pk}/department-activity-records/warehouse-balance/:
+    get:
+      summary: Query warehouse material balance summary
+      description: Returns stock balance aggregated by (material_type, unit) up to the specified date.
+      operationId: getWarehouseBalance
+      tags:
+        - Project warehouse records
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project identifier
+        - name: as_of_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Cutoff date for balance calculation (defaults to today)
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Case-insensitive material name filter
+      responses:
+        '200':
+          description: Successful stock balance summary list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehouseBalanceItem'
+        '400':
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+        '403':
+          description: Permission denied (requires view_reports and project membership)
+        '404':
+          description: Project not found
+components:
+  schemas:
+    WarehouseBalanceItem:
+      type: object
+      required:
+        - material_type
+        - unit
+        - total_in
+        - total_out
+        - current_balance
+        - last_movement_date
+      properties:
+        material_type:
+          type: string
+          example: سیمان تیپ 2
+        unit:
+          type: string
+          example: کیسه 50 کیلویی
+        total_in:
+          type: number
+          format: float
+          example: 500.0
+        total_out:
+          type: number
+          format: float
+          example: 100.0
+        current_balance:
+          type: number
+          format: float
+          example: 400.0
+        last_movement_date:
+          type: string
+          format: date
+          nullable: true
+          example: '2026-10-28'
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
