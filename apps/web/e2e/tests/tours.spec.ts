@@ -30,6 +30,7 @@ const TOURS = [
   { id: "project-costs", path: "costs" },
   { id: "project-contracts", path: "contracts" },
   { id: "project-contract-detail", path: "contracts/mock-contract-id" },
+  { id: "project-ipc-detail", path: "ipcs/mock-ipc-id" },
 ] as const;
 
 /** An untranslated step renders the raw i18n key instead of a sentence. */
@@ -77,6 +78,24 @@ test.describe("Product tours", () => {
           gross_amount: 500000000,
           items: [],
           change_orders: [],
+        }),
+      });
+    });
+
+    await page.route(/\/api\/v1\/projects\/[^\/]+\/ipcs\/mock-ipc-id\//, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "mock-ipc-id",
+          ipc_number: "101",
+          contract_number: "CNT-101",
+          status: "draft",
+          gross_amount: 150000000,
+          deductions_total: 15000000,
+          net_amount: 135000000,
+          items: [],
+          deductions: [],
         }),
       });
     });
