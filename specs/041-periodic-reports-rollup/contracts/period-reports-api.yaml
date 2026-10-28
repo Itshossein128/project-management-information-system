@@ -1,0 +1,398 @@
+openapi: 3.0.3
+info:
+  title: Periodic Reports Rollup, Figure Provenance & Override API
+  version: 1.0.0
+  description: API contracts for generating weekly/monthly periodic project reports with automated daily rollup, provenance tracking, and controlled overrides.
+
+paths:
+  /api/v1/projects/{project_pk}/progress-reports/:
+    get:
+      summary: List weekly and monthly period reports
+      operationId: listPeriodReports
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [weekly, monthly]
+        - name: include_superseded
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectPeriodReportSummary'
+
+    post:
+      summary: Generate weekly or monthly period report
+      operationId: generatePeriodReport
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, period_start, period_end]
+              properties:
+                kind:
+                  type: string
+                  enum: [weekly, monthly]
+                period_start:
+                  type: string
+                  description: ISO Gregorian (YYYY-MM-DD) or Jalali (YYYY/MM/DD)
+                period_end:
+                  type: string
+                  description: ISO Gregorian (YYYY-MM-DD) or Jalali (YYYY/MM/DD)
+      responses:
+        '201':
+          description: Generated report with figures and warnings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectPeriodReportDetail'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/projects/{project_pk}/progress-reports/{report_id}/:
+    get:
+      summary: Retrieve period report details with figures
+      operationId: getPeriodReportDetail
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: report_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full report detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectPeriodReportDetail'
+
+  /api/v1/projects/{project_pk}/progress-reports/{report_id}/approve/:
+    post:
+      summary: Officially approve a monthly or weekly report and stamp serial number
+      operationId: approvePeriodReport
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: report_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Approved report with official serial number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectPeriodReportDetail'
+        '403':
+          description: Lacking approve_reports permission
+        '400':
+          description: Already approved or invalid state
+
+  /api/v1/projects/{project_pk}/progress-reports/figures/{figure_id}/:
+    get:
+      summary: Retrieve single figure detail
+      operationId: getPeriodReportFigure
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: figure_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodReportFigureDetail'
+
+    patch:
+      summary: Direct mutation is forbidden (returns figure_immutable)
+      operationId: directPatchFigure
+      responses:
+        '400':
+          description: Direct figure mutation rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/projects/{project_pk}/progress-reports/figures/{figure_id}/sources/:
+    get:
+      summary: Retrieve granular figure provenance breakdown
+      operationId: getFigureProvenanceSources
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: figure_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Itemized list of source daily records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FigureSourceItem'
+
+  /api/v1/projects/{project_pk}/progress-reports/figures/{figure_id}/override/:
+    post:
+      summary: Submit figure override with required justification
+      operationId: overrideFigure
+      parameters:
+        - name: project_pk
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: figure_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [new_value, reason]
+              properties:
+                new_value:
+                  description: New overridden value (any JSON value)
+                reason:
+                  type: string
+                  minLength: 10
+                  description: Mandatory justification of at least 10 characters
+      responses:
+        '200':
+          description: Successfully overridden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  override:
+                    $ref: '#/components/schemas/FigureOverrideAudit'
+                  figure:
+                    $ref: '#/components/schemas/PeriodReportFigureDetail'
+        '400':
+          description: Reason too short or missing value (override_reason_required)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: User lacks edit_reports or approve_reports permission
+
+components:
+  schemas:
+    ProjectPeriodReportSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum: [weekly, monthly]
+        title:
+          type: string
+        period_start:
+          type: string
+          format: date
+        period_end:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [generated, approved, superseded]
+        serial_number:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        generated_at:
+          type: string
+          format: date-time
+        generated_by:
+          type: string
+        approved_at:
+          type: string
+          format: date-time
+          nullable: true
+        approved_by:
+          type: string
+          nullable: true
+        superseded_by:
+          type: string
+          nullable: true
+
+    ProjectPeriodReportDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProjectPeriodReportSummary'
+        - type: object
+          properties:
+            figures:
+              type: array
+              items:
+                $ref: '#/components/schemas/PeriodReportFigureDetail'
+
+    PeriodReportFigureDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        section:
+          type: string
+        label_key:
+          type: string
+        value:
+          description: Active value (could be overridden)
+        calculated_value:
+          description: Permanent initial calculated value
+        is_overridden:
+          type: boolean
+        unit_of_measure:
+          type: string
+        value_status:
+          type: string
+          enum: [recorded, not_recorded]
+        source_type:
+          type: string
+        source_id:
+          type: string
+          nullable: true
+        source_path:
+          type: string
+        source_approved:
+          type: boolean
+        last_updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        override_count:
+          type: integer
+
+    FigureSourceItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        source_type:
+          type: string
+        source_id:
+          type: string
+          nullable: true
+        source_date:
+          type: string
+          format: date
+        source_date_jalali:
+          type: string
+        source_code:
+          type: string
+        contributed_quantity:
+          description: Contributed volume or hours
+        created_by_name:
+          type: string
+        approved_by_name:
+          type: string
+
+    FigureOverrideAudit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        figure_id:
+          type: string
+          format: uuid
+        old_value:
+          description: Prior value
+        new_value:
+          description: Overridden value
+        reason:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string

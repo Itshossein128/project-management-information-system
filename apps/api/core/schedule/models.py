@@ -430,6 +430,7 @@ class PeriodReportKind(models.TextChoices):
 
 class PeriodReportStatus(models.TextChoices):
     GENERATED = 'generated', 'Generated'
+    APPROVED = 'approved', 'Approved'
     SUPERSEDED = 'superseded', 'Superseded'
 
 
@@ -447,6 +448,8 @@ class ProjectPeriodReport(AuditSoftDeleteModel):
         choices=PeriodReportStatus.choices,
         default=PeriodReportStatus.GENERATED,
     )
+    serial_number = models.CharField(max_length=64, blank=True, default='')
+    warnings = models.JSONField(default=list, blank=True)
     generated_at = models.DateTimeField()
     generated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -454,6 +457,14 @@ class ProjectPeriodReport(AuditSoftDeleteModel):
         null=True,
         blank=True,
         related_name='generated_period_reports',
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_period_reports',
     )
     superseded_by = models.ForeignKey(
         'self',
@@ -489,6 +500,10 @@ class PeriodReportFigure(UUIDModel):
     section = models.CharField(max_length=60)
     label_key = models.CharField(max_length=120)
     value = models.JSONField(null=True, blank=True)
+    calculated_value = models.JSONField(null=True, blank=True)
+    is_overridden = models.BooleanField(default=False)
+    version = models.PositiveIntegerField(default=1)
+    unit_of_measure = models.CharField(max_length=40, blank=True, default='')
     value_status = models.CharField(
         max_length=20,
         choices=FigureValueStatus.choices,
@@ -503,6 +518,79 @@ class PeriodReportFigure(UUIDModel):
     class Meta:
         db_table = 'period_report_figures'
         ordering = ['section']
+
+
+class PeriodReportFigureSourceItem(UUIDModel, TimeStampedModel):
+    figure = models.ForeignKey(
+        PeriodReportFigure,
+        on_delete=models.CASCADE,
+        related_name='source_items',
+    )
+    source_type = models.CharField(max_length=40)
+    daily_report = models.ForeignKey(
+        'field_reports.DailyReport',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    daily_labor = models.ForeignKey(
+        'field_reports.DailyReportLabor',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    daily_equipment = models.ForeignKey(
+        'field_reports.DailyReportEquipment',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    daily_material = models.ForeignKey(
+        'field_reports.DailyReportMaterial',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    daily_activity = models.ForeignKey(
+        'field_reports.DailyReportActivity',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    daily_incident = models.ForeignKey(
+        'field_reports.DailyReportIncident',
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='period_figure_sources',
+    )
+    source_id = models.UUIDField(null=True, blank=True)
+    source_date = models.DateField(null=True, blank=True)
+    source_code = models.CharField(max_length=60, blank=True, default='')
+    contributed_quantity = models.JSONField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+    )
+
+    class Meta:
+        db_table = 'period_report_figure_source_items'
+        ordering = ['source_date', 'created_at']
 
 
 class PeriodReportFigureOverride(UUIDModel, TimeStampedModel):

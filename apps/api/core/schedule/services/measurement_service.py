@@ -26,6 +26,7 @@ PROGRESS_EPSILON = 1e-9
 
 _STATUS_BY_CODE = {
     'measurement_already_approved': 409,
+    'conflict': 409,
 }
 
 

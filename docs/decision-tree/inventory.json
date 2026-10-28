@@ -2702,6 +2702,16 @@
       "kind": "mutation"
     },
     {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[approve-official-report]",
+      "protected": true,
+      "kind": "mutation"
+    },
+    {
+      "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[generate-period-report]/[inspect-figure-provenance]",
+      "protected": true,
+      "kind": "read"
+    },
+    {
       "path": "login/submit-valid-credentials/select-project/[navigate-progress]/[record-manual-progress]",
       "protected": true,
       "kind": "mutation"

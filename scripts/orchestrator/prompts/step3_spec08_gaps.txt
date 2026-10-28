@@ -1,0 +1,19 @@
+You are an expert software architect and gap-analysis specialist working on: /home/hossein/Desktop/projects/building-management
+
+Your task is to analyze `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-08-PERIODIC-REPORTS-ROLLUP.md` and find the gaps between the project's current implementation and this specification document.
+
+Specifically:
+1. Thoroughly read and analyze:
+   - `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-08-PERIODIC-REPORTS-ROLLUP.md`
+   - Existing codebase implementations in `apps/api/core/schedule/`, `apps/api/core/field_reports/`, `apps/web/src/components/reports/`, `apps/web/src/app/routes/`, etc.
+   - Reference previous gap analyses in `reports_gaps/07/GAP-SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md` and `reports_gaps/07/speckit-specify-prompts/01-PROMPT-PHYSICAL-PROGRESS-MEASUREMENT.md`.
+2. Identify all gaps:
+   - Check US-PR-04: Auto-generation of weekly report from approved daily reports (`report_type="weekly"`), required sections (completed activities, critical delayed activities, manpower & machinery table, materials received/consumed, upcoming priorities), exclusion of unapproved drafts with warning.
+   - Check US-PR-05: Auto-generation of monthly report (`report_type="monthly"`), S-curve progress, financial vs physical status, HSE incidents & QC inspections, variance analysis (SPI/CPI), unique serial number.
+   - Check US-PR-06: Figure Provenance model (`source_type`, `source_id`, `source_path`, `source_approved`), provenance inquiry endpoint (`GET .../figures/{figure_id}/`), protected FK constraints against deleting daily source records.
+   - Check US-PR-07: Controlled Figure Override (`PeriodReportFigureOverride`), min 10 characters `override_reason` (`override_reason_required`), immutability of raw figures (`figure_immutable`), asterisk (*) footnote in UI/print.
+3. Generate the artifacts in `/home/hossein/Desktop/projects/building-management/reports_gaps/08/`:
+   - Create `reports_gaps/08/GAP-SPEC-08-PERIODIC-REPORTS-ROLLUP.md` documenting findings, evidence, and missing capabilities.
+   - Create `reports_gaps/08/speckit-specify-prompts/01-PROMPT-PERIODIC-REPORTS-ROLLUP.md` containing a comprehensive, structured Persian prompt for `speckit-specify` that starts with `/speckit-specify` and covers all identified gaps, acceptance criteria, boundaries, and required evidence.
+   - Also create a copy or link at `reports_gaps/08/PROMPT-SPEC-08.md` for easy access.
+4. Provide a summary of the discovered gaps and confirm the files created.

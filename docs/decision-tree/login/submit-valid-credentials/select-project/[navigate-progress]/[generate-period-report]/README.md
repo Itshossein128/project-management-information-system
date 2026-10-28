@@ -9,7 +9,7 @@
 ## Action Taken
 
 - **Trigger**: Click Generate Weekly or Generate Monthly.
-- **Inputs**: No user-supplied period dates; the component computes the current week or current calendar month.
+- **Inputs**: No user-supplied period dates; the component computes the current Solar Hijri Saturday-to-Friday week or Solar Hijri month.
 
 ## Authorization & Permissions
 
@@ -26,12 +26,14 @@
 
 ## Outcomes & Guards
 
-The report creation view deliberately uses its read_permission even for POST; this is the actual implementation. The UI computes period_start/period_end using mondayOf/sundayOf or monthBounds; it has no editable period dates.
+The report creation view deliberately uses its read_permission even for POST; this is the actual implementation. The server independently validates the Saturday-to-Friday or Solar Hijri month boundary and rejects arbitrary spans. Unapproved or missing daily dates remain visible in header warnings and are excluded from rollups.
 
 A pending request uses the component’s busy/disabled state where implemented. Validation, permission or network failure follows its error handler; do not infer rollback or idempotency for a sequence of requests. Correct the input or access issue before retrying. Cancel/close on an unsent form makes no API write; closing after submission does not undo a request.
 
 ## Subsequent Decisions
 
+- [Approve official report](%5Bapprove-official-report%5D/README.md)
+- [Inspect figure provenance](%5Binspect-figure-provenance%5D/README.md)
 - [Override a report figure](%5Boverride-report-figure%5D/README.md)
 
 Continue / return links (the same state is documented once):

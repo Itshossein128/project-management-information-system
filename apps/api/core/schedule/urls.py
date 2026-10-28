@@ -28,8 +28,10 @@ from schedule.measurement_views import (
     ProgressTechnicalApproveView,
 )
 from schedule.period_report_views import (
+    ProgressReportApproveView,
     ProgressReportDetailView,
     ProgressReportFigureOverrideView,
+    ProgressReportFigureSourcesView,
     ProgressReportFigureView,
     ProgressReportListCreateView,
 )
@@ -178,14 +180,29 @@ urlpatterns = [
     ),
     path('progress-reports/', ProgressReportListCreateView.as_view(), name='progress-report-list'),
     path(
+        'progress-reports/<uuid:report_id>/approve/',
+        ProgressReportApproveView.as_view(),
+        name='progress-report-approve',
+    ),
+    path(
         'progress-reports/figures/<uuid:figure_id>/',
         ProgressReportFigureView.as_view(),
         name='progress-report-figure',
     ),
     path(
+        'progress-reports/figures/<uuid:figure_id>/sources/',
+        ProgressReportFigureSourcesView.as_view(),
+        name='progress-report-figure-sources',
+    ),
+    path(
         'progress-reports/figures/<uuid:figure_id>/overrides/',
         ProgressReportFigureOverrideView.as_view(),
         name='progress-report-figure-override',
+    ),
+    path(
+        'progress-reports/figures/<uuid:figure_id>/override/',
+        ProgressReportFigureOverrideView.as_view(),
+        name='progress-report-figure-override-alias',
     ),
     path(
         'progress-reports/<uuid:report_id>/',

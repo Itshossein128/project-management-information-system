@@ -210,11 +210,31 @@ export interface ActivityMeasurement {
   pending_change_reason?: string;
 }
 
+export interface FigureSourceItem {
+  id: string;
+  figure_id: string;
+  source_type: string;
+  source_id: string | null;
+  daily_report_id: string | null;
+  source_date: string | null;
+  source_date_jalali: string;
+  source_code: string;
+  contributed_quantity: unknown;
+  created_by: string | null;
+  created_by_name: string;
+  approved_by: string | null;
+  approved_by_name: string;
+}
+
 export interface PeriodReportFigure {
   id: string;
   section: string;
   label_key: string;
   value: unknown;
+  calculated_value?: unknown;
+  is_overridden?: boolean;
+  version: number;
+  unit_of_measure?: string;
   value_status: "recorded" | "not_recorded";
   source_type: string;
   source_id: string | null;
@@ -231,9 +251,13 @@ export interface PeriodReport {
   title: string;
   period_start: string;
   period_end: string;
-  status: "generated" | "superseded";
+  status: "generated" | "approved" | "superseded";
+  serial_number?: string;
+  warnings?: string[];
   generated_at: string;
   generated_by: string | null;
+  approved_at?: string | null;
+  approved_by?: string | null;
   superseded_by: string | null;
   figures?: PeriodReportFigure[];
 }
@@ -421,10 +445,20 @@ export function fetchPeriodReport(projectId: string, reportId: string) {
 export function overridePeriodReportFigure(
   projectId: string,
   figureId: string,
-  body: { new_value: unknown; reason: string },
+  body: { new_value: unknown; reason: string; expected_version?: number },
 ) {
   return apiJson(`${reportsBase(projectId)}/figures/${figureId}/overrides/`, {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function approvePeriodReport(projectId: string, reportId: string) {
+  return apiJson<PeriodReport>(`${reportsBase(projectId)}/${reportId}/approve/`, {
+    method: "POST",
+  });
+}
+
+export function fetchFigureSources(projectId: string, figureId: string) {
+  return apiJson<FigureSourceItem[]>(`${reportsBase(projectId)}/figures/${figureId}/sources/`);
 }

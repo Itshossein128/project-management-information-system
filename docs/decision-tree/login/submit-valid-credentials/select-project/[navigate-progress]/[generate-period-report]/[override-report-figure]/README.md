@@ -9,18 +9,18 @@
 ## Action Taken
 
 - **Trigger**: Select report and figure; enter override and reason, then save.
-- **Inputs**: Figure ID, replacement value and reason.
+- **Inputs**: Figure ID, replacement value, expected figure version, and a justification of at least 10 characters.
 
 ## Authorization & Permissions
 
-- **Required Permissions**: edit_activities
+- **Required Permissions**: edit_reports or approve_reports
 - **Required Roles / Groups**: Project roles and member overrides determine codenames; see the permission catalog.
 - **Protection notation**: Special permission/role gate; directory uses brackets.
 
 ## Desired Result
 
 - **API Call**: POST overridePeriodReportFigure.
-- **State Change**: Override audit record updates the selected report figure.
+- **State Change**: Override audit record updates the selected report figure while preserving calculated_value. Negative values for non-negative metrics are rejected; a stale version returns HTTP 409 conflict.
 - **Navigation**: `/projects/:projectId/progress`
 - **UI Feedback**: Accepted requests update the described state. Rejected requests follow the component’s error handler; explicit error feedback exists only where the component renders it.
 

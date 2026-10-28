@@ -119,3 +119,34 @@ export function formatLocaleDateTime(iso: string | null | undefined, lang?: stri
   const time = iso.slice(11, 16);
   return time ? `${date} ${time}` : date;
 }
+
+/**
+ * Compute the Solar Hijri (Jalali) Saturday-to-Friday workweek containing the given date.
+ * Returns ISO strings { start: "YYYY-MM-DD", end: "YYYY-MM-DD" }.
+ * In Persian calendar, the week starts on Saturday (شنبه) and ends on Friday (جمعه).
+ */
+export function getSolarHijriWorkweekBounds(d: Date = new Date()): { start: string; end: string } {
+  const pDate = new DateObject({ date: d, calendar: persian, locale: persian_fa });
+  const dayIndex = pDate.weekDay.index; // 0 for Saturday .. 6 for Friday
+  const startObj = new DateObject(pDate).subtract(dayIndex, "days");
+  const endObj = new DateObject(pDate).add(6 - dayIndex, "days");
+  return {
+    start: dateObjectToIso(startObj),
+    end: dateObjectToIso(endObj),
+  };
+}
+
+/**
+ * Compute the Solar Hijri (Jalali) month boundaries (1st day to last day of Jalali month).
+ * Returns ISO strings { start: "YYYY-MM-DD", end: "YYYY-MM-DD" }.
+ */
+export function getSolarHijriMonthBounds(d: Date = new Date()): { start: string; end: string } {
+  const pDate = new DateObject({ date: d, calendar: persian, locale: persian_fa });
+  const startObj = new DateObject(pDate).set("day", 1);
+  const daysInMonth = pDate.month.length;
+  const endObj = new DateObject(pDate).set("day", daysInMonth);
+  return {
+    start: dateObjectToIso(startObj),
+    end: dateObjectToIso(endObj),
+  };
+}
