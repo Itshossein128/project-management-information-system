@@ -20,7 +20,7 @@ class TestMeasurementMethods:
     def test_get_creates_draft_defaulting_to_quantity(self, project, activity, auth_client):
         response = auth_client.get(_base(project, activity))
         assert response.status_code == 200
-        assert response.data['method'] == 'quantity'
+        assert response.data['method'] == 'quantity_based'
         assert response.data['status'] == 'draft'
         assert response.data['current_version_id'] is None
 

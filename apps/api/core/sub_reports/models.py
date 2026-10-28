@@ -248,6 +248,7 @@ class DisciplineSubReportActivity(SyncRevisionMixin, UUIDModel):
     unit = models.CharField(max_length=40, null=True, blank=True)
     quantity = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    achieved_milestones = models.JSONField(default=list, blank=True)
     shift_hours = models.DecimalField(max_digits=4, decimal_places=2, default=8.00)
     is_hydrostatic_tested = models.BooleanField(default=False)
     test_pressure_bar = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)

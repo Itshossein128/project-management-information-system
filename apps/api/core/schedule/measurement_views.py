@@ -17,13 +17,16 @@ from schedule.services.progress_service import invalidate_s_curve_cache
 
 def serialize_definition(definition: ActivityMeasurementDefinition) -> dict:
     versions = definition.versions.order_by('version_number')
+    unit = definition.unit
     return {
         'id': str(definition.id),
         'activity_id': str(definition.activity_id),
-        'method': definition.method,
+        'method': svc.normalize_method(definition.method),
         'status': definition.status,
         'total_quantity': float(definition.total_quantity) if definition.total_quantity is not None else None,
         'unit_id': str(definition.unit_id) if definition.unit_id else None,
+        'unit_symbol': (unit.unit_symbol or unit.unit_name) if unit else '',
+        'unit_name': unit.unit_name if unit else '',
         'milestones': definition.milestones or [],
         'evidence_rules': definition.evidence_rules,
         'pending_change_reason': definition.pending_change_reason,

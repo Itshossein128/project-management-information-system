@@ -51,8 +51,9 @@ class TestProgressFourWay:
         assert row['cumulative_progress_pct'] == 40.0
         assert row['actual_progress_pct'] == 40.0
         assert row['period_progress_pct'] == 20.0
+        assert row['period_quantity'] == 20.0
         assert row['approved_progress_pct'] == 0.0
-        assert row['measurement_method'] == 'quantity'
+        assert row['measurement_method'] in ('quantity', 'quantity_based')
         assert row['measurement_status'] == 'approved'
         assert row['measurement_version_id'] == str(approved_measurement.current_version_id)
         assert row['period_start'] == '2024-10-03'
@@ -95,6 +96,19 @@ class TestProgressFourWay:
         response = auth_client.post(url, {}, format='json')
         assert response.status_code == 400
         assert response.data['error']['code'] == 'progress_not_found'
+
+    def test_technical_approve_explicit_percentage(self, project, activity, approved_measurement, auth_client):
+        _manual(auth_client, project, activity, 50, '2024-10-01')
+        url = f'/api/v1/projects/{project.id}/progress/{activity.id}/technical-approve/'
+        response = auth_client.post(
+            url,
+            {'approved_progress_pct': 40.0, 'evidence_refs': {'test_sheet': 'TS-1'}},
+            format='json',
+        )
+        assert response.status_code == 200
+        assert response.data['approved_progress_pct'] == 40.0
+        row = ActivityProgress.objects.get(activity=activity, report_date='2024-10-01')
+        assert float(row.approved_progress) == 0.4
 
     def test_breakdown_without_measurement(self, project, activity, auth_client):
         row = _row(auth_client, project, activity, as_of='2024-10-05')

@@ -302,6 +302,7 @@ class DailyReportActivity(ChildRowModel):
     quantity_measured = models.BooleanField(default=True)
     unit = models.CharField(max_length=40, null=True, blank=True)
     execution_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    achieved_milestones = models.JSONField(default=list, blank=True)
     responsible_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

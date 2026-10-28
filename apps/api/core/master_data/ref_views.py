@@ -6,9 +6,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from master_data.models import ManagedContractType, OrganizationUnit
+from master_data.models import ManagedContractType, OrganizationUnit, Unit
 from master_data.permissions import IsOrgRefWriterOrReadOnly
-from master_data.ref_serializers import ManagedContractTypeSerializer, OrganizationUnitSerializer
+from master_data.ref_serializers import ManagedContractTypeSerializer, OrganizationUnitSerializer, UnitSerializer
 
 
 class OrganizationUnitListCreateView(APIView):
@@ -65,3 +65,12 @@ class ManagedContractTypeListCreateView(APIView):
         serializer.is_valid(raise_exception=True)
         obj = ManagedContractType.objects.create(**serializer.validated_data)
         return Response(ManagedContractTypeSerializer(obj).data, status=status.HTTP_201_CREATED)
+
+
+class UnitListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='List measurement units', tags=['Central Data'])
+    def get(self, request):
+        qs = Unit.objects.all().order_by('unit_name')
+        return Response(UnitSerializer(qs, many=True).data)

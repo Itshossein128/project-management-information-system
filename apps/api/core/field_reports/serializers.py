@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.utils.translation import gettext as _
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 
@@ -182,6 +183,7 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
             'quantity_measured',
             'unit',
             'execution_percentage',
+            'achieved_milestones',
             'responsible_user',
             'responsible_name',
             'notes',
@@ -278,6 +280,60 @@ class DailyReportActivitySerializer(serializers.ModelSerializer):
                         )
                     }
                 )
+
+        # Synchronous physical progress measurement validation (FR-007, FR-008, FR-009, FR-010)
+        activity = attrs.get('activity_ref')
+        if activity is None and self.instance:
+            activity = self.instance.activity_ref
+
+        if activity is not None:
+            from schedule.services.measurement_service import (
+                get_current_approved_version,
+                effective_total_quantity,
+            )
+            version = get_current_approved_version(activity)
+            if version is None:
+                raise serializers.ValidationError(
+                    serializers.ErrorDetail(
+                        'روش اندازه‌گیری این فعالیت هنوز تأیید نشده است.',
+                        code='measurement_not_approved',
+                    )
+                )
+
+            qty = attrs.get('quantity')
+            if qty is None and self.instance:
+                qty = self.instance.quantity
+
+            if qty is not None and qty > 0:
+                effective = effective_total_quantity(activity, version)
+                if effective is not None and effective > 0:
+                    from field_reports.models import DailyReportActivity, ReportStatus
+                    from django.db.models import Sum
+
+                    current_report_date = getattr(report, 'report_date', None)
+                    prior_qs = DailyReportActivity.objects.filter(
+                        report__project_id=project_id,
+                        report__is_deleted=False,
+                        activity_ref=activity,
+                        is_deleted=False,
+                        quantity_measured=True,
+                    ).filter(
+                        Q(report__status=ReportStatus.APPROVED)
+                        | Q(report__report_date=current_report_date),
+                    )
+                    if self.instance and self.instance.pk:
+                        prior_qs = prior_qs.exclude(pk=self.instance.pk)
+
+                    existing_cum = prior_qs.aggregate(total=Sum('quantity'))['total'] or Decimal('0')
+                    proposed_cum = existing_cum + Decimal(str(qty))
+                    if proposed_cum > Decimal(str(effective)) * Decimal('1.0001'):
+                        raise serializers.ValidationError(
+                            serializers.ErrorDetail(
+                                'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند',
+                                code='progress_exceeds_100',
+                            )
+                        )
+
         return attrs
 
 

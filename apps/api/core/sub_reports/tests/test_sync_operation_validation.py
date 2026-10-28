@@ -15,11 +15,15 @@ def enable_v2_sync(settings):
     settings.V2_OFFLINE_SYNC_ENABLED = True
 
 
-def test_nine_successes_one_invalid_and_blocked_dependent(project, user):
+def test_nine_successes_one_invalid_and_blocked_dependent(project, user, unit):
     node = WBS.add_root(project=project, wbs_code='1', wbs_name='Root')
     activity = Activity.objects.create(
         project=project, wbs=node, activity_code='R1', activity_name='Retry', status='in_progress', created_by=user,
     )
+    from schedule.services.measurement_service import approve_definition, get_or_create_definition, update_draft
+    definition = get_or_create_definition(activity, user)
+    update_draft(definition, {'method': 'quantity_based', 'total_quantity': 100, 'unit_id': str(unit.id)}, user)
+    approve_definition(definition, user)
     contractor = Stakeholder.objects.create(project=project, name='Retry Co', role='contractor', created_by=user)
     client = APIClient()
     client.force_authenticate(user)

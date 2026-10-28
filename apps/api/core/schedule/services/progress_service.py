@@ -437,12 +437,14 @@ def get_activity_progress_breakdown(
     horizon = max(as_of, period_end)
     cumulative_before: dict = {}
     cumulative_end: dict = {}
+    cum_qty_before: dict = {}
+    cum_qty_end: dict = {}
     approved_map: dict = {}
     for row in ActivityProgress.objects.filter(
         activity_id__in=activity_ids,
         report_date__lte=horizon,
     ).order_by('report_date').values(
-        'activity_id', 'report_date', 'actual_progress', 'approved_progress',
+        'activity_id', 'report_date', 'actual_progress', 'approved_progress', 'cumulative_quantity',
     ):
         aid = row['activity_id']
         if row['actual_progress'] is not None:
@@ -450,6 +452,11 @@ def get_activity_progress_breakdown(
                 cumulative_before[aid] = float(row['actual_progress'])
             if row['report_date'] <= period_end:
                 cumulative_end[aid] = float(row['actual_progress'])
+        if row['cumulative_quantity'] is not None:
+            if row['report_date'] < period_start:
+                cum_qty_before[aid] = float(row['cumulative_quantity'])
+            if row['report_date'] <= period_end:
+                cum_qty_end[aid] = float(row['cumulative_quantity'])
         if row['approved_progress'] is not None and row['report_date'] <= as_of:
             approved_map[aid] = float(row['approved_progress'])
 
@@ -473,7 +480,16 @@ def get_activity_progress_breakdown(
             if activity.id in cumulative_end
             else 0.0
         )
+        if activity.id in cum_qty_end:
+            period_quantity = round(cum_qty_end[activity.id] - cum_qty_before.get(activity.id, 0.0), 4)
+        elif activity.total_quantity and period > 0:
+            period_quantity = round(period * float(activity.total_quantity), 4)
+        else:
+            period_quantity = None
+
         definition = definitions.get(activity.id)
+        from schedule.services.measurement_service import normalize_method
+        method_name = normalize_method(definition.method) if definition else None
         approved = approved_map.get(activity.id, 0.0)
         rows.append({
             'activity_id': str(activity.id),
@@ -487,10 +503,11 @@ def get_activity_progress_breakdown(
             'actual_progress_pct': round(actual * 100, 2),
             'cumulative_progress_pct': round(actual * 100, 2),
             'period_progress_pct': round(period * 100, 2),
+            'period_quantity': period_quantity,
             'approved_progress_pct': round(approved * 100, 2),
             'period_start': period_start.strftime('%Y-%m-%d'),
             'period_end': period_end.strftime('%Y-%m-%d'),
-            'measurement_method': definition.method if definition else None,
+            'measurement_method': method_name,
             'measurement_version_id': (
                 str(definition.current_version_id)
                 if definition and definition.current_version_id

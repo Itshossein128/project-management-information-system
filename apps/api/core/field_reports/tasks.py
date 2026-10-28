@@ -21,7 +21,9 @@ def recalculate_activity_progress(report_id):
         ProgressValidationError,
         compute_quantity_progress,
         get_current_approved_version,
+        normalize_method,
         record_progress,
+        weighted_milestone_progress,
     )
 
     report = DailyReport.objects.get(id=report_id)
@@ -37,13 +39,37 @@ def recalculate_activity_progress(report_id):
         seen_activity_ids.add(activity.id)
 
         version = get_current_approved_version(activity)
-        if version is None or version.method != MeasurementMethod.QUANTITY:
-            reason = 'measurement_not_approved' if version is None else 'method_not_quantity'
+        if version is None or normalize_method(version.method) not in (
+            MeasurementMethod.QUANTITY_BASED,
+            MeasurementMethod.WEIGHTED_MILESTONES,
+        ):
+            reason = 'measurement_not_approved' if version is None else 'method_not_supported_for_daily_report'
             logger.info(
                 'Skipping progress recalculation for activity %s (report %s): %s',
                 activity.id, report_id, reason,
             )
             skipped.append({'activity_id': str(activity.id), 'code': reason})
+            continue
+
+        if normalize_method(version.method) == MeasurementMethod.WEIGHTED_MILESTONES:
+            approved_rows = DailyReportActivity.objects.filter(
+                report__project=report.project,
+                report__status=ReportStatus.APPROVED,
+                report__is_deleted=False,
+                activity_ref=activity,
+                is_deleted=False,
+            )
+            achieved = []
+            for approved_row in approved_rows:
+                achieved.extend(approved_row.achieved_milestones or [])
+            progress_pct = weighted_milestone_progress(version, achieved)
+            record_progress(
+                activity, report.report_date, progress_pct, report.approved_by,
+                source=ActivityProgress.ProgressSource.DAILY_REPORT,
+                version=version, approve=True,
+                evidence_refs={'achieved_milestones': list(dict.fromkeys(achieved))},
+            )
+            applied += 1
             continue
 
         cumulative = (

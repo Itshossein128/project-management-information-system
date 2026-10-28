@@ -1,0 +1,18 @@
+You are an expert software architect and gap-analysis specialist working on: /home/hossein/Desktop/projects/building-management
+
+Your task is to analyze `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md` and find the gaps between the project's current implementation and this specification document.
+
+Specifically:
+1. Thoroughly read and analyze:
+   - `/home/hossein/Desktop/projects/building-management/reports_documentation/atomic-specs/SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md`
+   - Existing codebase implementations in `apps/api/core/wbs/`, `apps/api/core/schedule/`, `apps/api/core/projects/`, `apps/web/src/components/wbs/`, `apps/web/src/components/progress/`, `apps/web/src/app/routes/`, etc.
+   - Reference previous gap analyses like `reports_gaps/06/GAP-SPEC-06-AUTO-DAILY-ROLLUP.md` and `reports_gaps/06/speckit-specify-prompts/01-PROMPT-AUTO-DAILY-ROLLUP.md`.
+2. Identify all gaps:
+   - Check US-PR-01: Configuration and validation of physical progress measurement methods (`quantity_based`, `weighted_milestones`, `evidence_based`). Check milestone sum to 100% (`incomplete_measurement_basis`) and prevention of progress logging before measurement method approval (`400 measurement_not_approved`).
+   - Check US-PR-02: 4-Way Progress calculation (`period_progress_pct`, `cumulative_progress_pct`, `planned_progress_pct`, `approved_progress_pct`), variance calculation, and financial basing on `approved_progress_pct`.
+   - Check US-PR-03: Strict prevention of progress > 100% (NO clamping, hard reject with `400 progress_exceeds_100`), and photo evidence != technical approval check (`photo_not_technical_approval`).
+3. Generate the artifacts in `/home/hossein/Desktop/projects/building-management/reports_gaps/07/`:
+   - Create `reports_gaps/07/GAP-SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md` documenting findings, evidence, and missing capabilities.
+   - Create `reports_gaps/07/speckit-specify-prompts/01-PROMPT-PHYSICAL-PROGRESS-MEASUREMENT.md` containing a comprehensive, structured Persian prompt for `speckit-specify` that starts with `/speckit-specify` and covers all identified gaps, acceptance criteria, boundaries, and required evidence.
+   - Also create a copy or link at `reports_gaps/07/PROMPT-SPEC-07.md` for easy access.
+4. Provide a summary of the discovered gaps and confirm the files created.

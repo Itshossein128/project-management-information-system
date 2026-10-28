@@ -34,7 +34,7 @@ def contractor(db, project, user):
 
 
 @pytest.fixture
-def project_activity(db, activity, project):
+def project_activity(db, activity, project, approved_measurement):
     activity.status = 'in_progress'
     activity.is_deleted = False
     activity.save()

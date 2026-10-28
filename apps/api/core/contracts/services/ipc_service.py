@@ -196,22 +196,64 @@ def auto_populate_ipc(ipc_id):
         qty_previous = prev_qty_map.get(item.id, Decimal('0')) or Decimal('0')
 
         qty_current = Decimal('0')
+        latest_approved = None
+        approval_log = None
+        warning_code = ''
+        warning_message = ''
         if item.activity_id and ipc.period_start and ipc.period_end:
-            progress_records = ActivityProgress.objects.filter(
+            latest_approved = (
+                ActivityProgress.objects.filter(
+                    activity_id=item.activity_id,
+                    report_date__gte=ipc.period_start,
+                    report_date__lte=ipc.period_end,
+                    approved_progress__isnull=False,
+                )
+                .order_by('-report_date')
+                .first()
+            )
+            earliest_before = (
+                ActivityProgress.objects.filter(
+                    activity_id=item.activity_id,
+                    report_date__lt=ipc.period_start,
+                    approved_progress__isnull=False,
+                )
+                .order_by('-report_date')
+                .first()
+            )
+
+            claims_in_period = ActivityProgress.objects.filter(
                 activity_id=item.activity_id,
                 report_date__gte=ipc.period_start,
                 report_date__lte=ipc.period_end,
             )
-            if progress_records.exists():
-                latest = progress_records.order_by('-report_date').first()
-                earliest_before = ActivityProgress.objects.filter(
-                    activity_id=item.activity_id,
-                    report_date__lt=ipc.period_start,
-                ).order_by('-report_date').first()
-                progress_start = float(earliest_before.actual_progress) if earliest_before else 0
-                progress_end = float(latest.actual_progress)
-                progress_delta = max(progress_end - progress_start, 0)
+            if claims_in_period.exists() and (
+                latest_approved is None
+                or latest_approved.approved_progress is None
+                or float(latest_approved.approved_progress) == 0
+            ):
+                logger.warning(
+                    'پیشرفت این فعالیت فاقد تأیید فنی مهندس ناظر است (activity: %s, contract_item: %s)',
+                    item.activity_id, item.id,
+                )
+
+            if latest_approved and latest_approved.approved_progress is not None:
+                from schedule.models import TechnicalApprovalLog
+                approval_log = TechnicalApprovalLog.objects.filter(
+                    progress=latest_approved,
+                ).order_by('-approved_at').first()
+                progress_start = (
+                    float(earliest_before.approved_progress)
+                    if earliest_before and earliest_before.approved_progress is not None
+                    else 0.0
+                )
+                progress_end = float(latest_approved.approved_progress)
+                progress_delta = max(progress_end - progress_start, 0.0)
                 qty_current = Decimal(str(progress_delta * float(item.activity.total_quantity or 0)))
+            else:
+                qty_current = Decimal('0')
+                if claims_in_period.exists():
+                    warning_code = 'unapproved_progress'
+                    warning_message = 'پیشرفت این فعالیت فاقد تأیید فنی مهندس ناظر است'
 
         unit_price = item.unit_price or Decimal('0')
         qty_cum = qty_previous + qty_current
@@ -225,6 +267,16 @@ def auto_populate_ipc(ipc_id):
             'qty_cumulative': qty_cum,
             'amount_current': unit_price * qty_current,
             'amount_cumulative': unit_price * qty_cum,
+            'approved_progress_pct': (
+                Decimal(str(float(latest_approved.approved_progress) * 100))
+                if latest_approved and latest_approved.approved_progress is not None else None
+            ),
+            'technical_approval_at': approval_log.approved_at if approval_log else (
+                latest_approved.technical_approved_at if latest_approved else None
+            ),
+            'technical_approval_log': approval_log,
+            'audit_warning_code': warning_code,
+            'audit_warning_message': warning_message,
         }
         if audit_user:
             defaults['created_by'] = audit_user

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Q
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
@@ -92,6 +93,7 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
     execution_percentage = serializers.DecimalField(
         max_digits=5, decimal_places=2, required=False, allow_null=True,
     )
+    achieved_milestones = serializers.ListField(required=False, allow_empty=True, default=list)
     shift_hours = serializers.DecimalField(
         max_digits=4, decimal_places=2, required=False, default=Decimal('8.00'),
     )
@@ -130,6 +132,7 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
             'quantity',
             'unit',
             'execution_percentage',
+            'achieved_milestones',
             'shift_hours',
             'is_hydrostatic_tested',
             'test_pressure_bar',
@@ -188,6 +191,53 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
             act = attrs.get('activity_ref') or getattr(self.instance, 'activity_ref', None)
             if act is not None and getattr(act, 'activity_name', None):
                 attrs['activity_description'] = act.activity_name
+
+        # A sub-report activity is a physical progress entry. Validate the
+        # approved measurement basis and cumulative quantity before the row is
+        # persisted, including draft/in-flight rows from the same project.
+        activity = attrs.get('activity_ref') or getattr(self.instance, 'activity_ref', None)
+        quantity = attrs.get('quantity')
+        if quantity is None and self.instance is not None:
+            quantity = self.instance.quantity
+        if activity is not None:
+            from django.db.models import Sum
+            from schedule.services.measurement_service import (
+                effective_total_quantity,
+                get_current_approved_version,
+            )
+
+            version = get_current_approved_version(activity)
+            if version is None:
+                raise serializers.ValidationError(
+                    serializers.ErrorDetail(
+                        'روش اندازه‌گیری این فعالیت هنوز تأیید نشده است.',
+                        code='measurement_not_approved',
+                    )
+                )
+            if quantity is not None and quantity > 0:
+                total = effective_total_quantity(activity, version)
+                if total is not None and total > 0:
+                    from sub_reports.models import DisciplineSubReportActivity
+                    report = self.context.get('report') or getattr(self.instance, 'sub_report', None)
+                    report_date = getattr(report, 'report_date', None)
+                    prior = DisciplineSubReportActivity.objects.filter(
+                        sub_report__project_id=activity.project_id,
+                        activity_ref=activity,
+                        is_deleted=False,
+                    ).filter(
+                        Q(sub_report__status='approved')
+                        | Q(sub_report__report_date=report_date),
+                    )
+                    if self.instance is not None:
+                        prior = prior.exclude(pk=self.instance.pk)
+                    existing = prior.aggregate(total=Sum('quantity'))['total'] or Decimal('0')
+                    if existing + quantity > total:
+                        raise serializers.ValidationError(
+                            serializers.ErrorDetail(
+                                'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند',
+                                code='progress_exceeds_100',
+                            )
+                        )
         return attrs
 
     def to_representation(self, instance):

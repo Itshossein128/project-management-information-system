@@ -7,7 +7,12 @@ const activitiesBase = (projectId: string) =>
 const reportsBase = (projectId: string) =>
   `/${PATHS.API_PROJECTS}/${projectId}/progress-reports`;
 
-export type MeasurementMethod = "quantity" | "weighted_milestones" | "evidence_percent";
+export type MeasurementMethod =
+  | "quantity_based"
+  | "weighted_milestones"
+  | "evidence_based"
+  | "quantity"
+  | "evidence_percent";
 export type MeasurementStatus = "draft" | "approved" | "not_defined";
 
 export interface ProgressSnapshot {
@@ -46,6 +51,7 @@ export interface ActivityProgressRow {
   variance_pct: number;
   total_quantity: number | null;
   cumulative_quantity: number | null;
+  period_quantity?: number | null;
   unit: string;
   status: string;
   is_behind: boolean;
@@ -190,11 +196,14 @@ export interface ProgressHistoryRow {
 }
 
 export interface ActivityMeasurement {
+  id?: string;
   activity_id: string;
   method: MeasurementMethod;
   status: MeasurementStatus | "draft" | "approved";
   total_quantity: number | string | null;
   unit_id: string | null;
+  unit_symbol?: string;
+  unit_name?: string;
   milestones: { name: string; weight: number }[];
   evidence_rules: string;
   current_version_id: string | null;
@@ -369,10 +378,19 @@ export function changeActivityMeasurement(
   );
 }
 
-export function technicalApproveProgress(projectId: string, activityId: string) {
+export function technicalApproveProgress(
+  projectId: string,
+  activityId: string,
+  body: {
+    report_date?: string;
+    approved_progress_pct?: number;
+    basis?: string;
+    evidence_refs?: Record<string, unknown>;
+  } = {},
+) {
   return apiJson(`${base(projectId)}/${activityId}/technical-approve/`, {
     method: "POST",
-    body: JSON.stringify({}),
+    body: JSON.stringify(body),
   });
 }
 

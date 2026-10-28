@@ -28,11 +28,13 @@ def test_auto_populate_from_activity_progress(db, ipc, contract_item, activity):
         activity=activity,
         report_date=date(2024, 2, 28),
         actual_progress=0.1,
+        approved_progress=0.1,
     )
     ActivityProgress.objects.create(
         activity=activity,
         report_date=date(2024, 3, 15),
         actual_progress=0.25,
+        approved_progress=0.25,
     )
 
     auto_populate_ipc(ipc.id)
@@ -41,6 +43,43 @@ def test_auto_populate_from_activity_progress(db, ipc, contract_item, activity):
     item = ipc.items.get()
     assert float(item.qty_current) == pytest.approx(15.0, rel=1e-3)
     assert float(ipc.gross_amount) == pytest.approx(150000.0, rel=1e-3)
+
+
+def test_auto_populate_unapproved_progress_yields_zero(db, ipc, contract_item, activity):
+    """US2: Claimed progress without supervisor technical approval must yield 0 qty and 0 amount."""
+    ActivityProgress.objects.create(
+        activity=activity,
+        report_date=date(2024, 3, 15),
+        actual_progress=0.5,
+        approved_progress=None,
+    )
+
+    auto_populate_ipc(ipc.id)
+    ipc.refresh_from_db()
+
+    item = ipc.items.get()
+    assert float(item.qty_current) == 0.0
+    assert float(item.amount_current) == 0.0
+    assert float(ipc.gross_amount) == 0.0
+
+
+def test_auto_populate_uses_strictly_approved_progress_not_claimed(db, ipc, contract_item, activity):
+    """US2: Claimed cumulative 50% but approved 40% must bill strictly 40%."""
+    ActivityProgress.objects.create(
+        activity=activity,
+        report_date=date(2024, 3, 15),
+        actual_progress=0.5,
+        approved_progress=0.4,
+    )
+
+    auto_populate_ipc(ipc.id)
+    ipc.refresh_from_db()
+
+    item = ipc.items.get()
+    # 40% of 100 m³ = 40.0
+    assert float(item.qty_current) == pytest.approx(40.0, rel=1e-3)
+    assert float(item.amount_current) == pytest.approx(400000.0, rel=1e-3)
+    assert float(ipc.gross_amount) == pytest.approx(400000.0, rel=1e-3)
 
 
 def test_apply_deductions_retention_and_tax(db, ipc, contract):

@@ -161,6 +161,14 @@ class IPCItem(AuditSoftDeleteModel):
     unit_price = models.DecimalField(max_digits=14, decimal_places=4, null=True, blank=True)
     amount_current = models.DecimalField(max_digits=18, decimal_places=2, default=0)
     amount_cumulative = models.DecimalField(max_digits=18, decimal_places=2, default=0)
+    approved_progress_pct = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    technical_approval_at = models.DateTimeField(null=True, blank=True)
+    technical_approval_log = models.ForeignKey(
+        'schedule.TechnicalApprovalLog', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='ipc_items',
+    )
+    audit_warning_code = models.CharField(max_length=80, blank=True, default='')
+    audit_warning_message = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'ipc_items'

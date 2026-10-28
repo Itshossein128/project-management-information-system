@@ -262,9 +262,35 @@ class ActivityProgress(UUIDModel):
         unique_together = [['activity', 'report_date']]
 
 
+class TechnicalApprovalLog(UUIDModel):
+    """Immutable audit record for every supervisor progress approval event."""
+
+    activity = models.ForeignKey(
+        'projects.Activity', on_delete=models.CASCADE, related_name='technical_approval_logs',
+    )
+    progress = models.ForeignKey(
+        ActivityProgress, on_delete=models.CASCADE, related_name='technical_approval_logs',
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='technical_approval_logs',
+    )
+    approved_progress = models.DecimalField(max_digits=6, decimal_places=3)
+    basis = models.CharField(max_length=40, default='engineering_documents')
+    evidence_refs = models.JSONField(default=dict, blank=True)
+    comments = models.TextField(blank=True, default='')
+    approved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'technical_approval_logs'
+        ordering = ['-approved_at', '-id']
+
+
 class MeasurementMethod(models.TextChoices):
-    QUANTITY = 'quantity', 'Quantity'
+    QUANTITY_BASED = 'quantity_based', 'Quantity based'
     WEIGHTED_MILESTONES = 'weighted_milestones', 'Weighted milestones'
+    EVIDENCE_BASED = 'evidence_based', 'Evidence based'
+    # Backwards compatibility legacy aliases
+    QUANTITY = 'quantity', 'Quantity'
     EVIDENCE_PERCENT = 'evidence_percent', 'Evidence percent'
 
 
@@ -287,7 +313,7 @@ class ActivityMeasurementDefinition(AuditSoftDeleteModel):
     method = models.CharField(
         max_length=30,
         choices=MeasurementMethod.choices,
-        default=MeasurementMethod.QUANTITY,
+        default=MeasurementMethod.QUANTITY_BASED,
     )
     status = models.CharField(
         max_length=20,

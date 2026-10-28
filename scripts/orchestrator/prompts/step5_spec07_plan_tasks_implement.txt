@@ -1,0 +1,49 @@
+You are an expert full-stack AI engineer executing `speckit-plan`, `speckit-tasks`, and `speckit-implement` sequentially in a single session in this codebase: /home/hossein/Desktop/projects/building-management
+
+The active feature is `specs/040-physical-progress-measurement` (refer to `.specify/feature.json`).
+
+============================================================
+STAGE 1: speckit-plan
+============================================================
+Follow `.agents/skills/speckit-plan/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec` to inspect context.
+2. Read `specs/040-physical-progress-measurement/spec.md`, `.specify/memory/constitution.md`, and `AGENTS.md`.
+3. Generate the required design artifacts in `specs/040-physical-progress-measurement/`:
+   - `plan.md` (Implementation architecture, tech decisions, schema additions, contracts)
+   - `research.md` (Design choices, alternatives considered)
+   - `data-model.md` (Entities, fields, relationships: `period_quantity`, unified enums, technical approval data model, milestone weights)
+   - `contracts/` (API endpoint contracts for technical approval, measurement validation, IPC calculation based on approved progress, progress > 100 rejection)
+   - `quickstart.md` (Verification commands, isolated DB setup, tests)
+
+============================================================
+STAGE 2: speckit-tasks
+============================================================
+Follow `.agents/skills/speckit-tasks/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-spec --require-plan` to verify prerequisites.
+2. Read `specs/040-physical-progress-measurement/plan.md`, `spec.md`, and related design artifacts.
+3. Generate `specs/040-physical-progress-measurement/tasks.md`:
+   - Structured by phases: Setup, Foundational safety, User Stories (US1 through US5), and Polish/Cross-Cutting Verification.
+   - Every task has an ID (`T001`, `T002`, ...), clear file path, exact action, and test verification rule.
+   - Ensure TDD workflow (tests first, make green).
+
+============================================================
+STAGE 3: speckit-implement
+============================================================
+Follow `.agents/skills/speckit-implement/SKILL.md`:
+1. Run `python3 .specify/scripts/python/check_prerequisites.py --json --require-tasks --include-tasks` to check tasks.
+2. Read `tasks.md` and execute the tasks in order:
+   - Backend in `apps/api/core/`:
+     - Update IPC generation in `contracts/services/ipc_service.py` to strictly use `approved_progress`.
+     - Add synchronous validation blocking progress if measurement method not approved (`400 measurement_not_approved`).
+     - Enforce hard rejection of progress > 100% (`400 progress_exceeds_100`) without clamping in all progress entry points.
+     - Implement technical approval endpoint requiring supervisor/approver permission, and reject photo-only claims (`photo_not_technical_approval`).
+     - Calculate and return `period_quantity` in progress views.
+     - Align enum values to `quantity_based`, `weighted_milestones`, `evidence_based`.
+     - Run backend tests with `apps/api/.venv/bin/python -m pytest` with Postgres (5433) and Redis (6379).
+   - Frontend in `apps/web/src/`:
+     - Upgrade `MeasurementEditor.tsx` with dynamic weighted milestones grid (sum to 100% check), evidence rules, unit selector, and integrate into WBS `activity-drawer.tsx`.
+     - Wire Technical Approve action and modal into `ActivityProgressTable.tsx` for `approve_reports` holders.
+     - Add `period_quantity` column in progress table.
+     - Run `pnpm --filter web build` to verify clean build.
+   - Mark completed tasks with `[X]` in `tasks.md`.
+3. Provide a detailed final report of all implemented tasks, test outcomes, and verified features.

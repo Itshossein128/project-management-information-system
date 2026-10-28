@@ -4,6 +4,7 @@ from master_data.ref_views import (
     ManagedContractTypeListCreateView,
     OrganizationUnitDetailView,
     OrganizationUnitListCreateView,
+    UnitListView,
 )
 
 urlpatterns = [
@@ -21,5 +22,10 @@ urlpatterns = [
         'contract-types/',
         ManagedContractTypeListCreateView.as_view(),
         name='managed-contract-type-list',
+    ),
+    path(
+        'measurement-units/',
+        UnitListView.as_view(),
+        name='measurement-unit-list',
     ),
 ]

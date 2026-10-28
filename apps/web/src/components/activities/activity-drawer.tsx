@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
 import { cn } from "@/app/lib/utils";
+import { MeasurementEditor } from "@/components/progress/MeasurementEditor";
 
 const STATUS_OPTIONS: { value: ActivityStatus; label: string }[] = [
   { value: "not_started", label: "شروع نشده" },
@@ -409,6 +410,14 @@ export function ActivityDrawer({
             ))}
           </select>
         </section>
+
+        {isEdit && activity ? (
+          <MeasurementEditor projectId={projectId} activityId={activity.activity_id} />
+        ) : (
+          <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
+            پس از ذخیره فعالیت، روش اندازه‌گیری فیزیکی و تأیید مبنای آن را در همین ویرایشگر تنظیم کنید.
+          </p>
+        )}
 
         {weightSummary ? (
           <div className="rounded-lg border border-border p-3">

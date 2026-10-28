@@ -18,6 +18,7 @@ from schedule.models import (
     ActivityQuantityChangeStatus,
     MeasurementMethod,
     MeasurementStatus,
+    TechnicalApprovalLog,
 )
 
 MILESTONE_WEIGHT_TOLERANCE = Decimal('0.01')
@@ -45,6 +46,14 @@ class ProgressValidationError(Exception):
 
 
 # ---------------------------------------------------------------- helpers
+
+def normalize_method(method: str | None) -> str | None:
+    if method in (MeasurementMethod.QUANTITY, MeasurementMethod.QUANTITY_BASED):
+        return MeasurementMethod.QUANTITY_BASED
+    if method in (MeasurementMethod.EVIDENCE_PERCENT, MeasurementMethod.EVIDENCE_BASED):
+        return MeasurementMethod.EVIDENCE_BASED
+    return method
+
 
 def _to_decimal(value: Any, field: str) -> Decimal | None:
     if value is None or value == '':
@@ -78,8 +87,8 @@ def _normalize_milestones(raw: Any) -> list[dict]:
 
 def _definition_basis_errors(definition: ActivityMeasurementDefinition) -> str | None:
     """Return a human message when the draft basis is incomplete; None when valid."""
-    method = definition.method
-    if method == MeasurementMethod.QUANTITY:
+    method = normalize_method(definition.method)
+    if method == MeasurementMethod.QUANTITY_BASED:
         if definition.total_quantity is None or definition.total_quantity <= 0:
             return 'برای روش مقداری، مقدار کل (total_quantity) الزامی است.'
         if definition.unit_id is None:
@@ -97,7 +106,7 @@ def _definition_basis_errors(definition: ActivityMeasurementDefinition) -> str |
         if abs(total - Decimal('1')) > MILESTONE_WEIGHT_TOLERANCE:
             return 'مجموع وزن milestoneها باید برابر ۱ باشد.'
         return None
-    if method == MeasurementMethod.EVIDENCE_PERCENT:
+    if method == MeasurementMethod.EVIDENCE_BASED:
         if not (definition.evidence_rules or '').strip():
             return 'برای روش درصد مستند، قوانین مستندات (evidence_rules) الزامی است.'
         return None
@@ -107,7 +116,7 @@ def _definition_basis_errors(definition: ActivityMeasurementDefinition) -> str |
 def build_basis_snapshot(definition: ActivityMeasurementDefinition) -> dict:
     unit = definition.unit
     return {
-        'method': definition.method,
+        'method': normalize_method(definition.method),
         'total_quantity': str(definition.total_quantity) if definition.total_quantity is not None else None,
         'unit_id': str(definition.unit_id) if definition.unit_id else None,
         'unit_symbol': (unit.unit_symbol or unit.unit_name) if unit else '',
@@ -118,8 +127,8 @@ def build_basis_snapshot(definition: ActivityMeasurementDefinition) -> dict:
 
 def _snapshot_basis_error(snapshot: dict) -> str | None:
     """Validate a stored snapshot (used on every progress write)."""
-    method = snapshot.get('method')
-    if method == MeasurementMethod.QUANTITY:
+    method = normalize_method(snapshot.get('method'))
+    if method == MeasurementMethod.QUANTITY_BASED:
         try:
             total = Decimal(str(snapshot.get('total_quantity')))
         except (InvalidOperation, ValueError):
@@ -135,7 +144,7 @@ def _snapshot_basis_error(snapshot: dict) -> str | None:
         if abs(Decimal(str(sum(weights))) - Decimal('1')) > MILESTONE_WEIGHT_TOLERANCE:
             return 'مجموع وزن milestoneها برابر ۱ نیست.'
         return None
-    if method == MeasurementMethod.EVIDENCE_PERCENT:
+    if method == MeasurementMethod.EVIDENCE_BASED:
         if not (snapshot.get('evidence_rules') or '').strip():
             return 'قوانین مستندات تعریف نشده است.'
         return None
@@ -144,9 +153,10 @@ def _snapshot_basis_error(snapshot: dict) -> str | None:
 
 def _apply_basis(definition: ActivityMeasurementDefinition, data: dict) -> None:
     if 'method' in data and data['method'] is not None:
-        if data['method'] not in MeasurementMethod.values:
+        raw_m = data['method']
+        if raw_m not in MeasurementMethod.values:
             raise ProgressValidationError('روش اندازه‌گیری نامعتبر است.', 'incomplete_measurement_basis')
-        definition.method = data['method']
+        definition.method = normalize_method(raw_m)
     if 'total_quantity' in data:
         definition.total_quantity = _to_decimal(data['total_quantity'], 'total_quantity')
     if 'unit_id' in data or 'unit' in data:
@@ -175,7 +185,7 @@ def get_or_create_definition(activity, user) -> ActivityMeasurementDefinition:
     return ActivityMeasurementDefinition.objects.create(
         project_id=activity.project_id,
         activity=activity,
-        method=MeasurementMethod.QUANTITY,
+        method=MeasurementMethod.QUANTITY_BASED,
         status=MeasurementStatus.DRAFT,
         total_quantity=activity.total_quantity,
         unit_id=activity.unit_id,
@@ -325,7 +335,7 @@ def effective_total_quantity(activity, version: ActivityMeasurementVersion | Non
     """Approved basis total, raised by the latest approved quantity change."""
     version = version or get_current_approved_version(activity)
     base: Decimal | None = None
-    if version is not None and version.method == MeasurementMethod.QUANTITY:
+    if version is not None and normalize_method(version.method) == MeasurementMethod.QUANTITY_BASED:
         raw = version.basis_snapshot.get('total_quantity')
         base = Decimal(str(raw)) if raw is not None else None
     elif version is None and activity.total_quantity is not None:
@@ -361,10 +371,10 @@ def validate_progress_pct(activity, pct: float, *, version: ActivityMeasurementV
     version = version or require_approved_version(activity)
     if pct < 0:
         raise ProgressValidationError('پیشرفت نمی‌تواند منفی باشد.', 'invalid_progress')
-    if pct <= 1 + PROGRESS_EPSILON:
-        return min(pct, 1.0)
+    if pct <= 1:
+        return pct
 
-    if version.method == MeasurementMethod.QUANTITY:
+    if normalize_method(version.method) == MeasurementMethod.QUANTITY_BASED:
         base = Decimal(str(version.basis_snapshot.get('total_quantity')))
         effective = effective_total_quantity(activity, version)
         if effective is not None and effective > base:
@@ -372,7 +382,7 @@ def validate_progress_pct(activity, pct: float, *, version: ActivityMeasurementV
             if implied_quantity <= effective:
                 return float(implied_quantity / effective)
     raise ProgressValidationError(
-        'پیشرفت تجمعی بیش از ۱۰۰٪ است و تغییر مقدار تأییدشده‌ای آن را پوشش نمی‌دهد.',
+        'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند',
         'progress_exceeds_100',
     )
 
@@ -385,10 +395,22 @@ def compute_quantity_progress(activity, cumulative_quantity, version: ActivityMe
     pct = float(Decimal(str(cumulative_quantity or 0)) / total)
     if pct > 1 + PROGRESS_EPSILON:
         raise ProgressValidationError(
-            'پیشرفت تجمعی بیش از ۱۰۰٪ است و تغییر مقدار تأییدشده‌ای آن را پوشش نمی‌دهد.',
+            'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند',
             'progress_exceeds_100',
         )
     return min(pct, 1.0)
+
+
+def weighted_milestone_progress(version: ActivityMeasurementVersion, achieved: list[Any]) -> float:
+    """Return the exact cumulative fraction represented by achieved milestone names/indices."""
+    milestones = version.basis_snapshot.get('milestones') or []
+    achieved_values = {str(value) for value in achieved}
+    total = Decimal('0')
+    for index, milestone in enumerate(milestones):
+        name = str(milestone.get('name') or '')
+        if str(index) in achieved_values or name in achieved_values:
+            total += Decimal(str(milestone.get('weight') or 0))
+    return float(min(total, Decimal('1')))
 
 
 # ---------------------------------------------------------------- progress recording
@@ -480,7 +502,8 @@ def technical_approve_progress(activity, user, *, report_date: date | None = Non
     data = data or {}
     if data.get('basis') == 'photo' or data.get('approved_by_photo'):
         raise ProgressValidationError(
-            'عکس به‌تنهایی تأیید فنی محسوب نمی‌شود.', 'photo_not_technical_approval',
+            'بارگذاری عکس به‌تنهایی معادل تأیید فنی نیست؛ تأیید صریح ناظر الزامی است',
+            'photo_not_technical_approval',
         )
     version = require_approved_version(activity)
     qs = ActivityProgress.objects.filter(activity=activity, actual_progress__isnull=False)
@@ -489,9 +512,33 @@ def technical_approve_progress(activity, user, *, report_date: date | None = Non
     progress = qs.order_by('-report_date').first()
     if progress is None:
         raise ProgressValidationError('پیشرفت ثبت‌شده‌ای برای تأیید وجود ندارد.', 'progress_not_found')
-    validate_progress_pct(activity, float(progress.actual_progress), version=version)
 
-    progress.approved_progress = progress.actual_progress
+    approved_pct_raw = data.get('approved_progress_pct', data.get('approved_progress'))
+    if approved_pct_raw is not None:
+        try:
+            approved_pct = float(approved_pct_raw)
+        except (ValueError, TypeError):
+            raise ProgressValidationError('درصد پیشرفت تأییدشده نامعتبر است.', 'invalid_progress')
+        if approved_pct > 1:
+            approved_pct = approved_pct / 100.0
+        if approved_pct < 0 or approved_pct > 1.0 + PROGRESS_EPSILON:
+            raise ProgressValidationError(
+                'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند',
+                'progress_exceeds_100',
+            )
+        actual_pct = float(progress.actual_progress)
+        if approved_pct > actual_pct + 1e-4 and not data.get('evidence_refs'):
+            raise ProgressValidationError(
+                'تأیید پیشرفت بیش از مقدار اعلام‌شده نیازمند ارائه مستندات است.',
+                'approval_exceeds_claimed',
+            )
+        target_approved = approved_pct
+    else:
+        target_approved = progress.actual_progress
+
+    validate_progress_pct(activity, float(target_approved), version=version)
+
+    progress.approved_progress = target_approved
     progress.technical_approved_at = timezone.now()
     progress.technical_approved_by = user
     progress.updated_by = user
@@ -506,4 +553,13 @@ def technical_approve_progress(activity, user, *, report_date: date | None = Non
         progress.evidence_refs = evidence
         update_fields.append('evidence_refs')
     progress.save(update_fields=update_fields)
+    TechnicalApprovalLog.objects.create(
+        activity=activity,
+        progress=progress,
+        approved_by=user,
+        approved_progress=target_approved,
+        basis=str(data.get('basis') or 'engineering_documents'),
+        evidence_refs=progress.evidence_refs if isinstance(progress.evidence_refs, dict) else {},
+        comments=str(data.get('comments') or ''),
+    )
     return progress

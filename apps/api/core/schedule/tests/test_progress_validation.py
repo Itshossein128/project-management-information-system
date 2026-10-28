@@ -92,3 +92,50 @@ class TestProgressValidation:
         response = _manual(auth_client, project, activity, 10)
         assert response.status_code == 400
         assert response.data['error']['code'] == 'incomplete_measurement_basis'
+
+    def test_daily_report_activity_without_measurement_rejected(self, project, activity, auth_client, user):
+        from field_reports.models import DailyReport
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-10-10',
+            created_by=user,
+            updated_by=user,
+        )
+        url = f'/api/v1/projects/{project.id}/daily-reports/{report.id}/activities/'
+        resp = auth_client.post(
+            url,
+            {
+                'activity_ref': str(activity.id),
+                'activity_description': 'Concrete pouring',
+                'shift': 'shift_1',
+                'quantity': 10,
+            },
+            format='json',
+        )
+        assert resp.status_code == 400
+        assert resp.data['error']['code'] == 'measurement_not_approved'
+
+    def test_daily_report_activity_over_100_rejected_not_clamped(
+        self, project, activity, approved_measurement, auth_client, user,
+    ):
+        from field_reports.models import DailyReport
+        report = DailyReport.objects.create(
+            project=project,
+            report_date='2024-10-10',
+            created_by=user,
+            updated_by=user,
+        )
+        url = f'/api/v1/projects/{project.id}/daily-reports/{report.id}/activities/'
+        resp = auth_client.post(
+            url,
+            {
+                'activity_ref': str(activity.id),
+                'activity_description': 'Concrete pouring',
+                'shift': 'shift_1',
+                'quantity': 120,
+            },
+            format='json',
+        )
+        assert resp.status_code == 400
+        assert resp.data['error']['code'] == 'progress_exceeds_100'
+        assert resp.data['error']['message'] == 'مجموع پیشرفت نمی‌تواند از ۱۰۰٪ بیشتر شود؛ لطفاً مقادیر اصلاح شوند'

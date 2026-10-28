@@ -121,6 +121,15 @@ def custom_exception_handler(exc, context):
 
     message = _extract_message(response.data)
     code = _error_code(exc)
+    # Physical-progress governance errors are synchronous client input
+    # rejections and must use the documented 400 contract even on nested
+    # report endpoints that otherwise expose serializer failures as 422.
+    if code in {
+        'measurement_not_approved',
+        'progress_exceeds_100',
+        'photo_not_technical_approval',
+    }:
+        response.status_code = 400
     details = response.data if isinstance(response.data, dict) else {'detail': response.data}
 
     if isinstance(exc, Throttled):

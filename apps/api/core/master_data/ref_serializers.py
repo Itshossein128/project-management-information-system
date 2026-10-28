@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from master_data.models import ManagedContractType, OrganizationUnit
+from master_data.models import ManagedContractType, OrganizationUnit, Unit
 
 
 class OrganizationUnitSerializer(serializers.ModelSerializer):
@@ -23,3 +23,10 @@ class ManagedContractTypeSerializer(serializers.ModelSerializer):
         model = ManagedContractType
         fields = ['id', 'code', 'name_fa', 'name_en', 'is_active', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class UnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Unit
+        fields = ['id', 'unit_name', 'unit_symbol']
+        read_only_fields = ['id']
