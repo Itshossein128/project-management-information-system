@@ -71,6 +71,21 @@ def partial_approve_items(
     return updated
 
 
+def assert_draft_status(requisition: RequisitionHeader, action: str):
+    """Ensure the requisition is in DRAFT status."""
+    if requisition.status != RequisitionStatus.DRAFT:
+        raise ValidationError(
+            {'detail': f'Requisition can only be {action} in DRAFT status.'}
+        )
+
+
+@transaction.atomic
+def delete_requisition(requisition: RequisitionHeader, user):
+    """Soft-delete a requisition if it is in DRAFT status."""
+    assert_draft_status(requisition, action='deleted')
+    requisition.soft_delete(user=user)
+
+
 @transaction.atomic
 def put_item_on_hold(item: RequisitionItem, user) -> RequisitionItem:
     """Put a requisition item On-Hold (awaiting budget)."""

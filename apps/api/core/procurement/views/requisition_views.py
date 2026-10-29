@@ -152,20 +152,17 @@ class RequisitionHeaderViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
+        from procurement.services.requisition_service import assert_draft_status
+
         instance = self.get_object()
-        if instance.status != RequisitionStatus.DRAFT:
-            raise ValidationError(
-                {'detail': 'Requisition can only be edited in DRAFT status.'}
-            )
+        assert_draft_status(instance, action='edited')
         instance = serializer.save(updated_by=self.request.user)
         notify_fast_track_requisition(instance)
 
     def perform_destroy(self, instance):
-        if instance.status != RequisitionStatus.DRAFT:
-            raise ValidationError(
-                {'detail': 'Only DRAFT requisitions can be deleted.'}
-            )
-        instance.soft_delete(user=self.request.user)
+        from procurement.services.requisition_service import delete_requisition
+
+        delete_requisition(instance, self.request.user)
 
 
 class RequisitionItemHoldView(APIView):
