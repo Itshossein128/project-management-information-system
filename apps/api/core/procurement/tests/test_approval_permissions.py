@@ -101,6 +101,9 @@ class TestProcurementStepRBACViews:
         role_eng, _ = Role.objects.get_or_create(role_name='block_engineer')
         role_tech, _ = Role.objects.get_or_create(role_name='technical_office')
 
+        RolePermission.objects.get_or_create(role=role_eng, permission_codename='edit_procurement')
+        RolePermission.objects.get_or_create(role=role_tech, permission_codename='edit_procurement')
+
         m_eng = ProjectMember.objects.create(project=project, user=user_eng, status=MemberStatus.ACTIVE)
         ProjectMemberRole.objects.create(member=m_eng, role=role_eng)
 
@@ -176,6 +179,22 @@ class TestProcurementStepRBACViews:
         req.refresh_from_db()
         assert req.status == RequisitionStatus.WORKSHOP_APPROVAL
 
+    def test_approval_action_denied_for_non_project_member_with_global_group(self, setup_data):
+        client = APIClient()
+        data = setup_data
+        # Create a user in the Django group matching the required step role, but NOT a project member
+        non_member = User.objects.create_user(username='global_eng', password='pass')
+        eng_group, _ = Group.objects.get_or_create(name='block_engineer')
+        non_member.groups.add(eng_group)
+
+        client.force_authenticate(user=non_member)
+        url = f"/api/v1/projects/{data['project'].id}/requisitions/{data['requisition'].id}/submit/"
+        response = client.post(url, {'comments': 'Malicious submit attempt'}, format='json')
+        if response.status_code == 404:
+            url = f"/api/projects/{data['project'].id}/requisitions/{data['requisition'].id}/submit/"
+            response = client.post(url, {'comments': 'Malicious submit attempt'}, format='json')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
 
 @pytest.mark.django_db
 class TestWorkshopDraftPermissions:
@@ -193,6 +212,7 @@ class TestWorkshopDraftPermissions:
         role_engineer, _ = Role.objects.get_or_create(role_name='block_engineer')
 
         RolePermission.objects.create(role=role_supervisor, permission_codename='view_procurement')
+        RolePermission.objects.create(role=role_supervisor, permission_codename='edit_procurement')
 
         m_super = ProjectMember.objects.create(
             project=project, user=user_supervisor, status=MemberStatus.ACTIVE,
