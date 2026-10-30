@@ -2417,6 +2417,17 @@
       "step5Title": "Alert Rules",
       "step5Desc": "This tab defines the threshold for each alert, which roles are notified, and how long to wait before repeating it. System rules (marked with a lock) cannot be deleted but can be switched off. Use \"Add alert rule\" to create your own; the cooldown in hours is what stops the same subject notifying repeatedly."
     },
+    "projectBarriers": {
+      "title": "Barriers & Issues Guide",
+      "step1Title": "Filter & Search Barriers",
+      "step1Desc": "Search and analyze project barriers by date range and status (Open, Under Review, Resolved).",
+      "step2Title": "Log New Barrier",
+      "step2Desc": "Click 'Add' to log a new barrier, specifying the date, category, description, and schedule/cost impact.",
+      "step3Title": "Barriers Log Table",
+      "step3Desc": "View and edit all recorded project barriers along with their current status and impact on schedule and budget.",
+      "step4Title": "Resolve & Log Actions",
+      "step4Desc": "Click 'Resolved' on any open barrier row to record the resolution date, corrective action, and close the issue."
+    },
     "projectManpower": {
       "title": "Project Manpower Tour",
       "step1Title": "Report Date",
