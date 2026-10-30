@@ -9,8 +9,10 @@ from __future__ import annotations
 from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import Http404
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
@@ -180,6 +182,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
             self._report_or_404(),
             user=request.user,
             unit=self._unit(),
+            enforce_permission=True,
             validated_fields={
                 field: request.data[field]
                 for field in ('form_code', 'revision_number', 'weather_condition', 'site_status', 'sub_discipline')
@@ -190,7 +193,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
         return self._detail(report)
 
     def destroy(self, request, *args, **kwargs):
-        svc.soft_delete_unit_report(self._report_or_404(), user=request.user, unit=self._unit())
+        svc.soft_delete_unit_report(self._report_or_404(), user=request.user, unit=self._unit(), enforce_permission=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(summary='Export sub-report as Shiraz Excel spreadsheet (FILE 5 / FILE 6)', tags=['Unit Daily Reports'])
@@ -242,14 +245,14 @@ class UnitReportViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['post'])
     def correct(self, request, *args, **kwargs):
         report = svc.correct_unit_report(
-            self._report_or_404(), user=request.user, unit=self._unit(),
+            self._report_or_404(), user=request.user, unit=self._unit(), enforce_permission=True,
         )
         return self._detail(report)
 
     @extend_schema(methods=['POST'], responses=UnitReportDetailSerializer)
     @action(detail=True, methods=['post'])
     def submit(self, request, *args, **kwargs):
-        report = svc.submit_unit_report(self._report_or_404(), user=request.user, unit=self._unit())
+        report = svc.submit_unit_report(self._report_or_404(), user=request.user, unit=self._unit(), enforce_permission=True)
         return self._detail(report)
 
     @extend_schema(methods=['POST'], responses=UnitReportDetailSerializer)
@@ -258,6 +261,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
         report = svc.approve_unit_report(
             self._report_or_404(), user=request.user, unit=self._unit(),
             sod_checker=_sod_violation,
+            enforce_permission=True,
         )
         return self._detail(report)
 
@@ -271,6 +275,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
             user=request.user,
             rejection_reason=payload.validated_data['rejection_reason'],
             unit=self._unit(),
+            enforce_permission=True,
         )
         return self._detail(report)
 
@@ -286,6 +291,7 @@ def _sod_violation(report, approver):
     return None
 
 
+@method_decorator(transaction.atomic, name='dispatch')
 class UnitReportActivitySectionViewSet(viewsets.GenericViewSet):
     """§1 executed-activity child rows bound to one unit-report version (033).
 
@@ -319,8 +325,7 @@ class UnitReportActivitySectionViewSet(viewsets.GenericViewSet):
 
     def _editable_report(self):
         report = self._report()
-        svc.assert_editable(report, self.request.user, unit=self._unit())
-        return report
+        return svc.lock_editable_report(report, self.request.user, unit=self._unit(), enforce_permission=True)
 
     def _row(self, report):
         try:
@@ -392,6 +397,7 @@ class UnitReportActivitySectionViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@method_decorator(transaction.atomic, name='dispatch')
 class UnitReportLaborSectionViewSet(viewsets.GenericViewSet):
     """§2 labor child rows bound to one unit-report version (feature 033, T021).
 
@@ -422,8 +428,7 @@ class UnitReportLaborSectionViewSet(viewsets.GenericViewSet):
 
     def _editable_report(self):
         report = self._report()
-        svc.assert_editable(report, self.request.user, unit=self._unit())
-        return report
+        return svc.lock_editable_report(report, self.request.user, unit=self._unit(), enforce_permission=True)
 
     def _row(self, report):
         try:
@@ -511,6 +516,7 @@ class UnitReportLaborSectionViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@method_decorator(transaction.atomic, name='dispatch')
 class UnitReportMachinerySectionViewSet(viewsets.GenericViewSet):
     """§3 machinery child rows bound to one unit-report version (feature 033, T028).
 
@@ -541,8 +547,7 @@ class UnitReportMachinerySectionViewSet(viewsets.GenericViewSet):
 
     def _editable_report(self):
         report = self._report()
-        svc.assert_editable(report, self.request.user, unit=self._unit())
-        return report
+        return svc.lock_editable_report(report, self.request.user, unit=self._unit(), enforce_permission=True)
 
     def _row(self, report):
         try:
@@ -629,6 +634,7 @@ class UnitReportMachinerySectionViewSet(viewsets.GenericViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@method_decorator(transaction.atomic, name='dispatch')
 class UnitReportMaterialSectionViewSet(viewsets.GenericViewSet):
     """§4 material child rows bound to one unit-report version (feature 033, T035).
 
@@ -659,8 +665,7 @@ class UnitReportMaterialSectionViewSet(viewsets.GenericViewSet):
 
     def _editable_report(self):
         report = self._report()
-        svc.assert_editable(report, self.request.user, unit=self._unit())
-        return report
+        return svc.lock_editable_report(report, self.request.user, unit=self._unit(), enforce_permission=True)
 
     def _row(self, report):
         try:

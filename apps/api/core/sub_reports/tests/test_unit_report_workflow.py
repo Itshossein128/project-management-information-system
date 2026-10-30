@@ -15,6 +15,21 @@ from sub_reports.models import (
 BASE = '/api/v1/projects/{project_id}/units/{unit}/daily-reports/'
 
 
+def submit_report(client, base, report_id):
+    # A live unit report needs an active section row before it may be submitted.
+    edited = client.patch(
+        f'{base}{report_id}/',
+        {'activities': [{'row_number': 1, 'shift': 'shift_1', 'crew_name': 'Crew',
+                         'activity_description': 'Workflow test activity', 'worker_count': 2,
+                         'quantity': '1', 'unit': 'm2'}]},
+        format='json',
+    )
+    assert edited.status_code == status.HTTP_200_OK, edited.data
+    submitted = client.post(f'{base}{report_id}/submit/')
+    assert submitted.status_code == status.HTTP_200_OK, submitted.data
+    return submitted
+
+
 @pytest.fixture
 def base(project):
     return BASE.format(project_id=project.id, unit='buildings')
@@ -80,7 +95,7 @@ class TestEditAndSubmit:
     def test_submit_moves_draft_to_submitted(self, auth_client, base, user):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        res = auth_client.post(f'{base}{rid}/submit/')
+        res = submit_report(auth_client, base, rid)
         assert res.status_code == status.HTTP_200_OK
         assert res.data['status'] == SubReportStatus.SUBMITTED
         assert res.data['audit']['submitted_by']['id'] == str(user.id)
@@ -91,7 +106,7 @@ class TestEditAndSubmit:
     def test_submitted_content_immutable(self, auth_client, base):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        auth_client.post(f'{base}{rid}/submit/')
+        submit_report(auth_client, base, rid)
         res = auth_client.patch(f'{base}{rid}/', {'form_code': 'B-2'}, format='json')
         assert res.status_code == status.HTTP_400_BAD_REQUEST
         report = DisciplineSubReport.objects.get(id=rid)
@@ -101,19 +116,20 @@ class TestEditAndSubmit:
     def test_rejected_report_editable(self, auth_client, base):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        auth_client.post(f'{base}{rid}/submit/')
-        auth_client.post(
+        submit_report(auth_client, base, rid)
+        rejected = auth_client.post(
             f'{base}{rid}/reject/',
             {'rejection_reason': 'اطلاعات ناقص است و نیاز به تکمیل دارد'},
             format='json',
         )
+        assert rejected.status_code == status.HTTP_200_OK
         res = auth_client.patch(f'{base}{rid}/', {'form_code': 'B-3'}, format='json')
         assert res.status_code == status.HTTP_200_OK
 
     def test_rejection_requires_reason(self, auth_client, base):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        auth_client.post(f'{base}{rid}/submit/')
+        submit_report(auth_client, base, rid)
 
         # Whitespace-only reason
         res_blank = auth_client.post(f'{base}{rid}/reject/', {'rejection_reason': '   '}, format='json')
@@ -137,7 +153,7 @@ class TestEditAndSubmit:
     def test_rejection_records_reviewer_time_reason_and_event(self, auth_client, base, user):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        auth_client.post(f'{base}{rid}/submit/')
+        submit_report(auth_client, base, rid)
 
         reason_text = 'گزارش نیازمند بازبینی و ثبت جزئیات دقیق‌تر بتن‌ریزی است'
         res = auth_client.post(f'{base}{rid}/reject/', {'rejection_reason': reason_text}, format='json')
@@ -184,7 +200,7 @@ class TestEditAndSubmit:
     def test_history_lists_versions_and_events(self, auth_client, base):
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         rid = created.data['id']
-        auth_client.post(f'{base}{rid}/submit/')
+        submit_report(auth_client, base, rid)
         res = auth_client.get(f'{base}{rid}/history/')
         assert res.status_code == status.HTTP_200_OK
         assert len(res.data['versions']) == 1
@@ -227,7 +243,7 @@ class TestCorrectionWorkflow:
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         v1_id = created.data['id']
         auth_client.patch(f'{base}{v1_id}/', {'form_code': 'BLD-V1'}, format='json')
-        auth_client.post(f'{base}{v1_id}/submit/')
+        submit_report(auth_client, base, v1_id)
 
         # 2. Approver approves v1
         appr_res = approver_client.post(f'{base}{v1_id}/approve/')
@@ -283,13 +299,14 @@ class TestCorrectionWorkflow:
         assert res_draft.data['error']['code'] == 'invalid_unit_report_transition'
 
         # Submitted -> correct refused
-        auth_client.post(f'{base}{rid}/submit/')
+        submit_report(auth_client, base, rid)
         res_sub = auth_client.post(f'{base}{rid}/correct/')
         assert res_sub.status_code == status.HTTP_400_BAD_REQUEST
         assert res_sub.data['error']['code'] == 'invalid_unit_report_transition'
 
         # Rejected -> correct refused
-        auth_client.post(f'{base}{rid}/reject/', {'rejection_reason': 'Need details'}, format='json')
+        rejected = auth_client.post(f'{base}{rid}/reject/', {'rejection_reason': 'Need details'}, format='json')
+        assert rejected.status_code == status.HTTP_200_OK
         res_rej = auth_client.post(f'{base}{rid}/correct/')
         assert res_rej.status_code == status.HTTP_400_BAD_REQUEST
         assert res_rej.data['error']['code'] == 'invalid_unit_report_transition'
@@ -300,8 +317,9 @@ class TestCorrectionWorkflow:
         # Create and approve v1
         created = auth_client.post(base + 'open/', {'report_date': '2026-10-20'}, format='json')
         v1_id = created.data['id']
-        auth_client.post(f'{base}{v1_id}/submit/')
-        approver_client.post(f'{base}{v1_id}/approve/')
+        submit_report(auth_client, base, v1_id)
+        approved = approver_client.post(f'{base}{v1_id}/approve/')
+        assert approved.status_code == status.HTTP_200_OK
 
         # Correct to v2
         corr = auth_client.post(f'{base}{v1_id}/correct/')
@@ -309,7 +327,8 @@ class TestCorrectionWorkflow:
 
         # Edit v2, submit v2
         auth_client.patch(f'{base}{v2_id}/', {'form_code': 'V2-REV1'}, format='json')
-        auth_client.post(f'{base}{v2_id}/submit/')
+        submitted = auth_client.post(f'{base}{v2_id}/submit/')
+        assert submitted.status_code == status.HTTP_200_OK, submitted.data
 
         # Approver rejects v2
         rej = approver_client.post(

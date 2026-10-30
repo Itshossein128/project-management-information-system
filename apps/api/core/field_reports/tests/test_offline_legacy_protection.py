@@ -27,9 +27,9 @@ def snapshot(report):
     )
 
 
-def assert_derived_readonly(response):
+def assert_derived_readonly(response, *, code='derived_readonly'):
     assert response.status_code == 400
-    assert response.data['error']['code'] == 'derived_readonly'
+    assert response.data['error']['code'] == code
 
 
 @pytest.mark.parametrize('method', ['post', 'patch', 'delete'])
@@ -44,7 +44,7 @@ def test_summary_child_writes_are_rejected_and_preserve_provenance(auth_client, 
     else:
         response = auth_client.delete(f'{url}{row.id}/')
     assert snapshot(report) == before
-    assert_derived_readonly(response)
+    assert_derived_readonly(response, code='derived_collection_read_only')
 
 
 @pytest.mark.parametrize('activities', [[], [{'activity_description': 'manual', 'shift': 'shift_1'}]])

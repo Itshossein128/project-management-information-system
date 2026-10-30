@@ -6,7 +6,7 @@ import pytest
 from django.db import DatabaseError, connection, transaction
 
 from projects.models import Project
-from sub_reports.models import DisciplineSubReport, SubReportStatus
+from sub_reports.models import DisciplineSubReport, DisciplineSubReportActivity, SubReportStatus
 from sub_reports import unit_report_services as svc
 
 
@@ -16,6 +16,10 @@ def test_submit_waits_for_project_lock_before_taking_report_lock(project, user, 
         pytest.fail('This concurrency test requires PostgreSQL')
     report = DisciplineSubReport.objects.create(project=project, unit='buildings', discipline='civil',
         report_date=date(2026, 10, 20), status=SubReportStatus.DRAFT, created_by=user)
+    DisciplineSubReportActivity.objects.create(
+        sub_report=report, row_number=1, shift='shift_1', crew_name='Crew',
+        activity_description='Lock ordering activity', quantity=1, unit='m2', worker_count=1,
+    )
     report_locked = threading.Event()
     worker_started = threading.Event()
     errors = []

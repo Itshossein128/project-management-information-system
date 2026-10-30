@@ -3,7 +3,7 @@
 Generates the flat historical activity database spreadsheet matching
 Shiraz template FILE 1 (ACTIVITY sheet) with RTL layout, Tahoma font,
 and columns:
-ردیف, تاریخ, شرح فعالیت, شیفت, پیمانکار, نفرات, قطعه, بلوک, طبقه, موقعیت, مقدار, واحد
+ردیف, تاریخ, شرح فعالیت, شیفت, پیمانکار, نفرات, قطعه, بلوک, طبقه, موقعیت, مقدار, واحد, اکیپ, ناحیه
 """
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from openpyxl.utils import get_column_letter
 
 from common.jalali import gregorian_to_jalali
 from field_reports.models import DailyReportActivity
+from field_reports.excel_safety import literalize_cell
 
 FONT_FAMILY = 'Tahoma'
 
@@ -49,7 +50,7 @@ class ShirazFile1ExcelBuilder:
     def build(self) -> Tuple[bytes, str]:
         headers = [
             'ردیف', 'تاریخ', 'شرح فعالیت', 'شیفت', 'پیمانکار',
-            'نفرات', 'قطعه', 'بلوک', 'طبقه', 'موقعیت', 'مقدار', 'واحد'
+            'نفرات', 'قطعه', 'بلوک', 'طبقه', 'موقعیت', 'مقدار', 'واحد', 'اکیپ', 'ناحیه'
         ]
 
         # Row 1: Headers
@@ -63,7 +64,7 @@ class ShirazFile1ExcelBuilder:
         row = 2
         items = list(self.queryset)
         if not items:
-            self.ws.merge_cells('A2:L2')
+            self.ws.merge_cells('A2:N2')
             c = self.ws.cell(row=2, column=1, value='هیچ فعالیتی با فیلترهای مشخص‌شده یافت نشد.')
             c.font = STYLE_DATA_FONT
             c.alignment = ALIGN_CENTER
@@ -74,9 +75,9 @@ class ShirazFile1ExcelBuilder:
                 report = act.report
                 r_date = gregorian_to_jalali(report.report_date) if report and report.report_date else ''
                 shift_display = act.get_shift_display() if hasattr(act, 'get_shift_display') else (act.shift or '—')
-                contractor = act.subcontractor_name or act.responsible_name or 'نفر شرکت'
-                headcount = act.headcount if act.headcount is not None else 0
-                qty_val = float(act.quantity) if act.quantity is not None else '*'
+                contractor = (act.contractor_ref.name if act.contractor_ref_id else act.subcontractor_name) or '—'
+                headcount = act.headcount
+                qty_val = float(act.quantity) if act.quantity_measured and act.quantity is not None else '*'
 
                 self.ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=2, value=r_date).alignment = ALIGN_CENTER
@@ -84,15 +85,17 @@ class ShirazFile1ExcelBuilder:
                 self.ws.cell(row=row, column=4, value=shift_display).alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=5, value=contractor).alignment = ALIGN_RIGHT
                 self.ws.cell(row=row, column=6, value=headcount).alignment = ALIGN_CENTER
-                self.ws.cell(row=row, column=7, value=act.parcel or act.zone or '—').alignment = ALIGN_CENTER
+                self.ws.cell(row=row, column=7, value=act.parcel or '—').alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=8, value=act.block or '—').alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=9, value=act.floor or '—').alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=10, value=act.location_detail or '—').alignment = ALIGN_RIGHT
                 self.ws.cell(row=row, column=11, value=qty_val).alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=12, value=act.unit or '—').alignment = ALIGN_CENTER
+                self.ws.cell(row=row, column=13, value=act.crew_name or '—').alignment = ALIGN_RIGHT
+                self.ws.cell(row=row, column=14, value=act.zone or '—').alignment = ALIGN_RIGHT
 
-                for c_i in range(1, 13):
-                    cell = self.ws.cell(row=row, column=c_i)
+                for c_i in range(1, 15):
+                    cell = literalize_cell(self.ws.cell(row=row, column=c_i))
                     cell.font = STYLE_DATA_FONT
                     cell.border = THIN_BORDER
                 row += 1
@@ -100,7 +103,11 @@ class ShirazFile1ExcelBuilder:
             # Subtotal row for headcount
             data_end = row - 1
             self.ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=5)
-            lbl = self.ws.cell(row=row, column=1, value='مجموع نفرات (نفر-روز)')
+            missing_count = sum(act.headcount is None for act in items)
+            label = 'جمع تعداد نفرات ردیف‌ها'
+            if missing_count:
+                label += f' (ناقص؛ تعداد ثبت‌نشده: {missing_count})'
+            lbl = self.ws.cell(row=row, column=1, value=label)
             lbl.font = STYLE_TOTAL_FONT
             lbl.fill = STYLE_TOTAL_FILL
             lbl.alignment = ALIGN_RIGHT
@@ -110,7 +117,7 @@ class ShirazFile1ExcelBuilder:
             tot_hc.fill = STYLE_TOTAL_FILL
             tot_hc.alignment = ALIGN_CENTER
 
-            for c_i in range(1, 13):
+            for c_i in range(1, 15):
                 cell = self.ws.cell(row=row, column=c_i)
                 cell.font = STYLE_TOTAL_FONT
                 cell.fill = STYLE_TOTAL_FILL

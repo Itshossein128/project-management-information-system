@@ -18,6 +18,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.db import connection
 
+from sub_reports import unit_report_services as svc
 from common.reporting_units import SpecialtyUnit
 from field_reports.models import DailyReport, DailyReportDerivedSource, ReportShift
 from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
@@ -25,6 +26,7 @@ from projects.models import Project, ProjectStatus
 from sub_reports.models import (
     DisciplineSubReport,
     DisciplineSubReportActivity,
+    DisciplineSubReportMachinery,
     SubReportStatus,
     UnitReportEventType,
     UnitReportStatusEvent,
@@ -35,6 +37,7 @@ from sub_reports.unit_report_services import (
     correct_unit_report,
     open_unit_report,
     reject_unit_report,
+    soft_delete_unit_report,
     submit_unit_report,
     update_unit_report,
 )
@@ -155,6 +158,10 @@ class TestUnitReportConcurrency:
             report_date=report_date,
             user=conc_user,
         )
+        DisciplineSubReportActivity.objects.create(
+            sub_report=v1, row_number=1, shift='shift_1', crew_name='Electrical crew',
+            activity_description='Conduit installation', quantity=1, unit='m', worker_count=1,
+        )
         submit_unit_report(v1, user=conc_user, unit=SpecialtyUnit.ELECTRICAL)
         approve_unit_report(v1, user=conc_reviewer, unit=SpecialtyUnit.ELECTRICAL)
 
@@ -196,6 +203,10 @@ class TestUnitReportConcurrency:
             report_date=report_date,
             user=conc_user,
         )
+        DisciplineSubReportActivity.objects.create(
+            sub_report=report, row_number=1, shift='shift_1', crew_name='Mechanical crew',
+            activity_description='Mechanical installation', quantity=1, unit='m', worker_count=1,
+        )
 
         barrier = threading.Barrier(2)
 
@@ -219,6 +230,8 @@ class TestUnitReportConcurrency:
         results, errors = _run_in_threads(call_edit, call_submit)
 
         report.refresh_from_db()
+        assert results[1] is not None
+        assert all(isinstance(error, UnitReportError) for error in errors), errors
         assert report.status == SubReportStatus.SUBMITTED
         # Content remains immutable once submitted
         with pytest.raises(UnitReportError):
@@ -229,6 +242,65 @@ class TestUnitReportConcurrency:
                 validated_fields={'weather_condition': 'sunny'},
             )
 
+    @pytest.mark.parametrize('first', ['delete', 'submit'])
+    def test_delete_racing_submit_preserves_winner_and_summary(self, conc_project, conc_user, monkeypatch, first):
+        """Each operation starts while the other holds the shared project lock."""
+        report_date = date(2026, 10, 26)
+        report, _ = open_unit_report(
+            project=conc_project, unit=SpecialtyUnit.BUILDINGS,
+            report_date=report_date, user=conc_user,
+        )
+        DisciplineSubReportActivity.objects.create(
+            sub_report=report, row_number=1, shift='shift_1', crew_name='Crew',
+            activity_description='Activity under concurrent transition', quantity=1,
+            unit='m2', worker_count=1,
+        )
+        acquired = threading.Event()
+        contender_started = threading.Event()
+        barrier = threading.Barrier(2)
+        original_lock = svc._lock_project_for_rebuild
+
+        def observe_project_lock(target):
+            original_lock(target)
+            if threading.current_thread().name == 'first-transition':
+                acquired.set()
+                if not contender_started.wait(timeout=10):
+                    raise AssertionError('Second operation did not start')
+
+        monkeypatch.setattr(svc, '_lock_project_for_rebuild', observe_project_lock)
+
+        def operation(kind):
+            threading.current_thread().name = 'first-transition' if kind == first else 'second-transition'
+            barrier.wait(timeout=10)
+            if kind != first and not acquired.wait(timeout=10):
+                raise AssertionError('First operation did not acquire project lock')
+            if kind != first:
+                contender_started.set()
+            if kind == 'delete':
+                return soft_delete_unit_report(report, user=conc_user, unit=SpecialtyUnit.BUILDINGS)
+            return submit_unit_report(report, user=conc_user, unit=SpecialtyUnit.BUILDINGS)
+
+        results, errors = _run_in_threads(lambda: operation('delete'), lambda: operation('submit'))
+        assert sum(result is not None for result in results) == 1
+        assert len(errors) == 1 and isinstance(errors[0], UnitReportError)
+        report.refresh_from_db()
+        events = set(report.status_events.values_list('event_type', flat=True))
+        summary = DailyReport.objects.get(project=conc_project, report_date=report_date, shift=ReportShift.FULL)
+        activities = summary.activities.filter(activity_description='Activity under concurrent transition', is_deleted=False)
+
+        if first == 'delete':
+            assert results[0] is not None and results[1] is None
+            assert report.is_deleted is True and report.is_current is False
+            assert report.status == SubReportStatus.DRAFT
+            assert UnitReportEventType.DELETED in events and UnitReportEventType.SUBMITTED not in events
+            assert activities.count() == 0
+        else:
+            assert results[0] is None and results[1] is not None
+            assert report.is_deleted is False and report.is_current is True
+            assert report.status == SubReportStatus.SUBMITTED
+            assert UnitReportEventType.SUBMITTED in events and UnitReportEventType.DELETED not in events
+            assert activities.count() == 1
+
     def test_approve_racing_reject(self, conc_project, conc_user, conc_reviewer):
         """Approve racing reject: exactly one transition succeeds, report never in contradictory state."""
         report_date = date(2026, 10, 23)
@@ -237,6 +309,9 @@ class TestUnitReportConcurrency:
             unit=SpecialtyUnit.MACHINERY,
             report_date=report_date,
             user=conc_user,
+        )
+        DisciplineSubReportMachinery.objects.create(
+            sub_report=report, row_number=1, equipment_type='Loader', status_total=1, status_active=1,
         )
         submit_unit_report(report, user=conc_user, unit=SpecialtyUnit.MACHINERY)
 

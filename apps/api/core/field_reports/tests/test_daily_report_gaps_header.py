@@ -98,7 +98,15 @@ class TestDailyReportGapsHeader:
             },
             format='json',
         )
-        assert bad.status_code == status.HTTP_400_BAD_REQUEST
+        # A measured-but-unset value may be saved in a draft, but cannot be submitted.
+        assert bad.status_code == status.HTTP_201_CREATED
+        assert bad.data['quantity_measured'] is True
+        assert bad.data['quantity'] is None
+        submit = auth_client.post(f'{reports_url}{report.id}/submit/', {}, format='json')
+        assert submit.status_code == status.HTTP_400_BAD_REQUEST
+        assert submit.data['error']['code'] == 'quantity_unset_invalid'
+        report.refresh_from_db()
+        assert report.status == ReportStatus.DRAFT
 
     def test_submit_rejects_measured_null_quantity(self, auth_client, reports_url, project, user):
         report = DailyReport.objects.create(
@@ -113,3 +121,4 @@ class TestDailyReportGapsHeader:
         )
         response = auth_client.post(f'{reports_url}{report.id}/submit/', {}, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data['error']['code'] == 'quantity_unset_invalid'

@@ -68,6 +68,7 @@ class MaterialTransactionType(models.TextChoices):
     ISSUE = 'issue', 'مصرف شده'
     WASTE = 'waste', 'ضایعات'
     RETURN = 'return', 'برگشتی'
+    UNKNOWN = 'unknown', 'نامشخص'
 
 
 class IncidentType(models.TextChoices):

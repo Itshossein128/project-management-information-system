@@ -44,7 +44,7 @@ def test_view_reports_without_edit_can_get_by_date_existing_but_cannot_post(
 
 
 @pytest.mark.django_db
-def test_view_reports_without_edit_gets_404_on_missing_date_and_creates_no_records(
+def test_view_reports_without_edit_can_get_shell_but_cannot_post(
     api_client, project, other_user, viewer_member,
 ):
     api_client.force_authenticate(user=other_user)
@@ -52,13 +52,16 @@ def test_view_reports_without_edit_gets_404_on_missing_date_and_creates_no_recor
     initial_count = DailyReport.objects.filter(project=project).count()
 
     res = api_client.get(by_date, {'date': '2026-08-01'})
-    assert res.status_code == status.HTTP_404_NOT_FOUND
-    assert DailyReport.objects.filter(project=project).count() == initial_count
+    # Feature 039 explicitly permits server-owned shell provisioning on GET
+    # for read-only viewers; it does not grant user-authored write access.
+    assert res.status_code == status.HTTP_200_OK
+    assert res.data['is_auto_summary'] is True
+    assert DailyReport.objects.filter(project=project).count() == initial_count + 1
 
-    # POST returns 403 and still creates nothing
+    # POST returns 403 and creates no additional records.
     post_res = api_client.post(by_date, {'date': '2026-08-01'}, format='json')
     assert post_res.status_code == status.HTTP_403_FORBIDDEN
-    assert DailyReport.objects.filter(project=project).count() == initial_count
+    assert DailyReport.objects.filter(project=project).count() == initial_count + 1
 
 
 @pytest.mark.django_db

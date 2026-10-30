@@ -189,9 +189,10 @@ export function PeriodReportsPanel({ projectId }: { projectId: string }) {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-base">{detail.title}</span>
-                <Badge variant={detail.status === "approved" ? "success" : "secondary"}>
-                  {detail.status === "approved" ? "تأیید رسمی شده" : "پیش‌نویس سیستمی"}
-                </Badge>
+                <Badge
+                  variant={detail.status === "approved" ? "success" : "neutral"}
+                  label={detail.status === "approved" ? "تأیید رسمی شده" : "پیش‌نویس سیستمی"}
+                />
               </div>
               <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                 <span>بازه: {formatDisplayDate(detail.period_start)} تا {formatDisplayDate(detail.period_end)}</span>

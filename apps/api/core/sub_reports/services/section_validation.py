@@ -215,6 +215,7 @@ def validate_activity_rows(report, rows, context=None):
     """
     if context is None:
         context = {}
+    context = {**context, 'report': report}
     errors = []
     saved = []
     rows = rows if rows is not None else []
@@ -290,7 +291,7 @@ def update_activity_row(report, row, payload, context=None):
     :class:`SectionContractError` with the fielded codes otherwise.
     """
     serializer = UnitReportActivitySectionSerializer(
-        instance=row, data=payload, context=context or {}, partial=True,
+        instance=row, data=payload, context={**(context or {}), 'report': report}, partial=True,
     )
     try:
         serializer.is_valid(raise_exception=True)

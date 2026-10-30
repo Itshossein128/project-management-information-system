@@ -53,6 +53,12 @@ def test_activity_delete_leaves_changed_tombstone_revision(auth_client, project,
 
 
 def test_submit_changes_header_revision(auth_client, project, report):
+    # Submission requires a non-empty report; this row is not the subject of
+    # the revision assertion but supplies that lifecycle prerequisite.
+    DisciplineSubReportActivity.objects.create(
+        sub_report=report, row_number=1, shift='shift_1',
+        activity_description='work', quantity=1, unit='m2',
+    )
     before = report.sync_revision
     response = auth_client.post(base(project, report) + 'submit/')
     assert response.status_code == 200, response.data

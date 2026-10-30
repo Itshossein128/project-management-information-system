@@ -1008,9 +1008,10 @@ export function SectionActivities({
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="checkbox-unitActivityHydrostatic"
+                  name="unitActivityHydrostatic"
                   checked={form.is_hydrostatic_tested}
-                  onCheckedChange={(checked) =>
-                    setFieldValue("is_hydrostatic_tested", Boolean(checked))
+                  onChange={(event) =>
+                    setFieldValue("is_hydrostatic_tested", event.target.checked)
                   }
                 />
                 <label

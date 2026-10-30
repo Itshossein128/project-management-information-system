@@ -47,11 +47,16 @@ def activity_op(local_report_id, activity, contractor, description, depends_on, 
 
 
 @pytest.fixture
-def activity_refs(project, user):
+def activity_refs(project, user, unit):
+    from schedule.services.measurement_service import approve_definition, get_or_create_definition, update_draft
+
     node = WBS.add_root(project=project, wbs_code='1', wbs_name='Root')
     activity = Activity.objects.create(
         project=project, wbs=node, activity_code='ISO', activity_name='Isolation', status='in_progress', created_by=user,
     )
+    definition = get_or_create_definition(activity, user)
+    update_draft(definition, {'method': 'quantity', 'total_quantity': 100, 'unit_id': str(unit.id)}, user)
+    approve_definition(definition, user)
     contractor = Stakeholder.objects.create(project=project, name='Iso Co', role='contractor', created_by=user)
     return activity, contractor
 

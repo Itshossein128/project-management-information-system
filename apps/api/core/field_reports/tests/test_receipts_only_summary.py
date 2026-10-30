@@ -34,6 +34,24 @@ User = get_user_model()
 
 REPORT_DATE = date(2024, 6, 10)
 
+@pytest.mark.django_db
+def test_unclassified_unit_material_never_becomes_a_receipt(project, user):
+    source = DisciplineSubReport.objects.create(
+        project=project, report_date=REPORT_DATE, unit=SpecialtyUnit.WAREHOUSE,
+        discipline='civil', status=SubReportStatus.SUBMITTED, created_by=user,
+    )
+    DisciplineSubReportMaterial.objects.create(
+        sub_report=source, material_description='نوع نامعلوم', quantity=Decimal('5'),
+        unit='kg', transaction_type=None,
+    )
+    summary = rebuild_daily_report_summary(project.id, REPORT_DATE, user=user)
+    row = summary.material_entries.get(material_description='نوع نامعلوم')
+    assert row.transaction_type == 'unknown'
+    assert row.receipt_resolved is False
+    payload = DailyReportDetailSerializer(summary).data['materials_summary']
+    assert not payload['main_table']
+    assert payload['details'][0]['transaction_type'] == 'unknown'
+
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -142,6 +160,9 @@ class TestReceiptsOnlySummary:
         )
         assert len(resolved_ids) == 1
         assert resolved_ids[0] == str(resolved_row.id)
+        grouped = {item['material_description']: item for item in data['materials_summary']['grouped_summary']}
+        assert grouped['Resolved Beams']['total_received'] == 10
+        assert 'Unresolved Beams' not in grouped
 
         # Unresolved row is in details, never silently lost
         detail_ids = [str(m['id']) for m in data['materials_summary']['details']]

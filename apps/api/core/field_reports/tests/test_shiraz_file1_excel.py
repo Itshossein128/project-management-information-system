@@ -80,6 +80,15 @@ def sample_activity_data(project, user):
 
 @pytest.mark.django_db
 class TestShirazFile1Excel:
+
+    def test_user_text_is_literal_and_totals_remain_formulas(self, sample_activity_data):
+        sample_activity_data[0].activity_description = '=1+1'
+        sample_activity_data[0].crew_name = '=2+2'
+        raw, _ = ShirazFile1ExcelBuilder(sample_activity_data).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
+        assert ws['C2'].value == '=1+1' and ws['C2'].data_type == 's'
+        assert ws['M2'].value == '=2+2' and ws['M2'].data_type == 's'
+        assert ws['F5'].data_type == 'f'
     def test_empty_builder(self):
         builder = ShirazFile1ExcelBuilder([])
         excel_bytes, filename = builder.build()
@@ -92,7 +101,7 @@ class TestShirazFile1Excel:
         assert 'هیچ فعالیتی' in str(ws['A2'].value)
 
     def test_populated_builder(self, sample_activity_data):
-        builder = ShirazFile1ExcelBuilder(DailyReportActivity.objects.all())
+        builder = ShirazFile1ExcelBuilder(sample_activity_data)
         excel_bytes, filename = builder.build()
         assert filename == 'activity-database.xlsx'
 
@@ -104,7 +113,7 @@ class TestShirazFile1Excel:
         # Check headers
         expected_headers = [
             'ردیف', 'تاریخ', 'شرح فعالیت', 'شیفت', 'پیمانکار',
-            'نفرات', 'قطعه', 'بلوک', 'طبقه', 'موقعیت', 'مقدار', 'واحد'
+            'نفرات', 'قطعه', 'بلوک', 'طبقه', 'موقعیت', 'مقدار', 'واحد', 'اکیپ', 'ناحیه'
         ]
         for col_idx, expected_h in enumerate(expected_headers, start=1):
             assert ws.cell(row=1, column=col_idx).value == expected_h
@@ -115,8 +124,37 @@ class TestShirazFile1Excel:
         assert ws.cell(row=2, column=12).value == 'مترمربع'
 
         # Row 5 should be the subtotal row
-        assert 'مجموع نفرات' in str(ws.cell(row=5, column=1).value)
+        assert ws.cell(row=5, column=1).value == 'جمع تعداد نفرات ردیف‌ها'
         assert ws.cell(row=5, column=6).value == '=SUM(F2:F4)'
+
+    def test_derived_rows_preserve_contractor_crew_unknowns_and_location(self, project, user):
+        from projects.models import Stakeholder
+
+        report = DailyReport.objects.create(project=project, created_by=user, report_date=date(2025, 2, 3))
+        stakeholder = Stakeholder.objects.create(project=project, name='پیمانکار مرجع', role='contractor', created_by=user)
+        actual = DailyReportActivity.objects.create(
+            report=report, shift='shift_1', activity_description='فعالیت', contractor_ref=stakeholder,
+            crew_name='اکیپ مستقل', headcount=None, parcel=None, zone='ناحیه الف',
+            location_detail='محور ۱', quantity=Decimal('15'), quantity_measured=False,
+        )
+        missing = DailyReportActivity.objects.create(
+            report=report, shift='shift_1', activity_description='فاقد پیمانکار',
+            responsible_name='مسئول متفاوت', headcount=0, quantity=Decimal('0'), quantity_measured=True,
+        )
+        data, _ = ShirazFile1ExcelBuilder([actual, missing]).build()
+        sheet = openpyxl.load_workbook(io.BytesIO(data), data_only=False).active
+        assert sheet['E2'].value == 'پیمانکار مرجع'
+        assert sheet['M2'].value == 'اکیپ مستقل'
+        assert sheet['F2'].value is None
+        assert sheet['F3'].value == 0
+        assert sheet['E3'].value in (None, '—')
+        assert sheet['G2'].value in (None, '—')
+        assert sheet['N2'].value == 'ناحیه الف'
+        assert sheet['J2'].value == 'محور ۱'
+        assert sheet['K2'].value == '*'
+        assert sheet['K3'].value == 0
+        assert 'جمع تعداد نفرات ردیف‌ها' in sheet['A4'].value
+        assert 'ناقص' in sheet['A4'].value
 
     def test_activity_log_excel_endpoint_authorized(self, auth_client, project, sample_activity_data):
         url = f'/api/v1/projects/{project.id}/activity-log/excel/'

@@ -8,6 +8,7 @@ formulas, incoming materials, concrete pours, machinery, and daily activities).
 from __future__ import annotations
 
 import io
+from collections import defaultdict
 from typing import Tuple
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -15,6 +16,7 @@ from openpyxl.utils import get_column_letter
 
 from common.jalali import gregorian_to_jalali, persian_day_of_week
 from field_reports.models import DailyReport
+from field_reports.excel_safety import literalize_cell
 
 # Fixed 34 indirect / staff roles from Shiraz FILE 4 & migration 0010
 SHIRAZ_INDIRECT_ROLES = [
@@ -139,6 +141,9 @@ class ShirazFile4ExcelBuilder:
         current_row = self._write_machinery(current_row)
         current_row += 1
         current_row = self._write_activities(current_row)
+        current_row = self._write_general_activities(current_row + 1)
+        current_row = self._write_visits_and_incidents(current_row + 1)
+        self._write_notes(current_row + 1)
 
         self._auto_fit_columns()
 
@@ -157,7 +162,7 @@ class ShirazFile4ExcelBuilder:
     def _write_header(self):
         ws = self.ws
         project_name = getattr(self.report.project, 'project_name', 'پروژه ساختمانی')
-        contract_number = getattr(self.report.project, 'contract_number', '1402/25319/ص') or '1402/25319/ص'
+        contract_number = self.report.project.contract_number or 'ثبت نشده'
         jalali_date = gregorian_to_jalali(self.report.report_date) if self.report.report_date else ''
         dow = persian_day_of_week(self.report.report_date) if self.report.report_date else ''
 
@@ -175,10 +180,16 @@ class ShirazFile4ExcelBuilder:
         ws.merge_cells('C3:D3')
         ws['C3'] = f'روز: {dow}'
         ws.merge_cells('E3:F3')
-        status_text = 'فعال' if self.report.site_status == 'active' else f'غیرفعال ({self.report.get_inactivity_reason_display() or "تعطیل"})'
+        if self.report.site_status == 'active':
+            status_text = 'فعال'
+        elif self.report.site_status == 'inactive':
+            reason = self.report.get_inactivity_reason_display()
+            status_text = f'غیرفعال ({reason})' if reason else 'غیرفعال (دلیل ثبت نشده)'
+        else:
+            status_text = 'نامشخص'
         ws['E3'] = f'وضعیت کارگاه: {status_text}'
         ws.merge_cells('G3:H3')
-        weather_text = self.report.get_weather_condition_display() if self.report.weather_condition else 'صاف'
+        weather_text = self.report.get_weather_condition_display() if self.report.weather_condition else 'نامشخص'
         t_min = self.report.temp_min if self.report.temp_min is not None else '—'
         t_max = self.report.temp_max if self.report.temp_max is not None else '—'
         ws['G3'] = f'وضعیت جوی: {weather_text} (دما: {t_min} تا {t_max} °C)'
@@ -187,11 +198,42 @@ class ShirazFile4ExcelBuilder:
 
         # Row 4: Shift hours
         ws.merge_cells('A4:C4')
-        ws['A4'] = 'ساعات کاری شیفت ۱: ۷ الی ۱۷'
+        ws['A4'] = 'کارفرما: ' + (self.report.project.employer or 'ثبت نشده')
         ws.merge_cells('D4:F4')
-        ws['D4'] = 'ساعات کاری شیفت ۲: ۱۸ الی ۲۴'
+        ws['D4'] = 'مشاور: ' + (self.report.project.consultant or 'ثبت نشده')
         ws.merge_cells('G4:J4')
-        ws['G4'] = 'ساعات کاری شیفت ۳: ۱ الی ۶'
+        ws['G4'] = 'ساعات کاری شیفت: ثبت نشده'
+
+        if self.report.is_auto_summary:
+            from field_reports.services.daily_report_aggregation import build_aggregation_meta
+
+            meta = build_aggregation_meta(self.report.project_id, self.report.report_date, self.report)
+            completeness = meta['completeness']
+            state = completeness['state']
+            if state == 'complete':
+                message = 'وضعیت فعلی گزارش‌های واحدها: کامل'
+            elif state == 'configuration_incomplete':
+                message = 'هشدار وضعیت فعلی واحدها: پیکربندی مشخص نیست؛ کامل بودن گزارش قابل احراز نیست.'
+            else:
+                missing = '، '.join(completeness['missing_units']) or 'نامشخص'
+                message = f'هشدار وضعیت فعلی واحدها: ناقص؛ واحدهای فاقد گزارش: {missing}'
+            message += f' | آخرین تجمیع: {self.report.aggregated_at.isoformat() if self.report.aggregated_at else "ثبت نشده"}'
+            ws.merge_cells('A5:L5')
+            ws['A5'] = message
+            ws['A5'].font = STYLE_BOLD_FONT
+            ws['A5'].alignment = ALIGN_RIGHT
+            ws.row_dimensions[5].height = 32
+            comparison = meta['snapshot_source_comparison']
+            if comparison != 'matching_fingerprint':
+                ws.merge_cells('A6:L6')
+                ws['A6'] = (
+                    'هشدار: منابع پس از آخرین تجمیع تغییر کرده‌اند؛ این خروجی نسخه ذخیره‌شده است.'
+                    if comparison == 'changed'
+                    else 'هشدار: انطباق منابع با نسخه ذخیره‌شده قابل احراز نیست.'
+                )
+                ws['A6'].font = STYLE_BOLD_FONT
+                ws['A6'].alignment = ALIGN_RIGHT
+                ws.row_dimensions[6].height = 32
 
         # Style header rows 3-4
         for r in range(3, 5):
@@ -222,7 +264,8 @@ class ShirazFile4ExcelBuilder:
         c.alignment = ALIGN_RIGHT
         row += 1
 
-        headers = ['ردیف', 'عنوان شغلی', 'شیفت ۱', 'شیفت ۲', 'شیفت ۳', 'غیبت', 'جمع']
+        absence_label = 'مرخصی' if self.report.is_auto_summary else 'مرخصی / غیبت'
+        headers = ['ردیف', 'عنوان شغلی', 'شیفت ۱', 'شیفت ۲', 'شیفت ۳', absence_label, 'جمع نفر-شیفت']
         for col_idx, h in enumerate(headers, start=1):
             cell = ws.cell(row=row, column=col_idx, value=h)
             cell.font = STYLE_SUBHEADER_FONT
@@ -231,18 +274,12 @@ class ShirazFile4ExcelBuilder:
             cell.border = THIN_BORDER
         row += 1
 
-        indirect_entries = {
-            (entry.custom_title or entry.job_title): entry
-            for entry in self.report.labor_entries.filter(is_deleted=False, labor_category='indirect')
-        }
+        indirect_entries = self._labor_totals('indirect')
 
         indirect_start = row
-        for idx, role in enumerate(SHIRAZ_INDIRECT_ROLES, start=1):
-            entry = indirect_entries.get(role)
-            s1 = entry.shift_1_count if entry else 0
-            s2 = entry.shift_2_count if entry else 0
-            s3 = entry.shift_3_count if entry else 0
-            absent = (entry.absence_count if entry and entry.absence_count is not None else 0)
+        for idx, role in enumerate(SHIRAZ_INDIRECT_ROLES + sorted(set(indirect_entries) - set(SHIRAZ_INDIRECT_ROLES)), start=1):
+            recorded = role in indirect_entries
+            s1, s2, s3, absent = indirect_entries.get(role, [None, None, None, None])
 
             ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
             ws.cell(row=row, column=2, value=role).alignment = ALIGN_RIGHT
@@ -251,13 +288,14 @@ class ShirazFile4ExcelBuilder:
             ws.cell(row=row, column=5, value=s3).alignment = ALIGN_CENTER
             ws.cell(row=row, column=6, value=absent).alignment = ALIGN_CENTER
             # Formula: =SUM(C{row}:E{row})
-            sum_cell = ws.cell(row=row, column=7, value=f'=SUM(C{row}:E{row})')
+            sum_cell = ws.cell(row=row, column=7, value=f'=SUM(C{row}:E{row})' if recorded else None)
             sum_cell.alignment = ALIGN_CENTER
             sum_cell.font = STYLE_BOLD_FONT
 
             for c_i in range(1, 8):
                 cell = ws.cell(row=row, column=c_i)
                 if c_i != 7:
+                    literalize_cell(cell)
                     cell.font = STYLE_DATA_FONT
                 cell.border = THIN_BORDER
             row += 1
@@ -266,7 +304,7 @@ class ShirazFile4ExcelBuilder:
 
         # Subtotal row for Indirect
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
-        sub_c = ws.cell(row=row, column=1, value='جمع نیروی انسانی غیرمستقیم (ستادی)')
+        sub_c = ws.cell(row=row, column=1, value='جمع نیروی انسانی غیرمستقیم (ستادی) - نفر-شیفت')
         sub_c.alignment = ALIGN_RIGHT
         sub_c.font = STYLE_TOTAL_FONT
         sub_c.fill = STYLE_TOTAL_FILL
@@ -301,18 +339,12 @@ class ShirazFile4ExcelBuilder:
             cell.border = THIN_BORDER
         row += 1
 
-        direct_entries = {
-            (entry.custom_title or entry.job_title): entry
-            for entry in self.report.labor_entries.filter(is_deleted=False, labor_category='direct')
-        }
+        direct_entries = self._labor_totals('direct')
 
         direct_start = row
-        for idx, role in enumerate(SHIRAZ_DIRECT_ROLES, start=1):
-            entry = direct_entries.get(role)
-            s1 = entry.shift_1_count if entry else 0
-            s2 = entry.shift_2_count if entry else 0
-            s3 = entry.shift_3_count if entry else 0
-            absent = (entry.absence_count if entry and entry.absence_count is not None else 0)
+        for idx, role in enumerate(SHIRAZ_DIRECT_ROLES + sorted(set(direct_entries) - set(SHIRAZ_DIRECT_ROLES)), start=1):
+            recorded = role in direct_entries
+            s1, s2, s3, absent = direct_entries.get(role, [None, None, None, None])
 
             ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
             ws.cell(row=row, column=2, value=role).alignment = ALIGN_RIGHT
@@ -320,13 +352,14 @@ class ShirazFile4ExcelBuilder:
             ws.cell(row=row, column=4, value=s2).alignment = ALIGN_CENTER
             ws.cell(row=row, column=5, value=s3).alignment = ALIGN_CENTER
             ws.cell(row=row, column=6, value=absent).alignment = ALIGN_CENTER
-            sum_cell = ws.cell(row=row, column=7, value=f'=SUM(C{row}:E{row})')
+            sum_cell = ws.cell(row=row, column=7, value=f'=SUM(C{row}:E{row})' if recorded else None)
             sum_cell.alignment = ALIGN_CENTER
             sum_cell.font = STYLE_BOLD_FONT
 
             for c_i in range(1, 8):
                 cell = ws.cell(row=row, column=c_i)
                 if c_i != 7:
+                    literalize_cell(cell)
                     cell.font = STYLE_DATA_FONT
                 cell.border = THIN_BORDER
             row += 1
@@ -335,7 +368,7 @@ class ShirazFile4ExcelBuilder:
 
         # Subtotal row for Direct
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
-        sub_c2 = ws.cell(row=row, column=1, value='جمع نیروی انسانی مستقیم (کارگری)')
+        sub_c2 = ws.cell(row=row, column=1, value='جمع نیروی انسانی مستقیم (کارگری) - نفر-شیفت')
         sub_c2.alignment = ALIGN_RIGHT
         sub_c2.font = STYLE_TOTAL_FONT
         sub_c2.fill = STYLE_TOTAL_FILL
@@ -356,7 +389,7 @@ class ShirazFile4ExcelBuilder:
 
         # Grand Total Row
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=6)
-        gt_c = ws.cell(row=row, column=1, value='جمع کل نیروی انسانی کارگاه (ستادی + کارگری)')
+        gt_c = ws.cell(row=row, column=1, value='جمع کل نفر-شیفت کارگاه (ستادی + کارگری)')
         gt_c.alignment = ALIGN_RIGHT
         gt_c.font = STYLE_TOTAL_FONT
         gt_c.fill = STYLE_TOTAL_FILL
@@ -371,6 +404,15 @@ class ShirazFile4ExcelBuilder:
         row += 1
 
         return row
+
+    def _labor_totals(self, category):
+        totals = defaultdict(lambda: [0, 0, 0, None])
+        for entry in self.report.labor_entries.filter(is_deleted=False, labor_category=category):
+            bucket = totals[entry.custom_title or entry.job_title]
+            for index, value in enumerate((entry.shift_1_count, entry.shift_2_count, entry.shift_3_count, entry.absence_count)):
+                if value is not None:
+                    bucket[index] = (bucket[index] or 0) + value
+        return totals
 
     def _write_materials(self, start_row: int) -> int:
         ws = self.ws
@@ -392,7 +434,8 @@ class ShirazFile4ExcelBuilder:
             cell.border = THIN_BORDER
         row += 1
 
-        items = list(self.report.material_entries.filter(is_deleted=False))
+        all_items = list(self.report.material_entries.filter(is_deleted=False))
+        items = [item for item in all_items if item.transaction_type == 'receipt' and (not self.report.is_auto_summary or item.receipt_resolved is True)]
         if not items:
             ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
             cell = ws.cell(row=row, column=1, value='موردی برای مصالح وارده در این روز ثبت نشده است.')
@@ -412,10 +455,22 @@ class ShirazFile4ExcelBuilder:
                 ws.cell(row=row, column=7, value=supplier_val).alignment = ALIGN_RIGHT
 
                 for c_i in range(1, 8):
-                    ws.cell(row=row, column=c_i).font = STYLE_DATA_FONT
+                    literalize_cell(ws.cell(row=row, column=c_i)).font = STYLE_DATA_FONT
                     ws.cell(row=row, column=c_i).border = THIN_BORDER
                 row += 1
 
+        other_items = [item for item in all_items if item not in items]
+        if other_items:
+            ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
+            cell = ws.cell(row=row, column=1, value='سایر گردش‌ها و رسیدهای تأییدنشده (خارج از مصالح وارده)')
+            cell.font, cell.fill, cell.alignment = STYLE_SUBHEADER_FONT, STYLE_SUBHEADER_FILL, ALIGN_RIGHT
+            row += 1
+            for idx, item in enumerate(other_items, 1):
+                values = [idx, item.material_description, item.get_transaction_type_display(), item.quantity, item.unit, item.consumption_location or '—', item.supplier or '—']
+                for col, value in enumerate(values, 1):
+                    cell = literalize_cell(ws.cell(row=row, column=col, value=value))
+                    cell.font, cell.border, cell.alignment = STYLE_DATA_FONT, THIN_BORDER, ALIGN_CENTER
+                row += 1
         return row
 
     def _write_concrete(self, start_row: int) -> int:
@@ -476,7 +531,7 @@ class ShirazFile4ExcelBuilder:
                 ws.cell(row=row, column=7, value=loc_val).alignment = ALIGN_RIGHT
 
                 for c_i in range(1, 8):
-                    ws.cell(row=row, column=c_i).font = STYLE_DATA_FONT
+                    literalize_cell(ws.cell(row=row, column=c_i)).font = STYLE_DATA_FONT
                     ws.cell(row=row, column=c_i).border = THIN_BORDER
                 row += 1
 
@@ -502,6 +557,28 @@ class ShirazFile4ExcelBuilder:
     def _write_machinery(self, start_row: int) -> int:
         ws = self.ws
         row = start_row
+
+        derived = list(self.report.machinery_rows.filter(is_deleted=False))
+        if derived or self.report.is_auto_summary:
+            headers = ['ردیف', 'نوع دستگاه', 'تعداد کل', 'فعال', 'آماده', 'غیرفعال', 'در تعمیر', 'ساعت کارکرد', 'ساعت توقف', 'ساعت تعمیر']
+            ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=10)
+            cell = ws.cell(row=row, column=1, value='بخش هـ: ماشین‌آلات و تجهیزات کارگاه')
+            cell.font, cell.fill, cell.alignment = STYLE_SECTION_FONT, STYLE_SECTION_FILL, ALIGN_CENTER
+            row += 1
+            for col, title in enumerate(headers, 1):
+                cell = ws.cell(row=row, column=col, value=title)
+                cell.font, cell.fill, cell.alignment, cell.border = STYLE_SUBHEADER_FONT, STYLE_SUBHEADER_FILL, ALIGN_CENTER, THIN_BORDER
+            row += 1
+            for idx, item in enumerate(derived, 1):
+                values = [idx, item.equipment_type, item.status_total, item.status_active, item.status_ready, item.status_inactive, item.status_under_repair, item.operating_hours, item.stoppage_hours, item.repair_hours]
+                for col, value in enumerate(values, 1):
+                    cell = literalize_cell(ws.cell(row=row, column=col, value=value))
+                    cell.font, cell.border, cell.alignment = STYLE_DATA_FONT, THIN_BORDER, ALIGN_CENTER
+                row += 1
+            if not derived:
+                ws.cell(row=row, column=2, value='موردی برای ماشین‌آلات در این روز ثبت نشده است.')
+                row += 1
+            return row
 
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
         c = ws.cell(row=row, column=1, value='بخش هـ: ماشین‌آلات و تجهیزات کارگاه')
@@ -539,7 +616,7 @@ class ShirazFile4ExcelBuilder:
                 ws.cell(row=row, column=7, value=repair_h).alignment = ALIGN_CENTER
 
                 for c_i in range(1, 8):
-                    ws.cell(row=row, column=c_i).font = STYLE_DATA_FONT
+                    literalize_cell(ws.cell(row=row, column=c_i)).font = STYLE_DATA_FONT
                     ws.cell(row=row, column=c_i).border = THIN_BORDER
                 row += 1
 
@@ -549,14 +626,14 @@ class ShirazFile4ExcelBuilder:
         ws = self.ws
         row = start_row
 
-        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=10)
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=12)
         c = ws.cell(row=row, column=1, value='بخش و: فعالیت‌های اجرایی کارگاه (منطبق بر دیتابیس فعالیت‌ها)')
         c.font = STYLE_SECTION_FONT
         c.fill = STYLE_SECTION_FILL
         c.alignment = ALIGN_CENTER
         row += 1
 
-        headers = ['ردیف', 'شرح فعالیت', 'شیفت', 'پیمانکار / اکیپ', 'نفرات', 'قطعه', 'بلوک', 'طبقه', 'مقدار', 'واحد']
+        headers = ['ردیف', 'شرح فعالیت', 'شیفت', 'پیمانکار / اکیپ', 'نفرات', 'قطعه', 'بلوک', 'طبقه', 'مقدار', 'واحد', 'موقعیت', 'توضیحات']
         for col_idx, h in enumerate(headers, start=1):
             cell = ws.cell(row=row, column=col_idx, value=h)
             cell.font = STYLE_SUBHEADER_FONT
@@ -590,23 +667,97 @@ class ShirazFile4ExcelBuilder:
             row += 1
         else:
             for idx, item in enumerate(items, start=1):
-                qty_display = float(item.quantity) if item.quantity is not None else '*'
+                qty_display = float(item.quantity) if item.quantity is not None and item.quantity_measured else '*'
                 ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=2, value=item.activity_description).alignment = ALIGN_RIGHT
                 ws.cell(row=row, column=3, value=item.get_shift_display()).alignment = ALIGN_CENTER
-                ws.cell(row=row, column=4, value=item.subcontractor_name or item.responsible_name or 'نفر شرکت').alignment = ALIGN_RIGHT
-                ws.cell(row=row, column=5, value=item.headcount if item.headcount is not None else 0).alignment = ALIGN_CENTER
+                contractor = item.contractor_ref.name if item.contractor_ref_id else item.subcontractor_name
+                parties = []
+                if contractor:
+                    parties.append(f'پیمانکار: {contractor}')
+                if item.crew_name:
+                    parties.append(f'اکیپ: {item.crew_name}')
+                if not parties and item.responsible_name:
+                    parties.append(f'مسئول: {item.responsible_name}')
+                ws.cell(row=row, column=4, value=' / '.join(parties) or '—').alignment = ALIGN_RIGHT
+                ws.cell(row=row, column=5, value=item.headcount).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=6, value=item.parcel or item.zone or '—').alignment = ALIGN_CENTER
                 ws.cell(row=row, column=7, value=item.block or '—').alignment = ALIGN_CENTER
                 ws.cell(row=row, column=8, value=item.floor or '—').alignment = ALIGN_CENTER
                 ws.cell(row=row, column=9, value=qty_display).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=10, value=item.unit or '—').alignment = ALIGN_CENTER
+                ws.cell(row=row, column=11, value=item.location_detail or '—').alignment = ALIGN_RIGHT
+                ws.cell(row=row, column=12, value=item.notes or '—').alignment = ALIGN_RIGHT
 
-                for c_i in range(1, 11):
-                    ws.cell(row=row, column=c_i).font = STYLE_DATA_FONT
+                for c_i in range(1, 13):
+                    literalize_cell(ws.cell(row=row, column=c_i)).font = STYLE_DATA_FONT
                     ws.cell(row=row, column=c_i).border = THIN_BORDER
                 row += 1
 
+        return row
+
+    def _write_general_activities(self, row):
+        ws = self.ws
+        ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=7)
+        cell = ws.cell(row=row, column=1, value='فعالیت‌های عمومی کارگاه')
+        cell.font, cell.fill, cell.alignment = STYLE_SECTION_FONT, STYLE_SECTION_FILL, ALIGN_CENTER
+        row += 1
+        for col, label in enumerate(['ردیف', 'شرح فعالیت', 'محل', 'مقدار', 'واحد', 'توضیحات'], 1):
+            cell = ws.cell(row=row, column=col, value=label)
+            cell.font, cell.fill, cell.border, cell.alignment = STYLE_SUBHEADER_FONT, STYLE_SUBHEADER_FILL, THIN_BORDER, ALIGN_CENTER
+        row += 1
+        for item in self.report.general_activities.filter(is_deleted=False).order_by('row_number', 'id'):
+            for col, value in enumerate([item.row_number, item.activity_description, item.location, item.quantity, item.unit, item.notes], 1):
+                cell = literalize_cell(ws.cell(row=row, column=col, value=value))
+                cell.font, cell.border, cell.alignment = STYLE_DATA_FONT, THIN_BORDER, ALIGN_RIGHT
+            row += 1
+        return row
+
+    def _write_notes(self, row):
+        for label, value in [('توضیحات عمومی و موانع', self.report.general_notes), ('نظر مدیریت', self.report.management_opinion), ('تأثیر شرایط جوی', self.report.weather_impact_notes)]:
+            self.ws.cell(row=row, column=1, value=label).font = STYLE_BOLD_FONT
+            self.ws.merge_cells(start_row=row, start_column=2, end_row=row, end_column=10)
+            literalize_cell(self.ws.cell(row=row, column=2, value=value or '—')).alignment = ALIGN_RIGHT
+            row += 1
+
+    def _write_visits_and_incidents(self, row):
+        """Keep structured field observations separate from free-text notes."""
+        ws = self.ws
+
+        def heading(title, headers):
+            nonlocal row
+            ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=len(headers))
+            cell = ws.cell(row=row, column=1, value=title)
+            cell.font, cell.fill, cell.alignment = STYLE_SECTION_FONT, STYLE_SECTION_FILL, ALIGN_CENTER
+            row += 1
+            for col, label in enumerate(headers, 1):
+                cell = ws.cell(row=row, column=col, value=label)
+                cell.font, cell.fill, cell.border, cell.alignment = STYLE_SUBHEADER_FONT, STYLE_SUBHEADER_FILL, THIN_BORDER, ALIGN_CENTER
+            row += 1
+
+        def data_row(values):
+            nonlocal row
+            for col, value in enumerate(values, 1):
+                cell = literalize_cell(ws.cell(row=row, column=col, value=value))
+                cell.font, cell.border, cell.alignment = STYLE_DATA_FONT, THIN_BORDER, ALIGN_RIGHT
+            row += 1
+
+        heading('بازدیدهای کارگاه', ['ردیف', 'شرح بازدید'])
+        for visit in self.report.visits.filter(is_deleted=False).order_by('row_number', 'id'):
+            data_row([visit.row_number, visit.text])
+
+        heading('مسائل، موانع و حوادث ایمنی', ['ردیف', 'نوع', 'شرح', 'مسئول پیگیری', 'موعد', 'اقدام اصلاحی / فوری', 'شدت'])
+        type_labels = {'barrier': 'مانع', 'issue': 'مسئله', 'safety': 'حادثه ایمنی'}
+        for incident in self.report.incidents.filter(is_deleted=False).select_related('follow_up_owner_user').order_by('row_number', 'id'):
+            owner = incident.follow_up_owner_name
+            if not owner and incident.follow_up_owner_user:
+                owner = incident.follow_up_owner_user.get_full_name() or incident.follow_up_owner_user.username
+            due = gregorian_to_jalali(incident.due_date) if incident.due_date else '—'
+            data_row([
+                incident.row_number, type_labels.get(incident.incident_type, incident.get_incident_type_display()),
+                incident.description, owner or '—', due, incident.corrective_action or '—',
+                incident.get_severity_display() if incident.severity else '—',
+            ])
         return row
 
     def _auto_fit_columns(self):
@@ -620,4 +771,4 @@ class ShirazFile4ExcelBuilder:
                     val_str = str(val)
                     if not val_str.startswith('='):
                         max_len = max(max_len, len(val_str))
-            ws.column_dimensions[col_letter].width = max(max_len + 3, 12)
+            ws.column_dimensions[col_letter].width = min(max(max_len + 3, 12), 48)

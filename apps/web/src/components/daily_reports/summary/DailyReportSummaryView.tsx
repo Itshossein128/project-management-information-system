@@ -632,7 +632,13 @@ export function DailyReportSummaryView({
                 rows={detailMaterials.map((r) => [
                   r.transaction_type === "receipt"
                     ? t("dailyReports.summary.txReceipt", "ورود (فاقد سند منطبق)")
-                    : t("dailyReports.summary.txConsumption", "مصرف"),
+                    : r.transaction_type === "issue"
+                      ? t("dailyReports.summary.txConsumption", "مصرف")
+                      : r.transaction_type === "waste"
+                        ? t("dailyReports.summary.txWaste", "ضایعات")
+                        : r.transaction_type === "return"
+                          ? t("dailyReports.summary.txReturn", "برگشتی")
+                          : t("dailyReports.summary.txUnknown", "نوع نامشخص"),
                   r.material_code
                     ? `${r.material_code} — ${r.material_description}`
                     : r.material_description,

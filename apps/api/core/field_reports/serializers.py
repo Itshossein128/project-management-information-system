@@ -1366,6 +1366,12 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         })
 
         for r in rows:
+            tx_type = r.get('transaction_type')
+            # Unresolved receipts and unclassified rows remain in details;
+            # they cannot be presented as a zero or as a confirmed receipt.
+            if not (tx_type in ('issue', 'consumption') or
+                    (tx_type == 'receipt' and r.get('receipt_resolved') is True)):
+                continue
             mat_ref = r.get('material_ref')
             mat_desc = (r.get('material_description') or '').strip()
             unit = (r.get('unit') or '').strip()
@@ -1379,8 +1385,7 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             item['material_ref_id'] = mat_ref
 
             qty = Decimal(str(r.get('quantity') or 0))
-            tx_type = r.get('transaction_type')
-            if tx_type == 'receipt':
+            if tx_type == 'receipt' and r.get('receipt_resolved') is True:
                 item['total_received'] += qty
             elif tx_type in ('issue', 'consumption'):
                 item['total_consumed'] += qty

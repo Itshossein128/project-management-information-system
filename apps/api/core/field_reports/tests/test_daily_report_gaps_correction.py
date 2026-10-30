@@ -379,6 +379,44 @@ class TestDailyReportGapsCorrection:
         assert res_rep.inactivity_reason == InactivityReason.WEATHER
         assert res_rep.weather_impact_notes == 'بارندگی شدید باعث توقف کار شد'
 
+    def test_correction_copies_activity_achieved_milestones(self, project, user):
+        from field_reports.services.correction_service import open_correction
+
+        source = DailyReport.objects.create(
+            project=project, report_date='2024-09-10', status=ReportStatus.APPROVED,
+            is_current=True, created_by=user, updated_by=user,
+        )
+        original = DailyReportActivity.objects.create(
+            report=source, activity_description='آزمایش نقاط عطف', shift='shift_1',
+            achieved_milestones=['inspection', 'handover'],
+        )
+        correction = open_correction(source_report=source, user=user, reason='اصلاح گزارش روزانه آزمون')
+        cloned = correction.result_report.activities.get()
+        assert cloned.achieved_milestones == ['inspection', 'handover']
+        cloned.achieved_milestones.append('new')
+        cloned.save(update_fields=['achieved_milestones'])
+        original.refresh_from_db()
+        assert original.achieved_milestones == ['inspection', 'handover']
+
+    def test_correction_keeps_each_labor_contractor_and_name(self, project, user):
+        from field_reports.models import DailyReportLabor
+        from field_reports.services.correction_service import open_correction
+
+        source = DailyReport.objects.create(
+            project=project, report_date='2024-09-11', status=ReportStatus.APPROVED,
+            is_current=True, created_by=user, updated_by=user,
+        )
+        first = make_active_contractor(project, user, 'پیمانکار اول')
+        second = make_active_contractor(project, user, 'پیمانکار دوم')
+        for contractor, count in ((first, 2), (second, 3)):
+            DailyReportLabor.objects.create(
+                report=source, labor_category='direct', job_title='کارگر ساده',
+                contractor_ref=contractor, contractor_name=contractor.name, shift_1_count=count,
+            )
+        correction = open_correction(source_report=source, user=user, reason='اصلاح گزارش روزانه آزمون')
+        actual = set(correction.result_report.labor_entries.values_list('contractor_ref_id', 'contractor_name', 'shift_1_count'))
+        assert actual == {(first.id, first.name, 2), (second.id, second.name, 3)}
+
     def test_child_clone_specs_fieldwise_registry_coverage(self):
         """Fieldwise regression: every child model domain field must be in CHILD_CLONE_SPECS."""
         from field_reports.services.correction_service import CHILD_CLONE_SPECS

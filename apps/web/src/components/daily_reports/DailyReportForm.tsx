@@ -111,7 +111,7 @@ export function DailyReportForm({
   useEffect(() => {
     if (report) {
       if (report.is_auto_summary && reportId) {
-        toast.info(
+        toast.warning(
           t(
             "dailyReports.form.autoSummaryRedirect",
             "گزارش‌های تجمیعی خودکار از طریق نمای جمع‌بندی مشاهده می‌شوند.",

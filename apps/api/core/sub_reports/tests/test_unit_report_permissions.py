@@ -202,7 +202,15 @@ class TestPermissionMatrix:
         assert res_open.status_code == status.HTTP_201_CREATED
         rid = res_open.data['id']
 
-        res_edit = client.patch(f'{base}{rid}/', {'form_code': 'B-101'}, format='json')
+        res_edit = client.patch(
+            f'{base}{rid}/',
+            {'form_code': 'B-101', 'activities': [{
+                'row_number': 1, 'shift': 'shift_1', 'crew_name': 'Crew',
+                'activity_description': 'Permission test activity', 'worker_count': 2,
+                'quantity': '1', 'unit': 'm2',
+            }]},
+            format='json',
+        )
         assert res_edit.status_code == status.HTTP_200_OK
 
         res_submit = client.post(f'{base}{rid}/submit/')

@@ -33,13 +33,14 @@ CHILD_CLONE_SPECS = (
     (DailyReportActivity, 'activities', {
         'activity_ref_id', 'activity_description', 'shift', 'subcontractor_name',
         'subcontractor_ref_id', 'headcount', 'zone', 'block', 'floor', 'location_detail',
-        'quantity', 'quantity_measured', 'unit', 'execution_percentage',
+        'quantity', 'quantity_measured', 'unit', 'execution_percentage', 'achieved_milestones',
         'responsible_user_id', 'responsible_name', 'notes', 'photo_file_id',
         'contractor_ref_id', 'crew_name', 'foreman_count', 'worker_count', 'parcel',
         'source_sub_report_id', 'source_discipline', 'is_derived',
     }),
     (DailyReportLabor, 'labor_entries', {
         'project_id', 'report_date', 'labor_category', 'job_title', 'custom_title',
+        'contractor_ref_id', 'contractor_name',
         'shift_1_count', 'shift_2_count', 'shift_3_count', 'total_count',
         'work_hours', 'overtime_hours', 'daily_rate', 'absence_count',
         'source_set_complete', 'source_sub_report_id', 'source_discipline', 'is_derived',

@@ -16,6 +16,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from common.jalali import gregorian_to_jalali, persian_day_of_week
+from field_reports.excel_safety import literalize_cell
 from common.reporting_units import SpecialtyUnit
 from sub_reports.models import DisciplineSubReport
 
@@ -94,8 +95,8 @@ class ShirazSubReportExcelBuilder:
         project_name = getattr(self.sub_report.project, 'project_name', 'پروژه مسکن ملی')
         jalali_date = gregorian_to_jalali(self.sub_report.report_date) if self.sub_report.report_date else ''
         dow = persian_day_of_week(self.sub_report.report_date) if self.sub_report.report_date else ''
-        form_code = getattr(self.sub_report, 'form_code', '') or 'P-REP-01'
-        revision = getattr(self.sub_report, 'revision_number', '') or '00'
+        form_code = getattr(self.sub_report, 'form_code', '') or 'ثبت نشده'
+        revision = getattr(self.sub_report, 'revision_number', '') or 'ثبت نشده'
 
         col_span = 12 if self.is_civil else (10 if self.is_electrical else 11)
         last_col = get_column_letter(col_span)
@@ -103,7 +104,9 @@ class ShirazSubReportExcelBuilder:
         # Row 1-2: Company & Header
         ws.merge_cells(f'A1:{last_col}2')
         header_cell = ws['A1']
-        header_cell.value = f'شرکت پی‌چین — گزارش روزانه واحدهای اجرا ({self.discipline_name}) — {project_name}'
+        project = self.sub_report.project
+        contractor = project.contractor_ref.name if project.contractor_ref_id else project.contractor
+        header_cell.value = f'{contractor or "پیمانکار ثبت نشده"} — گزارش روزانه واحدهای اجرا ({self.discipline_name}) — {project_name}'
         header_cell.font = STYLE_HEADER_FONT
         header_cell.fill = STYLE_HEADER_FILL
         header_cell.alignment = ALIGN_CENTER
@@ -112,7 +115,7 @@ class ShirazSubReportExcelBuilder:
         ws.merge_cells('A3:C3')
         ws['A3'] = f'تاریخ: {jalali_date} ({dow})'
         ws.merge_cells('D3:F3')
-        weather_text = self.sub_report.get_weather_condition_display() if hasattr(self.sub_report, 'get_weather_condition_display') and self.sub_report.weather_condition else 'صاف'
+        weather_text = self.sub_report.get_weather_condition_display() if hasattr(self.sub_report, 'get_weather_condition_display') and self.sub_report.weather_condition else 'نامشخص'
         ws['D3'] = f'وضعیت هوا: {weather_text}'
         ws.merge_cells('G3:I3')
         ws['G3'] = f'کد فرم: {form_code}'
@@ -165,7 +168,7 @@ class ShirazSubReportExcelBuilder:
             cell.border = THIN_BORDER
         row += 1
 
-        activities = list(self.sub_report.activities.filter(is_deleted=False).order_by('row_number', 'id'))
+        activities = list(self.sub_report.activities.filter(is_deleted=False).select_related('contractor_ref').order_by('row_number', 'id'))
         if not activities:
             ws.merge_cells(f'A{row}:{last_col}{row}')
             empty_cell = ws.cell(row=row, column=1, value='هیچ فعالیتی برای این گزارش ثبت نشده است.')
@@ -177,22 +180,28 @@ class ShirazSubReportExcelBuilder:
 
         data_start_row = row
         for idx, act in enumerate(activities, start=1):
-            shift_display = act.shift or '۱'
-            if shift_display == '1':
+            shift_display = act.shift or '—'
+            if shift_display in ('1', 'shift_1'):
                 shift_display = 'شیفت ۱'
-            elif shift_display == '2':
+            elif shift_display in ('2', 'shift_2'):
                 shift_display = 'شیفت ۲'
-            elif shift_display == '3':
+            elif shift_display in ('3', 'shift_3'):
                 shift_display = 'شیفت ۳'
 
-            foreman = act.foreman_count if act.foreman_count is not None else 0
-            worker = act.worker_count if act.worker_count is not None else 0
-            qty = float(act.quantity) if act.quantity is not None else 0
+            foreman = act.foreman_count
+            worker = act.worker_count
+            qty = float(act.quantity) if act.quantity is not None else '*'
+            parties = []
+            if act.contractor_ref_id:
+                parties.append(f'پیمانکار: {act.contractor_ref.name}')
+            if act.crew_name:
+                parties.append(f'اکیپ: {act.crew_name}')
+            party_text = ' / '.join(parties) or '—'
 
             if self.is_civil:
                 ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=2, value=shift_display).alignment = ALIGN_CENTER
-                ws.cell(row=row, column=3, value=act.crew_name or 'نفر شرکت').alignment = ALIGN_RIGHT
+                ws.cell(row=row, column=3, value=party_text).alignment = ALIGN_RIGHT
                 ws.cell(row=row, column=4, value=foreman).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=5, value=worker).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=6, value=act.parcel or act.zone or '—').alignment = ALIGN_CENTER
@@ -204,19 +213,16 @@ class ShirazSubReportExcelBuilder:
 
                 # Percentage formatting 0.0%
                 pct_cell = ws.cell(row=row, column=12)
-                # Keep the FILE 5 column numeric even when the source is null;
-                # this makes Excel's native percentage formatting stable for
-                # both missing and explicit zero progress.
-                pct_val = float(act.execution_percentage or 0)
-                if pct_val > 1.0:
-                    pct_val /= 100.0
-                pct_cell.value = pct_val
+                # The source uses percentages on a 0..100 scale, while Excel
+                # displays percentages from a 0..1 numeric scale.
+                pct_cell.value = (float(act.execution_percentage) / 100.0
+                                  if act.execution_percentage is not None else None)
                 pct_cell.number_format = '0.0%'
                 pct_cell.alignment = ALIGN_CENTER
             elif self.is_electrical:
                 ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
-                ws.cell(row=row, column=2, value=act.shift or 1).alignment = ALIGN_CENTER
-                ws.cell(row=row, column=3, value=act.crew_name or 'نفر شرکت').alignment = ALIGN_RIGHT
+                ws.cell(row=row, column=2, value=shift_display).alignment = ALIGN_CENTER
+                ws.cell(row=row, column=3, value=party_text).alignment = ALIGN_RIGHT
                 ws.cell(row=row, column=4, value=foreman).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=5, value=worker).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=6, value=act.block or '—').alignment = ALIGN_CENTER
@@ -227,7 +233,7 @@ class ShirazSubReportExcelBuilder:
             else:
                 ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=2, value=shift_display).alignment = ALIGN_CENTER
-                ws.cell(row=row, column=3, value=act.crew_name or 'نفر شرکت').alignment = ALIGN_RIGHT
+                ws.cell(row=row, column=3, value=party_text).alignment = ALIGN_RIGHT
                 ws.cell(row=row, column=4, value=foreman).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=5, value=worker).alignment = ALIGN_CENTER
                 ws.cell(row=row, column=6, value=act.parcel or act.zone or '—').alignment = ALIGN_CENTER
@@ -238,7 +244,7 @@ class ShirazSubReportExcelBuilder:
                 ws.cell(row=row, column=11, value=qty).alignment = ALIGN_CENTER
 
             for c_i in range(1, col_span + 1):
-                cell = ws.cell(row=row, column=c_i)
+                cell = literalize_cell(ws.cell(row=row, column=c_i))
                 cell.font = STYLE_DATA_FONT
                 cell.border = THIN_BORDER
             row += 1
@@ -247,7 +253,7 @@ class ShirazSubReportExcelBuilder:
 
         # Summary Subtotal Row for Foreman & Laborers
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=3)
-        sub_label = ws.cell(row=row, column=1, value='مجموع نفرات')
+        sub_label = ws.cell(row=row, column=1, value=('جمع نفرات ردیف‌ها (برخی ثبت نشده)' if any(a.foreman_count is None or a.worker_count is None for a in activities) else 'جمع نفرات ردیف‌ها'))
         sub_label.alignment = ALIGN_RIGHT
         sub_label.font = STYLE_TOTAL_FONT
         sub_label.fill = STYLE_TOTAL_FILL

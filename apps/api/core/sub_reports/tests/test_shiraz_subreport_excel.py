@@ -97,6 +97,56 @@ def electrical_sub_report(project, user):
 @pytest.mark.django_db
 class TestShirazSubReportExcel:
 
+    def test_header_uses_project_data_and_does_not_invent_missing_values(self, civil_sub_report):
+        civil_sub_report.project.contractor = 'پیمانکار نمونه'
+        civil_sub_report.weather_condition = ''
+        civil_sub_report.form_code = ''
+        civil_sub_report.revision_number = ''
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazSubReportExcelBuilder(civil_sub_report).build()[0])).active
+        assert 'پیمانکار نمونه' in ws['A1'].value
+        assert 'پی‌چین' not in ws['A1'].value
+        assert 'نامشخص' in ws['D3'].value
+        assert 'ثبت نشده' in ws['G3'].value and 'ثبت نشده' in ws['J3'].value
+
+    def test_null_values_one_percent_and_formula_text_are_preserved(self, civil_sub_report):
+        DisciplineSubReportActivity.objects.create(
+            sub_report=civil_sub_report, row_number=3, shift='1', crew_name='=1+1',
+            foreman_count=None, worker_count=None, activity_description='=2+2',
+            unit='متر', quantity=None, execution_percentage=None,
+        )
+        DisciplineSubReportActivity.objects.create(
+            sub_report=civil_sub_report, row_number=4, shift='1', crew_name='One percent',
+            foreman_count=0, worker_count=0, activity_description='One percent',
+            unit='متر', quantity=0, execution_percentage=Decimal('1'),
+        )
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazSubReportExcelBuilder(civil_sub_report).build()[0]), data_only=False).active
+        rows = {row[8].value: row for row in ws.iter_rows() if len(row) > 11 and row[8].value in ('=2+2', 'One percent')}
+        unknown, one = rows['=2+2'], rows['One percent']
+        assert unknown[2].data_type == 's' and unknown[8].data_type == 's'
+        assert unknown[3].value is None and unknown[4].value is None
+        assert unknown[10].value == '*' and unknown[11].value is None
+        assert one[10].value == 0 and one[11].value == 0.01
+        assert any(cell.data_type == 'f' and str(cell.value).startswith('=SUM(') for row in ws for cell in row)
+
+    def test_contractor_and_crew_are_both_kept(self, civil_sub_report, user):
+        from projects.models import Stakeholder
+        contractor = Stakeholder.objects.create(project=civil_sub_report.project, name='پیمانکار نمونه', role='contractor', created_by=user)
+        activity = civil_sub_report.activities.first()
+        activity.contractor_ref = contractor
+        activity.crew_name = 'اکیپ مستقل'
+        activity.save()
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazSubReportExcelBuilder(civil_sub_report).build()[0])).active
+        row = next(row for row in ws.iter_rows() if len(row) > 8 and row[8].value == activity.activity_description)
+        assert 'پیمانکار نمونه' in row[2].value and 'اکیپ مستقل' in row[2].value
+
+    def test_canonical_shift_is_readable_in_export(self, civil_sub_report):
+        activity = civil_sub_report.activities.first()
+        activity.shift = 'shift_1'
+        activity.save(update_fields=['shift'])
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazSubReportExcelBuilder(civil_sub_report).build()[0])).active
+        row = next(row for row in ws.iter_rows() if len(row) > 8 and row[8].value == activity.activity_description)
+        assert row[1].value == 'شیفت ۱'
+
     def test_civil_subreport_file5_format(self, civil_sub_report):
         builder = ShirazSubReportExcelBuilder(civil_sub_report)
         excel_bytes, filename = builder.build()
@@ -112,7 +162,7 @@ class TestShirazSubReportExcel:
 
         # Header contains company and civil discipline
         title_val = str(ws['A1'].value)
-        assert 'شرکت پی‌چین' in title_val
+        assert 'پی‌چین' not in title_val
         assert 'اجرای ابنیه' in title_val
 
         # Scan all cell contents
@@ -198,7 +248,8 @@ class TestShirazSubReportExcel:
         percentage_cells = [
             cell for row in ws.iter_rows() for cell in row if cell.number_format == '0.0%'
         ]
-        assert sum(cell.value == 0 for cell in percentage_cells) >= 2
+        assert any(cell.value is None for cell in percentage_cells)
+        assert any(cell.value == 0 for cell in percentage_cells)
 
     def test_subreport_excel_endpoint_authorized(self, auth_client, civil_sub_report):
         url = f'/api/v1/projects/{civil_sub_report.project_id}/units/buildings/daily-reports/{civil_sub_report.id}/excel/'

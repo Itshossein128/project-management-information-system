@@ -200,6 +200,15 @@ class UnitReportActivitySectionSerializer(serializers.ModelSerializer):
         if quantity is None and self.instance is not None:
             quantity = self.instance.quantity
         if activity is not None:
+            # Reject foreign references before consulting their measurement
+            # status or quantities, which belong to another project's data.
+            report = self.context.get('report') or getattr(self.instance, 'sub_report', None)
+            if report is not None and str(activity.project_id) != str(report.project_id):
+                raise serializers.ValidationError({
+                    'activity_ref': serializers.ErrorDetail(
+                        'فعالیت به پروژه گزارش تعلق ندارد.', code='activity_not_in_project_scope',
+                    ),
+                })
             from django.db.models import Sum
             from schedule.services.measurement_service import (
                 effective_total_quantity,

@@ -13,6 +13,8 @@ from field_reports.models import (
     DailyReportEquipment,
     DailyReportLabor,
     DailyReportMaterial,
+    DailyReportMachineryRow,
+    DailyReportGeneralActivity,
     LaborCategory,
     ReportShift,
     ReportStatus,
@@ -141,6 +143,197 @@ def sample_report_with_data(project, user):
 @pytest.mark.django_db
 class TestShirazFile4Excel:
 
+    def test_user_text_is_literal_and_totals_remain_formulas(self, sample_report_with_data):
+        report = sample_report_with_data
+        activity = report.activities.get()
+        activity.activity_description = '=1+1'
+        activity.notes = '=2+2'
+        activity.save()
+        report.general_notes = '=3+3'
+        report.save(update_fields=['general_notes'])
+        DailyReportLabor.objects.create(report=report, labor_category='direct', job_title='=4+4', shift_1_count=1)
+        material = report.material_entries.get()
+        material.material_description = '=5+5'
+        material.save(update_fields=['material_description'])
+        from field_reports.models import DailyReportVisit
+        DailyReportVisit.objects.create(report=report, row_number=1, text='=6+6')
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
+        found = {cell.value: cell for row in ws for cell in row if cell.value in ('=1+1', '=2+2', '=3+3', '=4+4', '=5+5', '=6+6')}
+        assert len(found) == 6
+        assert all(cell.data_type == 's' for cell in found.values())
+        assert any(cell.data_type == 'f' and str(cell.value).startswith('=SUM(') for row in ws for cell in row)
+
+    def test_structured_issues_hse_and_visits_are_exported_from_unit_summary(self, project, user):
+        from common.reporting_units import SpecialtyUnit
+        from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
+        from sub_reports.models import (
+            DisciplineSubReport, DisciplineSubReportIssue, DisciplineSubReportVisit,
+            DisciplineSubReportHseIncident, SubReportStatus,
+        )
+
+        day = date(2025, 2, 3)
+        unit = DisciplineSubReport.objects.create(
+            project=project, report_date=day, unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil', status=SubReportStatus.SUBMITTED, created_by=user,
+        )
+        DisciplineSubReportIssue.objects.create(
+            sub_report=unit, row_number=1, kind='barrier', text='مانع تأمین مصالح',
+            owner_user=user, due_date=date(2025, 2, 8),
+        )
+        DisciplineSubReportHseIncident.objects.create(
+            sub_report=unit, row_number=2, text='حادثه در کارگاه',
+            severity='major', immediate_action='توقف و ایمن‌سازی',
+        )
+        DisciplineSubReportVisit.objects.create(sub_report=unit, row_number=1, text='بازدید مشاور')
+        report = rebuild_daily_report_summary(project.id, day, user=user)
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
+        cells = [[cell.value for cell in row] for row in ws.iter_rows()]
+        visit = next(row for row in cells if 'بازدید مشاور' in row)
+        barrier = next(row for row in cells if 'مانع تأمین مصالح' in row)
+        hse = next(row for row in cells if 'حادثه در کارگاه' in row)
+        assert visit[1] == 'بازدید مشاور'
+        assert 'Test User' in barrier and '1403/11/20' in barrier
+        assert 'توقف و ایمن‌سازی' in hse and 'Major' in hse
+        assert any('مرخصی' in row for row in cells)
+
+    def test_export_preserves_real_header_and_derived_rows(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.project.contract_number = ''
+        report.project.employer = 'کارفرمای آزمایشی'
+        report.project.consultant = 'مشاور آزمایشی'
+        report.project.save()
+        report.weather_condition = None
+        report.general_notes = 'مانع آزمایشی'
+        report.save()
+        DailyReportLabor.objects.create(report=report, labor_category='direct', job_title='کارگر ساده', shift_1_count=4)
+        DailyReportLabor.objects.create(report=report, labor_category='direct', job_title='عنوان سفارشی', shift_1_count=7)
+        DailyReportMachineryRow.objects.create(report=report, equipment_type='دستگاه تجمیعی', status_total=3, status_active=2, status_under_repair=1)
+        DailyReportGeneralActivity.objects.create(report=report, row_number=1, activity_description='فعالیت عمومی خاص', location='کارگاه', quantity=2, unit='عدد', notes='شرح خاص')
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
+        text = ' '.join(str(c.value) for row in ws for c in row if c.value is not None)
+        assert '1402/25319/ص' not in text
+        assert '۷ الی ۱۷' not in text
+        assert 'نامشخص' in text
+        assert 'کارفرمای آزمایشی' in text and 'مشاور آزمایشی' in text
+        assert 'دستگاه تجمیعی' in text and 'فعالیت عمومی خاص' in text and 'مانع آزمایشی' in text
+        assert 'جمع نفر-شیفت' in text
+        assert 'جمع کل نفر-شیفت کارگاه' in text
+        rows = {row[1].value: row for row in ws.iter_rows() if len(row) > 2 and row[1].value in ('کارگر ساده', 'عنوان سفارشی')}
+        assert rows['کارگر ساده'][2].value == 19
+        assert rows['عنوان سفارشی'][2].value == 7
+        machine = next(row for row in ws.iter_rows() if len(row) > 1 and row[1].value == 'دستگاه تجمیعی')
+        assert [c.value for c in machine[2:7]] == [3, 2, 0, 0, 1]
+
+    def test_export_keeps_unmeasured_activity_distinct_from_zero(self, sample_report_with_data):
+        activity = sample_report_with_data.activities.get()
+        activity.quantity = Decimal('0')
+        activity.quantity_measured = False
+        activity.location_detail = 'ضلع شرقی'
+        activity.notes = 'توضیح ردیف'
+        activity.save()
+        raw, _ = ShirazFile4ExcelBuilder(sample_report_with_data).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        row = next(row for row in ws.iter_rows() if len(row) > 1 and row[1].value == activity.activity_description)
+        assert row[8].value == '*'
+        assert row[10].value == 'ضلع شرقی'
+        assert row[11].value == 'توضیح ردیف'
+
+    def test_activity_export_keeps_contractor_and_crew(self, sample_report_with_data):
+        activity = sample_report_with_data.activities.get()
+        activity.subcontractor_name = 'پیمانکار نمونه'
+        activity.crew_name = 'اکیپ نمونه'
+        activity.save(update_fields=['subcontractor_name', 'crew_name'])
+        raw, _ = ShirazFile4ExcelBuilder(sample_report_with_data).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        row = next(row for row in ws.iter_rows() if len(row) > 3 and row[1].value == activity.activity_description)
+        assert 'پیمانکار: پیمانکار نمونه' in row[3].value
+        assert 'اکیپ: اکیپ نمونه' in row[3].value
+
+    def test_header_uses_project_contract(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.project.contract_number = 'TEST-123'
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert 'TEST-123' in ws['A1'].value
+
+    def test_unknown_site_status_and_inactive_reason_are_not_invented(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.site_status = ''
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert ws['E3'].value == 'وضعیت کارگاه: نامشخص'
+        report.site_status = 'inactive'
+        report.inactivity_reason = ''
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert ws['E3'].value == 'وضعیت کارگاه: غیرفعال (دلیل ثبت نشده)'
+
+    def test_unrecorded_labor_is_blank_but_explicit_zero_is_preserved(self, sample_report_with_data):
+        DailyReportLabor.objects.create(
+            report=sample_report_with_data, labor_category='direct', job_title='کارگر ماهر',
+            shift_1_count=0, shift_2_count=0, shift_3_count=0, absence_count=0,
+        )
+        raw, _ = ShirazFile4ExcelBuilder(sample_report_with_data).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
+        rows = {row[1].value: row for row in ws.iter_rows() if len(row) > 6 and row[1].value in ('مدیرشعبه', 'کارگر ماهر')}
+        assert [c.value for c in rows['مدیرشعبه'][2:7]] == [None, None, None, None, None]
+        assert [c.value for c in rows['کارگر ماهر'][2:6]] == [0, 0, 0, 0]
+        assert rows['کارگر ماهر'][6].value.startswith('=SUM(')
+
+    def test_auto_summary_warns_when_completeness_unknown(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.is_auto_summary = True
+        report.save(update_fields=['is_auto_summary'])
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert 'کامل بودن گزارش قابل احراز نیست' in ws['A5'].value
+        assert 'انطباق منابع با نسخه ذخیره‌شده قابل احراز نیست' in ws['A6'].value
+
+    def test_auto_summary_warns_when_source_changed_after_snapshot(self, project, user):
+        from common.reporting_units import SpecialtyUnit
+        from field_reports.services.daily_report_aggregation import rebuild_daily_report_summary
+        from sub_reports.models import DisciplineSubReport, DisciplineSubReportActivity, SubReportStatus
+
+        day = date(2025, 2, 3)
+        source = DisciplineSubReport.objects.create(
+            project=project, report_date=day, unit=SpecialtyUnit.BUILDINGS,
+            discipline='civil', status=SubReportStatus.SUBMITTED, created_by=user, updated_by=user,
+        )
+        activity = DisciplineSubReportActivity.objects.create(
+            sub_report=source, row_number=1, shift='shift_1', crew_name='Crew',
+            activity_description='پیش از تغییر', quantity=5, unit='m2',
+        )
+        report = rebuild_daily_report_summary(project.id, day, user=user)
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert ws['A6'].value is None
+
+        activity.activity_description = 'پس از تغییر'
+        activity.save(update_fields=['activity_description'])
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert 'منابع پس از آخرین تجمیع تغییر کرده‌اند' in ws['A6'].value
+        assert report.activities.filter(activity_description='پیش از تغییر').exists()
+
+    def test_auto_summary_distinguishes_resolved_receipts_from_other_materials(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.is_auto_summary = True
+        report.save(update_fields=['is_auto_summary'])
+        resolved = report.material_entries.get()
+        resolved.receipt_resolved = True
+        resolved.save(update_fields=['receipt_resolved'])
+        DailyReportMaterial.objects.create(report=report, material_description='مصرف نمونه', transaction_type='issue', quantity=3, unit='تن')
+        DailyReportMaterial.objects.create(report=report, material_description='رسید نامشخص', transaction_type='receipt', quantity=2, unit='تن', receipt_resolved=False)
+        raw, _ = ShirazFile4ExcelBuilder(report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        rows = {cell.value: cell.row for row in ws for cell in row if cell.value in ('سیمان فله تیپ ۲', 'مصرف نمونه', 'رسید نامشخص', 'سایر گردش‌ها و رسیدهای تأییدنشده (خارج از مصالح وارده)')}
+        separator = rows['سایر گردش‌ها و رسیدهای تأییدنشده (خارج از مصالح وارده)']
+        assert rows['سیمان فله تیپ ۲'] < separator < rows['مصرف نمونه']
+        assert separator < rows['رسید نامشخص']
+
     def test_empty_report_keeps_sections_and_zero_formulas(self, project, user):
         report = DailyReport.objects.create(
             project=project,
@@ -194,7 +387,7 @@ class TestShirazFile4Excel:
 
         # Native Excel formulas checked
         formula_cells = [str(v) for v in cell_values if str(v).startswith('=SUM')]
-        assert len(formula_cells) >= 68, f'Expected at least 68 =SUM formulas, found {len(formula_cells)}'
+        assert len(formula_cells) >= 14, 'Expected recorded row and subtotal =SUM formulas'
 
         # Child tables checked
         assert 'سیمان فله تیپ ۲' in all_text

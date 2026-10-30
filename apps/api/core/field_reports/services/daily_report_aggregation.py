@@ -112,6 +112,20 @@ def build_aggregation_meta(
         config = resolve_project_reporting_configuration(project_id, report_date)
 
     eligible_reports = list(contributing_sub_reports(project_id, report_date))
+    # This comparison detects changes in inputs covered by the aggregation
+    # fingerprint. A matching fingerprint is not proof that every external
+    # dependency (for example a referenced party's name) is unchanged.
+    snapshot_source_comparison = 'unknown'
+    if report and report.is_auto_summary and report.aggregation_fingerprint:
+        current_fingerprint = compute_aggregation_fingerprint(
+            report.reporting_configuration_id or (config.id if config else None),
+            eligible_reports,
+        )
+        snapshot_source_comparison = (
+            'matching_fingerprint'
+            if current_fingerprint == report.aggregation_fingerprint
+            else 'changed'
+        )
     contributing_units = sorted(
         set(sr.unit for sr in eligible_reports if sr.unit and sr.unit in CANONICAL_SPECIALTY_UNITS)
     )
@@ -160,6 +174,7 @@ def build_aggregation_meta(
 
     return {
         'is_auto_summary': bool(report.is_auto_summary) if report else True,
+        'snapshot_source_comparison': snapshot_source_comparison,
         'aggregated_at': report.aggregated_at.isoformat().replace('+00:00', 'Z')
         if report and report.aggregated_at
         else None,
@@ -206,6 +221,7 @@ def compute_aggregation_fingerprint(config_id, sub_reports) -> str:
             vocab_revision = getattr(cfg, 'snapshot_revision_marker', '') or str(cfg.effective_from)
 
     payload = {
+        'projection_version': 2,
         'configuration_id': str(config_id.id if hasattr(config_id, 'id') else config_id) if config_id else '',
         'catalog_rule_code': rule_code,
         'machinery_vocabulary_revision': vocab_revision,
@@ -1170,11 +1186,10 @@ def rebuild_daily_report_summary(
             if existing_id:
                 mat_obj = DailyReportMaterial.objects.filter(id=existing_id, report=report).first()
 
-            tx_type = (
-                MaterialTransactionType.ISSUE
-                if row.transaction_type == 'consumption'
-                else MaterialTransactionType.RECEIPT
-            )
+            tx_type = {
+                'consumption': MaterialTransactionType.ISSUE,
+                'receipt': MaterialTransactionType.RECEIPT,
+            }.get(row.transaction_type, MaterialTransactionType.UNKNOWN)
             rec_status, resolved_doc = reconcile_material_row(project_id, row)
             is_receipt_resolved = bool(
                 row.transaction_type == 'receipt' and resolved_doc is not None

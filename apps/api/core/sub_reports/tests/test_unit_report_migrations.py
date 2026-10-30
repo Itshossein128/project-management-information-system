@@ -177,7 +177,6 @@ class TestMigrationMappingAndAccounting:
     def test_migration_executor_rehearsal(self):
         """MigrationExecutor forward -> pre-feature target -> forward again, restoring leaf in finally."""
         executor = MigrationExecutor(connection)
-        current_leaves = dict(executor.loader.graph.leaf_nodes())
         leaf_targets = list(executor.loader.graph.leaf_nodes())
 
         # Roll back feature 032 apps to pre-feature targets
@@ -187,16 +186,21 @@ class TestMigrationMappingAndAccounting:
             'inventory': '0005_department_activity_contractor_ref',
             'project_templates': '0002_seed_system_templates',
         }
-        pre_feature_targets = [
-            (app, feature_rollbacks.get(app, leaf))
-            for app, leaf in current_leaves.items()
-        ]
+        # Other apps can depend on later feature migrations. Including their
+        # current leaves in this target list would ask Django to roll those
+        # dependencies back and forward in the same plan. Target only the
+        # feature boundaries: Django also rolls back dependent migrations.
+        pre_feature_targets = list(feature_rollbacks.items())
 
         try:
-            # Unapply down to pre-feature boundary
+            reverse_plan = executor.migration_plan(pre_feature_targets)
+            assert reverse_plan and all(backwards for _, backwards in reverse_plan)
             executor.migrate(pre_feature_targets)
             executor = MigrationExecutor(connection)
+            for target in pre_feature_targets:
+                assert target in executor.loader.applied_migrations
             plan = executor.migration_plan(leaf_targets)
+            assert plan and all(not backwards for _, backwards in plan)
             sub_reports_steps = [m for m, _ in plan if m.app_label == 'sub_reports']
             assert len(sub_reports_steps) >= 2
 

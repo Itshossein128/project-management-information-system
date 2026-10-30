@@ -314,7 +314,7 @@ function ActivityLogContent() {
           ) : null}
         </div>
         <Button
-          variant='outline'
+          variant='secondary'
           size='sm'
           disabled={exportingExcel}
           onClick={handleExportExcel}

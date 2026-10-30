@@ -239,7 +239,7 @@ export interface MaterialRow {
   quantity: string;
   unit_cost: string | null;
   unit: string;
-  transaction_type: "receipt" | "issue" | "waste" | "return";
+  transaction_type: "receipt" | "issue" | "waste" | "return" | "unknown";
   consumption_location?: string;
   supplier?: string;
   warehouse_document_reference?: string;

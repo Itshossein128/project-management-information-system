@@ -65,7 +65,7 @@ def contractor(db, project, user):
 
 
 @pytest.fixture
-def project_activity(db, activity, project):
+def project_activity(db, activity, project, approved_measurement):
     activity.status = 'in_progress'
     activity.is_deleted = False
     activity.save()
@@ -73,7 +73,7 @@ def project_activity(db, activity, project):
 
 
 @pytest.fixture
-def foreign_project(db, user):
+def foreign_project(db, user, unit):
     other = Project.objects.create(
         project_code='PRJ-001-F',
         project_name='Other Project',
@@ -88,6 +88,11 @@ def foreign_project(db, user):
         status='in_progress',
         created_by=user,
     )
+    from schedule.services.measurement_service import approve_definition, get_or_create_definition, update_draft
+
+    definition = get_or_create_definition(activity, user)
+    update_draft(definition, {'method': 'quantity', 'total_quantity': 100, 'unit_id': str(unit.id)}, user)
+    approve_definition(definition, user)
     stakeholder = Stakeholder.objects.create(
         project=other,
         name='Foreign Contractor Co',
