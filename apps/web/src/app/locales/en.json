@@ -2464,6 +2464,21 @@
       "infoDesc": "View or update contractor details, start/end dates, base amounts, and payment terms.",
       "issueIpcTitle": "Issue New Interim Payment Certificate",
       "issueIpcDesc": "Launch the IPC wizard to record a new interim work certificate for this contract."
+    },
+    "projectIpcDetail": {
+      "title": "IPC Detail Tour",
+      "headerTitle": "IPC Header & Context",
+      "headerDesc": "Manage IPC number, associated contract details, and return to contract management.",
+      "amountsTitle": "Gross, Deductions & Net Amounts",
+      "amountsDesc": "View gross certified work amount, total statutory or contractual deductions, and net payable balance.",
+      "workflowTitle": "Workflow Status & Approvals",
+      "workflowDesc": "Track draft creation, submission for review, approval, or rejection of this IPC.",
+      "lineItemsTitle": "Work Items & Quantities Table",
+      "lineItemsDesc": "Inspect or update detailed item work quantities, unit rates, and extended totals for this period.",
+      "deductionsTitle": "Deductions Breakdown Table",
+      "deductionsDesc": "Review statutory and contractual deductions including advance recovery, retention, taxes, and social security.",
+      "collectionsTitle": "Collections & Payments Panel",
+      "collectionsDesc": "Record and track received payments, cash receipts, and collection transactions for this IPC."
     }
   },
   "dailyReports": {

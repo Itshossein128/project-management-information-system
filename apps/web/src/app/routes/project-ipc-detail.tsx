@@ -15,6 +15,8 @@ import { IPCWorkflowBar } from "@/components/contracts/IPCWorkflowBar";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { ProductTourButton } from "@/components/tour/ProductTourButton";
+import { useProductTour } from "@/components/tour/useProductTour";
 import { Button } from "@/components/ui/sprint-button";
 
 function IPCDetailContent() {
@@ -59,21 +61,110 @@ function IPCDetailContent() {
 
   const canEditLines = canEditIpc && ipc.status === "draft";
 
+  const { startTour } = useProductTour({
+    tourId: "project-ipc-detail",
+    steps: [
+      {
+        element: '[data-tour="ipc-detail-header"]',
+        popover: {
+          title: t("tour.projectIpcDetail.headerTitle", {
+            defaultValue: "شناسنامه صورت‌وضعیت (IPC)",
+          }),
+          description: t("tour.projectIpcDetail.headerDesc", {
+            defaultValue:
+              "شماره صورت‌وضعیت، قرارداد مربوطه و بازگشت به لیست قراردادها را مدیریت کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="ipc-amounts-summary"]',
+        popover: {
+          title: t("tour.projectIpcDetail.amountsTitle", {
+            defaultValue: "خلاصه مبالغ ناخالص، کسورات و خالص",
+          }),
+          description: t("tour.projectIpcDetail.amountsDesc", {
+            defaultValue:
+              "مبلغ ناخالص صورت‌وضعیت، مجموع کسورات قانونی و قراردادی و مبلغ خالص قابل پرداخت را مشاهده نمایید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="ipc-workflow-bar"]',
+        popover: {
+          title: t("tour.projectIpcDetail.workflowTitle", {
+            defaultValue: "چرخه کار و وضعیت تأیید",
+          }),
+          description: t("tour.projectIpcDetail.workflowDesc", {
+            defaultValue:
+              "مراحل ثبت پیش‌نویس، ارسال برای بررسی، تأیید یا رد صورت‌وضعیت را کنترل و پیگیری کنید.",
+          }),
+          side: "bottom",
+        },
+      },
+      {
+        element: '[data-tour="ipc-line-items-table"]',
+        popover: {
+          title: t("tour.projectIpcDetail.lineItemsTitle", {
+            defaultValue: "جدول اقلام و مقادیر کارکرد",
+          }),
+          description: t("tour.projectIpcDetail.lineItemsDesc", {
+            defaultValue:
+              "اقلام ریز کارکرد، احجام، قیمت‌های واحد و مبالغ کل مربوط به این دوره را مشاهده یا ویرایش کنید.",
+          }),
+          side: "top",
+        },
+      },
+      {
+        element: '[data-tour="ipc-deductions-table"]',
+        popover: {
+          title: t("tour.projectIpcDetail.deductionsTitle", {
+            defaultValue: "جدول کسورات قانونی و قراردادی",
+          }),
+          description: t("tour.projectIpcDetail.deductionsDesc", {
+            defaultValue:
+              "انواع کسورات از جمله پیش‌پرداخت، بیمه، مالیات و حسن انجام کار را ثبت و بازبینی کنید.",
+          }),
+          side: "top",
+        },
+      },
+      {
+        element: '[data-tour="ipc-collections-panel"]',
+        popover: {
+          title: t("tour.projectIpcDetail.collectionsTitle", {
+            defaultValue: "پنل دریافتی‌ها و وصول مطالبات",
+          }),
+          description: t("tour.projectIpcDetail.collectionsDesc", {
+            defaultValue:
+              "تاریخچه‌ و تراکنش‌های وصول وجه پرداختی بابت این صورت‌وضعیت را ثبت و پیگیری نمایید.",
+          }),
+          side: "top",
+        },
+      },
+    ],
+  });
+
   return (
     <div className='space-y-6'>
-      <PageHeader
-        title={`صدور موقت #${ipc.ipc_number}`}
-        subtitle={`${ipc.contract_number} — ${project.project_name}`}
-        actions={
-          <Link
-            to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_CONTRACTS}`}
-          >
-            <Button variant='secondary'>بازگشت به قراردادها</Button>
-          </Link>
-        }
-      />
+      <div data-tour='ipc-detail-header'>
+        <PageHeader
+          title={`صدور موقت #${ipc.ipc_number}`}
+          subtitle={`${ipc.contract_number} — ${project.project_name}`}
+          actions={
+            <div className='flex flex-wrap gap-2 items-center'>
+              <ProductTourButton onClick={startTour} />
+              <Link
+                to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_CONTRACTS}`}
+              >
+                <Button variant='secondary'>بازگشت به قراردادها</Button>
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
-      <div className='grid gap-4 md:grid-cols-3'>
+      <div className='grid gap-4 md:grid-cols-3' data-tour='ipc-amounts-summary'>
         <div className='rounded-lg border p-4'>
           <p className='text-sm text-muted-foreground'>مبلغ ناخالص</p>
           <p className='text-lg font-semibold'>
@@ -94,15 +185,17 @@ function IPCDetailContent() {
         </div>
       </div>
 
-      <IPCWorkflowBar
-        projectId={projectId}
-        ipc={ipc}
-        canEditIpc={canEditIpc}
-        canApprove={canApprove}
-        onUpdated={refresh}
-      />
+      <div data-tour='ipc-workflow-bar'>
+        <IPCWorkflowBar
+          projectId={projectId}
+          ipc={ipc}
+          canEditIpc={canEditIpc}
+          canApprove={canApprove}
+          onUpdated={refresh}
+        />
+      </div>
 
-      <section className='space-y-2'>
+      <section className='space-y-2' data-tour='ipc-line-items-table'>
         <h2 className='text-lg font-medium'>اقلام</h2>
         <IPCLineItemsTable
           projectId={projectId}
@@ -112,7 +205,7 @@ function IPCDetailContent() {
         />
       </section>
 
-      <section className='space-y-2'>
+      <section className='space-y-2' data-tour='ipc-deductions-table'>
         <h2 className='text-lg font-medium'>کسورات</h2>
         <IPCDeductionsTable
           projectId={projectId}
@@ -122,11 +215,13 @@ function IPCDetailContent() {
         />
       </section>
 
-      <IPCCollectionsPanel
-        projectId={projectId}
-        ipcId={ipcId}
-        canEdit={canEditIpc}
-      />
+      <div data-tour='ipc-collections-panel'>
+        <IPCCollectionsPanel
+          projectId={projectId}
+          ipcId={ipcId}
+          canEdit={canEditIpc}
+        />
+      </div>
     </div>
   );
 }
