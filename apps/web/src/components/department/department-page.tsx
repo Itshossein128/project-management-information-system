@@ -543,7 +543,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         </div>
       </header>
 
-      <main className="page-main" id="container-businessDepartmentMain">
+      <main className="page-main space-y-7" id="container-businessDepartmentMain">
         <UnitDailyReportPanel
           businessId={businessId ?? ""}
           unit={department as CanonicalUnit}
@@ -592,7 +592,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
             id="container-departmentActivityLogHeader"
             className="flex flex-wrap items-center justify-between gap-2"
           >
-            <h2 id="text-departmentActivityLogTitle" className="text-xl font-medium">
+            <h2 id="text-departmentActivityLogTitle" className="text-lg font-semibold tracking-tight">
               {t("businessDepartment.activityLog.title")}
             </h2>
             {activityQuery.isFetching ? (
@@ -623,7 +623,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
             toolbarLeftSlot={
               <div
                 id="container-departmentActivityFilters"
-                className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))] items-start gap-2"
+                className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,11rem),1fr))] items-start gap-3 [&_input]:h-10 [&_input]:rounded-lg"
               >
                 <div
                   id="container-departmentActivityDateRange"

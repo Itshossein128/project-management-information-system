@@ -27,12 +27,15 @@ test.describe("Project registration — Spec 03", () => {
     await page.getByLabel("کد پروژه *").fill(code);
     await page.getByLabel("کارفرما *").fill("Wizard Employer");
     await page.getByTestId("wizard-contract-number").fill(`CN-${code}`);
-    await page.getByTestId("wizard-currency").selectOption("IRT");
+    await page.getByTestId("wizard-currency").click();
+    await page.getByRole("option", { name: "تومان (IRT)" }).click();
 
     await page.getByRole("button", { name: "بعدی" }).click();
     await expect(page.locator("#input-start_date")).toBeVisible({ timeout: 10_000 });
     await page.locator("#input-start_date").click();
-    await page.locator(".rmdp-day:not(.rmdp-disabled)").first().click();
+    await page.locator(".rmdp-toolbar").getByText("امروز", { exact: true }).click();
+    await expect(page.locator(".rmdp-calendar")).toBeHidden();
+    await expect(page.locator("#input-start_date")).not.toHaveValue("");
     await expect(page.getByRole("button", { name: "بعدی" })).toBeEnabled({
       timeout: 5_000,
     });

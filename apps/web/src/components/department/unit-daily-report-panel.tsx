@@ -1,5 +1,5 @@
 import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { Download } from "lucide-react";
@@ -32,6 +32,8 @@ import { ApiRequestError } from "@/app/lib/api-client";
 import { Button, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Modal } from "@/components/overlay/modal";
 import { queueUnitReportOperation } from "@/app/lib/offlineWrite";
@@ -112,22 +114,24 @@ export function UnitDailyReportPanel({
   const urlDate = searchParams.get("date");
   const fallbackDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const activeDate = propDate || urlDate || fallbackDate;
+  const onDateChangeRef = useRef(onDateChange);
+  onDateChangeRef.current = onDateChange;
 
   useEffect(() => {
-    if (!searchParams.get("date") && activeDate) {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set("date", activeDate);
-          return next;
-        },
-        { replace: true },
-      );
-      onDateChange?.(activeDate);
-    }
-  }, [searchParams, setSearchParams, activeDate, onDateChange]);
+    if (!activeDate || searchParams.get("date") === activeDate) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("date", activeDate);
+        return next;
+      },
+      { replace: true },
+    );
+    onDateChangeRef.current?.(activeDate);
+  }, [searchParams, setSearchParams, activeDate]);
 
   const handleDateChange = (newDate: string) => {
+    if ((searchParams.get("date") ?? "") === newDate) return;
     setActionError(null);
     setActionErrorCode(null);
     setSearchParams(
@@ -351,10 +355,10 @@ export function UnitDailyReportPanel({
     <section
       id="container-unitDailyReportPanel"
       aria-labelledby="text-unitDailyReportTitle"
-      className="space-y-4 rounded-xl border border-border bg-card p-4 sm:p-6"
+      className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+        <div className="flex flex-wrap items-center gap-3">
           <h2 id="text-unitDailyReportTitle" className="text-lg font-semibold tracking-tight">
             {t("businessDepartment.unitReport.title")}
           </h2>
@@ -394,55 +398,40 @@ export function UnitDailyReportPanel({
         onOpen={handleDateChange}
       />
 
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-4">
         <div className="w-full sm:w-64">
           <JalaliDatePicker
             id="input-unitReportDate"
             name="unitReportDate"
             label={t("businessDepartment.unitReport.selectDate")}
+            fieldClassName="gap-2.5"
+            className="h-11 rounded-lg bg-background"
             value={activeDate}
             onChange={handleDateChange}
           />
         </div>
 
         {report === null && !currentQuery.isLoading ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <span id="text-noUnitReport" className="text-sm text-muted-foreground">
-              {t("businessDepartment.unitReport.noReport")}
-            </span>
+          <>
             {SUB_DISCIPLINE_OPTIONS[unit] ? (
-              <select
-                id="select-unitReportSubDiscipline"
-                data-testid="select-sub-discipline"
-                value={selectedSubDiscipline}
-                onChange={(e) => setSelectedSubDiscipline(e.target.value)}
-                className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="">
-                  {t(
-                    "businessDepartment.unitReport.selectSubDisciplineDefault",
-                    "انتخاب زیررشته (اختیاری)",
-                  )}
-                </option>
-                {SUB_DISCIPLINE_OPTIONS[unit]?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {t(opt.labelKey, opt.value)}
-                  </option>
-                ))}
-              </select>
+              <div className="w-full sm:w-64">
+                <Label htmlFor="select-unitReportSubDiscipline" className="mb-2.5 leading-5">{t("businessDepartment.unitReport.selectSubDisciplineDefault", "انتخاب زیررشته (اختیاری)")}</Label>
+                <Select dir={i18n.dir()} value={selectedSubDiscipline || "__none__"} onValueChange={(value) => setSelectedSubDiscipline(value === "__none__" ? "" : value)}>
+                  <SelectTrigger id="select-unitReportSubDiscipline" data-testid="select-sub-discipline" className="w-full rounded-lg bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="__none__">{t("businessDepartment.unitReport.selectSubDisciplineDefault", "انتخاب زیررشته (اختیاری)")}</SelectItem>
+                    {SUB_DISCIPLINE_OPTIONS[unit]?.map((opt) => <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey, opt.value)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             ) : null}
-            <Button
-              id="button-createUnitReportDraft"
-              type="button"
-              size="sm"
-              disabled={openMutation.isPending || !activeDate}
-              onClick={() => void handleCreateDraft()}
-            >
-              {openMutation.isPending
-                ? t("common.loading")
-                : t("businessDepartment.unitReport.createDraft")}
+            <Button id="button-createUnitReportDraft" type="button" className="h-11 rounded-lg" disabled={openMutation.isPending || !activeDate} onClick={() => void handleCreateDraft()}>
+              {openMutation.isPending ? t("common.loading") : t("businessDepartment.unitReport.createDraft")}
             </Button>
-          </div>
+            <p id="text-noUnitReport" className="w-full rounded-lg border border-dashed border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+              {t("businessDepartment.unitReport.noReport")}
+            </p>
+          </>
         ) : null}
       </div>
 
@@ -1065,7 +1054,7 @@ function LocalDraftList({
   activeDate: string;
   onOpen: (date: string) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [drafts, setDrafts] = useState<LocalReportSnapshot[]>([]);
 
   useEffect(() => {

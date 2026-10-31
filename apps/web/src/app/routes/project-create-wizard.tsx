@@ -32,7 +32,8 @@ import { Input } from "@/components/form";
 import { formatWithCommas, toRawNumericString } from "@/app/lib/utils";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Label } from "@/components/ui/label";
-import { LayoutTemplate } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { LayoutTemplate, Check, Building2, CalendarDays, Users } from "lucide-react";
 
 interface DraftMember {
   user?: UserLookupResult;
@@ -50,10 +51,12 @@ function suggestCode(name: string) {
 }
 
 export default function ProjectCreateWizardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
   const [step, setStep] = useState(1);
+  const [codeEdited, setCodeEdited] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   const [form, setForm] = useState<CreateProjectPayload>({
     project_name: "",
@@ -173,14 +176,23 @@ export default function ProjectCreateWizardPage() {
 
   const handleSearch = async () => {
     if (search.length < 2) return;
-    const results = await lookupUsers(search);
-    setSearchResults(results);
+    try {
+      const results = await lookupUsers(search.trim());
+      setSearchResults(results);
+      setSearched(true);
+    } catch {
+      toast.error(t("projectWizard.searchError", "جستجوی کاربران ناموفق بود. دوباره تلاش کنید."));
+    }
   };
 
   const handlePmSearch = async () => {
     if (pmSearch.length < 2) return;
-    const results = await lookupUsers(pmSearch);
-    setPmResults(results);
+    try {
+      const results = await lookupUsers(pmSearch.trim());
+      setPmResults(results);
+    } catch {
+      toast.error(t("projectWizard.searchError", "جستجوی کاربران ناموفق بود. دوباره تلاش کنید."));
+    }
   };
 
   const addSearchedMember = (user: UserLookupResult) => {
@@ -189,6 +201,7 @@ export default function ProjectCreateWizardPage() {
     setMembers((prev) => [...prev, { user, roleId: selectedRoleId }]);
     setSearch("");
     setSearchResults([]);
+    setSearched(false);
   };
 
   const addInviteMember = () => {
@@ -215,37 +228,87 @@ export default function ProjectCreateWizardPage() {
   ];
 
   return (
-    <main className="page-main page-shell mx-auto max-w-3xl px-4 py-8">
+    <main className="page-main page-shell mx-auto px-4 py-8 sm:px-6 [&_input]:h-11 [&_input]:rounded-lg [&_input]:border-border [&_input]:bg-background [&_select]:min-h-11 [&_select]:rounded-lg [&_select]:focus-visible:outline-none [&_select]:focus-visible:ring-2 [&_select]:focus-visible:ring-ring">
       <Breadcrumb
         items={[
           { label: t("project.title"), href: `/${PATHS.PROJECT}` },
           { label: t("projectWizard.breadcrumb") },
         ]}
       />
-      <PageHeader title={t("projectWizard.title")} />
-
-      <div className="mb-8 flex gap-2">
-        {steps.map((label, i) => (
-          <div
-            key={label}
-            className={`flex-1 rounded-md border px-3 py-2 text-center text-sm ${
-              step === i + 1 ? "border-primary bg-primary/5 font-medium" : "border-border text-muted-foreground"
-            }`}
-          >
-            {i + 1}. {label}
-          </div>
-        ))}
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <PageHeader title={t("projectWizard.title")} />
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">اطلاعات پروژه را در سه مرحله وارد کنید. جزئیات تکمیلی را می‌توانید بعداً ویرایش کنید.</p>
+        </div>
+        <span className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">مرحله {step} از ۳</span>
       </div>
 
+      <nav aria-label="مراحل ایجاد پروژه" className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
+        {steps.map((label, i) => {
+          const Icon = [Building2, CalendarDays, Users][i];
+          const active = step === i + 1;
+          const complete = step > i + 1;
+          return (
+            <div key={label} aria-current={active ? "step" : undefined} className={`flex min-h-16 items-center gap-2 rounded-xl border px-3 py-3 sm:gap-3 sm:px-4 ${active ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border bg-card text-muted-foreground"}`}>
+              <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${active ? "bg-primary-foreground/15" : "bg-muted"}`}>
+                {complete ? <Check className="size-4" /> : <Icon className="size-4" />}
+              </span>
+              <span className="min-w-0"><span className="hidden text-xs opacity-75 sm:block">مرحله {i + 1}</span><span className="block text-xs font-semibold sm:text-sm">{label}</span></span>
+            </div>
+          );
+        })}
+      </nav>
+
       {step === 1 && (
-        <div className="space-y-4">
-          <div className="space-y-3">
-            <Label>{t("projectWizard.useTemplate")}</Label>
-            <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-5">
+          <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
+            <div className="mb-6 border-b border-border pb-4">
+              <h2 className="text-lg font-semibold">اطلاعات اصلی پروژه</h2>
+              <p className="mt-1 text-sm text-muted-foreground">برای شناسایی پروژه، این اطلاعات را وارد کنید. فیلدهای ستاره‌دار الزامی هستند.</p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-name">نام پروژه *</Label>
+            <Input
+              id="wizard-project-name"
+              value={form.project_name}
+              onChange={(e) => {
+                const name = e.target.value;
+                setForm((f) => ({
+                  ...f,
+                  project_name: name,
+                  project_code: codeEdited ? f.project_code : suggestCode(name),
+                }));
+              }}
+            />
+          </div>
+          <div>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-code">کد پروژه *</Label>
+            <Input
+              id="wizard-project-code"
+              value={form.project_code}
+              onChange={(e) => { setCodeEdited(true); setForm((f) => ({ ...f, project_code: e.target.value })); }}
+            />
+          </div>
+          <div>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-employer">کارفرما *</Label>
+            <Input
+              id="wizard-employer"
+              value={form.employer}
+              onChange={(e) => setForm((f) => ({ ...f, employer: e.target.value }))}
+            />
+          </div>
+            </div>
+          </section>
+          <details className="rounded-lg border border-border bg-card p-4">
+            <summary className="cursor-pointer font-medium">{t("projectWizard.useTemplate")} <span className="text-sm font-normal text-muted-foreground">(اختیاری)</span></summary>
+            <p className="mt-2 text-sm text-muted-foreground">برای شروع از ساختار آماده، یک قالب انتخاب کنید.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {templates.map((tpl) => (
                 <button
                   key={tpl.template_id}
                   type="button"
+                  aria-pressed={selectedTemplateId === tpl.template_id}
                   onClick={() =>
                     selectTemplate(
                       selectedTemplateId === tpl.template_id ? null : tpl,
@@ -283,61 +346,33 @@ export default function ProjectCreateWizardPage() {
                 <TemplateWBSPreviewTree nodes={selectedTemplateDetail.wbs_tree} />
               </div>
             ) : null}
-          </div>
+          </details>
 
+          <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
+            <div className="mb-6 border-b border-border pb-4"><h2 className="text-lg font-semibold">جزئیات پروژه</h2><p className="mt-1 text-sm text-muted-foreground">این اطلاعات اختیاری هستند و بعداً نیز قابل تکمیل‌اند.</p></div>
+            <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <Label htmlFor="wizard-project-name">نام پروژه *</Label>
-            <Input
-              id="wizard-project-name"
-              value={form.project_name}
-              onChange={(e) => {
-                const name = e.target.value;
-                setForm((f) => ({
-                  ...f,
-                  project_name: name,
-                  project_code: f.project_code || suggestCode(name),
-                }));
-              }}
-            />
-          </div>
-          <div>
-            <Label htmlFor="wizard-project-code">کد پروژه *</Label>
-            <Input
-              id="wizard-project-code"
-              value={form.project_code}
-              onChange={(e) => setForm((f) => ({ ...f, project_code: e.target.value }))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="wizard-employer">کارفرما *</Label>
-            <Input
-              id="wizard-employer"
-              value={form.employer}
-              onChange={(e) => setForm((f) => ({ ...f, employer: e.target.value }))}
-            />
-          </div>
-          <div>
-            <Label>{t("project.purpose", "هدف پروژه")}</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-purpose">{t("project.purpose", "هدف پروژه")}</Label>
+            <Input id="wizard-purpose"
               value={form.purpose ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, purpose: e.target.value }))}
             />
           </div>
           <div>
-            <Label>{t("project.scope", "شرح محدوده")}</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-scope">{t("project.scope", "شرح محدوده")}</Label>
+            <Input id="wizard-scope"
               value={form.scope_description ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, scope_description: e.target.value }))}
             />
           </div>
           <div>
-            <Label>{t("project.deliverables", "خروجی‌های اصلی")}</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-deliverables">{t("project.deliverables", "خروجی‌های اصلی")}</Label>
+            <Input id="wizard-deliverables"
               value={form.main_deliverables ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, main_deliverables: e.target.value }))}
             />
           </div>
-          <div data-testid="wizard-contractor-deferred">
+          <div className="sm:col-span-2 rounded-lg bg-muted/50 p-4" data-testid="wizard-contractor-deferred">
             <Label>{t("project.contractor", "پیمانکار")}</Label>
             <p className="mt-1 text-sm text-muted-foreground">
               {t(
@@ -347,83 +382,52 @@ export default function ProjectCreateWizardPage() {
             </p>
           </div>
           <div>
-            <Label>مشاور</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-consultant">مشاور</Label>
+            <Input id="wizard-consultant"
               value={form.consultant}
               onChange={(e) => setForm((f) => ({ ...f, consultant: e.target.value }))}
             />
           </div>
           <div>
-            <Label>{t("project.contractNumber", "شماره قرارداد")}</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-contract-number">{t("project.contractNumber", "شماره قرارداد")}</Label>
             <Input
+              id="wizard-contract-number"
               data-testid="wizard-contract-number"
               value={form.contract_number ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, contract_number: e.target.value }))}
             />
           </div>
           <div>
-            <Label>نوع قرارداد</Label>
-            <select
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              data-testid="wizard-contract-type"
-              value={form.contract_type}
-              onChange={(e) => setForm((f) => ({ ...f, contract_type: e.target.value }))}
-            >
-              <option value="">—</option>
-              {contractTypes.map((ct) => (
-                <option key={ct.id} value={ct.code}>
-                  {ct.code} — {ct.name_fa || ct.name_en}
-                </option>
-              ))}
-            </select>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-contract-type">نوع قرارداد</Label>
+            <Select dir={i18n.dir()} value={form.contract_type || "__none__"} onValueChange={(value) => setForm((f) => ({ ...f, contract_type: value === "__none__" ? "" : value }))}>
+              <SelectTrigger id="wizard-contract-type" data-testid="wizard-contract-type" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
+              <SelectContent position="popper"><SelectItem value="__none__">انتخاب نشده</SelectItem>{contractTypes.map((ct) => <SelectItem key={ct.id} value={ct.code}>{ct.code} — {ct.name_fa || ct.name_en}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
           <div>
-            <Label>{t("projectSettings.currency", "واحد پول")}</Label>
-            <select
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              data-testid="wizard-currency"
-              value={form.currency ?? "IRR"}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  currency: e.target.value as ProjectCurrency,
-                }))
-              }
-            >
-              <option value="IRR">{t("projectSettings.currencyIrr", "ریال (IRR)")}</option>
-              <option value="IRT">{t("projectSettings.currencyIrt", "تومان (IRT)")}</option>
-            </select>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-currency">{t("projectSettings.currency", "واحد پول")}</Label>
+            <Select dir={i18n.dir()} value={form.currency ?? "IRR"} onValueChange={(value) => setForm((f) => ({ ...f, currency: value as ProjectCurrency }))}>
+              <SelectTrigger id="wizard-currency" data-testid="wizard-currency" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
+              <SelectContent position="popper"><SelectItem value="IRR">{t("projectSettings.currencyIrr", "ریال (IRR)")}</SelectItem><SelectItem value="IRT">{t("projectSettings.currencyIrt", "تومان (IRT)")}</SelectItem></SelectContent>
+            </Select>
           </div>
           <div>
-            <Label>{t("centralData.owningUnit", "واحد سازمانی مالک")}</Label>
-            <select
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              data-testid="wizard-owning-unit"
-              value={form.owning_unit ?? ""}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  owning_unit: e.target.value || null,
-                }))
-              }
-            >
-              <option value="">—</option>
-              {orgUnits.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.code} — {u.name}
-                </option>
-              ))}
-            </select>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-owning-unit">{t("centralData.owningUnit", "واحد سازمانی مالک")}</Label>
+            <Select dir={i18n.dir()} value={form.owning_unit || "__none__"} onValueChange={(value) => setForm((f) => ({ ...f, owning_unit: value === "__none__" ? null : value }))}>
+              <SelectTrigger id="wizard-owning-unit" data-testid="wizard-owning-unit" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
+              <SelectContent position="popper"><SelectItem value="__none__">انتخاب نشده</SelectItem>{orgUnits.map((u) => <SelectItem key={u.id} value={u.id}>{u.code} — {u.name}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
           <div className="space-y-2" data-testid="wizard-project-manager">
-            <Label>{t("project.projectManager", "مدیر پروژه")}</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-pm-search">{t("project.projectManager", "مدیر پروژه")}</Label>
             <div className="flex gap-2">
               <Input
+                id="wizard-pm-search"
                 placeholder={t("projectWizard.searchPm", "جستجوی مدیر پروژه")}
                 value={pmSearch}
                 onChange={(e) => setPmSearch(e.target.value)}
               />
-              <Button type="button" variant="secondary" onClick={handlePmSearch}>
+              <Button type="button" variant="secondary" className="h-11 rounded-lg" onClick={handlePmSearch}>
                 {t("common.search", "جستجو")}
               </Button>
             </div>
@@ -454,20 +458,22 @@ export default function ProjectCreateWizardPage() {
             ) : null}
           </div>
           <div>
-            <Label>موقعیت</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-location">موقعیت</Label>
+            <Input id="wizard-location"
               value={form.location}
               onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
             />
           </div>
-          <div className="flex justify-end gap-2 pt-4">
+            </div>
+          </section>
+          <div className="flex justify-end gap-2 border-t border-border pt-5">
             <Link to={`/${PATHS.PROJECT}`}>
               <Button variant="ghost">انصراف</Button>
             </Link>
             <Button
               variant="primary"
               onClick={() => setStep(2)}
-              disabled={!form.project_name || !form.project_code || !form.employer}
+              disabled={!form.project_name.trim() || !form.project_code.trim() || !form.employer.trim()}
             >
               بعدی
             </Button>
@@ -476,28 +482,34 @@ export default function ProjectCreateWizardPage() {
       )}
 
       {step === 2 && (
-        <div className="space-y-4">
+        <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
+          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">زمان‌بندی و مبلغ قرارداد</h2><p className="mt-1 text-sm text-muted-foreground">تاریخ شروع الزامی است؛ سایر موارد را می‌توانید بعداً تکمیل کنید.</p></div>
           <JalaliDatePicker
             name="start_date"
+            fieldClassName="gap-2.5"
             label="تاریخ شروع *"
             value={form.start_date}
             onChange={(v) => setForm((f) => ({ ...f, start_date: v }))}
           />
           <JalaliDatePicker
             name="planned_finish_date"
+            fieldClassName="gap-2.5"
             label="تاریخ پایان برنامه‌ای"
             value={form.planned_finish_date ?? ""}
             onChange={(v) => setForm((f) => ({ ...f, planned_finish_date: v }))}
           />
           <div>
-            <Label>مبلغ قرارداد</Label>
-            <Input
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-amount">مبلغ قرارداد</Label>
+            <Input id="wizard-amount"
               type="text"
               inputMode="decimal"
               value={formatWithCommas(form.contract_amount ?? "")}
               onChange={(e) => setForm((f) => ({ ...f, contract_amount: toRawNumericString(e.target.value) }))}
             />
           </div>
+          {form.start_date && form.planned_finish_date && durationDays === null ? (
+            <p role="alert" className="text-sm text-destructive">تاریخ پایان نمی‌تواند پیش از تاریخ شروع باشد.</p>
+          ) : null}
           {durationDays != null ? (
             <p className="text-sm text-muted-foreground">مدت قرارداد: {durationDays} روز</p>
           ) : null}
@@ -505,7 +517,7 @@ export default function ProjectCreateWizardPage() {
             <Button variant="ghost" onClick={() => setStep(1)}>
               قبلی
             </Button>
-            <Button variant="primary" onClick={() => setStep(3)} disabled={!form.start_date}>
+            <Button variant="primary" onClick={() => setStep(3)} disabled={!form.start_date || (Boolean(form.planned_finish_date) && durationDays === null)}>
               بعدی
             </Button>
           </div>
@@ -513,19 +525,27 @@ export default function ProjectCreateWizardPage() {
       )}
 
       {step === 3 && (
-        <div className="space-y-4">
+        <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
+          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">تیم اولیه پروژه</h2><p className="mt-1 text-sm text-muted-foreground">افزودن اعضا اختیاری است و می‌توانید بعداً هم تیم را تکمیل کنید.</p></div>
           <div className="rounded-lg border border-border p-3 text-sm">
             <p className="font-medium">شما — مدیر پروژه</p>
             <p className="text-muted-foreground">به‌صورت خودکار اضافه می‌شوید</p>
           </div>
 
           <div className="space-y-2">
-            <Label>افزودن عضو (اختیاری)</Label>
+            <p className="font-medium">افزودن عضو (اختیاری)</p>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-role">نقش عضو</Label>
+            <Select dir={i18n.dir()} value={selectedRoleId} onValueChange={setSelectedRoleId}>
+              <SelectTrigger id="wizard-member-role" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue placeholder="نقش عضو را انتخاب کنید" /></SelectTrigger>
+              <SelectContent position="popper">{roles.map((r: Role) => <SelectItem key={r.id} value={r.id}>{formatRoleLabel(r.role_name, t)}</SelectItem>)}</SelectContent>
+            </Select>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-search">جستجوی عضو</Label>
             <div className="flex gap-2">
               <Input
+                id="wizard-member-search"
                 placeholder="جستجو با نام یا ایمیل"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setSearchResults([]); setSearched(false); }}
               />
               <Button variant="secondary" onClick={handleSearch}>
                 جستجو
@@ -537,7 +557,8 @@ export default function ProjectCreateWizardPage() {
                   <li key={u.user_id}>
                     <button
                       type="button"
-                      className="w-full px-3 py-2 text-start text-sm hover:bg-muted"
+                      className="w-full px-3 py-2 text-start text-sm hover:bg-muted disabled:opacity-50"
+                      disabled={!selectedRoleId}
                       onClick={() => addSearchedMember(u)}
                     >
                       {u.full_name} — {u.email || u.mobile}
@@ -546,42 +567,36 @@ export default function ProjectCreateWizardPage() {
                 ))}
               </ul>
             )}
-            {search.length >= 2 && searchResults.length === 0 && (
+            {searched && searchResults.length === 0 && (
               <div className="space-y-2 rounded-md border border-dashed border-border p-3">
                 <p className="text-sm text-muted-foreground">کاربر یافت نشد — دعوت‌نامه ارسال کنید</p>
+                <Label className="mb-2.5 leading-5" htmlFor="wizard-invite-email">ایمیل دعوت‌شونده</Label>
                 <Input
+                  id="wizard-invite-email"
+                  type="email"
                   placeholder="ایمیل"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
-                <Button variant="secondary" size="sm" onClick={addInviteMember}>
+                <Button variant="secondary" size="sm" disabled={!selectedRoleId || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail)} onClick={addInviteMember}>
                   افزودن دعوت‌نامه
                 </Button>
               </div>
             )}
-            <select
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-              value={selectedRoleId}
-              onChange={(e) => setSelectedRoleId(e.target.value)}
-            >
-              <option value="">نقش عضو</option>
-              {roles.map((r: Role) => (
-                <option key={r.id} value={r.id}>
-                  {formatRoleLabel(r.role_name, t)}
-                </option>
-              ))}
-            </select>
+
           </div>
 
           {members.length > 0 && (
             <ul className="space-y-1 text-sm">
               {members.map((m, i) => (
-                <li key={i} className="rounded border border-border px-3 py-2">
+                <li key={i} className="flex items-center justify-between gap-2 rounded border border-border px-3 py-2">
+                  <span>
                   {m.user?.full_name ?? m.email} —{" "}
                   {(() => {
                     const roleName = roles.find((r) => r.id === m.roleId)?.role_name;
                     return roleName ? formatRoleLabel(roleName, t) : null;
-                  })()}
+                  })()}</span>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setMembers((prev) => prev.filter((_, index) => index !== i))} aria-label={`حذف ${m.user?.full_name || m.email || "عضو"}`}>حذف</Button>
                 </li>
               ))}
             </ul>
@@ -592,9 +607,7 @@ export default function ProjectCreateWizardPage() {
               قبلی
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => createMutation.mutate()} loading={createMutation.isPending}>
-                ادامه بدون افزودن عضو
-              </Button>
+
               <Button variant="primary" loading={createMutation.isPending} onClick={() => createMutation.mutate()}>
                 ایجاد پروژه
               </Button>

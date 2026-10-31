@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import type { DatePickerRef } from "react-multi-date-picker";
 import { useTranslation } from "react-i18next";
 import MultiDatePicker from "react-multi-date-picker";
 import MultiToolbar from "react-multi-date-picker/plugins/toolbar";
@@ -68,6 +70,7 @@ export function JalaliDatePicker({
   stickyAriaLabel,
 }: JalaliDatePickerProps) {
   const { i18n } = useTranslation();
+  const pickerRef = useRef<DatePickerRef>(null);
   const { calendar, locale, format } = getDatePickerCalendarConfig(i18n.language);
 
   const inputId = id?.trim() ? id.trim() : `input-${name}`;
@@ -90,6 +93,7 @@ export function JalaliDatePicker({
     >
       {() => (
         <DatePicker
+          ref={pickerRef}
           id={inputId}
           name={name}
           value={parsedValue ?? ""}
@@ -115,7 +119,7 @@ export function JalaliDatePicker({
           minDate={parsedMinDate || undefined}
           maxDate={parsedMaxDate || undefined}
           editable={false}
-          plugins={[<Toolbar key="toolbar" position="bottom" sort={["today"]} />]}
+          plugins={[<Toolbar key="toolbar" position="bottom" sort={["today"]} onClick={() => pickerRef.current?.closeCalendar()} />]}
         />
       )}
     </Field>

@@ -1,17 +1,17 @@
-# Graph Report - building-management  (2026-10-28)
+# Graph Report - building-management  (2026-10-30)
 
 ## Corpus Check
-- 3114 files · ~2,008,053 words
+- 3116 files · ~2,013,407 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 188 file(s) not represented in the graph (top: .csv 153, (none) 13, .css 6)
 
 ## Summary
-- 29065 nodes · 62110 edges · 1807 communities (1314 shown, 493 thin omitted)
-- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 6946 edges (avg confidence: 0.94)
+- 29136 nodes · 62447 edges · 1807 communities (1291 shown, 516 thin omitted)
+- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 7018 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7db0f142`
+- Built from commit: `b0ff4489`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -23,13 +23,13 @@
 - useToast
 - JalaliDatePicker
 - projects.ts
-- Stakeholder
+- test_offline_sync_foundation.py
 - django_contrib_auth
 - ProjectMember
 - decimal
 - models/__init__.py
-- OfflineOperation
 - queries.ts
+- unit-reports.ts
 - cashflow.ts
 - lifecycle_service.py
 - offlineDB.ts
@@ -38,29 +38,29 @@
 - ViewsTests
 - services/validators.py
 - activities-grid.tsx
-- BaselineActivityDetailView
+- schedule/serializers.py
 - Tasks: Warehouse Report Fields
 - compute_evm
-- Decision: Open register
+- WorkingCalendar
 - Research: Undo Project Suspension and Completion
 - TailwindConfigGenerator
-- SectionContractError
-- member_has_codename
+- ProjectMemberPermissionOverride
+- documents/views.py
 - TailwindConfigGenerator
-- gregorian_to_jalali
+- field_reports/pdf.py
 - test_ranking_reference_harness.py
-- io
+- section-labor.tsx
 - test_credential_security.py
 - .agents/skills/design/scripts/cip/render-html.py
 - project.ts
 - HasProjectPermission
 - Tasks: Specialty Unit Reporting Source of Truth
-- projection_service.py
+- BudgetVersionSerializer
 - react
 - wbs
 - msp_import.py
 - unit_report_services.py
-- _DepartmentActivityDataBase
+- offline_sync.py
 - 01-core-requirements-and-excel-blueprints/چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md
 - devDependencies
 - sub_reports/models.py
@@ -68,16 +68,16 @@
 - SubReportStatus
 - offlineWrite.ts
 - form/index.ts
-- Block
+- test_workshop_block.py
 - actor
 - project_templates/views.py
 - EventPublisher
 - test_section_contracts.py
 - Inspection
-- parse_jalali_or_gregorian
-- datetime
+- kpi_service.py
+- test_verify_blueprint_schema.py
 - WorkflowViewSetMixin
-- project-subcontractor-detail.tsx
+- useNavigation.ts
 - Decision: Create project position
 - cash_flow/views.py
 - field_reports/services/__init__.py
@@ -94,10 +94,10 @@
 - jalali.py
 - Research: Independent ISM Criterion Layering
 - RiskEvent
-- 030-daily-header-weather/plan.md
+- Feature Specification: Standardized Daily Weather and Temperature
 - TestHRServices
 - TestHasProcurementStepRole
-- projects/urls.py
+- ProjectChangeRequestSerializer
 - Decision: Create custom role
 - Decision: Create barriers record
 - Decision: Add/invite project member
@@ -108,15 +108,15 @@
 - TestEditAndSubmit
 - .agents/skills/design-system/scripts/slide_search_core.py
 - equipment_utilization.py
-- Department
-- LaborTitleCatalogTitleSerializer
+- central-data.ts
+- contracts.ts
 - create_wbs_node
 - .cursor/skills/design-system/scripts/slide_search_core.py
 - .gemini/skills/design-system/scripts/slide_search_core.py
 - risk/models.py
 - [open-electrical-department]/README.md
 - test_wage_acl_and_cost_estimate.py
-- full_project.py
+- ActivityMeasurementVersion
 - User Scenarios & Testing *(mandatory)*
 - pytest
 - Tasks: Core Domain Principles & Glossary
@@ -124,7 +124,7 @@
 - project-risk-register.tsx
 - Decision: Open Payments and ledger tab
 - execution-record-rules.ts
-- django_contrib_auth
+- test_material_reconciliation_documents.py
 - economic/views.py
 - assert_not_self_final_approve
 - traefik.customer.yml
@@ -134,17 +134,17 @@
 - Specification Quality Checklist: Decision Support AHP Criteria Weighting (Phase 4)
 - Implementation Plan: Dashboards, Roles & Reports
 - color
-- web/package.json
+- dependencies
 - color
 - color
-- test_cost_control.py
+- subcontractors/views.py
 - common/tests/test_validators.py
 - instance_service.py
 - Decision: Delete equipment log
-- csv
+- .agents/skills/design-system/scripts/fetch-background.py
 - Decision: Filter or change the displayed view
 - Decision: Filter or change the displayed view
-- syncService.ts
+- InlineGridTab.tsx
 - Velora Scope Map
 - common.sh
 - Tasks: Verifiable Decision Ranking Reference
@@ -157,7 +157,7 @@
 - test_offline_sync_migrations.py
 - .agents/skills/design-system/templates/design-tokens-starter.json
 - test_approval_workflow.py
-- sprint-button.tsx
+- project-resource-allocations.tsx
 - spacing
 - Excel Forms & Grids Documentation
 - spacing
@@ -194,7 +194,7 @@
 - Tasks: Earned Value & Project Control (EVM)
 - .agents/skills/design-system/scripts/html-token-validator.py
 - User Scenarios & Testing *(mandatory)*
-- wbs/views.py
+- .get_queryset
 - radius
 - طرح اولیه سیستم اتوماسیون یکپارچه کنترل پروژه‌های عمرانی
 - projects/models.py
@@ -204,9 +204,9 @@
 - gray
 - radius
 - TestProgressFourWay
-- test_concrete_qc_link.py
+- validate_concrete_rows
 - constants.py
-- ShirazFile4ExcelBuilder
+- gregorian_to_jalali
 - Data Model: Automated Project Daily Report Summary
 - unit
 - Feature Specification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
@@ -220,16 +220,16 @@
 - Decision: Filter or change the displayed view
 - gray
 - color
-- pathlib
+- .agents/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - color
 - Tasks: WBS Structure
 - Tasks: Restore Project from Archive — TDD
 - Tasks: Cost Commitment & Payment Gap Closure
-- math
+- .agents/skills/design/scripts/logo/core.py
 - test_ahp_api.py
 - مشخصات: گزارش روزانه کارگاه
 - test_transfer_api.py
-- API Contract: TOPSIS Run — Create & Read
+- ۴. یافته‌های تفصیلی
 - ProjectScopedViewSet
 - Tasks: Specialty Unit Daily Sections and Structured Aggregation
 - 2. openpyxl Layout & Formatting Patterns
@@ -249,34 +249,34 @@
 - .cursor/skills/ui-ux-pro-max/scripts/core.py
 - environment
 - environment
-- AuditSoftDeleteModel
+- Entities
 - compute_topsis
 - TestMeasurementMethods
-- dashboards.ts
-- get_department_activity_queryset
+- extend_schema
+- hr/services/allocation_service.py
 - Tasks: Traceable Decision Execution Records
 - Contract: Daily Report Summary API
-- Validation Guide: Undo Project Status
+- Contract: Project Status Undo API
 - decision_support/views.py
 - .agents/skills/design/scripts/cip/core.py
 - Decision: Automatically allocate cost pool
 - DailyReportDetailSerializer
-- Tasks: Schedule & Baseline Gap Closure
-- Tasks: Multi-Level Budget Gap Closure
+- Dependencies & Execution Order
+- core/conftest.py
 - Data Model: Stakeholders, Documents, Decisions & Workflow
-- inventory/tests.py
+- Stakeholder
 - workflow/serializers.py
 - steps
 - Decision: Approve daily report
 - Decision: Add concrete row
-- User Scenarios & Testing *(mandatory)*
+- بخش ۲.۳: داستان کاربری US-DR-13 (درخواست اصلاح گزارش قفل‌شده و نسخه‌بندی)
 - Decision: Add incidents row
 - Decision: Add labor-camp row
 - Contract: Decision Cases
 - models/__init__.py
 - TestShadcnInstaller
 - .agents/skills/ui-ux-pro-max/scripts/core.py
-- Decision: Approve stock transfer
+- [open-stock-transfers]/README.md
 - Research: Stakeholders, Documents, Decisions & Workflow
 - .agents/skills/design-system/scripts/generate-slide.py
 - fontSize
@@ -292,7 +292,7 @@
 - card
 - Implementation Plan: Independent ISM Criterion Layering
 - fontSize
-- ref_node_path
+- project-status-undo.ts
 - Decision: Submit budget version
 - Decision: Approve project
 - Tasks: Shiraz Excel Forms Parity & Official PDF Standardization
@@ -325,32 +325,31 @@
 - .cursor/skills/design/scripts/cip/core.py
 - Quickstart Validation Guide: Decision Support TOPSIS Ranking (Phase 3)
 - ShadcnInstaller
-- reference_tests/conftest.py
+- .cursor/skills/design/scripts/logo/core.py
 - TestBlockCRUD
-- ShirazFile1ExcelBuilder
+- cache_key
 - ShadcnInstaller
-- RiskAction
+- .gemini/skills/design-system/scripts/generate-slide.py
 - services
 - environment
 - Decision: Create stakeholder
-- DisciplineSubReport
+- datetime
 - Color Semantics
 - feature_request.yml
 - scripts
 - Implementation verification — Restore Project from Archive
 - Tasks: Automated Project Daily Report Summary — TDD
 - pr-labeler.yml
-- Decision: Request correction of locked report
 - signals.py
-- Quickstart: Specialty Unit Reporting Source of Truth
+- authentication/services.py
 - tours.spec.ts
 - depends_on
 - ShadcnInstaller
 - Implementation Plan: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 - celery-worker
 - Tasks: [FEATURE NAME]
-- Decisions
-- CostBreakdownNode
+- TestLeaveRequestViewSet
+- WorkflowDefinition
 - [navigate-schema-setup]/README.md
 - re
 - button
@@ -370,20 +369,20 @@
 - Contract: Pure SAW Engine
 - OrganizationUnit
 - TestRiskRegisterAPI
-- NamedListEditor
+- NamedListEditor.tsx
 - Decision: Return or cancel import
-- Decision: Create correspondence
+- ProjectDocumentsPage
 - User Scenarios & Testing *(mandatory)*
-- .agents/skills/design/scripts/cip/generate.py
+- Decision: Filter or change the displayed view
 - Contract: EVM by CBS
 - Feature Specification: Decision Support SAW Ranking (Phase 2)
 - Feature Specification: Decision Support TOPSIS Ranking (Phase 3)
 - Feature Specification: Decision Support AHP Criteria Weighting (Phase 4)
 - Tasks: Decision Support AHP Criteria Weighting (Phase 4)
-- TestDailyReportCrud
+- .cursor/skills/design-system/scripts/fetch-background.py
 - .agents/skills/brand/scripts/extract-colors.cjs
 - .agents/skills/brand/scripts/validate-asset.cjs
-- argparse
+- sys
 - login/README.md
 - Phase 0 Research: Warehouse Department Reports
 - Field Reports Endpoints
@@ -394,7 +393,7 @@
 - .cursor/skills/brand/scripts/extract-colors.cjs
 - .cursor/skills/brand/scripts/validate-asset.cjs
 - .cursor/skills/speckit-analyze/SKILL.md
-- transition
+- Tasks: Physical Progress Measurement, Strict Financial Governance, and Technical Approval Workflow
 - Resource allocations
 - 6. Sprint Plan (13 Sprints × 2 Weeks)
 - .gemini/skills/brand/scripts/extract-colors.cjs
@@ -413,13 +412,13 @@
 - Feature Specification: Risk, Quality & Safety
 - Feature Specification: Stakeholders, Documents, Decisions & Workflow
 - Feature Specification: Decision Support Case Shell (Phase 1)
-- DailyReportVersionSerializer
+- DailyReportViewSet
 - Tasks: Contractor Stakeholder Select — TDD
 - Slides Reference Guide
-- WarehouseReportsAndBalanceTests
+- TestProjectList
 - .gemini/skills/design-system/templates/design-tokens-starter.json
 - Feature Specification: Department Activity Reports & Excel Workbooks
-- Correspondence
+- web/package.json
 - Decision: Create block
 - test_decision_rationale.py
 - 4. Detection Passes (Token-Efficient Analysis)
@@ -436,7 +435,7 @@
 - labeler.yml
 - probe_frontend.cjs
 - Feature Specification: Multi-Level Budget Gap Closure
-- ProjectMemberViewSet
+- check_prerequisites.py
 - Feature Specification: Contracts & IPC Gap Closure
 - Data Model: Cost Commitment & Payment Gap Closure
 - Data Model: Cash Flow & Liquidity Allocation Gap Closure
@@ -445,7 +444,7 @@
 - User Scenarios & Testing *(mandatory)*
 - User Scenarios & Testing *(mandatory)*
 - 025-decision-ranking-reference/tasks.md
-- Phase 0 Research: Specialty Unit Daily Sections and Structured Aggregation
+- TestStructuredTransfer
 - Quickstart & Validation: AHP Criteria Weighting
 - User Scenarios & Testing *(mandatory)*
 - Decision: Approve daily report
@@ -460,11 +459,11 @@
 - 036-validation-codes-unset-semantics/tasks.md
 - [navigate-alerts]/README.md
 - AlertCheckerRegistry
-- execution-record-rules.ts
+- Contract: DEMATEL Workspace and History
 - .cursor/skills/design-system/scripts/validate-tokens.cjs
-- CustomUserManager
+- SubcontractorSerializer
 - TestActivityValidation
-- syncPendingUnitOperations
+- syncService.ts
 - WBS
 - Decision: Create HR user
 - Decision: Approve contract change order
@@ -488,8 +487,8 @@
 - 3.2 Core Endpoints
 - Primitive Tokens
 - .gemini/skills/design-system/scripts/validate-tokens.cjs
-- ۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)
-- test_sync_operation_validation.py
+- ref_node_fs
+- test_offline_target_isolation.py
 - LoginView
 - updates
 - Feature Specification: WBS Structure
@@ -506,7 +505,7 @@
 - .agents/skills/speckit-plan/SKILL.md
 - .agents/skills/speckit-specify/SKILL.md
 - .agents/skills/speckit-tasks/SKILL.md
-- test_topsis_api.py
+- .gemini/skills/design/scripts/cip/generate.py
 - Decision: Create cash transaction
 - Contract: Daily Report Summary UI
 - copy
@@ -521,7 +520,7 @@
 - master_data/tests/conftest.py
 - Open subcontractor
 - Spec Kit prompts — Decision Support (تصمیم‌یار)
-- ConflictCard.tsx
+- labor_productivity.py
 - Decision: Remove dependency
 - Decision: Edit IPC quantities
 - _validate
@@ -532,31 +531,31 @@
 - 2. Architecture & Data Integrity Decisions
 - Decision: Delete manual cash transaction
 - Core Principles
-- Contract: SAW Execution via Decision Runs
+- Decision: Buildings department activity
 - ۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)
-- Implementation Plan: Physical Progress Measurement, Strict Financial Governance, and Technical Approval Workflow
+- RequisitionHeaderListSerializer
 - Decision: Change language
 - Contract: Remaining Allocatable & Transfers
 - Implementation Plan: Cost Commitment & Payment Gap Closure
 - Documents
 - Data Model: Dashboards, Roles & Reports
-- open-reset-link/README.md
+- Decision: Handle invalid reset inputs
 - Research: Decision Support TOPSIS Ranking (Phase 3)
-- member_serializers.py
+- recalculate_activity_progress
 - Decision: Edit manual cash transaction
 - Decision: Change theme
 - Decision: Sign out
 - Unified Design Skill
 - CIP Design Reference
-- TestMppImportApi
+- test_unit_report_models.py
 - .agents/skills/design-system/scripts/generate-tokens.cjs
-- subcontractors/views.py
+- test_subcontractors.py
 - RoleAwareUserRateThrottle
 - Contract: Department Activity Records (Warehouse Fields)
 - .cursor/skills/speckit-converge/SKILL.md
 - Decision: Filter or change the displayed view
 - use-sticky-form-fields.ts
-- ۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)
+- test_offline_legacy_protection.py
 - .cursor/skills/design-system/scripts/generate-tokens.cjs
 - duration
 - constitution.md
@@ -571,7 +570,7 @@
 - .gemini/skills/design-system/scripts/generate-tokens.cjs
 - duration
 - healthcheck
-- CanAccessStoredFile
+- Decisions
 - Contract: Wage ACL & approved-rate cost estimate
 - Contract: Daily report header and extended child rows
 - Decision: View projected cash and suggested net need
@@ -623,7 +622,7 @@
 - Progress Dashboard
 - api service
 - Decision: Executive portfolio dashboard
-- Decision: Add materials row
+- .gemini/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - TestTailwindConfigGenerator
 - Decision: Create approved labor rate
 - Decision: Delete resource allocation
@@ -633,7 +632,7 @@
 - Implementation Plan: Traceable Decision Execution Records
 - Decision: Edit personnel dossier
 - celery-beat
-- DecisionCase
+- DecisionRun
 - Ranking Reference Implementation Evidence
 - User Scenarios & Testing *(mandatory)*
 - Decision: Supervisor approve leave
@@ -662,10 +661,10 @@
 - Decision: Supervisor reject overtime
 - Decision: Export daily report Excel (FILE 4)
 - Decision: Filter or change the displayed view
-- BinaryRelationEditor.tsx
+- .cursor/skills/ui-styling/scripts/tests/test_tailwind_config_gen.py
 - Research & Decisions: AHP Criteria Weighting
 - Endpoint: `POST /api/v1/projects/{project_pk}/progress/{activity_id}/technical-approve/`
-- Decision: Filter or change the displayed view
+- TestProgressValidation
 - Decision: Approve submitted IPC
 - Decision: Manage IPC deductions
 - Decision: Mark approved IPC paid
@@ -682,24 +681,24 @@
 - Decision: Save budget line
 - Decision: Record inventory transaction
 - Research: Automated Project Daily Report Summary
-- Contract: Department Activity Records (Warehouse Fields)
+- ConfirmUploadView
 - Decision: Retry failed load
 - 3. `POST /api/v1/projects/{project_pk}/activities/{activity_id}/measurement/approve/`
-- Decision: Assign procurement officers
+- vite.config.ts
 - Implementation Plan: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد
 - Endpoint: `GET /api/v1/projects/{project_pk}/daily-reports/by-date/`
-- Decision: Reject requisition
+- [open-mechanical-department]/README.md
 - Decision: Retry failed load
-- Decision: Start screen walkthrough
+- Schedule Endpoints
 - Decision: Register equipment
 - ProcurementNewPage
 - Decision: Filter or change the displayed view
-- Decision: Submit requisition
+- UserRegistrationService
 - Data Model: Daily Report Lifecycle Lock
 - 2. API End-to-End Scenarios
 - Decision: Filter or change the displayed view
-- navigate-project-settings/README.md
-- Decision: Create schedule baseline
+- Decision: Delete project
+- [navigate-gantt]/README.md
 - Decision: Create leave request
 - duration
 - open-budget-tab/README.md
@@ -711,29 +710,29 @@
 - Decision: Retry failed load
 - Decision: Retry failed load
 - services
-- login/navigate-register/README.md
+- Decision: Registration validation fails
 - healthCheck
-- [open-subcontractor]/README.md
+- Decision: Create warning
 - [edit-report]/README.md
-- BarrierSerializer
+- RiskEventSerializer
 - Data model: offline operations and recovery
-- set_permission_override
+- SubcontractorDetailSerializer
 - Decision: Create contract
 - postgres
 - postgres
 - healthcheck
-- TestSubReportsAPI
-- Decision: Filter or change the displayed view
+- ۲. داستان‌های کاربری اتمیک (Atomic User Stories)
+- Decision: Delete labor camp group
 - Decision: Filter or change the displayed view
 - Implementation Plan: Specialty Unit Reporting Source of Truth
 - measurement_service.py
-- Decision: Record labor camp group
-- exportOfflineBackup
+- Data Model & Technical Schema: Department Activity Reports
+- TestDailyReportGapsStatusUnset
 - Decision: Inspect legacy assignment
 - Decision: Retry failed load
 - [open-requisition]/README.md
 - Decision: Keep local version
-- Decision: Start screen walkthrough
+- ManagedContractType
 - 1. Entity Modifications & Additions
 - Case 2: Cumulative Progress > 100% (No Clamping)
 - Decision: Create contract change order
@@ -747,21 +746,21 @@
 - Decision: Save WBS as a template
 - ratelimit_handlers.py
 - Intake an Idea
-- Decision: Discard failed queued item
+- TestProjectRegistrationLifecycle
 - Decision: Suspend project
 - navigate-sync-conflicts/README.md
 - Decision: Edit BoQ items
-- Decision: Add activities row
+- TestProjectMembersAPI
 - .gemini/skills/brand/scripts/sync-brand-to-tokens.cjs
 - Decision: Show/hide password
-- Decision: Return to login
+- login/navigate-register/README.md
 - Traefik API Read Router
 - Implementation Plan: [FEATURE]
 - Decision: Export department activities
 - Entities
 - Implementation Plan: Schedule & Baseline Gap Closure
-- Decision: Request correction of locked report
-- Contract: Daily report correction requests
+- .cursor/skills/design-system/scripts/tests/test_validate_tokens.py
+- TestDailyReportGapsCorrection
 - Implementation Plan: Daily Site Report Gap Closure
 - Contract: Project change requests
 - Implementation Plan: Project Registration & Kickoff Gap Closure
@@ -769,38 +768,38 @@
 - Implementation Plan: Physical Progress & Periodic Reports Gap Closure
 - Decision: Create subcontractor
 - Contract: Budget versions
-- integration
-- Notification
+- Decision: Change language
+- TestNotificationsApi
 - Contract: Remaining Math & Ledger Report
 - Contract: Liquidity Scores, Proposal, Decision, Simulation
 - Decision: Return to login
 - Implementation Plan: Decision Support SAW Ranking (Phase 2)
-- Implementation Plan: HR & Capacity Gap Closure
-- Quickstart: Validate Daily Report Lifecycle Lock
+- Decision: Download daily activity report
+- Decision: Download weekly activity report
 - Decision: HR job positions
-- Decision: Approve budget change request
+- Decision: Export department activities
 - Data Model: Restore Project from Archive
 - Specification Quality Checklist: Native Microsoft Project MPP Import
 - Research: Native Microsoft Project MPP Import
 - UI Styling Skill
 - Component Interactive States
 - .agents/skills/speckit-checklist/SKILL.md
-- Quickstart validation: FR-PRG gap closure
+- Contract: Activity measurement methods
 - Decision: Specialty unit daily report & activity export
 - Implementation Plan: Department Activity Reports & Excel Workbooks
 - Decision: Open Variance tab
-- login/README.md
+- Decision: Request password recovery
 - .cursor/skills/design-system/templates/design-tokens-starter.json
 - ApprovalLogSerializer
 - Decision: Filter or change the displayed view
 - RequisitionHeaderViewSet
-- Contract: Project Status Undo API
+- Decision: Import department activities
 - scripts
 - routes.ts Root Config
 - Decision: Show/hide password
 - .cursor/skills/speckit-checklist/SKILL.md
 - .cursor/skills/speckit-implement/SKILL.md
-- Decision: Return to HR
+- Decision: Open HR hub
 - Decision: Approve project change request
 - Decision: Submit recovery phone
 - Contract: Unit Daily Report API
@@ -812,10 +811,10 @@
 - Decision: HR users
 - 1. Request Correction for Approved Report
 - Quickstart: Contractor Stakeholder Select
-- Decision: Mark notification read
+- Decision: Download daily activity report
 - Decision: Create capacity exception
 - Decision: Open forgot-password
-- Decision: Open notifications
+- Decision: Download weekly activity report
 - Decision: Reject capacity exception
 - Quickstart: Validate Daily Report Correction Lineage and Lossless Cloning
 - API Contract: Standardized Daily Weather and Temperature
@@ -830,32 +829,31 @@
 - Decision: Return to basic information
 - Decision: Complete dates
 - Decision: Overtime requests
-- [open-machinery-department]/README.md
+- Decision: Create department activity record
 - Decision: Prepare team membership
 - Decision: Return to dates
 - Decision: Save contract
 - Decision: Approve measurement method
 - 033-daily-sections-grid/plan.md
 - Decision: Create IPC
-- Decision: Reset password
+- Decision: Export department activities
 - Decision: Delete dynamic row
 - Decision: Export dynamic rows
 - Decision: Filter or change the displayed view
 - UI Contract: Standardized Daily Weather and Temperature
 - Data Model: Standardized Daily Weather and Temperature
 - Decision: Import dynamic rows
-- Contract: Activity Master Log (Shiraz Excel Sheet 1 Sync)
+- FILE 1 — بانک اطلاعاتی فاز 1
 - Decision: Show/hide password
 - Evidence log
 - Decision: Recover an expired session
 - Decision: Open dynamic table
 - AuthLayout
 - Decision: Retry failed load
-- [open-mechanical-department]/README.md
+- Decision: Create department activity record
 - Implementation Plan: Daily Report Auto-Rollup & Activity Master Log Sync
-- Decision: Change theme
+- Decision: Import department activities
 - test_health.py
-- 031-site-inactivity-security/plan.md
 - Decision: Create the draft project
 - ۴. یافته‌های تفصیلی
 - Decision: Export daily report PDF
@@ -865,106 +863,107 @@
 - Decision: Delete exception
 - Decision: Delete calendar
 - Decision: Set default calendar
-- Decision: Submit invalid credentials
-- Decision: Filter or change the displayed view
+- Decision: Open register
+- [navigate-progress]/README.md
 - Decision: Reject daily report
 - Decision: Open legacy project area
 - Decision: Cash flow
 - Contract: Unit Report Activity Section API
 - Decision: Open a notification
 - UnitReportViewSet
+- [navigate-daily-reports]/README.md
 - Decision: Register successfully
 - Decision: Retry failed load
 - Decision: Submit daily report
 - Decision: Concrete operations
 - Decision: Approve schedule change request
 - Decision: Download daily activity report
-- Decision: Open/download a document
-- Decision: Filter or change the displayed view
-- Decision: Respond to correspondence
+- Decision: Reject budget version
+- Decision: Submit daily report
+- Decision: Resolve warning
 - Decision: Retry failed load
 - Decision: Adjust monthly forecast
 - [open-ipc]/README.md
 - Decision: Open IPC
 - Decision: Submit valid credentials
-- Decision: Upload a document
-- Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
-- Decision: Delete activities row
+- test_sync_operation_idempotency.py
+- Research: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
+- Decision: Open reset link
 - Decision: Activity bank
 - Decision: Open Budget tab
-- Decision: Delete labor camp group
-- Decision: View meeting minutes
+- Decision: Show/hide password
+- Decision: Change theme
 - Decision: Save WBS budget grid
-- Decision: Edit concrete row
-- Decision: Delete equipment row
-- Decision: Attach activity photo
+- Decision: Open registration
+- Decision: Create department activity record
+- DailyReportEditPage
 - Decision: Filter or change the displayed view
 - Decision: Equipment utilization
-- Decision: Edit equipment row
-- TestRoleAPI
-- Decision: Retry row synchronization
-- Decision: Edit activities row
+- Decision: Filter or change the displayed view
+- django_contrib_auth_models
+- Decision: Create department activity record
+- Decision: Filter or change the displayed view
 - Entities
-- Decision: Add custom labor title
+- Decision: Filter or change the displayed view
 - Decision: Decisions and workflow
 - Decision: Filter or change the displayed view
 - Decision: Labor productivity
-- Decision: Labor-Camp section
-- Decision: Retry row synchronization
+- Decision: Record actual cost
+- Decision: Create budget change request
 - Quickstart: Feature 039 Auto Daily Rollup & Activity Master Log Sync
-- Decision: Materials section
+- Decision: Add materials row
 - Quickstart: Discipline Sub-Reports Lifecycle and Validation
-- Decision: Delete project position
-- Decision: Edit project position
+- Decision: Reject budget change request
+- Decision: Open CBS and commitments tab
 - Decision: Risk and delay register
 - Decision: Create activity
-- Decision: Retry row synchronization
-- Decision: Retry row synchronization
+- Decision: Manually allocate cost pool
+- Decision: Allocate cost pool
 - Decision: Schedule status
-- Decision: Filter or change the displayed view
-- Decision: Inspect report versions
+- Decision: Materials section
+- Decision: Issue block stock
 - Idea Assessment Pipeline Extension
 - Decision: Download weekly activity report
-- Decision: Query warehouse stock balance
-- Decision: Project job positions
+- Decision: Block inventory
+- Decision: Receive requisition stock
 - Dependencies & Execution Order
 - 9. سطح‌بندی دسترسی‌ها
 - Decision: Filter or change the displayed view
-- Decision: Create budget change request
+- Decision: Approve budget change request
 - Contract: Derived Collection Mutation Guard
-- Entities
+- Contract: SAW Execution via Decision Runs
 - Decision: Import department activity records
 - Quickstart and Verification: Standardized Daily Weather and Temperature
 - Decision: Save report header
 - 11. روش‌های تخصیص هزینه‌های سرجمع
 - 21. فرآیند پیشنهادی پیاده‌سازی
-- Decision: Labor camp
+- Decision: Retry failed load
 - Decision: Quality and HSE
 - ۲. داستان‌های کاربری اتمیک (Atomic User Stories)
 - Decision: Security department activity
 - Decision: Download weekly workbook
-- Decision: Add equipment row
+- Decision: Start screen walkthrough
 - Decision: Personnel summary
 - Decision: Delete activity
-- kpi_drill_service.py
-- [open-block-inventory]/README.md
+- CostCategory
+- Decision: Filter or change the displayed view
 - Decision: Edit activity
 - راهنمای پرامپت‌های مهندسی‌شده برای ابزار `speckit-specify`
-- Decision: Edit labor row
+- Decision: Procurement reports
 - minio
 - postgres
 - routers
-- Decision: Warehouse department activity
+- Decision: Start screen walkthrough
 - Decision: Filter or change the displayed view
 - Data Model: Physical Progress & Periodic Reports (FR-PRG)
-- Decision: Delete materials row
+- Decision: Create commitment from requisition
 - 17. ساختار پیشنهادی صفحات نرم‌افزار
 - جریان کاربری و درخت تصمیم ساب‌ریپورت‌های دیسیپلین (Discipline Sub-Reports User Flow)
 - Decision: Open mobile navigation
 - Decision: Add dependency
 - Decision: Manage activity dependencies
-- Decision: Edit materials row
-- Decision: Edit daily report
+- Decision: Lock fiscal period
+- Decision: Create project change request
 - Decision: Filter or change the displayed view
 - Implementation Plan: Standardized Daily Weather and Temperature
 - Decision: Manpower
@@ -973,18 +972,18 @@
 - Decision: Start screen walkthrough
 - 3. Key Endpoint Verification Examples
 - API Contract: Contractor Stakeholder Select
-- Decision: Progress dashboard
+- Decision: Reject project change request
 - UI Contract: Contractor Stakeholder Select
-- Decision: Record manual progress
+- Decision: Submit project change request
 - Contract: Mechanical Materials Section API
 - Decision: Filter or change the displayed view
-- Decision: Retry failed load
+- Decision: Project settings
 - 10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool
 - web
 - 13. سطوح ورود اطلاعات گذشته
 - 22. ساختار پیشنهادی فایل Excel ورود اطلاعات افتتاحیه
 - 3. اجزای اصلی این بخش از نرم‌افزار
-- Research: Warehouse Report Fields
+- Decision: Retry failed load
 - Quickstart Validation: Core Domain Principles & Glossary
 - test_ipc_amounts.py
 - 3. چالش‌های اصلی در پیاده‌سازی سیستم در میانه پروژه
@@ -992,11 +991,10 @@
 - Specification Quality Checklist: Discipline Sub-Reports Lifecycle and Validation
 - Decision: Barriers
 - Contract: Unit Report Submission & Approval API
-- Decision: Keep server version
-- ProcurementBlocksPage
+- Decision: Save project settings
+- Decision: Enable/disable capability
 - Application Decision Tree & State Machine
 - Decision: Manager approve leave
-- ProjectMaterialBalancePage
 - Contract: EVM by Phase
 - 12. تعریف سطح اطمینان داده‌ها
 - 14. تهیه Data Inventory
@@ -1005,7 +1003,7 @@
 - Decision: Stakeholders
 - api
 - Decision: Retry failed load
-- Research: Decision Support Case Shell (Phase 1)
+- Decision: Filter or change the displayed view
 - Decision: Security reject leave
 - Decision: Standard reports
 - راهنمای پرامپت‌های مهندسی‌شده برای ابزار `speckit-specify`
@@ -1013,13 +1011,13 @@
 - Quickstart: Validate Daily Report Lifecycle Lock
 - defaultCertificate
 - Decision: Supervisor reject leave
-- Decision: Create commitment
+- Decision: Export subcontractor activities
 - Quickstart: Decision Support SAW Ranking (Phase 2)
 - Implementation Plan: Central Data Model
-- Decision: Add concrete row
+- Decision: Filter or change the displayed view
 - Specification Quality Checklist: Project Registration & Kickoff Gap Closure
 - Data Model: Existing State and Presentation Rules
-- Decision: Resolve a synchronization conflict
+- Decision: Open subcontractor
 - Contract: Contractor Daily Labor Ledger API
 - Validation Guide: Feature 036
 - 16. ثبت Opening Progress
@@ -1027,16 +1025,16 @@
 - Phase 0 Research: Validation Codes and Unset Semantics
 - Decision: Submit overtime request
 - Decision: Add a child WBS node
-- شواهد ممیزی SPEC-04
+- Decision: Record performance score
 - Decision: Edit a WBS node
 - Decision: Filter or change the displayed view
-- Decision: Delete concrete row
-- Decision: Equipment section
+- Decision: Subcontractors
+- Decision: Add equipment row
 - Decision: WBS
 - 9. سطح‌بندی دسترسی‌ها
 - Velora — Integrated Project Control Automation System
 - ۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)
-- Contract: Activity measurement methods
+- Decision: Retry failed load
 - Contract: CBS, Commitment, Payment
 - Contract: WBS tree & node fields
 - Data Model: WBS Structure
@@ -1045,7 +1043,7 @@
 - Contract: Schedule status report
 - rabbitmq
 - schedule/models.py
-- Entities
+- Decision: Sync conflicts
 - minio-init
 - rabbitmq
 - Actions
@@ -1063,26 +1061,25 @@
 - Tasks: Decision Support SAW Ranking (Phase 2)
 - api-read
 - api-write
-- Dependencies & Execution Order
+- Implementation Plan: Decision Support Case Shell (Phase 1)
 - test_meeting_open_actions.py
 - Specification Quality Checklist: Contracts & IPC Gap Closure
 - Contract: Daily Report Summary UI
 - Specification Quality Checklist: Stakeholders, Documents, Decisions & Workflow
-- TestEconomicForecastAPI
+- Contract: Status Undo UI
 - Logo Design Reference
 - Logo Design Reference
 - 4. Detection Passes (Token-Efficient Analysis)
 - .agents/skills/speckit-clarify/SKILL.md
-- test_normalize_weather_conditions_daily_report_and_weather_log
+- subprocess
 - Specification Quality Checklist: Multi-Level Budget Gap Closure
 - 18. تطبیق اطلاعات با حسابداری
-- ContractItem
+- Routine: `auto_populate_ipc(ipc_id)`
 - TestStandaloneManpower
 - Quickstart Validation: Central Data Model
 - schedule/urls.py
-- assert_capability_enabled
 - TestWorkflowActivateGate
-- IPCCollection
+- Endpoint
 - .cursor/skills/speckit-clarify/SKILL.md
 - .cursor/skills/speckit-constitution/SKILL.md
 - Specification Quality Checklist: Cost Commitment & Payment Gap Closure
@@ -1108,7 +1105,7 @@
 - PROMPT-SPEC-05.md
 - Findings
 - Quickstart: Cash Flow & Liquidity Allocation Gap Closure
-- Decision: Delete incidents row
+- Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 - Quickstart: Earned Value & Project Control (EVM)
 - Quickstart: Risk, Quality & Safety
 - Quickstart: Stakeholders, Documents, Decisions & Workflow
@@ -1125,16 +1122,17 @@
 - فهرست مرجع و ماتریس ردیابی مشخصات و داستان‌های کاربری اتمیک
 - مستندات جامع، یکپارچه و بهینه‌شده گزارشات و دپارتمان‌های پروژه Velora
 - Specification Quality Checklist: Contractor Stakeholder Select
-- Data Model: Decision Support Case Shell (Phase 1)
-- گزارش شکاف‌های ثبت آفلاین، همگام‌سازی دسته‌ای و رفع تعارض
-- Decision: Edit incidents row
+- Foundation Verification Report: Phase 2 Safety and Shared Contracts
+- Implementation Plan: Discipline Sub-Reports Lifecycle and Validation
+- .agents/skills/design/scripts/logo/search.py
 - TestInflationMappingsAPI
 - TestProjectRegistrationChangeRequest
 - Specification Quality Checklist: Department Activity Reports & Excel Workbooks
 - test_app_registered.py
+- .cursor/skills/design/scripts/logo/search.py
 - assert_same_currency
 - ref_node_assert
-- Decision: Delete labor-camp row
+- .gemini/skills/design/scripts/logo/search.py
 - قرارداد ورودی پرونده تصمیم
 - وزن‌دهی معیارها با AHP
 - سطح‌بندی معیارها با ISM
@@ -1149,7 +1147,8 @@
 - Verification evidence: 002-core-domain-principles
 - Contract: Actionable Notifications
 - Contract: Project Capability Settings
-- Decision: Synchronize queued reports
+- TestProcurementReportViews
+- TestRiskIssueSeparation
 - Contract: WBS delete dependency guards
 - static
 - Specification Quality Checklist: Schedule & Baseline Gap Closure
@@ -1165,27 +1164,27 @@
 - Contract: Status presentation and unset-vs-zero semantics
 - storage
 - Specification Quality Checklist: Physical Progress & Periodic Reports Gap Closure
-- Decision: Documents and correspondence
+- PerformanceScoreSerializer
 - web-http
 - Contract: Budget change requests
 - Quickstart: Multi-Level Budget
-- جریان کاربری و درخت تصمیم گزارشات روزانه (Daily Reports User Flow)
+- seed-project-archive-restore.py
 - Data Model: Contracts & IPC Gap Closure
 - Quickstart: Contracts & IPC Gap Closure
-- Contract: Four-way progress display
+- load_smoke_kpis.py
 - Specification Quality Checklist: Cash Flow & Liquidity Allocation Gap Closure
 - Contract: Net Cash Need
 - Contract: Portfolio Cash / Need / Allocation Report
-- Specification Quality Checklist: Earned Value & Project Control (EVM)
+- Implementation Plan: Stakeholders, Documents, Decisions & Workflow
 - Specification Quality Checklist: Risk, Quality & Safety
-- Requirements *(mandatory)*
+- Quickstart & Verification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 - APIs
 - APIs
 - Contract: Standard Reports & Export Metadata
 - Specification Quality Checklist: Decision Support Case Shell (Phase 1)
 - Specification Quality Checklist: Decision Support SAW Ranking (Phase 2)
 - Specification Quality Checklist: Decision Support TOPSIS Ranking (Phase 3)
-- 0007_canonical_unit_and_version_constraints.py
+- Feature: `specs/040-physical-progress-measurement`
 - Dependencies & Execution Order
 - Specification Quality Checklist: Independent DEMATEL Criterion Influence Analysis
 - Specification Quality Checklist: Independent ISM Criterion Layering
@@ -1195,30 +1194,29 @@
 - Specification Quality Checklist: Daily Report Validation Codes and Unset Semantics
 - Specification Quality Checklist: Automated Project Daily Report Summary
 - Dependencies & Execution Order
-- 0004_seed_mapping_indices.py
+- ResetPasswordView
 - Decision: Export specialty sub-report Excel (FILE 5 / FILE 6)
-- field_reports/models.py
+- daily_report_views.py
 - Monorepo Migration Plan
 - Canvas Design System
-- Decision: Export Gantt PDF
+- Decision Support API
 - .agents/skills/speckit-taskstoissues/SKILL.md
-- Decision: Filter or change the displayed view
+- CommunicationPlan
 - worker
-- 0008_sprint9_procurement_permissions.py
 - Velora Product Tours & Practical User Guides Progress Checklist
 - Economic & Cost Module Endpoints
 - django_db
-- test_report_export_metadata.py
-- Project
+- Specification Quality Checklist: WBS Structure
+- fiscal_service.py
 - 1.1.1 فونداسیون
 - 20. الزامات ثبت اطلاعات بعد از تاریخ برش
-- Decision: Manage schedule change requests
+- Data Model: Ranking Reference Verification
 - Implementation Strategy
 - Final checks for phases 10 and 11 (T074)
 - Daily Report Lifecycle & Lock Workflow
 - 0002_seed_system_templates.py
 - 5. تفکیک داده‌های پروژه به دو گروه اصلی
-- Decision: Approve schedule change request
+- Specification Quality Checklist: Standardized Daily Weather and Temperature
 - پرامپت جامع و یکپارچه (توصیه‌شده): تطبیق کامل چرخه حیات، قفل، بازنگری، اصلاح و تمایز صفر در برابر ثبت‌نشده
 - پرامپت ماژولار ۱: اصلاح باگ کلونینگ، گردش کار انصراف از اصلاح و تاریخچه نسخه‌ها
 - Velora Design System Master Spec
@@ -1235,7 +1233,8 @@
 - T001 baseline — 2026-10-27
 - Traceability Matrix (T075)
 - department_activity_data_views.py
-- Decision: Reject schedule change request
+- Specification Quality Checklist: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
+- Baseline Evidence — Feature 033 (Phase 1, T002)
 - 11. ماژول جریان نقدی
 - 10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool
 - 13. سطوح ورود اطلاعات گذشته
@@ -1252,13 +1251,12 @@
 - Verification stub: Daily Report Gaps (007)
 - Contract: Material consumption reconciliation hint
 - economic/apps.py
-- Contract: Progress validation rules
-- Contract: Ranking Inputs (SAW Phase 2)
+- Specification Quality Checklist: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد
+- cost_estimate_service.py
 - Dependencies & Execution Order
-- Decision: Submit schedule change request
+- Decision: Approve schedule change request
 - API
-- Decision: Schedule Gantt
-- 0011_project_registration_permissions.py
+- Contract: IPC Partial Collections
 - 9. نحوه برخورد با اعداد سرجمع حسابداری
 - پرامپت جامع و یکپارچه (توصیه‌شده): تطبیق کامل هدر گزارش روزانه، شرایط جوی و تعطیلی کارگاه
 - Social Photos Design Guide
@@ -1316,7 +1314,7 @@
 - CashFlowConfig
 - CommonConfig
 - CostControlConfig
-- Decision: Retry failed load
+- Contract: History Navigation and Guarded Execution UI
 - decision_support/apps.py
 - test_core_principles_fiscal_lock_api.py
 - EventsConfig
@@ -1337,7 +1335,7 @@
 - Subcontractors Registry Endpoints
 - WbsConfig
 - welcome.tsx
-- SlidingText.tsx
+- Data Model: Contractor Stakeholder Select
 - Cash Flow and Liquidity Allocation Specs
 - Concrete operations
 - Sprint 6 Security Audit Report
@@ -1383,42 +1381,49 @@
 - Decision: Start screen walkthrough
 - PROMPT-SPEC-09.md
 - 01-PROMPT-DEPARTMENT-ACTIVITY-REPORTS.md
-- Decision: Approve requisition
+- Dependencies & Execution Order
 - Implementation Strategy
-- Decision: Partially approve items
-- Decision: Create stock transfer
-- Decision: Internal stock transfers
-- Decision: Reject stock transfer
-- Decision: Retry failed load
+- Dependencies & Execution Order
+- Decision 2: Concurrency Control & HTTP Status for Duplicate Corrections
+- test_central_data_stakeholders.py
+- test_core_principles_wbs_tenancy.py
+- Implementation Strategy
 - Phase 4: User Story 2 - Universal project record hygiene (Priority: P1)
 - Materials & Material Requests Endpoints
 - TestAuthenticationAPI
-- Phase 5: User Story 3 - Currency unit safety (Priority: P1)
+- i18next
 - Phase 7: User Story 5 - Actionable notifications (Priority: P2)
-- IPCStatus
+- Phase 9: User Story 7 - Fiscal period lock and duplicate transaction warning (Priority: P3)
+- StandaloneManpowerSerializer
+- clsx
+- driver.js
+- i18next-browser-languagedetector
 - Decision: Discipline subreports
+- isbot@^5.2.2
+- @radix-ui/react-checkbox@^1.3.11
 - Research: Core Domain Principles & Glossary
+- @radix-ui/react-collapsible@^1.1.20
+- @radix-ui/react-switch@^1.3.7
 - mpp/README.md
 - S3 Direct Presigned Upload & Confirm Flow
+- @radix-ui/react-tabs@^1.1.21
 - Discipline Sub-Report State Transitions (Submit/Approve/Reject)
 - Implementation Plan: Shiraz Excel Forms Parity & Official PDF Standardization
-- CashTransaction
-- Execution Steps
+- @radix-ui/react-toggle-group@^1.1.19
+- react-dom@^19.3.0
 - PROMPT-SPEC-10.md
-- .cursor/skills/speckit-implement/SKILL.md
+- @react-router/node@7.12.0
 - Decision: Create department activity record
 - django-treebeard WBS Hierarchy
-- Contract
+- IPC
 - docker-entrypoint.sh
 - runserver.sh script
 - Decision: Download export workbook
 - E2E Coverage Map
-- Decision: Approve and lock baseline
-- apply_template_to_project
+- tailwind-merge
+- @xyflow/react
+- zustand
 - Phase 8 (T063–T072) — 2026-10-18
-- Contract: Canonical Unit Aggregation and Provenance
-- Core Principles
-- TestDailyReportGapsRows
 - role_views.py
 - PROMPT-SPEC-06.md
 - 01-PROMPT-AUTO-DAILY-ROLLUP.md
@@ -1443,7 +1448,6 @@
 - notifications/apps.py
 - test_daily_report_no_blank_create.py
 - BusinessSecurityRoute
-- Decision: Open daily report summary by date
 - Research an Idea
 - Quickstart: Dashboards, Roles & Reports
 - Decide: Go, Clarify, or Kill
@@ -1490,12 +1494,9 @@
 - PR Labeler Workflow
 - Stale PR and Issue Cleanup Workflow
 - UI Contract: Site Inactivity, Conflict Guard, and Access Hardening
-- ProjectScheduleGanttPage
 - Documents Endpoints Documentation
 - Contract: AHP Inputs, Execution and History
 - HR Endpoints Documentation
-- Data Model: Daily Report Correction Lineage and Lossless Cloning
-- منابع علمی و فنی تصمیم‌یار
 - Risk, Quality & HSE Module Endpoints
 - Playwright Data-TestID Selectors Catalog
 - PROMPT-SPEC-11.md
@@ -1541,7 +1542,7 @@
 - Contract: TOPSIS Run Result
 - Quickstart: Decision Support TOPSIS Ranking (Phase 3)
 - Quickstart: Decision Support AHP Criteria Weighting (Phase 4)
-- Commitment
+- cost_control/models.py
 - Research an Idea
 - Research an Idea
 - Decide: Go, Clarify, or Kill
@@ -1557,13 +1558,13 @@
 1. `apiJson()` - 482 edges
 2. `Project` - 307 edges
 3. `HasProjectPermission` - 262 edges
-4. `DailyReport` - 237 edges
+4. `DailyReport` - 247 edges
 5. `IsProjectMember` - 226 edges
-6. `ProjectMember` - 210 edges
-7. `react` - 208 edges
+6. `ProjectMember` - 212 edges
+7. `react` - 209 edges
 8. `CodedValidationError` - 198 edges
 9. `react-i18next` - 183 edges
-10. `SubReportStatus` - 172 edges
+10. `SubReportStatus` - 180 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Source Code (repository root; proposed touchpoints, not edits)` --references--> `persist_audit_log()`  [INFERRED]
@@ -1574,8 +1575,8 @@
   reports_documentation/04-periodic-weekly-monthly-reports/schedule_and_progress_ENDPOINTS.md → apps/api/core/common/jalali.py
 - `1.2 Date & Calendar Calculations (Persian Saturday-to-Friday Work Week)` --references--> `parse_date_optional()`  [INFERRED]
   specs/042-department-activity-reports/research.md → apps/api/core/common/jalali.py
-- `Activity (existing — extend)` --references--> `AuditSoftDeleteModel`  [INFERRED]
-  specs/005-schedule-baseline/data-model.md → apps/api/core/common/models.py
+- `DailyReport (existing — extend)` --references--> `AuditSoftDeleteModel`  [INFERRED]
+  reports_documentation/03-daily-field-reports-and-apis/data-model_007.md → apps/api/core/common/models.py
 
 ## Import Cycles
 - 2-file cycle: `apps/web/src/app/lib/api/decision-support.ts -> apps/web/src/components/decision-support/execution-record-rules.ts -> apps/web/src/app/lib/api/decision-support.ts`
@@ -1635,135 +1636,135 @@
 - **Decision Support Method Progression (Phases 1-4)** — specs_019_decision_saw_spec_md, specs_020_decision_topsis_spec_md, specs_021_decision_ahp_spec_md [INFERRED 0.95]
 - **Financial Control Spine Pipeline (Contracts to Cash Flow to EVM)** — specs_011_contracts_ipc_spec_spec, specs_012_cost_commitment_payment_spec_spec, specs_013_cash_flow_liquidity_spec_spec, specs_014_earned_value_control_spec_spec [INFERRED 0.95]
 
-## Communities (1807 total, 493 thin omitted)
+## Communities (1807 total, 516 thin omitted)
 
 ### Community 0 - "react-i18next"
 Cohesion: 0.03
-Nodes (251): ProjectContext, ProjectProvider(), usePermission(), useProject(), fetchProjection(), fetchSuggestedNeed(), createCommitmentFromRequisition(), fetchPortfolioSummary() (+243 more)
+Nodes (238): ProjectContext, ProjectProvider(), usePermission(), useProject(), createCommitmentFromRequisition(), client, fetchContracts(), fetchIPCs() (+230 more)
 
 ### Community 1 - "apiJson"
-Cohesion: 0.03
-Nodes (155): useBusinessesQuery(), useCreateAssignment(), useDeleteAssignment(), useDeleteDepartmentActivityRecord(), useUpdateAssignment(), useUpdateDepartmentActivityRecord(), apiJson(), base() (+147 more)
+Cohesion: 0.04
+Nodes (117): acknowledgeAlert(), ALERT_TYPE_LABELS, AlertLogEntry, AlertRule, base(), createAlertRule(), deleteAlertRule(), fetchActiveAlertCounts() (+109 more)
 
 ### Community 2 - "سیستم کنترل پروژه و اتوماسیون (Integrated Project Control System)/چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md"
 Cohesion: 0.01
 Nodes (263): 10. تفاوت با سیستم‌های رایج, 10. خلاصه کل سیستم (خیلی ساده), 10. داشبورد اقتصادی پروژه, 10. دامنه نهم: جریان نقدی, 10. مدیریت جریان نقدی, 10. مشکلات و موانع, 10. پیشنهاد برای نمایش در نرم‌افزار, 10. کاربردهای واقعی (+255 more)
 
 ### Community 3 - "DailyReport"
-Cohesion: 0.03
-Nodes (83): TestCostControlPermissions, ActivityRowShift, DailyReport, Meta, DailyReportActivity, Meta, LaborCategory, ReportShift (+75 more)
+Cohesion: 0.02
+Nodes (72): TestCostControlPermissions, ActivityRowShift, CorrectionRequestStatus, DailyReport, Meta, DailyReportActivity, Meta, HseSeverity (+64 more)
 
 ### Community 4 - "useToast"
-Cohesion: 0.03
-Nodes (159): categoryLabel(), createCashTransaction(), deleteCashTransaction(), fetchCashFlowList(), updateCashTransaction(), addIPCDeduction(), approveChangeOrder(), approveIPC() (+151 more)
+Cohesion: 0.04
+Nodes (158): fetchActivities(), createCBSNode(), createCommitment(), fetchCBS(), ActualCostListResponse, ActualCostRow, allocateCostPool(), approveBudgetChangeRequest() (+150 more)
 
 ### Community 5 - "JalaliDatePicker"
 Cohesion: 0.05
-Nodes (90): BarrierCategory, BarrierLog, BarrierStatus, base(), CATEGORY_META, createBarrier(), deleteBarrier(), fetchBarriers() (+82 more)
+Nodes (82): BarrierCategory, BarrierLog, BarrierStatus, base(), CATEGORY_META, createBarrier(), deleteBarrier(), fetchBarriers() (+74 more)
 
 ### Community 6 - "projects.ts"
 Cohesion: 0.03
-Nodes (142): ProjectContextValue, cancelCorrectionRequest(), fetchCorrectionRequests(), fetchReportVersions(), openCorrectionRequest(), technicalApproveProgress(), asList(), base() (+134 more)
+Nodes (134): ProjectContextValue, ApiRequestError, cancelCorrectionRequest(), DailyReportDetail, fetchCorrectionRequests(), fetchReportVersions(), openCorrectionRequest(), technicalApproveProgress() (+126 more)
 
-### Community 7 - "Stakeholder"
-Cohesion: 0.06
-Nodes (48): Decision Support API, ISM run, SAW run (Phase 2), Shared record lifecycle and history review, Validation error (interim O03), Stakeholder, Meta, test_stakeholder_crud() (+40 more)
+### Community 7 - "test_offline_sync_foundation.py"
+Cohesion: 0.29
+Nodes (13): client_for(), create_operation(), enable_v2_sync(), endpoint(), member(), result(), send(), test_cross_project_target_and_reference_are_refused() (+5 more)
 
 ### Community 8 - "django_contrib_auth"
-Cohesion: 0.02
-Nodes (75): IsBusinessSetup, IsCommentor, IsHrOrAdmin, IsHumanResource, IsInGroup, IsManager, IsVisitor, ProjectAdmin (+67 more)
+Cohesion: 0.03
+Nodes (52): UserAdmin, ProjectAdmin, ProjectMemberAdmin, ProjectPositionAdmin, TableDefinitionAdmin, DynamicRowDetailView, DynamicRowsExportView, DynamicRowsImportView (+44 more)
 
 ### Community 9 - "ProjectMember"
-Cohesion: 0.01
-Nodes (116): test_fire_alert_notifies_project_manager_fk(), Command, run_seed(), projects_visible_for_cashflow(), test_report_excludes_non_member_project(), test_creator_with_pm_sees_own_project(), test_user_without_membership_does_not_see_other_project(), activity() (+108 more)
+Cohesion: 0.02
+Nodes (90): create_assignment_for_user(), Command, run_seed(), ProjectMemberCreateSerializer, projects_visible_for_cashflow(), test_portfolio_report_membership_and_projection(), test_report_excludes_non_member_project(), test_creator_with_pm_sees_own_project() (+82 more)
 
 ### Community 10 - "decimal"
-Cohesion: 0.04
-Nodes (58): CodedValidationError, Budget, Meta, BudgetChangeRequest, Meta, BudgetChangeRequestStatus, BudgetVersion, Meta (+50 more)
+Cohesion: 0.03
+Nodes (85): Budget, Meta, BudgetChangeRequest, Meta, BudgetChangeRequestStatus, BudgetTransfer, Meta, BudgetVersion (+77 more)
 
 ### Community 11 - "models/__init__.py"
-Cohesion: 0.03
-Nodes (58): ApprovalAction, ApprovalLog, Meta, ItemStatus, RequisitionHeader, Meta, RequisitionItem, Meta (+50 more)
+Cohesion: 0.02
+Nodes (78): ApprovalAction, ApprovalLog, Meta, Block, Meta, BlockKind, ItemStatus, RequisitionHeader (+70 more)
 
-### Community 12 - "OfflineOperation"
-Cohesion: 0.13
-Nodes (18): reconcileServerChoice(), retainUntilReceipts(), LocalReportSnapshot, OfflineOperation, fieldErrorFor(), ReconciledReportData, rowStatus(), buildSupersedingRetry() (+10 more)
+### Community 12 - "queries.ts"
+Cohesion: 0.08
+Nodes (60): getLocalSnapshot(), useBusinessesQuery(), useCreateAssignment(), useCreateUnitReportActivity(), useCreateUnitReportLabor(), useCreateUnitReportMachinery(), useCreateUnitReportMaterial(), useCurrentUnitReportQuery() (+52 more)
 
-### Community 13 - "queries.ts"
-Cohesion: 0.03
-Nodes (182): getLocalSnapshot(), useApproveUnitReport(), useCorrectUnitReport(), useCreateUnitReportActivity(), useCreateUnitReportLabor(), useCreateUnitReportMachinery(), useCreateUnitReportMaterial(), useCurrentUnitReportQuery() (+174 more)
+### Community 13 - "unit-reports.ts"
+Cohesion: 0.06
+Nodes (71): useApproveUnitReport(), useCorrectUnitReport(), useRejectUnitReport(), useSubmitUnitReport(), ACTIVITY_ENABLED_UNITS, approveUnitReport(), CanonicalUnit, correctUnitReport() (+63 more)
 
 ### Community 14 - "cashflow.ts"
-Cohesion: 0.05
-Nodes (69): base(), CashFlowListResponse, CashFlowSummary, CashTransactionRow, compareAllocationSimulation(), createAllocationDecision(), createLiquidityCycle(), fetchForecast() (+61 more)
+Cohesion: 0.07
+Nodes (60): base(), CashFlowListResponse, CashFlowSummary, CashTransactionRow, categoryLabel(), compareAllocationSimulation(), createAllocationDecision(), createCashTransaction() (+52 more)
 
 ### Community 15 - "lifecycle_service.py"
-Cohesion: 0.07
-Nodes (67): approve_change_request(), _assert_completion_remediation(), _assert_no_open(), _assert_restore_remediation(), cancel_change_request(), _check_bound_remediation(), create_change_request(), _deserialize_value() (+59 more)
+Cohesion: 0.06
+Nodes (70): CodedValidationError, ConflictError, _is_global_admin(), approve_change_request(), _assert_completion_remediation(), _assert_no_open(), _assert_restore_remediation(), cancel_change_request() (+62 more)
 
 ### Community 16 - "offlineDB.ts"
-Cohesion: 0.08
-Nodes (44): unitSupportsActivitiesSection(), unitSupportsLaborSection(), checkUnitPrerequisites(), JobTitleDTO, SubcontractorDTO, UnitPrerequisitesCheck, warmUnitReferenceCache(), cacheActivities() (+36 more)
+Cohesion: 0.06
+Nodes (66): unitSupportsActivitiesSection(), unitSupportsLaborSection(), checkUnitPrerequisites(), JobTitleDTO, SubcontractorDTO, UnitPrerequisitesCheck, warmProjectCache(), warmUnitReferenceCache() (+58 more)
 
 ### Community 17 - "Contract: Weekly & monthly project period reports"
-Cohesion: 0.25
-Nodes (8): Contract: Weekly & monthly project period reports, Figure object, GET list / detail, Permissions, POST `…/figures/{figure_id}/overrides/`, POST generate, SC-004, Weekly minimum sections
+Cohesion: 0.20
+Nodes (9): Contract: Weekly & monthly project period reports, Figure object, GET list / detail, Monthly minimum sections, Permissions, POST `…/figures/{figure_id}/overrides/`, POST generate, SC-004 (+1 more)
 
 ### Community 18 - "checkers.py"
-Cohesion: 0.04
-Nodes (63): AlertCondition, AlertLog, Meta, AlertRule, Meta, AlertType, check_and_fire_for_project(), _evaluate_rule() (+55 more)
+Cohesion: 0.03
+Nodes (79): AlertCondition, AlertLog, Meta, AlertRule, Meta, AlertType, check_and_fire_for_project(), _evaluate_rule() (+71 more)
 
 ### Community 20 - "services/validators.py"
 Cohesion: 0.09
-Nodes (30): _case_dict(), _normalize_case_fields(), _ranking_payload_present(), update_case(), compute_ism(), _extract_layers(), _check_topsis_denominators(), _is_non_finite() (+22 more)
+Nodes (29): _case_dict(), _normalize_case_fields(), _ranking_payload_present(), compute_ism(), _extract_layers(), _check_topsis_denominators(), _is_non_finite(), _is_number() (+21 more)
 
 ### Community 21 - "activities-grid.tsx"
-Cohesion: 0.08
-Nodes (47): Activity, ActivityLink, ActivityListParams, ActivityNetwork, ActivityPayload, ActivityStatus, activityToPayload(), buildQuery() (+39 more)
+Cohesion: 0.03
+Nodes (118): Activity, ActivityLink, ActivityListParams, ActivityNetwork, ActivityPayload, ActivityStatus, activityToPayload(), buildQuery() (+110 more)
 
-### Community 22 - "BaselineActivityDetailView"
-Cohesion: 0.18
-Nodes (9): BaselineActivityDetailView, BaselineApproveLockView, BaselineListCreateView, BaselineActivitySerializer, Meta, BaselineCreateSerializer, BaselineScheduleSerializer, Meta (+1 more)
+### Community 22 - "schedule/serializers.py"
+Cohesion: 0.06
+Nodes (33): BaselineActivityDetailView, BaselineApproveLockView, BaselineListCreateView, ScheduleChangeRequestApproveView, ScheduleChangeRequestDetailView, ScheduleChangeRequestListCreateView, ScheduleChangeRequestRejectView, ScheduleChangeRequestSubmitView (+25 more)
 
 ### Community 23 - "Tasks: Warehouse Report Fields"
-Cohesion: 0.06
-Nodes (31): DepartmentActivityRecordSerializer, Meta, Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 2, Implementation for User Story 3, Implementation Strategy (+23 more)
+Cohesion: 0.07
+Nodes (26): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 2, Implementation for User Story 3, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes (+18 more)
 
 ### Community 24 - "compute_evm"
-Cohesion: 0.06
-Nodes (32): BudgetLineLevel, resolve_evm_baseline_validity(), _bac_for_project(), _build_indices(), compute_evm(), _currencies_for_budgets(), build_evm_by_cbs(), build_evm_by_phase() (+24 more)
+Cohesion: 0.03
+Nodes (51): BudgetLineLevel, ActivityProgress, Meta, ProgressSource, resolve_evm_baseline_validity(), _bac_for_project(), _build_indices(), compute_evm() (+43 more)
 
-### Community 25 - "Decision: Open register"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Open register, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 25 - "WorkingCalendar"
+Cohesion: 0.07
+Nodes (29): CalendarExceptionDetailView, CalendarExceptionListCreateView, WorkingCalendarDetailView, WorkingCalendarListCreateView, CalendarException, Meta, WorkingCalendar, Meta (+21 more)
 
 ### Community 26 - "Research: Undo Project Suspension and Completion"
-Cohesion: 0.13
-Nodes (15): D10 — Capabilities and UI reuse without changing archive contracts, D11 — Scoped drafts, frozen sent body and evidenced refresh, D12 — Atomic semantic auditing and error taxonomy, D13 — Additive migration and explicit development-data boundary, D14 — Evidence design and gates, D1 — Preserve asymmetric authority, D2 — Keep one resume mutation, D3 — Typed original events in existing audit storage (+7 more)
+Cohesion: 0.12
+Nodes (15): resume(), consumed_resume_context(), D10 — Capabilities and UI reuse without changing archive contracts, D11 — Scoped drafts, frozen sent body and evidenced refresh, D12 — Atomic semantic auditing and error taxonomy, D13 — Additive migration and explicit development-data boundary, D14 — Evidence design and gates, D2 — Keep one resume mutation (+7 more)
 
-### Community 28 - "SectionContractError"
+### Community 28 - "ProjectMemberPermissionOverride"
+Cohesion: 0.07
+Nodes (41): ProjectMemberPermissionOverride, Meta, ProjectStatusUndo, Meta, assert_project_allows_binding_commitment(), assert_project_allows_definitive_baseline(), confirmed_body(), member() (+33 more)
+
+### Community 29 - "documents/views.py"
 Cohesion: 0.06
-Nodes (7): SectionContractError, UnitReportActivitySectionViewSet, UnitReportAttachmentSectionViewSet, UnitReportConcreteSectionViewSet, UnitReportLaborSectionViewSet, UnitReportMachinerySectionViewSet, UnitReportMaterialSectionViewSet
+Nodes (28): AccessLevel, MeetingAction, Meta, MeetingActionStatus, MeetingActionSerializer, Meta, ProjectDocumentDetailSerializer, Meta (+20 more)
 
-### Community 29 - "member_has_codename"
+### Community 31 - "field_reports/pdf.py"
 Cohesion: 0.05
-Nodes (17): _get_active_member(), _get_project_id(), _is_global_admin(), member_has_codename(), normalize_stakeholder_role(), _DashboardOrReports, ProjectDetailSerializer, Meta (+9 more)
-
-### Community 31 - "gregorian_to_jalali"
-Cohesion: 0.05
-Nodes (21): gregorian_to_jalali(), persian_day_of_week(), render_ipc_pdf(), _fa(), _full_name(), generate_daily_report_pdf(), generate_report_audit_hash(), _kv_table() (+13 more)
+Nodes (39): _fa(), _full_name(), generate_daily_report_pdf(), generate_report_audit_hash(), _kv_table(), _make_watermark(), _draw(), _material_status_label() (+31 more)
 
 ### Community 32 - "test_ranking_reference_harness.py"
-Cohesion: 0.08
-Nodes (47): pytest_sessionfinish(), authenticate(), build_report(), check_rejection(), compare(), digest(), has_observations(), json_safe() (+39 more)
+Cohesion: 0.05
+Nodes (54): block_reference_database(), pytest_collection_modifyitems(), pytest_runtest_makereport(), pytest_sessionfinish(), record(), record_helper_observations(), wrap(), wrapped() (+46 more)
 
-### Community 33 - "io"
-Cohesion: 0.07
-Nodes (22): format_output(), CategoryAdmin, DepartmentActivityRecordAdmin, ItemAdmin, SpaceMaterialRequestAdmin, _bulk_save_items(), export_items_to_excel(), _get_or_create_categories() (+14 more)
+### Community 33 - "section-labor.tsx"
+Cohesion: 0.05
+Nodes (48): useEffectiveReportingConfigurationQuery(), EffectiveLaborTitle, EffectiveStoppageReason, extractSectionErrors(), fetchEffectiveReportingConfiguration(), SectionFieldError, UnitLaborCategory, UnitMaterialTransactionType (+40 more)
 
 ### Community 34 - "test_credential_security.py"
-Cohesion: 0.11
-Nodes (19): PasswordResetToken, Meta, blacklist_user_tokens(), _hash_token(), PasswordChangeService, PasswordResetService, issue_reset(), test_invalid_reset_returns_400() (+11 more)
+Cohesion: 0.15
+Nodes (17): PasswordResetToken, Meta, _hash_token(), PasswordResetService, issue_reset(), test_invalid_reset_returns_400(), test_legacy_six_digit_reset_cannot_select_another_account(), test_password_update_revokes_existing_credentials() (+9 more)
 
 ### Community 35 - ".agents/skills/design/scripts/cip/render-html.py"
 Cohesion: 0.09
@@ -1775,127 +1776,123 @@ Nodes (29): cachedTokens, E2E_USERS, loginAs(), loginViaUI(), activateProjectVia
 
 ### Community 37 - "HasProjectPermission"
 Cohesion: 0.02
-Nodes (106): AlertLogSerializer, Meta, AlertRuleSerializer, Meta, ActiveAlertsView, AlertAcknowledgeView, AlertLogListView, AlertRuleDetailView (+98 more)
+Nodes (105): AlertLogSerializer, Meta, AlertRuleSerializer, Meta, ActiveAlertsView, AlertAcknowledgeView, AlertLogListView, AlertRuleDetailView (+97 more)
 
 ### Community 38 - "Tasks: Specialty Unit Reporting Source of Truth"
 Cohesion: 0.06
-Nodes (32): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation for User Story 5, Implementation for User Story 6, Implementation Strategy (+24 more)
+Nodes (33): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 4, Implementation for User Story 5, Implementation Strategy, Incremental Delivery (+25 more)
 
-### Community 39 - "projection_service.py"
-Cohesion: 0.08
-Nodes (23): CashFlowForecast, Meta, suggested_net_need(), build_portfolio_report(), _actual_months(), build_projected_series(), _iter_months(), _manual_forecast_months() (+15 more)
+### Community 39 - "BudgetVersionSerializer"
+Cohesion: 0.07
+Nodes (20): BudgetChangeRequestActionView, BudgetChangeRequestDetailView, BudgetChangeRequestListCreateView, BudgetLineDetailView, BudgetTransferView, BudgetVersionDetailView, BudgetVersionLinesView, BudgetVersionListCreateView (+12 more)
 
 ### Community 40 - "react"
 Cohesion: 0.03
-Nodes (110): LIST_KEY, UNREAD_KEY, useNotificationActions(), useNotificationList(), useUnreadCount(), fetchProjectContractors(), base(), createLaborCampBatch() (+102 more)
+Nodes (135): LIST_KEY, UNREAD_KEY, useNotificationActions(), useNotificationList(), useUnreadCount(), useOnlineStatus(), AppNotification, fetchNotifications() (+127 more)
 
 ### Community 41 - "wbs"
-Cohesion: 0.04
-Nodes (40): wbs(), Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: WBS Structure, Project Structure, Source Code (repository root), Summary (+32 more)
+Cohesion: 0.05
+Nodes (34): wbs(), Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: WBS Structure, Project Structure, Source Code (repository root), Summary (+26 more)
 
 ### Community 42 - "msp_import.py"
 Cohesion: 0.03
-Nodes (102): BaseImportJob, Meta, MspImportJob, Meta, MspImportStatus, P6ImportJob, Meta, build_preview() (+94 more)
+Nodes (91): BaseImportJob, Meta, MspImportJob, Meta, MspImportStatus, P6ImportJob, Meta, build_preview() (+83 more)
 
 ### Community 43 - "unit_report_services.py"
 Cohesion: 0.03
-Nodes (78): is_canonical_unit(), add_labor(), add_concrete(), add_material(), add_note(), make_unit_report(), TestConcurrentRebuilds, TestOverridePreservation (+70 more)
+Nodes (73): is_canonical_unit(), ensure_hse_notifications_for_report(), SubcontractorLaborLedgerEntry, Meta, UnitReportEventType, rollup_subcontractor_labor(), submit(), report() (+65 more)
 
-### Community 44 - "_DepartmentActivityDataBase"
-Cohesion: 0.06
-Nodes (32): DepartmentActivityDailyReportView, _DepartmentActivityDataBase, DepartmentActivityExportView, DepartmentActivityImportView, DepartmentActivityWeeklyReportView, _parse_query_date(), to_persian_digits(), WarehouseBalanceView (+24 more)
+### Community 44 - "offline_sync.py"
+Cohesion: 0.08
+Nodes (34): OfflineOperationReceipt, Meta, _allows_failed_predecessor(), apply_idempotent_operation(), _as_date(), _correction_transfer(), _dependency_state(), dispatch_operations() (+26 more)
 
 ### Community 45 - "01-core-requirements-and-excel-blueprints/چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md"
 Cohesion: 0.01
 Nodes (263): 10. تفاوت با سیستم‌های رایج, 10. خلاصه کل سیستم (خیلی ساده), 10. داشبورد اقتصادی پروژه, 10. دامنه نهم: جریان نقدی, 10. مدیریت جریان نقدی, 10. مشکلات و موانع, 10. پیشنهاد برای نمایش در نرم‌افزار, 10. کاربردهای واقعی (+255 more)
 
 ### Community 46 - "devDependencies"
-Cohesion: 0.07
-Nodes (28): devDependencies, @playwright/test@^1.63.0, @react-router/dev@7.12.0, shadcn@^3.8.5, tailwindcss@^4.3.3, @tailwindcss/vite@^4.3.3, tw-animate-css@^1.4.0, @types/node@^22 (+20 more)
+Cohesion: 0.11
+Nodes (18): devDependencies, @playwright/test@^1.63.0, @react-router/dev@7.12.0, shadcn@^3.8.5, tailwindcss@^4.3.3, tw-animate-css@^1.4.0, @types/node@^22, @types/react@^19.3.0 (+10 more)
 
 ### Community 47 - "sub_reports/models.py"
-Cohesion: 0.02
-Nodes (99): UUIDModel, Meta, project_factory(), TestStructuredTransfer, unit_report(), DisciplineSubReportConcrete, Meta, DisciplineSubReportGeneralActivity (+91 more)
+Cohesion: 0.01
+Nodes (109): resolve_project_reporting_configuration(), DisciplineSubReportConcrete, Meta, DisciplineSubReportGeneralActivity, Meta, DisciplineSubReportHseIncident, Meta, DisciplineSubReportIssue (+101 more)
 
 ### Community 48 - ".gemini/skills/design-system/scripts/html-token-validator.py"
-Cohesion: 0.12
-Nodes (12): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result(), print_summary() (+4 more)
+Cohesion: 0.07
+Nodes (13): main(), get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_block(), load_css_variables(), main(), print_result() (+5 more)
 
 ### Community 49 - "SubReportStatus"
 Cohesion: 0.03
-Nodes (107): DailyReportDerivedSource, Meta, Equipment, Meta, compute_aggregation_fingerprint(), contributing_sub_reports(), ensure_daily_report_summary(), _pick_weather() (+99 more)
+Nodes (120): gregorian_to_jalali_datetime(), DailyReportDerivedSource, Meta, Equipment, Meta, InactivityReason, LaborCategory, build_aggregation_meta() (+112 more)
 
 ### Community 50 - "offlineWrite.ts"
-Cohesion: 0.12
-Nodes (26): addToQueue(), getLocalSnapshot(), getOfflineReport(), getOperation(), getQueueByProject(), getUnresolvedConflicts(), OfflineReport, OperationKind (+18 more)
+Cohesion: 0.11
+Nodes (28): addToQueue(), getOfflineReport(), getQueueByProject(), LocalReportSnapshot, OfflineOperation, OfflineReport, OperationKind, QueueMethod (+20 more)
 
 ### Community 51 - "form/index.ts"
 Cohesion: 0.03
-Nodes (155): AuthApiResponse, AuthContext, AuthContextValue, AuthProvider(), LoginCredentials, normalizeRoles(), RegisterCredentials, useAuth() (+147 more)
+Nodes (156): AuthApiResponse, AuthContext, AuthContextValue, AuthProvider(), LoginCredentials, normalizeRoles(), RegisterCredentials, useAuth() (+148 more)
 
-### Community 52 - "Block"
-Cohesion: 0.07
-Nodes (18): Block, Meta, BlockKind, ensure_workshop_block(), block_requisition(), material(), standard_block(), workshop_requisition() (+10 more)
+### Community 52 - "test_workshop_block.py"
+Cohesion: 0.15
+Nodes (6): blocks_url(), standard_block(), TestEnsureWorkshopBlock, TestWorkshopBlockAPI, workshop_block(), workshop_block_detail_url()
 
 ### Community 53 - "actor"
-Cohesion: 0.05
-Nodes (121): AuditLog, Meta, ProjectMemberPermissionOverride, Meta, ProjectArchiveRestore, Meta, ProjectStatusUndo, Meta (+113 more)
+Cohesion: 0.07
+Nodes (81): AuditLog, Meta, ProjectArchiveRestore, Meta, actor(), archived_project(), base(), business_snapshot() (+73 more)
 
 ### Community 54 - "project_templates/views.py"
 Cohesion: 0.02
-Nodes (123): SpecialtyUnit, build_aggregation_meta(), resolve_project_reporting_configuration(), test_normalize_discipline_weather_conditions(), configured_project(), make_unit_report(), reporting_template(), test_completeness_complete_when_all_required_present() (+115 more)
+Nodes (108): TimeStampedModel, Meta, UUIDModel, Meta, configured_project(), build_titles_spec(), seed_default_catalogs_for_owner(), seed_default_catalogs_for_template() (+100 more)
 
 ### Community 55 - "EventPublisher"
 Cohesion: 0.06
 Nodes (17): dispatch_message(), handle_audit_log(), handle_daily_report_approved(), handle_default(), _handle_shutdown(), _on_message(), run_consumer(), Command (+9 more)
 
 ### Community 56 - "test_section_contracts.py"
-Cohesion: 0.03
-Nodes (31): project_with_attachments(), TestSummaryAttachmentCounts, UnitReportAttachment, Meta, resolve_shift(), UnitReportActivitySectionSerializer, Meta, UnitReportLaborSectionSerializer (+23 more)
+Cohesion: 0.05
+Nodes (14): UnitReportAttachment, Meta, attach_image_to_activity(), get_attachment_counts(), get_attachment_links(), _reject(), contractor(), project_activity() (+6 more)
 
 ### Community 57 - "Inspection"
-Cohesion: 0.06
-Nodes (39): Inspection, Meta, Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Specialty Unit Daily Sections and Structured Aggregation, Implementation Strategy and Ordering, Phase 0 — Research Outcome (+31 more)
+Cohesion: 0.07
+Nodes (33): Inspection, Meta, Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Specialty Unit Daily Sections and Structured Aggregation, Implementation Strategy and Ordering, Phase 0 — Research Outcome (+25 more)
 
-### Community 58 - "parse_jalali_or_gregorian"
+### Community 58 - "kpi_service.py"
 Cohesion: 0.03
-Nodes (54): cache_key(), get_cached_or_compute(), params_fingerprint(), parse_jalali_or_gregorian(), ReportPagination, assert_not_self_approve, capability_enabled(), _build_kpi_figures() (+46 more)
+Nodes (54): assert_not_self_approve, assert_capability_enabled(), capability_enabled(), CapabilityDisabled, list_capability_settings(), update_capability_setting(), _build_kpi_figures(), add() (+46 more)
 
-### Community 59 - "datetime"
-Cohesion: 0.03
-Nodes (24): DepartmentActivityRecord, Meta, Command, test_verify_blueprint_schema_real_models(), Command, Command, MigrationDisposition, UnitReportMigrationQuarantine (+16 more)
-
-### Community 61 - "project-subcontractor-detail.tsx"
-Cohesion: 0.09
-Nodes (42): acknowledgeAlert(), ALERT_TYPE_LABELS, AlertLogEntry, AlertRule, base(), createAlertRule(), deleteAlertRule(), fetchActiveAlertCounts() (+34 more)
+### Community 61 - "useNavigation.ts"
+Cohesion: 0.11
+Nodes (32): ProjectCapability, ApprovalLogEntry(), IconName, filterNavByCapabilities(), isCapabilityDisabled(), useNavigation(), useProjectNavigation(), matchesPath() (+24 more)
 
 ### Community 62 - "Decision: Create project position"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create project position, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create project position, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 63 - "cash_flow/views.py"
-Cohesion: 0.05
-Nodes (55): AllocationDecision, Meta, AllocationDecisionLine, Meta, AllocationProposal, Meta, AllocationProposalLine, Meta (+47 more)
+Cohesion: 0.02
+Nodes (88): fire_cash_gap(), check_and_fire_for_project_task(), monitor_cash_gaps(), run_daily_alert_checks(), AllocationDecision, Meta, AllocationDecisionLine, Meta (+80 more)
 
 ### Community 64 - "field_reports/services/__init__.py"
-Cohesion: 0.07
-Nodes (28): DailyReportHeaderSerializer, Meta, _apply_header_merge(), _child_sections_in_payload(), _child_serializers(), _clear_child_sections(), _conflict_result(), _diff_conflict_fields() (+20 more)
+Cohesion: 0.05
+Nodes (42): SyncConflictLog, Meta, DailyReportHeaderSerializer, Meta, invalidate_activity_log_cache(), mark_correction_approved_for_report(), _apply_header_merge(), approve_report() (+34 more)
 
 ### Community 65 - "test_unit_report_permissions.py"
-Cohesion: 0.11
-Nodes (3): make_client(), TestPermissionMatrix, TestSegregationOfDuties
+Cohesion: 0.09
+Nodes (14): admin_superuser(), approver_user(), editor_user(), existing_draft_report(), existing_submitted_report(), full_user(), make_client(), make_member() (+6 more)
 
 ### Community 66 - "RiskEventSerializer"
-Cohesion: 0.15
-Nodes (5): RiskEventSerializer, Meta, compute_composite_score(), default_status_for_incomplete_score(), TestScoreHelpers
+Cohesion: 0.21
+Nodes (3): compute_composite_score(), default_status_for_incomplete_score(), TestScoreHelpers
 
 ### Community 67 - "Tasks: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
-Cohesion: 0.11
-Nodes (18): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes, Parallel Example: User Story 2, Parallel Opportunities (+10 more)
+Cohesion: 0.14
+Nodes (14): Format: `[ID] [P?] [Story] Description`, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes, Parallel Example: User Story 2, Path Conventions, Phase 1: Setup (Shared Infrastructure) (+6 more)
 
 ### Community 68 - "risk/views.py"
-Cohesion: 0.07
-Nodes (20): DefaultPageNumberPagination, DepartmentActivityRecordPagination, BarrierCreateSerializer, InspectionSerializer, Meta, NonconformitySerializer, Meta, WorkPermitSerializer (+12 more)
+Cohesion: 0.08
+Nodes (28): JalaliDateField, RiskAction, Meta, BarrierCreateSerializer, BarrierSerializer, Meta, CorrectiveActionSerializer, Meta (+20 more)
 
 ### Community 69 - ".gemini/skills/design/scripts/cip/core.py"
 Cohesion: 0.12
@@ -1914,36 +1911,36 @@ Cohesion: 0.06
 Nodes (31): Ambiguous execution outcomes and recovery, Contract: Execution and History API, Execute request and authoritative state, Existing response envelope, Existing routes and authorization, List and detail read contract, Required backend acceptance slices, Classification boundaries (+23 more)
 
 ### Community 74 - "Excel Forms & Grids Documentation"
-Cohesion: 0.06
-Nodes (34): Civil Sub-Report Form Structure (per sheet/day), Cross-File Relationships & Velora Module Mapping, Daily Report Form Structure (per sheet/day), Electrical Sub-Report Form Structure (per sheet/day), Excel Forms & Grids Documentation, FILE 1 — بانک اطلاعاتی فاز 1, FILE 2 — بانک اطلاعاتی فاز 2 (دوره اول), FILE 3 — بانک اطلاعاتی فاز 2 (دوره دوم) (+26 more)
+Cohesion: 0.08
+Nodes (24): Civil Sub-Report Form Structure (per sheet/day), Cross-File Relationships & Velora Module Mapping, Daily Report Form Structure (per sheet/day), Electrical Sub-Report Form Structure (per sheet/day), Excel Forms & Grids Documentation, FILE 2 — بانک اطلاعاتی فاز 2 (دوره اول), FILE 3 — بانک اطلاعاتی فاز 2 (دوره دوم), FILE 4 — گزارش روزانه کل پروژه (+16 more)
 
 ### Community 76 - "jalali.py"
 Cohesion: 0.03
-Nodes (65): parse_date_optional(), AccessLevel, DocumentRevision, Meta, DocumentStatus, MeetingAction, Meta, MeetingActionStatus (+57 more)
+Nodes (77): parse_date_optional(), batch_payload(), supplier(), TestConcreteOperations, urls(), Correspondence, Meta, CorrStatus (+69 more)
 
 ### Community 77 - "Research: Independent ISM Criterion Layering"
 Cohesion: 0.05
 Nodes (39): Consistency boundary, Contract: ISM Inputs and Existing Project API, Drafts, Errors, Execution validation, Routes and authorization, Algorithm contract, Completed result shape (+31 more)
 
 ### Community 78 - "RiskEvent"
-Cohesion: 0.07
-Nodes (15): EventType, RiskEvent, Meta, RiskStatus, build_risk_matrix(), _probability_bucket(), TestBarrierStatusMigration, activity() (+7 more)
+Cohesion: 0.08
+Nodes (12): test_disabled_risk_blocks_create_allows_list(), EventType, RiskEvent, Meta, RiskStatus, Severity, build_risk_matrix(), _probability_bucket() (+4 more)
 
-### Community 79 - "030-daily-header-weather/plan.md"
-Cohesion: 0.12
-Nodes (15): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Standardized Daily Weather and Temperature, Assumptions, Dependencies, Edge Cases (+7 more)
+### Community 79 - "Feature Specification: Standardized Daily Weather and Temperature"
+Cohesion: 0.13
+Nodes (15): Assumptions, Dependencies, Edge Cases, Feature Specification: Standardized Daily Weather and Temperature, Functional Requirements, Interface Compatibility Constraints, Key Entities *(include if feature involves data)*, Measurable Outcomes (+7 more)
 
 ### Community 80 - "TestHRServices"
-Cohesion: 0.06
-Nodes (7): LeaveRequest, Meta, OvertimeRequest, Meta, TestLeaveRequestViewSet, TestOvertimeRequestViewSet, TestHRServices
+Cohesion: 0.11
+Nodes (5): LeaveRequest, Meta, OvertimeRequest, Meta, TestHRServices
 
 ### Community 81 - "TestHasProcurementStepRole"
-Cohesion: 0.19
-Nodes (3): has_procurement_step_role(), ProcurementStepPermission, TestHasProcurementStepRole
+Cohesion: 0.09
+Nodes (5): has_procurement_step_role(), ProcurementStepPermission, TestHasProcurementStepRole, TestProcurementStepRBACViews, TestWorkshopDraftPermissions
 
-### Community 82 - "projects/urls.py"
-Cohesion: 0.07
-Nodes (30): PortfolioDashboardView, ReportExportVersion, Meta, PortfolioSummaryView, PortfolioReportCatalogView, PortfolioReportExportView, ProjectReportCatalogView, ProjectReportExportDetailView (+22 more)
+### Community 82 - "ProjectChangeRequestSerializer"
+Cohesion: 0.25
+Nodes (4): ProjectChangeRequestSerializer, Meta, ProjectChangeRequestDetailView, ProjectChangeRequestListCreateView
 
 ### Community 83 - "Decision: Create custom role"
 Cohesion: 0.04
@@ -1974,8 +1971,8 @@ Cohesion: 0.17
 Nodes (14): Args, _clean_branch_name(), _fit_branch_name(), _generate_branch_name(), _get_highest_from_specs(), _has_spec_prefix_conflict(), _help_text(), _int64_from_digits() (+6 more)
 
 ### Community 90 - "TestEditAndSubmit"
-Cohesion: 0.06
-Nodes (7): _report(), TestUnitReportStatusEvent, TestUnitReportVersionConstraints, base(), TestCorrectionWorkflow, TestEditAndSubmit, TestOpenOrCreate
+Cohesion: 0.10
+Nodes (5): base(), submit_report(), TestCorrectionWorkflow, TestEditAndSubmit, TestOpenOrCreate
 
 ### Community 91 - ".agents/skills/design-system/scripts/slide_search_core.py"
 Cohesion: 0.08
@@ -1985,17 +1982,17 @@ Nodes (14): BM25, calculate_pattern_break(), detect_domain(), get_background_con
 Cohesion: 0.11
 Nodes (21): BaseEquipmentEntry, Meta, EquipmentLog, Meta, EquipmentStatus, OwnershipType, _collect_daily_report_equipment(), _collect_standalone_logs() (+13 more)
 
-### Community 93 - "Department"
-Cohesion: 0.14
-Nodes (23): Department, test_import_resolves_exact_contractor_name(), test_import_unknown_contractor_fails_without_create(), _xlsx(), _list_url(), test_create_rejects_missing_inactive_foreign_and_non_contractor(), test_create_requires_active_contractor_ref_and_snapshots_name(), test_filter_by_contractor_ref_and_legacy_name() (+15 more)
-
-### Community 94 - "LaborTitleCatalogTitleSerializer"
+### Community 93 - "central-data.ts"
 Cohesion: 0.10
-Nodes (10): LaborTitleCatalogCreateSerializer, LaborTitleCatalogSerializer, Meta, LaborTitleCatalogTitleSerializer, Meta, _can_manage_templates(), catalog_data_for_update(), LaborCatalogTitleAPIView (+2 more)
+Nodes (38): addIPCCollection(), CBSNode, CommitmentRow, CommunicationPlanRow, createCommunicationPlan(), createContractType(), createOrganizationUnit(), createPayment() (+30 more)
+
+### Community 94 - "contracts.ts"
+Cohesion: 0.11
+Nodes (37): addIPCDeduction(), approveChangeOrder(), approveIPC(), base(), bulkContractItems(), ChangeOrderRow, CONTRACT_TYPE_LABELS, ContractDetail (+29 more)
 
 ### Community 95 - "create_wbs_node"
-Cohesion: 0.03
-Nodes (44): WBS, Meta, test_create_wbs_has_audit_and_project_binding(), test_service_sets_created_by(), test_delete_wbs_node_service_soft_deletes(), test_soft_delete_sets_flag_and_excludes_from_flat(), wbs_node(), _create_activity() (+36 more)
+Cohesion: 0.02
+Nodes (68): test_allocation_crud_and_hours_to_percent(), test_capacity_conflict_409(), test_resource_allocation_model_fields(), WBS, Meta, WBSStatus, test_create_wbs_has_audit_and_project_binding(), test_service_sets_created_by() (+60 more)
 
 ### Community 96 - ".cursor/skills/design-system/scripts/slide_search_core.py"
 Cohesion: 0.08
@@ -2006,60 +2003,60 @@ Cohesion: 0.08
 Nodes (14): BM25, calculate_pattern_break(), detect_domain(), get_background_config(), get_color_for_emotion(), get_layout_for_goal(), get_typography_for_slide(), _load_csv() (+6 more)
 
 ### Community 98 - "risk/models.py"
-Cohesion: 0.08
-Nodes (27): CorrectiveAction, Meta, CorrectiveActionStatus, HseEvent, Meta, HseEventKind, HseEventStatus, InspectionResult (+19 more)
+Cohesion: 0.10
+Nodes (22): CorrectiveAction, Meta, CorrectiveActionStatus, HseEvent, Meta, HseEventKind, HseEventStatus, InspectionResult (+14 more)
 
 ### Community 99 - "[open-electrical-department]/README.md"
-Cohesion: 0.03
-Nodes (61): BusinessElectricalRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+53 more)
+Cohesion: 0.05
+Nodes (36): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download daily activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+28 more)
 
 ### Community 100 - "test_wage_acl_and_cost_estimate.py"
-Cohesion: 0.06
-Nodes (28): DailyReportLaborSerializer, Meta, test_allocation_does_not_change_activity_progress(), test_daily_rate_omitted_without_view_wage(), test_hr_permission_codes_exist(), test_labor_cost_estimate_missing_rate(), test_labor_cost_estimate_with_rate(), test_labor_headcount_alone_does_not_change_activity_progress() (+20 more)
+Cohesion: 0.04
+Nodes (40): DailyReportLaborSerializer, Meta, compute_man_hours(), standard_shift_plus_overtime(), Phase 0 Research: Specialty Unit Daily Sections and Structured Aggregation, R10. Shift vocabulary, R11. Detail vs print surface, R1. Where does the labor-title catalog live, and how do the conflicting counts (34/32, 33/32, 32/36) resolve? (+32 more)
 
-### Community 101 - "full_project.py"
-Cohesion: 0.10
-Nodes (29): CashTransactionType, InflowCategory, OutflowCategory, CashTransactionSerializer, Meta, _format_amount(), _ipc_cash_transaction_defaults(), test_main_contract_ipc_pay_creates_inflow() (+21 more)
+### Community 101 - "ActivityMeasurementVersion"
+Cohesion: 0.07
+Nodes (37): ActivityMeasurementDefinition, Meta, ActivityMeasurementVersion, Meta, ActivityQuantityChange, Meta, جدول ماتریس ارزیابی انطباق سناریوها, ۱. خلاصه‌ی اجرایی و تحلیل انطباق (Executive Summary) (+29 more)
 
 ### Community 102 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.10
 Nodes (18): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: 039-auto-daily-rollup, Assumptions, Edge Cases, Feature Specification: Daily Report Auto-Rollup & Activity Master Log Sync (+10 more)
 
 ### Community 103 - "pytest"
-Cohesion: 0.17
-Nodes (26): test_create_and_retrieve_payment_terms(), compute_ahp(), _issues(), test_ac17_consistent_matrix_geometric_mean_weights(), test_ac18_inconsistent_matrix(), test_ahp_n1_single_criterion(), test_ahp_n2_two_criteria(), test_ahp_validation_diagonal_invalid() (+18 more)
+Cohesion: 0.10
+Nodes (36): test_create_and_retrieve_payment_terms(), test_ipc_pay_twice_updates_existing_transaction(), compute_ahp(), compute_topsis(), _issues(), test_ac02_no_saw_or_topsis_in_module(), test_ac17_consistent_matrix_geometric_mean_weights(), test_ac18_inconsistent_matrix() (+28 more)
 
 ### Community 104 - "Tasks: Core Domain Principles & Glossary"
 Cohesion: 0.12
-Nodes (16): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 4, Implementation for User Story 7, Notes, Parallel Example: User Story 2, Path Conventions, Phase 10: Polish & Cross-Cutting Concerns (+8 more)
+Nodes (16): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 3, Implementation for User Story 4, Notes, Parallel Example: User Story 2, Path Conventions, Phase 10: Polish & Cross-Cutting Concerns (+8 more)
 
 ### Community 105 - "[edit-report-sections]/README.md"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Labor section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.06
+Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add custom labor title, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
 ### Community 106 - "project-risk-register.tsx"
-Cohesion: 0.16
-Nodes (23): base(), createRiskAction(), createRiskEvent(), deleteRiskEvent(), EVENT_TYPE_LABELS, fetchRiskEvents(), fetchRiskMatrix(), ImpactDimension (+15 more)
+Cohesion: 0.17
+Nodes (22): base(), createRiskAction(), createRiskEvent(), deleteRiskEvent(), EVENT_TYPE_LABELS, fetchRiskEvents(), fetchRiskMatrix(), ImpactDimension (+14 more)
 
 ### Community 107 - "Decision: Open Payments and ledger tab"
 Cohesion: 0.11
 Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open Payments and ledger tab, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 108 - "execution-record-rules.ts"
-Cohesion: 0.14
-Nodes (26): policy, require, result, classifyHistory(), finite(), isCompletedRun(), isHistoricalAhp(), isHistoricalDematel() (+18 more)
+Cohesion: 0.07
+Nodes (47): policy, require, result, CriteriaMetricsTable(), classifyHistory(), DematelResult, finite(), isCompletedRun() (+39 more)
 
-### Community 109 - "django_contrib_auth"
-Cohesion: 0.06
-Nodes (12): UserAdmin, ReconciliationStatus, reconcile_material_row(), reconcile_report_materials(), TestMaterialReconciliationDocuments, user(), material(), TestReceiptsOnlySummary (+4 more)
+### Community 109 - "test_material_reconciliation_documents.py"
+Cohesion: 0.05
+Nodes (25): IncidentType, MaterialTransactionType, ReconciliationStatus, reconcile_material_row(), reconcile_report_materials(), TestDailyReportGapsRows, TestMaterialReconciliationDocuments, user() (+17 more)
 
 ### Community 110 - "economic/views.py"
-Cohesion: 0.03
-Nodes (58): CostCategoryInflationMapping, Meta, EconomicSnapshot, Meta, InflationIndex, Meta, SimulationResult, Meta (+50 more)
+Cohesion: 0.02
+Nodes (100): Command, Contract, Meta, ContractStatus, ContractType, DeductionType, test_contract_type_ref_without_legacy_enum_still_persists(), test_create_contract_with_contract_type_ref() (+92 more)
 
 ### Community 111 - "assert_not_self_final_approve"
-Cohesion: 0.08
-Nodes (24): assert_not_self_final_approve(), test_sod_different_user_passes(), test_sod_null_creator_passes(), test_sod_same_user_raises(), test_sod_superuser_break_glass(), Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation Strategy (+16 more)
+Cohesion: 0.07
+Nodes (28): _collect_detail_codes(), custom_exception_handler(), _error_code(), _extract_message(), assert_not_self_final_approve(), test_sod_different_user_passes(), test_sod_null_creator_passes(), test_sod_same_user_raises() (+20 more)
 
 ### Community 112 - "traefik.customer.yml"
 Cohesion: 0.08
@@ -2075,7 +2072,7 @@ Nodes (18): Content Quality, Feature Readiness, Notes, Requirement Completeness,
 
 ### Community 115 - "Tasks: Native Microsoft Project MPP Import"
 Cohesion: 0.07
-Nodes (26): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 3, Implementation for User Story 5, Implementation for User Story 6, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only) (+18 more)
+Nodes (28): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 3, Implementation for User Story 5, Implementation for User Story 6, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only) (+20 more)
 
 ### Community 116 - "Specification Quality Checklist: Decision Support AHP Criteria Weighting (Phase 4)"
 Cohesion: 0.40
@@ -2089,9 +2086,9 @@ Nodes (34): Content Quality, Feature Readiness, Requirement Completeness, Specif
 Cohesion: 0.05
 Nodes (37): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+29 more)
 
-### Community 119 - "web/package.json"
-Cohesion: 0.04
-Nodes (72): dependencies, class-variance-authority@^0.7.1, clsx@^2.1.1, @dagrejs/dagre@^1.1.4, driver.js@^1.8.0, @fontsource/inter@^5.3.0, @fontsource/vazirmatn@^5.3.0, frappe-gantt@^1.2.2 (+64 more)
+### Community 119 - "dependencies"
+Cohesion: 0.08
+Nodes (25): dependencies, class-variance-authority@^0.7.1, @fontsource/inter@^5.3.0, @fontsource/vazirmatn@^5.3.0, frappe-gantt@^1.2.2, idb@^8.0.3, lucide-react@^0.575.0, radix-ui@^1.6.7 (+17 more)
 
 ### Community 120 - "color"
 Cohesion: 0.05
@@ -2101,25 +2098,25 @@ Nodes (37): $type, $value, background, destructive, destructive-foreground, fore
 Cohesion: 0.05
 Nodes (37): $type, $value, background, destructive, destructive-foreground, foreground, muted, muted-foreground (+29 more)
 
-### Community 122 - "test_cost_control.py"
-Cohesion: 0.07
-Nodes (20): CostPool, Meta, CostType, current_spent_against_budget(), allocate_cost_pool(), AllocationExceededError, auto_allocate_cost_pool(), compute_auto_allocations() (+12 more)
+### Community 122 - "subcontractors/views.py"
+Cohesion: 0.13
+Nodes (12): fire_subcontractor_at_risk(), invalidate_project_caches(), _redis_client(), WarningSerializer, Meta, SubcontractorPerformanceService, _invalidate_subcontractor_caches(), RiskSummaryView (+4 more)
 
 ### Community 123 - "common/tests/test_validators.py"
-Cohesion: 0.07
-Nodes (35): _ErrorUpload, _FakeUpload, test_accepts_document_upload_with_expected_mime(), test_accepts_mpp_with_ole_magic(), test_accepts_p6_upload(), test_accepts_xlsx_extension(), test_accepts_xml_extension(), test_mime_detection_exception_handling() (+27 more)
+Cohesion: 0.09
+Nodes (24): _ErrorUpload, _FakeUpload, test_accepts_document_upload_with_expected_mime(), test_accepts_mpp_with_ole_magic(), test_accepts_p6_upload(), test_accepts_xlsx_extension(), test_accepts_xml_extension(), test_mime_detection_exception_handling() (+16 more)
 
 ### Community 124 - "instance_service.py"
-Cohesion: 0.19
-Nodes (26): ApprovalMode, ExecutionStatus, OnReject, StageAssignmentStatus, WorkflowAction, WorkflowInstance, Meta, WorkflowInstanceStatus (+18 more)
+Cohesion: 0.20
+Nodes (24): ApprovalMode, ExecutionStatus, OnReject, StageAssignmentStatus, WorkflowAction, WorkflowInstance, Meta, WorkflowInstanceStatus (+16 more)
 
 ### Community 125 - "Decision: Delete equipment log"
 Cohesion: 0.06
 Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete equipment log, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
-### Community 126 - "csv"
-Cohesion: 0.05
-Nodes (27): generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors(), main() (+19 more)
+### Community 126 - ".agents/skills/design-system/scripts/fetch-background.py"
+Cohesion: 0.16
+Nodes (9): generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors(), main() (+1 more)
 
 ### Community 127 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
@@ -2129,9 +2126,9 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 129 - "syncService.ts"
-Cohesion: 0.14
-Nodes (28): syncBatch(), confirmUpload(), requestUploadUrl(), uploadProjectFile(), UploadUrlResponse, addConflict(), clearSyncedItems(), deletePendingPhoto() (+20 more)
+### Community 129 - "InlineGridTab.tsx"
+Cohesion: 0.11
+Nodes (32): ChildResource, createChildRow(), deleteChildRow(), updateChildRow(), confirmUpload(), getDownloadUrl(), requestUploadUrl(), uploadProjectFile() (+24 more)
 
 ### Community 130 - "Velora Scope Map"
 Cohesion: 0.06
@@ -2143,7 +2140,7 @@ Nodes (28): check-prerequisites.sh script, check_dir(), check_file(), find_speci
 
 ### Community 132 - "Tasks: Verifiable Decision Ranking Reference"
 Cohesion: 0.06
-Nodes (31): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation completion, Implementation for User Story 1, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+23 more)
+Nodes (34): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation completion, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy (+26 more)
 
 ### Community 134 - "setup_tasks.py"
 Cohesion: 0.26
@@ -2154,16 +2151,16 @@ Cohesion: 0.06
 Nodes (33): 1.1 مدل `Block` (بلوک / فاز), 1.2 مدل `RequisitionHeader` (سرتیتر درخواست خرید), 1.3 مدل `RequisitionItem` (ردیف‌های درخواست), 1.4 مدل `ApprovalLog` (ردپای تاییدها), 1.5 مدل `InventoryAllocation` (قفل‌گذاری بلوکی), 1.6 مدل `InternalTransfer` (انتقال بین‌بلوکی), 3.1 تفکیک ردیفی (Line-Item Splitting), 3.2 خرید ناقص (Partial Fulfillment) (+25 more)
 
 ### Community 136 - "Contract: Department Activity Records (Warehouse Fields)"
-Cohesion: 0.09
-Nodes (19): Data Model: Warehouse Report Fields, Department (unchanged enum), DepartmentActivityRecord (extended), Entities, Helpers (logical, not tables), Migration Strategy, Non-warehouse (unchanged behavior), Relationships (+11 more)
+Cohesion: 0.06
+Nodes (31): Contract: Department Activity Records (Warehouse Fields), GET `export/?department=warehouse`, GET `/` — List, GET/PATCH/PUT/DELETE `/{id}/`, GET `reports/daily/` and `reports/weekly/`, Non-warehouse body (unchanged), POST `/` — Create, POST `import/?department=warehouse` (+23 more)
 
 ### Community 137 - "spacing"
 Cohesion: 0.06
 Nodes (34): $type, $value, $type, $value, $type, $value, $type, $value (+26 more)
 
 ### Community 138 - "service.py"
-Cohesion: 0.05
-Nodes (30): AuditLogMiddleware, _parse_uuid(), resolve_resource(), ResolvedResource, build_audit_payload(), persist_audit_log(), record_audit_log(), AuditLogMiddlewareTests (+22 more)
+Cohesion: 0.06
+Nodes (29): AuditLogMiddleware, _parse_uuid(), resolve_resource(), ResolvedResource, build_audit_payload(), persist_audit_log(), record_audit_log(), AuditLogMiddlewareTests (+21 more)
 
 ### Community 139 - "test_offline_sync_migrations.py"
 Cohesion: 0.26
@@ -2177,9 +2174,9 @@ Nodes (11): $type, $value, dark, semantic, $schema, $type, $value, semantic (+3 
 Cohesion: 0.06
 Nodes (24): _add_activity(), _add_measured_row(), _assert_lifecycle_unchanged(), base_url(), _create_foreign_report(), draft_report(), _lifecycle_snapshot(), _reject() (+16 more)
 
-### Community 142 - "sprint-button.tsx"
-Cohesion: 0.03
-Nodes (156): addIPCCollection(), CBSNode, CommitmentRow, CommunicationPlanRow, createCBSNode(), createCommitment(), createCommunicationPlan(), createContractType() (+148 more)
+### Community 142 - "project-resource-allocations.tsx"
+Cohesion: 0.05
+Nodes (83): fetchPortfolioSummary(), approveCapacityException(), base(), CapacityConflict, CapacityConflictError, CapacityException, CapacityPreview, createCapacityException() (+75 more)
 
 ### Community 143 - "spacing"
 Cohesion: 0.06
@@ -2210,8 +2207,8 @@ Cohesion: 0.13
 Nodes (14): Assumptions, Edge Cases, Feature Specification: Physical Progress & Periodic Reports Gap Closure, Functional Requirements, Gap Analysis (current vs FR-PRG), Key Entities, Measurable Outcomes, Requirements *(mandatory)* (+6 more)
 
 ### Community 150 - "ProjectViewSet"
-Cohesion: 0.06
-Nodes (14): _apply_project_contractor_ref(), ProjectCreateSerializer, Meta, ProjectLifecycleWriteGuard, ProjectStatusUndoRequestSerializer, ProjectUpdateSerializer, Meta, LifecycleNotApplied (+6 more)
+Cohesion: 0.04
+Nodes (29): _apply_project_contractor_ref(), ProjectCreateSerializer, Meta, ProjectDetailSerializer, Meta, ProjectLifecycleWriteGuard, ProjectListSerializer, Meta (+21 more)
 
 ### Community 151 - "IsOrgRefWriterOrReadOnly"
 Cohesion: 0.07
@@ -2219,23 +2216,23 @@ Nodes (25): IsOrgRefWriterOrReadOnly, Action Taken, Authorization & Permissions,
 
 ### Community 152 - "Tasks: Risk, Quality & Safety"
 Cohesion: 0.07
-Nodes (28): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 1, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+20 more)
+Nodes (26): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes (+18 more)
 
 ### Community 153 - "daily-reports.ts"
 Cohesion: 0.03
-Nodes (108): useAutoSync(), SaveHeaderResult, useDailyReportForm(), useOnlineStatus(), ActivityRow, AttachmentCount, batchSaveLabor(), buildQuery() (+100 more)
+Nodes (119): SaveHeaderResult, useDailyReportForm(), asList(), fetchProjectContractors(), ActivityRow, AggregationMeta, approveReport(), AttachmentCount (+111 more)
 
 ### Community 154 - "User"
-Cohesion: 0.07
-Nodes (19): User, Meta, IsManagerOrHR, StoredFile, Meta, confirm_upload(), generate_download_url(), generate_upload_url() (+11 more)
+Cohesion: 0.03
+Nodes (35): User, Meta, IsManagerOrHR, api_client(), test_user(), DepartmentActivityDataViewsTests, WarehouseReportsAndBalanceTests, StoredFile (+27 more)
 
 ### Community 155 - "compilerOptions"
 Cohesion: 0.11
 Nodes (18): compilerOptions, esModuleInterop, jsx, lib, module, moduleResolution, noEmit, paths (+10 more)
 
 ### Community 156 - "Decision: Create cost pool"
-Cohesion: 0.11
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 157 - "New / extended entities"
 Cohesion: 0.13
@@ -2250,8 +2247,8 @@ Cohesion: 0.06
 Nodes (31): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation / docs, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4 (+23 more)
 
 ### Community 160 - "Tasks: Stakeholders, Documents, Decisions & Workflow"
-Cohesion: 0.09
-Nodes (22): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 4, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes (+14 more)
+Cohesion: 0.08
+Nodes (24): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 4, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes (+16 more)
 
 ### Community 161 - "UI Styling Skill"
 Cohesion: 0.07
@@ -2270,36 +2267,36 @@ Cohesion: 0.07
 Nodes (27): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+19 more)
 
 ### Community 166 - "Phase 0 Research: Daily Report Auto-Rollup & Activity Master Log Sync"
-Cohesion: 0.09
-Nodes (21): 1. Guaranteed Date Shell Access (`GET /by-date/`), 2. Contractor-Keyed Labor Aggregation and Headcount Bucketing, 3. Strict Read-Only Locking for Derived Collections, 4. Shiraz Excel Sheet 1 (`ACTIVITY`) Alignment & Real-Time Cache Invalidation, 5. Weather Hierarchy and Manager Override Attribution, 6. Discipline Completeness Confirmation Banner, 7. Jalali Timestamping and Materials Aggregation, Alternatives Considered (+13 more)
+Cohesion: 0.10
+Nodes (20): 1. Guaranteed Date Shell Access (`GET /by-date/`), 2. Contractor-Keyed Labor Aggregation and Headcount Bucketing, 3. Strict Read-Only Locking for Derived Collections, 4. Shiraz Excel Sheet 1 (`ACTIVITY`) Alignment & Real-Time Cache Invalidation, 5. Weather Hierarchy and Manager Override Attribution, 6. Discipline Completeness Confirmation Banner, 7. Jalali Timestamping and Materials Aggregation, Alternatives Considered (+12 more)
 
 ### Community 167 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.14
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Automated Project Daily Report Summary, Functional Requirements, Key Entities *(include if feature involves data)*, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+5 more)
 
 ### Community 168 - "project-decision-support.tsx"
-Cohesion: 0.06
-Nodes (81): AhpRunResult, base(), createDecisionCase(), createDecisionRun(), CriterionType, DECISION_METHODS, DecisionCase, DecisionCaseSummary (+73 more)
+Cohesion: 0.08
+Nodes (64): AhpRunResult, base(), createDecisionCase(), createDecisionRun(), CriterionType, DECISION_METHODS, DecisionCase, DecisionCaseSummary (+56 more)
 
 ### Community 169 - "color"
 Cohesion: 0.12
 Nodes (26): $type, $value, $type, $value, $type, $value, 500, 600 (+18 more)
 
 ### Community 170 - "02-decision-inputs.md"
-Cohesion: 0.19
-Nodes (8): Contract: Decision Runs (Execution Records), Create (Phase 1 stub execution), Errors, List, Mutation rejection, Non-goals, Retrieve, Ranking Sample and Product Differences
+Cohesion: 0.35
+Nodes (3): حدود استفاده, منابع سند اصلی, منابع علمی و فنی تصمیم‌یار
 
 ### Community 171 - "Tasks: Central Data Model"
 Cohesion: 0.07
-Nodes (27): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 4, Implementation for User Story 5, Implementation Strategy (+19 more)
+Nodes (29): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 4, Implementation for User Story 5, Implementation Strategy (+21 more)
 
 ### Community 172 - "Tasks: Project Registration & Kickoff Gap Closure"
-Cohesion: 0.05
-Nodes (42): get_charter(), upsert_charter(), ProjectKickoffCharter, Meta, Current state (codebase), D1 — Expand `ProjectStatus` on existing `Project`, D2 — Additive identity fields; budget approval flag, D4 — Kickoff charter OneToOne (+34 more)
+Cohesion: 0.06
+Nodes (32): get_charter(), upsert_charter(), ProjectKickoffCharter, Meta, ProjectKickoffCharterSerializer, Meta, D4 — Kickoff charter OneToOne, Dependencies & Execution Order (+24 more)
 
 ### Community 173 - "Tasks: Physical Progress & Periodic Reports Gap Closure"
-Cohesion: 0.04
-Nodes (44): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+36 more)
+Cohesion: 0.07
+Nodes (26): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+18 more)
 
 ### Community 174 - "with"
 Cohesion: 0.09
@@ -2321,10 +2318,6 @@ Nodes (12): get_context(), is_allowed_exception(), is_allowed_rgba(), is_inside_
 Cohesion: 0.14
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Warehouse Report Fields, Functional Requirements, Key Entities, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+5 more)
 
-### Community 179 - "wbs/views.py"
-Cohesion: 0.14
-Nodes (11): WBSStatus, WBSCreateSerializer, WBSFlatSerializer, Meta, WBSMoveSerializer, WBSTreeSerializer, Meta, WBSUpdateSerializer (+3 more)
-
 ### Community 180 - "radius"
 Cohesion: 0.10
 Nodes (28): $type, $value, lg, sm, $type, $value, $type, $value (+20 more)
@@ -2335,7 +2328,7 @@ Nodes (27): 10-1. هدف ماژول, 10-2. داده‌های ورودی, 10-3. �
 
 ### Community 182 - "projects/models.py"
 Cohesion: 0.02
-Nodes (118): _collect_detail_codes(), ConflictError, custom_exception_handler(), _error_code(), _extract_message(), Activity, Meta, ActivityRelation (+110 more)
+Nodes (97): Activity, Meta, ActivityRelation, Meta, CommunicationPlanStatus, RelationType, TestProjectRegistrationGates, ActivityViewSet (+89 more)
 
 ### Community 183 - "radius"
 Cohesion: 0.10
@@ -2361,49 +2354,49 @@ Nodes (28): $type, $value, lg, sm, $type, $value, $type, $value (+20 more)
 Cohesion: 0.15
 Nodes (5): test_canonical_four_way_suite_is_available(), _manual(), _row(), TestProgressFourWay, test_canonical_technical_approval_suite_is_available()
 
-### Community 189 - "test_concrete_qc_link.py"
-Cohesion: 0.14
-Nodes (12): InspectionStage, SamplingState, assert_sampling_ready(), link_declared_concrete_sampling(), link_hydrostatic_tests(), _project_wbs(), _stakeholder_in_other_project(), validate_concrete_rows() (+4 more)
+### Community 189 - "validate_concrete_rows"
+Cohesion: 0.06
+Nodes (28): InspectionStage, SamplingState, assert_sampling_ready(), link_declared_concrete_sampling(), link_hydrostatic_tests(), _project_wbs(), _stakeholder_in_other_project(), validate_concrete_rows() (+20 more)
 
 ### Community 190 - "constants.py"
-Cohesion: 0.07
-Nodes (6): Migration, Migration, Migration, Migration, Migration, Migration
+Cohesion: 0.04
+Nodes (22): Migration, Migration, Migration, Migration, Migration, Migration, Migration, Migration (+14 more)
 
-### Community 191 - "ShirazFile4ExcelBuilder"
-Cohesion: 0.11
-Nodes (11): ShirazFile4ExcelBuilder, TestShirazFile4Excel, 1.1 Shiraz Daily Report Document (`DailyReportExportDocument`), 1.3 Shiraz Master Activity Database Export (`ActivityLogExportDocument` / FILE 1), 1. Domain Entities & Value Objects, 2.1 `ShirazFile4ExcelBuilder`, 2.2 `ShirazSubReportExcelBuilder`, 2.3 `ActivityLogExcelBuilder` (+3 more)
+### Community 191 - "gregorian_to_jalali"
+Cohesion: 0.06
+Nodes (16): gregorian_to_jalali(), persian_day_of_week(), WeatherLogCreateSerializer, Meta, WeatherLogSerializer, Meta, _bucket_key(), _date_range() (+8 more)
 
 ### Community 192 - "Data Model: Automated Project Daily Report Summary"
 Cohesion: 0.25
 Nodes (7): DailyReport (summary shell), Data Model: Automated Project Daily Report Summary, DisciplineSubReport, Identity & tenancy, Incompleteness projection (API-computed, not necessarily stored), State transitions, Validation rules
 
 ### Community 193 - "unit"
-Cohesion: 0.04
-Nodes (51): unit(), داستان کاربری US-DR-04: ثبت فعالیت‌های اجرایی روزانه متصل به WBS, داستان کاربری US-DR-05: ثبت نیروی انسانی ستادی و مستقیم کارگاه, داستان کاربری US-DR-06: ثبت ساعات کارکرد و توقفات ماشین‌آلات و تجهیزات, داستان کاربری US-DR-07: ثبت مصالح کارگاه و مغایرت‌گیری با حواله‌های انبار, داستان کاربری US-DR-08: ثبت تخصصی احجام بتن‌ریزی کارگاه (Concrete Logs), داستان کاربری US-DR-09: ثبت حوادث ایمنی، دستورکارها و موانع کاری (Incidents & Stoppages), داستان کاربری US-DR-10: الصاق تصاویر و مستندات میدانی به تفکیک فعالیت (+43 more)
+Cohesion: 0.06
+Nodes (40): unit(), G01 — P1 — فقدان فیلد «مقدار اجرا» (`executed_quantity`) در مدل دیتابیس، سریالایزر و فرم فرانت‌اند برای دپارتمان‌های غیرانباری, G02 — P1 — انحراف کامل فرمت گزارش روزانه دپارتمان (تولید PDF به جای اکسل) و عدم پشتیبانی از فیلتر `date`, G04 — P1 — عدم رعایت اصل تراکنش اتمیک (Atomic Transaction Rollback) در ورود دسته‌ای اکسل (Import), G05 — P1 — فقدان اعتبارسنجی مقادیر عددی برای دپارتمان‌های غیرانباری و نبود پیام‌های خطای سطر-محور شفاف به زبان فارسی, G06 — P2 — ناسازگاری اسلاگ دپارتمان ابنیه (`civil` در برابر `buildings`) و عدم پذیرش `civil` در اندپوینت‌ها, G07 — P2 — نقص امنیتی در کنترل دسترسی اندپوینت ورود دسته‌ای اطلاعات (Import View), G08 — P2 — کاستی‌های ظاهری و فنی در خروجی اکسل فیلترشده (Export) (+32 more)
 
 ### Community 194 - "Feature Specification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
 Cohesion: 0.15
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening, Functional Requirements, Interface Compatibility Constraints, Key Entities *(include if feature involves data)*, Measurable Outcomes, Requirements *(mandatory)* (+5 more)
 
 ### Community 195 - "[open-buildings-department]/README.md"
-Cohesion: 0.03
-Nodes (65): BusinessBuildingsRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+57 more)
+Cohesion: 0.05
+Nodes (36): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download daily activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+28 more)
 
 ### Community 196 - "card"
 Cohesion: 0.18
 Nodes (13): $type, $value, border, padding, shadow, border, component, card (+5 more)
 
 ### Community 197 - "ref_views.py"
-Cohesion: 0.13
-Nodes (16): ManagedContractType, Meta, ManagedContractTypeSerializer, Meta, OrganizationUnitSerializer, Meta, UnitSerializer, Meta (+8 more)
+Cohesion: 0.20
+Nodes (10): ManagedContractTypeSerializer, Meta, OrganizationUnitSerializer, Meta, UnitSerializer, Meta, ManagedContractTypeListCreateView, OrganizationUnitDetailView (+2 more)
 
 ### Community 198 - "Decision: Create project template"
 Cohesion: 0.07
 Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create project template, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
 
 ### Community 199 - "Decision: Mark all notifications read"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Mark all notifications read, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.07
+Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Mark all notifications read, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
 
 ### Community 200 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
@@ -2414,8 +2407,8 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export personnel summary, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 202 - "Decision: Filter or change the displayed view"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 203 - "gray"
 Cohesion: 0.08
@@ -2424,10 +2417,6 @@ Nodes (27): $type, $value, $type, $value, $type, $value, $type, $value (+19 more
 ### Community 204 - "color"
 Cohesion: 0.12
 Nodes (26): $type, $value, $type, $value, $type, $value, 500, 600 (+18 more)
-
-### Community 205 - "pathlib"
-Cohesion: 0.03
-Nodes (27): test_sync_parses_bundled_starter_template(), main(), _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation(), _strip_to_object(), TestGeneratedConfigIsValidJs, main() (+19 more)
 
 ### Community 206 - "color"
 Cohesion: 0.12
@@ -2445,33 +2434,33 @@ Nodes (26): Dependencies & Execution Order, Execution summary, Format: `[ID] [P?
 Cohesion: 0.08
 Nodes (25): Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+17 more)
 
-### Community 210 - "math"
-Cohesion: 0.06
-Nodes (12): BM25, detect_domain(), _load_csv(), search(), search_all(), _search_csv(), BM25, detect_domain() (+4 more)
+### Community 210 - ".agents/skills/design/scripts/logo/core.py"
+Cohesion: 0.13
+Nodes (6): BM25, detect_domain(), _load_csv(), search(), search_all(), _search_csv()
 
 ### Community 211 - "test_ahp_api.py"
-Cohesion: 0.11
-Nodes (37): DecisionCase, Meta, DecisionRun, Meta, _ahp_payload(), test_ac02_ac17_ahp_only_run(), test_ac04_ahp_does_not_mutate_case_ranking_inputs(), test_ac18_inconsistent_run_persisted_with_alert() (+29 more)
+Cohesion: 0.23
+Nodes (19): _ahp_payload(), test_ac02_ac17_ahp_only_run(), test_ac04_ahp_does_not_mutate_case_ranking_inputs(), test_ac18_inconsistent_run_persisted_with_alert(), test_ac23_ac24_immutable_history(), test_ahp_snapshot_actor_and_view_edit_permissions(), test_ahp_validation_error_paths(), test_convergence_api_structural_errors_fully_localized() (+11 more)
 
 ### Community 212 - "مشخصات: گزارش روزانه کارگاه"
 Cohesion: 0.08
 Nodes (22): الزامات کارکردی, خلاصه و دامنه, داستان ۱ — ثبت گزارش روزانه کامل (اولویت: P1), داستان ۲ — گردش تأیید و قفل (اولویت: P1), داستان ۳ — ثبت مصالح، ماشین‌آلات و حوادث (اولویت: P2), سناریوهای کاربری و آزمون, فرضیات و وابستگی‌ها, مشخصات: گزارش روزانه کارگاه (+14 more)
 
 ### Community 213 - "test_transfer_api.py"
-Cohesion: 0.11
-Nodes (10): InternalTransferSerializer, Meta, foreign_block(), foreign_material(), material(), other_project(), source_block(), target_block() (+2 more)
+Cohesion: 0.09
+Nodes (11): InternalTransferSerializer, Meta, foreign_block(), foreign_material(), material(), other_project(), source_block(), target_block() (+3 more)
 
-### Community 214 - "API Contract: TOPSIS Run — Create & Read"
-Cohesion: 0.12
-Nodes (17): `400 Bad Request` — Method not selected, `400 Bad Request` — Validation failure (no run created), `403 Forbidden` — Missing permission, `404 Not Found` — Case not found or does not belong to project, API Contract: TOPSIS Run — Create & Read, Authentication & Authorization, Endpoint: Create TOPSIS Run, Endpoint: List Runs (filtered to TOPSIS) (+9 more)
+### Community 214 - "۴. یافته‌های تفصیلی"
+Cohesion: 0.08
+Nodes (24): گزارش بازبینی شکاف‌ها: SPEC-02 — سکشن‌ها و گرید گزارش روزانه, ۱. اصلاح مبنای ارزیابی, ۲. آنچه از نمونه واقعی اکسل به‌دست آمد, ۳. جمع‌بندی وضعیت فعلی, ۴. یافته‌های تفصیلی, ۴.۱ بحرانی — صفحه و مسیر ممنوع `/sub-reports` هنوز جزئی از محصول است, ۴.۱۰ بالا — داده‌های نیروی انسانی، بتن، مسائل و بازدید در صفحات صحیح واحدها قابل ثبت نیستند, ۴.۱۱ متوسط — تعداد و محتوای کاتالوگ مشاغل بین سه مرجع یکسان نیست (+16 more)
 
 ### Community 215 - "ProjectScopedViewSet"
 Cohesion: 0.03
-Nodes (42): ProjectScopedViewSet, EquipmentViewSet, EquipmentLogViewSet, LaborCampReportViewSet, StandaloneManpowerViewSet, ApprovedLaborRateViewSet, CapacityExceptionViewSet, CapacityPreviewView (+34 more)
+Nodes (43): ProjectMemberWriteSerializer, Meta, DefaultPageNumberPagination, ApprovedLaborRateViewSet, CapacityExceptionViewSet, CapacityPreviewView, HRProjectMixin, LaborCostEstimateView (+35 more)
 
 ### Community 216 - "Tasks: Specialty Unit Daily Sections and Structured Aggregation"
 Cohesion: 0.06
-Nodes (31): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation for User Story 7, Implementation for User Story 8, Implementation Strategy (+23 more)
+Nodes (29): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 3, Implementation for User Story 4, Implementation for User Story 7, Implementation for User Story 8, Implementation Strategy, Incremental Delivery (+21 more)
 
 ### Community 217 - "2. openpyxl Layout & Formatting Patterns"
 Cohesion: 0.12
@@ -2482,8 +2471,8 @@ Cohesion: 0.08
 Nodes (23): All 15 functional requirements, All seven success criteria, Baseline and preservation, Completion boundaries, Continuation after interruption, D1–D14 and constitution, Evidence boundaries, Execution (+15 more)
 
 ### Community 220 - "apiJson"
-Cohesion: 0.05
-Nodes (100): base(), createInflationMapping(), deleteInflationMapping(), EconomicForecast, EconomicSnapshot, fetchCashFlowReal(), fetchEconomicForecast(), fetchEconomicHistory() (+92 more)
+Cohesion: 0.04
+Nodes (114): base(), createInflationMapping(), deleteInflationMapping(), EconomicForecast, EconomicSnapshot, fetchCashFlowReal(), fetchEconomicForecast(), fetchEconomicHistory() (+106 more)
 
 ### Community 221 - "extension"
 Cohesion: 0.10
@@ -2506,8 +2495,8 @@ Cohesion: 0.09
 Nodes (21): 1. Initialize Convergence Context, 2. Load Artifacts (Progressive Disclosure), 3. Build the Intent Inventory, 4. Assess the Codebase and Classify Findings, 5. Assign Severity, 6. Present the In-Session Findings Summary, 7. Append Convergence Tasks (or report converged), 8. Provide Next Actions (Handoff) (+13 more)
 
 ### Community 226 - "sum_amounts"
-Cohesion: 0.17
-Nodes (8): assert_same_currency(), convert_explicit(), CurrencyMixError, sum_amounts(), TestConvertExplicit, TestSumAmounts, test_mix_forbidden(), test_mix_with_rate_ok()
+Cohesion: 0.18
+Nodes (7): convert_explicit(), CurrencyMixError, sum_amounts(), TestConvertExplicit, TestSumAmounts, test_mix_forbidden(), test_mix_with_rate_ok()
 
 ### Community 227 - "gray"
 Cohesion: 0.08
@@ -2537,21 +2526,21 @@ Nodes (19): environment, environment, ALLOWED_HOSTS, AUDIT_LOG_ASYNC, AWS_ACCESS
 Cohesion: 0.32
 Nodes (19): environment, environment, environment, ALLOWED_HOSTS, AWS_ACCESS_KEY_ID, AWS_S3_ENDPOINT_URL, AWS_S3_USE_SSL, AWS_SECRET_ACCESS_KEY (+11 more)
 
-### Community 234 - "AuditSoftDeleteModel"
-Cohesion: 0.06
-Nodes (26): AllObjectsManager, AuditSoftDeleteModel, Meta, SoftDeleteManager, SoftDeleteQuerySet, notifications(), DailyReport (existing — extend), DailyReportActivity (existing — extend) (+18 more)
+### Community 234 - "Entities"
+Cohesion: 0.17
+Nodes (11): DailyReport (existing — extend), DailyReportActivity (existing — extend), DailyReportCorrectionRequest (new), DailyReportIncident / Site event (existing — extend), DailyReportLabor (existing — extend), DailyReportMaterial (existing — extend), Data Model: Daily Site Report Gap Closure, Entities (+3 more)
 
 ### Community 235 - "compute_topsis"
-Cohesion: 0.07
-Nodes (30): compute_saw(), compute_topsis(), test_ac02_no_saw_or_topsis_in_module(), _issues(), test_ac01_no_topsis_in_output_or_module(), test_ac09_engine_cost_zero(), test_ac11_scaled_weights_same_scores(), test_ac13_engine_benefit_all_zero() (+22 more)
-
-### Community 237 - "dashboards.ts"
-Cohesion: 0.13
-Nodes (22): DashboardFigure, DashboardPackGroup, fetchKpiDrill(), fetchPortfolioDashboard(), fetchProjectDashboardPack(), fetchProjectKpisWithFigures(), FigureStatus, figureTitleKey() (+14 more)
-
-### Community 238 - "get_department_activity_queryset"
 Cohesion: 0.12
-Nodes (5): get_department_activity_queryset(), require_valid_department(), DepartmentActivityServicesTests, WarehouseListFilterAPITests, Phase 2: Serializers and Department Slug Normalization (`civil` <-> `buildings`)
+Nodes (18): compute_saw(), _issues(), test_ac01_no_topsis_in_output_or_module(), test_ac09_engine_cost_zero(), test_ac11_scaled_weights_same_scores(), test_ac13_engine_benefit_all_zero(), test_ac14_acceptance_sample(), test_equal_scores_stable_order_and_ordinal_ranks() (+10 more)
+
+### Community 237 - "extend_schema"
+Cohesion: 0.11
+Nodes (6): UserListSerializer, Meta, UserSerializer, Meta, UserListView, UserProfileView
+
+### Community 238 - "hr/services/allocation_service.py"
+Cohesion: 0.23
+Nodes (15): ResourceAllocation, Meta, ResourceAllocationStatus, create_allocation(), _enforce_capacity(), _resolve_capacity_percent(), soft_delete_allocation(), update_allocation() (+7 more)
 
 ### Community 239 - "Tasks: Traceable Decision Execution Records"
 Cohesion: 0.07
@@ -2561,93 +2550,93 @@ Nodes (27): Dependencies & Execution Order, Entity and interface mapping, Format
 Cohesion: 0.18
 Nodes (10): 1. Ensure / open summary by date, 2. List (unchanged path, semantic shift), 3. Disable blank create, 4. Retrieve / patch summary metadata, 5. Derived child collections — read-only, 6. Aggregation metadata (detail + by-date), 7. Specialty hooks (sub_reports), 8. Permissions (+2 more)
 
-### Community 241 - "Validation Guide: Undo Project Status"
-Cohesion: 0.09
-Nodes (22): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: بازگردانی تعلیق و خاتمهٔ اشتباهی پروژه, Bilingual meaning requirements, Contract: Status Undo UI, Overview entry and fixed destination (+14 more)
+### Community 241 - "Contract: Project Status Undo API"
+Cohesion: 0.06
+Nodes (38): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: بازگردانی تعلیق و خاتمهٔ اشتباهی پروژه, Authority and compatibility, Bounded history, Completed remediation through existing CR interfaces (+30 more)
 
 ### Community 242 - "decision_support/views.py"
-Cohesion: 0.12
-Nodes (10): DecisionCaseListSerializer, Meta, DecisionCaseSerializer, Meta, DecisionRunCreateSerializer, DecisionRunSerializer, Meta, DecisionCaseViewSet (+2 more)
+Cohesion: 0.14
+Nodes (7): DecisionCaseSerializer, Meta, DecisionRunCreateSerializer, DecisionRunSerializer, Meta, DecisionCaseViewSet, DecisionRunViewSet
 
 ### Community 243 - ".agents/skills/design/scripts/cip/core.py"
-Cohesion: 0.12
-Nodes (7): BM25, detect_domain(), get_cip_brief(), _load_csv(), search(), search_all(), _search_csv()
+Cohesion: 0.07
+Nodes (16): BM25, detect_domain(), get_cip_brief(), _load_csv(), search(), search_all(), _search_csv(), generate_css_for_background() (+8 more)
 
 ### Community 244 - "Decision: Automatically allocate cost pool"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Automatically allocate cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Automatically allocate cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 245 - "DailyReportDetailSerializer"
-Cohesion: 0.03
-Nodes (27): DailyReportViewSet, _validate_report_ready_for_submit(), _build_provenance_list(), DailyReportConcreteLogSerializer, Meta, DailyReportDetailSerializer, Meta, DailyReportGeneralActivitySerializer (+19 more)
+Cohesion: 0.04
+Nodes (25): _build_provenance_list(), DailyReportActivitySerializer, Meta, DailyReportConcreteLogSerializer, Meta, DailyReportDetailSerializer, Meta, DailyReportGeneralActivitySerializer (+17 more)
 
-### Community 246 - "Tasks: Schedule & Baseline Gap Closure"
-Cohesion: 0.07
-Nodes (26): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation for User Story 1, Implementation for User Story 3, Implementation for User Story 4, Implementation Strategy, Incremental Delivery (+18 more)
+### Community 246 - "Dependencies & Execution Order"
+Cohesion: 0.40
+Nodes (5): Dependencies & Execution Order, Parallel Example: User Story 1, Parallel Opportunities, Phase Dependencies, User Story Dependencies
 
-### Community 247 - "Tasks: Multi-Level Budget Gap Closure"
-Cohesion: 0.09
-Nodes (20): BudgetTransfer, Meta, Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Multi-Level Budget Gap Closure, Project Structure, Source Code (repository root) (+12 more)
+### Community 247 - "core/conftest.py"
+Cohesion: 0.16
+Nodes (16): activity(), api_client(), approved_measurement(), auth_client(), _ensure_role_permissions(), member(), other_user(), project() (+8 more)
 
 ### Community 248 - "Data Model: Stakeholders, Documents, Decisions & Workflow"
-Cohesion: 0.09
-Nodes (21): WorkflowActionLog, Meta, WorkflowActionLogSerializer, Meta, Data Model: Stakeholders, Documents, Decisions & Workflow, Document status (typical), Existing (extended): `documents.Correspondence`, Existing (extended): `projects.Stakeholder` (+13 more)
+Cohesion: 0.12
+Nodes (16): WorkflowActionLog, Meta, Data Model: Stakeholders, Documents, Decisions & Workflow, Document status (typical), Existing (extended): `documents.Correspondence`, Existing (extended): `documents.MeetingMinutes`, Existing (extended): `projects.Stakeholder`, Meeting action (+8 more)
 
-### Community 249 - "inventory/tests.py"
-Cohesion: 0.08
-Nodes (28): _adjust_column_widths(), department_display_label(), export_activities_to_xlsx(), export_headers_for_department(), generate_activity_report_pdf(), handle_documentBegin(), generate_daily_activity_report_xlsx(), generate_weekly_activity_report_xlsx() (+20 more)
+### Community 249 - "Stakeholder"
+Cohesion: 0.02
+Nodes (143): CategoryAdmin, DepartmentActivityRecordAdmin, ItemAdmin, SpaceMaterialRequestAdmin, _parse_query_date(), _adjust_column_widths(), department_display_label(), export_activities_to_xlsx() (+135 more)
 
 ### Community 250 - "workflow/serializers.py"
-Cohesion: 0.19
-Nodes (9): WorkflowCommentSerializer, WorkflowInstanceSerializer, Meta, WorkflowInstanceStartSerializer, WorkflowStageSerializer, Meta, notify_overdue_instances(), WorkflowInstanceActionView (+1 more)
+Cohesion: 0.17
+Nodes (11): WorkflowActionLogSerializer, Meta, WorkflowCommentSerializer, WorkflowInstanceSerializer, Meta, WorkflowInstanceStartSerializer, notify_overdue_instances(), WorkflowDefinitionRetireView (+3 more)
 
 ### Community 251 - "steps"
 Cohesion: 0.11
 Nodes (17): RABBITMQ_URL, SMOKE_BASE_URL, jobs, smoke, name, on, push, workflow_dispatch (+9 more)
 
 ### Community 252 - "Decision: Approve daily report"
-Cohesion: 0.22
+Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 253 - "Decision: Add concrete row"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Concrete section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add concrete row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
-### Community 254 - "User Scenarios & Testing *(mandatory)*"
-Cohesion: 0.13
-Nodes (15): Assumptions, Edge Cases, Feature Specification: بازگردانی تعلیق و خاتمهٔ اشتباهی پروژه, Functional Requirements, Key Entities *(include if feature involves data)*, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+7 more)
+### Community 254 - "بخش ۲.۳: داستان کاربری US-DR-13 (درخواست اصلاح گزارش قفل‌شده و نسخه‌بندی)"
+Cohesion: 0.09
+Nodes (21): بخش ۲.۱: داستان کاربری US-DR-11 (گردش کار چندمرحله‌ای تأیید و رد), بخش ۲.۲: داستان کاربری US-DR-12 (قفل شدن خودکار گزارش - Immutability & Lock), بخش ۲.۳: داستان کاربری US-DR-13 (درخواست اصلاح گزارش قفل‌شده و نسخه‌بندی), بخش ۲.۴: داستان کاربری US-DR-14 (تمایز صریح میان مقدار صفر و ثبت‌نشده), جدول ماتریس ارزیابی انطباق, سناریو ۱: ارسال گزارش پیش‌نویس (Submit), سناریو ۱: ممانعت از ارسال گزارش با فیلدهای احجام نامشخص, سناریو ۲: شروع بررسی گزارش (Review) (+13 more)
 
 ### Community 255 - "Decision: Add incidents row"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add incidents row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add incidents row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 256 - "Decision: Add labor-camp row"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add labor-camp row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add labor-camp row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 257 - "Contract: Decision Cases"
 Cohesion: 0.09
 Nodes (22): Create, Delete, Errors, List, Contract: Decision Cases, Non-goals, Partial update, Retrieve (+14 more)
 
 ### Community 258 - "models/__init__.py"
-Cohesion: 0.03
-Nodes (44): ApprovalLogAdmin, ApprovalLogInline, BlockAdmin, InternalTransferAdmin, InventoryAllocationAdmin, RequisitionHeaderAdmin, RequisitionItemAdmin, RequisitionItemInline (+36 more)
+Cohesion: 0.04
+Nodes (38): ApprovalLogAdmin, ApprovalLogInline, BlockAdmin, InternalTransferAdmin, InventoryAllocationAdmin, RequisitionHeaderAdmin, RequisitionItemAdmin, RequisitionItemInline (+30 more)
 
 ### Community 260 - ".agents/skills/ui-ux-pro-max/scripts/core.py"
 Cohesion: 0.13
 Nodes (6): BM25, detect_domain(), _load_csv(), search(), _search_csv(), search_stack()
 
-### Community 261 - "Decision: Approve stock transfer"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve stock transfer, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 261 - "[open-stock-transfers]/README.md"
+Cohesion: 0.04
+Nodes (48): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve stock transfer, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+40 more)
 
 ### Community 262 - "Research: Stakeholders, Documents, Decisions & Workflow"
-Cohesion: 0.29
-Nodes (6): Alternatives considered, Decisions, Findings, Gaps to close, NEEDS CLARIFICATION, Research: Stakeholders, Documents, Decisions & Workflow
+Cohesion: 0.33
+Nodes (5): Alternatives considered, Findings, Gaps to close, NEEDS CLARIFICATION, Research: Stakeholders, Documents, Decisions & Workflow
 
 ### Community 263 - ".agents/skills/design-system/scripts/generate-slide.py"
-Cohesion: 0.07
-Nodes (22): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+14 more)
+Cohesion: 0.13
+Nodes (11): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+3 more)
 
 ### Community 264 - "fontSize"
 Cohesion: 0.11
@@ -2697,12 +2686,12 @@ Nodes (10): Complexity Tracking, Constitution Check, Delivery Sequence and TDD B
 Cohesion: 0.11
 Nodes (20): $type, $value, $type, $value, $type, $value, $type, $value (+12 more)
 
-### Community 277 - "ref_node_path"
-Cohesion: 0.15
-Nodes (11): assertResponse(), createStatusSourceProject(), grantHistoryOnlyProjectAuthority(), grantOrdinaryProjectAuthority(), realActors(), realSession(), root, root (+3 more)
+### Community 277 - "project-status-undo.ts"
+Cohesion: 0.56
+Nodes (6): assertResponse(), createStatusSourceProject(), grantHistoryOnlyProjectAuthority(), grantOrdinaryProjectAuthority(), realActors(), realSession()
 
 ### Community 278 - "Decision: Submit budget version"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit budget version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 279 - "Decision: Approve project"
@@ -2715,7 +2704,7 @@ Nodes (14): Format: `[ID] [P?] [Story] Description`, Implementation Tasks for Us
 
 ### Community 281 - "Material"
 Cohesion: 0.04
-Nodes (59): MaterialTransactionType, _auto_create_inventory_from_report(), InventoryTransaction, Meta, Material, Meta, MaterialRequest, Meta (+51 more)
+Nodes (58): _auto_create_inventory_from_report(), InventoryTransaction, Meta, Material, Meta, MaterialRequest, Meta, MaterialRequestStatus (+50 more)
 
 ### Community 282 - ".cursor/skills/design-system/scripts/generate-slide.py"
 Cohesion: 0.14
@@ -2735,11 +2724,11 @@ Nodes (20): $type, $value, $type, $value, $type, $value, $type, $value (+12 more
 
 ### Community 286 - "common.py"
 Cohesion: 0.05
-Nodes (43): django.sh script, Args, _available_docs(), _check_dir(), _check_file(), _dir_has_entries(), _json_line(), main() (+35 more)
+Nodes (40): test_sync_parses_bundled_starter_template(), _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation(), test_sync_parses_bundled_starter_template(), test_sync_parses_bundled_starter_template(), _run(), test_flags_hardcoded_hex_sharing_line_with_token() (+32 more)
 
 ### Community 287 - "002-core-domain-principles/spec.md"
-Cohesion: 0.13
-Nodes (8): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: WBS Structure, Commands run, Spec Kit deferred (out of Specs 01–07 polish plan), Verification: HR & Capacity Gap Closure
+Cohesion: 0.11
+Nodes (8): Commands run, Spec Kit deferred (out of Specs 01–07 polish plan), Verification: HR & Capacity Gap Closure, Content Quality, Feature Readiness, Requirement Completeness, Specification Quality Checklist: Earned Value & Project Control (EVM), Validation Notes (2026-10-09)
 
 ### Community 288 - "Quickstart validation: Daily Site Report Gap Closure"
 Cohesion: 0.09
@@ -2750,8 +2739,8 @@ Cohesion: 0.08
 Nodes (26): Dependencies & Execution Order, Format and Path Conventions, Implementation and GREEN verification, Implementation and GREEN verification, Implementation and GREEN verification, Implementation and GREEN verification, Implementation Strategy, Incremental delivery (+18 more)
 
 ### Community 290 - "User Scenarios & Testing *(mandatory)*"
-Cohesion: 0.06
-Nodes (30): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Automated Periodic Reports Rollup, Figure Provenance, and Controlled Override Audit, Complexity Tracking, Documentation (this feature), Implementation Plan: Automated Periodic Reports Rollup, Figure Provenance, and Controlled Override Audit (+22 more)
+Cohesion: 0.10
+Nodes (18): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Automated Periodic Reports Rollup, Figure Provenance, and Controlled Override Audit, Assumptions, Edge Cases, Feature Specification: Automated Periodic Reports Rollup, Figure Provenance, and Controlled Override Audit (+10 more)
 
 ### Community 291 - ".agents/skills/ui-ux-pro-max/scripts/design_system.py"
 Cohesion: 0.06
@@ -2778,20 +2767,20 @@ Cohesion: 0.06
 Nodes (14): ansi_ljust(), DesignSystemGenerator, _detect_page_type(), format_ascii_box(), format_markdown(), format_master_md(), format_page_override_md(), generate_design_system() (+6 more)
 
 ### Community 298 - "routeVars.ts"
-Cohesion: 0.03
-Nodes (92): buildDepartmentActivityRecordsSearch(), isUnitReportEditable(), useCreateDepartmentActivityRecord(), useDepartmentActivityRecordsQuery(), apiBlob(), AggregationMeta, DerivedSourceItem, MaterialReconciliationStatus (+84 more)
+Cohesion: 0.05
+Nodes (60): buildDepartmentActivityRecordsSearch(), isUnitReportEditable(), useCreateDepartmentActivityRecord(), useDepartmentActivityRecordsQuery(), DashboardFigure, DashboardPackGroup, fetchKpiDrill(), fetchPortfolioDashboard() (+52 more)
 
 ### Community 299 - "Decision: Save kickoff charter"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Save kickoff charter, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 300 - "Decision: Filter or change the displayed view"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.11
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 301 - "Decision: Create CBS node"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create CBS node, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create CBS node, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 302 - "Decision: Start screen walkthrough"
 Cohesion: 0.22
@@ -2825,13 +2814,17 @@ Nodes (7): BM25, detect_domain(), get_cip_brief(), _load_csv(), search(), search
 Cohesion: 0.07
 Nodes (25): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Decision Support TOPSIS Ranking (Phase 3), Project Structure, Source Code (repository root), Summary, Technical Context (+17 more)
 
-### Community 311 - "reference_tests/conftest.py"
-Cohesion: 0.12
-Nodes (7): block_reference_database(), pytest_collection_modifyitems(), pytest_runtest_makereport(), record(), record_helper_observations(), wrap(), wrapped()
+### Community 311 - ".cursor/skills/design/scripts/logo/core.py"
+Cohesion: 0.13
+Nodes (6): BM25, detect_domain(), _load_csv(), search(), search_all(), _search_csv()
 
-### Community 315 - "RiskAction"
-Cohesion: 0.33
-Nodes (4): RiskAction, Meta, RiskActionSerializer, Meta
+### Community 313 - "cache_key"
+Cohesion: 0.12
+Nodes (6): cache_key(), get_cached_or_compute(), params_fingerprint(), ShirazFile1ExcelBuilder, TestShirazFile1Excel, compute()
+
+### Community 315 - ".gemini/skills/design-system/scripts/generate-slide.py"
+Cohesion: 0.14
+Nodes (11): _e(), generate_chart_slide(), generate_cta_slide(), generate_deck(), generate_metrics_slide(), generate_problem_slide(), generate_solution_slide(), generate_testimonial_slide() (+3 more)
 
 ### Community 316 - "services"
 Cohesion: 0.12
@@ -2845,9 +2838,9 @@ Nodes (16): environment, environment, ALLOWED_HOSTS, AUDIT_LOG_ASYNC, AWS_ACCESS
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create stakeholder, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 320 - "DisciplineSubReport"
-Cohesion: 0.02
-Nodes (143): Command, DisciplineSubReport, Meta, DisciplineSubReportActivity, Meta, SubcontractorLaborLedgerEntry, Meta, rollup_subcontractor_labor() (+135 more)
+### Community 320 - "datetime"
+Cohesion: 0.01
+Nodes (117): SpecialtyUnit, test_normalize_discipline_weather_conditions(), material(), TestReceiptsOnlySummary, user(), unit_report(), project_with_attachments(), TestSummaryAttachmentCounts (+109 more)
 
 ### Community 321 - "Color Semantics"
 Cohesion: 0.11
@@ -2873,17 +2866,13 @@ Nodes (22): Format: `[ID] [P?] [Story] Description`, Implementation, Implementat
 Cohesion: 0.12
 Nodes (15): jobs, label, runs-on, steps, name, on, pull_request_target, permissions (+7 more)
 
-### Community 327 - "Decision: Request correction of locked report"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Request correction of locked report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
 ### Community 328 - "signals.py"
-Cohesion: 0.13
-Nodes (12): fire_cash_gap(), _delay_project_check(), on_actual_cost_saved(), on_correspondence_saved(), on_daily_report_saved(), on_inventory_tx_saved(), on_score_saved(), check_and_fire_for_project_task() (+4 more)
+Cohesion: 0.27
+Nodes (6): _delay_project_check(), on_actual_cost_saved(), on_correspondence_saved(), on_daily_report_saved(), on_inventory_tx_saved(), on_score_saved()
 
-### Community 329 - "Quickstart: Specialty Unit Reporting Source of Truth"
-Cohesion: 0.17
-Nodes (12): 10. Sanitized dataset rehearsal and rollback, 1. Prerequisites, 2. Establish RED evidence, 3. Migration and schema proof, 4. Model, workflow, permissions, and SoD, 5. Aggregation, completeness, and provenance, 6. Real PostgreSQL concurrency, 7. Focused regression suite (+4 more)
+### Community 329 - "authentication/services.py"
+Cohesion: 0.15
+Nodes (5): ChangePasswordSerializer, ForgotPasswordSerializer, blacklist_user_tokens(), PasswordChangeService, ChangePasswordView
 
 ### Community 330 - "tours.spec.ts"
 Cohesion: 0.32
@@ -2905,13 +2894,9 @@ Nodes (15): depends_on, build, command, depends_on, restart, minio, postgres, ra
 Cohesion: 0.12
 Nodes (17): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Notes, Parallel Example: User Story 1, Path Conventions, Phase 1: Setup (Shared Infrastructure) (+9 more)
 
-### Community 336 - "Decisions"
-Cohesion: 0.12
-Nodes (15): Current state (codebase), D10 — Offline sync interaction, D11 — Permissions, D12 — UI surfaces, D1 — Approved equals locked, D2 — Correction request as new report version lineage, D3 — Uniqueness for date/shift with versions, D4 — Header work_front / site location (+7 more)
-
-### Community 337 - "CostBreakdownNode"
-Cohesion: 0.13
-Nodes (12): CostBreakdownNode, Meta, test_cannot_delete_cbs_with_child(), test_create_cbs_node(), test_list_cbs(), R1 — CBS storage pattern, R3 — Partial IPC collections, R4 — Portfolio aggregation (+4 more)
+### Community 337 - "WorkflowDefinition"
+Cohesion: 0.19
+Nodes (16): WorkflowDefinition, Meta, WorkflowDefinitionStatus, WorkflowStage, Meta, WorkflowStageSerializer, Meta, activate_definition() (+8 more)
 
 ### Community 338 - "[navigate-schema-setup]/README.md"
 Cohesion: 0.03
@@ -2919,15 +2904,15 @@ Nodes (56): Action Taken, Authorization & Permissions, Context & Screen, Decisio
 
 ### Community 339 - "re"
 Cohesion: 0.03
-Nodes (52): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+44 more)
+Nodes (51): apply_color(), apply_viewbox_size(), extract_svgs(), generate_batch(), generate_icon(), generate_sizes(), load_env(), main() (+43 more)
 
 ### Community 340 - "button"
 Cohesion: 0.08
 Nodes (32): $type, $value, bg, fg, font-size, hover-bg, padding-x, padding-y (+24 more)
 
 ### Community 341 - "project-documents.tsx"
-Cohesion: 0.09
-Nodes (47): apiFormData(), base(), CORR_STATUS_LABELS, CORR_TYPE_LABELS, CorrespondenceRow, createCorrespondence(), createMeeting(), createMeetingAction() (+39 more)
+Cohesion: 0.10
+Nodes (46): apiFormData(), base(), CORR_STATUS_LABELS, CORR_TYPE_LABELS, CorrespondenceRow, createCorrespondence(), createMeeting(), createMeetingAction() (+38 more)
 
 ### Community 342 - "Implementation Plan: Daily Report Lifecycle Lock"
 Cohesion: 0.18
@@ -2946,8 +2931,8 @@ Cohesion: 0.17
 Nodes (15): logging, logging, command, image, logging, driver, options, max-file (+7 more)
 
 ### Community 347 - "Tasks: Standardized Daily Weather and Temperature"
-Cohesion: 0.07
-Nodes (28): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 2, Implementation for User Story 3, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes (+20 more)
+Cohesion: 0.09
+Nodes (23): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 2, Implementation for User Story 3, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes, Parallel Example: User Story 1 (+15 more)
 
 ### Community 348 - "bug_report.yml"
 Cohesion: 0.13
@@ -2974,28 +2959,28 @@ Cohesion: 0.12
 Nodes (16): AC11, Acceptance fixture (AC14), Engine rejection codes, Formulas, Interface (conceptual), Contract: Pure SAW Engine, Non-goals, Ordering (interim — O01/O02 open) (+8 more)
 
 ### Community 355 - "OrganizationUnit"
-Cohesion: 0.09
-Nodes (28): UserStatus, person_visible_in_project(), update_dossier(), test_dossier_get_patch(), test_inactive_person_rejected_for_allocation(), test_user_dossier_schema_fields(), OrganizationUnit, Meta (+20 more)
+Cohesion: 0.14
+Nodes (17): UserStatus, person_visible_in_project(), update_dossier(), test_dossier_get_patch(), test_inactive_person_rejected_for_allocation(), test_user_dossier_schema_fields(), OrganizationUnit, Meta (+9 more)
 
-### Community 357 - "NamedListEditor"
-Cohesion: 0.36
-Nodes (9): addNamedItem(), canAddNamedItem(), changeNamedList(), MAX_NAMED_LIST, NamedListIssue, NamedListOperation, validateNamedList(), NamedListEditor() (+1 more)
+### Community 357 - "NamedListEditor.tsx"
+Cohesion: 0.08
+Nodes (37): BinaryRelationEditor(), Props, createIsmMatrix(), editIsmCell(), hydrateIsmMatrix(), remapIsmMatrix(), selectIsmValue(), validateIsmDraft() (+29 more)
 
 ### Community 358 - "Decision: Return or cancel import"
 Cohesion: 0.07
 Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Return or cancel import, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
 
-### Community 359 - "Decision: Create correspondence"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create correspondence, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 359 - "ProjectDocumentsPage"
+Cohesion: 0.03
+Nodes (65): ProjectDocumentsPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create correspondence, Desired Result, Outcomes & Guards, Source Evidence (+57 more)
 
 ### Community 360 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.07
 Nodes (25): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Warehouse Department Reports, Architecture Decisions & Component Diagrams, Complexity Tracking, Documentation (this feature) (+17 more)
 
-### Community 361 - ".agents/skills/design/scripts/cip/generate.py"
-Cohesion: 0.19
-Nodes (7): build_cip_prompt(), check_logo_required(), generate_cip_set(), generate_with_nano_banana(), load_env(), load_logo_image(), main()
+### Community 361 - "Decision: Filter or change the displayed view"
+Cohesion: 0.11
+Nodes (18): BusinessElectricalRoute(), Context & Screen, Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards (+10 more)
 
 ### Community 362 - "Contract: EVM by CBS"
 Cohesion: 0.13
@@ -3017,9 +3002,9 @@ Nodes (15): Assumptions, Edge Cases, Feature Specification: Decision Support AHP
 Cohesion: 0.10
 Nodes (21): Dependencies & Execution Order, Implementation and checkpoint, Implementation and checkpoint, Implementation and checkpoint, Implementation and checkpoint, Implementation Strategy, Parallel Execution Examples, Phase 1: Setup (Shared Infrastructure) (+13 more)
 
-### Community 367 - "TestDailyReportCrud"
-Cohesion: 0.12
-Nodes (5): reports_url(), TestDailyReportCrud, TestJobTitles, TestLaborBatchUpsert, TestPdfExport
+### Community 367 - ".cursor/skills/design-system/scripts/fetch-background.py"
+Cohesion: 0.16
+Nodes (9): generate_css_for_background(), get_background_image(), get_curated_images(), get_overlay_css(), get_pexels_search_url(), load_backgrounds_config(), load_brand_colors(), main() (+1 more)
 
 ### Community 368 - ".agents/skills/brand/scripts/extract-colors.cjs"
 Cohesion: 0.20
@@ -3029,12 +3014,12 @@ Nodes (11): calculateCompliance(), colorDistance(), displayPalette(), extractHex
 Cohesion: 0.25
 Nodes (13): checkManifest(), formatBytes(), formatOutput(), fs, main(), parseFilename(), path, RULES (+5 more)
 
-### Community 370 - "argparse"
+### Community 370 - "sys"
 Cohesion: 0.03
-Nodes (33): format_brief(), format_results(), main(), format_output(), generate_design_brief(), format_context(), format_result(), main() (+25 more)
+Nodes (38): build_cip_prompt(), check_logo_required(), generate_cip_set(), generate_with_nano_banana(), load_env(), load_logo_image(), main(), format_brief() (+30 more)
 
 ### Community 371 - "login/README.md"
-Cohesion: 0.22
+Cohesion: 0.15
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Return to login, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 372 - "Phase 0 Research: Warehouse Department Reports"
@@ -3073,9 +3058,9 @@ Nodes (13): checkManifest(), formatBytes(), formatOutput(), fs, main(), parseFil
 Cohesion: 0.14
 Nodes (12): 7. Provide Next Actions, 8. Offer Remediation, 9. Check for extension hooks, Analysis Guidelines, Context, Context Efficiency, Goal, Operating Constraints (+4 more)
 
-### Community 381 - "transition"
-Cohesion: 0.15
-Nodes (5): ApprovalEngineError, get_transitions(), transition(), _validate_control_check(), TestApprovalEngine
+### Community 381 - "Tasks: Physical Progress Measurement, Strict Financial Governance, and Technical Approval Workflow"
+Cohesion: 0.11
+Nodes (18): Dependencies & Execution Order, Format: `- [ ] [TaskID] [P?] [Story?] Description with file path`, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Phase 1: Setup & Environment, Phase 2: Foundational Safety & Enum Alignment, Phase 3: User Story 1 - Configuration & Synchronous Validation of Physical Measurement Methods (Priority: P1) (+10 more)
 
 ### Community 382 - "Resource allocations"
 Cohesion: 0.14
@@ -3149,21 +3134,21 @@ Nodes (14): Assumptions, Edge Cases, Feature Specification: Stakeholders, Docume
 Cohesion: 0.14
 Nodes (14): Assumptions, Edge Cases, Feature Specification: Decision Support Case Shell (Phase 1), Functional Requirements, Gap Analysis (current vs Phase 1), Key Entities, Measurable Outcomes, Requirements *(mandatory)* (+6 more)
 
-### Community 400 - "DailyReportVersionSerializer"
-Cohesion: 0.03
-Nodes (56): DailyReportVersionSerializer, Meta, بخش ۲.۲: داستان کاربری US-DR-12 (قفل شدن خودکار گزارش - Immutability & Lock), بخش ۲.۳: داستان کاربری US-DR-13 (درخواست اصلاح گزارش قفل‌شده و نسخه‌بندی), بخش ۲.۴: داستان کاربری US-DR-14 (تمایز صریح میان مقدار صفر و ثبت‌نشده), جدول ماتریس ارزیابی انطباق, سناریو ۱: ممانعت از ارسال گزارش با فیلدهای احجام نامشخص, سناریو ۲: رد یا انصراف از درخواست اصلاح (Cancel) (+48 more)
+### Community 400 - "DailyReportViewSet"
+Cohesion: 0.05
+Nodes (30): DailyReportViewSet, DailyReportCorrectionRequestSerializer, Meta, DailyReportVersionSerializer, Meta, list_versions(), _derived_sections_in_payload(), review_report() (+22 more)
 
 ### Community 401 - "Tasks: Contractor Stakeholder Select — TDD"
-Cohesion: 0.09
-Nodes (23): Format: `[ID] [P?] [Story] Description`, Implementation, Implementation, Implementation, Implementation Strategy, Incremental, MVP (US1 only), Notes (+15 more)
+Cohesion: 0.08
+Nodes (25): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation, Implementation, Implementation, Notes, Parallel example: User Story 1, Parallel opportunities (+17 more)
 
 ### Community 402 - "Slides Reference Guide"
 Cohesion: 0.15
 Nodes (12): Slides Creation Task Router, HTML Slide Template Reference, 16:9 Responsive Slide Deck Container, 25 Slide Layouts Catalog, Slide Layout Decision Flow, Slides Layout Patterns Reference, Slides Reference Guide, Slide Strategies Reference (+4 more)
 
-### Community 403 - "WarehouseReportsAndBalanceTests"
-Cohesion: 0.09
-Nodes (3): DepartmentActivityDataViewsTests, WarehouseHelperAndModelTests, WarehouseReportsAndBalanceTests
+### Community 403 - "TestProjectList"
+Cohesion: 0.11
+Nodes (4): TestProjectCreate, TestProjectDelete, TestProjectList, TestProjectPatch
 
 ### Community 404 - ".gemini/skills/design-system/templates/design-tokens-starter.json"
 Cohesion: 0.17
@@ -3173,13 +3158,13 @@ Nodes (11): $type, $value, dark, semantic, $schema, $type, $value, semantic (+3 
 Cohesion: 0.15
 Nodes (12): Assumptions, Edge Cases, Feature Specification: Department Activity Reports & Excel Workbooks, Functional Requirements, Key Entities *(include if feature involves data)*, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+4 more)
 
-### Community 406 - "Correspondence"
-Cohesion: 0.21
-Nodes (12): Correspondence, Meta, CorrStatus, CorrType, generate_corr_number(), respond_to_correspondence(), test_attachment_cannot_accept_private_storage_key(), test_attachment_create_endpoint_rejects_key() (+4 more)
+### Community 406 - "web/package.json"
+Cohesion: 0.11
+Nodes (17): @dagrejs/dagre@^1.1.4, @radix-ui/react-accordion@^1.2.20, @radix-ui/react-slider@^1.4.7, @radix-ui/react-tooltip@^1.2.16, react-icons@^5.7.0, workbox-window@^7.4.1, zod@^4.6.5, name (+9 more)
 
 ### Community 407 - "Decision: Create block"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Create block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 408 - "test_decision_rationale.py"
 Cohesion: 0.24
@@ -3190,8 +3175,8 @@ Cohesion: 0.15
 Nodes (13): 1. Initialize Analysis Context, 2. Load Artifacts (Progressive Disclosure), 3. Build Semantic Models, 4. Detection Passes (Token-Efficient Analysis), 5. Severity Assignment, 6. Produce Compact Analysis Report, A. Duplication Detection, B. Ambiguity Detection (+5 more)
 
 ### Community 410 - "[navigate-activities]/README.md"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Activities, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.20
+Nodes (10): ProjectActivitiesPage(), Context & Screen, Action Taken, Authorization & Permissions, Context & Screen, Decision: Activities, Desired Result, Outcomes & Guards (+2 more)
 
 ### Community 411 - "Decision: Manage working calendars"
 Cohesion: 0.25
@@ -3202,8 +3187,8 @@ Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Cancel creation, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 413 - "Decision: Filter or change the displayed view"
-Cohesion: 0.05
-Nodes (41): ProjectEconomicPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence (+33 more)
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 414 - "مشخصات: دامنه، اصول و واژه‌نامه"
 Cohesion: 0.17
@@ -3241,9 +3226,9 @@ Nodes (13): assert, conflicts, db, fs, main(), path, queue, reports (+5 more)
 Cohesion: 0.15
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Multi-Level Budget Gap Closure, Functional Requirements, Gap Analysis (current vs FR-BUD), Key Entities, Measurable Outcomes, Requirements *(mandatory)* (+5 more)
 
-### Community 423 - "ProjectMemberViewSet"
-Cohesion: 0.14
-Nodes (6): PermissionOverrideSerializer, ProjectMemberCreateSerializer, ProjectMemberListSerializer, Meta, ProjectMemberUpdateSerializer, ProjectMemberViewSet
+### Community 423 - "check_prerequisites.py"
+Cohesion: 0.23
+Nodes (11): Args, _available_docs(), _check_dir(), _check_file(), _dir_has_entries(), _json_line(), main(), _parse_args() (+3 more)
 
 ### Community 424 - "Feature Specification: Contracts & IPC Gap Closure"
 Cohesion: 0.15
@@ -3274,12 +3259,8 @@ Cohesion: 0.15
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Verifiable Decision Ranking Reference, Functional Requirements, Key Entities *(include if feature involves data)*, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+5 more)
 
 ### Community 431 - "025-decision-ranking-reference/tasks.md"
-Cohesion: 0.06
-Nodes (30): Contract: Existing Product Boundaries and Evidence, Reuse acceptance, Six-category difference record, Authenticated extraction, Boundary and invocation, Contract: Test-Only Reference Verification, Rejection and representation catalog, Reporting and falsification (+22 more)
-
-### Community 432 - "Phase 0 Research: Specialty Unit Daily Sections and Structured Aggregation"
-Cohesion: 0.14
-Nodes (12): compute_man_hours(), standard_shift_plus_overtime(), Phase 0 Research: Specialty Unit Daily Sections and Structured Aggregation, R10. Shift vocabulary, R11. Detail vs print surface, R1. Where does the labor-title catalog live, and how do the conflicting counts (34/32, 33/32, 32/36) resolve?, R2. Which man-hours rule is "the project-approved rule"?, R3. Executed-activity contract: crew vs contractor, headcount, cross-project checks, and shift (+4 more)
+Cohesion: 0.07
+Nodes (25): Contract: Existing Product Boundaries and Evidence, Reuse acceptance, Six-category difference record, Authenticated extraction, Boundary and invocation, Contract: Test-Only Reference Verification, Rejection and representation catalog, Reporting and falsification (+17 more)
 
 ### Community 433 - "Quickstart & Validation: AHP Criteria Weighting"
 Cohesion: 0.20
@@ -3294,8 +3275,8 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 436 - "authentication/views.py"
-Cohesion: 0.04
-Nodes (27): auth_ratelimit(), ChangePasswordSerializer, ForgotPasswordSerializer, LoginSerializer, ResetPasswordSerializer, UserListSerializer, Meta, UserRegistrationSerializer (+19 more)
+Cohesion: 0.10
+Nodes (9): LoginSerializer, LoginService, LoginView, LogoutView, SystemRolesListView, UserAssignmentsListView, ProjectMemberReadSerializer, Meta (+1 more)
 
 ### Community 437 - "Component Tokens Layer"
 Cohesion: 0.23
@@ -3318,8 +3299,8 @@ Cohesion: 0.24
 Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), path, patterns (+3 more)
 
 ### Community 442 - "hr/services/__init__.py"
-Cohesion: 0.09
-Nodes (39): CapacityException, Meta, CapacityExceptionStatus, LeaveStatus, LeaveType, OvertimeStatus, ResourceAllocation, Meta (+31 more)
+Cohesion: 0.16
+Nodes (22): CapacityException, Meta, CapacityExceptionStatus, LeaveStatus, LeaveType, OvertimeStatus, approve_exception(), create_exception() (+14 more)
 
 ### Community 443 - "Data Model: Traceable Decision Execution Records"
 Cohesion: 0.18
@@ -3333,17 +3314,21 @@ Nodes (7): Authorization and lookup, Contract: Daily-Report Workflow Validation,
 Cohesion: 0.03
 Nodes (65): ProjectAlertsPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Acknowledge alert(s), Desired Result, Outcomes & Guards, Source Evidence (+57 more)
 
-### Community 447 - "execution-record-rules.ts"
-Cohesion: 0.06
-Nodes (43): AhpWeightRow, formatWeightDecimal(), formatWeightPercent(), CriteriaMetricsTable(), CriteriaWeightTable(), Props, DematelResult, InputSnapshotViewer() (+35 more)
+### Community 447 - "Contract: DEMATEL Workspace and History"
+Cohesion: 0.40
+Nodes (5): Contract: DEMATEL Workspace and History, Input and permission experience, Required browser acceptance, Result and history presentation, Save/run lifecycle
 
 ### Community 448 - ".cursor/skills/design-system/scripts/validate-tokens.cjs"
 Cohesion: 0.24
 Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), path, patterns (+3 more)
 
-### Community 451 - "syncPendingUnitOperations"
-Cohesion: 0.11
-Nodes (24): syncOperationsV2(), SyncV2Operation, SyncV2Request, SyncV2Response, ackAllowed(), CLAIM_LEASE_MS, decideClaim(), recoverAbandonedSyncing() (+16 more)
+### Community 449 - "SubcontractorSerializer"
+Cohesion: 0.15
+Nodes (4): SubcontractorSerializer, Meta, SubcontractorViewSet, SubScopedViewSet
+
+### Community 451 - "syncService.ts"
+Cohesion: 0.06
+Nodes (55): useAutoSync(), syncBatch(), syncOperationsV2(), SyncV2Operation, SyncV2Request, SyncV2Response, ackAllowed(), CLAIM_LEASE_MS (+47 more)
 
 ### Community 452 - "WBS"
 Cohesion: 0.17
@@ -3437,13 +3422,13 @@ Nodes (11): Border Radius, Color Scales, Gray Scale, Motion / Duration, Primary 
 Cohesion: 0.24
 Nodes (11): extensions, formatReport(), fs, getFiles(), main(), parseArgs(), path, patterns (+3 more)
 
-### Community 475 - "۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)"
-Cohesion: 0.12
-Nodes (13): get_report_date_range(), G01 — P1 — فقدان فیلد «مقدار اجرا» (`executed_quantity`) در مدل دیتابیس، سریالایزر و فرم فرانت‌اند برای دپارتمان‌های غیرانباری, G02 — P1 — انحراف کامل فرمت گزارش روزانه دپارتمان (تولید PDF به جای اکسل) و عدم پشتیبانی از فیلتر `date`, G03 — P1 — انحراف فرمت گزارش هفتگی دپارتمان (PDF به جای اکسل)، فقدان شیت‌های روزانه و شیت جمع‌بندی، و نبود فرمول‌های `=SUM(...)`, G04 — P1 — عدم رعایت اصل تراکنش اتمیک (Atomic Transaction Rollback) در ورود دسته‌ای اکسل (Import), G05 — P1 — فقدان اعتبارسنجی مقادیر عددی برای دپارتمان‌های غیرانباری و نبود پیام‌های خطای سطر-محور شفاف به زبان فارسی, G06 — P2 — ناسازگاری اسلاگ دپارتمان ابنیه (`civil` در برابر `buildings`) و عدم پذیرش `civil` در اندپوینت‌ها, G08 — P2 — کاستی‌های ظاهری و فنی در خروجی اکسل فیلترشده (Export) (+5 more)
+### Community 475 - "ref_node_fs"
+Cohesion: 0.24
+Nodes (11): commitThenReplace(), copies, gate(), insertHistorical(), setup(), ahp, dematel, ism (+3 more)
 
-### Community 476 - "test_sync_operation_validation.py"
-Cohesion: 0.22
-Nodes (5): serialize_definition(), serialize_quantity_change(), get_or_create_definition(), enable_v2_sync(), test_nine_successes_one_invalid_and_blocked_dependent()
+### Community 476 - "test_offline_target_isolation.py"
+Cohesion: 0.15
+Nodes (18): serialize_definition(), serialize_quantity_change(), MeasurementStatus, approve_definition(), get_or_create_definition(), update_draft(), activity_op(), activity_refs() (+10 more)
 
 ### Community 478 - "updates"
 Cohesion: 0.15
@@ -3460,10 +3445,6 @@ Nodes (11): Dependencies, Implementation strategy, Parallel opportunities, Phase
 ### Community 481 - "APIs"
 Cohesion: 0.17
 Nodes (11): APIs, Communication plan, Contact redaction, Contract: Stakeholders, Communication Plan & Meeting Actions, Create/update body (extras), Influence–interest matrix, Meeting actions, Meetings (existing, extended) (+3 more)
-
-### Community 482 - "0002_seed_labor_titles.py"
-Cohesion: 0.10
-Nodes (4): Migration, Migration, Migration, Migration
 
 ### Community 483 - "Feature Specification: Contractor Stakeholder Select"
 Cohesion: 0.17
@@ -3505,9 +3486,9 @@ Nodes (10): Completion Report, Done When, For AI Generation, Mandatory Post-Exec
 Cohesion: 0.18
 Nodes (10): Checklist Format (REQUIRED), Completion Report, Done When, Mandatory Post-Execution Hooks, Outline, Phase Structure, Pre-Execution Checks, Task Generation Rules (+2 more)
 
-### Community 494 - "test_topsis_api.py"
-Cohesion: 0.44
-Nodes (6): test_ac01_ac15_topsis_only_run(), test_ac03_ac25_saw_and_topsis_independent(), test_ac16_api_zero_distance(), test_ac23_ac24_topsis_immutability(), test_topsis_denom_zero_rejected_no_run(), _topsis_payload()
+### Community 494 - ".gemini/skills/design/scripts/cip/generate.py"
+Cohesion: 0.19
+Nodes (7): build_cip_prompt(), check_logo_required(), generate_cip_set(), generate_with_nano_banana(), load_env(), load_logo_image(), main()
 
 ### Community 495 - "Decision: Create cash transaction"
 Cohesion: 0.22
@@ -3526,12 +3507,12 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Review daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 499 - "037-daily-offline-sync/tasks.md"
-Cohesion: 0.12
-Nodes (12): Daily Report Offline Sync & Conflict Resolution, Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد, Contract: versioned targeted synchronization, Correction and protected data (+4 more)
+Cohesion: 0.10
+Nodes (17): Daily Report Offline Sync & Conflict Resolution, بازاجرای probe بک‌اند, بازاجرای probe فرانت‌اند, بازاجرای تست موجود, شواهد ممیزی SPEC-04, موارد اجرا نشده, نتایج, Contract: versioned targeted synchronization (+9 more)
 
 ### Community 500 - "Data Model: Decision Support TOPSIS Ranking (Phase 3)"
-Cohesion: 0.11
-Nodes (18): 1. `DecisionCase` *(shared, unchanged)*, 2. `DecisionRun` *(shared, shape extended in result JSON)*, 3. TOPSIS `input_snapshot` Shape, 4. TOPSIS `result` Shape (Interim Contract — O02 open), 5. TOPSIS Ranking Row (per row in `result.ranking`), `decision-support.ts` Types, `en.json` — additions to `decisionSupport`, Entities (+10 more)
+Cohesion: 0.05
+Nodes (35): `400 Bad Request` — Method not selected, `400 Bad Request` — Validation failure (no run created), `403 Forbidden` — Missing permission, `404 Not Found` — Case not found or does not belong to project, API Contract: TOPSIS Run — Create & Read, Authentication & Authorization, Endpoint: Create TOPSIS Run, Endpoint: List Runs (filtered to TOPSIS) (+27 more)
 
 ### Community 501 - ".cursor/skills/brand/scripts/inject-brand-context.cjs"
 Cohesion: 0.31
@@ -3565,9 +3546,9 @@ Nodes (11): Open subcontractor, Filter or change view (Subcontractor Detail), Re
 Cohesion: 0.18
 Nodes (11): How to run a phase (cheat sheet), Notes, Phase 1 — Case shell, input contract, execution records, Phase 2 — SAW ranking (MVP vertical slice), Phase 3 — Independent TOPSIS + shared ranking proof, Phase 4 — AHP criteria weighting, Phase 5 — DEMATEL influence analysis, Phase 6 — ISM structural layering (+3 more)
 
-### Community 510 - "ConflictCard.tsx"
+### Community 510 - "labor_productivity.py"
 Cohesion: 0.20
-Nodes (14): ConflictEntry, getConflictQueueEndpoint(), getQueueItem(), removeQueueItem(), resolveConflict(), ConflictCard(), ENTITY_LABELS, parseApiError() (+6 more)
+Nodes (7): _activity_qty_queryset(), _allocate_labor_to_activities(), _effective_work_hours(), labor_productivity_report(), _labor_queryset(), _planned_man_days(), TestLaborProductivity
 
 ### Community 511 - "Decision: Remove dependency"
 Cohesion: 0.25
@@ -3598,28 +3579,24 @@ Cohesion: 0.20
 Nodes (12): steps, name, run, uses, with, working-directory, steps, cache (+4 more)
 
 ### Community 519 - "2. Architecture & Data Integrity Decisions"
-Cohesion: 0.22
-Nodes (8): 1.1 Excel Generation Engine: `openpyxl`, 1.2 Date & Calendar Calculations (Persian Saturday-to-Friday Work Week), 1. Technology Choices & Libraries, 3.1 Single-Day Report (`reports/daily/`), 3.2 Weekly Report (`reports/weekly/`), 3. Spreadsheet Design Details, 4. Frontend Integration Decisions, Technical Research: Department Activity Reports & Excel Workbooks
+Cohesion: 0.15
+Nodes (12): 1.1 Excel Generation Engine: `openpyxl`, 1.2 Date & Calendar Calculations (Persian Saturday-to-Friday Work Week), 1. Technology Choices & Libraries, 2.1 Model Migration & `executed_quantity`, 2.2 Department Slug Normalization (`civil` <-> `buildings`), 2.3 Strict Atomic Batch Import & Persian Diagnostics, 2. Architecture & Data Integrity Decisions, 3.1 Single-Day Report (`reports/daily/`) (+4 more)
 
 ### Community 520 - "Decision: Delete manual cash transaction"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete manual cash transaction, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 521 - "Core Principles"
 Cohesion: 0.18
 Nodes (10): Core Principles, Governance, [PRINCIPLE_1_NAME], [PRINCIPLE_2_NAME], [PRINCIPLE_3_NAME], [PRINCIPLE_4_NAME], [PRINCIPLE_5_NAME], [PROJECT_NAME] Constitution (+2 more)
 
-### Community 522 - "Contract: SAW Execution via Decision Runs"
-Cohesion: 0.20
-Nodes (10): Contract: Decision Runs, Behavior, Create SAW run, Errors, Immutability (AC23–AC24), List / retrieve, Contract: SAW Execution via Decision Runs, Non-goals (+2 more)
+### Community 522 - "Decision: Buildings department activity"
+Cohesion: 0.12
+Nodes (15): BusinessBuildingsRoute(), Context & Screen, Context & Screen, Action Taken, Authorization & Permissions, Context & Screen, Decision: Buildings department activity, Desired Result (+7 more)
 
 ### Community 523 - "۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)"
-Cohesion: 0.12
-Nodes (15): G02 — P1 — فقدان خروجی اکسل ساب‌ریپورت‌های ابنیه (FILE 5) و برق (FILE 6), G03 — P1 — نقص خروجی چاپی و PDF رسمی، فقدان بلوک ۳ امضای دیجیتال و هش ممیزی, G04 — P2 — فیلترهای چندبعدی و عدم همگام‌سازی وضعیت در URL جهت اشتراک‌گذاری, G05 — P2 — نقص همگام‌سازی درخت تصمیم‌گیری (Decision Tree), G06 — P2 — فقدان آزمون‌های خودکار یکپارچه (Integration & Unit Tests), الف. معماری تولید اکسل FILE 4 شیراز (`field_reports/shiraz_file4_excel.py`), ب. معماری امضای دیجیتال و واترمارک در PDF (`field_reports/pdf.py`), ج. همگام‌سازی فیلترها با URL در فرانت‌اند (+7 more)
-
-### Community 524 - "Implementation Plan: Physical Progress Measurement, Strict Financial Governance, and Technical Approval Workflow"
-Cohesion: 0.25
-Nodes (7): Constitution Check, Documentation (`specs/040-physical-progress-measurement/`), Implementation Plan: Physical Progress Measurement, Strict Financial Governance, and Technical Approval Workflow, Project Structure, Source Code, Summary, Technical Context
+Cohesion: 0.20
+Nodes (9): الف. معماری تولید اکسل FILE 4 شیراز (`field_reports/shiraz_file4_excel.py`), ب. معماری امضای دیجیتال و واترمارک در PDF (`field_reports/pdf.py`), ج. همگام‌سازی فیلترها با URL در فرانت‌اند, جدول ماتریس ارزیابی انطباق سناریوها, سند نهایی ارزیابی شکاف‌ها و تحلیل انطباق: انطباق با فرم‌های اکسل شیراز، خروجی PDF و فیلترهای گزارش‌گیری, ۱. خلاصه‌ی اجرایی و تحلیل انطباق (Executive Summary), ۳. ماتریس تفصیلی نیازمندی‌ها و سناریوهای بازسازی (Requirements & Remediation Matrix), ۴. طرح معماری ماژول‌ها و تغییرات پیشنهادی (Architectural Design & File Changes) (+1 more)
 
 ### Community 525 - "Decision: Change language"
 Cohesion: 0.22
@@ -3641,20 +3618,20 @@ Nodes (10): APIs, Body extras, Compatibility, Contract: Documents & Corresponden
 Cohesion: 0.18
 Nodes (10): Config (code): Role dashboard pack catalog, Data Model: Dashboards, Roles & Reports, Drill row, Existing (extended): Roles (`master_data.Role` via seed / `permissions.constants`), Existing (unchanged SoR), New: `projects.ReportExportVersion` (or `reporting.ReportExportVersion`), Optional: `projects.UserDashboardPref`, Provenance shape (canonical for figures) (+2 more)
 
-### Community 530 - "open-reset-link/README.md"
-Cohesion: 0.04
-Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Change language, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
+### Community 530 - "Decision: Handle invalid reset inputs"
+Cohesion: 0.11
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Handle invalid reset inputs, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 531 - "Research: Decision Support TOPSIS Ranking (Phase 3)"
 Cohesion: 0.18
 Nodes (10): Research: Decision Support TOPSIS Ranking (Phase 3), New keys — `en.json`, New keys — `fa.json`, Open Items (Inherited, Not Closed by Phase 3), R1 — TOPSIS Service Return Shape, R2 — All-Zero Column Guard (TOPSIS Denominator Zero), R3 — RankingResultTable TypeScript Extension, R4 — execution_service.py TOPSIS Wiring (+2 more)
 
-### Community 532 - "member_serializers.py"
-Cohesion: 0.21
-Nodes (8): get_effective_permissions(), get_role_permission_codenames(), member_has_permission(), permissions_summary(), EffectivePermissionsSerializer, MemberPermissionsSerializer, RoleSerializer, Meta
+### Community 532 - "recalculate_activity_progress"
+Cohesion: 0.18
+Nodes (7): recalculate_activity_progress(), TestProgressRecalculation, Error codes, Four-way progress, Measurement methods, Physical progress & periodic reports (FR-PRG, spec 009), Weekly / monthly period reports
 
 ### Community 533 - "Decision: Edit manual cash transaction"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit manual cash transaction, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 534 - "Decision: Change theme"
@@ -3673,13 +3650,17 @@ Nodes (9): 22 Art Direction Styles Catalog, Banner Safe Zones Rule, Banner Sizes
 Cohesion: 0.22
 Nodes (10): CIP Deliverable Guide, Office Environment & Signage, Stationery Branding Set, Vehicle Branding & Fleet, CIP Design Reference, CIP HTML Presentation Renderer, Gemini CIP Mockup Generation, Base Mockup Prompt Structure (+2 more)
 
+### Community 538 - "test_unit_report_models.py"
+Cohesion: 0.24
+Nodes (3): _report(), TestUnitReportStatusEvent, TestUnitReportVersionConstraints
+
 ### Community 539 - ".agents/skills/design-system/scripts/generate-tokens.cjs"
 Cohesion: 0.36
 Nodes (9): flattenTokens(), fs, generateCSS(), generateTailwind(), main(), parseArgs(), path, resolveReference() (+1 more)
 
-### Community 540 - "subcontractors/views.py"
-Cohesion: 0.05
-Nodes (47): invalidate_project_caches(), _redis_client(), Subcontractor, Meta, SubcontractorPerformanceScore, Meta, SubcontractorStatus, SubcontractorWarning (+39 more)
+### Community 540 - "test_subcontractors.py"
+Cohesion: 0.14
+Nodes (21): Subcontractor, Meta, SubcontractorPerformanceScore, Meta, SubcontractorStatus, SubcontractorWarning, Meta, WarningType (+13 more)
 
 ### Community 541 - "RoleAwareUserRateThrottle"
 Cohesion: 0.24
@@ -3690,20 +3671,20 @@ Cohesion: 0.15
 Nodes (12): Contract: Department Activity Records (Warehouse Fields), GET `export/?department=warehouse`, GET `/` — List, GET/PATCH/PUT/DELETE `/{id}/`, GET `reports/daily/` and `reports/weekly/`, Non-warehouse body (unchanged), POST `/` — Create, POST `import/?department=warehouse` (+4 more)
 
 ### Community 543 - ".cursor/skills/speckit-converge/SKILL.md"
-Cohesion: 0.22
-Nodes (8): 7. Append Convergence Tasks (or report converged), 8. Provide Next Actions (Handoff), 9. Check for extension hooks, Convergence Findings, Goal, Operating Constraints, Pre-Execution Checks, User Input
+Cohesion: 0.12
+Nodes (15): 1. Initialize Convergence Context, 2. Load Artifacts (Progressive Disclosure), 3. Build the Intent Inventory, 4. Assess the Codebase and Classify Findings, 5. Assign Severity, 6. Present the In-Session Findings Summary, 7. Append Convergence Tasks (or report converged), 8. Provide Next Actions (Handoff) (+7 more)
 
 ### Community 544 - "Decision: Filter or change the displayed view"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 545 - "use-sticky-form-fields.ts"
 Cohesion: 0.38
 Nodes (8): buildInitialState(), resolveDefaultLocked(), StickyDefaults, useStickyFormFields(), readStickyFormState(), StickyFormPersistedState, storageKey(), writeStickyFormState()
 
-### Community 546 - "۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)"
-Cohesion: 0.14
-Nodes (13): G02 — P1 — عدم صدور کد خطای صریح `at_least_one_quantity_must_be_positive` و فقدان پیام فارسی, G03 — P2 — فقدان فرمول تراز خالص روزانه در گزارش روزانه (فرمت کارگاه شیراز), G04 — P2 — فقدان اندپوینت اختصاصی وب‌سرویس بالانس مصالح انبار (`warehouse-balance`), G05 — P2 — نقایص رابط کاربری دپارتمان انبار (عدم قالب‌بندی اعداد و برچسب‌های عمومی), G07 — P3 — لزوم به‌روزرسانی نودهای درخت تصمیم‌گیری (Decision Tree), سند نهایی ارزیابی شکاف‌ها و تحلیل انطباق: گزارشات و گردش مصالح دپارتمان انبار, ۲. اعتبارسنجی سرور و کد خطای `at_least_one_quantity_must_be_positive`, ۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence) (+5 more)
+### Community 546 - "test_offline_legacy_protection.py"
+Cohesion: 0.31
+Nodes (10): assert_derived_readonly(), snapshot(), test_by_date_cannot_accept_authored_derived_rows(), test_existing_summary_legacy_batch_rejects_derived_mutation(), test_invalid_new_header_rolls_back_shell_and_independent_item_succeeds(), test_legacy_batch_create_rejects_authored_activities_without_shell(), test_legacy_create_rejects_authored_activities_without_creating_report(), test_summary_child_writes_are_rejected_and_preserve_provenance() (+2 more)
 
 ### Community 547 - ".cursor/skills/design-system/scripts/generate-tokens.cjs"
 Cohesion: 0.36
@@ -3714,8 +3695,8 @@ Cohesion: 0.20
 Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 
 ### Community 549 - "constitution.md"
-Cohesion: 0.20
-Nodes (8): Outline, Post-Execution Checks, Pre-Execution Checks, User Input, Architecture and Development Constraints, Building Management Constitution, Governance, Quality Gates
+Cohesion: 0.11
+Nodes (16): Outline, Post-Execution Checks, Pre-Execution Checks, User Input, Architecture and Development Constraints, Building Management Constitution, Core Principles, Governance (+8 more)
 
 ### Community 550 - "Implementation Plan: Daily Report Validation Codes and Unset Semantics"
 Cohesion: 0.18
@@ -3761,6 +3742,10 @@ Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 Cohesion: 0.47
 Nodes (10): healthcheck, interval, retries, start_period, test, timeout, healthcheck, healthcheck (+2 more)
 
+### Community 561 - "Decisions"
+Cohesion: 0.15
+Nodes (12): Current state (codebase), D1 — Person dossier on User (+ OBS FK), D2 — ResourceAllocation in `hr`, not `ProjectMember` / `resources`, D3 — Capacity overlap math and standard day, D4 — Soft-block save; hard path via CapacityException, D5 — Permissions and optional capability, D6 — ApprovedLaborRate + cost estimate, D7 — Progress and attendance isolation (regression only) (+4 more)
+
 ### Community 562 - "Contract: Wage ACL & approved-rate cost estimate"
 Cohesion: 0.20
 Nodes (10): Approved labor rates, Contract: Wage ACL & approved-rate cost estimate, Cost estimate, Errors, Membership example (without permission), Missing approved rate, Progress isolation (regression), Rule (+2 more)
@@ -3770,7 +3755,7 @@ Cohesion: 0.20
 Nodes (9): Activity rows, Contract: Daily report header and extended child rows, Create / update header, Errors, Labor rows, List filters (additive), Material rows, Permissions (+1 more)
 
 ### Community 564 - "Decision: View projected cash and suggested net need"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: View projected cash and suggested net need, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 565 - "Implementation Plan: Restore Project from Archive"
@@ -3806,8 +3791,8 @@ Cohesion: 0.03
 Nodes (64): Action Taken, Authorization & Permissions, Context & Screen, Decision: Acknowledge overlapping allocation, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+56 more)
 
 ### Community 573 - "۲. یافته‌های تفصیلی و شواهد کد (Detailed Findings & Code Evidence)"
-Cohesion: 0.15
-Nodes (12): G01 — P1 — بازگرداندن خطای ۴۰۴ در متد `GET /daily-reports/by-date/` و نادیده گرفتن پارامتر `shift`, G02 — P1 — عدم تجمیع کلیدمحور نیروی انسانی بر مبنای `(job_title, contractor)` و فقدان فیلد پیمانکار در `DailyReportLabor`, G03 — P1 — مغایرت کد خطای رد ردیف مشتق‌شده و نشت گرید ویرایش در `DailyReportForm.tsx`, G05 — P2 — عدم نمایش بنر سبز «تکمیل و تجمیع موفق تمام دیسیپلین‌ها» در فرانت‌اند, G06 — P2 — مغایرت در ثبت برچسب بازنویسی شرایط جوی (`overridden_by_manager`), G07 — P2 — عدم ارائه تاریخ شمسی تجمیع در متادیتا و فقدان خلاصه‌سازی مصالح به تفکیک جنس, جدول ماتریس ارزیابی انطباق سناریوها, سند نهایی ارزیابی شکاف‌ها و تحلیل انطباق: موتور تجمیع خودکار ساب‌ریپورت‌ها در گزارش جامع روزانه (+4 more)
+Cohesion: 0.17
+Nodes (11): G01 — P1 — بازگرداندن خطای ۴۰۴ در متد `GET /daily-reports/by-date/` و نادیده گرفتن پارامتر `shift`, G02 — P1 — عدم تجمیع کلیدمحور نیروی انسانی بر مبنای `(job_title, contractor)` و فقدان فیلد پیمانکار در `DailyReportLabor`, G03 — P1 — مغایرت کد خطای رد ردیف مشتق‌شده و نشت گرید ویرایش در `DailyReportForm.tsx`, G04 — P1 — نقص بانک جامع فعالیت‌ها (`ACTIVITY` Master Log) مطابق با اکسل شیراز و عدم ابطال کش بلادرنگ, G05 — P2 — عدم نمایش بنر سبز «تکمیل و تجمیع موفق تمام دیسیپلین‌ها» در فرانت‌اند, G06 — P2 — مغایرت در ثبت برچسب بازنویسی شرایط جوی (`overridden_by_manager`), G07 — P2 — عدم ارائه تاریخ شمسی تجمیع در متادیتا و فقدان خلاصه‌سازی مصالح به تفکیک جنس, سند نهایی ارزیابی شکاف‌ها و تحلیل انطباق: موتور تجمیع خودکار ساب‌ریپورت‌ها در گزارش جامع روزانه (+3 more)
 
 ### Community 574 - "web"
 Cohesion: 0.20
@@ -3818,8 +3803,8 @@ Cohesion: 0.20
 Nodes (10): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Decision Support AHP Criteria Weighting (Phase 4), Phase 0 — Research, Phase 1 — Design, Project Structure, Source Code (repository root) (+2 more)
 
 ### Community 576 - "cost_control/views.py"
-Cohesion: 0.04
-Nodes (40): gregorian_to_jalali_datetime(), jalali_to_gregorian(), to_persian_digits(), JalaliDateField, ActualCostSerializer, Meta, BudgetBulkItemSerializer, CostPoolAllocationItemSerializer (+32 more)
+Cohesion: 0.05
+Nodes (39): CostPool, Meta, CostType, ActualCostSerializer, Meta, BudgetBulkItemSerializer, CostPoolAllocationItemSerializer, CostPoolSerializer (+31 more)
 
 ### Community 577 - "Decision: Contracts"
 Cohesion: 0.22
@@ -3894,12 +3879,12 @@ Cohesion: 0.38
 Nodes (7): Cash Flow Endpoints Documentation, Contracts Endpoints Documentation, Cost Control Endpoints Documentation, Field Reports Endpoints Documentation, Projects Endpoints Documentation, Schedule Endpoints Documentation, API Requirements
 
 ### Community 595 - "ProjectCostsPage"
-Cohesion: 0.12
-Nodes (17): ProjectCostsPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create budget version, Desired Result, Outcomes & Guards, Source Evidence (+9 more)
+Cohesion: 0.22
+Nodes (9): ProjectCostsPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Cost control, Desired Result, Outcomes & Guards, Source Evidence (+1 more)
 
 ### Community 596 - "test_glossary_locale_keys.py"
-Cohesion: 0.08
-Nodes (27): en(), fa(), _load(), Done when, Automated checks (primary evidence), Evidence categories (constitution VI), Manual API smoke (optional), Out of scope for this quickstart (+19 more)
+Cohesion: 0.06
+Nodes (33): en(), fa(), _load(), Done when, Automated checks (primary evidence), Evidence categories (constitution VI), Manual API smoke (optional), Out of scope for this quickstart (+25 more)
 
 ### Community 597 - "Decision: Export concrete operations"
 Cohesion: 0.25
@@ -3914,7 +3899,7 @@ Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add dynamic row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 600 - "Decision: Record concrete production"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record concrete production, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 601 - "Decision: Change language"
@@ -3938,8 +3923,8 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete a daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 607 - "Decision: Create department activity record"
-Cohesion: 0.18
-Nodes (11): BusinessWarehouseRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+3 more)
+Cohesion: 0.11
+Nodes (18): BusinessWarehouseRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+10 more)
 
 ### Community 608 - "Decision: Record ready-mix delivery"
 Cohesion: 0.22
@@ -3961,10 +3946,6 @@ Nodes (9): api service, celery-worker service, minio service, postgres service, 
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Executive portfolio dashboard, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 613 - "Decision: Add materials row"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add materials row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
 ### Community 615 - "Decision: Create approved labor rate"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create approved labor rate, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
@@ -3982,8 +3963,8 @@ Cohesion: 0.22
 Nodes (9): 1. Scope and conventions, 2. Read daily-report detail, 3. Update daily-report header, 4. Lifecycle paths, 5. Permissions (already implemented), 6. Derived summary weather/status reconciliation, 7. Corrections, sync, and offline replay, 8. Official PDF (+1 more)
 
 ### Community 619 - "Quickstart: Specialty Unit Reporting Source of Truth"
-Cohesion: 0.10
-Nodes (18): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Specialty Unit Reporting Source of Truth, Authorization and safety, Contract: Required Unit Templates and Project Activation, Errors (+10 more)
+Cohesion: 0.06
+Nodes (32): Aggregation metadata, Contract: Canonical Unit Aggregation and Provenance, Eligible inputs, Provenance projection, Rebuild behavior, Source navigation authorization, Summary-owned data, Authorization and safety (+24 more)
 
 ### Community 620 - "Implementation Plan: Traceable Decision Execution Records"
 Cohesion: 0.17
@@ -3997,9 +3978,9 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (9): condition, command, depends_on, image, restart, volumes, depends_on, api (+1 more)
 
-### Community 623 - "DecisionCase"
-Cohesion: 0.12
-Nodes (18): create_case(), create_run(), _snapshot_from_case(), payload(), test_real_access_nested_scope_immutable_and_revocation(), test_actual_postgres_parent_wait(), work(), test_execute_waits_then_rejects_released_ineligible_state() (+10 more)
+### Community 623 - "DecisionRun"
+Cohesion: 0.07
+Nodes (45): DecisionCase, Meta, DecisionRun, Meta, DecisionCaseListSerializer, Meta, create_case(), update_case() (+37 more)
 
 ### Community 624 - "Ranking Reference Implementation Evidence"
 Cohesion: 0.15
@@ -4014,8 +3995,8 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Supervisor approve leave, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 627 - "User Scenarios & Testing *(mandatory)*"
-Cohesion: 0.10
-Nodes (21): Assumptions, Canonical unit taxonomy, Dependencies, Edge Cases, Feature Specification: Specialty Unit Reporting Source of Truth, Functional Requirements, Key Entities *(include if feature involves data)*, Measurable Outcomes (+13 more)
+Cohesion: 0.07
+Nodes (26): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Specialty Unit Reporting Source of Truth, Assumptions, Canonical unit taxonomy, Dependencies (+18 more)
 
 ### Community 628 - "Research: Specialty Unit Reporting Source of Truth"
 Cohesion: 0.15
@@ -4034,7 +4015,7 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 632 - "Decision: Filter or change the displayed view"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 633 - "MppImportError"
@@ -4078,7 +4059,7 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 643 - "Decision: Add calendar exception"
-Cohesion: 0.25
+Cohesion: 0.14
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add calendar exception, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 644 - "Decision: Resolve a barrier"
@@ -4111,11 +4092,7 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 
 ### Community 651 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 652 - "BinaryRelationEditor.tsx"
-Cohesion: 0.42
-Nodes (8): BinaryRelationEditor(), Props, createIsmMatrix(), editIsmCell(), hydrateIsmMatrix(), remapIsmMatrix(), selectIsmValue(), validateIsmDraft()
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 653 - "Research & Decisions: AHP Criteria Weighting"
 Cohesion: 0.18
@@ -4124,10 +4101,6 @@ Nodes (11): 1. Reuse implemented behavior, 2. Numerical semantics and safety, 3.
 ### Community 654 - "Endpoint: `POST /api/v1/projects/{project_pk}/progress/{activity_id}/technical-approve/`"
 Cohesion: 0.18
 Nodes (10): 400 Bad Request: Measurement Not Approved (`measurement_not_approved`), 400 Bad Request: Photo Only Claim (`photo_not_technical_approval`), 403 Forbidden: Insufficient Permission, API Contract: Technical Approval Workflow, Endpoint: `POST /api/v1/projects/{project_pk}/progress/{activity_id}/technical-approve/`, Error Responses, Permissions Required, Request Body (+2 more)
-
-### Community 655 - "Decision: Filter or change the displayed view"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 656 - "Decision: Approve submitted IPC"
 Cohesion: 0.22
@@ -4193,21 +4166,21 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.17
 Nodes (12): Decision 10 — Excel-like UI (not pixel-perfect xlsx export), Decision 11 — Offline / sync create queue, Decision 12 — Verification approach, Decision 1 — Materialized DailyReport as the summary shell, Decision 3 — Gap: specialty models vs Excel sections, Decision 4 — Rebuild trigger and ensure-by-date, Decision 5 — Remove project-level create UX (and constrain API), Decision 6 — Derived rows read-only; summary metadata editable (+4 more)
 
-### Community 672 - "Contract: Department Activity Records (Warehouse Fields)"
-Cohesion: 0.17
-Nodes (12): Contract: Department Activity Records (Warehouse Fields), GET `export/?department=warehouse`, GET `/` — List, GET/PATCH/PUT/DELETE `/{id}/`, GET `reports/daily/` and `reports/weekly/`, Non-warehouse body (unchanged), POST `/` — Create, POST `import/?department=warehouse` (+4 more)
+### Community 672 - "ConfirmUploadView"
+Cohesion: 0.23
+Nodes (3): ConfirmUploadView, DownloadUrlView, UploadUrlView
 
 ### Community 673 - "Decision: Retry failed load"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 674 - "3. `POST /api/v1/projects/{project_pk}/activities/{activity_id}/measurement/approve/`"
 Cohesion: 0.20
 Nodes (9): 1. `GET /api/v1/projects/{project_pk}/activities/{activity_id}/measurement/`, 2. `PATCH /api/v1/projects/{project_pk}/activities/{activity_id}/measurement/`, 3. `POST /api/v1/projects/{project_pk}/activities/{activity_id}/measurement/approve/`, API Contract: Measurement Method Configuration & Approval, Endpoints, Error Response: Incomplete Basis (`incomplete_measurement_basis`), Request Body, Response 200 OK (+1 more)
 
-### Community 675 - "Decision: Assign procurement officers"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Assign procurement officers, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 675 - "vite.config.ts"
+Cohesion: 0.17
+Nodes (10): @tailwindcss/vite@^4.3.3, vite@^7.1.7, vite-plugin-pwa@^1.3.0, vite-tsconfig-paths@^5.1.4, frappeGanttCss, require, @tailwindcss/vite, vite (+2 more)
 
 ### Community 677 - "Implementation Plan: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد"
 Cohesion: 0.22
@@ -4217,17 +4190,17 @@ Nodes (9): Complexity Tracking, Constitution Check, Documentation (this feature)
 Cohesion: 0.22
 Nodes (8): Authorization, Behaviors, Contract: By-Date Daily Report Access & Auto-Provisioning, Endpoint: `GET /api/v1/projects/{project_pk}/daily-reports/by-date/`, Endpoint: `POST /api/v1/projects/{project_pk}/daily-reports/` (Manual Blank Creation), Query Parameters, Rejection Contract (HTTP 400 Bad Request), Success Response (HTTP 200 OK)
 
-### Community 679 - "Decision: Reject requisition"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject requisition, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 679 - "[open-mechanical-department]/README.md"
+Cohesion: 0.17
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Mechanical department activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 680 - "Decision: Retry failed load"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 681 - "Decision: Start screen walkthrough"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 681 - "Schedule Endpoints"
+Cohesion: 0.17
+Nodes (11): Activities, Activity validation error codes, Baselines, Frontend routes, Gantt (Sprint 9), Operational notes, Permissions, Schedule change requests (+3 more)
 
 ### Community 682 - "Decision: Register equipment"
 Cohesion: 0.22
@@ -4241,9 +4214,9 @@ Nodes (73): ProcurementNewPage(), Action Taken, Authorization & Permissions, Con
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 685 - "Decision: Submit requisition"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit requisition, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 685 - "UserRegistrationService"
+Cohesion: 0.29
+Nodes (4): UserRegistrationSerializer, Meta, UserRegistrationService, UserRegistrationView
 
 ### Community 686 - "Data Model: Daily Report Lifecycle Lock"
 Cohesion: 0.22
@@ -4257,13 +4230,13 @@ Nodes (9): 1. Automated Backend Test Suites, 2. API End-to-End Scenarios, 3. Fro
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 689 - "navigate-project-settings/README.md"
-Cohesion: 0.04
-Nodes (48): Action Taken, Authorization & Permissions, Context & Screen, Decision: Lock fiscal period, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+40 more)
-
-### Community 690 - "Decision: Create schedule baseline"
+### Community 689 - "Decision: Delete project"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create schedule baseline, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete project, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+
+### Community 690 - "[navigate-gantt]/README.md"
+Cohesion: 0.04
+Nodes (48): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve and lock baseline, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+40 more)
 
 ### Community 691 - "Decision: Create leave request"
 Cohesion: 0.22
@@ -4274,8 +4247,8 @@ Cohesion: 0.20
 Nodes (10): fast, normal, slow, $type, $value, $type, $value, duration (+2 more)
 
 ### Community 693 - "open-budget-tab/README.md"
-Cohesion: 0.09
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject budget version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create budget version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 694 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
@@ -4290,12 +4263,12 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record risk/delay event, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 697 - "Decision: Create legacy material request"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Create legacy material request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create legacy material request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 698 - "Decision: Change language"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Change language, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Change language, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 699 - "Decision: Retry failed load"
 Cohesion: 0.22
@@ -4309,29 +4282,33 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.28
 Nodes (9): loadBalancer, services, servers, url, api, storage, web, loadBalancer (+1 more)
 
-### Community 702 - "login/navigate-register/README.md"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open registration, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+### Community 702 - "Decision: Registration validation fails"
+Cohesion: 0.22
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Registration validation fails, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 703 - "healthCheck"
 Cohesion: 0.22
 Nodes (8): api, address, healthCheck, interval, path, timeout, web, address
 
-### Community 704 - "[open-subcontractor]/README.md"
-Cohesion: 0.03
-Nodes (56): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create warning, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+48 more)
+### Community 704 - "Decision: Create warning"
+Cohesion: 0.22
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create warning, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 705 - "[edit-report]/README.md"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Review daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Inspect report versions, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
-### Community 706 - "BarrierSerializer"
-Cohesion: 0.20
-Nodes (4): BarrierSerializer, Meta, _closed_like(), normalize_status()
+### Community 706 - "RiskEventSerializer"
+Cohesion: 0.15
+Nodes (8): BarrierStatus, RiskActionStatus, _closed_like(), RiskEventSerializer, Meta, normalize_status(), RiskEventViewSet, Implementation for User Story 1
 
 ### Community 707 - "Data model: offline operations and recovery"
 Cohesion: 0.22
 Nodes (9): Concurrency token, Correction transfer intent, Data model: offline operations and recovery, Existing authoritative entities, Local entities, Migration and rollback, Operation receipt, Server additions (logical model; migration must expand safely) (+1 more)
+
+### Community 708 - "SubcontractorDetailSerializer"
+Cohesion: 0.20
+Nodes (4): SubcontractorDetailSerializer, Meta, financial_summary(), test_financial_summary_from_ipc()
 
 ### Community 709 - "Decision: Create contract"
 Cohesion: 0.25
@@ -4349,9 +4326,13 @@ Nodes (8): POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, environment, image, po
 Cohesion: 0.57
 Nodes (8): interval, retries, test, timeout, healthcheck, healthcheck, healthcheck, healthcheck
 
-### Community 714 - "Decision: Filter or change the displayed view"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 713 - "۲. داستان‌های کاربری اتمیک (Atomic User Stories)"
+Cohesion: 0.18
+Nodes (10): داستان کاربری US-DR-04: ثبت فعالیت‌های اجرایی روزانه متصل به WBS, داستان کاربری US-DR-05: ثبت نیروی انسانی ستادی و مستقیم کارگاه, داستان کاربری US-DR-06: ثبت ساعات کارکرد و توقفات ماشین‌آلات و تجهیزات, داستان کاربری US-DR-07: ثبت مصالح کارگاه و مغایرت‌گیری با حواله‌های انبار, داستان کاربری US-DR-08: ثبت تخصصی احجام بتن‌ریزی کارگاه (Concrete Logs), داستان کاربری US-DR-09: ثبت حوادث ایمنی، دستورکارها و موانع کاری (Incidents & Stoppages), داستان کاربری US-DR-10: الصاق تصاویر و مستندات میدانی به تفکیک فعالیت, سند مشخصات فنی اتمیک: ردیف‌ها و سکشن‌های فرزند گزارش روزانه (+2 more)
+
+### Community 714 - "Decision: Delete labor camp group"
+Cohesion: 0.06
+Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete labor camp group, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
 ### Community 715 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
@@ -4362,16 +4343,12 @@ Cohesion: 0.17
 Nodes (12): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Specialty Unit Reporting Source of Truth, Implementation Strategy and Ordering, Phase 0 — Research Outcome, Phase 1 — Design Outcome, Project Structure (+4 more)
 
 ### Community 717 - "measurement_service.py"
-Cohesion: 0.03
-Nodes (88): TestLaborAutoCost, _auto_create_costs_from_report(), recalculate_activity_progress(), TestProgressRecalculation, error_response(), ActivityMeasurementDefinition, Meta, ActivityMeasurementVersion (+80 more)
+Cohesion: 0.07
+Nodes (30): error_response(), ActivityQuantityChangeStatus, MeasurementMethod, TechnicalApprovalLog, Meta, _apply_basis(), approve_quantity_change(), build_basis_snapshot() (+22 more)
 
-### Community 718 - "Decision: Record labor camp group"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record labor camp group, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 719 - "exportOfflineBackup"
-Cohesion: 0.24
-Nodes (9): exportOfflineBackup(), restoreOfflineBackup(), Acceptance checklist for evidence, Local backup and server rollback, Prerequisites and isolation, Quickstart: validation and evidence, Required test runs and expected evidence, IndexedDB Migration Evidence (+1 more)
+### Community 718 - "Data Model & Technical Schema: Department Activity Reports"
+Cohesion: 0.18
+Nodes (10): 1.1 `DepartmentActivityRecord` (`apps/api/core/inventory/models.py`), 1. Entity Schema Updates, 2. Department Alias & Normalization Rules, 3.1 Daily Workbook (`reports/daily/`), 3.2 Weekly Workbook (`reports/weekly/`), 3.3 Filtered Export Workbook (`export/`), 3. Spreadsheet Workbook Structures, 4. Batch Import Schema & Atomic Validation (+2 more)
 
 ### Community 720 - "Decision: Inspect legacy assignment"
 Cohesion: 0.22
@@ -4382,16 +4359,16 @@ Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 722 - "[open-requisition]/README.md"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Hold requisition item, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.02
+Nodes (72): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve requisition, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+64 more)
 
 ### Community 723 - "Decision: Keep local version"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Keep local version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 724 - "Decision: Start screen walkthrough"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 724 - "ManagedContractType"
+Cohesion: 0.36
+Nodes (6): ManagedContractType, Meta, test_create_and_list_contract_types(), test_create_contract_type_as_business_setup(), test_create_contract_types_forbidden(), test_list_contract_types_authenticated()
 
 ### Community 725 - "1. Entity Modifications & Additions"
 Cohesion: 0.20
@@ -4437,41 +4414,37 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Save WBS as a template, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
+### Community 736 - "ratelimit_handlers.py"
+Cohesion: 0.15
+Nodes (4): auth_ratelimit(), handle_ratelimit_403(), ratelimit_view(), TokenRefreshView
+
 ### Community 737 - "Intake an Idea"
 Cohesion: 0.22
 Nodes (8): Execution, Guardrails, Intake an Idea, Prerequisites, Safety When Fetching URLs, Slug Resolution, URL Trust Policy, User Input
-
-### Community 738 - "Decision: Discard failed queued item"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Discard failed queued item, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 739 - "Decision: Suspend project"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Suspend project, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 740 - "navigate-sync-conflicts/README.md"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Sync conflicts, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+Cohesion: 0.05
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Discard failed queued item, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 741 - "Decision: Edit BoQ items"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit BoQ items, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 742 - "Decision: Add activities row"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add activities row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 743 - ".gemini/skills/brand/scripts/sync-brand-to-tokens.cjs"
 Cohesion: 0.33
 Nodes (8): adjustBrightness(), { execFileSync }, extractColorsFromMarkdown(), fs, generateColorScale(), main(), path, updateDesignTokens()
 
 ### Community 744 - "Decision: Show/hide password"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Show/hide password, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 745 - "Decision: Return to login"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Return to login, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 745 - "login/navigate-register/README.md"
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Return to login, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 746 - "Traefik API Read Router"
 Cohesion: 0.22
@@ -4493,13 +4466,13 @@ Nodes (9): Activity (existing — extend), ActivityRelation (existing), Baseline
 Cohesion: 0.22
 Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Schedule & Baseline Gap Closure, Project Structure, Source Code (repository root), Summary, Technical Context
 
-### Community 751 - "Decision: Request correction of locked report"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Request correction of locked report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 751 - ".cursor/skills/design-system/scripts/tests/test_validate_tokens.py"
+Cohesion: 0.28
+Nodes (3): _run(), test_flags_hardcoded_hex_sharing_line_with_token(), test_token_only_line_reports_no_violation()
 
-### Community 752 - "Contract: Daily report correction requests"
-Cohesion: 0.22
-Nodes (8): Cancel open correction, Contract: Daily report correction requests, Errors, List / detail, Normal workflow on result report, Open correction, Permissions, Version history
+### Community 752 - "TestDailyReportGapsCorrection"
+Cohesion: 0.03
+Nodes (44): DailyReportCorrectionCancelView, DailyReportCorrectionRequest, Meta, cancel_correction(), open_correction(), TestDailyReportGapsCorrection, سناریو ۲: رد یا انصراف از درخواست اصلاح (Cancel), Cancel open correction (+36 more)
 
 ### Community 753 - "Implementation Plan: Daily Site Report Gap Closure"
 Cohesion: 0.22
@@ -4522,20 +4495,20 @@ Cohesion: 0.22
 Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Physical Progress & Periodic Reports Gap Closure, Project Structure, Source Code (repository root), Summary, Technical Context
 
 ### Community 758 - "Decision: Create subcontractor"
-Cohesion: 0.06
-Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create subcontractor, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create subcontractor, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 759 - "Contract: Budget versions"
 Cohesion: 0.22
 Nodes (8): Compare, Contract: Budget versions, Create, Lifecycle, List / detail, Permissions, Plan: Earned Value & Project Control (EVM), Feature Spec: Earned Value & Project Control (EVM)
 
-### Community 760 - "integration"
+### Community 760 - "Decision: Change language"
 Cohesion: 0.22
-Nodes (9): inputs, integration, spec, default, prompt, type, prompt, required (+1 more)
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Change language, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 761 - "Notification"
-Cohesion: 0.05
-Nodes (22): monitor_correspondence_due(), _notify_roles(), ensure_hse_notification(), ensure_hse_notifications_for_report(), NotificationAdmin, Notification, Meta, NotificationType (+14 more)
+### Community 761 - "TestNotificationsApi"
+Cohesion: 0.10
+Nodes (11): notifications(), TestNotificationsApi, Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Core Domain Principles & Glossary, Project Structure, Source Code (repository root) (+3 more)
 
 ### Community 762 - "Contract: Remaining Math & Ledger Report"
 Cohesion: 0.22
@@ -4553,21 +4526,21 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (9): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Phases, Implementation Plan: Decision Support SAW Ranking (Phase 2), Project Structure, Source Code (touched), Summary (+1 more)
 
-### Community 766 - "Implementation Plan: HR & Capacity Gap Closure"
+### Community 766 - "Decision: Download daily activity report"
 Cohesion: 0.22
-Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: HR & Capacity Gap Closure, Project Structure, Source Code (repository root), Summary, Technical Context
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download daily activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
-### Community 767 - "Quickstart: Validate Daily Report Lifecycle Lock"
+### Community 767 - "Decision: Download weekly activity report"
 Cohesion: 0.22
-Nodes (9): 1. Schema-drift guard, 2. Focused backend lifecycle checks, 3. Browser lifecycle and quantity checks, 4. Static and regression guards, 5. Manual bilingual/accessibility pass, Evidence boundary, Prerequisites, Quickstart: Validate Daily Report Lifecycle Lock (+1 more)
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download weekly activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 768 - "Decision: HR job positions"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: HR job positions, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.12
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: HR job positions, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
-### Community 769 - "Decision: Approve budget change request"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve budget change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 769 - "Decision: Export department activities"
+Cohesion: 0.22
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export department activities, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 770 - "Data Model: Restore Project from Archive"
 Cohesion: 0.20
@@ -4593,9 +4566,9 @@ Nodes (8): Button Component Specification, Component Interactive States, Compone
 Cohesion: 0.25
 Nodes (7): Anti-Examples: What NOT To Do, Checklist Purpose: "Unit Tests for English", Example Checklist Types & Sample Items, Execution Steps, Post-Execution Checks, Pre-Execution Checks, User Input
 
-### Community 776 - "Quickstart validation: FR-PRG gap closure"
-Cohesion: 0.22
-Nodes (9): Out of scope checks, Prerequisites, Quickstart validation: FR-PRG gap closure, Scenarios, Suggested automated commands (post-implement), US1 — Measurement method + period progress, US2 — Four-way display, US3 — Weekly / monthly reports (+1 more)
+### Community 776 - "Contract: Activity measurement methods"
+Cohesion: 0.06
+Nodes (28): Contract: Activity measurement methods, Errors, GET current definition, Permissions, POST `…/measurement/approve/`, POST `…/measurement/change/`, PUT / PATCH draft basis, Quantity change (exception for >100%) (+20 more)
 
 ### Community 777 - "Decision: Specialty unit daily report & activity export"
 Cohesion: 0.25
@@ -4609,8 +4582,8 @@ Nodes (8): Constitution Check, Documentation (this feature), Implementation Plan
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open Variance tab, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 780 - "login/README.md"
-Cohesion: 0.14
+### Community 780 - "Decision: Request password recovery"
+Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Request password recovery, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 781 - ".cursor/skills/design-system/templates/design-tokens-starter.json"
@@ -4621,9 +4594,9 @@ Nodes (11): $type, $value, dark, semantic, $schema, $type, $value, semantic (+3 
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 785 - "Contract: Project Status Undo API"
+### Community 785 - "Decision: Import department activities"
 Cohesion: 0.22
-Nodes (9): Authority and compatibility, Bounded history, Completed remediation through existing CR interfaces, Confirmed mutations, Contract: Project Status Undo API, Owned attempt lookup, Project detail additions — server computed, Read-only previews (+1 more)
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Import department activities, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 786 - "scripts"
 Cohesion: 0.25
@@ -4642,16 +4615,16 @@ Cohesion: 0.25
 Nodes (7): Anti-Examples: What NOT To Do, Checklist Purpose: "Unit Tests for English", Example Checklist Types & Sample Items, Execution Steps, Post-Execution Checks, Pre-Execution Checks, User Input
 
 ### Community 790 - ".cursor/skills/speckit-implement/SKILL.md"
-Cohesion: 0.17
-Nodes (11): any, requires, integrations, speckit_version, schema_version, workflow, author, description (+3 more)
+Cohesion: 0.07
+Nodes (26): Completion Report, Done When, Mandatory Post-Execution Hooks, Outline, Pre-Execution Checks, User Input, inputs, integration (+18 more)
 
-### Community 791 - "Decision: Return to HR"
-Cohesion: 0.12
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Return to HR, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+### Community 791 - "Decision: Open HR hub"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open HR hub, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 792 - "Decision: Approve project change request"
-Cohesion: 0.06
-Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve project change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
+Cohesion: 0.17
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve project change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 793 - "Decision: Submit recovery phone"
 Cohesion: 0.25
@@ -4670,8 +4643,8 @@ Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Inspect user assignments, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 797 - "WorkflowDefinition"
-Cohesion: 0.16
-Nodes (11): WorkflowDefinition, Meta, WorkflowDefinitionStatus, WorkflowDefinitionSerializer, Meta, activate_definition(), replace_stages(), retire_definition() (+3 more)
+Cohesion: 0.15
+Nodes (6): WorkflowDefinitionSerializer, Meta, ManagementDecisionViewSet, WorkflowDefinitionActivateView, WorkflowDefinitionViewSet, WorkflowReadMixin
 
 ### Community 798 - "Decision: Retry failed load"
 Cohesion: 0.22
@@ -4693,9 +4666,9 @@ Nodes (12): 1. Request Correction for Approved Report, 2. Cancel Open Correction
 Cohesion: 0.22
 Nodes (9): 1. Register a contractor, 2. Department activity (P1), 3. Isolation, 4. Inactive, 5. P2 smoke (when implemented), 6. Import, Prerequisites, Quickstart: Contractor Stakeholder Select (+1 more)
 
-### Community 804 - "Decision: Mark notification read"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Mark notification read, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 804 - "Decision: Download daily activity report"
+Cohesion: 0.22
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download daily activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 805 - "Decision: Create capacity exception"
 Cohesion: 0.25
@@ -4705,9 +4678,9 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open forgot-password, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 807 - "Decision: Open notifications"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open notifications, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 807 - "Decision: Download weekly activity report"
+Cohesion: 0.22
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download weekly activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 808 - "Decision: Reject capacity exception"
 Cohesion: 0.25
@@ -4765,9 +4738,9 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Overtime requests, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 822 - "[open-machinery-department]/README.md"
-Cohesion: 0.03
-Nodes (61): BusinessMachineryRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+53 more)
+### Community 822 - "Decision: Create department activity record"
+Cohesion: 0.11
+Nodes (18): BusinessMachineryRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+10 more)
 
 ### Community 823 - "Decision: Prepare team membership"
 Cohesion: 0.25
@@ -4793,9 +4766,9 @@ Nodes (25): Content Quality, Feature Readiness, Notes, Requirement Completeness,
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create IPC, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 829 - "Decision: Reset password"
+### Community 829 - "Decision: Export department activities"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reset password, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export department activities, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 830 - "Decision: Delete dynamic row"
 Cohesion: 0.25
@@ -4821,9 +4794,9 @@ Nodes (15): 1. Shared Weather Condition, 2. Daily Report, 3. Specialty Report Co
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Import dynamic rows, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 836 - "Contract: Activity Master Log (Shiraz Excel Sheet 1 Sync)"
-Cohesion: 0.25
-Nodes (7): Cache Invalidation Contract, Contract: Activity Master Log (Shiraz Excel Sheet 1 Sync), Endpoint: `GET /api/v1/projects/{project_pk}/activity-log/`, Endpoint: `GET /api/v1/projects/{project_pk}/activity-log/filter-options/`, Query Parameters, Success Response (HTTP 200 OK), Success Response (HTTP 200 OK)
+### Community 836 - "FILE 1 — بانک اطلاعاتی فاز 1"
+Cohesion: 0.10
+Nodes (19): finance_manager_role(), subcontractor(), FILE 1 — بانک اطلاعاتی فاز 1, Sheet 1: ACTIVITY (بانک اطلاعات فعالیت‌های روزانه), Sheet 2: Sheet12 (کارکرد آقای خنکا), Sheet 3: weather (وضعیت جوی), Sheet 4: problems (موانع و مشکلات), Sheet 5: labor camp report (گزارش نفرات کمپ) (+11 more)
 
 ### Community 837 - "Decision: Show/hide password"
 Cohesion: 0.22
@@ -4834,44 +4807,40 @@ Cohesion: 0.15
 Nodes (11): hr_auth_client(), Baseline (T001 / T003), Evidence log, Final API suite (Phase 7), Foundational, Notes, Phase 7 polish, Typecheck (T055) (+3 more)
 
 ### Community 839 - "Decision: Recover an expired session"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Recover an expired session, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Recover an expired session, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 840 - "Decision: Open dynamic table"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open dynamic table, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 841 - "AuthLayout"
-Cohesion: 0.11
-Nodes (18): AuthLayout(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Open the application, Desired Result, Outcomes & Guards, Source Evidence (+10 more)
+Cohesion: 0.10
+Nodes (19): AuthLayout(), Context & Screen, Action Taken, Authorization & Permissions, Context & Screen, Decision: Open the application, Desired Result, Outcomes & Guards (+11 more)
 
 ### Community 842 - "Decision: Retry failed load"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 843 - "[open-mechanical-department]/README.md"
-Cohesion: 0.03
-Nodes (61): BusinessMechanicalRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+53 more)
+### Community 843 - "Decision: Create department activity record"
+Cohesion: 0.17
+Nodes (11): BusinessMechanicalRoute(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence (+3 more)
 
 ### Community 844 - "Implementation Plan: Daily Report Auto-Rollup & Activity Master Log Sync"
-Cohesion: 0.22
-Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Daily Report Auto-Rollup & Activity Master Log Sync, Project Structure, Source Code, Summary, Technical Context
-
-### Community 845 - "Decision: Change theme"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Change theme, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Complexity Tracking, Documentation (this feature), Implementation Plan: Daily Report Auto-Rollup & Activity Master Log Sync, Project Structure, Source Code, Summary, Technical Context
 
-### Community 847 - "031-site-inactivity-security/plan.md"
-Cohesion: 0.12
-Nodes (12): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening, 1. Backend invariants (evidence category: pytest), 2. Frontend typecheck + guard unit tests (evidence category: node tests), 3. Browser verification (evidence category: Playwright E2E) (+4 more)
+### Community 845 - "Decision: Import department activities"
+Cohesion: 0.22
+Nodes (9): Action Taken, Authorization & Permissions, Context & Screen, Decision: Import department activities, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence (+1 more)
 
 ### Community 848 - "Decision: Create the draft project"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create the draft project, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 849 - "۴. یافته‌های تفصیلی"
-Cohesion: 0.14
-Nodes (14): EntityType, G01 — P1 — ثبت آفلاین به مسیر فعلی واحد تخصصی متصل نیست, G02 — P1 — ردیف POST ممکن است حذف شود و تأیید کاذب بگیرد, G04 — P1 — مسیر batch حفاظت ردیف‌های تجمیعی را دور می‌زند, G05 — P1 — تأیید همزمان گزارش در برابر sync ایمن نیست, G06 — P1 — Retry Row خطای اختصاصی را حفظ نمی‌کند و ردیف failed را دوباره نمی‌فرستد, G07 — P2 — UUID عملیات جای شناسه پایدار ردیف را گرفته و نشانگر ردیف جدید وصل نیست, G08 — P1 — وجود صف پایدار، بازیابی قابل استفاده ردیف‌ها پس از refresh را تضمین نمی‌کند (+6 more)
+Cohesion: 0.11
+Nodes (18): EntityType, G01 — P1 — ثبت آفلاین به مسیر فعلی واحد تخصصی متصل نیست, G02 — P1 — ردیف POST ممکن است حذف شود و تأیید کاذب بگیرد, G03 — P1 — تبدیل PATCH/DELETE به snapshot ناقص، جایگزینی مخرب می‌سازد, G04 — P1 — مسیر batch حفاظت ردیف‌های تجمیعی را دور می‌زند, G07 — P2 — UUID عملیات جای شناسه پایدار ردیف را گرفته و نشانگر ردیف جدید وصل نیست, G08 — P1 — وجود صف پایدار، بازیابی قابل استفاده ردیف‌ها پس از refresh را تضمین نمی‌کند, G10 — P1 — تعارض approved مسیر بازیابی امن به اصلاحیه/منبع جدید ندارد (+10 more)
 
 ### Community 850 - "Decision: Export daily report PDF"
 Cohesion: 0.22
@@ -4894,20 +4863,20 @@ Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete exception, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 855 - "Decision: Delete calendar"
-Cohesion: 0.14
+Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete calendar, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 856 - "Decision: Set default calendar"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Set default calendar, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 857 - "Decision: Submit invalid credentials"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit invalid credentials, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 857 - "Decision: Open register"
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open register, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
-### Community 858 - "Decision: Filter or change the displayed view"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 858 - "[navigate-progress]/README.md"
+Cohesion: 0.06
+Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
 ### Community 859 - "Decision: Reject daily report"
 Cohesion: 0.22
@@ -4930,11 +4899,15 @@ Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open a notification, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 864 - "UnitReportViewSet"
-Cohesion: 0.10
-Nodes (11): ShirazSubReportExcelBuilder, TestShirazSubReportExcel, UnitReportCurrentQuerySerializer, UnitReportDetailSerializer, Meta, UnitReportHistorySerializer, UnitReportOpenSerializer, UnitReportRejectSerializer (+3 more)
+Cohesion: 0.07
+Nodes (18): ShirazSubReportExcelBuilder, TestShirazSubReportExcel, compute_capabilities(), UnitReportAuditSerializer, UnitReportCapabilitiesSerializer, UnitReportCurrentQuerySerializer, UnitReportDetailSerializer, Meta (+10 more)
+
+### Community 865 - "[navigate-daily-reports]/README.md"
+Cohesion: 0.09
+Nodes (22): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions, Action Taken (+14 more)
 
 ### Community 866 - "Decision: Register successfully"
-Cohesion: 0.22
+Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Register successfully, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 867 - "Decision: Retry failed load"
@@ -4954,20 +4927,20 @@ Cohesion: 0.06
 Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve schedule change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
 ### Community 871 - "Decision: Download daily activity report"
-Cohesion: 0.22
+Cohesion: 0.25
 Nodes (8): Action Taken, Context & Screen, Decision: Download daily activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence, Subsequent Decisions
 
-### Community 872 - "Decision: Open/download a document"
+### Community 872 - "Decision: Reject budget version"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open/download a document, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject budget version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 873 - "Decision: Filter or change the displayed view"
+### Community 873 - "Decision: Submit daily report"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 874 - "Decision: Respond to correspondence"
+### Community 874 - "Decision: Resolve warning"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Respond to correspondence, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Resolve warning, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 875 - "Decision: Retry failed load"
 Cohesion: 0.22
@@ -4989,17 +4962,17 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit valid credentials, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 880 - "Decision: Upload a document"
+### Community 880 - "test_sync_operation_idempotency.py"
+Cohesion: 0.36
+Nodes (5): enable_v2_sync(), endpoint(), post(), test_missing_and_cyclic_dependencies_do_not_mutate(), test_offline_create_then_edit_in_one_batch_resolves_client_row()
+
+### Community 881 - "Research: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
 Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Upload a document, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Enforcement surfaces (all exist), R1 — Current implementation state of the inactivity cycle, R2 — Warning copy and locale-key mismatch (the real US2 gap), R3 — Shared reason-option labels and bilingual catalogs, R4 — Validation across all write paths and the offline queue, R5 — Aggregation and override behavior, R6 — Verification strategy for the residual scope, Research: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 
-### Community 881 - "Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
-Cohesion: 0.12
-Nodes (15): 1. Inactivity Reason Vocabulary, 2. Daily Report — header fields touched by this feature, 3. Activity Row — inactive-day guard input, 4. Copy and localization artifacts (residual deltas), 5. Preserved behaviors (no change required), 6. Migration and Rollback, Conditional invariant (effective-state), Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening (+7 more)
-
-### Community 882 - "Decision: Delete activities row"
+### Community 882 - "Decision: Open reset link"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete activities row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open reset link, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 883 - "Decision: Activity bank"
 Cohesion: 0.25
@@ -5009,29 +4982,29 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open Budget tab, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 885 - "Decision: Delete labor camp group"
+### Community 885 - "Decision: Show/hide password"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete labor camp group, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Show/hide password, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 886 - "Decision: View meeting minutes"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: View meeting minutes, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 886 - "Decision: Change theme"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Change theme, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 887 - "Decision: Save WBS budget grid"
-Cohesion: 0.22
+Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Save WBS budget grid, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 888 - "Decision: Edit concrete row"
+### Community 888 - "Decision: Open registration"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit concrete row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open registration, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 889 - "Decision: Delete equipment row"
+### Community 889 - "Decision: Create department activity record"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete equipment row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 890 - "Decision: Attach activity photo"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Attach activity photo, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+### Community 890 - "DailyReportEditPage"
+Cohesion: 0.04
+Nodes (54): DailyReportEditPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Add activities row, Desired Result, Outcomes & Guards, Source Evidence (+46 more)
 
 ### Community 891 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
@@ -5041,29 +5014,29 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Equipment utilization, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 893 - "Decision: Edit equipment row"
+### Community 893 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit equipment row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 894 - "TestRoleAPI"
-Cohesion: 0.12
-Nodes (4): admin_client(), admin_user(), TestMemberPermissionReset, TestRoleAPI
+### Community 894 - "django_contrib_auth_models"
+Cohesion: 0.05
+Nodes (7): set_permission_override(), TestPermissions, admin_client(), admin_user(), TestMemberPermissionReset, TestRoleAPI, TestMppImportApi
 
-### Community 895 - "Decision: Retry row synchronization"
+### Community 895 - "Decision: Create department activity record"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry row synchronization, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 896 - "Decision: Edit activities row"
+### Community 896 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit activities row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 897 - "Entities"
-Cohesion: 0.25
-Nodes (7): Data Model: Physical Progress & Periodic Reports (FR-PRG), Measurement definition / version, Period report, Progress approval, Relationships, State transitions, Validation summary
+Cohesion: 0.12
+Nodes (15): ActivityMeasurementDefinition, ActivityMeasurementVersion, ActivityProgress (extended), ActivityQuantityChange (lightweight exception for >100%), Data Model: Physical Progress & Periodic Reports (FR-PRG), Entities, Measurement definition / version, Period report (+7 more)
 
-### Community 898 - "Decision: Add custom labor title"
+### Community 898 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add custom labor title, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 899 - "Decision: Decisions and workflow"
 Cohesion: 0.29
@@ -5077,77 +5050,77 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Labor productivity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 904 - "Decision: Labor-Camp section"
+### Community 904 - "Decision: Record actual cost"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Labor-Camp section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record actual cost, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 905 - "Decision: Retry row synchronization"
+### Community 905 - "Decision: Create budget change request"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry row synchronization, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create budget change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 906 - "Quickstart: Feature 039 Auto Daily Rollup & Activity Master Log Sync"
 Cohesion: 0.29
 Nodes (6): 1. Prerequisites & Services, 2. Environment & Database Setup, 3. Running Backend Tests, 4. Running Frontend Verification, 5. End-to-End User Scenario Verification, Quickstart: Feature 039 Auto Daily Rollup & Activity Master Log Sync
 
-### Community 907 - "Decision: Materials section"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Materials section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+### Community 907 - "Decision: Add materials row"
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add materials row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 908 - "Quickstart: Discipline Sub-Reports Lifecycle and Validation"
 Cohesion: 0.33
 Nodes (5): Environment Setup & Prerequisites, Quickstart: Discipline Sub-Reports Lifecycle and Validation, Running Automated Backend Tests, Running Backend Migrations & Verification, Running Frontend Verification
 
-### Community 909 - "Decision: Delete project position"
+### Community 909 - "Decision: Reject budget change request"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete project position, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject budget change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 910 - "Decision: Edit project position"
+### Community 910 - "Decision: Open CBS and commitments tab"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit project position, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open CBS and commitments tab, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 911 - "Decision: Risk and delay register"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Risk and delay register, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 912 - "Decision: Create activity"
-Cohesion: 0.15
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 913 - "Decision: Retry row synchronization"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry row synchronization, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Action Taken, Authorization & Permissions, Decision: Create activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 914 - "Decision: Retry row synchronization"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry row synchronization, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 913 - "Decision: Manually allocate cost pool"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Manually allocate cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+
+### Community 914 - "Decision: Allocate cost pool"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Allocate cost pool, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 915 - "Decision: Schedule status"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Schedule status, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 916 - "Decision: Filter or change the displayed view"
+### Community 916 - "Decision: Materials section"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Materials section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 917 - "Decision: Inspect report versions"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Inspect report versions, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 917 - "Decision: Issue block stock"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Issue block stock, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 918 - "Idea Assessment Pipeline Extension"
 Cohesion: 0.17
 Nodes (11): Commands, Disabling, Guardrails, Handoff, Idea Assessment Pipeline Extension, Installation, Overview, Relationship to Other Extensions (+3 more)
 
 ### Community 919 - "Decision: Download weekly activity report"
-Cohesion: 0.22
+Cohesion: 0.25
 Nodes (8): Action Taken, Context & Screen, Decision: Download weekly activity report, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence, Subsequent Decisions
 
-### Community 920 - "Decision: Query warehouse stock balance"
+### Community 920 - "Decision: Block inventory"
 Cohesion: 0.25
-Nodes (7): Action Taken, Decision: Query warehouse stock balance, Desired Result, Outcomes & Guards, Resulting Route / Screen, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Block inventory, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 921 - "Decision: Project job positions"
+### Community 921 - "Decision: Receive requisition stock"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Project job positions, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Receive requisition stock, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 922 - "Dependencies & Execution Order"
 Cohesion: 0.33
@@ -5161,17 +5134,17 @@ Nodes (8): 9.1. دسترسی‌های برنامه‌ریزی, 9.2. دسترسی
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 925 - "Decision: Create budget change request"
-Cohesion: 0.07
-Nodes (24): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create budget change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+16 more)
+### Community 925 - "Decision: Approve budget change request"
+Cohesion: 0.10
+Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve budget change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
 
 ### Community 926 - "Contract: Derived Collection Mutation Guard"
 Cohesion: 0.33
 Nodes (5): Condition, Contract: Derived Collection Mutation Guard, Exceptions & Permitted Operations, Rejection Response (HTTP 400 Bad Request), Scope
 
-### Community 927 - "Entities"
-Cohesion: 0.18
-Nodes (11): DecisionCase (live ranking inputs — activated), DecisionRun (SAW result), Entities, Indexes / permissions, Data Model: Decision Support SAW Ranking (Phase 2), Out of model (later phases), Pure value objects (not persisted alone), Result shape (SAW — interim) (+3 more)
+### Community 927 - "Contract: SAW Execution via Decision Runs"
+Cohesion: 0.04
+Nodes (47): Contract: Decision Runs (Execution Records), Create (Phase 1 stub execution), Errors, List, Contract: Decision Runs, Mutation rejection, Non-goals, Retrieve (+39 more)
 
 ### Community 928 - "Decision: Import department activity records"
 Cohesion: 0.25
@@ -5193,9 +5166,9 @@ Nodes (7): 11.1. تخصیص بر اساس مقدار اجراشده, 11.2. تخ�
 Cohesion: 0.29
 Nodes (7): 21.1. فاز اول: Stabilize, 21.2. فاز دوم: Opening Snapshot, 21.3. فاز سوم: Reconciliation, 21.4. فاز چهارم: Go-Live, 21.5. فاز پنجم: Gradual Enrichment, 21.6. فاز ششم: Parallel Run, 21. فرآیند پیشنهادی پیاده‌سازی
 
-### Community 933 - "Decision: Labor camp"
+### Community 933 - "Decision: Retry failed load"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Labor camp, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 934 - "Decision: Quality and HSE"
 Cohesion: 0.25
@@ -5213,37 +5186,37 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Download weekly workbook, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 938 - "Decision: Add equipment row"
+### Community 938 - "Decision: Start screen walkthrough"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add equipment row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 939 - "Decision: Personnel summary"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Personnel summary, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 940 - "Decision: Delete activity"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 941 - "kpi_drill_service.py"
-Cohesion: 0.24
-Nodes (11): make_drill_row(), _drill_cash_net_balance(), _drill_critical_activities(), _drill_evm_cpi(), _drill_evm_spi(), _drill_finance_actual_cost(), _drill_finance_budget(), _drill_progress_plan_vs_actual() (+3 more)
+### Community 941 - "CostCategory"
+Cohesion: 0.06
+Nodes (33): ActualCostStatus, CostCategory, approve_actual_cost(), _invalidate_evm_caches(), project_requires_cost_document(), void_actual_cost(), test_approve_and_void_with_classification(), test_approve_requires_wbs_or_cbs() (+25 more)
 
-### Community 942 - "[open-block-inventory]/README.md"
-Cohesion: 0.04
-Nodes (48): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+40 more)
+### Community 942 - "Decision: Filter or change the displayed view"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 943 - "Decision: Edit activity"
-Cohesion: 0.25
+Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 944 - "راهنمای پرامپت‌های مهندسی‌شده برای ابزار `speckit-specify`"
 Cohesion: 0.29
 Nodes (6): راهنمای پرامپت‌های مهندسی‌شده برای ابزار `speckit-specify`, رویکرد اول: پرامپت جامع و یکپارچه (توصیه‌شده - Recommended), رویکرد دوم: تفکیک ماژولار دو مرحله‌ای (Modular 2-Phase Approach), گام‌های بعدی چرخه Spec-Kit پس از تولید مشخصات:, ۱. منطق معماری و تصمیم‌گیری در مورد تعداد پرامپت‌ها (Architecture Decision), ۲. نحوه استفاده با ابزار `/speckit-specify`
 
-### Community 945 - "Decision: Edit labor row"
+### Community 945 - "Decision: Procurement reports"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit labor row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Procurement reports, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 947 - "minio"
 Cohesion: 0.25
@@ -5257,21 +5230,21 @@ Nodes (8): POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, env, image, options, p
 Cohesion: 0.25
 Nodes (7): entryPoints, priority, rule, service, http, routers, admin
 
-### Community 950 - "Decision: Warehouse department activity"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Warehouse department activity, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 950 - "Decision: Start screen walkthrough"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 951 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
-Nodes (9): ProjectActivitiesPage(), Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence (+1 more)
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 952 - "Data Model: Physical Progress & Periodic Reports (FR-PRG)"
 Cohesion: 0.12
 Nodes (15): ActivityMeasurementDefinition, ActivityMeasurementVersion, ActivityProgress (extended), ActivityQuantityChange (lightweight exception for >100%), Data Model: Physical Progress & Periodic Reports (FR-PRG), Entities, Measurement definition / version, Period report (+7 more)
 
-### Community 953 - "Decision: Delete materials row"
+### Community 953 - "Decision: Create commitment from requisition"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete materials row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create commitment from requisition, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 954 - "17. ساختار پیشنهادی صفحات نرم‌افزار"
 Cohesion: 0.33
@@ -5293,13 +5266,13 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.18
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Manage activity dependencies, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 959 - "Decision: Edit materials row"
+### Community 959 - "Decision: Lock fiscal period"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit materials row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Lock fiscal period, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 960 - "Decision: Edit daily report"
+### Community 960 - "Decision: Create project change request"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit daily report, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create project change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 961 - "Decision: Filter or change the displayed view"
 Cohesion: 0.22
@@ -5333,17 +5306,17 @@ Nodes (7): 1. Running Database Migrations, 2. Running Automated Tests, 3.1 Daily
 Cohesion: 0.25
 Nodes (8): 1. List contractors (options), 2. Create / update contractor on ذینفعان, 3. Department activity write, 4. Department activity import, 5. Daily report activity / labor camp, 6. Project settings, 7. Cross-project isolation, API Contract: Contractor Stakeholder Select
 
-### Community 969 - "Decision: Progress dashboard"
+### Community 969 - "Decision: Reject project change request"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Progress dashboard, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject project change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 970 - "UI Contract: Contractor Stakeholder Select"
 Cohesion: 0.25
 Nodes (8): Accessibility, Daily report / labor (P2), Department activity (P1), Locales, Project settings / create wizard (P2), Shared control, UI Contract: Contractor Stakeholder Select, ذینفعان page
 
-### Community 971 - "Decision: Record manual progress"
+### Community 971 - "Decision: Submit project change request"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record manual progress, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Submit project change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 972 - "Contract: Mechanical Materials Section API"
 Cohesion: 0.40
@@ -5353,9 +5326,9 @@ Nodes (4): Contract: Mechanical Materials Section API, Endpoints, Quick-Pick Cat
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 974 - "Decision: Retry failed load"
+### Community 974 - "Decision: Project settings"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Project settings, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 975 - "10. ثبت هزینه‌های سرجمع به‌عنوان Cost Pool"
 Cohesion: 0.40
@@ -5377,9 +5350,9 @@ Nodes (5): 22.1. Sheet اطلاعات پروژه, 22.2. Sheet WBS, 22.3. Sheet O
 Cohesion: 0.40
 Nodes (5): 3.1. شخص یا کاربر, 3.2. پروژه, 3.3. سمت یا نقش, 3.4. دسترسی, 3. اجزای اصلی این بخش از نرم‌افزار
 
-### Community 980 - "Research: Warehouse Report Fields"
+### Community 980 - "Decision: Retry failed load"
 Cohesion: 0.25
-Nodes (7): 1. Schema strategy: extend shared record vs new model, 2. Field storage and nullability, 4. API shape, 7. Legacy data migration, 8. TDD approach, 9. Resolved clarifications, Research: Warehouse Report Fields
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 981 - "Quickstart Validation: Core Domain Principles & Glossary"
 Cohesion: 0.25
@@ -5394,8 +5367,8 @@ Cohesion: 0.40
 Nodes (5): 3.1. ناقص بودن داده‌های تاریخی, 3.2. وجود اعداد سرجمع در حسابداری, 3.3. نبود ارتباط مستقیم بین حسابداری و WBS, 3.4. خطر تصمیم‌گیری بر اساس داده‌های نادرست, 3. چالش‌های اصلی در پیاده‌سازی سیستم در میانه پروژه
 
 ### Community 984 - "Component inventory — Decision Support (تصمیم‌یار)"
-Cohesion: 0.29
-Nodes (7): Capability map (docs → UI surface), Component inventory — Decision Support (تصمیم‌یار), Design principles (prevent repetition), Explicit non-goals / anti-patterns, Implementation checklist (for `/speckit-*` or tickets), Maintenance, Suggested composition (no duplication)
+Cohesion: 0.20
+Nodes (10): Already available — reuse these, Backend building blocks to reuse, Capability map (docs → UI surface), Component inventory — Decision Support (تصمیم‌یار), Design principles (prevent repetition), Explicit non-goals / anti-patterns, Implementation checklist (for `/speckit-*` or tickets), Patterns to copy (not domain UI) (+2 more)
 
 ### Community 985 - "Specification Quality Checklist: Discipline Sub-Reports Lifecycle and Validation"
 Cohesion: 0.29
@@ -5409,13 +5382,13 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.29
 Nodes (6): Approval Endpoint, Contract: Unit Report Submission & Approval API, Empty Sub-Report Submission Rejection (400 Bad Request), Submission Endpoint, Successful Approval (200 OK), Successful Submission (200 OK)
 
-### Community 988 - "Decision: Keep server version"
+### Community 988 - "Decision: Save project settings"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Keep server version, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Save project settings, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 989 - "ProcurementBlocksPage"
-Cohesion: 0.33
-Nodes (6): ProcurementBlocksPage(), Context & Screen, Context & Screen, Context & Screen, Context & Screen, Context & Screen
+### Community 989 - "Decision: Enable/disable capability"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Enable/disable capability, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 990 - "Application Decision Tree & State Machine"
 Cohesion: 0.29
@@ -5424,10 +5397,6 @@ Nodes (7): Application Decision Tree & State Machine, Coverage and verification 
 ### Community 991 - "Decision: Manager approve leave"
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Manager approve leave, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 992 - "ProjectMaterialBalancePage"
-Cohesion: 0.33
-Nodes (6): ProjectMaterialBalancePage(), Context & Screen, Context & Screen, Context & Screen, Context & Screen, Context & Screen
 
 ### Community 993 - "Contract: EVM by Phase"
 Cohesion: 0.29
@@ -5461,9 +5430,9 @@ Nodes (7): if, runs-on, jobs, api, web, if, runs-on
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1001 - "Research: Decision Support Case Shell (Phase 1)"
-Cohesion: 0.29
-Nodes (6): Alternatives considered, Decisions, Findings, Gaps, NEEDS CLARIFICATION, Research: Decision Support Case Shell (Phase 1)
+### Community 1001 - "Decision: Filter or change the displayed view"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1002 - "Decision: Security reject leave"
 Cohesion: 0.22
@@ -5482,8 +5451,8 @@ Cohesion: 0.29
 Nodes (7): RABBITMQ_DEFAULT_PASS, RABBITMQ_DEFAULT_USER, env, image, options, ports, rabbitmq
 
 ### Community 1006 - "Quickstart: Validate Daily Report Lifecycle Lock"
-Cohesion: 0.10
-Nodes (16): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Daily Report Lifecycle Lock, Cancel correction, Contract: Daily Report Lifecycle API, List correction requests (+8 more)
+Cohesion: 0.07
+Nodes (25): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Daily Report Lifecycle Lock, Cancel correction, Contract: Daily Report Lifecycle API, List correction requests (+17 more)
 
 ### Community 1007 - "defaultCertificate"
 Cohesion: 0.29
@@ -5493,9 +5462,9 @@ Nodes (6): defaultCertificate, certFile, keyFile, default, tls, stores
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Supervisor reject leave, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1009 - "Decision: Create commitment"
+### Community 1009 - "Decision: Export subcontractor activities"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create commitment, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export subcontractor activities, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1010 - "Quickstart: Decision Support SAW Ranking (Phase 2)"
 Cohesion: 0.29
@@ -5505,9 +5474,9 @@ Nodes (7): Automated checks (primary evidence), Evidence categories (constitutio
 Cohesion: 0.25
 Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Central Data Model, Project Structure, Source Code (repository root), Summary, Technical Context
 
-### Community 1014 - "Decision: Add concrete row"
+### Community 1014 - "Decision: Filter or change the displayed view"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add concrete row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1015 - "Specification Quality Checklist: Project Registration & Kickoff Gap Closure"
 Cohesion: 0.33
@@ -5517,9 +5486,9 @@ Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, 
 Cohesion: 0.25
 Nodes (7): DailyReport, DailyReportActivity / Activity Quantity State, Data Model: Existing State and Presentation Rules, GeneralActivityRow, Rejection Reason, Unset Quantity Presentation, Validation Outcome
 
-### Community 1017 - "Decision: Resolve a synchronization conflict"
+### Community 1017 - "Decision: Open subcontractor"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Resolve a synchronization conflict, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open subcontractor, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1021 - "Contract: Contractor Daily Labor Ledger API"
 Cohesion: 0.50
@@ -5549,9 +5518,9 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add a child WBS node, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1029 - "شواهد ممیزی SPEC-04"
-Cohesion: 0.33
-Nodes (6): بازاجرای probe بک‌اند, بازاجرای probe فرانت‌اند, بازاجرای تست موجود, شواهد ممیزی SPEC-04, موارد اجرا نشده, نتایج
+### Community 1029 - "Decision: Record performance score"
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Record performance score, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1030 - "Decision: Edit a WBS node"
 Cohesion: 0.22
@@ -5561,13 +5530,13 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 Cohesion: 0.22
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1032 - "Decision: Delete concrete row"
+### Community 1032 - "Decision: Subcontractors"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete concrete row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Subcontractors, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1033 - "Decision: Equipment section"
-Cohesion: 0.10
-Nodes (16): Action Taken, Authorization & Permissions, Context & Screen, Decision: Equipment section, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+8 more)
+### Community 1033 - "Decision: Add equipment row"
+Cohesion: 0.04
+Nodes (40): Action Taken, Authorization & Permissions, Context & Screen, Decision: Add equipment row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+32 more)
 
 ### Community 1034 - "Decision: WBS"
 Cohesion: 0.25
@@ -5585,9 +5554,9 @@ Nodes (7): 1.1 Architectural Overview, 1.2 Service Breakdown, 1.3 Offline-First 
 Cohesion: 0.17
 Nodes (11): G01 — P1 — نقض صریح حاکمیت مالی در صورت‌وضعیت‌ها (`IPC`): محاسبه مبالغ بر پایه پیشرفت ادعایی به جای پیشرفت تأییدشده ناظر, G02 — P1 — عدم اعتبارسنجی روش اندازه‌گیری هنگام ثبت پیشرفت روزانه و نادیده‌گرفتن خاموش در تسک Celery, G03 — P1 — نشت پیشرفت بالای ۱۰۰٪ در گزارش‌های روزانه و عدم صدور خطای سنکرون `400 progress_exceeds_100` با پیام مصوب, G04 — P1 — فقدان اکشن تعاملی تأیید فنی ناظر (`technicalApproveProgress`) در رابط کاربری کلاینت, G05 — P1 — نقصان شدید ویرایشگر روش اندازه‌گیری (`MeasurementEditor.tsx`) در پشتیبانی از مایلستون‌ها و مستندات, G06 — P2 — مغایرت در نام‌گذاری Enum روش‌ها و غیبت روش مایلستون در گزارش روزانه, G07 — P2 — عدم محاسبه و ارائه حجم فیزیکی دوره (`period_quantity`) در تفکیک ۴ گانه, سند نهایی ارزیابی شکاف‌ها و تحلیل انطباق: روش‌های اندازه‌گیری و پیشرفت فیزیکی ۴ گانه (+3 more)
 
-### Community 1039 - "Contract: Activity measurement methods"
+### Community 1039 - "Decision: Retry failed load"
 Cohesion: 0.25
-Nodes (8): Contract: Activity measurement methods, Errors, GET current definition, Permissions, POST `…/measurement/approve/`, POST `…/measurement/change/`, PUT / PATCH draft basis, Quantity change (exception for >100%)
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1040 - "Contract: CBS, Commitment, Payment"
 Cohesion: 0.22
@@ -5618,12 +5587,12 @@ Cohesion: 0.33
 Nodes (6): RABBITMQ_DEFAULT_PASS, RABBITMQ_DEFAULT_USER, environment, image, restart, rabbitmq
 
 ### Community 1047 - "schedule/models.py"
-Cohesion: 0.06
-Nodes (72): FigureValueStatus, PeriodReportFigureOverride, Meta, PeriodReportKind, PeriodReportStatus, ProjectPeriodReport, Meta, apply_figure_override() (+64 more)
+Cohesion: 0.05
+Nodes (89): FigureValueStatus, PeriodReportFigure, Meta, PeriodReportFigureOverride, Meta, PeriodReportFigureSourceItem, Meta, PeriodReportKind (+81 more)
 
-### Community 1048 - "Entities"
+### Community 1048 - "Decision: Sync conflicts"
 Cohesion: 0.25
-Nodes (8): ActivityMeasurementDefinition, ActivityMeasurementVersion, ActivityProgress (extended), ActivityQuantityChange (lightweight exception for >100%), Entities, PeriodReportFigure, PeriodReportFigureOverride, ProjectPeriodReport
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Sync conflicts, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1049 - "minio-init"
 Cohesion: 0.33
@@ -5693,9 +5662,9 @@ Nodes (6): entryPoints, middlewares, priority, rule, service, api-read
 Cohesion: 0.33
 Nodes (6): entryPoints, middlewares, priority, rule, service, api-write
 
-### Community 1066 - "Dependencies & Execution Order"
-Cohesion: 0.33
-Nodes (6): Dependencies & Execution Order, Parallel example: User Story 1, Parallel opportunities, Phase Dependencies, User Story Dependencies, Within each story
+### Community 1066 - "Implementation Plan: Decision Support Case Shell (Phase 1)"
+Cohesion: 0.25
+Nodes (7): Complexity Tracking, Documentation (this feature), Implementation Phases, Implementation Plan: Decision Support Case Shell (Phase 1), Project Structure, Source Code (touched), Summary
 
 ### Community 1068 - "Specification Quality Checklist: Contracts & IPC Gap Closure"
 Cohesion: 0.33
@@ -5708,6 +5677,10 @@ Nodes (8): 1. Project daily reports list (`/projects/:projectId/daily-reports`),
 ### Community 1071 - "Specification Quality Checklist: Stakeholders, Documents, Decisions & Workflow"
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Requirement Completeness, Specification Quality Checklist: Stakeholders, Documents, Decisions & Workflow, Validation Notes (2026-10-09)
+
+### Community 1072 - "Contract: Status Undo UI"
+Cohesion: 0.25
+Nodes (8): Bilingual meaning requirements, Contract: Status Undo UI, Overview entry and fixed destination, Preview and confirmation, Preview failures are read failures, Query refresh and safe history, Readiness/remediation journey, Sent request state and recovery
 
 ### Community 1073 - "Logo Design Reference"
 Cohesion: 0.33
@@ -5725,6 +5698,10 @@ Nodes (7): 4. Detection Passes (Token-Efficient Analysis), A. Duplication Detect
 Cohesion: 0.29
 Nodes (6): Completion Report, Done When, Mandatory Post-Execution Hooks, Outline, Pre-Execution Checks, User Input
 
+### Community 1077 - "subprocess"
+Cohesion: 0.06
+Nodes (17): SiteStatus, WeatherCondition, WeatherLog, Meta, DailyReportListSerializer, Meta, check_weather_log_conflict(), test_pdf_export_contains_unconditional_weather_impact_row_with_empty_notes() (+9 more)
+
 ### Community 1078 - "Specification Quality Checklist: Multi-Level Budget Gap Closure"
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Multi-Level Budget Gap Closure
@@ -5733,21 +5710,21 @@ Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, 
 Cohesion: 0.50
 Nodes (4): 18.1. هدف Reconciliation, 18.2. نمونه تطبیق هزینه, 18.3. جدول Reconciliation, 18. تطبیق اطلاعات با حسابداری
 
-### Community 1080 - "ContractItem"
-Cohesion: 0.04
-Nodes (33): ContractItem, Meta, ContractDetailSerializer, Meta, ContractListSerializer, Meta, ContractWriteSerializer, Meta (+25 more)
+### Community 1080 - "Routine: `auto_populate_ipc(ipc_id)`"
+Cohesion: 0.25
+Nodes (7): Calculation Rules, Module: `apps/api/core/contracts/services/ipc_service.py`, Preconditions, Progress Query Logic, Routine: `auto_populate_ipc(ipc_id)`, Service Contract: IPC Auto-Population Based on Approved Progress, Warning Logging
 
 ### Community 1082 - "Quickstart Validation: Central Data Model"
 Cohesion: 0.29
 Nodes (7): Expected outcomes, Prerequisites, Purpose, Quickstart Validation: Central Data Model, References, Smoke commands (after implement), Suggested test map
 
 ### Community 1083 - "schedule/urls.py"
-Cohesion: 0.06
-Nodes (36): ScheduleChangeRequestApproveView, ScheduleChangeRequestDetailView, ScheduleChangeRequestListCreateView, ScheduleChangeRequestRejectView, ScheduleChangeRequestSubmitView, ActivityMeasurementApproveView, ActivityMeasurementChangeView, ActivityMeasurementView (+28 more)
+Cohesion: 0.05
+Nodes (32): clear_ratelimit_cache(), test_forgot_password_rate_limit_returns_429(), test_login_rate_limit_returns_429(), ActivityMeasurementApproveView, ActivityMeasurementChangeView, ActivityMeasurementView, ActivityQuantityChangeApproveView, ActivityQuantityChangeListCreateView (+24 more)
 
-### Community 1086 - "IPCCollection"
-Cohesion: 0.06
-Nodes (33): add_collection(), collections_total(), payable_net(), remaining_receivable(), IPCCollectionListCreateView, IPCCollection, Meta, IPCCollectionSerializer (+25 more)
+### Community 1086 - "Endpoint"
+Cohesion: 0.29
+Nodes (6): Contract: Receivables Report, Endpoint, Inclusion rules, Query, Response, Receivables Report DTO
 
 ### Community 1088 - ".cursor/skills/speckit-clarify/SKILL.md"
 Cohesion: 0.29
@@ -5845,9 +5822,9 @@ Nodes (6): Alternatives considered, Decisions, Existing coverage (keep), Finding
 Cohesion: 0.29
 Nodes (6): Backend verify, Expected outcomes, Manual API smoke, Prerequisites, Quickstart: Cash Flow & Liquidity Allocation Gap Closure, UI
 
-### Community 1115 - "Decision: Delete incidents row"
+### Community 1115 - "Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete incidents row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): 1. Inactivity Reason Vocabulary, 2. Daily Report — header fields touched by this feature, 3. Activity Row — inactive-day guard input, 4. Copy and localization artifacts (residual deltas), 5. Preserved behaviors (no change required), 6. Migration and Rollback, Conditional invariant (effective-state), Data Model: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 
 ### Community 1116 - "Quickstart: Earned Value & Project Control (EVM)"
 Cohesion: 0.29
@@ -5909,33 +5886,25 @@ Nodes (3): ساختار پوشه و دسته‌بندی اسناد, ماتریس
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Contractor Stakeholder Select
 
-### Community 1132 - "Data Model: Decision Support Case Shell (Phase 1)"
+### Community 1132 - "Foundation Verification Report: Phase 2 Safety and Shared Contracts"
 Cohesion: 0.25
-Nodes (8): Data Model: Decision Support Case Shell (Phase 1), DecisionCase, DecisionRun, Entities, Indexes / constraints, Out of model (later phases), Permission codes (catalog), State transitions
+Nodes (7): 1. Executive Summary, 2.1 Backend Foundation & Regression Suites (55 passed), 2.2 Concurrency & Locking Verification (11 passed), 2. Test Execution and Evidence Matrix, 3. Pending Endpoint Status (T006), 4. Justified Legacy Behavior Changes, Foundation Verification Report: Phase 2 Safety and Shared Contracts
 
-### Community 1133 - "گزارش شکاف‌های ثبت آفلاین، همگام‌سازی دسته‌ای و رفع تعارض"
-Cohesion: 0.29
-Nodes (7): گزارش شکاف‌های ثبت آفلاین، همگام‌سازی دسته‌ای و رفع تعارض, ۱. نتیجه ارزیابی, ۲. روش بررسی و مرز شواهد, ۳. پوشش معیارهای پذیرش, ۵. اجزای موجود که نباید به اشتباه «پیاده‌نشده» نامیده شوند, ۶. ترتیب پیشنهادی رفع شکاف‌ها و معیار پایان, ۷. شواهد و بازاجرای بررسی
-
-### Community 1134 - "Decision: Edit incidents row"
+### Community 1133 - "Implementation Plan: Discipline Sub-Reports Lifecycle and Validation"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit incidents row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (7): Complexity Tracking, Documentation (this feature), Implementation Plan: Discipline Sub-Reports Lifecycle and Validation, Project Structure, Source Code Impact, Summary, Technical Context
 
 ### Community 1137 - "Specification Quality Checklist: Department Activity Reports & Excel Workbooks"
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Department Activity Reports & Excel Workbooks
 
 ### Community 1140 - "assert_same_currency"
-Cohesion: 0.67
-Nodes (3): Implementation, Phase 2: Foundational (Blocking Prerequisites), Tests first
+Cohesion: 0.40
+Nodes (5): assert_same_currency(), R2 — Project currency & rial/toman, Implementation, Phase 2: Foundational (Blocking Prerequisites), Tests first
 
 ### Community 1141 - "ref_node_assert"
-Cohesion: 0.05
-Nodes (39): repoRoot, commitThenReplace(), copies, gate(), insertHistorical(), setup(), __dirname, enLocale (+31 more)
-
-### Community 1142 - "Decision: Delete labor-camp row"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete labor-camp row, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.04
+Nodes (42): repoRoot, AhpWeightRow, __dirname, enLocale, faLocale, __filename, allocationDecisionBlocker(), normalizeLiquidityAmount() (+34 more)
 
 ### Community 1143 - "قرارداد ورودی پرونده تصمیم"
 Cohesion: 0.33
@@ -5966,8 +5935,8 @@ Cohesion: 0.33
 Nodes (6): 17.1. صفحه پروژه‌ها, 17.2. صفحه تنظیمات پروژه, 17.3. صفحه تیم پروژه, 17.4. صفحه سمت‌ها, 17.5. صفحه دسترسی‌ها, 17. ساختار پیشنهادی صفحات نرم‌افزار
 
 ### Community 1151 - "project-activation-feedback.spec.ts"
-Cohesion: 0.04
-Nodes (41): operation(), session(), visit(), assertResponse(), createArchivedProject(), grantOrdinaryProjectAuthority(), realActors(), realSession() (+33 more)
+Cohesion: 0.05
+Nodes (36): operation(), session(), visit(), registeredRoutes(), contractorRow, permissions, project, dailyReport (+28 more)
 
 ### Community 1152 - "Decision: Daily reports"
 Cohesion: 0.25
@@ -5988,10 +5957,6 @@ Nodes (5): Contract: Actionable Notifications, Create rules (service), Errors, E
 ### Community 1157 - "Contract: Project Capability Settings"
 Cohesion: 0.33
 Nodes (5): Behavior when disabled, Contract: Project Capability Settings, Endpoints, Errors, Resource schema
-
-### Community 1159 - "Decision: Synchronize queued reports"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Synchronize queued reports, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1161 - "Contract: WBS delete dependency guards"
 Cohesion: 0.33
@@ -6053,9 +6018,9 @@ Nodes (5): storage, entryPoints, priority, rule, service
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Physical Progress & Periodic Reports Gap Closure
 
-### Community 1176 - "Decision: Documents and correspondence"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Documents and correspondence, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1176 - "PerformanceScoreSerializer"
+Cohesion: 0.29
+Nodes (3): PerformanceScoreSerializer, Meta, _validate_score_range()
 
 ### Community 1177 - "web-http"
 Cohesion: 0.40
@@ -6069,10 +6034,6 @@ Nodes (5): Contract: Budget change requests, Create, Interaction with direct edi
 Cohesion: 0.33
 Nodes (5): Happy path (manual / API), Prerequisites, Pytest focus, Quickstart: Multi-Level Budget, UI
 
-### Community 1180 - "جریان کاربری و درخت تصمیم گزارشات روزانه (Daily Reports User Flow)"
-Cohesion: 0.40
-Nodes (4): جریان کاربری و درخت تصمیم گزارشات روزانه (Daily Reports User Flow), عملیات‌های چرخه وضعیت:, ۲. چرخه حیات و ماشین وضعیت گزارش روزانه (Lifecycle State Machine), ۴. الگوی عملیات ردیف‌های درون‌جدولی و همگام‌سازی آفلاین
-
 ### Community 1181 - "Data Model: Contracts & IPC Gap Closure"
 Cohesion: 0.33
 Nodes (5): Contract (extend), Data Model: Contracts & IPC Gap Closure, IPC (extend), Receivables report (derived, not stored), Relationships (unchanged)
@@ -6080,10 +6041,6 @@ Nodes (5): Contract (extend), Data Model: Contracts & IPC Gap Closure, IPC (exte
 ### Community 1182 - "Quickstart: Contracts & IPC Gap Closure"
 Cohesion: 0.33
 Nodes (5): Backend verify, Manual API smoke, Prerequisites, Quickstart: Contracts & IPC Gap Closure, UI
-
-### Community 1183 - "Contract: Four-way progress display"
-Cohesion: 0.33
-Nodes (6): Contract: Four-way progress display, GET progress snapshot / activities list (additive fields), Permissions, POST `progress/{activity_id}/technical-approve/` (new), POST `progress/manual/` (behavior change), Regression
 
 ### Community 1184 - "Specification Quality Checklist: Cash Flow & Liquidity Allocation Gap Closure"
 Cohesion: 0.33
@@ -6097,17 +6054,17 @@ Nodes (5): Contract: Net Cash Need, Monthly net (from projection), Suggested net
 Cohesion: 0.33
 Nodes (5): API, Contract: Portfolio Cash / Need / Allocation Report, Response, Test anchor, UI
 
-### Community 1187 - "Specification Quality Checklist: Earned Value & Project Control (EVM)"
-Cohesion: 0.33
-Nodes (5): Content Quality, Feature Readiness, Requirement Completeness, Specification Quality Checklist: Earned Value & Project Control (EVM), Validation Notes (2026-10-09)
+### Community 1187 - "Implementation Plan: Stakeholders, Documents, Decisions & Workflow"
+Cohesion: 0.29
+Nodes (7): Complexity Tracking, Documentation (this feature), Implementation Phases, Implementation Plan: Stakeholders, Documents, Decisions & Workflow, Project Structure, Source Code (touched), Summary
 
 ### Community 1188 - "Specification Quality Checklist: Risk, Quality & Safety"
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Requirement Completeness, Specification Quality Checklist: Risk, Quality & Safety, Validation Notes (2026-10-09)
 
-### Community 1189 - "Requirements *(mandatory)*"
-Cohesion: 0.40
-Nodes (5): Functional Requirements, Interface Compatibility Constraints, Key Entities *(include if feature involves data)*, Requirements *(mandatory)*, Scope Boundaries
+### Community 1189 - "Quickstart & Verification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
+Cohesion: 0.29
+Nodes (7): 1. Backend invariants (evidence category: pytest), 2. Frontend typecheck + guard unit tests (evidence category: node tests), 3. Browser verification (evidence category: Playwright E2E), 4. PDF extraction (evidence category: backend PDF), 5. Localization check (evidence category: bilingual), 6. Feature constitution evidence checklist, Quickstart & Verification: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
 
 ### Community 1190 - "APIs"
 Cohesion: 0.33
@@ -6132,6 +6089,10 @@ Nodes (5): Content Quality, Feature Readiness, Requirement Completeness, Specifi
 ### Community 1195 - "Specification Quality Checklist: Decision Support TOPSIS Ranking (Phase 3)"
 Cohesion: 0.33
 Nodes (5): Content Quality, Feature Readiness, Requirement Completeness, Specification Quality Checklist: Decision Support TOPSIS Ranking (Phase 3), Validation Notes (2026-10-10)
+
+### Community 1196 - "Feature: `specs/040-physical-progress-measurement`"
+Cohesion: 0.29
+Nodes (6): Feature: `specs/040-physical-progress-measurement`, Research & Technical Decisions: Physical Progress Measurement, Financial Governance & Technical Approval, Research Topic 1: Unified Enum Alignment (`quantity_based`, `weighted_milestones`, `evidence_based`), Research Topic 2: Strict Financial Governance in Interim Payment Certificates (IPC), Research Topic 5: Supervisor Technical Approval Workflow & Photo-Only Rejection, Research Topic 6: Four-Way Progress & `period_quantity` Calculation
 
 ### Community 1197 - "Dependencies & Execution Order"
 Cohesion: 0.40
@@ -6173,9 +6134,9 @@ Nodes (5): Dependencies & Execution Order, Parallel Opportunities, Phase Depende
 Cohesion: 0.29
 Nodes (7): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export specialty sub-report Excel (FILE 5 / FILE 6), Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1208 - "field_reports/models.py"
-Cohesion: 0.02
-Nodes (117): DailyReportActivityViewSet, DailyReportChildViewSet, DailyReportConcreteLogViewSet, DailyReportCorrectionCancelView, DailyReportEquipmentViewSet, DailyReportIncidentViewSet, DailyReportLaborCampViewSet, DailyReportLaborViewSet (+109 more)
+### Community 1208 - "daily_report_views.py"
+Cohesion: 0.04
+Nodes (82): TestLaborAutoCost, DailyReportActivityViewSet, DailyReportChildViewSet, DailyReportConcreteLogViewSet, DailyReportEquipmentViewSet, DailyReportIncidentViewSet, DailyReportLaborCampViewSet, DailyReportLaborViewSet (+74 more)
 
 ### Community 1209 - "Monorepo Migration Plan"
 Cohesion: 0.40
@@ -6185,17 +6146,17 @@ Nodes (3): JWT Role Claims Integration, Monorepo Migration Plan, Multi-Business 
 Cohesion: 0.40
 Nodes (3): Canvas Design System, shadcn/ui Accessibility Patterns, UI Styling Skill Definition
 
-### Community 1211 - "Decision: Export Gantt PDF"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Export Gantt PDF, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1211 - "Decision Support API"
+Cohesion: 0.33
+Nodes (5): Decision Support API, ISM run, SAW run (Phase 2), Shared record lifecycle and history review, Validation error (interim O03)
 
 ### Community 1212 - ".agents/skills/speckit-taskstoissues/SKILL.md"
 Cohesion: 0.40
 Nodes (4): Outline, Post-Execution Checks, Pre-Execution Checks, User Input
 
-### Community 1213 - "Decision: Filter or change the displayed view"
-Cohesion: 0.22
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Filter or change the displayed view, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1213 - "CommunicationPlan"
+Cohesion: 0.33
+Nodes (5): CommunicationPlan, Meta, CommunicationPlanSerializer, Meta, New: `projects.CommunicationPlan`
 
 ### Community 1214 - "worker"
 Cohesion: 0.50
@@ -6211,11 +6172,15 @@ Nodes (5): Actual Costs & Variance Endpoints, Budget Matrix & Upsert Endpoints, 
 
 ### Community 1218 - "django_db"
 Cohesion: 0.01
-Nodes (147): Migration, Migration, Migration, Migration, Migration, Migration, Migration, Migration (+139 more)
+Nodes (156): Migration, Migration, Migration, Migration, Migration, Migration, Migration, Migration (+148 more)
 
-### Community 1220 - "Project"
-Cohesion: 0.04
-Nodes (41): approve_actual_cost(), _invalidate_evm_caches(), project_requires_cost_document(), test_allocation_crud_and_hours_to_percent(), test_capacity_conflict_409(), test_resource_allocation_model_fields(), TestProcurementReportViews, list_capability_settings() (+33 more)
+### Community 1219 - "Specification Quality Checklist: WBS Structure"
+Cohesion: 0.33
+Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: WBS Structure
+
+### Community 1220 - "fiscal_service.py"
+Cohesion: 0.14
+Nodes (12): assert_fiscal_writable(), create_fiscal_lock(), deactivate_fiscal_lock(), duplicate_document_warnings(), find_active_lock(), FiscalPeriodLocked, require_warning_ack(), WarningsUnacknowledged (+4 more)
 
 ### Community 1221 - "1.1.1 فونداسیون"
 Cohesion: 0.67
@@ -6225,9 +6190,9 @@ Nodes (3): 1.1.1.1 بتن مگر, 1.1.1 فونداسیون, 1.1 ساختمان �
 Cohesion: 0.67
 Nodes (3): 20.1. الزامات کلی, 20.2. جدول الزامات, 20. الزامات ثبت اطلاعات بعد از تاریخ برش
 
-### Community 1223 - "Decision: Manage schedule change requests"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Manage schedule change requests, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1223 - "Data Model: Ranking Reference Verification"
+Cohesion: 0.33
+Nodes (6): ComparisonCase, Data Model: Ranking Reference Verification, DifferenceRecord / ReusedEvidence, Observation, PreservedRankingReference, VerificationCheck / EvidenceRun
 
 ### Community 1224 - "Implementation Strategy"
 Cohesion: 0.50
@@ -6249,9 +6214,9 @@ Nodes (3): _create_wbs(), Migration, seed_templates()
 Cohesion: 0.67
 Nodes (3): 5.1. داده‌های تاریخی, 5.2. داده‌های جاری, 5. تفکیک داده‌های پروژه به دو گروه اصلی
 
-### Community 1229 - "Decision: Approve schedule change request"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve schedule change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1229 - "Specification Quality Checklist: Standardized Daily Weather and Temperature"
+Cohesion: 0.33
+Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Standardized Daily Weather and Temperature
 
 ### Community 1232 - "Velora Design System Master Spec"
 Cohesion: 0.40
@@ -6294,12 +6259,16 @@ Cohesion: 0.67
 Nodes (3): 6.1. پرهیز از کمال‌گرایی, 6.2. اصل پیشنهادی, 6. رویکرد صحیح نسبت به اطلاعات گذشته
 
 ### Community 1247 - "department_activity_data_views.py"
-Cohesion: 0.05
-Nodes (20): IsHrOrAdminOrReadOnly, IsVisitorReadOnly, SpaceMaterialRequest, Meta, _as_decimal(), ItemSerializer, Meta, SpaceMaterialRequestSerializer (+12 more)
+Cohesion: 0.04
+Nodes (38): IsBusinessSetup, IsCommentor, IsHrOrAdmin, IsHumanResource, IsInGroup, IsManager, IsVisitor, CanViewProjectMembers (+30 more)
 
-### Community 1249 - "Decision: Reject schedule change request"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject schedule change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1249 - "Specification Quality Checklist: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening"
+Cohesion: 0.33
+Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Site Inactivity Reasons, Conflict Guard, and Daily-Report Access Hardening
+
+### Community 1250 - "Baseline Evidence — Feature 033 (Phase 1, T002)"
+Cohesion: 0.33
+Nodes (5): 032 state note, Backend pytest baseline (scope: `sub_reports/tests`, `field_reports/tests`), Baseline Evidence — Feature 033 (Phase 1, T002), Environment caveat (T002 evidence-bounds note), Frontend typecheck baseline
 
 ### Community 1251 - "11. ماژول جریان نقدی"
 Cohesion: 0.40
@@ -6357,29 +6326,25 @@ Nodes (4): Automated / UI evidence, Smoke command, Spec Kit deferred (out of pol
 Cohesion: 0.40
 Nodes (4): Contract: Material consumption reconciliation hint, Errors, Get hints, Permissions
 
-### Community 1268 - "Contract: Progress validation rules"
-Cohesion: 0.40
-Nodes (5): >100% with approved quantity change, Compatibility, Contract: Progress validation rules, Daily-report recalculation, Rules
-
-### Community 1269 - "Contract: Ranking Inputs (SAW Phase 2)"
-Cohesion: 0.40
-Nodes (5): Contract: Ranking Inputs (SAW Phase 2), Non-goals, Persistence (case), Structural rules, UI contract (product surface)
+### Community 1268 - "Specification Quality Checklist: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد"
+Cohesion: 0.33
+Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: ثبت آفلاین و همگام‌سازی مطمئن گزارش واحد
 
 ### Community 1270 - "Dependencies & Execution Order"
 Cohesion: 0.40
 Nodes (5): Dependencies & Execution Order, Parallel Opportunities, Phase Dependencies, User Story Dependencies, Within Each User Story
 
-### Community 1271 - "Decision: Submit schedule change request"
-Cohesion: 0.18
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Submit schedule change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1271 - "Decision: Approve schedule change request"
+Cohesion: 0.06
+Nodes (32): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve schedule change request, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions (+24 more)
 
 ### Community 1272 - "API"
 Cohesion: 0.40
 Nodes (4): API, Contract: Quality & Safety Period Report, Response, Rules
 
-### Community 1275 - "Decision: Schedule Gantt"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Schedule Gantt, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1277 - "Contract: IPC Partial Collections"
+Cohesion: 0.40
+Nodes (4): Contract: IPC Partial Collections, Create body, Endpoints, Errors
 
 ### Community 1278 - "9. نحوه برخورد با اعداد سرجمع حسابداری"
 Cohesion: 0.67
@@ -6569,13 +6534,17 @@ Nodes (3): Design Sub-Skill Routing Table, Unified Design Skill Routing, Design 
 Cohesion: 0.67
 Nodes (3): Tailwind CSS @theme Directive, Tailwind Mobile-First Responsive Design, Tailwind CSS Core Utility Classes
 
-### Community 1364 - "Decision: Retry failed load"
-Cohesion: 0.25
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1364 - "Contract: History Navigation and Guarded Execution UI"
+Cohesion: 0.40
+Nodes (5): Behavioral test matrix, Contract: History Navigation and Guarded Execution UI, History state and transitions, Save–execute operation ownership, Shared bounded recovery
 
 ### Community 1393 - "Subcontractors Registry Endpoints"
 Cohesion: 0.67
 Nodes (3): Automated Subcontractor Risk Flag Logic, Subcontractor Weighted Performance Scorecard, Subcontractors Registry Endpoints
+
+### Community 1401 - "Data Model: Contractor Stakeholder Select"
+Cohesion: 0.40
+Nodes (5): Classification — `projects.Stakeholder` (existing), Data Model: Contractor Stakeholder Select, Relationships (conceptual), State / transitions, Validation rules
 
 ### Community 1405 - "Cash Flow and Liquidity Allocation Specs"
 Cohesion: 0.67
@@ -6618,144 +6587,100 @@ Cohesion: 0.67
 Nodes (3): Contract: Liquidity Allocation, AllocationDecision & Lines, ProjectPriorityScore Model
 
 ### Community 1496 - "Decision: Open low-stock alerts"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Open low-stock alerts, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open low-stock alerts, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1497 - "Phase 8: User Story 6 - Optional capability toggles per project (Priority: P2)"
 Cohesion: 0.67
 Nodes (3): Implementation for User Story 6, Phase 8: User Story 6 - Optional capability toggles per project (Priority: P2), Tests for User Story 6 ⚠️
 
 ### Community 1499 - "Decision: Material balance"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Material balance, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Material balance, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1500 - "Decision: Delete block"
 Cohesion: 0.25
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Delete block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Delete block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1501 - "Decision: Edit block"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Edit block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Edit block, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1502 - "Decision: Procurement blocks"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Procurement blocks, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Cohesion: 0.25
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Procurement blocks, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1503 - "Decision: Retry failed load"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1509 - "Decision: Start screen walkthrough"
-Cohesion: 0.29
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 1512 - "Decision: Approve requisition"
 Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Approve requisition, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Start screen walkthrough, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+
+### Community 1512 - "Dependencies & Execution Order"
+Cohesion: 0.40
+Nodes (5): Dependencies & Execution Order, Parallel Opportunities, Phase Dependencies, User Story Dependencies, Within Each User Story
 
 ### Community 1513 - "Implementation Strategy"
 Cohesion: 0.50
 Nodes (4): Implementation Strategy, Incremental Delivery, MVP First (US1 + US2 + US3), TDD reminder
 
-### Community 1514 - "Decision: Partially approve items"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Partially approve items, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1514 - "Dependencies & Execution Order"
+Cohesion: 0.40
+Nodes (5): Dependencies & Execution Order, Parallel Opportunities, Phase Dependencies, User Story Dependencies, Within Each User Story
 
-### Community 1515 - "Decision: Create stock transfer"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Create stock transfer, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1515 - "Decision 2: Concurrency Control & HTTP Status for Duplicate Corrections"
+Cohesion: 0.40
+Nodes (5): Alternatives Considered, Decision 2: Concurrency Control & HTTP Status for Duplicate Corrections, Decision, Problem, Rationale
 
-### Community 1516 - "Decision: Internal stock transfers"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Internal stock transfers, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 1517 - "Decision: Reject stock transfer"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Reject stock transfer, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 1518 - "Decision: Retry failed load"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Retry failed load, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
+### Community 1518 - "Implementation Strategy"
+Cohesion: 0.50
+Nodes (4): Implementation Strategy, Incremental, MVP (US1 only), Suggested MVP scope
 
 ### Community 1519 - "Phase 4: User Story 2 - Universal project record hygiene (Priority: P1)"
 Cohesion: 0.67
 Nodes (3): Implementation for User Story 2, Phase 4: User Story 2 - Universal project record hygiene (Priority: P1), Tests for User Story 2 ⚠️
 
-### Community 1521 - "TestAuthenticationAPI"
-Cohesion: 0.20
-Nodes (3): api_client(), test_user(), TestAuthenticationAPI
-
-### Community 1522 - "Phase 5: User Story 3 - Currency unit safety (Priority: P1)"
-Cohesion: 0.67
-Nodes (3): Implementation for User Story 3, Phase 5: User Story 3 - Currency unit safety (Priority: P1), Tests for User Story 3 ⚠️
-
 ### Community 1523 - "Phase 7: User Story 5 - Actionable notifications (Priority: P2)"
 Cohesion: 0.67
 Nodes (3): Implementation for User Story 5, Phase 7: User Story 5 - Actionable notifications (Priority: P2), Tests for User Story 5 ⚠️
 
-### Community 1527 - "IPCStatus"
-Cohesion: 0.03
-Nodes (59): approved_commitment(), approved_ipc(), contract(), outsider_user(), second_project(), Command, ChangeOrder, Meta (+51 more)
+### Community 1524 - "Phase 9: User Story 7 - Fiscal period lock and duplicate transaction warning (Priority: P3)"
+Cohesion: 0.67
+Nodes (3): Implementation for User Story 7, Phase 9: User Story 7 - Fiscal period lock and duplicate transaction warning (Priority: P3), Tests for User Story 7 ⚠️
 
 ### Community 1529 - "Decision: Discipline subreports"
 Cohesion: 0.25
 Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Discipline subreports, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1532 - "Research: Core Domain Principles & Glossary"
-Cohesion: 0.18
-Nodes (10): R1 — Soft-delete / audit universality, R2 — Project currency & rial/toman, R3 — Unset vs zero, R4 — Actionable notifications, R5 — Project capability toggles, R6 — Fiscal period lock, R7 — Duplicate document warning, R8 — Glossary alignment (+2 more)
+Cohesion: 0.22
+Nodes (8): R3 — Unset vs zero, R4 — Actionable notifications, R5 — Project capability toggles, R6 — Fiscal period lock, R7 — Duplicate document warning, R8 — Glossary alignment, R9 — TDD workflow, Research: Core Domain Principles & Glossary
 
 ### Community 1540 - "Implementation Plan: Shiraz Excel Forms Parity & Official PDF Standardization"
-Cohesion: 0.22
-Nodes (8): Complexity Tracking, Constitution Check, Documentation (this feature), Implementation Plan: Shiraz Excel Forms Parity & Official PDF Standardization, Project Structure, Source Code (repository root), Summary, Technical Context
-
-### Community 1541 - "CashTransaction"
-Cohesion: 0.09
-Nodes (13): CashTransaction, Meta, pay_ipc(), _upsert_ipc_cash_transaction(), test_cash_transaction_failure_rolls_back_payment(), test_payment_rechecks_persisted_approval(), test_payment_rejects_unapproved_ipc(), test_payment_uses_current_approved_state() (+5 more)
-
-### Community 1542 - "Execution Steps"
-Cohesion: 0.29
-Nodes (7): 1. Initialize Convergence Context, 2. Load Artifacts (Progressive Disclosure), 3. Build the Intent Inventory, 4. Assess the Codebase and Classify Findings, 5. Assign Severity, 6. Present the In-Session Findings Summary, Execution Steps
-
-### Community 1544 - ".cursor/skills/speckit-implement/SKILL.md"
-Cohesion: 0.29
-Nodes (6): Completion Report, Done When, Mandatory Post-Execution Hooks, Outline, Pre-Execution Checks, User Input
+Cohesion: 0.25
+Nodes (7): Complexity Tracking, Documentation (this feature), Implementation Plan: Shiraz Excel Forms Parity & Official PDF Standardization, Project Structure, Source Code (repository root), Summary, Technical Context
 
 ### Community 1545 - "Decision: Create department activity record"
 Cohesion: 0.29
 Nodes (7): Action Taken, Authorization & Permissions, Decision: Create department activity record, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1547 - "Contract"
-Cohesion: 0.04
-Nodes (65): IPC, Meta, IPCDeduction, Meta, IPCItem, Meta, ChangeOrderSerializer, Meta (+57 more)
+### Community 1547 - "IPC"
+Cohesion: 0.02
+Nodes (137): add_collection(), collections_total(), payable_net(), remaining_receivable(), IPCCollectionDetailView, IPCCollectionListCreateView, ChangeOrder, Meta (+129 more)
 
 ### Community 1550 - "Decision: Download export workbook"
 Cohesion: 0.29
 Nodes (7): Action Taken, Authorization & Permissions, Decision: Download export workbook, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
-### Community 1552 - "Decision: Approve and lock baseline"
-Cohesion: 0.25
-Nodes (7): Action Taken, Authorization & Permissions, Decision: Approve and lock baseline, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
-
-### Community 1554 - "apply_template_to_project"
-Cohesion: 0.09
-Nodes (21): ProjectTemplateWBS, Meta, apply_template_to_project(), _project_wbs_has_blocking_dependencies(), test_force_apply_blocked_when_cost_depends(), test_template_edit_does_not_change_applied_project(), wbs_template(), Apply (+13 more)
-
 ### Community 1555 - "Phase 8 (T063–T072) — 2026-10-18"
 Cohesion: 0.40
 Nodes (4): Baseline (T001), Run log, Test modules, Verification: Automated Project Daily Report Summary
 
-### Community 1556 - "Contract: Canonical Unit Aggregation and Provenance"
-Cohesion: 0.29
-Nodes (7): Aggregation metadata, Contract: Canonical Unit Aggregation and Provenance, Eligible inputs, Provenance projection, Rebuild behavior, Source navigation authorization, Summary-owned data
-
-### Community 1558 - "Core Principles"
-Cohesion: 0.25
-Nodes (8): Core Principles, I. Server-Enforced Authorization and Tenant/Project Isolation, II. Data Integrity and End-to-End Domain Consistency, III. Bilingual and Locale-Correct Experience, IV. Explicit, Safe Business Mutations, V. Minimal Coherent Changes, VI. Evidence-Based Verification, VII. Accessible, Practical Construction-Management UX
-
 ### Community 1560 - "role_views.py"
-Cohesion: 0.06
-Nodes (18): clear_ratelimit_cache(), test_forgot_password_rate_limit_returns_429(), test_login_rate_limit_returns_429(), health(), is_system_role(), set_role_permissions(), validate_permission_codenames(), RoleListView (+10 more)
+Cohesion: 0.13
+Nodes (11): is_system_role(), set_role_permissions(), validate_permission_codenames(), _normalize_role_name(), RoleCreateSerializer, RoleDetailSerializer, Meta, RolePermissionsSerializer (+3 more)
 
 ### Community 1565 - "scripts"
 Cohesion: 0.33
@@ -6780,10 +6705,6 @@ Nodes (6): Consumer attachment (domains 09–11 / 14), Management decisions, Sam
 ### Community 1592 - "BusinessSecurityRoute"
 Cohesion: 0.40
 Nodes (5): BusinessSecurityRoute(), Context & Screen, Context & Screen, Context & Screen, Context & Screen
-
-### Community 1594 - "Decision: Open daily report summary by date"
-Cohesion: 0.25
-Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision: Open daily report summary by date, Desired Result, Outcomes & Guards, Source Evidence, Subsequent Decisions
 
 ### Community 1595 - "Research an Idea"
 Cohesion: 0.29
@@ -6818,28 +6739,16 @@ Cohesion: 0.40
 Nodes (4): AHP implementation evidence, Convergence implementation (2026-10-11), Final convergence verification, Final verification
 
 ### Community 1614 - "test_api.py"
-Cohesion: 0.08
-Nodes (24): ConcreteBatch, Meta, ReadyMixDelivery, Meta, ConcreteBatchSerializer, Meta, ReadyMixDeliverySerializer, Meta (+16 more)
+Cohesion: 0.13
+Nodes (15): health(), ConcreteBatch, Meta, ReadyMixDelivery, Meta, ConcreteBatchSerializer, Meta, ReadyMixDeliverySerializer (+7 more)
 
 ### Community 1688 - "UI Contract: Site Inactivity, Conflict Guard, and Access Hardening"
 Cohesion: 0.29
 Nodes (7): 1. Covered surfaces, 2. Dynamic reason selector, 3. Inactive-day activity confirmation dialog (residual alignment scope), 4. Accessibility, 5. Localization keys (all exist; the warning copy wording is the only text change), 6. Acceptance scenarios, UI Contract: Site Inactivity, Conflict Guard, and Access Hardening
 
-### Community 1697 - "ProjectScheduleGanttPage"
-Cohesion: 0.50
-Nodes (4): ProjectScheduleGanttPage(), Context & Screen, Context & Screen, Context & Screen
-
 ### Community 1715 - "Contract: AHP Inputs, Execution and History"
 Cohesion: 0.50
 Nodes (4): Contract: AHP Inputs, Execution and History, Draft and run requests, HTTP 400 envelope, Strict execution validation
-
-### Community 1742 - "Data Model: Daily Report Correction Lineage and Lossless Cloning"
-Cohesion: 0.29
-Nodes (6): 1. Domain Entities & Lineage Hierarchy, 2.1 `DailyReport`, 2.2 `DailyReportCorrectionRequest`, 2. Model Specifications, 4. Invariants & Business Rules, Data Model: Daily Report Correction Lineage and Lossless Cloning
-
-### Community 1743 - "منابع علمی و فنی تصمیم‌یار"
-Cohesion: 0.67
-Nodes (3): حدود استفاده, منابع سند اصلی, منابع علمی و فنی تصمیم‌یار
 
 ### Community 1804 - "with"
 Cohesion: 0.08
@@ -6849,9 +6758,9 @@ Nodes (25): cancel-in-progress, group, concurrency, name, runs-on, steps, jobs, 
 Cohesion: 0.07
 Nodes (33): runs-on, steps, AUDIT_LOG_ASYNC, CELERY_TASK_ALWAYS_EAGER, CI, jobs, activation-feedback, playwright (+25 more)
 
-### Community 1825 - "Commitment"
-Cohesion: 0.04
-Nodes (71): _score(), test_decision_requires_owner_and_rationale(), test_incomplete_scores_in_warnings(), test_priority_score_composite(), test_propose_ranks_by_composite_and_respects_pool(), test_score_out_of_range_rejected(), test_zero_liquidity_empty_proposal(), _create_cycle() (+63 more)
+### Community 1825 - "cost_control/models.py"
+Cohesion: 0.03
+Nodes (86): suggested_net_need(), build_portfolio_report(), _actual_months(), build_projected_series(), _iter_months(), _manual_forecast_months(), _month_end(), _month_start() (+78 more)
 
 ### Community 1855 - "Research an Idea"
 Cohesion: 0.29
@@ -6895,23 +6804,23 @@ Nodes (8): Action Taken, Authorization & Permissions, Context & Screen, Decision
 
 ## Knowledge Gaps
 - **385 isolated node(s):** `ADMIN`, `MANAGER`, `ENGINEER`, `ACCOUNTANT`, `HR` (+380 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 14187 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **493 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 14201 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **516 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Existing coverage to reuse` connect `react-i18next` to `HasProjectPermission`, `Research: Decision Support Case Shell (Phase 1)`, `decimal`, `projects/urls.py`, `projects/models.py`?**
-  _High betweenness centrality (0.104) - this node is a cross-community bridge._
+- **Why does `Existing coverage to reuse` connect `HasProjectPermission` to `react-i18next`, `useToast`, `assert_not_self_final_approve`, `lifecycle_service.py`, `kpi_service.py`, `Contract: SAW Execution via Decision Runs`?**
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
 - **Are the 192 inferred relationships involving `Project` (e.g. with `_resolve_recipients()` and `run_daily_alert_checks()`) actually correct?**
   _`Project` has 192 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `ADMIN`, `MANAGER`, `ENGINEER` to the rest of the system?**
   _385 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `react-i18next` be split into smaller, more focused modules?**
-  _Cohesion score 0.029866435814988868 - nodes in this community are weakly interconnected._
-- **Why does `PageHeader()` connect `react-i18next` to `apiJson`, `useToast`, `JalaliDatePicker`, `projects.ts`, `project-decision-support.tsx`, `react`, `project-risk-register.tsx`, `cashflow.ts`, `sprint-button.tsx`, `project-documents.tsx`, `daily-reports.ts`, `apiJson`, `project-subcontractor-detail.tsx`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _Cohesion score 0.028244598220590313 - nodes in this community are weakly interconnected._
+- **Why does `Project` connect `jalali.py` to `models/__init__.py`, `DailyReport`, `TestProcurementReportViews`, `TestRiskIssueSeparation`, `django_contrib_auth`, `ProjectMember`, `test_offline_sync_foundation.py`, `IPC`, `models/__init__.py`, `📋 فازهای پیاده‌سازی`, `lifecycle_service.py`, `DailyReportViewSet`, `checkers.py`, `ViewsTests`, `TestProjectList`, `ProjectViewSet`, `schedule/models.py`, `test_decision_rationale.py`, `Material`, `User`, `Research: Undo Project Suspension and Completion`, `ProjectMemberPermissionOverride`, `daily-reports.ts`, `field_reports/pdf.py`, `cost_control/models.py`, `HasProjectPermission`, `msp_import.py`, `unit_report_services.py`, `Tasks: Project Registration & Kickoff Gap Closure`, `offline_sync.py`, `sub_reports/models.py`, `TestStructuredTransfer`, `SubReportStatus`, `actor`, `project_templates/views.py`, `projects/models.py`, `daily_report_views.py`, `test_section_contracts.py`, `kpi_service.py`, `schedule/urls.py`, `validate_concrete_rows`, `cash_flow/views.py`, `cost_control/views.py`, `field_reports/services/__init__.py`, `datetime`, `RiskEventSerializer`, `risk/views.py`, `RiskEvent`, `TestHasProcurementStepRole`, `ProjectChangeRequestSerializer`, `test_transfer_api.py`, `ProjectScopedViewSet`, `WarehouseCreateAPITests`, `test_offline_target_isolation.py`, `create_wbs_node`, `UnitReportViewSet`, `OrganizationUnit`, `TestRiskRegisterAPI`, `Tasks: Core Domain Principles & Glossary`, `test_material_reconciliation_documents.py`, `economic/views.py`, `hr/services/allocation_service.py`, `core/conftest.py`, `Stakeholder`, `common/tests/test_validators.py`?**
+  _High betweenness centrality (0.072) - this node is a cross-community bridge._
 - **Are the 185 inferred relationships involving `HasProjectPermission` (e.g. with `ActiveAlertsView` and `AlertAcknowledgeView`) actually correct?**
   _`HasProjectPermission` has 185 INFERRED edges - model-reasoned connections that need verification._
 - **Should `apiJson` be split into smaller, more focused modules?**
-  _Cohesion score 0.02722140072590402 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.03828537874339401 - nodes in this community are weakly interconnected._

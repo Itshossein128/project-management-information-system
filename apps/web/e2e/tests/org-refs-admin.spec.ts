@@ -41,9 +41,8 @@ test.describe("Org refs admin — Spec 02", () => {
 
     await page.goto("/projects/new");
     await expect(page.getByTestId("wizard-contract-type")).toBeVisible({ timeout: 15_000 });
-    await expect(
-      page.getByTestId("wizard-contract-type").locator(`option[value="${typeCode}"]`),
-    ).toHaveCount(1, { timeout: 15_000 });
+    await page.getByTestId("wizard-contract-type").click();
+    await expect(page.getByRole("option", { name: new RegExp(typeCode) })).toBeVisible();
   });
 });
 
