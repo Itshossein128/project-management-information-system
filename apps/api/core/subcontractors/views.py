@@ -151,6 +151,7 @@ class ScoreDetailView(APIView):
 
 class WarningListCreateView(APIView):
     permission_classes = [IsAuthenticated, HasProjectPermission]
+    required_permission = 'view_contracts'
 
     def get_permissions(self):
         if self.request.method == 'GET':
