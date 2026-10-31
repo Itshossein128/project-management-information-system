@@ -5,6 +5,7 @@ import { cn } from "@/app/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "../hooks/useNavigation";
 import { SidebarItem } from "./components/sidebarItem";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface SidebarProps {
   className?: string;
@@ -30,7 +31,21 @@ export const Sidebar = ({ className, onClose }: SidebarProps) => {
             <span className="block text-xs text-muted-foreground">{t("nav.workspaceSubtitle")}</span>
           </span>
         </Link>
-        {onClose ? <button type="button" onClick={onClose} aria-label={t("nav.closeMenu")} className="flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"><X className="size-5" aria-hidden="true" /></button> : null}
+        {onClose ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={t("nav.closeMenu")}
+                className="flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              >
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{t("nav.closeMenu")}</TooltipContent>
+          </Tooltip>
+        ) : null}
       </div>
       <nav id="nav-mainSidebar" className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 py-5 [scrollbar-gutter:stable]" aria-label={t("nav.main")}>
         {sections.map((section) => {
