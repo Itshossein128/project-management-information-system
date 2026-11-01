@@ -38,6 +38,11 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - name: Test project activation messages on desktop and mobile
         run: pnpm test:project-activation
+        env:
+          CI: "true"
+          CELERY_TASK_ALWAYS_EAGER: "true"
+          AUDIT_LOG_ASYNC: "false"
+          DATABASE_URL: sqlite:///:memory:
       - name: Upload activation test report and failure evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -87,3 +92,4 @@ jobs:
           CI: "true"
           CELERY_TASK_ALWAYS_EAGER: "true"
           AUDIT_LOG_ASYNC: "false"
+          DATABASE_URL: sqlite:///:memory:

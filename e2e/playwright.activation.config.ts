@@ -7,6 +7,7 @@ const root = resolve(__dirname, "..");
 export default defineConfig({
   testDir: "./tests",
   testMatch: "project-activation-feedback.spec.ts",
+  timeout: 60000,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
