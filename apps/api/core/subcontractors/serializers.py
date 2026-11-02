@@ -42,18 +42,24 @@ class SubcontractorSerializer(serializers.ModelSerializer):
             obj._risk_cache = compute_risk_flag(obj)
         return obj._risk_cache
 
-    def get_latest_score(self, obj):
+    def _get_latest_score_obj(self, obj):
+        # ⚡ Bolt: Cache latest score on model instance to avoid duplicate filtering and max() calculations across fields
+        if hasattr(obj, '_cached_latest_score'):
+            return obj._cached_latest_score
         valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
-        if not valid_scores:
+        obj._cached_latest_score = max(valid_scores, key=lambda x: x.score_date) if valid_scores else None
+        return obj._cached_latest_score
+
+    def get_latest_score(self, obj):
+        s = self._get_latest_score_obj(obj)
+        if not s:
             return None
-        s = max(valid_scores, key=lambda x: x.score_date)
         return float(s.overall_score) if s.overall_score is not None else None
 
     def get_latest_score_date(self, obj):
-        valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
-        if not valid_scores:
+        s = self._get_latest_score_obj(obj)
+        if not s:
             return None
-        s = max(valid_scores, key=lambda x: x.score_date)
         return s.score_date.isoformat()
 
     def get_financial_summary(self, obj):
@@ -70,13 +76,20 @@ class SubcontractorSerializer(serializers.ModelSerializer):
     def get_risk_reasons(self, obj):
         return self._risk(obj)[1]
 
+    def _get_active_warnings(self, obj):
+        # ⚡ Bolt: Cache active warnings on model instance to prevent duplicate iterations across warning_count and active_warning_types
+        if hasattr(obj, '_cached_active_warnings'):
+            return obj._cached_active_warnings
+        obj._cached_active_warnings = [
+            w for w in obj.warnings.all() if not w.is_deleted and not w.resolved
+        ]
+        return obj._cached_active_warnings
+
     def get_warning_count(self, obj):
-        return sum(1 for w in obj.warnings.all() if not w.is_deleted and not w.resolved)
+        return len(self._get_active_warnings(obj))
 
     def get_active_warning_types(self, obj):
-        return list(set(
-            w.warning_type for w in obj.warnings.all() if not w.is_deleted and not w.resolved
-        ))
+        return list(set(w.warning_type for w in self._get_active_warnings(obj)))
 
 
 class SubcontractorDetailSerializer(SubcontractorSerializer):
