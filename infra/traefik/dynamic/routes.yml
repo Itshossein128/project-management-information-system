@@ -97,7 +97,7 @@ http:
     web:
       loadBalancer:
         servers:
-          - url: http://web:3000
+          - url: http://velora-web:3000
     storage:
       loadBalancer:
         servers:
