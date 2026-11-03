@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "mapping_status": "proposed_aliases_require_stakeholder_review",
+  "concepts": [
+    {
+      "id": "daily-report",
+      "name_fa": "گزارش روزانه کل کارگاه",
+      "name_en": "Daily report",
+      "aliases": [
+        "گزارش روزانه",
+        "گزارش کل کارگاه",
+        "گزارش کارگاه",
+        "daily report",
+        "DailyReport"
+      ],
+      "description": "گزارش یک روز کارگاه با وضعیت و ردیف‌های عملیاتی؛ با گزارش دوره‌ای یا صورت‌وضعیت یکی نیست.",
+      "sources": [
+        "apps/api/core/field_reports/models.py",
+        "specs/034-daily-lifecycle-lock/spec.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ],
+      "symbols": [
+        "DailyReport"
+      ]
+    },
+    {
+      "id": "discipline-sub-report",
+      "name_fa": "گزارش روزانه تخصصی",
+      "name_en": "Discipline sub-report",
+      "aliases": [
+        "ساب ریپورت",
+        "سابریپورت",
+        "ساب گزارش",
+        "گزارش ابنیه",
+        "گزارش برق",
+        "گزارش تاسیسات",
+        "گزارش دیسیپلین",
+        "discipline sub report",
+        "DisciplineSubReport"
+      ],
+      "description": "گزارش تخصصی رشته مانند ابنیه یا تأسیسات؛ نقش آن در جمع روزانه باید از قرارداد تجمیع بررسی شود.",
+      "sources": [
+        "apps/api/core/sub_reports/models.py",
+        "apps/api/core/field_reports/services/daily_report_aggregation.py"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ],
+      "symbols": [
+        "DisciplineSubReport"
+      ]
+    },
+    {
+      "id": "daily-rollup",
+      "name_fa": "تجمیع گزارش‌های روزانه",
+      "name_en": "Daily report aggregation",
+      "aliases": [
+        "جمع گزارش",
+        "جمع گزارشها",
+        "جمع نیروها",
+        "تعداد کارگرها",
+        "جمع کارگرها",
+        "نیروها دوبار",
+        "جمع کارگاه",
+        "تجمیع",
+        "rollup",
+        "aggregation",
+        "rebuild_daily_report_summary",
+        "عدد کارگرا",
+        "عدد کارگرها"
+      ],
+      "description": "ساخت جمع روزانه از منابع تخصصی، با توجه به وضعیت منابع و منشأ هر عدد. علت اختلاف عدد از خود عبارت کاربر قابل نتیجه‌گیری نیست.",
+      "sources": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py",
+        "specs/039-auto-daily-rollup/spec.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ],
+      "symbols": [
+        "rebuild_daily_report_summary",
+        "ensure_daily_report_summary"
+      ]
+    },
+    {
+      "id": "report-correction",
+      "name_fa": "اصلاح و قفل گزارش",
+      "name_en": "Report correction and lineage",
+      "aliases": [
+        "اصلاح گزارش",
+        "گزارش تایید شده",
+        "گزارش قفل",
+        "قفل گزارش",
+        "تاریخچه گزارش",
+        "گزارش رو بستم",
+        "گزارش را بستم",
+        "بعد از تایید",
+        "open_correction",
+        "correction",
+        "lineage"
+      ],
+      "description": "چرخه تأیید، قفل و نسخه اصلاحی گزارش؛ واژه بستن به‌تنهایی وضعیت approved را ثابت نمی‌کند.",
+      "sources": [
+        "apps/api/core/field_reports/services/correction_service.py",
+        "apps/api/core/field_reports/services/__init__.py",
+        "specs/034-daily-lifecycle-lock/spec.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ],
+      "symbols": [
+        "open_correction",
+        "cancel_correction"
+      ]
+    },
+    {
+      "id": "unset-quantity",
+      "name_fa": "مقدار ثبت‌نشده در برابر صفر",
+      "name_en": "Unset versus zero quantity",
+      "aliases": [
+        "ثبت نشده",
+        "مقدار خالی",
+        "صفر نشون",
+        "صفر نشان",
+        "عدد صفر",
+        "quantity_unset_invalid",
+        "unset",
+        "not measured"
+      ],
+      "description": "مقدار نامشخص و صفر ثبت‌شده دو حالت متفاوت‌اند؛ پیش از اصلاح نمایش باید وضعیت اندازه‌گیری هم بررسی شود.",
+      "sources": [
+        "specs/036-validation-codes-unset-semantics/spec.md",
+        "apps/api/core/field_reports/serializers.py"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/01-دامنه، اصول و واژه‌نامه.md"
+      ]
+    },
+    {
+      "id": "offline-sync",
+      "name_fa": "ثبت آفلاین و همگام‌سازی",
+      "name_en": "Offline synchronization",
+      "aliases": [
+        "بدون اینترنت",
+        "اینترنت قطع",
+        "اینترنت وصل",
+        "دوباره ارسال",
+        "آفلاین",
+        "افلاین",
+        "همگام سازی",
+        "offline",
+        "sync_batch",
+        "idempotency"
+      ],
+      "description": "ذخیره محلی، صف ارسال و حل تعارض پس از اتصال؛ ارسال مجدد لزوماً به معنی ایجاد دوباره رکورد نیست.",
+      "sources": [
+        "specs/037-daily-offline-sync/spec.md",
+        "apps/api/core/sub_reports/services/offline_sync.py",
+        "apps/api/core/field_reports/services/__init__.py"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ]
+    },
+    {
+      "id": "wbs",
+      "name_fa": "ساختار شکست کار",
+      "name_en": "Work breakdown structure",
+      "aliases": [
+        "ساختار شکست",
+        "شکست کار",
+        "بسته کاری",
+        "wbs",
+        "کد فعالیت",
+        "درخت فعالیت"
+      ],
+      "description": "ساختار سلسله‌مراتبی محدوده؛ فعالیت زمان‌بندی، کد WBS و محل اجرا مفاهیم قابل تفکیک‌اند.",
+      "sources": [
+        "apps/api/core/wbs/services.py",
+        "apps/web/src/app/routes/project-wbs.tsx"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/04-ساختار شکست کار WBS.md"
+      ]
+    },
+    {
+      "id": "activity-log",
+      "name_fa": "دفتر جامع فعالیت‌های اجرایی",
+      "name_en": "Activity master log",
+      "aliases": [
+        "دفتر فعالیت",
+        "فعالیتهای انجام شده",
+        "بانک فعالیت",
+        "فعالیت لاگ",
+        "activity log",
+        "activity master log"
+      ],
+      "description": "فهرست فعالیت‌های اجرایی و منشأ گزارش آن‌ها؛ با برنامه زمان‌بندی یکی نیست.",
+      "sources": [
+        "apps/api/core/field_reports/services/activity_log.py",
+        "apps/web/src/app/routes/project-activity-log.tsx"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ]
+    },
+    {
+      "id": "physical-progress",
+      "name_fa": "پیشرفت فیزیکی و گزارش دوره‌ای",
+      "name_en": "Physical progress and periodic reports",
+      "aliases": [
+        "پیشرفت فیزیکی",
+        "درصد پیشرفت",
+        "پیشرفت واقعی",
+        "کار چقدر جلو رفته",
+        "گزارش ماهانه",
+        "گزارش هفتگی",
+        "گزارش دوره ای",
+        "physical progress",
+        "earned value",
+        "EVM"
+      ],
+      "description": "پیشرفت تابع روش اندازه‌گیری، وزن و بازه است؛ با مبلغ پرداخت یا درصد زمان سپری‌شده برابر فرض نمی‌شود.",
+      "sources": [
+        "specs/040-physical-progress-measurement/spec.md",
+        "specs/041-periodic-reports-rollup/spec.md",
+        "apps/web/src/app/routes/project-progress.tsx"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/08-پیشرفت فیزیکی و گزارش‌های دوره‌ای.md"
+      ]
+    },
+    {
+      "id": "contract-ipc",
+      "name_fa": "قرارداد و صورت‌وضعیت",
+      "name_en": "Contract and interim payment certificate",
+      "aliases": [
+        "صورت وضعیت",
+        "صورتوضعیت",
+        "پول پیمانکار",
+        "طلب پیمانکار",
+        "پرداخت پیمانکار",
+        "ipc",
+        "interim payment",
+        "صورت حساب پیمانکار"
+      ],
+      "description": "درخواست پرداخت بابت کار انجام‌شده؛ تأیید صورت‌وضعیت با پرداخت وجه یکی نیست.",
+      "sources": [
+        "apps/api/core/contracts/models.py",
+        "apps/api/core/contracts/services/ipc_service.py",
+        "specs/011-contracts-ipc/spec.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/10-قرارداد و صورت‌وضعیت.md"
+      ],
+      "symbols": [
+        "IPCStatus"
+      ]
+    },
+    {
+      "id": "procurement",
+      "name_fa": "تدارکات و درخواست خرید",
+      "name_en": "Procurement and material requisitions",
+      "aliases": [
+        "درخواست خرید",
+        "خرید مصالح",
+        "درخواست مصالح",
+        "تدارکات",
+        "انبار",
+        "حواله",
+        "procurement",
+        "requisition"
+      ],
+      "description": "درخواست، تأیید، خرید و گردش مصالح؛ کاربر، مرحله و دامنه کارگاه یا بلوک باید معلوم شود.",
+      "sources": [
+        "apps/api/core/procurement/services/approval_engine.py",
+        "apps/api/core/procurement/permissions.py"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/تدارکات و درخواست‌های خرید (Procurement & Requisitions)/نیازمندی‌های سیستم تدارکات و خریدهای تفکیک‌شده (MR & Traceability).md"
+      ]
+    },
+    {
+      "id": "authorization",
+      "name_fa": "نقش، مجوز و عضویت پروژه",
+      "name_en": "Project authorization",
+      "aliases": [
+        "دسترسی",
+        "اجازه",
+        "نمی تونه ببینه",
+        "نمیتونه ببینه",
+        "نقش کاربر",
+        "عضویت پروژه",
+        "permission",
+        "403",
+        "IDOR",
+        "tenant",
+        "authorization"
+      ],
+      "description": "نمایش دکمه در UI با اختیار عملیات سمت سرور یکی نیست؛ مجوز باید در دامنه پروژه بررسی شود.",
+      "sources": [
+        ".specify/memory/constitution.md",
+        "apps/api/core/projects/permissions.py",
+        "docs/decision-tree/README.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/01-دامنه، اصول و واژه‌نامه.md"
+      ]
+    },
+    {
+      "id": "report-export",
+      "name_fa": "خروجی اکسل و PDF گزارش",
+      "name_en": "Report export",
+      "aliases": [
+        "خروجی اکسل",
+        "فایل اکسل",
+        "فرم شیراز",
+        "چاپ گزارش",
+        "پرینت",
+        "فایل ۴",
+        "فایل 4",
+        "PDF",
+        "FILE 4",
+        "excel export"
+      ],
+      "description": "خروجی گزارش باید با نوع گزارش، قالب، وضعیت و منشأ ارقام تطبیق داده شود.",
+      "sources": [
+        "specs/044-shiraz-excel-parity-pdf/spec.md",
+        "apps/api/core/field_reports/models.py"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/07-گزارش روزانه کارگاه.md"
+      ]
+    },
+    {
+      "id": "project-lifecycle",
+      "name_fa": "چرخه عمر پروژه",
+      "name_en": "Project lifecycle",
+      "aliases": [
+        "پروژه آرشیو",
+        "پروژه بایگانی",
+        "فعال کردن پروژه",
+        "تایید پروژه",
+        "تعلیق پروژه",
+        "project activation",
+        "archive project"
+      ],
+      "description": "فعال‌سازی، تعلیق، تکمیل و آرشیو پروژه وضعیت‌های متفاوتی دارند و به مجوز وابسته‌اند.",
+      "sources": [
+        "apps/api/core/projects/models.py",
+        "docs/decision-tree/README.md"
+      ],
+      "stakeholder_sources": [
+        "docs/طرح اولیه و نیازمندی‌های سیستم (System Requirements)/راهنمای پیاده‌سازی Velora (Velora Implementation Specs)/03-ثبت پروژه و آغاز کار.md"
+      ]
+    }
+  ],
+  "ambiguities": [
+    {
+      "terms": [
+        "گزارش"
+      ],
+      "unless": [
+        "روزانه",
+        "کارگاه",
+        "ماهانه",
+        "هفتگی",
+        "دوره ای",
+        "ابنیه",
+        "برق",
+        "تاسیسات",
+        "صورت وضعیت",
+        "daily",
+        "periodic"
+      ],
+      "question": "منظور کدام گزارش است: روزانه کل کارگاه، تخصصی یک رشته یا گزارش دوره‌ای؟"
+    },
+    {
+      "terms": [
+        "بستم",
+        "بسته شد",
+        "بستن گزارش"
+      ],
+      "unless": [],
+      "question": "منظور از بستن، تأیید و قفل گزارش است یا فقط خروج از صفحه؟ وضعیت ثبت‌شده گزارش چیست؟"
+    },
+    {
+      "terms": [
+        "کارکرد"
+      ],
+      "unless": [
+        "ماشین",
+        "نیرو",
+        "ساعت",
+        "مقدار",
+        "فعالیت",
+        "پیمانکار"
+      ],
+      "question": "منظور از کارکرد، مقدار اجرای فعالیت است، ساعت نیروی انسانی یا کارکرد ماشین‌آلات؟"
+    },
+    {
+      "terms": [
+        "پیشرفت"
+      ],
+      "unless": [
+        "فیزیکی",
+        "مالی",
+        "درصد",
+        "زمان",
+        "physical",
+        "evm"
+      ],
+      "question": "کدام شاخص پیشرفت مدنظر است: فیزیکی، مالی یا زمان‌بندی و برای چه بازه‌ای؟"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "chunk_chars": 1800,
+  "source_groups": [
+    {"pattern": ".specify/memory/constitution.md", "kind": "governance", "status": "project_policy"},
+    {"pattern": "knowledge/articles/*.md", "kind": "interpretation_guide", "status": "proposed"},
+    {"pattern": "knowledge/sources/*.md", "kind": "stakeholder_statement", "status": "unreviewed"},
+    {"pattern": "knowledge/sources/*.txt", "kind": "stakeholder_statement", "status": "unreviewed"},
+    {"pattern": "knowledge/sources/*.docx", "kind": "stakeholder_statement", "status": "unreviewed"},
+    {"pattern": "docs/decision-tree/**/*.md", "kind": "documented_behavior", "status": "requires_runtime_verification"},
+    {"pattern": "docs/**/*.md", "kind": "project_document", "status": "approval_unknown"},
+    {"pattern": "docs/**/*.txt", "kind": "stakeholder_statement", "status": "unreviewed"},
+    {"pattern": "docs/**/*.docx", "kind": "stakeholder_document", "status": "approval_unknown"},
+    {"pattern": "specs/**/*.md", "kind": "feature_design", "status": "implementation_not_implied"},
+    {"pattern": "reports_documentation/**/*.md", "kind": "feature_design", "status": "implementation_not_implied"},
+    {"pattern": "apps/api/core/**/*.py", "kind": "implementation", "status": "source_only_not_runtime_proof"},
+    {"pattern": "apps/web/src/**/*.ts", "kind": "implementation", "status": "source_only_not_runtime_proof"},
+    {"pattern": "apps/web/src/**/*.tsx", "kind": "implementation", "status": "source_only_not_runtime_proof"}
+  ],
+  "exclude_parts": [".git", "node_modules", ".venv", "__pycache__", "migrations", "test-results", "playwright-report"],
+  "embedding": {
+    "endpoint": "http://127.0.0.1:1234/v1/embeddings",
+    "model": "text-embedding-qwen3-embedding-0.6b",
+    "endpoint_env": "KNOWLEDGE_EMBEDDING_URL",
+    "model_env": "KNOWLEDGE_EMBEDDING_MODEL",
+    "key_env": "KNOWLEDGE_EMBEDDING_API_KEY",
+    "query_prefix": "Instruct: Given a Persian or English software-development request, retrieve relevant project requirements, stakeholder documents and source-code passages.\nQuery: ",
+    "passage_prefix": "",
+    "batch_size": 4
+  }
+}

@@ -1,0 +1,493 @@
+{
+  "schema_version": 1,
+  "name": "authored_request_understanding_benchmark",
+  "description": "Synthetic engineering and stakeholder-style requests. Development and holdout are separate. These are not real stakeholder conversations or human-validated acceptance decisions.",
+  "cases": [
+    {
+      "id": "d01",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "چرا جمع کارگرها در گزارش کل کارگاه بعد از تایید تغییر میکنه؟",
+      "request_type": "bug",
+      "expected_concepts": [
+        "daily-rollup",
+        "daily-report"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py"
+      ],
+      "expect_empty": false
+    },
+    {
+      "id": "d02",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "تعداد استادکار در گزارش ابنیه با جمع کل یکسان نیست",
+      "request_type": "bug",
+      "expected_concepts": [
+        "discipline-sub-report"
+      ],
+      "any_source": [
+        "apps/api/core/sub_reports/models.py"
+      ],
+      "expect_empty": false
+    },
+    {
+      "id": "d03",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "مقدار خالی رو صفر نشون میده؛ میخوام ثبت نشده مشخص باشه",
+      "request_type": "bug",
+      "expected_concepts": [
+        "unset-quantity"
+      ],
+      "any_source": [
+        "specs/036-validation-codes-unset-semantics/spec.md",
+        "apps/api/core/field_reports/serializers.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "d04",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "اینترنت وصل شد و دوباره ارسال باعث ثبت دو نسخه شد",
+      "request_type": "bug",
+      "expected_concepts": [
+        "offline-sync"
+      ],
+      "any_source": [
+        "specs/037-daily-offline-sync/spec.md",
+        "apps/api/core/sub_reports/services/offline_sync.py"
+      ],
+      "expect_empty": false
+    },
+    {
+      "id": "d05",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "تایید صورت وضعیت با پرداخت پیمانکار چه فرقی داره؟",
+      "request_type": "question",
+      "expected_concepts": [
+        "contract-ipc"
+      ],
+      "any_source": [
+        "apps/api/core/contracts/models.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "d06",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "ساختار شکست کار رو برای مرتب کردن بسته کاری میخوام",
+      "request_type": "feature",
+      "expected_concepts": [
+        "wbs"
+      ],
+      "any_source": [
+        "apps/api/core/wbs/services.py",
+        "apps/web/src/app/routes/project-wbs.tsx"
+      ],
+      "expect_empty": false
+    },
+    {
+      "id": "d07",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Trace DailyReport correction lineage",
+      "request_type": "question",
+      "expected_concepts": [
+        "daily-report",
+        "report-correction"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/services/correction_service.py",
+        "apps/api/core/field_reports/models.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "d08",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Explain quantity_unset_invalid and unset versus zero",
+      "request_type": "question",
+      "expected_concepts": [
+        "unset-quantity"
+      ],
+      "any_source": [
+        "specs/036-validation-codes-unset-semantics/spec.md",
+        "apps/api/core/field_reports/serializers.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "d09",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Review rebuild_daily_report_summary aggregation inputs",
+      "request_type": "question",
+      "expected_concepts": [
+        "daily-rollup"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "d10",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "گزارش خراب است درستش کنید",
+      "request_type": "bug",
+      "must_clarify": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "کدام گزارش",
+        "نوع گزارش"
+      ]
+    },
+    {
+      "id": "d11",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "کارکرد رو اصلاح کنید",
+      "request_type": "feature",
+      "must_clarify": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "منظور از کارکرد"
+      ]
+    },
+    {
+      "id": "d12",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "برای سفر به استانبول بلیط هواپیما میخوام",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false
+    },
+    {
+      "id": "d13",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Who won the football world cup?",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false
+    },
+    {
+      "id": "d14",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Trace quarterly_budget_frobnicator",
+      "request_type": "question",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "quarterly_budget_frobnicator"
+      ]
+    },
+    {
+      "id": "d15",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "گزارش روزانه را با imaginary_rollup_gateway تطبیق بده",
+      "request_type": "question",
+      "expected_concepts": [
+        "daily-report"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/models.py"
+      ],
+      "must_clarify": true,
+      "expect_empty": false,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "imaginary_rollup_gateway"
+      ]
+    },
+    {
+      "id": "d16",
+      "split": "development",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "ساختار شکست کار چیست؟",
+      "request_type": "question",
+      "expected_concepts": [
+        "wbs"
+      ],
+      "any_source": [
+        "apps/api/core/wbs/services.py",
+        "apps/web/src/app/routes/project-wbs.tsx"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h01",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "در گزارش روزانه کل کارگاه چه چیزهایی ثبت میشه؟",
+      "request_type": "question",
+      "expected_concepts": [
+        "daily-report"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/models.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h02",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "گزارش برق رو جدا از گزارش ابنیه میخوام",
+      "request_type": "feature",
+      "expected_concepts": [
+        "discipline-sub-report"
+      ],
+      "any_source": [
+        "apps/api/core/sub_reports/models.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h03",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "عدد صفر وارد کردم ولی میگه ثبت نشده",
+      "request_type": "bug",
+      "expected_concepts": [
+        "unset-quantity"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/serializers.py",
+        "specs/036-validation-codes-unset-semantics/spec.md"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h04",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "بدون اینترنت اطلاعات ذخیره بشه و بعدا همگام سازی بشه",
+      "request_type": "feature",
+      "expected_concepts": [
+        "offline-sync"
+      ],
+      "any_source": [
+        "specs/037-daily-offline-sync/spec.md",
+        "apps/api/core/sub_reports/services/offline_sync.py"
+      ],
+      "expect_empty": false
+    },
+    {
+      "id": "h05",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "صورت‌وضعیت تایید شده اما طلب پیمانکار هنوز پرداخت نشده",
+      "request_type": "question",
+      "expected_concepts": [
+        "contract-ipc"
+      ],
+      "any_source": [
+        "apps/api/core/contracts/models.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h06",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "خروجی اکسل فرم شیراز فایل 4 رو از کجا میگیرم؟",
+      "request_type": "question",
+      "expected_concepts": [
+        "report-export"
+      ],
+      "any_source": [
+        "specs/044-shiraz-excel-parity-pdf/spec.md"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h07",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Locate open_correction and cancel_correction",
+      "request_type": "question",
+      "expected_concepts": [
+        "report-correction"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/services/correction_service.py"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h08",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Locate ReportStatus definitions",
+      "request_type": "question",
+      "any_source": [
+        "apps/api/core/field_reports/models.py",
+        "apps/web/src/app/lib/api/daily-reports.ts"
+      ],
+      "must_clarify": false,
+      "expect_empty": false
+    },
+    {
+      "id": "h09",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "پیشرفت خوب نیست بررسی کنید",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "کدام شاخص پیشرفت"
+      ]
+    },
+    {
+      "id": "h10",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "گزارش رو بستم ولی هنوز تغییر میکنه",
+      "request_type": "bug",
+      "expected_concepts": [
+        "report-correction"
+      ],
+      "must_clarify": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "منظور از بستن"
+      ]
+    },
+    {
+      "id": "h11",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "zzalpha_pipeline_stage",
+      "request_type": "question",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "zzalpha_pipeline_stage"
+      ]
+    },
+    {
+      "id": "h12",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "BudgetTeleportWidget",
+      "request_type": "question",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "BudgetTeleportWidget"
+      ]
+    },
+    {
+      "id": "h13",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "stakeholder",
+      "query": "مقایسه قیمت هتل های مشهد برای تعطیلات",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false
+    },
+    {
+      "id": "h14",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "How do I tune a violin?",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false
+    },
+    {
+      "id": "h15",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Explain quantum entanglement experiments",
+      "request_type": "unknown",
+      "must_clarify": true,
+      "expect_empty": true,
+      "ready_for_planning": false
+    },
+    {
+      "id": "h16",
+      "split": "holdout",
+      "origin": "synthetic",
+      "audience": "engineer",
+      "query": "Explain open_correction together with speculative_cost_clone_v99",
+      "request_type": "question",
+      "expected_concepts": [
+        "report-correction"
+      ],
+      "any_source": [
+        "apps/api/core/field_reports/services/correction_service.py"
+      ],
+      "must_clarify": true,
+      "expect_empty": false,
+      "ready_for_planning": false,
+      "question_terms_any": [
+        "speculative_cost_clone_v99"
+      ]
+    }
+  ],
+  "holdout_status": "exposed_during_debugging_not_independent",
+  "holdout_note": "Initial run: development 16/16, holdout 15/16. h08 exposed import-use ranking ahead of symbol definitions. After this diagnosis, the suite is regression coverage; it is no longer independent evidence for the revised retriever."
+}

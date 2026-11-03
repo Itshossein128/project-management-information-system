@@ -1,0 +1,21 @@
+{
+  "suite_status": "authored_smoke_cases_not_stakeholder_validated",
+  "cases": [
+    {"id": "client-daily", "query": "گزارش روزانه کل کارگاه را میخوام ببینم", "expected_concepts": ["daily-report"], "any_source": ["apps/api/core/field_reports/models.py"]},
+    {"id": "client-closed", "query": "گزارش رو بستم ولی فرداش عدد کارگرا عوض شد", "expected_concepts": ["report-correction"], "must_clarify": true, "any_source": ["apps/api/core/field_reports/services/correction_service.py", "specs/034-daily-lifecycle-lock/spec.md"]},
+    {"id": "client-labor-rollup", "query": "چرا جمع کارگرها در گزارش کل کارگاه دوبار حساب شده؟", "expected_concepts": ["daily-rollup", "daily-report"], "any_source": ["apps/api/core/field_reports/services/daily_report_aggregation.py", "specs/039-auto-daily-rollup/spec.md"]},
+    {"id": "client-discipline", "query": "گزارش ابنیه و گزارش برق باید جدا باشند", "expected_concepts": ["discipline-sub-report"], "any_source": ["apps/api/core/sub_reports/models.py"]},
+    {"id": "client-unset", "query": "مقدار خالی رو صفر نشون میده", "expected_concepts": ["unset-quantity"], "any_source": ["specs/036-validation-codes-unset-semantics/spec.md", "apps/api/core/field_reports/serializers.py"]},
+    {"id": "client-offline", "query": "اینترنت وصل شد دوباره ارسال کردم و دوتا ثبت شد", "expected_concepts": ["offline-sync"], "any_source": ["specs/037-daily-offline-sync/spec.md", "apps/api/core/sub_reports/services/offline_sync.py"]},
+    {"id": "client-ipc", "query": "صورت‌وضعیت پیمانکار تایید شده ولی هنوز پول نداده ایم", "expected_concepts": ["contract-ipc"], "any_source": ["apps/api/core/contracts/models.py", "apps/api/core/contracts/services/ipc_service.py"]},
+    {"id": "client-progress", "query": "درصد پیشرفت فیزیکی از کجا حساب میشه؟", "expected_concepts": ["physical-progress"], "any_source": ["specs/040-physical-progress-measurement/spec.md", "apps/web/src/app/routes/project-progress.tsx"]},
+    {"id": "client-procurement", "query": "درخواست خرید مصالح به کدوم مسئول میره؟", "expected_concepts": ["procurement"], "any_source": ["apps/api/core/procurement/services/approval_engine.py"]},
+    {"id": "client-export", "query": "خروجی اکسل فرم شیراز فایل ۴ را میخواهم", "expected_concepts": ["report-export"], "any_source": ["specs/044-shiraz-excel-parity-pdf/spec.md"]},
+    {"id": "client-ambiguous-report", "query": "گزارش درست نیست", "must_clarify": true},
+    {"id": "client-ambiguous-work", "query": "کارکرد درست نیست", "must_clarify": true},
+    {"id": "engineer-symbol", "query": "Trace rebuild_daily_report_summary aggregation", "expected_concepts": ["daily-rollup"], "any_source": ["apps/api/core/field_reports/services/daily_report_aggregation.py"]},
+    {"id": "engineer-auth", "query": "Check project authorization and IDOR", "expected_concepts": ["authorization"], "any_source": [".specify/memory/constitution.md", "apps/api/core/projects/permissions.py"]},
+    {"id": "unrelated", "query": "دستور پخت کیک شکلاتی", "expect_empty": true, "must_clarify": true},
+    {"id": "unknown-symbol", "query": "zxyqv_nonexistent_frobnicator", "expect_empty": true, "must_clarify": true}
+  ]
+}

@@ -1,5 +1,26 @@
 # AGENTS.md
 
+## Knowledge-backed request understanding
+
+Before interpreting a substantive product-development or debugging request,
+read `knowledge/agent-instructions.md` and run
+`python3 scripts/knowledge/cli.py context "<original request>"`.
+This uses hybrid retrieval when a semantic index is available. If the index is
+missing or stale, inspect `python3 scripts/knowledge/cli.py status` first.
+Do not start a second indexing job while the recorded embedding job is active.
+The user authorized the configured local LM Studio Qwen embedding service;
+rebuild/resume it with `python3 scripts/knowledge/cli.py index --semantic`.
+Use `--lexical` on queries for an explicitly offline lookup. Running `index`
+without `--semantic` replaces a hybrid index with a lexical one, so avoid that
+downgrade unless requested.
+Keep original wording, cite sources, and separate stakeholder statements,
+proposed interpretations, feature designs, and observed code. Resolve material
+ambiguity before dispatching implementation. Alias matches and retrieval ranks
+do not establish stakeholder intent or runtime correctness.
+Changing to an external embedding service still requires the user's choice
+and authorization to send the corpus. See `knowledge/README.md` for modes,
+source provenance, exclusions and source-freshness checks.
+
 ## Cursor Cloud specific instructions
 
 Monorepo (pnpm workspace): `apps/web` (React Router 7 + Vite frontend) and `apps/api` (Django 4.2 + DRF backend — Velora Sprint 1–3+ domains; see `docs/مهندسی و معماری نرم‌افزار (Engineering & Blueprint)/معماری و نقشه محدوده سیستم (Architecture & Scope Map)/نقشه محدوده سیستم Velora (Velora Scope Map).md`). Standard commands live in `README.md` / `package.json` scripts; this section only covers non-obvious cloud caveats. The update script already runs `pnpm install` (against the npmjs registry), creates the API venv at `apps/api/.venv`, installs `requirements.txt` plus the pytest tooling (see below), creates `.env` from `.env.example` (with the local-dev overrides applied), and pins Django back to 4.2.11.

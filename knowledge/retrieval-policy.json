@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "provisional_on_authored_development_examples",
+  "calibrated_embedding_signature": "d0ddcbcac272cec2b7dbf74fd0f67ebf818df79bd719b4c9503c71cd452ad3a8",
+  "min_dense_similarity": 0.48,
+  "min_weighted_lexical_coverage": 0.55,
+  "min_lexical_terms": 2,
+  "single_term_max_document_fraction": 0.05,
+  "rationale": "Development probe: weakest related example 0.545; strongest unrelated example 0.412. This threshold is provisional and model/prefix specific, not a probability or a stakeholder-validated accuracy guarantee."
+}

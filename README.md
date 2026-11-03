@@ -12,6 +12,15 @@ infra/        Traefik gateway config
 packages/     Shared packages (future)
 ```
 
+## Project knowledge and request understanding
+
+The standalone [knowledge tool](knowledge/README.md) retrieves project documents,
+stakeholder terminology, feature contracts and code with source citations. Run
+`pnpm knowledge:index`, then `pnpm knowledge:context "your request"`. It runs
+locally without new dependencies; an explicitly configured embedding service
+enables hybrid retrieval. See [agent instructions](knowledge/agent-instructions.md)
+for the interpretation and clarification contract.
+
 ## Dev modes
 
 | Mode | Command | API | Gateway | MinIO / RabbitMQ |

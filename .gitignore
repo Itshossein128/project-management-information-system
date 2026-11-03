@@ -74,3 +74,7 @@ graphify-out/.graphify_uncached.txt
 graphify-out/.needs_update
 logs/
 
+# Local knowledge indexes and imported private stakeholder conversations.
+.knowledge/
+knowledge/sources/
+
