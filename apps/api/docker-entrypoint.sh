@@ -53,6 +53,16 @@ if [[ "${SKIP_MIGRATIONS:-}" != "true" ]]; then
     echo "Seeding demo data..."
     python manage.py seed_rbac_dev || echo "Warning: demo seed failed"
   fi
+
+  if [[ "${SEED_TEST_ROLES:-}" == "true" ]]; then
+    echo "Seeding test role accounts (R.0.03)..."
+    # When demo was already seeded above, skip re-running full demo inside seed_test_roles.
+    if [[ "${SEED_DEMO_DATA:-}" == "true" ]]; then
+      python manage.py seed_test_roles --skip-demo || echo "Warning: test role seed failed"
+    else
+      python manage.py seed_test_roles || echo "Warning: test role seed failed"
+    fi
+  fi
 fi
 
 exec "$@"

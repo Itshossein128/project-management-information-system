@@ -1,0 +1,124 @@
+# Isolated test/staging stack for R.0.03 — ports/volumes do not collide with
+# docker-compose.yml (dev) or docker-compose.production.yml.
+#
+# Start:  docker compose -f docker-compose.test-env.yml --env-file .env.test-env up -d
+# Setup:  ./scripts/setup_test_env.sh
+
+name: velora-test-env
+
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    # Hardcoded names avoid accidental override from the repo-root .env
+    # (POSTGRES_DB=ipcas) when Compose interpolates variables.
+    environment:
+      POSTGRES_USER: ipcas
+      POSTGRES_PASSWORD: ipcas
+      POSTGRES_DB: ipcas_test_env
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata_test_env:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ipcas -d ipcas_test_env"]
+      interval: 5s
+      timeout: 5s
+      retries: 8
+
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata_test_env:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 8
+
+  rabbitmq-test:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ipcas
+      RABBITMQ_DEFAULT_PASS: ipcas
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    volumes:
+      - rabbitmqdata_test_env:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  minio-test:
+    # Same image family as docker-compose.yml; use quay.io/minio/minio if Docker Hub is denied.
+    image: minio/minio:latest
+    command: server /data --console-address ":9002"
+    environment:
+      MINIO_ROOT_USER: ipcas
+      MINIO_ROOT_PASSWORD: ipcas-secret
+    ports:
+      - "9001:9000"
+      - "9002:9002"
+    volumes:
+      - miniodata_test_env:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+
+  minio-test-init:
+    image: minio/mc:latest
+    depends_on:
+      minio-test:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio-test:9000 ipcas ipcas-secret;
+      mc mb -p local/ipcas-test-files || true;
+      exit 0;
+      "
+
+  api-test:
+    build: ./apps/api
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      rabbitmq-test:
+        condition: service_healthy
+      minio-test:
+        condition: service_healthy
+      minio-test-init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://ipcas:ipcas@postgres-test:5432/ipcas_test_env
+      SECRET_KEY: test-env-secret-change-me
+      DEBUG: "true"
+      ALLOWED_HOSTS: localhost,127.0.0.1,api-test
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000
+      RABBITMQ_URL: amqp://ipcas:ipcas@rabbitmq-test:5672/
+      CELERY_BROKER_URL: redis://redis-test:6379/0
+      CELERY_RESULT_BACKEND: redis://redis-test:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "true"
+      AUDIT_LOG_ASYNC: "false"
+      AWS_S3_ENDPOINT_URL: http://minio-test:9000
+      AWS_ACCESS_KEY_ID: ipcas
+      AWS_SECRET_ACCESS_KEY: ipcas-secret
+      AWS_STORAGE_BUCKET_NAME: ipcas-test-files
+      AWS_S3_USE_SSL: "false"
+      SEED_DEMO_DATA: "false"
+      SEED_TEST_ROLES: "true"
+    ports:
+      - "8001:8000"
+
+volumes:
+  pgdata_test_env:
+  redisdata_test_env:
+  rabbitmqdata_test_env:
+  miniodata_test_env:
