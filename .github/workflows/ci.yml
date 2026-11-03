@@ -2,21 +2,28 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - "apps/**"
+      - "infra/**"
+      - "scripts/**"
+      - "docker-compose*.yml"
       - "pnpm-lock.yaml"
       - "package.json"
       - "pnpm-workspace.yaml"
       - ".github/workflows/ci.yml"
   pull_request:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - "apps/**"
+      - "infra/**"
+      - "scripts/**"
+      - "docker-compose*.yml"
       - "pnpm-lock.yaml"
       - "package.json"
       - "pnpm-workspace.yaml"
       - ".github/workflows/ci.yml"
+  workflow_dispatch:
 
 jobs:
   web:
