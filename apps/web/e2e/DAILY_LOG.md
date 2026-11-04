@@ -30,3 +30,8 @@ Selected flow: Decision Tree User Flow & Full Route Navigation (556 Decisions, 8
 Coverage score: 100% Decision-Tree & Route Coverage (18 / 18 tests passing)
 Reason: Complete simulation of user-flows and component navigation based on docs/decision-tree across Auth, Portfolio, Wizard Lifecycle, Planning, Field, Commercial, Resources, Reporting, and Interactive Domain Workflows.
 
+Date: 2026-11-04
+Selected flow: Doc scenarios — decision tree, spec user stories, R0 report contract
+Coverage score: 525 decision nodes and 834 spec scenarios registered; product fixes deferred
+Reason: Navigation smoke did not assert each documented action, acceptance scenario, or the R0 report catalog. New tests keep those assertions and leave failing product behavior for a later phase.
+

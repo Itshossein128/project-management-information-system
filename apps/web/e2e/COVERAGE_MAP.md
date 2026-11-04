@@ -1,7 +1,23 @@
 # Complete Application E2E Decision-Tree Coverage Map
 
+## Doc-scenario suite (2026-11-04)
+
+Authoritative scenario contract for `docs/decision-tree/`, `specs/*/spec.md`, and `docs/delivery/R0-scope-and-reports-contract.md`. These tests assert the documented outcome. They do not change application code when the product disagrees with the document.
+
+| Suite | Scenarios registered | File |
+|---|---|---|
+| Decision-tree nodes, plus a non-member denial for each protected page or mutation | 525 nodes inside the 1706-test suite | `tests/doc-scenarios/decision-tree.spec.ts` |
+| Spec acceptance scenarios and edge requirements | 754 acceptance + 111 edge | `tests/doc-scenarios/user-stories.spec.ts` |
+| R0 reference fixtures, no standalone transmittal route, report catalog including six T036 names, FILE 4 workbook, daily PDF | 8 | `tests/doc-scenarios/r0-reports-contract.spec.ts` |
+
+`playwright test doc-scenarios --list` registers **1706** tests, including `deep-offline-warehouse.spec.ts` for specs 037, 042, and 043. A sample run on 2026-11-04 passed the login theme toggle, the FILE 4 download (RTL sheet, 34 staff rows, 32 craft rows, native `SUM` formulas), the warehouse field labels, the zero-quantity message, the Shiraz warehouse export labels, and the absence of a transmittal route. Failures were left in place: the machinery workbook path in R0 does not match the file on disk, the report catalog does not yet list the six T036 names, the buildings weekly action is not labeled «دانلود گزارش هفتگی», and an offline unit save does not show «در انتظار همگام‌سازی».
+
+Run: `pnpm --dir apps/web exec playwright test --config e2e/playwright.config.ts doc-scenarios --project=chromium-desktop`
+
+Two inventoried org-ref actions have no README (`create-contract-type`, `create-unit`). Their tests fail until the decision tree documents them. Catalog names that R0 still lists as in progress fail until that catalog is complete.
+
 Source baseline: **2026-10-18**
-Decision Tree Validation: **556 decisions, 82 registered routes, 4196 local links; 100% valid & reachable**.
+Decision Tree Validation: **556 decisions, 82 registered routes, 4196 local links; 100% valid & reachable**. The table below is the earlier navigation smoke, not this scenario contract.
 
 | Module / Domain | Flow | Tested Branches | Total Branches | Coverage Score | Test Suite Reference |
 |---|---|---|---|---|---|
