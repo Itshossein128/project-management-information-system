@@ -1,0 +1,94 @@
+==> Phase A: intentional failures must block the gate
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'failure'.
+[CI-GATE] Details URL: 
+[ERROR] [CI-GATE] Workflow 'CI' did not succeed (conclusion: 'failure'). Deployment blocked!
+PASS drill=workflow-failure gate_exit=1 requests=1
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'success'.
+[CI-GATE] Details URL: 
+[ERROR] [CI-GATE] The following required jobs did not succeed: api (conclusion: failure). Deployment blocked!
+PASS drill=api-failure gate_exit=1 requests=2
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'success'.
+[CI-GATE] Details URL: 
+[ERROR] [CI-GATE] The following required jobs did not succeed: web (conclusion: failure). Deployment blocked!
+PASS drill=web-failure gate_exit=1 requests=2
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'success'.
+[CI-GATE] Details URL: 
+[ERROR] [CI-GATE] The following required jobs did not succeed: api (NOT FOUND). Deployment blocked!
+PASS drill=missing-api gate_exit=1 requests=2
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'cancelled'.
+[CI-GATE] Details URL: 
+[ERROR] [CI-GATE] Workflow 'CI' did not succeed (conclusion: 'cancelled'). Deployment blocked!
+PASS drill=cancelled gate_exit=1 requests=1
+==> Phase B: healthy checks must pass the gate
+==> [CI-GATE] Verifying CI checks for repository: rehearsal/fixture
+==> [CI-GATE] Target commit SHA: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+==> [CI-GATE] Required workflow: 'CI'
+==> [CI-GATE] Required jobs: ['web', 'api']
+==> [CI-GATE] Polling timeout: 2s (interval: 1s)
+[CI-GATE] Workflow 'CI' (Run #1) completed with conclusion: 'success'.
+[CI-GATE] Details URL: 
+SUCCESS: [CI-GATE] All required CI checks passed for commit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa! Proceeding to deployment.
+PASS drill=success gate_exit=0 requests=2
+==> Phase C: live integration smoke (all checks required)
+PASS API health
+PASS OpenAPI schema HTTP 200
+OK  verify_blueprint_schema
+PASS blueprint database schema
+/home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/jwt/api_jwt.py:368: InsecureKeyLengthWarning: The HMAC key is 25 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+  decoded = self.decode_complete(
+PASS JWT login admin
+PASS JWT login hr
+PASS JWT login visitor
+PASS JWT login worker
+PASS JWT login project_manager
+PASS JWT login project_controls
+PASS JWT login site_supervisor
+PASS JWT login finance_manager
+PASS JWT login document_controller
+PASS JWT login executive_approver
+INFO login rate limit reached; waiting 61s for next window
+PASS JWT login procurement_officer
+PASS scoped project listing admin
+PASS scoped project listing hr
+PASS scoped project listing visitor
+PASS scoped project listing worker
+PASS scoped project listing project_manager
+PASS scoped project listing project_controls
+PASS scoped project listing site_supervisor
+PASS scoped project listing finance_manager
+PASS scoped project listing document_controller
+PASS scoped project listing executive_approver
+PASS scoped project listing procurement_officer
+PASS nonmember project access denied
+PASS daily report batch sync and persistence
+PASS progress S-curve
+PASS cost control summary
+PASS RabbitMQ topology and confirmed event round-trip
+PASS disposable project cleanup
+SMOKE 31/31 passed; 0 failed (100% pass)
+PASS R.0 gate and integration smoke rehearsal

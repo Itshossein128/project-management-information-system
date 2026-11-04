@@ -187,7 +187,7 @@ class TestProgressService:
         assert any('evm_phase:' in k for k in deleted)
         assert any('evm_cbs:' in k for k in deleted)
 
-    def test_actual_cost_approve_invalidates_progress_caches(self, project, user, monkeypatch):
+    def test_actual_cost_approve_invalidates_progress_caches(self, project, user, other_user, monkeypatch):
         from cost_control.models import ActualCost, ActualCostStatus, CostCategory
         from cost_control.services.actual_cost_service import approve_actual_cost
         from datetime import date
@@ -216,7 +216,9 @@ class TestProgressService:
         cbs = make_cbs(project, user)
         actual.cbs = cbs
         actual.save(update_fields=['cbs', 'updated_at'])
-        approve_actual_cost(actual, user)
+        # Final approval must use a different actor from the cost creator.
+        approve_actual_cost(actual, other_user)
+        assert actual.approved_by_id == other_user.id
         assert project.id in calls
 
     def test_progress_history_matches_helpers(self, project, user, activity):

@@ -15,14 +15,14 @@ def clear_ratelimit_cache():
 @pytest.mark.django_db
 def test_login_rate_limit_returns_429(api_client, user):
     url = reverse('authentication:login')
-    payload = {'login': user.mobile, 'password': 'wrong-password'}
+    payload = {'phone_number': user.mobile, 'password': 'wrong-password'}
 
     for _ in range(10):
-        api_client.post(url, payload, format='json')
+        api_client.post(url, payload, format='json', HTTP_ACCEPT_LANGUAGE='en')
 
-    response = api_client.post(url, payload, format='json')
+    response = api_client.post(url, payload, format='json', HTTP_ACCEPT_LANGUAGE='en')
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-    assert 'تعداد درخواست' in response.json()['detail']
+    assert 'Too many requests' in response.json()['detail']
 
 
 @pytest.mark.django_db

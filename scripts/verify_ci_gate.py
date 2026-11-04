@@ -133,7 +133,7 @@ def verify_ci_gate(
         print(f"[CI-GATE] Details URL: {html_url}")
 
         if conclusion != "success":
-            print(f"ERROR: [CI-GATE] Workflow '{workflow_name}' did not succeed (conclusion: '{conclusion}'). Deployment blocked!")
+            print(f"[ERROR] [CI-GATE] Workflow '{workflow_name}' did not succeed (conclusion: '{conclusion}'). Deployment blocked!")
             return False
 
         # Verify individual required jobs
@@ -154,7 +154,7 @@ def verify_ci_gate(
                 missing_or_failed.append(f"{req_job} (conclusion: {job_conclusion})")
 
         if missing_or_failed:
-            print(f"ERROR: [CI-GATE] The following required jobs did not succeed: {', '.join(missing_or_failed)}.")
+            print(f"[ERROR] [CI-GATE] The following required jobs did not succeed: {', '.join(missing_or_failed)}. Deployment blocked!")
             return False
 
         print(f"SUCCESS: [CI-GATE] All required CI checks passed for commit {sha}! Proceeding to deployment.")

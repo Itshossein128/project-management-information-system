@@ -1,0 +1,17 @@
+FAIL API health: RuntimeError: GET /api/health/: expected HTTP 200, got 404
+FAIL OpenAPI schema HTTP 200: RuntimeError: GET /api/schema/: expected HTTP 200, got 404
+OK  verify_blueprint_schema
+PASS blueprint database schema
+FAIL JWT login admin: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login hr: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login visitor: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login worker: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login project_manager: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login project_controls: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login site_supervisor: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login finance_manager: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login document_controller: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login executive_approver: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL JWT login procurement_officer: RuntimeError: POST /api/auth/login/: expected HTTP 200, got 404
+FAIL all 11 roles authenticated (core smoke cannot proceed): RuntimeError: missing role tokens
+SMOKE 1/15 passed; 14 failed

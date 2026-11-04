@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -186,23 +187,36 @@ def login_all_roles(api_base: str) -> bool:
         payload = json.dumps(
             {'phone_number': account.mobile, 'password': DEV_PASSWORD}
         ).encode()
-        req = urllib.request.Request(
-            f'{base}/api/auth/login/',
-            data=payload,
-            headers={'Content-Type': 'application/json'},
-            method='POST',
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                body = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode(errors='replace')
-            _fail(f'login {account.key} ({account.mobile}): HTTP {exc.code} {detail}')
-            ok = False
-            continue
-        except Exception as exc:  # noqa: BLE001 — report and continue
-            _fail(f'login {account.key} ({account.mobile}): {exc}')
-            ok = False
+        # Keep the real 10/min login limit; one wait covers the 11-account catalog.
+        body = None
+        for attempt in range(2):
+            req = urllib.request.Request(
+                f'{base}/api/auth/login/',
+                data=payload,
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    body = json.loads(resp.read().decode())
+                break
+            except urllib.error.HTTPError as exc:
+                detail = exc.read().decode(errors='replace')
+                if exc.code == 429 and attempt == 0:
+                    print(
+                        'INFO login rate limit reached; waiting 61s for next window',
+                        flush=True,
+                    )
+                    time.sleep(61)
+                    continue
+                _fail(f'login {account.key} ({account.mobile}): HTTP {exc.code} {detail}')
+                ok = False
+                break
+            except Exception as exc:  # noqa: BLE001 — report and continue
+                _fail(f'login {account.key} ({account.mobile}): {exc}')
+                ok = False
+                break
+        if body is None:
             continue
 
         access = body.get('access')
