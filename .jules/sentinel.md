@@ -48,3 +48,8 @@ Added missing authentication and permission checks to RequisitionItemHoldView to
 - Discovered that `ApprovalLogListView` (`apps/api/core/procurement/views/approval_views.py`) was only enforcing `IsProjectMember` but not verifying the specific `view_procurement` permission. Fixed by adding `HasProjectPermission` to the `permission_classes` list and setting `required_permission = 'view_procurement'`.
 - Updated test setups to grant `view_procurement` permission to roles that require them for successful test execution after tightening the `ApprovalLogListView` permissions.
 - When running backend tests against an in-memory SQLite database (`DATABASE_URL=sqlite:///:memory:`), concurrency tests using threads (e.g. in `test_inventory_concurrency.py`) fail with `OperationalError('database table is locked')`. These are known SQLite limitations and can be safely ignored.
+
+## 2026-11-05 - Enforce Project Authorization on Sync Operations API
+**Vulnerability:** `SyncOperationsV2View` at `/api/v1/projects/{project_pk}/daily-reports/sync-operations/v2/` only configured `permission_classes = [IsAuthenticated]`, allowing arbitrary authenticated users to reach the view without project-level DRF permission enforcement (`IsProjectMember` and `HasProjectPermission`).
+**Learning:** Even if inner business logic checks project membership or permissions later in execution, DRF endpoints scoped to a project must declare `IsProjectMember` and `HasProjectPermission` with the appropriate `required_permission` directly on `permission_classes` to enforce defense-in-depth and fail-secure at the permission layer.
+**Prevention:** Always include `[IsAuthenticated, IsProjectMember, HasProjectPermission]` and declare `required_permission` on all project-scoped API views.
