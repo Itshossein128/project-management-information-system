@@ -2,14 +2,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
+import { ApiRequestError } from "@/app/lib/api-client";
 import {
+  createLocalRole,
+  deleteLocalRole,
+  fetchAccessChanges,
+  fetchAssignableRoles,
+  fetchLocalRoleImpact,
   fetchMembers,
-  fetchRoles,
+  setLocalRolePermissions,
+  updateLocalRole,
   updateMember,
   type ProjectMember,
   type Role,
 } from "@/app/lib/api/members";
 import { formatDisplayDate } from "@/app/lib/jalali-utils";
+import { fetchPermissionCatalog } from "@/app/lib/api/roles";
+import { formatPermissionLabel } from "@/app/lib/permission-labels";
 import { formatRoleLabel } from "@/app/lib/role-labels";
 import { PATHS } from "@/app/routeVars";
 import { AddMemberDrawer } from "@/components/projects/add-member-drawer";
@@ -21,16 +30,20 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { useToast } from "@/components/ui/toast";
+import { useActiveProjectPermission } from "@/app/contexts/project-context";
 
 export default function ProjectMembersPage() {
   const { t } = useTranslation();
   const { projectId = "" } = useParams();
+  const { has } = useActiveProjectPermission(projectId);
+  const canManageMembers = has("manage_members");
   const toast = useToast();
   const qc = useQueryClient();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editMember, setEditMember] = useState<ProjectMember | null>(null);
   const [deactivateTarget, setDeactivateTarget] =
     useState<ProjectMember | null>(null);
+  const [localRoleName, setLocalRoleName] = useState("");
 
   const { data: members = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["members", projectId],
@@ -38,8 +51,26 @@ export default function ProjectMembersPage() {
   });
 
   const { data: roles = [] } = useQuery({
-    queryKey: ["roles"],
-    queryFn: fetchRoles,
+    queryKey: ["roles", projectId],
+    queryFn: () => fetchAssignableRoles(projectId),
+  });
+  const { data: catalog = [] } = useQuery({
+    queryKey: ["permission-catalog"],
+    queryFn: fetchPermissionCatalog,
+  });
+  const { data: changes = [] } = useQuery({
+    queryKey: ["access-changes", projectId],
+    queryFn: () => fetchAccessChanges(projectId),
+    enabled: Boolean(projectId),
+  });
+  const createRoleMutation = useMutation({
+    mutationFn: () => createLocalRole(projectId, { role_name: localRoleName.trim() }),
+    onSuccess: () => {
+      toast.success(t("projectMembers.localRoleCreated"));
+      setLocalRoleName("");
+      void qc.invalidateQueries({ queryKey: ["roles", projectId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const deactivateMutation = useMutation({
@@ -111,7 +142,7 @@ export default function ProjectMembersPage() {
       key: "actions",
       label: t("projectMembers.actions"),
       render: (row: ProjectMember) =>
-        row.user_id ? (
+        canManageMembers && row.user_id ? (
           <div className='flex gap-1'>
             <Button
               variant='ghost'
@@ -147,7 +178,7 @@ export default function ProjectMembersPage() {
       />
       <PageHeader
         title={t("projectMembers.title")}
-        actions={
+        actions={canManageMembers ? (
           <Button
             variant='primary'
             onClick={() => {
@@ -157,15 +188,158 @@ export default function ProjectMembersPage() {
           >
             {t("projectMembers.add")}
           </Button>
-        }
+        ) : undefined}
       />
+
+      {canManageMembers || changes.length > 0 ? <section className="mb-6 rounded-lg border border-border p-4">
+        {canManageMembers ? <h2 className="mb-2 text-sm font-medium">{t("projectMembers.localRole")}</h2> : null}
+        {canManageMembers ? <form
+          className="flex flex-wrap gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (localRoleName.trim()) createRoleMutation.mutate();
+          }}
+        >
+          <input
+            className="rounded border border-border px-3 py-2 text-sm"
+            value={localRoleName}
+            placeholder={t("projectMembers.localRolePlaceholder")}
+            onChange={(event) => setLocalRoleName(event.target.value)}
+          />
+          <Button type="submit" variant="secondary" loading={createRoleMutation.isPending}>
+            {t("projectMembers.createLocalRole")}
+          </Button>
+        </form> : null}
+        <ul className="mt-3 space-y-1 text-sm">
+          {roles.filter((role) => role.project_id).map((role) => (
+            <li key={role.id} className="rounded border border-border px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <span>{formatRoleLabel(role.role_name, t)}</span>
+                {canManageMembers ? (
+                  <Button
+                    variant="ghost"
+                    onClick={async () => {
+                      try {
+                        const impact = await fetchLocalRoleImpact(projectId, role.id);
+                        if (impact.assignment_count > 0) {
+                          toast.error(t("roles.deleteBlocked", { count: impact.assignment_count }));
+                          return;
+                        }
+                        await deleteLocalRole(projectId, role.id);
+                        toast.success(t("roles.deleteSuccess"));
+                        void qc.invalidateQueries({ queryKey: ["roles", projectId] });
+                      } catch (error) {
+                        const count =
+                          error instanceof ApiRequestError &&
+                          error.code === "role_in_use" &&
+                          typeof error.details === "object" &&
+                          error.details !== null &&
+                          "assignment_count" in error.details
+                            ? Number((error.details as { assignment_count?: number }).assignment_count)
+                            : null;
+                        toast.error(
+                          count !== null && Number.isFinite(count)
+                            ? t("roles.deleteBlocked", { count })
+                            : error instanceof Error
+                              ? error.message
+                              : t("projectMembers.deactivateError"),
+                        );
+                      }
+                    }}
+                  >
+                    {t("projectMembers.deleteLocalRole")}
+                  </Button>
+                ) : null}
+              </div>
+              {canManageMembers ? (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-xs text-primary">{t("projectMembers.advancedPermissions")}</summary>
+                  <form
+                    className="mt-2 max-h-40 space-y-1 overflow-auto"
+                    onSubmit={async (event) => {
+                      event.preventDefault();
+                      const form = event.currentTarget;
+                      const selected = [...form.querySelectorAll<HTMLInputElement>("input[type=checkbox]:checked")].map(
+                        (input) => input.value,
+                      );
+                      const nextName = form.querySelector<HTMLInputElement>("input[name=role_name]")?.value.trim() ?? "";
+                      const nextDescription = form.querySelector<HTMLInputElement>("input[name=description]")?.value.trim() ?? "";
+                      if (!nextName) return;
+                      try {
+                        const impact = await fetchLocalRoleImpact(projectId, role.id);
+                        const permissionsChanged =
+                          selected.length !== role.permissions.length ||
+                          selected.some((code) => !role.permissions.includes(code));
+                        if (permissionsChanged && impact.assignment_count > 0) {
+                          const proceed = window.confirm(
+                            t("roles.impactConfirm", { count: impact.assignment_count }),
+                          );
+                          if (!proceed) return;
+                        }
+                        if (nextName !== role.role_name || nextDescription !== (role.description ?? "")) {
+                          await updateLocalRole(projectId, role.id, {
+                            role_name: nextName,
+                            description: nextDescription,
+                          });
+                        }
+                        await setLocalRolePermissions(projectId, role.id, selected);
+                        toast.success(t("roles.updateSuccess"));
+                        void qc.invalidateQueries({ queryKey: ["roles", projectId] });
+                        void qc.invalidateQueries({ queryKey: ["access-changes", projectId] });
+                      } catch (error) {
+                        toast.error(error instanceof Error ? error.message : t("projectMembers.deactivateError"));
+                      }
+                    }}
+                  >
+                    <input
+                      name="role_name"
+                      className="w-full rounded border border-border px-2 py-1 text-xs"
+                      defaultValue={role.role_name}
+                      aria-label={t("projectMembers.localRolePlaceholder")}
+                    />
+                    <input
+                      name="description"
+                      className="w-full rounded border border-border px-2 py-1 text-xs"
+                      defaultValue={role.description ?? ""}
+                      aria-label={t("roles.description")}
+                    />
+                    {catalog.map((item) => (
+                      <label key={item.codename} className="flex items-center gap-2 text-xs">
+                        <input
+                          type="checkbox"
+                          value={item.codename}
+                          defaultChecked={role.permissions.includes(item.codename)}
+                        />
+                        <span>{formatPermissionLabel(item.codename, item.label, t)}</span>
+                      </label>
+                    ))}
+                    <Button type="submit" variant="secondary">{t("roles.savePermissions")}</Button>
+                  </form>
+                </details>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        {changes.length > 0 ? (
+          <div className="mt-4">
+            <h3 className="mb-1 text-sm font-medium">{t("projectMembers.recentChanges")}</h3>
+            <ul className="space-y-1 text-xs text-muted-foreground">
+              {changes.slice(0, 5).map((change) => (
+                <li key={change.id}>
+                  {change.created_at} — {change.actor_name || "—"} — {change.subject_name || change.role_name} — {change.action}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </section> : null}
 
       {isError ? (
         <QueryErrorState onRetry={() => void refetch()} />
       ) : !isLoading && members.length === 0 ? (
         <EmptyState
           title={t("projectMembers.empty")}
-          action={
+          action={canManageMembers ? (
             <Button
               variant="primary"
               onClick={() => {
@@ -175,11 +349,11 @@ export default function ProjectMembersPage() {
             >
               {t("projectMembers.add")}
             </Button>
-          }
+          ) : undefined}
         />
       ) : (
         <DataTable
-          columns={columns}
+          columns={canManageMembers ? columns : columns.filter((column) => column.key !== "actions")}
           data={members}
           loading={isLoading}
           rowKey={(r) => r.user_id ?? r.invited_email ?? r.full_name}
@@ -189,7 +363,7 @@ export default function ProjectMembersPage() {
 
       <AddMemberDrawer
         projectId={projectId}
-        isOpen={drawerOpen}
+        isOpen={drawerOpen && canManageMembers}
         onClose={() => {
           setDrawerOpen(false);
           setEditMember(null);
@@ -199,7 +373,7 @@ export default function ProjectMembersPage() {
       />
 
       <Modal
-        open={Boolean(deactivateTarget)}
+        open={canManageMembers && Boolean(deactivateTarget)}
         onOpenChange={(o) => !o && setDeactivateTarget(null)}
         title={t("projectMembers.deactivateTitle")}
         idBase='deactivateMember'

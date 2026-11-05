@@ -7,6 +7,7 @@ import {
   deleteProjectRole,
   fetchPermissionCatalog,
   fetchProjectRoles,
+  fetchRoleImpact,
   groupPermissionsByModule,
   PERMISSION_MODULE_ORDER,
   setProjectRolePermissions,
@@ -125,13 +126,25 @@ export default function SettingsRolesPage() {
   });
 
   const savePermissionsMutation = useMutation({
-    mutationFn: () =>
-      setProjectRolePermissions(selectedId!, [...draftPermissions]),
+    mutationFn: async () => {
+      const impact = await fetchRoleImpact(selectedId!);
+      if (impact.assignment_count > 0) {
+        const proceed = window.confirm(
+          t("roles.impactConfirm", { count: impact.assignment_count }),
+        );
+        if (!proceed) {
+          throw new Error("cancelled");
+        }
+      }
+      return setProjectRolePermissions(selectedId!, [...draftPermissions]);
+    },
     onSuccess: () => {
       toast.success(t("roles.updateSuccess"));
       void qc.invalidateQueries({ queryKey: ["project-roles"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      if (e.message !== "cancelled") toast.error(e.message);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -240,7 +253,16 @@ export default function SettingsRolesPage() {
                   <Button
                     variant='ghost'
                     size='sm'
-                    onClick={() => setDeleteTarget(selectedRole)}
+                    onClick={async () => {
+                      const impact = await fetchRoleImpact(selectedRole.id);
+                      if (impact.assignment_count > 0) {
+                        toast.error(
+                          t("roles.deleteBlocked", { count: impact.assignment_count }),
+                        );
+                        return;
+                      }
+                      setDeleteTarget(selectedRole);
+                    }}
                   >
                     <Trash2 className='size-4 text-destructive' />
                     {t("roles.delete")}

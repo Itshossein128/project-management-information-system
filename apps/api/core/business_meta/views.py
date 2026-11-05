@@ -1,4 +1,5 @@
 """REST CRUD for project meta and dynamic schema."""
+from django.db.models import Q
 from rest_framework import viewsets, permissions as drf_permissions
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -64,6 +65,17 @@ class ProjectPositionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     queryset = ProjectPosition.objects.select_related('project')
     serializer_class = ProjectPositionSerializer
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
+
+    def get_queryset(self):
+        project_pk = self.kwargs.get('project_pk')
+        if (
+            self.request.method in drf_permissions.SAFE_METHODS
+            and self.request.query_params.get('selectable') == '1'
+        ):
+            return ProjectPosition.objects.filter(is_active=True).filter(
+                Q(project_id=project_pk) | Q(project__isnull=True),
+            )
+        return super().get_queryset()
 
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:

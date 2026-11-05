@@ -11,7 +11,7 @@ import {
   updateWorkingCalendar,
   type WorkingCalendar,
 } from "@/app/lib/api/schedule";
-import { usePermission } from "@/app/contexts/project-context";
+import { useActiveProjectPermission } from "@/app/contexts/project-context";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Checkbox, Input } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
@@ -43,7 +43,7 @@ export function WorkingCalendarPanel({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const { has } = usePermission(projectId);
+  const { has } = useActiveProjectPermission(projectId);
   const canEdit = has("edit_activities");
 
   const [name, setName] = useState("");

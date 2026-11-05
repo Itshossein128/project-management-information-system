@@ -17,6 +17,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   activityToPayload,
   deleteActivity,
@@ -31,7 +32,7 @@ import {
 } from "@/app/lib/api/activities";
 import { fetchMembers } from "@/app/lib/api/members";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
-import { usePermission } from "@/app/contexts/project-context";
+import { useActiveProjectPermission } from "@/app/contexts/project-context";
 import { ActivityDrawer } from "@/components/activities/activity-drawer";
 import { AddRelationModal } from "@/components/activities/add-relation-modal";
 import { NetworkDiagramView } from "@/components/activities/network-diagram-view";
@@ -77,10 +78,12 @@ export interface ActivitiesGridProps {
 }
 
 export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
-  const { has } = usePermission(projectId);
+  const { has } = useActiveProjectPermission(projectId);
   const canEdit = has("edit_activities");
+  const canDelete = has("delete_activities");
 
   const [viewMode, setViewMode] = useState<"table" | "network">("table");
   const [search, setSearch] = useState("");
@@ -217,9 +220,13 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     onSuccess: (_data, act) => {
       setDeleteTarget(null);
       invalidateActivityQueries();
-      offerUndo("فعالیت حذف شد", async () => {
-        await restoreActivity(projectId, act.activity_id);
-      });
+      if (canEdit) {
+        offerUndo("فعالیت حذف شد", async () => {
+          await restoreActivity(projectId, act.activity_id);
+        });
+      } else {
+        toast.success("فعالیت حذف شد");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -433,7 +440,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                           type="button"
                           className="font-mono text-primary hover:underline"
                           onClick={(e) => { e.stopPropagation(); void openEdit(act); }}
-                          aria-label={`ویرایش ${act.activity_code}`}
+                          aria-label={`${t(canEdit ? "common.edit" : "common.view")} ${act.activity_code}`}
                         >
                           {act.activity_code}
                         </button>
@@ -479,16 +486,16 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                                 </TooltipTrigger>
                                 <TooltipContent>ارتباط</TooltipContent>
                               </Tooltip>
-                              <Tooltip>
+                            </>
+                          ) : null}
+                          {canDelete ? <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
                                     <Trash2 className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>حذف</TooltipContent>
-                              </Tooltip>
-                            </>
-                          ) : null}
+                              </Tooltip> : null}
                         </div>
                       </td>
                     </tr>
@@ -572,14 +579,19 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
         isOpen={drawerOpen}
         onClose={() => { setDrawerOpen(false); setEditActivity(null); }}
         activity={editActivity}
+        readOnly={!canEdit}
         onSaved={({ mode, activity: saved, previous }) => {
           setDrawerOpen(false);
           setEditActivity(null);
           invalidateActivityQueries();
           if (mode === "create") {
-            offerUndo("فعالیت ایجاد شد", async () => {
-              await deleteActivity(projectId, saved.activity_id);
-            });
+            if (canDelete) {
+              offerUndo("فعالیت ایجاد شد", async () => {
+                await deleteActivity(projectId, saved.activity_id);
+              });
+            } else {
+              toast.success("فعالیت ایجاد شد");
+            }
             return;
           }
           if (previous) {

@@ -365,5 +365,17 @@ msgstr "یک پیمانکار فعال معتبر انتخاب کنید. ابت�
 msgid "One or more selected roles do not exist."
 msgstr "یک یا چند نقش انتخاب‌شده وجود ندارد و هیچ تغییری ذخیره نشد."
 
+msgid "This role is still assigned and was not deleted."
+msgstr "این نقش هنوز به اعضا تخصیص دارد و حذف نشد."
+
+msgid "This role does not belong to this project."
+msgstr "این نقش متعلق به این پروژه نیست."
+
+msgid "One or more job titles cannot be selected for this project."
+msgstr "یک یا چند سمت برای این پروژه قابل انتخاب نیست."
+
+msgid "Built-in role names cannot be reused for a project role."
+msgstr "نام نقش‌های ثابت را نمی‌توان برای نقش پروژه دوباره استفاده کرد."
+
 msgid "You do not have permission to perform this action."
 msgstr "اجازه انجام این کار را ندارید."

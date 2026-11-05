@@ -1316,7 +1316,14 @@
     "effectiveSummary": "Effective permissions",
     "resetInherited": "Reset to inherited",
     "saved": "Saved",
-    "overrideReset": "Override cleared"
+    "overrideReset": "Override cleared",
+    "positions": "Job titles",
+    "localRole": "Project role",
+    "localRolePlaceholder": "Name for this project's role",
+    "createLocalRole": "Create project role",
+    "deleteLocalRole": "Delete",
+    "localRoleCreated": "Project role created",
+    "recentChanges": "Recent access changes"
   },
   "templates": {
     "settings": "Settings",
@@ -1358,6 +1365,8 @@
     "createSuccess": "Role created",
     "updateSuccess": "Role updated",
     "deleteSuccess": "Role deleted",
+    "deleteBlocked": "This role still has {{count}} assignments. Remove or replace it on members first.",
+    "impactConfirm": "This change affects {{count}} current assignments. Continue?",
     "savePermissions": "Save permissions",
     "selectAll": "Select all",
     "deselectAll": "Deselect all",
@@ -2691,6 +2700,7 @@
     "edit_wbs": "Edit WBS",
     "view_activities": "View activities",
     "edit_activities": "Edit activities",
+    "delete_activities": "Delete activities",
     "view_costs": "View costs",
     "edit_costs": "Edit costs",
     "approve_costs": "Approve costs",

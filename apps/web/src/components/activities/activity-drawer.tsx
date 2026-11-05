@@ -52,6 +52,7 @@ export interface ActivityDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   activity: Activity | null;
+  readOnly?: boolean;
   onSaved: (result: {
     mode: "create" | "update";
     activity: Activity;
@@ -65,6 +66,7 @@ export function ActivityDrawer({
   isOpen,
   onClose,
   activity,
+  readOnly = false,
   onSaved,
   onError,
 }: ActivityDrawerProps) {
@@ -232,17 +234,18 @@ export function ActivityDrawer({
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? "ویرایش فعالیت" : "افزودن فعالیت"}
+      title={isEdit ? (readOnly ? `${t("common.view")} ${t("pages.activities.title")}` : "ویرایش فعالیت") : "افزودن فعالیت"}
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>لغو</Button>
-          <Button onClick={() => void handleSave()} disabled={saving}>
+          {!readOnly ? <Button onClick={() => void handleSave()} disabled={saving}>
             {saving ? "در حال ذخیره…" : "ذخیره"}
-          </Button>
+          </Button> : null}
         </div>
       }
     >
       <div className="space-y-6">
+        <fieldset disabled={readOnly} className="space-y-6">
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground">اطلاعات پایه</h3>
           <div className="space-y-2">
@@ -411,6 +414,7 @@ export function ActivityDrawer({
           </select>
         </section>
 
+        </fieldset>
         {isEdit && activity ? (
           <MeasurementEditor projectId={projectId} activityId={activity.activity_id} />
         ) : (

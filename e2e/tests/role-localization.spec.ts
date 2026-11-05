@@ -32,7 +32,7 @@ test("member permission summaries and overrides use the same bilingual labels", 
     id: projectId, project_id: projectId, project_name: "Localization project", status: "draft",
   } }));
   await page.route(`**${base}/members/`, route => route.fulfill({ json: [{
-    user_id: "member", full_name: "Test member", email: "", mobile: "", roles: ["viewer"],
+    user_id: "navigation-user", full_name: "Test member", email: "", mobile: "", roles: ["viewer"],
     status: "active", joined_at: "2026-10-15", last_login: null,
   }] }));
   await page.route(`**${base}/members/*/permissions/`, route => route.fulfill({ json: {

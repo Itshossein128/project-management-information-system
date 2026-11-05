@@ -1,5 +1,6 @@
 """System-wide project role management (UI-15)."""
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +11,14 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from authentication.permissions import IsHrOrAdmin
 from master_data.models import Role
 from permissions.constants import PERMISSIONS
-from permissions.role_services import is_system_role, set_role_permissions
+from permissions.role_services import (
+    RoleInUse,
+    assignment_impact,
+    delete_custom_role,
+    is_system_role,
+    record_access_change,
+    set_role_permissions,
+)
 from projects.role_serializers import (
     RoleCreateSerializer,
     RoleDetailSerializer,
@@ -36,12 +44,12 @@ class RoleViewSet(viewsets.ViewSet):
 
     def _get_role(self, pk):
         return get_object_or_404(
-            Role.objects.prefetch_related('role_permissions'),
+            Role.objects.filter(project__isnull=True).prefetch_related('role_permissions'),
             pk=pk,
         )
 
     def list(self, request):
-        roles = Role.objects.prefetch_related('role_permissions').order_by('role_name')
+        roles = Role.objects.filter(project__isnull=True).prefetch_related('role_permissions').order_by('role_name')
         return Response(RoleDetailSerializer(roles, many=True).data)
 
     def create(self, request):
@@ -53,7 +61,16 @@ class RoleViewSet(viewsets.ViewSet):
             description=data.get('description', ''),
         )
         if data.get('permissions'):
-            set_role_permissions(role, data['permissions'])
+            set_role_permissions(role, data['permissions'], actor=request.user)
+        record_access_change(
+            actor=request.user,
+            project=None,
+            subject_user=None,
+            role=role,
+            action='role_created',
+            before={},
+            after={'role_name': role.role_name, 'description': role.description},
+        )
         role = self._get_role(role.pk)
         return Response(RoleDetailSerializer(role).data, status=status.HTTP_201_CREATED)
 
@@ -71,11 +88,23 @@ class RoleViewSet(viewsets.ViewSet):
         serializer = RoleUpdateSerializer(data=request.data, partial=True, context={'role': role})
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        before = {'role_name': role.role_name, 'description': role.description}
         if 'role_name' in data:
             role.role_name = data['role_name']
         if 'description' in data:
             role.description = data['description']
         role.save()
+        after = {'role_name': role.role_name, 'description': role.description}
+        if before != after:
+            record_access_change(
+                actor=request.user,
+                project=None,
+                subject_user=None,
+                role=role,
+                action='role_renamed',
+                before=before,
+                after=after,
+            )
         role = self._get_role(role.pk)
         return Response(RoleDetailSerializer(role).data)
 
@@ -86,7 +115,24 @@ class RoleViewSet(viewsets.ViewSet):
                 {'error': {'code': 'forbidden', 'message': 'System roles cannot be deleted.', 'details': {}}},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        role.delete()
+        try:
+            delete_custom_role(role, actor=request.user)
+        except RoleInUse as exc:
+            return Response(
+                {
+                    'error': {
+                        'code': 'role_in_use',
+                        'message': _('This role is still assigned and was not deleted.'),
+                        'details': exc.impact,
+                    },
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        except PermissionError:
+            return Response(
+                {'error': {'code': 'forbidden', 'message': 'System roles cannot be deleted.', 'details': {}}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(summary='Set permissions on custom role', tags=['Roles'])
@@ -100,9 +146,17 @@ class RoleViewSet(viewsets.ViewSet):
             )
         serializer = RolePermissionsSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        set_role_permissions(role, serializer.validated_data['permissions'])
+        set_role_permissions(role, serializer.validated_data['permissions'], actor=request.user)
         role = self._get_role(role.pk)
         return Response(RoleDetailSerializer(role).data)
+
+    @extend_schema(summary='Assignment impact for a global role', tags=['Roles'])
+    @action(detail=True, methods=['get'], url_path='impact')
+    def impact(self, request, pk=None):
+        role = self._get_role(pk)
+        if role.project_id is not None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(assignment_impact(role))
 
 
 class PermissionCatalogView(APIView):

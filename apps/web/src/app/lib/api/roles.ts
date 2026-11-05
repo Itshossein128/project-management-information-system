@@ -46,6 +46,10 @@ export function updateProjectRole(
   });
 }
 
+export function fetchRoleImpact(roleId: string) {
+  return apiJson<{ assignment_count: number }>(`/v1/roles/${roleId}/impact/`);
+}
+
 export function deleteProjectRole(roleId: string) {
   return apiJson<void>(`/v1/roles/${roleId}/`, { method: "DELETE" });
 }

@@ -28,10 +28,11 @@ def _validate_role_name_format(name: str) -> None:
 class RoleDetailSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
     is_system = serializers.SerializerMethodField()
+    project_id = serializers.UUIDField(allow_null=True, read_only=True)
 
     class Meta:
         model = Role
-        fields = ['id', 'role_name', 'description', 'permissions', 'is_system']
+        fields = ['id', 'role_name', 'description', 'permissions', 'is_system', 'project_id']
 
     def get_permissions(self, obj):
         return [rp.permission_codename for rp in obj.role_permissions.all()]
@@ -52,7 +53,13 @@ class RoleCreateSerializer(serializers.Serializer):
     def validate_role_name(self, value):
         name = _normalize_role_name(value)
         _validate_role_name_format(name)
-        if Role.objects.filter(role_name=name).exists():
+        project = self.context.get('project')
+        existing = Role.objects.filter(role_name=name)
+        if project is None:
+            existing = existing.filter(project__isnull=True)
+        else:
+            existing = existing.filter(project=project)
+        if existing.exists():
             raise serializers.ValidationError(_('A role with this name already exists.'))
         return name
 
@@ -65,7 +72,12 @@ class RoleUpdateSerializer(serializers.Serializer):
         name = _normalize_role_name(value)
         _validate_role_name_format(name)
         role = self.context['role']
-        if Role.objects.filter(role_name=name).exclude(pk=role.pk).exists():
+        existing = Role.objects.filter(role_name=name).exclude(pk=role.pk)
+        if role.project_id is None:
+            existing = existing.filter(project__isnull=True)
+        else:
+            existing = existing.filter(project_id=role.project_id)
+        if existing.exists():
             raise serializers.ValidationError(_('A role with this name already exists.'))
         return name
 

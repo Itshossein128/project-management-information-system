@@ -1316,7 +1316,14 @@
     "effectiveSummary": "دسترسی‌های مؤثر",
     "resetInherited": "بازگشت به ارث",
     "saved": "ذخیره شد",
-    "overrideReset": "تنظیم دستی حذف شد"
+    "overrideReset": "تنظیم دستی حذف شد",
+    "positions": "سمت‌ها",
+    "localRole": "نقش محلی",
+    "localRolePlaceholder": "نام نقش این پروژه",
+    "createLocalRole": "ساخت نقش محلی",
+    "deleteLocalRole": "حذف",
+    "localRoleCreated": "نقش محلی ساخته شد",
+    "recentChanges": "تغییرهای اخیر دسترسی"
   },
   "templates": {
     "settings": "تنظیمات",
@@ -1358,6 +1365,8 @@
     "createSuccess": "نقش ایجاد شد",
     "updateSuccess": "نقش به‌روزرسانی شد",
     "deleteSuccess": "نقش حذف شد",
+    "deleteBlocked": "این نقش هنوز {{count}} تخصیص دارد. ابتدا آن را از اعضا بردارید یا جایگزین کنید.",
+    "impactConfirm": "این تغییر بر {{count}} تخصیص جاری اثر می‌گذارد. ادامه می‌دهید؟",
     "savePermissions": "ذخیره دسترسی‌ها",
     "selectAll": "انتخاب همه",
     "deselectAll": "لغو انتخاب همه",
@@ -2683,6 +2692,7 @@
     "edit_wbs": "ویرایش ساختار شکست کار",
     "view_activities": "مشاهده فعالیت‌ها",
     "edit_activities": "ویرایش فعالیت‌ها",
+    "delete_activities": "حذف فعالیت‌ها",
     "view_costs": "مشاهده هزینه‌ها",
     "edit_costs": "ویرایش هزینه‌ها",
     "approve_costs": "تأیید هزینه‌ها",

@@ -95,11 +95,30 @@ class Permission(UUIDModel):
 
 
 class Role(UUIDModel):
-    role_name = models.CharField(max_length=60, unique=True)
+    role_name = models.CharField(max_length=60)
     description = models.TextField(blank=True, default='')
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='local_roles',
+    )
 
     class Meta:
         db_table = 'roles'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['role_name'],
+                condition=models.Q(project__isnull=True),
+                name='unique_global_role_name',
+            ),
+            models.UniqueConstraint(
+                fields=['project', 'role_name'],
+                condition=models.Q(project__isnull=False),
+                name='unique_local_role_name',
+            ),
+        ]
 
     def __str__(self):
         return self.role_name
@@ -180,6 +199,11 @@ class ProjectMember(UUIDModel):
         blank=True,
         related_name='members',
     )
+    positions = models.ManyToManyField(
+        ProjectPosition,
+        blank=True,
+        related_name='assigned_members',
+    )
     wage = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     wage_type = models.CharField(max_length=20, choices=WageType.choices, default=WageType.HOURLY)
     weekly_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -209,7 +233,7 @@ class ProjectMember(UUIDModel):
 
 class ProjectMemberRole(UUIDModel):
     member = models.ForeignKey(ProjectMember, on_delete=models.CASCADE, related_name='member_roles')
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='member_assignments')
+    role = models.ForeignKey(Role, on_delete=models.PROTECT, related_name='member_assignments')
 
     class Meta:
         db_table = 'project_member_roles'
@@ -235,3 +259,52 @@ class ProjectMemberPermissionOverride(UUIDModel):
     def __str__(self):
         state = 'grant' if self.is_granted else 'deny'
         return f'{self.member_id} — {self.permission_codename} ({state})'
+
+
+class PositionPermission(UUIDModel):
+    position = models.ForeignKey(
+        ProjectPosition,
+        on_delete=models.CASCADE,
+        related_name='default_permissions',
+    )
+    permission_codename = models.CharField(max_length=60)
+
+    class Meta:
+        db_table = 'position_permissions'
+        unique_together = [['position', 'permission_codename']]
+
+
+class RoleAccessChange(UUIDModel):
+    """Base record for role and permission changes. Not the finished history screen."""
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='role_access_changes',
+    )
+    project = models.ForeignKey(
+        'projects.Project',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='role_access_changes',
+    )
+    subject_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='subject_role_access_changes',
+    )
+    role_id = models.UUIDField(null=True, blank=True)
+    role_name = models.CharField(max_length=60, blank=True, default='')
+    action = models.CharField(max_length=40)
+    before = models.JSONField(default=dict, blank=True)
+    after = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'role_access_changes'
+        ordering = ['-created_at']

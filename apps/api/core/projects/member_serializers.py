@@ -81,6 +81,10 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
         child=serializers.UUIDField(),
         allow_empty=False,
     )
+    position_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+    )
 
     def validate(self, attrs):
         user_id = attrs.get('user_id')
@@ -95,6 +99,10 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
 
 class ProjectMemberUpdateSerializer(serializers.Serializer):
     role_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        required=False,
+    )
+    position_ids = serializers.ListField(
         child=serializers.UUIDField(),
         required=False,
     )

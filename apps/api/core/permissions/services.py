@@ -13,12 +13,30 @@ def get_role_permission_codenames(member: ProjectMember) -> set[str]:
     return codenames
 
 
+def get_position_permission_codenames(member: ProjectMember) -> set[str]:
+    """Default permissions from every selected job title, including the legacy single title."""
+    positions = list(member.positions.all())
+    if member.position_id and all(position.id != member.position_id for position in positions):
+        if member.position is not None:
+            positions.append(member.position)
+    codenames: set[str] = set()
+    for position in positions:
+        codenames.update(
+            item.permission_codename for item in position.default_permissions.all()
+        )
+    return codenames
+
+
+def get_inherited_codenames(member: ProjectMember) -> set[str]:
+    return get_role_permission_codenames(member) | get_position_permission_codenames(member)
+
+
 def get_effective_permissions(member: ProjectMember) -> dict[str, bool | None]:
     """
     Return permission map: True/False for explicit override, or inherited bool from roles.
     Keys are all known permission codenames.
     """
-    role_codenames = get_role_permission_codenames(member)
+    inherited = get_inherited_codenames(member)
     overrides = {
         o.permission_codename: o.is_granted
         for o in member.permission_overrides.all()
@@ -29,8 +47,18 @@ def get_effective_permissions(member: ProjectMember) -> dict[str, bool | None]:
         if codename in overrides:
             result[codename] = overrides[codename]
         else:
-            result[codename] = codename in role_codenames
+            result[codename] = codename in inherited
     return result
+
+
+def permission_origin(member: ProjectMember, codename: str) -> str:
+    override = next(
+        (item for item in member.permission_overrides.all() if item.permission_codename == codename),
+        None,
+    )
+    if override is None:
+        return 'inherit'
+    return 'grant' if override.is_granted else 'deny'
 
 
 def member_has_permission(member: ProjectMember, codename: str) -> bool:
@@ -42,24 +70,46 @@ def member_has_permission(member: ProjectMember, codename: str) -> bool:
     if override is not None:
         return override.is_granted
 
-    return codename in get_role_permission_codenames(member)
+    return codename in get_inherited_codenames(member)
 
 
-def set_permission_override(member: ProjectMember, codename: str, is_granted: bool | None) -> None:
+def set_permission_override(
+    member: ProjectMember,
+    codename: str,
+    is_granted: bool | None,
+    actor=None,
+) -> None:
     if codename not in ALL_PERMISSION_CODENAMES:
         raise ValueError(f'Unknown permission codename: {codename}')
 
+    from permissions.role_services import record_access_change
+
+    before_origin = permission_origin(member, codename)
+    before_granted = member_has_permission(member, codename)
     if is_granted is None:
         ProjectMemberPermissionOverride.objects.filter(
             member=member,
             permission_codename=codename,
         ).delete()
-        return
-
-    ProjectMemberPermissionOverride.objects.update_or_create(
-        member=member,
-        permission_codename=codename,
-        defaults={'is_granted': is_granted},
+    else:
+        ProjectMemberPermissionOverride.objects.update_or_create(
+            member=member,
+            permission_codename=codename,
+            defaults={'is_granted': is_granted},
+        )
+    member = ProjectMember.objects.get(pk=member.pk)
+    record_access_change(
+        actor=actor,
+        project=member.project,
+        subject_user=member.user,
+        role=None,
+        action='override_cleared' if is_granted is None else 'override_set',
+        before={'codename': codename, 'origin': before_origin, 'granted': before_granted},
+        after={
+            'codename': codename,
+            'origin': permission_origin(member, codename),
+            'granted': member_has_permission(member, codename),
+        },
     )
 
 
@@ -70,6 +120,7 @@ def permissions_summary(member: ProjectMember) -> list[dict]:
             'codename': codename,
             'label': PERMISSIONS[codename],
             'granted': effective[codename],
+            'origin': permission_origin(member, codename),
         }
         for codename in sorted(ALL_PERMISSION_CODENAMES)
     ]

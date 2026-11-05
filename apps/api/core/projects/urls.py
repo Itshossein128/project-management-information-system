@@ -16,6 +16,7 @@ from projects.report_views import (
     ProjectReportExportView,
     ProjectReportRunView,
 )
+from projects.local_role_views import LocalRoleViewSet, ProjectAccessChangeListView
 from projects.member_views import ProjectMemberViewSet, RoleListView, UserLookupView
 from projects.core_principle_views import (
     FiscalPeriodLockDeactivateView,
@@ -63,6 +64,10 @@ position_detail = ProjectPositionViewSet.as_view(
 
 # Project Members (User Assignments)
 member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
+local_role_list = LocalRoleViewSet.as_view({'get': 'list', 'post': 'create'})
+local_role_detail = LocalRoleViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
+local_role_impact = LocalRoleViewSet.as_view({'get': 'impact'})
+local_role_permissions = LocalRoleViewSet.as_view({'put': 'permissions', 'patch': 'permissions'})
 member_detail = ProjectMemberViewSet.as_view({'patch': 'partial_update'})
 member_permissions = ProjectMemberViewSet.as_view({'get': 'permissions', 'post': 'permissions', 'delete': 'permissions'})
 
@@ -142,6 +147,23 @@ urlpatterns = [
     path('<uuid:project_pk>/positions/<uuid:pk>/', position_detail, name='project-position-detail'),
 
     # Project Members
+    path('<uuid:project_pk>/roles/', local_role_list, name='project-local-role-list'),
+    path('<uuid:project_pk>/roles/<uuid:pk>/', local_role_detail, name='project-local-role-detail'),
+    path(
+        '<uuid:project_pk>/roles/<uuid:pk>/impact/',
+        local_role_impact,
+        name='project-local-role-impact',
+    ),
+    path(
+        '<uuid:project_pk>/roles/<uuid:pk>/permissions/',
+        local_role_permissions,
+        name='project-local-role-permissions',
+    ),
+    path(
+        '<uuid:project_pk>/access-changes/',
+        ProjectAccessChangeListView.as_view(),
+        name='project-access-changes',
+    ),
     path('<uuid:project_pk>/members/', member_list, name='project-member-list'),
     path('<uuid:project_pk>/members/<uuid:user_id>/', member_detail, name='project-member-detail'),
     path(

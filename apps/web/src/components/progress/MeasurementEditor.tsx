@@ -13,6 +13,7 @@ import {
 import { Field, Input, Select } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 import { useToast } from "@/components/ui/toast";
+import { useActiveProjectPermission } from "@/app/contexts/project-context";
 import { Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface MilestoneItem {
@@ -34,6 +35,9 @@ export function MeasurementEditor({
   activityId?: string;
 }) {
   const { t } = useTranslation();
+  const { has } = useActiveProjectPermission(projectId);
+  const canEdit = has("edit_activities");
+  const canApprove = has("approve_reports");
   const toast = useToast();
   const qc = useQueryClient();
   const [activityId, setActivityId] = useState(initialActivityId ?? "");
@@ -197,6 +201,7 @@ export function MeasurementEditor({
 
       {activityId ? (
         <>
+          <fieldset disabled={!canEdit} className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Select
               name="measurement_method"
@@ -266,10 +271,10 @@ export function MeasurementEditor({
                     )}
                     مجموع اوزان: {(currentWeightSum <= 1 ? currentWeightSum * 100 : currentWeightSum).toFixed(1)}٪ (الزام: ۱۰۰٪)
                   </span>
-                  <Button size="xs" variant="secondary" onClick={handleAddMilestone} type="button">
+                  {canEdit ? <Button size="xs" variant="secondary" onClick={handleAddMilestone} type="button">
                     <Plus className="size-3.5 mr-1" />
                     افزودن عطف
-                  </Button>
+                  </Button> : null}
                 </div>
               </div>
 
@@ -297,7 +302,7 @@ export function MeasurementEditor({
                         />
                         <span className="text-xs text-muted-foreground">٪</span>
                       </div>
-                      <Button
+                      {canEdit ? <Button
                         size="xs"
                         variant="ghost"
                         onClick={() => handleRemoveMilestone(idx)}
@@ -305,7 +310,7 @@ export function MeasurementEditor({
                         type="button"
                       >
                         <Trash2 className="size-3.5" />
-                      </Button>
+                      </Button> : null}
                     </div>
                   ))}
                 </div>
@@ -331,16 +336,17 @@ export function MeasurementEditor({
             </p>
           ) : null}
 
-          {measurement?.status === "approved" ? (
+          {measurement?.status === "approved" && canEdit ? (
             <Input
               value={changeReason}
               onChange={(e) => setChangeReason(e.target.value)}
               placeholder={t("progress.changeReason", { defaultValue: "دلیل تغییر روش اندازه‌گیری (الزامی برای تغییر)" })}
             />
           ) : null}
+          </fieldset>
 
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            <Button
+            {canEdit ? <Button
               size="sm"
               variant="secondary"
               loading={saveDraft.isPending}
@@ -348,8 +354,8 @@ export function MeasurementEditor({
               onClick={() => saveDraft.mutate()}
             >
               {t("common.save", { defaultValue: "ذخیره پیش‌نویس" })}
-            </Button>
-            <Button
+            </Button> : null}
+            {canApprove ? <Button
               size="sm"
               variant="primary"
               loading={approve.isPending}
@@ -358,8 +364,8 @@ export function MeasurementEditor({
               data-testid="measurement-approve-btn"
             >
               {t("progress.approveMeasurement", { defaultValue: "تأیید نهایی روش اندازه‌گیری" })}
-            </Button>
-            {measurement?.status === "approved" ? (
+            </Button> : null}
+            {measurement?.status === "approved" && canEdit ? (
               <Button
                 size="sm"
                 variant="ghost"

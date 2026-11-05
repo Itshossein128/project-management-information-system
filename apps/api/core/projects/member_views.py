@@ -22,7 +22,14 @@ from projects.member_serializers import (
     ProjectMemberUpdateSerializer,
     RoleSerializer,
 )
-from projects.services import UnknownRoles, assign_roles_to_member, missing_role_ids
+from projects.services import (
+    PositionSelectionError,
+    RoleProjectMismatch,
+    UnknownRoles,
+    assign_roles_to_member,
+    missing_role_ids,
+    replace_member_positions,
+)
 
 User = get_user_model()
 
@@ -126,9 +133,33 @@ class ProjectMemberViewSet(viewsets.ViewSet):
                         invited_email=email,
                         status=MemberStatus.INVITED,
                     )
-                assign_roles_to_member(member, role_ids)
+                assign_roles_to_member(member, role_ids, actor=request.user)
+                if data.get('position_ids'):
+                    replace_member_positions(member, data['position_ids'], actor=request.user)
         except UnknownRoles as exc:
             return self._unknown_role_response(exc.missing_ids)
+        except RoleProjectMismatch as exc:
+            return Response(
+                {
+                    'error': {
+                        'code': 'role_project_mismatch',
+                        'message': _('This role does not belong to this project.'),
+                        'details': {'role_ids': [str(item) for item in exc.role_ids]},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except PositionSelectionError as exc:
+            return Response(
+                {
+                    'error': {
+                        'code': 'position_not_selectable',
+                        'message': _('One or more job titles cannot be selected for this project.'),
+                        'details': {'position_ids': [str(item) for item in exc.position_ids]},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(ProjectMemberListSerializer(member).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, project_pk=None, user_id=None):
@@ -145,12 +176,36 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         try:
             with transaction.atomic():
                 if 'role_ids' in data:
-                    assign_roles_to_member(member, data['role_ids'])
+                    assign_roles_to_member(member, data['role_ids'], actor=request.user)
+                if 'position_ids' in data:
+                    replace_member_positions(member, data['position_ids'], actor=request.user)
                 if 'status' in data:
                     member.status = data['status']
                     member.save(update_fields=['status'])
         except UnknownRoles as exc:
             return self._unknown_role_response(exc.missing_ids)
+        except RoleProjectMismatch as exc:
+            return Response(
+                {
+                    'error': {
+                        'code': 'role_project_mismatch',
+                        'message': _('This role does not belong to this project.'),
+                        'details': {'role_ids': [str(item) for item in exc.role_ids]},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except PositionSelectionError as exc:
+            return Response(
+                {
+                    'error': {
+                        'code': 'position_not_selectable',
+                        'message': _('One or more job titles cannot be selected for this project.'),
+                        'details': {'position_ids': [str(item) for item in exc.position_ids]},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         member.refresh_from_db()
         return Response(ProjectMemberListSerializer(member).data)
@@ -169,7 +224,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
                     {'error': {'code': 'validation_error', 'message': 'permission_codename is required.', 'details': {}}},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            set_permission_override(member, codename, None)
+            set_permission_override(member, codename, None, actor=request.user)
             member = self._get_member_by_user(user_id)
             return Response(EffectivePermissionsSerializer.from_member(member))
 
@@ -179,6 +234,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
             member,
             serializer.validated_data['permission_codename'],
             serializer.validated_data['is_granted'],
+            actor=request.user,
         )
         member = self._get_member_by_user(user_id)
         return Response(EffectivePermissionsSerializer.from_member(member))

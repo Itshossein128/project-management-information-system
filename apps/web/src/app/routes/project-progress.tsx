@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
 import { Link, useParams } from "react-router";
-import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
+import { ProjectProvider, useActiveProjectPermission, usePermission, useProject } from "@/app/contexts/project-context";
 import {
   evmIndexValue,
   evmIsNotComputable,
@@ -46,8 +46,10 @@ function ProgressPageContent() {
 
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
+  const { has: hasActivePermission } = useActiveProjectPermission(projectId);
   const canView = has("view_dashboard");
-  const canEdit = has("edit_activities");
+  const canEdit = hasActivePermission("edit_activities");
+  const canApprove = hasActivePermission("approve_reports");
   const qc = useQueryClient();
 
   const [dateRange, setDateRange] = useState({ from: "", to: "" });
@@ -408,7 +410,7 @@ function ProgressPageContent() {
         <ActivityProgressTable projectId={projectId} rows={activityRows} />
       </section>
 
-      {canEdit ? <MeasurementEditor projectId={projectId} /> : null}
+      {canEdit || canApprove ? <MeasurementEditor projectId={projectId} /> : null}
 
       <PeriodReportsPanel projectId={projectId} />
 

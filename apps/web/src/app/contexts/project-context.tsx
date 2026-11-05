@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProject, type ProjectDetail } from "@/app/lib/api/projects";
-import { fetchMemberPermissions } from "@/app/lib/api/members";
+import { fetchMemberPermissions, fetchMembers } from "@/app/lib/api/members";
 import { useAuth } from "@/app/contexts/auth-context";
 
 interface ProjectContextValue {
@@ -54,4 +54,21 @@ export function usePermission(projectId: string) {
   };
 
   return { has, permissions: data?.permissions ?? [], effective: data?.effective ?? {} };
+}
+
+/** Project mutations requiring active membership must not use retained grants
+ * from an inactive member, including an organizational observer. */
+export function useActiveProjectPermission(projectId: string) {
+  const { user } = useAuth();
+  const { has } = usePermission(projectId);
+  const userId = user?.id != null ? String(user.id) : undefined;
+  const { data: members } = useQuery({
+    queryKey: ["members", projectId],
+    queryFn: () => fetchMembers(projectId),
+    enabled: Boolean(projectId && userId),
+  });
+  const isActiveMember = members?.some(
+    (member) => String(member.user_id) === userId && member.status === "active",
+  ) === true;
+  return { has: (codename: string) => isActiveMember && has(codename) };
 }

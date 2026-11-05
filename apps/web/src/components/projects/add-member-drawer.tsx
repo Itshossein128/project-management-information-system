@@ -5,6 +5,7 @@ import {
   addMember,
   clearMemberPermissionOverride,
   fetchMemberPermissions,
+  fetchSelectablePositions,
   lookupUsers,
   setMemberPermissionOverride,
   updateMember,
@@ -53,7 +54,17 @@ export function AddMemberDrawer({
   const [selectedUser, setSelectedUser] = useState<UserLookupResult | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const { data: selectablePositions = [] } = useQuery({
+    queryKey: ["selectable-positions", projectId],
+    queryFn: async () => {
+      const payload = await fetchSelectablePositions(projectId);
+      return Array.isArray(payload) ? payload : payload.results;
+    },
+    enabled: isOpen,
+  });
 
   const { data: permData } = useQuery({
     queryKey: ["member-permissions", projectId, editMember?.user_id],
@@ -78,6 +89,7 @@ export function AddMemberDrawer({
       setSelectedRoles(roleIds);
     } else {
       setSelectedRoles([]);
+      setSelectedPositions([]);
       setSelectedUser(null);
       setInviteEmail("");
       setSearch("");
@@ -88,12 +100,23 @@ export function AddMemberDrawer({
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (editMember?.user_id) {
-        return updateMember(projectId, editMember.user_id, { role_ids: selectedRoles });
+        return updateMember(projectId, editMember.user_id, {
+          role_ids: selectedRoles,
+          position_ids: selectedPositions,
+        });
       }
       if (selectedUser) {
-        return addMember(projectId, { user_id: selectedUser.user_id, role_ids: selectedRoles });
+        return addMember(projectId, {
+          user_id: selectedUser.user_id,
+          role_ids: selectedRoles,
+          position_ids: selectedPositions,
+        });
       }
-      return addMember(projectId, { email: inviteEmail, role_ids: selectedRoles });
+      return addMember(projectId, {
+        email: inviteEmail,
+        role_ids: selectedRoles,
+        position_ids: selectedPositions,
+      });
     },
     onSuccess: () => {
       toast.success(t("projectMembers.saved"));
@@ -130,7 +153,8 @@ export function AddMemberDrawer({
 
   const overrideState = (codename: string): "inherit" | "grant" | "deny" => {
     const entry = permData?.permissions.find((p) => p.codename === codename);
-    if (!entry || entry.granted === null) return "inherit";
+    if (!entry || entry.origin === "inherit" || entry.granted === null) return "inherit";
+    if (entry.origin === "grant" || entry.origin === "deny") return entry.origin;
     return entry.granted ? "grant" : "deny";
   };
 
@@ -182,6 +206,28 @@ export function AddMemberDrawer({
           )}
         </div>
       )}
+
+      {selectablePositions.length > 0 ? (
+        <div className="mb-4 space-y-2">
+          <Label>{t("projectMembers.positions")}</Label>
+          {selectablePositions.map((position) => (
+            <label key={position.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selectedPositions.includes(position.id)}
+                onChange={() =>
+                  setSelectedPositions((current) =>
+                    current.includes(position.id)
+                      ? current.filter((id) => id !== position.id)
+                      : [...current, position.id],
+                  )
+                }
+              />
+              <span>{position.label || position.position_name}</span>
+            </label>
+          ))}
+        </div>
+      ) : null}
 
       <div className="space-y-2">
         <Label>{t("projectMembers.rolesRequired")} *</Label>
