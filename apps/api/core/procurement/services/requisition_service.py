@@ -78,3 +78,17 @@ def put_item_on_hold(item: RequisitionItem, user) -> RequisitionItem:
     item.updated_by = user
     item.save(update_fields=['status', 'updated_by', 'updated_at'])
     return item
+
+
+def assert_requisition_editable(requisition: RequisitionHeader) -> None:
+    if requisition.status != RequisitionStatus.DRAFT:
+        raise ValidationError(
+            {'detail': 'Requisition can only be edited in DRAFT status.'}
+        )
+
+
+def assert_requisition_deletable(requisition: RequisitionHeader) -> None:
+    if requisition.status != RequisitionStatus.DRAFT:
+        raise ValidationError(
+            {'detail': 'Only DRAFT requisitions can be deleted.'}
+        )

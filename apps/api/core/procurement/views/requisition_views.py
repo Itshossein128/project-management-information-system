@@ -25,6 +25,8 @@ from procurement.serializers import (
     RequisitionItemSerializer,
 )
 from procurement.services.fast_track_notify import notify_fast_track_requisition
+from procurement.services.block_service import assert_block_editable, assert_block_deletable
+from procurement.services.requisition_service import assert_requisition_editable, assert_requisition_deletable
 
 
 class BlockViewSet(ProjectScopedViewSet):
@@ -58,18 +60,12 @@ class BlockViewSet(ProjectScopedViewSet):
         return qs
 
     def perform_update(self, serializer):
-        if serializer.instance.block_kind == BlockKind.WORKSHOP:
-            raise ValidationError({'detail': 'System workshop block cannot be modified.'})
+        assert_block_editable(serializer.instance)
         super().perform_update(serializer)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.block_kind == BlockKind.WORKSHOP:
-            raise ValidationError({'detail': 'System workshop block cannot be deleted.'})
-        if RequisitionHeader.objects.filter(block=instance, is_deleted=False).exists():
-            raise ValidationError(
-                {'detail': 'Cannot delete a block that has purchase requisitions.'}
-            )
+        assert_block_deletable(instance)
         return super().destroy(request, *args, **kwargs)
 
 
@@ -153,18 +149,12 @@ class RequisitionHeaderViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = self.get_object()
-        if instance.status != RequisitionStatus.DRAFT:
-            raise ValidationError(
-                {'detail': 'Requisition can only be edited in DRAFT status.'}
-            )
+        assert_requisition_editable(instance)
         instance = serializer.save(updated_by=self.request.user)
         notify_fast_track_requisition(instance)
 
     def perform_destroy(self, instance):
-        if instance.status != RequisitionStatus.DRAFT:
-            raise ValidationError(
-                {'detail': 'Only DRAFT requisitions can be deleted.'}
-            )
+        assert_requisition_deletable(instance)
         instance.soft_delete(user=self.request.user)
 
 
