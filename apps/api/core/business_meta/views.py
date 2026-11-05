@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
 from common.mixins import ProjectNestedViewSetMixin
+from permissions.project import ActiveMemberPermission
 from projects.permissions import IsProjectMember
 from master_data.models import ProjectMember, ProjectPosition
 from .models import TableDefinition, FieldDefinition, RelationDefinition
@@ -67,7 +68,9 @@ class ProjectPositionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method in drf_permissions.SAFE_METHODS:
             return [IsAuthenticated(), CanViewProjectMembers(), IsVisitorReadOnly()]
-        return [IsAuthenticated(), IsHrOrAdmin(), IsVisitorReadOnly()]
+        write_permission = ActiveMemberPermission()
+        write_permission.codename = 'manage_members'
+        return [IsAuthenticated(), write_permission, IsVisitorReadOnly()]
 
     def perform_destroy(self, instance: ProjectPosition) -> None:
         if ProjectMember.objects.filter(position=instance).exists():

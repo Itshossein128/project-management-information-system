@@ -1,4 +1,6 @@
 """Project creation and membership business rules."""
+from uuid import UUID
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
@@ -40,8 +42,44 @@ def create_project_with_creator(*, creator: User, **project_fields) -> Project:
     return project
 
 
+class UnknownRoles(Exception):
+    """One or more submitted role ids are not assignable."""
+
+    def __init__(self, missing_ids: list):
+        self.missing_ids = list(missing_ids)
+        super().__init__(self.missing_ids)
+
+
+def missing_role_ids(role_ids) -> list:
+    """Return submitted ids that do not refer to an existing role, in order."""
+    if not role_ids:
+        return []
+    requested = []
+    invalid = []
+    for raw in role_ids:
+        try:
+            requested.append(raw if isinstance(raw, UUID) else UUID(str(raw)))
+        except (TypeError, ValueError):
+            invalid.append(raw)
+    found = set(Role.objects.filter(id__in=requested).values_list('id', flat=True))
+    missing = [item for item in requested if item not in found]
+    return invalid + missing
+
+
 def assign_roles_to_member(member: ProjectMember, role_ids: list) -> None:
-    roles = Role.objects.filter(id__in=role_ids)
-    member.member_roles.all().delete()
+    """Replace member roles only when every submitted id exists."""
+    missing = missing_role_ids(role_ids)
+    if missing:
+        raise UnknownRoles(missing)
+    roles = list(Role.objects.filter(id__in=role_ids))
+    seen = set()
+    unique_roles = []
     for role in roles:
-        ProjectMemberRole.objects.create(member=member, role=role)
+        if role.id in seen:
+            continue
+        seen.add(role.id)
+        unique_roles.append(role)
+    member.member_roles.all().delete()
+    ProjectMemberRole.objects.bulk_create(
+        [ProjectMemberRole(member=member, role=role) for role in unique_roles]
+    )

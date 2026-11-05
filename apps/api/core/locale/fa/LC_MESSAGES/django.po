@@ -361,3 +361,9 @@ msgstr "پیمانکار ناشناس است. ابتدا پیمانکار را �
 
 msgid "Select a valid active contractor. Register the contractor on stakeholders (ذینفعان) first."
 msgstr "یک پیمانکار فعال معتبر انتخاب کنید. ابتدا پیمانکار را در صفحه ذینفعان ثبت کنید."
+
+msgid "One or more selected roles do not exist."
+msgstr "یک یا چند نقش انتخاب‌شده وجود ندارد و هیچ تغییری ذخیره نشد."
+
+msgid "You do not have permission to perform this action."
+msgstr "اجازه انجام این کار را ندارید."

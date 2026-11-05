@@ -44,7 +44,7 @@ class ItemViewSet(viewsets.ModelViewSet):
     """
     queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsVisitorReadOnly]
 
     @extend_schema(
         summary="Export items to Excel",

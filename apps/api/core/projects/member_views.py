@@ -1,6 +1,8 @@
 """Project member management APIs (Sprint 2 C-01)."""
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Q
+from django.utils.translation import gettext as _
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -10,7 +12,7 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from master_data.models import MemberStatus, ProjectMember, Role
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.project import ActiveMemberPermission, IsProjectMember
 from permissions.services import set_permission_override
 from projects.member_serializers import (
     EffectivePermissionsSerializer,
@@ -20,7 +22,7 @@ from projects.member_serializers import (
     ProjectMemberUpdateSerializer,
     RoleSerializer,
 )
-from projects.services import assign_roles_to_member
+from projects.services import UnknownRoles, assign_roles_to_member, missing_role_ids
 
 User = get_user_model()
 
@@ -38,11 +40,11 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         if self.action == 'list':
             return [IsAuthenticated(), IsProjectMember()]
         if self.action == 'permissions':
-            # GET: any project member; POST/DELETE: manage_members required
+            # GET: any project member; POST/DELETE: active manage_members, no global bypass
             if self.request.method in ('GET', 'HEAD', 'OPTIONS'):
                 return [IsAuthenticated(), IsProjectMember()]
-            return [IsAuthenticated(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+            return [IsAuthenticated(), ActiveMemberPermission()]
+        return [IsAuthenticated(), ActiveMemberPermission()]
 
     @property
     def required_permission(self):
@@ -50,6 +52,18 @@ class ProjectMemberViewSet(viewsets.ViewSet):
 
     def _get_project_id(self):
         return self.kwargs['project_pk']
+
+    def _unknown_role_response(self, missing):
+        return Response(
+            {
+                'error': {
+                    'code': 'unknown_role',
+                    'message': _('One or more selected roles do not exist.'),
+                    'details': {'role_ids': [str(item) for item in missing]},
+                },
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     def _get_member_by_user(self, user_id):
         return get_object_or_404(
@@ -71,6 +85,9 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         return Response(ProjectMemberListSerializer(members, many=True).data)
 
     def create(self, request, project_pk=None):
+        missing = missing_role_ids((request.data or {}).get('role_ids') or [])
+        if missing:
+            return self._unknown_role_response(missing)
         serializer = ProjectMemberCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -79,49 +96,61 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         user_id = data.get('user_id')
         email = (data.get('email') or '').strip()
 
-        if user_id:
-            user = get_object_or_404(User, pk=user_id)
-            if ProjectMember.objects.filter(project_id=project_pk, user=user).exists():
-                return Response(
-                    {'error': {'code': 'validation_error', 'message': 'User is already a member.', 'details': {}}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            member = ProjectMember.objects.create(
-                project_id=project_pk,
-                user=user,
-                status=MemberStatus.ACTIVE,
-            )
-        else:
-            if ProjectMember.objects.filter(
-                project_id=project_pk,
-                invited_email__iexact=email,
-                status=MemberStatus.INVITED,
-            ).exists():
-                return Response(
-                    {'error': {'code': 'validation_error', 'message': 'Invitation already sent.', 'details': {}}},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            member = ProjectMember.objects.create(
-                project_id=project_pk,
-                user=None,
-                invited_email=email,
-                status=MemberStatus.INVITED,
-            )
-
-        assign_roles_to_member(member, role_ids)
+        try:
+            with transaction.atomic():
+                if user_id:
+                    user = get_object_or_404(User, pk=user_id)
+                    if ProjectMember.objects.filter(project_id=project_pk, user=user).exists():
+                        return Response(
+                            {'error': {'code': 'validation_error', 'message': 'User is already a member.', 'details': {}}},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    member = ProjectMember.objects.create(
+                        project_id=project_pk,
+                        user=user,
+                        status=MemberStatus.ACTIVE,
+                    )
+                else:
+                    if ProjectMember.objects.filter(
+                        project_id=project_pk,
+                        invited_email__iexact=email,
+                        status=MemberStatus.INVITED,
+                    ).exists():
+                        return Response(
+                            {'error': {'code': 'validation_error', 'message': 'Invitation already sent.', 'details': {}}},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    member = ProjectMember.objects.create(
+                        project_id=project_pk,
+                        user=None,
+                        invited_email=email,
+                        status=MemberStatus.INVITED,
+                    )
+                assign_roles_to_member(member, role_ids)
+        except UnknownRoles as exc:
+            return self._unknown_role_response(exc.missing_ids)
         return Response(ProjectMemberListSerializer(member).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, project_pk=None, user_id=None):
         member = self._get_member_by_user(user_id)
+        raw_roles = (request.data or {}).get('role_ids', None)
+        if raw_roles is not None:
+            missing = missing_role_ids(raw_roles)
+            if missing:
+                return self._unknown_role_response(missing)
         serializer = ProjectMemberUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        if 'role_ids' in data:
-            assign_roles_to_member(member, data['role_ids'])
-        if 'status' in data:
-            member.status = data['status']
-            member.save(update_fields=['status'])
+        try:
+            with transaction.atomic():
+                if 'role_ids' in data:
+                    assign_roles_to_member(member, data['role_ids'])
+                if 'status' in data:
+                    member.status = data['status']
+                    member.save(update_fields=['status'])
+        except UnknownRoles as exc:
+            return self._unknown_role_response(exc.missing_ids)
 
         member.refresh_from_db()
         return Response(ProjectMemberListSerializer(member).data)

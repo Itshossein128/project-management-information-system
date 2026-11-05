@@ -10,6 +10,26 @@ def _is_global_admin(user) -> bool:
     return user.is_superuser or user.groups.filter(name='admin').exists()
 
 
+def has_organizational_observation(user) -> bool:
+    """Read-only project observation for superuser or the admin group.
+
+    The staff flag and the hr group do not qualify. This does not grant writes.
+    """
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='admin').exists()
+
+
+def active_member_has_codename(user, project_id, codename: str) -> bool:
+    """Project permission that never treats a global admin as a writer."""
+    member = _get_active_member(user, project_id)
+    if member is None:
+        return False
+    return member.has_permission(codename)
+
+
 def _get_project_id(request, view) -> str | None:
     project_id = getattr(request, 'project_id', None)
     if project_id is not None:
@@ -69,6 +89,27 @@ class IsProjectMember(BasePermission):
         if _is_global_admin(request.user):
             return True
         return _get_active_member(request.user, str(project_id)) is not None
+
+
+class ActiveMemberPermission(BasePermission):
+    """Selected-path write check. Does not use the global-admin bypass."""
+
+    codename = 'manage_members'
+    message = _('You do not have permission to perform this action.')
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        project_id = _get_project_id(request, view)
+        if not project_id:
+            return False
+        codename = self.codename or getattr(view, 'required_permission', '')
+        if not codename:
+            return False
+        return active_member_has_codename(request.user, project_id, codename)
+
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view)
 
 
 class HasProjectPermission(BasePermission):

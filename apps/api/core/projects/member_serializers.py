@@ -1,8 +1,18 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
 from permissions.constants import PERMISSIONS
 from permissions.services import get_effective_permissions, permissions_summary
+from projects.services import missing_role_ids
+
+
+def _reject_unknown_roles(role_ids) -> None:
+    missing = missing_role_ids(role_ids)
+    if missing:
+        raise serializers.ValidationError(
+            {'role_ids': _('One or more selected roles do not exist.')},
+        )
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -79,6 +89,7 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError('Either user_id or email is required.')
         if not attrs.get('role_ids'):
             raise serializers.ValidationError({'role_ids': 'At least one role is required.'})
+        _reject_unknown_roles(attrs.get('role_ids'))
         return attrs
 
 
@@ -88,6 +99,11 @@ class ProjectMemberUpdateSerializer(serializers.Serializer):
         required=False,
     )
     status = serializers.ChoiceField(choices=MemberStatus.choices, required=False)
+
+    def validate(self, attrs):
+        if 'role_ids' in attrs:
+            _reject_unknown_roles(attrs.get('role_ids'))
+        return attrs
 
 
 class PermissionOverrideSerializer(serializers.Serializer):

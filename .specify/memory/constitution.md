@@ -1,15 +1,15 @@
 <!--
 Sync Impact Report
-- Version change: (none / template scaffold) → 1.0.0
-- Modified principles: N/A (initial ratification; replaced template placeholders)
-- Added sections:
-  - Core Principles I–VII (authorization, data integrity, bilingual UX,
-    safe mutations, minimal changes, evidence-based verification,
-    accessible construction-management UX)
-  - Architecture and Development Constraints
-  - Quality Gates
-  - Governance
-- Removed sections: none (template placeholders only)
+- Version change: 1.0.0 → 1.1.0
+- Bump rationale: MINOR. Principle I keeps mandatory server-side membership
+  and permission checks for project reads and every mutation. The amendment
+  adds one named, bounded read exception. It does not remove or replace the
+  principle, so the change is expanded guidance rather than a 2.0.0
+  redefinition. Principles II–VII are unchanged.
+- Modified principles: I. Server-Enforced Authorization and Tenant/Project
+  Isolation (same title; read exception added)
+- Added sections: none
+- Removed sections: none
 - Follow-up TODOs: none
 -->
 
@@ -20,13 +20,38 @@ Sync Impact Report
 ### I. Server-Enforced Authorization and Tenant/Project Isolation
 
 Authentication alone is NEVER sufficient authorization. Every project-scoped
-read or mutation MUST verify membership and the required project permission
-server-side. Client-side permission checks are UX only and MUST NOT be treated
-as the security boundary. Resource resolution MUST go through the authorized
-project scope to prevent IDOR (insecure direct object reference).
+read or mutation MUST verify active membership and the required project
+permission server-side, except the read-only observation exception stated in
+this principle. Client-side permission checks are UX only and MUST NOT be
+treated as the security boundary. Resource resolution MUST go through the
+authorized project scope to prevent IDOR (insecure direct object reference).
 
-**Rationale**: Construction data is multi-tenant and permission-sensitive;
-leaking or mutating another project's records is an unacceptable failure mode.
+Only two account kinds MAY read projects and their general operational
+information without an active membership: a member of the system-administrator
+group, and a superuser account. That read stays inside the organization the
+account is allowed to administer and MUST NOT cross an organization boundary.
+The exception MUST NOT authorize creating, editing, deleting, or approving
+project operations. Those actions MUST still require active membership in that
+project and the corresponding project permission.
+
+General observation MUST NOT disclose sensitive information. Wages, pay rates,
+confidential contact details, and sensitive exports or files MUST be checked
+against their own permission. The staff marker and membership in the
+human-resources group MUST NOT, by themselves, grant this exception.
+Human-resources authority is limited to organizational permissions explicitly
+assigned to that account.
+
+Organization administration means managing accounts and organizational
+reference data within the assigned permission. It MUST NOT automatically
+include managing a project's members, roles, or permissions. The observation
+exception MUST NOT bypass separation of duties between the person who submits
+an action and the person who approves it.
+
+**Rationale**: Construction data is multi-tenant and permission-sensitive.
+A named system administrator needs to see projects inside the organization
+they administer without joining every project. That visibility must not become
+a right to change project work, read confidential fields, skip approval
+separation, or cross an organization boundary.
 
 ### II. Data Integrity and End-to-End Domain Consistency
 
@@ -153,4 +178,4 @@ Versioning follows semantic versioning for governance:
 Compliance reviews for PRs and feature work MUST check alignment with these
 principles, Architecture and Development Constraints, and Quality Gates.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-01 | **Last Amended**: 2026-10-01
+**Version**: 1.1.0 | **Ratified**: 2026-10-01 | **Last Amended**: 2026-11-05

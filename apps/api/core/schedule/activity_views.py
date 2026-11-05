@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from config.exceptions import ConflictError
 from config.pagination import DefaultPageNumberPagination
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.project import ActiveMemberPermission, HasProjectPermission, IsProjectMember
 from projects.models import Activity, ActivityRelation
 from schedule.serializers import (
     ActivityCreateUpdateSerializer,
@@ -44,6 +44,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
     edit_permission = 'edit_activities'
 
     def get_permissions(self):
+        if self.action == 'destroy':
+            delete_permission = ActiveMemberPermission()
+            delete_permission.codename = 'delete_activities'
+            return [IsAuthenticated(), delete_permission]
         if self.action in ('list', 'retrieve', 'weight_summary', 'network'):
             return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
         return [IsAuthenticated(), HasProjectPermission()]

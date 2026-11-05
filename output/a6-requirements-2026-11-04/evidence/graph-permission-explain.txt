@@ -1,0 +1,51 @@
+Node: HasProjectPermission
+  ID:        apps_api_core_permissions_project_hasprojectpermission
+  Source:    apps/api/core/permissions/project.py L74
+  Type:      code
+  Community: HasProjectPermission
+  Degree:    246
+
+Connections (246):
+  <-- contracts/views.py [imports] [EXTRACTED] apps/api/core/contracts/views.py:L49
+  <-- cost_control/views.py [imports] [EXTRACTED] apps/api/core/cost_control/views.py:L41
+  <-- unit_report_views.py [imports] [EXTRACTED] apps/api/core/sub_reports/unit_report_views.py:L25
+  <-- department_activity_data_views.py [imports] [EXTRACTED] apps/api/core/inventory/department_activity_data_views.py:L26
+  <-- daily_report_views.py [imports] [EXTRACTED] apps/api/core/field_reports/daily_report_views.py:L15
+  <-- cash_flow/views.py [imports] [EXTRACTED] apps/api/core/cash_flow/views.py:L50
+  <-- projects/views.py [imports] [EXTRACTED] apps/api/core/projects/views.py:L20
+  <-- project.py [contains] [EXTRACTED] apps/api/core/permissions/project.py:L74
+  <-- risk/views.py [imports] [EXTRACTED] apps/api/core/risk/views.py:L11
+  <-- ProjectScopedViewSet [uses] [INFERRED] apps/api/core/common/viewsets.py:L19
+  <-- capacity_views.py [imports] [EXTRACTED] apps/api/core/hr/capacity_views.py:L29
+  <-- documents/views.py [imports] [EXTRACTED] apps/api/core/documents/views.py:L32
+  <-- requisition_views.py [imports] [EXTRACTED] apps/api/core/procurement/views/requisition_views.py:L11
+  <-- resources/views.py [imports] [EXTRACTED] apps/api/core/resources/views.py:L14
+  <-- economic/views.py [imports] [EXTRACTED] apps/api/core/economic/views.py:L25
+  <-- project_templates/views.py [imports] [EXTRACTED] apps/api/core/project_templates/views.py:L10
+  <-- progress_views.py [imports] [EXTRACTED] apps/api/core/schedule/progress_views.py:L16
+  <-- subcontractors/views.py [imports] [EXTRACTED] apps/api/core/subcontractors/views.py:L14
+  <-- budget_version_views.py [imports] [EXTRACTED] apps/api/core/cost_control/budget_version_views.py:L26
+  <-- po_views.py [imports] [EXTRACTED] apps/api/core/procurement/views/po_views.py:L8
+  ... and 226 more (--all lists all 246)
+  Grouped by file:
+    <-- apps/api/core/contracts/views.py: 17 connections
+    <-- apps/api/core/economic/views.py: 14 connections
+    <-- apps/api/core/cost_control/budget_version_views.py: 11 connections
+    <-- apps/api/core/cash_flow/views.py: 9 connections
+    <-- apps/api/core/procurement/views/po_views.py: 8 connections
+    <-- apps/api/core/resources/views.py: 8 connections
+    <-- apps/api/core/field_reports/daily_report_views.py: 7 connections
+    <-- apps/api/core/sub_reports/unit_report_views.py: 7 connections
+    <-- apps/api/core/subcontractors/views.py: 7 connections
+    <-- apps/api/core/alerts/views.py: 6 connections
+    <-- apps/api/core/cost_control/cbs_views.py: 6 connections
+    <-- apps/api/core/field_reports/report_views.py: 6 connections
+    <-- apps/api/core/hr/capacity_views.py: 6 connections
+    <-- apps/api/core/projects/views.py: 6 connections
+    <-- apps/api/core/schedule/change_request_views.py: 6 connections
+    <-- apps/api/core/workflow/views.py: 6 connections
+    <-- apps/api/core/cost_control/views.py: 5 connections
+    <-- apps/api/core/procurement/views/report_views.py: 5 connections
+    <-- apps/api/core/projects/core_principle_views.py: 5 connections
+    <-- apps/api/core/schedule/calendar_views.py: 5 connections
+    ... and 33 more files

@@ -1,0 +1,12 @@
+Graph: graphify-out/graph.json (27898 nodes) | Traversal: BFS depth=2 | Start: ['member()', 'Role', 'Permission', 'Authentication & User Management', 'Override with className', 'Accessibility'] | Context: field (heuristic) | 8 nodes found
+
+NODE member() [src=apps/api/core/conftest.py loc=L106 community=core/conftest.py]
+NODE Role [src=apps/web/src/app/lib/api/members.ts loc=L16 community=settings-roles.tsx]
+NODE Permission [src=apps/web/src/app/hooks/use-roles.ts loc=L19 community=Input]
+NODE Authentication & User Management [src=apps/api/core/authentication/ENDPOINTS.md loc=None community=مشخصات: مدل داده مرکزی و موجودیت‌های اصلی]
+NODE Override with className [src=.agents/skills/ui-styling/references/shadcn-theming.md loc=None community=shadcn/ui Theming & Customization]
+NODE Accessibility [src=.agents/skills/brand/references/approval-checklist.md loc=None community=Asset Approval Checklist]
+NODE AddMemberDrawerProps [src=apps/web/src/components/projects/add-member-drawer.tsx loc=L31 community=settings-roles.tsx]
+NODE ProjectMember [src=apps/web/src/app/lib/api/members.ts loc=L4 community=activities.ts]
+EDGE AddMemberDrawerProps --references [EXTRACTED context=field]--> Role at=apps/web/src/components/projects/add-member-drawer.tsx:L36
+EDGE AddMemberDrawerProps --references [EXTRACTED context=field]--> ProjectMember at=apps/web/src/components/projects/add-member-drawer.tsx:L35
