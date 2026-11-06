@@ -88,7 +88,7 @@ class IsHrOrAdmin(permissions.BasePermission):
 
 
 class IsOrganizationalAccountAdmin(permissions.BasePermission):
-    """Account create/status and org directory. Staff and bare hr do not qualify."""
+    """Account create/status and org directory. The admin and hr groups qualify. Staff alone does not."""
 
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
@@ -96,7 +96,7 @@ class IsOrganizationalAccountAdmin(permissions.BasePermission):
         user = cast(User, request.user)
         if user.is_superuser:
             return True
-        return user.groups.filter(name='admin').exists()
+        return user.groups.filter(name__in=('admin', 'hr')).exists()
 
 
 # Apply per view when you add route/endpoint/operation checks, e.g.:

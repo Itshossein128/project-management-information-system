@@ -80,4 +80,13 @@ export const mainSidebarNavigation: NavigationItem[] = [
     roles: [ROLES.ADMIN, ROLES.HR],
     activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`,
   },
+  {
+    label: "Access history",
+    section: "administration",
+    labelI18nKey: "nav.settingsAccessHistory",
+    icon: "shield",
+    path: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ACCESS_HISTORY}`,
+    roles: [ROLES.ADMIN],
+    activePathPrefix: `${PATHS.SETTINGS}/${PATHS.SETTINGS_ACCESS_HISTORY}`,
+  },
 ];

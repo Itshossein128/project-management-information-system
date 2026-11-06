@@ -35,6 +35,8 @@ with transaction.atomic():
         user = User.objects.create_user(username=f'a6p1_{run}_{kind}', mobile=f'+199{int(run,16):010d}{i:02d}', full_name=f'A6 {run} {kind}', password=password)
         if kind in groups:
             user.groups.add(groups[kind])
+        if kind == 'writer':
+            user.groups.add(groups['hr'])
         if kind in ('staff', 'superuser'):
             user.is_staff = True
         if kind == 'superuser':

@@ -1,9 +1,21 @@
 """Role management helpers for system vs custom project roles."""
+from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import APIException
+
 from django.db import transaction
 from django.db.models import Count, ProtectedError
 
 from master_data.models import ProjectMember, ProjectMemberRole, Role, RoleAccessChange, RolePermission
 from permissions.constants import ALL_PERMISSION_CODENAMES, DEFAULT_ROLE_PERMISSIONS
+
+REDACTED = '***REDACTED***'
+_SECRET_PARTS = ('password', 'token', 'secret', 'otp', 'authorization')
+
+
+class AuditUnavailable(APIException):
+    status_code = 503
+    default_code = 'audit_unavailable'
+    default_detail = _('The access change was not saved because its history could not be stored.')
 
 SYSTEM_ROLE_NAMES = frozenset(DEFAULT_ROLE_PERMISSIONS.keys())
 
@@ -117,20 +129,56 @@ def delete_custom_role(role: Role, actor=None) -> None:
             raise RoleInUse(assignment_impact(locked)) from exc
 
 
+def _is_secret_key(key: str) -> bool:
+    normalized = str(key).lower().replace('-', '_')
+    return any(part in normalized for part in _SECRET_PARTS)
+
+
+def redact_history_payload(value):
+    """Replace nested password, token, and secret values and keep sibling keys."""
+    if isinstance(value, dict):
+        return {
+            key: REDACTED if _is_secret_key(key) else redact_history_payload(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [redact_history_payload(item) for item in value]
+    return value
+
+
+def access_change_origin(action: str) -> str:
+    """Classify a stored action. The result is only role, exception, membership, account, or event."""
+    if action in {'override_set', 'override_cleared'}:
+        return 'exception'
+    if action in {'member_status_changed', 'invitation_created', 'invitation_cancelled', 'positions_replaced'}:
+        return 'membership'
+    if action in {'account_status_changed'}:
+        return 'account'
+    if action.startswith('role_') or action == 'roles_replaced':
+        return 'role'
+    return 'event'
+
+
 def record_access_change(*, actor, project, subject_user, role, action, before, after) -> None:
-    """Persist a base access-history row.
+    """Persist a base access-history row in the caller's transaction.
 
     Break-glass final approve (A6-P4) uses ``action='sod_break_glass'`` with
     ``after`` containing at least ``reason``, ``exception``: true, and
-    ``record_id``. Full history UI remains A6-P5.
+    ``record_id``. A failed insert raises ``AuditUnavailable`` so the
+    surrounding atomic change rolls back.
     """
-    RoleAccessChange.objects.create(
-        actor=actor if getattr(actor, 'is_authenticated', False) else None,
-        project=project,
-        subject_user=subject_user,
-        role_id=getattr(role, 'id', None),
-        role_name=getattr(role, 'role_name', '') or '',
-        action=action,
-        before=before,
-        after=after,
-    )
+    try:
+        RoleAccessChange.objects.create(
+            actor=actor if getattr(actor, 'is_authenticated', False) else None,
+            project=project,
+            subject_user=subject_user,
+            role_id=getattr(role, 'id', None),
+            role_name=getattr(role, 'role_name', '') or '',
+            action=action,
+            before=redact_history_payload(before or {}),
+            after=redact_history_payload(after or {}),
+        )
+    except AuditUnavailable:
+        raise
+    except Exception as exc:
+        raise AuditUnavailable() from exc

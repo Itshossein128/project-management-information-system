@@ -134,5 +134,5 @@ def test_suspended_assignment_blocks_delete_and_history_remains(auth_client, pro
     assert created.delete(f'/api/v1/roles/{role_id}/').status_code == status.HTTP_204_NO_CONTENT
     history = auth_client.get(f'/api/v1/projects/{project.id}/access-changes/')
     assert history.status_code == status.HTTP_200_OK
-    assert any(row['action'] == 'roles_replaced' for row in history.data)
-    assert history.data[0]['created_at']
+    assert any(row['action'] == 'roles_replaced' for row in history.data['results'])
+    assert history.data['results'][0]['created_at']

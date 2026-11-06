@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ApiRequestError } from "@/app/lib/api-client";
 import {
@@ -59,11 +59,12 @@ export default function ProjectMembersPage() {
     queryKey: ["permission-catalog"],
     queryFn: fetchPermissionCatalog,
   });
-  const { data: changes = [] } = useQuery({
+  const { data: changePage } = useQuery({
     queryKey: ["access-changes", projectId],
     queryFn: () => fetchAccessChanges(projectId),
     enabled: Boolean(projectId),
   });
+  const changes = changePage?.results ?? [];
   const createRoleMutation = useMutation({
     mutationFn: () => createLocalRole(projectId, { role_name: localRoleName.trim() }),
     onSuccess: () => {
@@ -344,6 +345,12 @@ export default function ProjectMembersPage() {
         {changes.length > 0 ? (
           <div className="mt-4">
             <h3 className="mb-1 text-sm font-medium">{t("projectMembers.recentChanges")}</h3>
+            <Link
+              className="mb-2 inline-block text-xs text-primary"
+              to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_ACCESS_HISTORY}`}
+            >
+              {t("projectMembers.openHistory")}
+            </Link>
             <ul className="space-y-1 text-xs text-muted-foreground">
               {changes.slice(0, 5).map((change) => (
                 <li key={change.id}>

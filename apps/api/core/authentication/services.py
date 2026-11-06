@@ -94,6 +94,16 @@ class LoginService:
         if not account_can_authenticate(user):
             raise ValidationError({'error': _('User account is disabled.')})
         update_last_login(None, user)
+        from permissions.role_services import record_access_change
+        record_access_change(
+            actor=user,
+            project=None,
+            subject_user=user,
+            role=None,
+            action='login_succeeded',
+            before={},
+            after={'username': user.username},
+        )
         tokens = get_tokens_for_user(user)
         return user, tokens
 
@@ -134,11 +144,22 @@ class PasswordResetService:
         if user is None:
             return self._reset_response('not_configured' if plan == 'not_configured' else 'not_sent')
         reset_token = self.generate_reset_token()
-        PasswordResetToken.objects.create(
-            user=user,
-            token_hash=_hash_token(reset_token),
-            expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours),
-        )
+        with transaction.atomic():
+            PasswordResetToken.objects.create(
+                user=user,
+                token_hash=_hash_token(reset_token),
+                expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours),
+            )
+            from permissions.role_services import record_access_change
+            record_access_change(
+                actor=None,
+                project=None,
+                subject_user=user,
+                role=None,
+                action='recovery_requested',
+                before={},
+                after={'target_user_id': str(user.id)},
+            )
         sent = self.send_reset_sms(user, reset_token)
         if sent:
             return self._reset_response('sent')

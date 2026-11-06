@@ -434,3 +434,9 @@ msgstr "اجازه جست‌وجوی افراد برای این پروژه را 
 
 msgid "You do not have permission to search people."
 msgstr "اجازه جست‌وجوی افراد را ندارید."
+
+msgid "The access change was not saved because its history could not be stored."
+msgstr "تغییر دسترسی ذخیره نشد چون تاریخچه آن ثبت نشد."
+
+msgid "You cannot view this access history."
+msgstr "اجازه دیدن این تاریخچه دسترسی را ندارید."

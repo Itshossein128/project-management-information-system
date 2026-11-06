@@ -5,6 +5,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 from cash_flow.urls import global_urlpatterns as cash_flow_global_urlpatterns
 from cost_control.urls import global_urlpatterns as cost_global_urlpatterns
 from economic.urls import global_urlpatterns as economic_global_urlpatterns
+from projects.local_role_views import OrganizationAccessChangeListView
 from projects.member_views import UserLookupView
 from projects.role_views import PermissionCatalogView
 from common.health import health
@@ -19,6 +20,7 @@ urlpatterns = [
     path('api/v1/projects/<uuid:project_pk>/', include('procurement.urls')),
     path('api/v1/projects/', include('projects.urls')),
     path('api/v1/roles/', include('projects.role_urls')),
+    path('api/v1/access-changes/', OrganizationAccessChangeListView.as_view(), name='organization-access-changes'),
     path('api/v1/permissions/', PermissionCatalogView.as_view(), name='permission-catalog'),
     path('api/v1/users/lookup/', UserLookupView.as_view(), name='user-lookup'),
     path('api/v1/notifications/', include('notifications.urls')),

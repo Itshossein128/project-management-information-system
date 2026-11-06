@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from permissions.constants import ALL_PERMISSION_CODENAMES, PERMISSIONS
 
 from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride, RolePermission
@@ -78,6 +80,7 @@ def member_has_permission(member: ProjectMember, codename: str) -> bool:
     return codename in get_inherited_codenames(member)
 
 
+@transaction.atomic
 def set_permission_override(
     member: ProjectMember,
     codename: str,

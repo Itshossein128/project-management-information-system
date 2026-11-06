@@ -336,3 +336,8 @@ class RoleAccessChange(UUIDModel):
     class Meta:
         db_table = 'role_access_changes'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['project', 'created_at'], name='rac_project_created_idx'),
+            models.Index(fields=['subject_user', 'created_at'], name='rac_subject_created_idx'),
+            models.Index(fields=['actor', 'created_at'], name='rac_actor_created_idx'),
+        ]

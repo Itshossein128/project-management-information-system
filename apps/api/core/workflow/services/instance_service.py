@@ -229,6 +229,16 @@ def _advance_or_complete(instance: WorkflowInstance, user, comment: str = '') ->
             stage_order=current_order,
             comment=comment,
         )
+        from permissions.role_services import record_access_change
+        record_access_change(
+            actor=user,
+            project=instance.project,
+            subject_user=user,
+            role=None,
+            action='final_approval',
+            before={'status': str(from_status)},
+            after={'status': str(instance.status), 'record_id': str(instance.id)},
+        )
         return instance
 
     next_stage = stages[idx + 1]

@@ -120,6 +120,7 @@ def replace_member_positions(member: ProjectMember, position_ids: list, actor=No
         )
 
 
+@transaction.atomic
 def assign_roles_to_member(member: ProjectMember, role_ids: list, actor=None) -> None:
     """Replace member roles only when every submitted id exists and belongs here."""
     from permissions.role_services import record_access_change

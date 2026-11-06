@@ -6,6 +6,7 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm password",
+    "passwordMismatch": "The password and its confirmation do not match.",
     "newPassword": "New password",
     "confirmNewPassword": "Confirm new password",
     "username": "Username",
@@ -158,6 +159,7 @@
     "projectSyncConflicts": "Sync Conflicts",
     "settingsTemplates": "Templates",
     "settingsRoles": "Roles & permissions",
+    "settingsAccessHistory": "Organization access history",
     "settingsOrgRefs": "Organization references",
     "deptBuildings": "Buildings",
     "deptMechanical": "Mechanical",
@@ -1355,7 +1357,26 @@
     "createLocalRole": "Create project role",
     "deleteLocalRole": "Delete",
     "localRoleCreated": "Project role created",
-    "recentChanges": "Recent access changes"
+    "recentChanges": "Recent access changes",
+    "openHistory": "Full access history",
+    "historyTitle": "Access history",
+    "historyForbidden": "You cannot view this access history.",
+    "filterSubject": "Person id",
+    "filterActor": "Actor id",
+    "filterSince": "From",
+    "filterUntil": "Until",
+    "filterProject": "Project id",
+    "applyFilters": "Apply filters",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "unknownValue": "Unknown",
+    "origins": {
+      "role": "Role",
+      "exception": "Individual exception",
+      "membership": "Membership",
+      "account": "Account",
+      "event": "Event"
+    }
   },
   "templates": {
     "settings": "Settings",

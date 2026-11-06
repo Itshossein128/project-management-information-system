@@ -48,11 +48,30 @@ def test_visitor_can_read_items_but_cannot_write(visitor, category):
 
 
 @pytest.mark.django_db
-def test_non_visitor_can_still_create_item(auth_client, category):
-    response = auth_client.post(
+def test_org_catalog_writer_can_create_item_and_project_manager_cannot(auth_client, category):
+    """Org item writes belong to an account administrator, not every signed-in user."""
+    manager = auth_client.post(
         '/api/items/',
         {'name': 'Nut', 'quantity': 4, 'category': category.id},
         format='json',
     )
-    assert response.status_code == status.HTTP_201_CREATED
+    assert manager.status_code == status.HTTP_403_FORBIDDEN
+    assert not Item.objects.filter(name='Nut').exists()
+
+    writer = User.objects.create_user(
+        username='catalog-writer',
+        mobile='+989121110099',
+        full_name='Catalog Writer',
+        password='testpass123',
+    )
+    group, _created = Group.objects.get_or_create(name='hr')
+    writer.groups.add(group)
+    client = APIClient()
+    client.force_authenticate(user=writer)
+    created = client.post(
+        '/api/items/',
+        {'name': 'Nut', 'quantity': 4, 'category': category.id},
+        format='json',
+    )
+    assert created.status_code == status.HTTP_201_CREATED
     assert Item.objects.filter(name='Nut').exists()

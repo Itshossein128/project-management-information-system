@@ -179,6 +179,16 @@ class ProjectReportExportDownloadView(APIView):
             project_id=project_pk,
         )
         perms = _user_project_permissions(request.user, project_pk)
+        from permissions.role_services import record_access_change
+        record_access_change(
+            actor=request.user,
+            project=version.project,
+            subject_user=request.user,
+            role=None,
+            action='sensitive_export',
+            before={},
+            after={'export_id': str(version.id)},
+        )
         payload = export_download_payload(version)
         data = payload.get('data') if isinstance(payload, dict) else None
         if isinstance(data, dict):

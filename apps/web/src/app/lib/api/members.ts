@@ -158,16 +158,47 @@ export function createLocalRole(
 export interface AccessChange {
   id: string;
   action: string;
+  origin: string;
   role_name: string;
   actor_name: string;
   subject_name: string;
+  project_id: string | null;
   before: Record<string, unknown>;
   after: Record<string, unknown>;
+  unknown: string[];
   created_at: string;
 }
 
-export function fetchAccessChanges(projectId: string) {
-  return apiJson<AccessChange[]>(`/${PATHS.API_PROJECTS}/${projectId}/access-changes/`);
+export interface AccessChangePage {
+  count: number;
+  page: number;
+  page_size: number;
+  results: AccessChange[];
+}
+
+export function fetchAccessChanges(
+  projectId: string | null,
+  params?: {
+    subject?: string;
+    actor?: string;
+    since?: string;
+    until?: string;
+    page?: number;
+    project?: string;
+  },
+) {
+  const query = new URLSearchParams();
+  if (params?.subject) query.set("subject", params.subject);
+  if (params?.actor) query.set("actor", params.actor);
+  if (params?.since) query.set("since", params.since);
+  if (params?.until) query.set("until", params.until);
+  if (params?.page) query.set("page", String(params.page));
+  if (!projectId && params?.project) query.set("project", params.project);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  const path = projectId
+    ? `/${PATHS.API_PROJECTS}/${projectId}/access-changes/${suffix}`
+    : `/v1/access-changes/${suffix}`;
+  return apiJson<AccessChangePage>(path);
 }
 
 export interface SelectablePosition {

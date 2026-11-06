@@ -1,7 +1,10 @@
 """Project-local roles and recent access-change records."""
 
+from datetime import datetime
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.translation import gettext as _
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,15 +15,23 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from master_data.models import Role, RoleAccessChange
 from permissions.constants import DEFAULT_ROLE_PERMISSIONS
-from permissions.project import ActiveMemberPermission, IsProjectMember
+from permissions.project import (
+    ActiveMemberPermission,
+    IsProjectMember,
+    active_member_has_codename,
+    has_organizational_observation,
+)
 from permissions.role_services import (
     RoleInUse,
+    access_change_origin,
     assignment_impact,
     delete_custom_role,
     is_system_role,
     record_access_change,
+    redact_history_payload,
     set_role_permissions,
 )
+from projects.models import Project
 from projects.role_serializers import (
     RoleCreateSerializer,
     RoleDetailSerializer,
@@ -167,32 +178,115 @@ class LocalRoleViewSet(viewsets.ViewSet):
         return Response(RoleDetailSerializer(self._local_role(role.pk, project_pk)).data)
 
 
-class ProjectAccessChangeListView(APIView):
-    permission_classes = [IsAuthenticated, ActiveMemberPermission]
+def _parse_bound(raw: str | None, *, end: bool):
+    if not raw:
+        return None
+    parsed = parse_datetime(raw)
+    if parsed is not None:
+        return parsed
+    day = parse_date(raw)
+    if day is None:
+        return None
+    if end:
+        return datetime.combine(day, datetime.max.time())
+    return datetime.combine(day, datetime.min.time())
 
-    @extend_schema(summary='Recent role and permission changes in this project', tags=['Project roles'])
+
+def _history_page(request):
+    try:
+        page = max(int(request.query_params.get('page') or 1), 1)
+    except ValueError:
+        page = 1
+    try:
+        page_size = int(request.query_params.get('page_size') or 50)
+    except ValueError:
+        page_size = 50
+    return page, min(max(page_size, 1), 100)
+
+
+def _history_queryset(request, queryset):
+    subject = request.query_params.get('subject')
+    actor = request.query_params.get('actor')
+    since = _parse_bound(request.query_params.get('since'), end=False)
+    until = _parse_bound(request.query_params.get('until'), end=True)
+    if subject:
+        queryset = queryset.filter(subject_user_id=subject)
+    if actor:
+        queryset = queryset.filter(actor_id=actor)
+    if since is not None:
+        queryset = queryset.filter(created_at__gte=since)
+    if until is not None:
+        queryset = queryset.filter(created_at__lte=until)
+    return queryset
+
+
+def _serialize_change(row) -> dict:
+    before = redact_history_payload(row.before or {})
+    after = redact_history_payload(row.after or {})
+    unknown = []
+    if row.actor_id is None and row.action not in {'login_succeeded', 'recovery_requested'}:
+        unknown.append('actor')
+    return {
+        'id': str(row.id),
+        'action': row.action,
+        'origin': access_change_origin(row.action),
+        'role_name': row.role_name,
+        'actor_name': row.actor.full_name if row.actor_id else '',
+        'subject_name': (
+            row.subject_user.full_name if row.subject_user_id
+            else (after or {}).get('invited_email')
+            or (after or {}).get('invited_mobile')
+            or ''
+        ),
+        'project_id': str(row.project_id) if row.project_id else None,
+        'before': before,
+        'after': after,
+        'unknown': unknown,
+        'created_at': row.created_at.isoformat(),
+    }
+
+
+def _paged_history(request, queryset):
+    page, page_size = _history_page(request)
+    queryset = _history_queryset(request, queryset).select_related('actor', 'subject_user')
+    count = queryset.count()
+    start = (page - 1) * page_size
+    rows = queryset.order_by('-created_at')[start:start + page_size]
+    return Response({
+        'count': count,
+        'page': page,
+        'page_size': page_size,
+        'results': [_serialize_change(row) for row in rows],
+    })
+
+
+class ProjectAccessChangeListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Role and permission changes in this project', tags=['Project roles'])
     def get(self, request, project_pk=None):
-        rows = RoleAccessChange.objects.filter(project_id=project_pk).select_related(
-            'actor',
-            'subject_user',
-        )[:50]
-        return Response(
-            [
-                {
-                    'id': str(row.id),
-                    'action': row.action,
-                    'role_name': row.role_name,
-                    'actor_name': row.actor.full_name if row.actor_id else '',
-                    'subject_name': (
-                        row.subject_user.full_name if row.subject_user_id
-                        else (row.after or {}).get('invited_email')
-                        or (row.after or {}).get('invited_mobile')
-                        or ''
-                    ),
-                    'before': row.before,
-                    'after': row.after,
-                    'created_at': row.created_at.isoformat(),
-                }
-                for row in rows
-            ],
-        )
+        project = get_object_or_404(Project, pk=project_pk)
+        allowed = active_member_has_codename(request.user, project.id, 'manage_members')
+        if not allowed and not has_organizational_observation(request.user):
+            return Response(
+                {'error': {'code': 'forbidden', 'message': _('You cannot view this access history.'), 'details': {}}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return _paged_history(request, RoleAccessChange.objects.filter(project_id=project.id))
+
+
+class OrganizationAccessChangeListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Organization access history, including global role changes', tags=['Project roles'])
+    def get(self, request):
+        if not has_organizational_observation(request.user):
+            return Response(
+                {'error': {'code': 'forbidden', 'message': _('You cannot view this access history.'), 'details': {}}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        queryset = RoleAccessChange.objects.all()
+        project_filter = request.query_params.get('project')
+        if project_filter:
+            queryset = queryset.filter(project_id=project_filter)
+        return _paged_history(request, queryset)

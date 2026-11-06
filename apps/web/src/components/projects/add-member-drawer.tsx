@@ -74,6 +74,9 @@ export function AddMemberDrawer({
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  useEffect(() => {
+    if (!isOpen) setShowAdvanced(false);
+  }, [isOpen]);
 
   const { data: selectablePositions = [] } = useQuery({
     queryKey: ["selectable-positions", projectId],
@@ -319,7 +322,7 @@ export function AddMemberDrawer({
                 onClick={() => {
                   setCreateError("");
                   if (password !== passwordConfirm) {
-                    setCreateError(t("common.confirmPassword"));
+                    setCreateError(t("common.passwordMismatch"));
                     return;
                   }
                   void createOrganizationalUser({
@@ -443,33 +446,23 @@ export function AddMemberDrawer({
                       <tbody>
                         {items.map((p) => {
                           const state = overrideState(p.codename);
+                          const permissionLabel = formatPermissionLabel(p.codename, p.label, t);
+                          const choiceName = (choice: "inherit" | "grant" | "deny") =>
+                            `${permissionLabel} (${p.codename}) ${t(`projectMembers.${choice}`)}`;
                           return (
                             <tr key={p.codename}>
-                              <td className="py-1">{formatPermissionLabel(p.codename, p.label, t)}</td>
-                              <td>
-                                <input
-                                  type="radio"
-                                  name={p.codename}
-                                  checked={state === "inherit"}
-                                  onChange={() => handleOverride(p.codename, "inherit")}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="radio"
-                                  name={p.codename}
-                                  checked={state === "grant"}
-                                  onChange={() => handleOverride(p.codename, "grant")}
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="radio"
-                                  name={p.codename}
-                                  checked={state === "deny"}
-                                  onChange={() => handleOverride(p.codename, "deny")}
-                                />
-                              </td>
+                              <td className="py-1">{permissionLabel}</td>
+                              {(["inherit", "grant", "deny"] as const).map((choice) => (
+                                <td key={choice}>
+                                  <input
+                                    type="radio"
+                                    name={p.codename}
+                                    aria-label={choiceName(choice)}
+                                    checked={state === choice}
+                                    onChange={() => handleOverride(p.codename, choice)}
+                                  />
+                                </td>
+                              ))}
                             </tr>
                           );
                         })}

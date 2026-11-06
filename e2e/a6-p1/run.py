@@ -78,7 +78,8 @@ try:
                 print((Path(temp) / 'api.log').read_text()[-3000:], file=sys.stderr)
                 print((Path(temp) / 'web.log').read_text()[-3000:], file=sys.stderr)
                 raise
-            result = subprocess.run(['pnpm', 'exec', 'playwright', 'test', '--config=e2e/playwright.a6-p1.config.ts'], cwd=ROOT, env=env)
+            playwright_config = os.environ.get('A6_E2E_PLAYWRIGHT_CONFIG', 'e2e/playwright.a6-p1.config.ts')
+            result = subprocess.run(['pnpm', 'exec', 'playwright', 'test', f'--config={playwright_config}'], cwd=ROOT, env=env)
             sys.exit(result.returncode)
 finally:
     for process in processes:

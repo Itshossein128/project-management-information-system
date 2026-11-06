@@ -17,6 +17,11 @@ export const projectRoutes = [
     ROUTES.PROJECT_MEMBERS,
   ),
   route(
+    `${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_SETTINGS}/${PATHS.PROJECT_ACCESS_HISTORY}`,
+    ROUTES.PROJECT_ACCESS_HISTORY,
+    { id: "project-access-history" },
+  ),
+  route(
     `${PATHS.PROJECT}/:projectId/${PATHS.PROJECT_SETTINGS}`,
     ROUTES.PROJECT_SETTINGS_PAGE,
   ),
@@ -146,5 +151,8 @@ export const projectRoutes = [
   route(PATHS.PROJECT, ROUTES.PROJECT_LIST),
   route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_TEMPLATES}`, ROUTES.SETTINGS_TEMPLATES),
   route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_ROLES}`, ROUTES.SETTINGS_ROLES),
+  route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_ACCESS_HISTORY}`, ROUTES.SETTINGS_ACCESS_HISTORY, {
+    id: "settings-access-history",
+  }),
   route(`${PATHS.SETTINGS}/${PATHS.SETTINGS_ORG_REFS}`, ROUTES.SETTINGS_ORG_REFS),
 ];
