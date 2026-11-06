@@ -10,7 +10,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
   "phases": [
     {
       "id": "R.0",
-      "title": "تثبیت قرارداد تحویل و مسیر آزمون/انتشار",
+      "title": "آماده‌سازی و توافق برنامه تحویل",
       "start": "2026-11-04",
       "finish": "2026-11-07",
       "acceptance": "2026-11-09",
@@ -52,7 +52,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
     },
     {
       "id": "A.6",
-      "title": "کاربران و مرز دسترسی",
+      "title": "کاربران و سطح دسترسی‌ها",
       "start": "2026-11-07",
       "finish": "2026-11-15",
       "acceptance": "2026-11-17",
@@ -141,7 +141,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
     },
     {
       "id": "A.1",
-      "title": "تطبیق و تحویل اولیه گزارش روزانه",
+      "title": "گزارش روزانه و خروجی‌ها",
       "start": "2026-11-20",
       "finish": "2026-11-27",
       "acceptance": "2026-11-29",
@@ -447,7 +447,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
     },
     {
       "id": "A.3.C",
-      "title": "ارتباطات یکپارچه ذی‌نفعان",
+      "title": "مدیریت ارتباطات ذی‌نفعان",
       "start": "2026-12-30",
       "finish": "2027-01-06",
       "acceptance": "2027-01-08",
@@ -627,7 +627,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
     },
     {
       "id": "A.11",
-      "title": "آزمون جامع، امنیت، بازیابی و پذیرش",
+      "title": "بررسی نهایی و پذیرش کارفرما",
       "start": "2027-02-07",
       "finish": "2027-02-21",
       "acceptance": "2027-02-23",
