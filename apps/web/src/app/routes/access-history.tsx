@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 
+import { formatAccessAction, formatAccessPayload } from "@/app/lib/access-history-format";
 import { fetchAccessChanges } from "@/app/lib/api/members";
 import { formatLocaleDateTime } from "@/app/lib/jalali-utils";
 import { Button } from "@/components/ui/button";
@@ -57,8 +58,10 @@ export default function AccessHistoryPage() {
       <ul className="space-y-2 text-sm">
         {(query.data?.results ?? []).map((row) => (
           <li key={row.id} className="rounded border border-border p-3">
-            <p>{formatLocaleDateTime(row.created_at, i18n.language)} — {row.actor_name || t("projectMembers.unknownValue")} — {row.subject_name || row.role_name}</p>
-            <p>{t(`projectMembers.origins.${row.origin}`, { defaultValue: row.origin })} — {row.action}</p>
+            <p>{formatLocaleDateTime(row.created_at, i18n.language)} — {row.actor_name || t("projectMembers.unknownValue")} — {row.subject_name || row.role_name || t("projectMembers.unknownValue")}</p>
+            <p>{t(`projectMembers.origins.${row.origin}`, { defaultValue: row.origin })} — {formatAccessAction(row.action, t)}</p>
+            <p>{t("projectMembers.beforeValue")}: {formatAccessPayload(row.before, t)}</p>
+            <p>{t("projectMembers.afterValue")}: {formatAccessPayload(row.after, t)}</p>
             {row.unknown.length > 0 ? <p>{t("projectMembers.unknownValue")}</p> : null}
           </li>
         ))}

@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from master_data.models import Role, RoleAccessChange
+from master_data.models import ProjectPosition, Role, RoleAccessChange
 from permissions.constants import DEFAULT_ROLE_PERMISSIONS
 from permissions.project import (
     ActiveMemberPermission,
@@ -220,9 +220,42 @@ def _history_queryset(request, queryset):
     return queryset
 
 
-def _serialize_change(row) -> dict:
-    before = redact_history_payload(row.before or {})
-    after = redact_history_payload(row.after or {})
+def _history_name_lookups(rows):
+    role_ids = set()
+    position_ids = set()
+    for row in rows:
+        for payload in (row.before or {}, row.after or {}):
+            if not isinstance(payload, dict):
+                continue
+            role_ids.update(str(item) for item in payload.get('role_ids') or [])
+            position_ids.update(str(item) for item in payload.get('position_ids') or [])
+    roles = {
+        str(item.id): item.role_name
+        for item in Role.objects.filter(id__in=role_ids)
+    } if role_ids else {}
+    positions = {
+        str(item.id): item.position_name
+        for item in ProjectPosition.objects.filter(id__in=position_ids)
+    } if position_ids else {}
+    return roles, positions
+
+
+def _with_display_names(payload, roles, positions):
+    named = dict(payload)
+    role_ids = named.get('role_ids')
+    if isinstance(role_ids, list):
+        named['role_names'] = [roles.get(str(item), str(item)) for item in role_ids]
+    position_ids = named.get('position_ids')
+    if isinstance(position_ids, list):
+        named['position_names'] = [positions.get(str(item), str(item)) for item in position_ids]
+    return named
+
+
+def _serialize_change(row, roles=None, positions=None) -> dict:
+    roles = roles or {}
+    positions = positions or {}
+    before = _with_display_names(redact_history_payload(row.before or {}), roles, positions)
+    after = _with_display_names(redact_history_payload(row.after or {}), roles, positions)
     unknown = []
     if row.actor_id is None and row.action not in {'login_succeeded', 'recovery_requested'}:
         unknown.append('actor')
@@ -251,12 +284,13 @@ def _paged_history(request, queryset):
     queryset = _history_queryset(request, queryset).select_related('actor', 'subject_user')
     count = queryset.count()
     start = (page - 1) * page_size
-    rows = queryset.order_by('-created_at')[start:start + page_size]
+    rows = list(queryset.order_by('-created_at')[start:start + page_size])
+    roles, positions = _history_name_lookups(rows)
     return Response({
         'count': count,
         'page': page,
         'page_size': page_size,
-        'results': [_serialize_change(row) for row in rows],
+        'results': [_serialize_change(row, roles, positions) for row in rows],
     })
 
 

@@ -389,7 +389,11 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
       ) : activities.length === 0 ? (
         <EmptyState
           title="فعالیتی یافت نشد"
-          description="فعالیت جدیدی اضافه کنید یا فیلترها را تغییر دهید."
+          description={
+            canEdit
+              ? "فعالیت جدیدی اضافه کنید یا فیلترها را تغییر دهید."
+              : "با فیلترهای فعلی فعالیتی برای نمایش نیست."
+          }
           action={
             // canEdit ? (
             //   <Button variant="primary" onClick={openCreate}>

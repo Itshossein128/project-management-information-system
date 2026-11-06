@@ -16,6 +16,7 @@ import {
   type ProjectMember,
   type Role,
 } from "@/app/lib/api/members";
+import { formatAccessAction } from "@/app/lib/access-history-format";
 import { formatLocaleDateTime } from "@/app/lib/jalali-utils";
 import { fetchPermissionCatalog } from "@/app/lib/api/roles";
 import { formatPermissionLabel } from "@/app/lib/permission-labels";
@@ -354,7 +355,7 @@ export default function ProjectMembersPage() {
             <ul className="space-y-1 text-xs text-muted-foreground">
               {changes.slice(0, 5).map((change) => (
                 <li key={change.id}>
-                  {formatLocaleDateTime(change.created_at, i18n.language)} — {change.actor_name || "—"} — {change.subject_name || change.role_name} — {change.action}
+                  {formatLocaleDateTime(change.created_at, i18n.language)} — {change.actor_name || "—"} — {change.subject_name || change.role_name} — {formatAccessAction(change.action, t)}
                 </li>
               ))}
             </ul>

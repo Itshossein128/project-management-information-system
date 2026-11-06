@@ -46,7 +46,7 @@ function CostsContent() {
   const { has } = usePermission(projectId);
   const canView = has("view_costs");
   const canEdit = has("edit_costs");
-  const canApprove = has("approve_costs") || has("edit_costs");
+  const canApprove = has("approve_costs");
   const [tab, setTab] = useState<Tab>("budget");
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
 
@@ -87,24 +87,6 @@ function CostsContent() {
     enabled: Boolean(activeVersionId) && tab === "budget",
   });
   const controlLineId = activeBudgets?.results?.[0]?.id ?? null;
-
-  if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
-  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
-  if (!canView) {
-    return (
-      <AccessDenied
-        title={t("common.accessDenied")}
-        description={t("pages.costs.accessDeniedDescription", {
-          defaultValue: "نقش شما مجوز مشاهده هزینه‌ها را ندارد.",
-        })}
-      />
-    );
-  }
-  if (summaryError) {
-    return <QueryErrorState onRetry={() => void refetchSummary()} />;
-  }
-
-  const consumption = summary?.budget_consumption_pct;
 
   const { startTour } = useProductTour({
     tourId: "project-costs",
@@ -176,6 +158,24 @@ function CostsContent() {
       },
     ],
   });
+
+  if (projectLoading || summaryLoading) return <LoadingSkeleton rows={10} />;
+  if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
+  if (!canView) {
+    return (
+      <AccessDenied
+        title={t("common.accessDenied")}
+        description={t("pages.costs.accessDeniedDescription", {
+          defaultValue: "نقش شما مجوز مشاهده هزینه‌ها را ندارد.",
+        })}
+      />
+    );
+  }
+  if (summaryError) {
+    return <QueryErrorState onRetry={() => void refetchSummary()} />;
+  }
+
+  const consumption = summary?.budget_consumption_pct;
 
   return (
     <div className="space-y-6">

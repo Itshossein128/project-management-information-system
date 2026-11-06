@@ -33,7 +33,7 @@ export function ProjectLifecycleBar({ project }: Props) {
   const queryClient = useQueryClient();
   const { has } = usePermission(project.project_id);
   const canEdit = has("edit_project");
-  const canApprove = has("approve_project") || canEdit;
+  const canApprove = has("approve_project");
 
   const run = useMutation({
     mutationFn: async (action: LifecycleAction) => {

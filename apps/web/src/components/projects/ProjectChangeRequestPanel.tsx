@@ -26,7 +26,7 @@ export function ProjectChangeRequestPanel({ projectId }: Props) {
   const qc = useQueryClient();
   const { has } = usePermission(projectId);
   const canEdit = has("edit_project");
-  const canApprove = has("approve_project") || has("edit_project");
+  const canApprove = has("approve_project");
   const {data: project} = useQuery({queryKey:["project",projectId],queryFn:()=>fetchProject(projectId)});
   const archived = project?.status === "archived";
   const completed = project?.status === "completed";
