@@ -1,8 +1,13 @@
 from datetime import date
 from decimal import Decimal
-from rest_framework.exceptions import NotFound
+
 from django.db import transaction
+from django.utils.translation import gettext as _
+from rest_framework.exceptions import NotFound
+
+from config.exceptions import CodedValidationError
 from contracts.models import Contract, ContractItem, ChangeOrder, ChangeOrderStatus
+from permissions.project import assert_same_project
 
 # Maps field names in a contract item payload to their corresponding Django app/model labels.
 # Used by _resolve_fk_fields to dynamically convert UUID strings into actual model instances.
@@ -54,6 +59,8 @@ def bulk_upsert_contract_items(contract, rows, user):
                 raise NotFound(f"ContractItem with id {item_id} not found.")
             for k, v in payload.items():
                 setattr(item, k, v)
+            if item.activity_id:
+                assert_same_project(contract.project_id, item.activity.project_id, field='activity')
             item.updated_by = user
             item.save()
         else:
@@ -63,6 +70,8 @@ def bulk_upsert_contract_items(contract, rows, user):
                 updated_by=user,
                 **payload,
             )
+            if item.activity_id:
+                assert_same_project(contract.project_id, item.activity.project_id, field='activity')
         saved.append(item)
     return saved
 
@@ -96,14 +105,46 @@ def create_change_order(contract, description, amount_change, user):
 
 
 @transaction.atomic
-def approve_change_order(co, user):
+def approve_change_order(co, user, *, break_glass_reason: str | None = None):
     """
     Approves a ChangeOrder and updates the associated contract's adjusted_amount.
     Ensures that the resulting adjusted amount is not negative.
     """
+    from permissions.role_services import record_access_change
+    from permissions.sod import assert_not_self_final_approve
+
     if co.status == ChangeOrderStatus.APPROVED:
         return co
+    if co.status != ChangeOrderStatus.SUBMITTED:
+        raise CodedValidationError(
+            detail=_('Only a submitted change order can be approved.'),
+            code='change_order_invalid_status',
+        )
     contract = co.contract
+    before = {'status': co.status}
+    decision = assert_not_self_final_approve(
+        co.created_by_id,
+        user,
+        break_glass_reason=break_glass_reason,
+        project=contract.project,
+        record_id=str(co.id),
+        record_type='change_order',
+    )
+    if decision.used_break_glass:
+        record_access_change(
+            actor=user,
+            project=contract.project,
+            subject_user=co.created_by,
+            role=None,
+            action='sod_break_glass',
+            before=before,
+            after={
+                'reason': decision.reason,
+                'exception': True,
+                'record_id': str(co.id),
+                'record_type': 'change_order',
+            },
+        )
     new_adjusted = _contract_adjusted_base(contract) + co.amount_change
     if new_adjusted < 0:
         raise ValueError('مبلغ تعدیل‌شده قرارداد نمی‌تواند منفی باشد')

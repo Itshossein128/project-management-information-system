@@ -11,9 +11,14 @@ from documents.models import (
     MeetingMinutes,
     ProjectDocument,
 )
-from documents.services.upload_service import (
-    attachment_url_for_display, presign_get_url, validate_attachment_url,
+from documents.file_access import (
+    presign_document_storage_value,
+    user_may_view_document_file,
 )
+from documents.services.upload_service import (
+    attachment_url_for_display, validate_attachment_url,
+)
+from permissions.project import assert_same_project
 
 User = get_user_model()
 
@@ -31,7 +36,13 @@ class DocumentRevisionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['file_url'] = presign_get_url(instance.file_url)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        doc = instance.document
+        if user and user.is_authenticated and user_may_view_document_file(user, doc):
+            data['file_url'] = presign_document_storage_value(user, doc, instance.file_url)
+        else:
+            data['file_url'] = ''
         return data
 
 
@@ -54,30 +65,42 @@ class ProjectDocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'file_url', 'file_name', 'file_size_kb', 'uploaded_by']
 
     def validate(self, attrs):
+        project_id = self.context.get('project_id')
+        if project_id is None and self.instance is not None:
+            project_id = self.instance.project_id
+        for field in ('related_activity', 'related_wbs'):
+            related = attrs.get(field)
+            if related is not None:
+                assert_same_project(
+                    project_id,
+                    getattr(related, 'project_id', None),
+                    field=field,
+                )
         doc_code = attrs.get('doc_code')
         if doc_code is None and self.instance is not None:
             doc_code = self.instance.doc_code
-        if doc_code:
-            project_id = self.context.get('project_id')
-            if project_id is None and self.instance is not None:
-                project_id = self.instance.project_id
-            if project_id is not None:
-                qs = ProjectDocument.objects.filter(
-                    project_id=project_id,
-                    doc_code=doc_code,
-                    is_deleted=False,
+        if doc_code and project_id is not None:
+            qs = ProjectDocument.objects.filter(
+                project_id=project_id,
+                doc_code=doc_code,
+                is_deleted=False,
+            )
+            if self.instance is not None:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError(
+                    {'doc_code': 'Document code must be unique within the project.'}
                 )
-                if self.instance is not None:
-                    qs = qs.exclude(pk=self.instance.pk)
-                if qs.exists():
-                    raise serializers.ValidationError(
-                        {'doc_code': 'Document code must be unique within the project.'}
-                    )
         return attrs
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['file_url'] = presign_get_url(instance.file_url)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if user and user.is_authenticated and user_may_view_document_file(user, instance):
+            data['file_url'] = presign_document_storage_value(user, instance, instance.file_url)
+        else:
+            data['file_url'] = ''
         return data
 
 
@@ -111,9 +134,22 @@ class CorrespondenceSerializer(serializers.ModelSerializer):
         if contract is None:
             return contract
         project_pk = self.context.get('project_pk')
-        if project_pk is not None and str(contract.project_id) != str(project_pk):
-            raise serializers.ValidationError('Contract must belong to the same project.')
+        assert_same_project(project_pk, getattr(contract, 'project_id', None), field='related_contract')
         return contract
+
+    def validate_related_document(self, document):
+        if document is None:
+            return document
+        project_pk = self.context.get('project_pk')
+        assert_same_project(project_pk, getattr(document, 'project_id', None), field='related_document')
+        return document
+
+    def validate_related_activity(self, activity):
+        if activity is None:
+            return activity
+        project_pk = self.context.get('project_pk')
+        assert_same_project(project_pk, getattr(activity, 'project_id', None), field='related_activity')
+        return activity
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

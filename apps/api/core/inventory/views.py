@@ -11,11 +11,14 @@ from django.http import HttpResponse
 logger = logging.getLogger(__name__)
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
-from business_meta.permissions import CanViewBusinessAssignments, IsVisitorReadOnly, IsHrOrAdminOrReadOnly
+from authentication.permissions import IsHrOrAdmin, IsOrganizationalAccountAdmin
+from business_meta.permissions import IsVisitorReadOnly
 from common.mixins import ProjectNestedViewSetMixin
 from common.validators import validate_xlsx_upload
+from permissions.project import HasProjectPermission, IsProjectMember
 
 from .department_activity_services import get_department_activity_queryset
 from .item_services import export_items_to_excel, import_items_from_excel
@@ -32,6 +35,16 @@ from .serializers import (
 )
 
 
+class IsOrgCatalogWriteAuthority(permissions.BasePermission):
+    """Org-wide shared catalog writes: explicit account/HR admin, not visitor/read-only."""
+
+    def has_permission(self, request, view):
+        return (
+            IsOrganizationalAccountAdmin().has_permission(request, view)
+            or IsHrOrAdmin().has_permission(request, view)
+        )
+
+
 class DepartmentActivityRecordPagination(DefaultPageNumberPagination):
     """Department activity grids use the shared default pagination."""
 
@@ -45,6 +58,11 @@ class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.select_related('category').all()
     serializer_class = ItemSerializer
     permission_classes = [IsAuthenticated, IsVisitorReadOnly]
+
+    def get_permissions(self):
+        if self.action in ('create', 'update', 'partial_update', 'destroy', 'export', 'import_items'):
+            return [IsAuthenticated(), IsOrgCatalogWriteAuthority()]
+        return [IsAuthenticated(), IsVisitorReadOnly()]
 
     @extend_schema(
         summary="Export items to Excel",
@@ -177,13 +195,13 @@ class SpaceMaterialRequestViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewS
     http_method_names = ['get', 'post', 'patch', 'put', 'delete', 'head', 'options']
 
     def get_permissions(self):
-        # Read: authenticated users who can view business data; Write: HR/admin; Visitors read-only.
-        return [
-            IsAuthenticated(),
-            CanViewBusinessAssignments(),
-            IsVisitorReadOnly(),
-            IsHrOrAdminOrReadOnly(),
-        ]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.request.method in SAFE_METHODS:
+            return 'view_reports'
+        return 'edit_reports'
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -324,12 +342,13 @@ class DepartmentActivityRecordViewSet(ProjectNestedViewSetMixin, viewsets.ModelV
     }
 
     def get_permissions(self):
-        return [
-            IsAuthenticated(),
-            CanViewBusinessAssignments(),
-            IsVisitorReadOnly(),
-            IsHrOrAdminOrReadOnly(),
-        ]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.request.method in SAFE_METHODS:
+            return 'view_reports'
+        return 'edit_reports'
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()

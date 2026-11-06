@@ -28,41 +28,88 @@ class RoleSerializer(serializers.ModelSerializer):
 
 
 class ProjectMemberListSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     user_id = serializers.UUIDField(source='user.id', read_only=True, allow_null=True)
     full_name = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     mobile = serializers.SerializerMethodField()
+    invited_email = serializers.SerializerMethodField()
+    invited_mobile = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
+    position_titles = serializers.SerializerMethodField()
     last_login = serializers.SerializerMethodField()
 
     class Meta:
         model = ProjectMember
         fields = [
+            'id',
             'user_id',
             'full_name',
             'email',
             'mobile',
+            'position_titles',
             'roles',
             'status',
             'joined_at',
             'last_login',
             'invited_email',
+            'invited_mobile',
+            'delivery_status',
+            'invite_expires_at',
+            'invite_cancelled_at',
+            'position_ids',
         ]
+
+    position_ids = serializers.SerializerMethodField()
+
+    def get_position_ids(self, obj):
+        return [str(position.id) for position in obj.positions.all()]
+
+    def _may_view_person_contacts(self, project_id) -> bool:
+        request = self.context.get('request')
+        if not request or not project_id:
+            return False
+        from permissions.project import active_member_has_codename
+
+        return active_member_has_codename(request.user, project_id, 'view_person_contacts')
+
+    def get_position_titles(self, obj):
+        return [p.position_name for p in obj.positions.all()]
 
     def get_full_name(self, obj):
         if obj.user_id:
             return obj.user.full_name
-        return obj.invited_email or ''
+        if self._may_view_person_contacts(getattr(obj, 'project_id', None)):
+            return obj.invited_email or obj.invited_mobile or ''
+        return ''
 
     def get_email(self, obj):
+        project_id = getattr(obj, 'project_id', None)
+        if not self._may_view_person_contacts(project_id):
+            return ''
         if obj.user_id:
             return obj.user.email or ''
         return obj.invited_email or ''
 
     def get_mobile(self, obj):
+        project_id = getattr(obj, 'project_id', None)
+        if not self._may_view_person_contacts(project_id):
+            return ''
         if obj.user_id:
             return obj.user.mobile or ''
-        return ''
+        return obj.invited_mobile or ''
+
+    def get_invited_email(self, obj):
+        project_id = getattr(obj, 'project_id', None)
+        if not self._may_view_person_contacts(project_id):
+            return ''
+        return getattr(obj, 'invited_email', '') or ''
+
+    def get_invited_mobile(self, obj):
+        project_id = getattr(obj, 'project_id', None)
+        if not self._may_view_person_contacts(project_id):
+            return ''
+        return getattr(obj, 'invited_mobile', '') or ''
 
     def get_roles(self, obj):
         # ⚡ Bolt: Removed .select_related() to prevent overriding prefetch cache
@@ -77,6 +124,7 @@ class ProjectMemberListSerializer(serializers.ModelSerializer):
 class ProjectMemberCreateSerializer(serializers.Serializer):
     user_id = serializers.UUIDField(required=False, allow_null=True)
     email = serializers.EmailField(required=False, allow_blank=True)
+    mobile = serializers.CharField(required=False, allow_blank=True, max_length=20)
     role_ids = serializers.ListField(
         child=serializers.UUIDField(),
         allow_empty=False,
@@ -89,10 +137,13 @@ class ProjectMemberCreateSerializer(serializers.Serializer):
     def validate(self, attrs):
         user_id = attrs.get('user_id')
         email = (attrs.get('email') or '').strip()
-        if not user_id and not email:
-            raise serializers.ValidationError('Either user_id or email is required.')
+        mobile = (attrs.get('mobile') or '').strip()
+        if not user_id and not email and not mobile:
+            raise serializers.ValidationError(
+                _('Either user_id, email, or mobile is required.'),
+            )
         if not attrs.get('role_ids'):
-            raise serializers.ValidationError({'role_ids': 'At least one role is required.'})
+            raise serializers.ValidationError({'role_ids': _('At least one role is required.')})
         _reject_unknown_roles(attrs.get('role_ids'))
         return attrs
 

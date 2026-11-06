@@ -30,9 +30,11 @@ def test_populate_locked_after_submit(finance_client, project, ipc):
 
 
 @pytest.mark.django_db
-def test_sc001_submit_approve_collect_to_zero(finance_client, project, ipc):
+def test_sc001_submit_approve_collect_to_zero(finance_client, project, ipc, other_user):
+    ipc.created_by = other_user
+    ipc.updated_by = other_user
     ipc.gross_amount = Decimal('1000')
-    ipc.save(update_fields=['gross_amount'])
+    ipc.save(update_fields=['gross_amount', 'created_by', 'updated_by'])
     base = f'{BASE.format(project_id=project.id)}/ipcs/{ipc.id}'
 
     submit = finance_client.post(f'{base}/submit/')
@@ -75,7 +77,7 @@ def test_sc001_submit_approve_collect_to_zero(finance_client, project, ipc):
 
 
 @pytest.mark.django_db
-def test_payment_terms_persist_through_change_order(finance_client, project, contract, user):
+def test_payment_terms_persist_through_change_order(finance_client, project, contract, user, other_user):
     contract.payment_terms = 'Net 30 after approval'
     contract.original_amount = Decimal('1000000')
     contract.adjusted_amount = Decimal('1000000')
@@ -89,6 +91,13 @@ def test_payment_terms_persist_through_change_order(finance_client, project, con
     )
     assert create.status_code == 201, create.content
     co_id = create.data['id']
+
+    from contracts.models import ChangeOrder, ChangeOrderStatus
+
+    ChangeOrder.objects.filter(pk=co_id).update(
+        created_by=other_user,
+        status=ChangeOrderStatus.SUBMITTED,
+    )
 
     approve = finance_client.post(f'{co_url}{co_id}/approve/')
     assert approve.status_code == 200, approve.content

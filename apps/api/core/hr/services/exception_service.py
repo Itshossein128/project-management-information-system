@@ -67,7 +67,13 @@ def approve_exception(exc: CapacityException, user, decision_notes: str = '') ->
 
     if exc.status != CapacityExceptionStatus.SUBMITTED:
         raise CodedValidationError(detail='Only submitted exceptions can be approved.', code='invalid_status_transition')
-    assert_not_self_final_approve(exc.created_by_id, user)
+    assert_not_self_final_approve(
+        exc.created_by_id,
+        user,
+        project=exc.project,
+        record_id=str(exc.id),
+        record_type='capacity_exception',
+    )
     exc.status = CapacityExceptionStatus.APPROVED
     exc.decided_by = user
     exc.decided_at = timezone.now()

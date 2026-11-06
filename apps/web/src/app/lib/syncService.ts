@@ -4,7 +4,8 @@
  * Daily reports sync via the batch endpoint; remaining child-only queue entries
  * sync individually after headers resolve.
  */
-import { apiFetch } from "@/app/lib/api-client";
+import { ApiRequestError, apiFetch } from "@/app/lib/api-client";
+import i18n from "@/app/lib/i18n";
 import { syncBatch, type SyncBatchResult } from "@/app/lib/api/daily-reports";
 import { syncOperationsV2 } from "@/app/lib/api/unit-reports";
 import {
@@ -240,7 +241,7 @@ async function syncProjectBatch(
       for (const id of ids) {
         await updateQueueItem(id, {
           status: "failed",
-          error_message: "خطا در همگام‌سازی دسته‌ای",
+          error_message: i18n.t("errors.sync_offline_batch_failed"),
         });
       }
     }
@@ -279,7 +280,7 @@ async function syncProjectBatch(
           created_at: new Date().toISOString(),
           status: "failed",
           retry_count: 0,
-          error_message: row.conflict_reason ?? "تعارض داده",
+          error_message: row.conflict_reason ?? i18n.t("errors.sync_offline_conflict"),
           local_id: localId,
           server_id: row.server_id,
         });
@@ -305,7 +306,7 @@ async function syncProjectBatch(
         });
         await updateQueueItem(id, {
           status: "failed",
-          error_message: row.conflict_reason ?? "تعارض داده",
+          error_message: row.conflict_reason ?? i18n.t("errors.sync_offline_conflict"),
         });
       }
       conflicts += Math.max(ids.length, 1);
@@ -315,7 +316,7 @@ async function syncProjectBatch(
       for (const id of queueIds) {
         await updateQueueItem(id, {
           status: "failed",
-          error_message: row.conflict_reason ?? "خطا در همگام‌سازی",
+          error_message: row.conflict_reason ?? i18n.t("errors.sync_offline_error"),
         });
       }
       failed += Math.max(queueIds.length, 1);
@@ -354,7 +355,7 @@ async function syncRemainingItems(pending: QueueItem[]): Promise<SyncResult> {
         });
         await updateQueueItem(entry.queue_id, {
           status: "failed",
-          error_message: "تعارض داده — نیاز به بررسی دستی",
+          error_message: i18n.t("errors.sync_offline_manual_review"),
         });
         conflicts++;
         continue;
@@ -367,7 +368,7 @@ async function syncRemainingItems(pending: QueueItem[]): Promise<SyncResult> {
     } catch {
       await updateQueueItem(entry.queue_id, {
         status: "failed",
-        error_message: "خطا در ارتباط با سرور",
+        error_message: i18n.t("errors.sync_server_error"),
       });
       failed++;
     }
@@ -449,7 +450,23 @@ export async function syncPendingUnitOperations(actorId: string): Promise<SyncRe
       ready.push(operationToV2(operation, snapshot.report_date));
     }
     if (ready.length === 0) continue;
-    const response = await syncOperationsV2(projectId, buildSyncRequest(ready));
+    let response: Awaited<ReturnType<typeof syncOperationsV2>>;
+    try {
+      response = await syncOperationsV2(projectId, buildSyncRequest(ready));
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 403) {
+        for (const operation of operations) {
+          await updateOperation(operation.operation_id, {
+            status: "failed",
+            error_code: "permission_denied",
+            error_message: i18n.t("errors.permission_revoked"),
+          });
+          failed += 1;
+        }
+        continue;
+      }
+      throw err;
+    }
     const db = await initDB();
     const currentClaim = await db.get("offline_claims", `${actorId}:${projectId}`);
     if (!currentClaim || !ackAllowed(currentClaim, fencingToken)) continue;

@@ -667,7 +667,8 @@
   },
   "login": {
     "title": "ورود",
-    "description": "شماره تلفن و رمز عبور خود را وارد کنید.",
+    "description": "شماره تلفن یا نام کاربری و رمز عبور را وارد کنید.",
+    "identity": "شماره تلفن یا نام کاربری",
     "phonePlaceholder": "+989123456789",
     "signingIn": "در حال ورود…",
     "noAccount": "حساب کاربری ندارید؟",
@@ -692,6 +693,7 @@
     "checkEmail": "پیامک خود را بررسی کنید",
     "emailSent": "اگر حسابی با شماره {{email}} وجود داشته باشد، کد بازنشانی رمز عبور برایتان ارسال شده است.",
     "failed": "درخواست ناموفق بود. دوباره تلاش کنید.",
+    "notSent": "پیام بازنشانی ارسال نشد.",
     "enterCode": "وارد کردن کد بازیابی"
   },
   "resetPassword": {
@@ -766,7 +768,17 @@
     "consumption_location_required_for_consumption": "برای ثبت مصرف مصالح، وارد کردن محل مصرف الزامی است.",
     "percent_must_be_between_0_and_100": "درصد پیشرفت باید بین ۰ تا ۱۰۰ باشد.",
     "cannot_submit_empty_sub_report": "امکان ارسال گزارش خالی وجود ندارد؛ حداقل یک ردیف فعالیت یا کارکرد وارد نمایید.",
-    "invalid_test_pressure_value": "فشار آزمون باید عددی مثبت باشد."
+    "invalid_test_pressure_value": "فشار آزمون باید عددی مثبت باشد.",
+    "project_scope_mismatch": "رکورد مرتبط متعلق به این پروژه نیست.",
+    "sod_missing_creator": "رکورد بدون ثبت‌کننده نمی‌تواند از مسیر عادی تأیید نهایی عبور کند.",
+    "sod_actor_required": "برای تأیید نهایی، انجام‌دهنده الزامی است.",
+    "sod_break_glass_reason_required": "برای این اقدام، دلیل شکستن محدودیت (break-glass) نباید خالی باشد.",
+    "sync_offline_batch_failed": "همگام‌سازی آفلاین به صورت دسته‌ای ناموفق بود.",
+    "sync_offline_conflict": "تعارض همگام‌سازی.",
+    "sync_offline_error": "خطا در همگام‌سازی.",
+    "sync_offline_manual_review": "نیاز به بررسی دستی.",
+    "sync_server_error": "خطای سرور هنگام همگام‌سازی.",
+    "permission_revoked": "دسترسی شما به این پروژه لغو شده است؛ اقدامات در انتظار ارسال نشدند."
   },
   "dashboard": {
     "portfolio": {
@@ -920,6 +932,7 @@
     "columnStatus": "وضعیت",
     "statusActive": "فعال",
     "statusInactive": "غیرفعال",
+    "statusSuspended": "معلق",
     "empty": "کاربری یافت نشد.",
     "loadError": "بارگذاری فهرست کاربران ممکن نشد.",
     "pageInfo": "صفحه {{page}} از {{totalPages}} (جمع {{count}} نفر)",
@@ -1294,6 +1307,23 @@
     "status": "وضعیت",
     "joinedAt": "تاریخ عضویت",
     "lastLogin": "آخرین ورود",
+    "searchTeam": "جست‌وجو با نام",
+    "createPerson": "ساخت شخص",
+    "connectInvitation": "اتصال دعوت",
+    "cancelInvitation": "لغو دعوت",
+    "invitationCancelled": "دعوت لغو شد",
+    "statuses": {
+      "active": "فعال",
+      "inactive": "غیرفعال",
+      "invited": "دعوت‌شده",
+      "suspended": "تعلیق‌شده",
+      "archived": "خارج‌شده"
+    },
+    "delivery": {
+      "not_configured": "پیامی ارسال نشد. ارسال پیکربندی نشده است.",
+      "not_sent": "پیام ارسال نشد.",
+      "sent": "پیام برای گیرنده آزمایشی مورد توافق ارسال شد."
+    },
     "actions": "عملیات",
     "edit": "ویرایش",
     "deactivate": "غیرفعال",
@@ -1307,6 +1337,8 @@
     "drawerAdd": "افزودن عضو",
     "drawerEdit": "ویرایش عضو",
     "searchUser": "جستجوی کاربر",
+    "lookupForbidden": "اجازه جست‌وجوی افراد برای این پروژه را ندارید.",
+    "projectScopeMismatch": "شیء مرتبط به این پروژه تعلق ندارد.",
     "rolesRequired": "نقش‌ها",
     "advancedPermissions": "دسترسی‌های پیشرفته",
     "permission": "دسترسی",
@@ -2280,7 +2312,13 @@
     "updated": "با موفقیت به‌روزرسانی شد",
     "failed": "عملیات ناموفق بود",
     "approved": "تأیید شد",
-    "rejected": "رد شد"
+    "rejected": "رد شد",
+    "syncSynced": "{{count}} مورد همگام‌سازی شد",
+    "syncFailed": "{{count}} مورد همگام‌سازی نشد",
+    "syncConflicts": "{{count}} تعارض داده نیاز به بررسی دارد",
+    "manualSyncSynced": "{{count}} مورد همگام‌سازی شد",
+    "manualSyncConflicts": "{{count}} تعارض شناسایی شد",
+    "conflictsAllResolved": "همه تعارض‌ها حل شدند"
   },
   "dialog": {
     "close": "بستن"
@@ -2703,6 +2741,7 @@
     "approve_reports": "تأیید گزارش‌ها",
     "view_contracts": "مشاهده قراردادها",
     "edit_contracts": "ویرایش قراردادها",
+    "approve_contracts": "تأیید قراردادها و دستور تغییرها",
     "view_ipcs": "مشاهده صورت‌وضعیت‌ها",
     "edit_ipcs": "ویرایش صورت‌وضعیت‌ها",
     "approve_ipcs": "تأیید صورت‌وضعیت‌ها",
@@ -2716,6 +2755,7 @@
     "view_correspondence": "مشاهده مکاتبات",
     "edit_correspondence": "ویرایش مکاتبات",
     "view_sensitive_contacts": "مشاهده اطلاعات تماس حساس ذی‌نفعان",
+    "view_person_contacts": "مشاهده اطلاعات تماس شخص و کارکنان",
     "view_dashboard": "مشاهده داشبورد",
     "view_hr": "مشاهده منابع انسانی و ظرفیت",
     "edit_hr": "ویرایش منابع انسانی و ظرفیت",

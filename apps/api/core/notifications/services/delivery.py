@@ -35,6 +35,63 @@ def get_sms_backend():
     return ConsoleSmsBackend()
 
 
+_NON_OPERATIONAL_EMAIL = {
+    'django.core.mail.backends.console.EmailBackend',
+    'django.core.mail.backends.locmem.EmailBackend',
+    'django.core.mail.backends.dummy.EmailBackend',
+}
+
+
+def email_is_operational() -> bool:
+    backend = getattr(settings, 'EMAIL_BACKEND', '') or ''
+    return backend not in _NON_OPERATIONAL_EMAIL and bool(backend)
+
+
+def sms_is_operational() -> bool:
+    provider = (getattr(settings, 'SMS_PROVIDER', 'console') or 'console').strip().lower()
+    if provider in ('', 'console'):
+        return False
+    return not isinstance(get_sms_backend(), ConsoleSmsBackend)
+
+
+def delivery_plan(recipient: str) -> str:
+    """Return not_configured, not_sent, or attempt. Does not log the recipient."""
+    address = (recipient or '').strip()
+    email_ok = email_is_operational()
+    sms_ok = sms_is_operational()
+    if not email_ok and not sms_ok:
+        return 'not_configured'
+    reachable = email_ok if '@' in address else sms_ok
+    if not reachable or not address:
+        return 'not_sent'
+    expected = (getattr(settings, 'TEAM_DELIVERY_TEST_RECIPIENT', '') or '').strip()
+    if not expected or address.casefold() != expected.casefold():
+        return 'not_sent'
+    return 'attempt'
+
+
+def deliver_account_message(*, recipient: str, subject: str, body: str) -> str:
+    """Send only to the agreed test recipient on an operational channel."""
+    plan = delivery_plan(recipient)
+    if plan != 'attempt':
+        return plan
+    try:
+        if '@' in (recipient or ''):
+            count = send_mail(
+                subject=subject,
+                message=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient],
+                fail_silently=False,
+            )
+            return 'sent' if count else 'not_sent'
+        sent = get_sms_backend().send(recipient, body)
+        return 'sent' if sent else 'not_sent'
+    except Exception:
+        logger.exception('Account message delivery failed')
+        return 'not_sent'
+
+
 def deliver_alert_notifications(
     *,
     user_ids: Iterable,

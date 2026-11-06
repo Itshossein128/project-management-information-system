@@ -106,13 +106,21 @@ class BudgetViewSet(CostScopedViewSet):
             assert_version_editable(version)
         else:
             version = ensure_working_draft(self.get_project_id(), self.request.user)
-        serializer.save(
-            project_id=self.get_project_id(),
+        from permissions.project import assert_same_project
+
+        pid = self.get_project_id()
+        instance = serializer.save(
+            project_id=pid,
             version=version,
             created_by=self.request.user,
             updated_by=self.request.user,
             **kwargs,
         )
+        assert_same_project(pid, instance.project_id)
+        for attr in ('wbs', 'activity', 'cbs', 'contract'):
+            related = getattr(instance, attr, None)
+            if related is not None:
+                assert_same_project(pid, getattr(related, 'project_id', None), field=attr)
         self.post_save(serializer.instance)
 
     def create(self, request, *args, **kwargs):
@@ -126,8 +134,16 @@ class BudgetViewSet(CostScopedViewSet):
         return Response(data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
+        from permissions.project import assert_same_project
+
         assert_line_mutable(serializer.instance)
-        serializer.save(updated_by=self.request.user)
+        pid = self.get_project_id()
+        instance = serializer.save(updated_by=self.request.user)
+        assert_same_project(pid, instance.project_id)
+        for attr in ('wbs', 'activity', 'cbs', 'contract'):
+            related = getattr(instance, attr, None)
+            if related is not None:
+                assert_same_project(pid, getattr(related, 'project_id', None), field=attr)
         self.post_save(serializer.instance)
 
     def destroy(self, request, *args, **kwargs):
@@ -139,7 +155,7 @@ class BudgetViewSet(CostScopedViewSet):
 
 
 class BudgetBulkView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_costs'
 
     @extend_schema(summary='Bulk upsert budgets', tags=['Cost control'])
@@ -230,13 +246,23 @@ class ActualCostViewSet(CostScopedViewSet):
         require_warning_ack(warnings, bool(self.request.data.get('acknowledge_warnings')))
         super().perform_create(serializer, **kwargs)
 
+    @property
+    def required_permission(self):
+        if getattr(self, 'action', None) in ('approve', 'void'):
+            return 'approve_costs'
+        return super().required_permission
+
     @extend_schema(summary='Approve actual cost', tags=['Cost Control'])
     def approve(self, request, project_pk=None, pk=None):
         from cost_control.services.actual_cost_service import approve_actual_cost
 
         actual = self.get_object()
         try:
-            approve_actual_cost(actual, request.user)
+            approve_actual_cost(
+                actual,
+                request.user,
+                break_glass_reason=(request.data or {}).get('break_glass_reason'),
+            )
         except ValidationError as exc:
             return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
         return Response(ActualCostSerializer(actual).data)
@@ -333,7 +359,7 @@ class CostPoolViewSet(CostScopedViewSet):
 
 
 class CostPoolAllocateView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_costs'
 
     @extend_schema(summary='Allocate cost pool to activities', tags=['Cost control'])
@@ -349,7 +375,7 @@ class CostPoolAllocateView(APIView):
 
 
 class CostPoolAutoAllocateView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_costs'
 
     @extend_schema(summary='Auto-allocate cost pool by method', tags=['Cost control'])

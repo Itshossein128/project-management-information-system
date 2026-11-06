@@ -3,7 +3,9 @@
 import pytest
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.test import APIClient
 
+from master_data.models import ProjectMember, ProjectMemberPermissionOverride, ProjectMemberRole
 from projects.capability_service import update_capability_setting
 from schedule.models import ActivityProgress
 
@@ -39,6 +41,38 @@ class TestKpiDrillthrough:
             if hasattr(code, 'code'):
                 code = code.code
         assert code == 'unknown_figure_key'
+
+    def test_drill_finance_denied_without_view_costs(self, project, user, viewer_role):
+        m = ProjectMember.objects.get(project=project, user=user)
+        m.member_roles.all().delete()
+        ProjectMemberRole.objects.create(member=m, role=viewer_role)
+        ProjectMemberPermissionOverride.objects.update_or_create(
+            member=m,
+            permission_codename='view_costs',
+            defaults={'is_granted': False},
+        )
+        client = APIClient()
+        client.force_authenticate(user=user)
+        resp = client.get(
+            f'/api/v1/projects/{project.id}/kpis/drill/?figure_key=finance.budget'
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_drill_cash_denied_without_view_cashflow(self, project, user, viewer_role):
+        m = ProjectMember.objects.get(project=project, user=user)
+        m.member_roles.all().delete()
+        ProjectMemberRole.objects.create(member=m, role=viewer_role)
+        ProjectMemberPermissionOverride.objects.update_or_create(
+            member=m,
+            permission_codename='view_cashflow',
+            defaults={'is_granted': False},
+        )
+        client = APIClient()
+        client.force_authenticate(user=user)
+        resp = client.get(
+            f'/api/v1/projects/{project.id}/kpis/drill/?figure_key=cash.net_balance'
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_drill_cash_rows(self, auth_client, project, user):
         from cash_flow.models import CashTransaction, CashTransactionType

@@ -33,7 +33,21 @@ class UploadUrlView(APIView):
         content_type = request.data.get('content_type', 'application/octet-stream')
 
         try:
-            result = generate_upload_url(project_pk, request.user, raw_filename, content_type)
+            source = request.data.get('source', 'documents')
+            if source not in ('documents', 'reports'):
+                source = 'documents'
+            document_id = request.data.get('document_id')
+            restricted_raw = request.data.get('restricted_user_ids') or []
+            restricted_user_ids = restricted_raw if isinstance(restricted_raw, list) else []
+            result = generate_upload_url(
+                project_pk,
+                request.user,
+                raw_filename,
+                content_type,
+                source=source,
+                document_id=document_id,
+                restricted_user_ids=restricted_user_ids,
+            )
             return Response(result)
         except ValueError as exc:
             logger.exception('Failed to generate upload URL')
@@ -71,10 +85,12 @@ class DownloadUrlView(APIView):
     @extend_schema(summary='Get presigned download URL', tags=['Storage'])
     def get(self, request, file_id):
         try:
-            result = generate_download_url(file_id)
+            result = generate_download_url(file_id, user=request.user)
             return Response(result)
         except ValueError as exc:
             if str(exc) == 'Not found.':
                 return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+            if str(exc) == 'Forbidden.':
+                return Response({'detail': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
             logger.exception('Failed to generate download URL')
             return Response({'detail': 'Invalid request.'}, status=status.HTTP_400_BAD_REQUEST)

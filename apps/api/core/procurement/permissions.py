@@ -5,20 +5,22 @@ from procurement.services.approval_engine import get_required_role
 
 
 def has_procurement_step_role(user, project_id, required_role: str) -> bool:
-    """Check if a user has the required role for a procurement step."""
+    """Check if a user has the required role for a procurement step.
+
+    Organizational observation (superuser / admin group) and bare staff do not
+    satisfy step writes. Callers must hold the step role via project membership
+    or an explicit Django group named for that step.
+    """
     if not user or not user.is_authenticated:
         return False
-
-    # Superuser, staff, or admin group override
-    if user.is_superuser or getattr(user, 'is_staff', False) or user.groups.filter(name='admin').exists():
-        return True
 
     allowed_roles = [required_role]
     if '_or_' in required_role:
         allowed_roles.extend(required_role.split('_or_'))
 
-    # Check Django Group names
-    if user.groups.filter(name__in=allowed_roles).exists():
+    # Check Django Group names (step roles only — not the observation admin group)
+    step_groups = [name for name in allowed_roles if name and name != 'admin']
+    if step_groups and user.groups.filter(name__in=step_groups).exists():
         return True
 
     # Check ProjectMemberRole for the given project

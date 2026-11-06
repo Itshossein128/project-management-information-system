@@ -3,6 +3,7 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from authentication.permissions import IsOrganizationalAccountAdmin
 from sub_reports.models import UnitReportMigrationQuarantine
 from sub_reports.quarantine_serializers import UnitReportMigrationQuarantineSerializer
 
@@ -11,12 +12,12 @@ class UnitReportMigrationQuarantineViewSet(viewsets.ReadOnlyModelViewSet):
     """Quarantine resolution surface for authorized migration operators (data-model §10).
 
     Quarantined rows remain readable, are never current, and never contribute.
-    Only admin operators may list, inspect, and record resolutions.
+    Only organizational account admins may list, inspect, and record resolutions.
     """
 
     queryset = UnitReportMigrationQuarantine.objects.select_related('trace', 'resolved_by').all()
     serializer_class = UnitReportMigrationQuarantineSerializer
-    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsOrganizationalAccountAdmin]
 
     @action(detail=True, methods=['post'])
     def resolve(self, request, pk=None):

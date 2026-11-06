@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from config.exceptions import CodedValidationError
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -120,7 +121,7 @@ class ContractViewSet(ContractScopedViewSet):
 
 
 class ContractItemsBulkView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_contracts'
 
     @extend_schema(summary='Bulk upsert contract BoQ items', tags=['Contracts'])
@@ -162,8 +163,8 @@ class ChangeOrderDetailView(APIView):
 
 
 class ChangeOrderApproveView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
-    required_permission = 'edit_contracts'
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+    required_permission = 'approve_contracts'
 
     @extend_schema(summary='Approve change order', tags=['Contracts'])
     def post(self, request, project_pk=None, pk=None, chid=None):
@@ -171,8 +172,14 @@ class ChangeOrderApproveView(APIView):
             ChangeOrder, pk=chid, contract_id=pk, contract__project_id=project_pk, is_deleted=False
         )
         try:
-            co = approve_change_order(co, request.user)
+            reason = (request.data or {}).get('break_glass_reason')
+            co = approve_change_order(co, request.user, break_glass_reason=reason)
             return Response(ChangeOrderSerializer(co).data)
+        except CodedValidationError as e:
+            return Response(
+                {'code': e.default_code, 'detail': e.detail},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except ValueError as e:
             return Response(
                 {'detail': str(e)},

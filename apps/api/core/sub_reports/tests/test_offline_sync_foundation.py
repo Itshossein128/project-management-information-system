@@ -11,7 +11,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride, RoleAccessChange
 from projects.models import Activity, Project, Stakeholder, WBS
 from sub_reports.models import DisciplineSubReport, DisciplineSubReportActivity, SubReportStatus
 
@@ -92,6 +92,9 @@ def test_receipt_is_not_disclosed_after_membership_revoked(project, user):
     denied = send(client, project, operation)
     assert denied.status_code in (403, 404)
     assert operation['operation_id'] not in str(denied.data)
+    assert RoleAccessChange.objects.filter(
+        actor=user, project=project, action='offline_sync_permission_denied',
+    ).exists()
 
 
 @pytest.mark.parametrize('state,edit', [(MemberStatus.ACTIVE, False), (MemberStatus.INACTIVE, True), (MemberStatus.SUSPENDED, True)])
@@ -110,6 +113,20 @@ def test_nonmember_denied_and_global_admin_policy_preserved(project, other_user)
     denied = send(client_for(other_user), project, operation)
     assert denied.status_code in (403, 404)
     admin = get_user_model().objects.create_user(username='sync-admin', mobile='+989120006001', full_name='Admin', is_staff=True, is_superuser=True)
+    from django.contrib.auth.models import Group
+
+    group, _ = Group.objects.get_or_create(name='admin')
+    admin.groups.add(group)
+    admin_member, _ = ProjectMember.objects.get_or_create(
+        project=project,
+        user=admin,
+        defaults={'status': MemberStatus.ACTIVE},
+    )
+    ProjectMemberPermissionOverride.objects.update_or_create(
+        member=admin_member,
+        permission_codename='edit_reports',
+        defaults={'is_granted': True},
+    )
     response = send(client_for(admin), project, operation)
     assert result(response, operation)['outcome'] == 'success'
     assert response.data['synced_ids'] == [operation['operation_id']]

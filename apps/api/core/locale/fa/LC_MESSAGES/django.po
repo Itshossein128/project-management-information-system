@@ -379,3 +379,58 @@ msgstr "نام نقش‌های ثابت را نمی‌توان برای نقش �
 
 msgid "You do not have permission to perform this action."
 msgstr "اجازه انجام این کار را ندارید."
+
+msgid "Mobile number is required."
+msgstr "شماره موبایل لازم است."
+
+msgid "This field may not be blank."
+msgstr "این فیلد نباید خالی باشد."
+
+msgid "Either user_id, email, or mobile is required."
+msgstr "شناسه شخص، ایمیل یا موبایل لازم است."
+
+msgid "At least one role is required."
+msgstr "حداقل یک نقش لازم است."
+
+msgid "You cannot manage organizational accounts."
+msgstr "اجازه مدیریت حساب‌های سازمان را ندارید."
+
+msgid "This person already has a membership in this project."
+msgstr "این شخص از قبل در این پروژه عضویت دارد."
+
+msgid "This invitation can no longer be used."
+msgstr "این دعوت دیگر قابل استفاده نیست."
+
+msgid "A person is required."
+msgstr "انتخاب شخص لازم است."
+
+msgid "Status must be active, inactive, or suspended."
+msgstr "وضعیت باید فعال، غیرفعال یا معلق باشد."
+
+msgid "This person has history and was not deleted."
+msgstr "این شخص سابقه دارد و حذف نشد."
+
+msgid "If an account exists for this phone number, no message was sent because delivery is not configured."
+msgstr "اگر حسابی با این شماره وجود داشته باشد، پیامی ارسال نشد چون ارسال پیکربندی نشده است."
+
+msgid "If an account exists for this phone number, the message was not sent."
+msgstr "اگر حسابی با این شماره وجود داشته باشد، پیام ارسال نشد."
+
+
+msgid "The related object does not belong to this project."
+msgstr "شیء مرتبط به این پروژه تعلق ندارد."
+
+msgid "The creator cannot alone complete final approval of this transaction."
+msgstr "ثبت‌کننده نمی‌تواند به‌تنهایی تأیید نهایی این تراکنش را انجام دهد."
+
+msgid "A record without a recorded creator cannot take the normal final-approve path."
+msgstr "رکورد بدون ثبت‌کننده مشخص از مسیر عادی تأیید نهایی نمی‌شود."
+
+msgid "An actor is required for final approval."
+msgstr "برای تأیید نهایی اقدام‌کننده لازم است."
+
+msgid "You do not have permission to search people for this project."
+msgstr "اجازه جست‌وجوی افراد برای این پروژه را ندارید."
+
+msgid "You do not have permission to search people."
+msgstr "اجازه جست‌وجوی افراد را ندارید."

@@ -53,14 +53,14 @@ def test_bulk_contract_items(finance_client, project, contract, activity):
     assert ContractItem.objects.filter(contract=contract, is_deleted=False).count() == 1
 
 
-def test_change_order_approve_updates_adjusted_amount(finance_client, project, contract, user):
+def test_change_order_approve_updates_adjusted_amount(finance_client, project, contract, user, other_user):
     co = ChangeOrder.objects.create(
         contract=contract,
         change_number=1,
         description='Scope increase',
         amount_change=Decimal('100000000'),
-        status=ChangeOrderStatus.DRAFT,
-        created_by=user,
+        status=ChangeOrderStatus.SUBMITTED,
+        created_by=other_user,
         updated_by=user,
     )
     url = (

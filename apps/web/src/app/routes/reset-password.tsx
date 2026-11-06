@@ -15,7 +15,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router";
-import { apiFetch } from "src/app/lib/api-client";
+import { apiJson } from "src/app/lib/api-client";
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -41,7 +41,7 @@ export default function ResetPassword() {
     }
     setSubmitting(true);
     try {
-      const res = await apiFetch("/auth/reset-password/", {
+      await apiJson("/auth/reset-password/", {
         method: "POST",
         body: JSON.stringify({
           token,
@@ -49,11 +49,6 @@ export default function ResetPassword() {
           new_password_confirm: passwordConfirm,
         }),
       });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(data.error ?? res.statusText ?? t("resetPassword.failed"));
-        return;
-      }
       setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("resetPassword.failed"));

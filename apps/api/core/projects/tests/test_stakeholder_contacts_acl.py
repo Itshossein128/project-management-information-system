@@ -3,7 +3,7 @@
 import pytest
 from rest_framework.test import APIClient
 
-from master_data.models import MemberStatus, ProjectMemberRole, Role
+from master_data.models import MemberStatus, ProjectMemberRole, Role, RolePermission
 
 
 @pytest.mark.django_db
@@ -42,6 +42,87 @@ def test_stakeholder_contacts_redacted_for_viewer(
             'name': 'Secret Contact',
             'email': 'secret@example.com',
             'phone': '+10000000002',
+        },
+        format='json',
+    )
+    assert create.status_code == 201
+    sid = create.json()['id']
+
+    api_client.force_authenticate(user=other_user)
+    detail = api_client.get(f'/api/v1/projects/{project.id}/stakeholders/{sid}/')
+    assert detail.status_code == 200
+    data = detail.json()
+    assert data.get('email') in (None, '')
+    assert data.get('phone') in (None, '')
+    assert data.get('contacts_redacted') is True
+
+
+@pytest.mark.django_db
+def test_observation_admin_without_sensitive_permission_sees_no_contacts(
+    api_client, project, user
+):
+    """Organizational observation does not open stakeholder contacts."""
+    from django.contrib.auth.models import Group
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    create = APIClient()
+    create.force_authenticate(user=user)
+    created = create.post(
+        f'/api/v1/projects/{project.id}/stakeholders/',
+        {
+            'name': 'Obs Hidden',
+            'email': 'obs-hidden@example.com',
+            'phone': '+10000000009',
+        },
+        format='json',
+    )
+    assert created.status_code == 201
+    sid = created.json()['id']
+
+    admin = User.objects.create_user(
+        username='obs_stake',
+        mobile='+989120000701',
+        password='x',
+    )
+    group, _ = Group.objects.get_or_create(name='admin')
+    admin.groups.add(group)
+    api_client.force_authenticate(user=admin)
+    detail = api_client.get(f'/api/v1/projects/{project.id}/stakeholders/{sid}/')
+    # Observation may read project-scoped stakeholder list/detail as view_project,
+    # but contacts must stay redacted without view_sensitive_contacts.
+    assert detail.status_code in (200, 403)
+    if detail.status_code == 200:
+        data = detail.json()
+        assert data.get('email') in (None, '')
+        assert data.get('phone') in (None, '')
+        assert data.get('contacts_redacted') is True
+
+
+@pytest.mark.django_db
+def test_edit_project_does_not_reveal_stakeholder_contacts(
+    auth_client, api_client, project, user, other_user, project_manager_role
+):
+    """Contact visibility follows ``view_sensitive_contacts`` only (A6-P4 T073)."""
+    RolePermission.objects.filter(
+        role=project_manager_role,
+        permission_codename='view_sensitive_contacts',
+    ).delete()
+    from master_data.models import ProjectMember, ProjectMemberRole
+
+    m, _ = ProjectMember.objects.get_or_create(
+        project=project,
+        user=other_user,
+        defaults={'status': MemberStatus.ACTIVE},
+    )
+    ProjectMemberRole.objects.get_or_create(member=m, role=project_manager_role)
+
+    create = auth_client.post(
+        f'/api/v1/projects/{project.id}/stakeholders/',
+        {
+            'name': 'PM edit only',
+            'email': 'pm-edit@example.com',
+            'phone': '+10000000011',
         },
         format='json',
     )

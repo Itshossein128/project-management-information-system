@@ -69,10 +69,16 @@ class PersonDossierView(HRProjectMixin, APIView):
             raise NotFound('User not visible in this project scope.')
         return person
 
+    def _dossier_serializer(self, person, request, project_pk):
+        return PersonDossierSerializer(
+            person,
+            context={'request': request, 'project_id': project_pk, 'project_pk': project_pk},
+        )
+
     @extend_schema(summary='Get person dossier', tags=['HR'])
     def get(self, request, project_pk, user_id):
         person = self.get_person(project_pk, user_id)
-        return Response(PersonDossierSerializer(person).data)
+        return Response(self._dossier_serializer(person, request, project_pk).data)
 
     @extend_schema(summary='Update person dossier', tags=['HR'])
     def patch(self, request, project_pk, user_id):
@@ -82,12 +88,11 @@ class PersonDossierView(HRProjectMixin, APIView):
             'qualifications',
             'org_unit_id',
             'supervisor_id',
-            'status',
             'default_capacity_percent',
         }
         payload = {k: request.data[k] for k in allowed_keys if k in request.data}
         updated = services.update_dossier(person, payload)
-        return Response(PersonDossierSerializer(updated).data)
+        return Response(self._dossier_serializer(updated, request, project_pk).data)
 
 
 @extend_schema_view(
@@ -270,6 +275,11 @@ class ApprovedLaborRateViewSet(HRProjectMixin, ProjectScopedViewSet):
             ApprovedLaborRateSerializer(rate, context=self.get_serializer_context()).data,
             status=status.HTTP_201_CREATED,
         )
+
+    def destroy(self, request, *args, **kwargs):
+        if not member_has_codename(request.user, self.get_project_id(), 'edit_wage'):
+            raise PermissionDenied('Deleting approved labor rates requires edit_wage.')
+        return super().destroy(request, *args, **kwargs)
 
 
 class LaborCostEstimateView(HRProjectMixin, APIView):

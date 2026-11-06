@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, RefreshCw, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { getStoredActorId } from "@/app/lib/auth-storage";
 import { PATHS } from "@/app/routeVars";
 import {
   type ConflictEntry,
@@ -41,9 +42,10 @@ export default function SyncConflictsPage() {
       return;
     }
     try {
+      const actorId = getStoredActorId();
       const [next, failed, held] = await Promise.all([
         getUnresolvedConflicts(projectId),
-        getFailedQueue(),
+        getFailedQueue(actorId),
         getQuarantinedRecords(projectId),
       ]);
       setConflicts(next.filter((c) => !removingIds.has(c.conflict_id)));
@@ -67,7 +69,7 @@ export default function SyncConflictsPage() {
     setConflicts(visible);
     if (visible.length === 0 && !navigatedRef.current) {
       navigatedRef.current = true;
-      toast.success("همه تعارض‌ها حل شدند");
+      toast.success(t("toast.conflictsAllResolved"));
       navigate(listHref);
     }
   };

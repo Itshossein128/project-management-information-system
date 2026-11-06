@@ -67,6 +67,11 @@ def project_manager_role(db):
 
 
 @pytest.fixture
+def finance_manager_role(db):
+    return _ensure_role_permissions('finance_manager')
+
+
+@pytest.fixture
 def viewer_role(db):
     return _ensure_role_permissions('viewer')
 

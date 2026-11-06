@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 
-from authentication.models import UserStatus
 from config.exceptions import CodedValidationError
 from master_data.models import OrganizationUnit
 
@@ -30,8 +29,6 @@ def update_dossier(person: User, data: dict) -> User:
             if not User.objects.filter(pk=supervisor_id).exists():
                 raise CodedValidationError(detail='Unknown supervisor.', code='validation_error')
         person.supervisor_id = supervisor_id
-    if 'status' in data:
-        person.status = data['status']
     if 'default_capacity_percent' in data:
         person.default_capacity_percent = data['default_capacity_percent']
 

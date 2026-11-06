@@ -15,6 +15,7 @@ export interface AuthUser {
   last_name: string;
   full_name: string;
   roles: ROLES[];
+  is_superuser?: boolean;
   date_joined?: string;
 }
 

@@ -17,7 +17,8 @@ import {
 import type { AuthUser } from "src/app/lib/auth-types";
 
 interface LoginCredentials {
-  phone_number: string;
+  phone_number?: string;
+  username?: string;
   password: string;
 }
 
@@ -67,6 +68,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Stay in loading while a stored session is validated — avoids flashing protected UI with dead tokens.
   const [isLoading, setIsLoading] = React.useState(() => hasStoredSession());
+  // Offline/unit-report queues are actor-scoped (see offlineWrite/offlineDB).
+  // On account switch or logout, clear project session queries so the next
+  // account cannot submit or display the previous actor's queued work.
   const queryActor = React.useRef(user?.id);
   const prepareQueryActor = React.useCallback((next?: string) => {
     if (queryActor.current !== next) {
@@ -133,8 +137,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     retainRestoreAttemptsForUser();
     retainStatusUndoStateForUser();
-    prepareQueryActor();
     clearStoredAuth();
+    prepareQueryActor();
     setUser(null);
   }, [prepareQueryActor]);
 

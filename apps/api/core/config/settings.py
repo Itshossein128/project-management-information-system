@@ -152,7 +152,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'authentication.jwt.AccountJWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -206,6 +206,7 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+    'USER_AUTHENTICATION_RULE': 'authentication.services.account_can_authenticate',
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -226,6 +227,9 @@ V2_OFFLINE_SYNC_ENABLED = os.environ.get('V2_OFFLINE_SYNC_ENABLED', 'false').low
 # Alert notification channels (K-04): in_app, email, sms
 ALERT_NOTIFY_CHANNELS = os.environ.get('ALERT_NOTIFY_CHANNELS', 'in_app,email')
 SMS_PROVIDER = os.environ.get('SMS_PROVIDER', 'console')
+# Empty until the customer channel owner names one test recipient.
+# Console, locmem, and dummy email, and SMS_PROVIDER=console, are not delivery.
+TEAM_DELIVERY_TEST_RECIPIENT = os.environ.get('TEAM_DELIVERY_TEST_RECIPIENT', '')
 
 # S3 / MinIO
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', 'http://localhost:9000')

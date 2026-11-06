@@ -667,7 +667,8 @@
   },
   "login": {
     "title": "Sign in",
-    "description": "Enter your phone number and password.",
+    "description": "Enter your phone number or username and password.",
+    "identity": "Phone number or username",
     "phonePlaceholder": "+989123456789",
     "signingIn": "Signing in…",
     "noAccount": "Don't have an account?",
@@ -692,6 +693,7 @@
     "checkEmail": "Check your phone",
     "emailSent": "If an account exists for {{email}}, we've sent a password reset code.",
     "failed": "Request failed. Try again.",
+    "notSent": "No reset message was sent.",
     "enterCode": "Enter reset code"
   },
   "resetPassword": {
@@ -766,7 +768,17 @@
     "consumption_location_required_for_consumption": "A consumption location is required for material consumption rows.",
     "percent_must_be_between_0_and_100": "Execution percentage must be between 0.00 and 100.00.",
     "cannot_submit_empty_sub_report": "Cannot submit an empty sub-report; at least one activity or workforce row is required.",
-    "invalid_test_pressure_value": "Test pressure must be a positive number."
+    "invalid_test_pressure_value": "Test pressure must be a positive number.",
+    "project_scope_mismatch": "The related record does not belong to this project.",
+    "sod_missing_creator": "A record without a recorded creator cannot take the normal final-approve path.",
+    "sod_actor_required": "An actor is required for final approval.",
+    "sod_break_glass_reason_required": "A non-empty break-glass reason is required for this action.",
+    "sync_offline_batch_failed": "Offline batch sync failed.",
+    "sync_offline_conflict": "Sync conflict.",
+    "sync_offline_error": "Sync error.",
+    "sync_offline_manual_review": "Manual review required.",
+    "sync_server_error": "Server error during sync.",
+    "permission_revoked": "Your permission for this project was revoked; pending actions were not sent."
   },
   "dashboard": {
     "portfolio": {
@@ -920,6 +932,7 @@
     "columnStatus": "Status",
     "statusActive": "Active",
     "statusInactive": "Inactive",
+    "statusSuspended": "Suspended",
     "empty": "No users found.",
     "loadError": "Could not load users.",
     "pageInfo": "Page {{page}} of {{totalPages}} ({{count}} total)",
@@ -1294,6 +1307,23 @@
     "status": "Status",
     "joinedAt": "Joined",
     "lastLogin": "Last login",
+    "searchTeam": "Search by name",
+    "createPerson": "Create person",
+    "connectInvitation": "Connect invitation",
+    "cancelInvitation": "Cancel invitation",
+    "invitationCancelled": "Invitation cancelled",
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "invited": "Invited",
+      "suspended": "Suspended",
+      "archived": "Left the project"
+    },
+    "delivery": {
+      "not_configured": "No message was sent. Delivery is not configured.",
+      "not_sent": "The message was not sent.",
+      "sent": "The message was sent to the agreed test recipient."
+    },
     "actions": "Actions",
     "edit": "Edit",
     "deactivate": "Deactivate",
@@ -1307,6 +1337,8 @@
     "drawerAdd": "Add member",
     "drawerEdit": "Edit member",
     "searchUser": "Search user",
+    "lookupForbidden": "You do not have permission to search people for this project.",
+    "projectScopeMismatch": "The related object does not belong to this project.",
     "rolesRequired": "Roles",
     "advancedPermissions": "Advanced permissions",
     "permission": "Permission",
@@ -2288,7 +2320,13 @@
     "updated": "Updated successfully",
     "failed": "Operation failed",
     "approved": "Approved",
-    "rejected": "Rejected"
+    "rejected": "Rejected",
+    "syncSynced": "{{count}} item(s) synced",
+    "syncFailed": "{{count}} item(s) could not be synced",
+    "syncConflicts": "{{count}} data conflict(s) need review",
+    "manualSyncSynced": "{{count}} item(s) synced",
+    "manualSyncConflicts": "{{count}} conflict(s) detected",
+    "conflictsAllResolved": "All conflicts resolved"
   },
   "dialog": {
     "close": "Close"
@@ -2711,6 +2749,7 @@
     "approve_reports": "Approve reports",
     "view_contracts": "View contracts",
     "edit_contracts": "Edit contracts",
+    "approve_contracts": "Approve contracts and change orders",
     "view_ipcs": "View IPCs",
     "edit_ipcs": "Edit IPCs",
     "approve_ipcs": "Approve IPCs",
@@ -2724,6 +2763,7 @@
     "view_correspondence": "View correspondence",
     "edit_correspondence": "Edit correspondence",
     "view_sensitive_contacts": "View stakeholder sensitive contact fields",
+    "view_person_contacts": "View person and employee contact fields",
     "view_dashboard": "View dashboard",
     "view_hr": "View HR & capacity",
     "edit_hr": "Edit HR & capacity",

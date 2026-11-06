@@ -524,20 +524,28 @@ export async function clearSyncedItems(): Promise<void> {
   await tx.done;
 }
 
-export async function getFailedQueue(): Promise<QueueItem[]> {
+export async function getFailedQueue(actorId?: string | null): Promise<QueueItem[]> {
   const db = await getDB();
   const all = await db.getAll("offline_queue");
-  return all.filter((i) => i.status === "failed");
+  return all.filter(
+    (i) =>
+      i.status === "failed" &&
+      (actorId == null || actorId === "" || i.actor_id === actorId),
+  );
 }
 
-export async function getQueueStats(): Promise<QueueStats> {
+export async function getQueueStats(actorId?: string | null): Promise<QueueStats> {
   const db = await getDB();
   const all = await db.getAll("offline_queue");
+  const scoped =
+    actorId == null || actorId === ""
+      ? all
+      : all.filter((i) => i.actor_id === actorId);
   return {
-    pending: all.filter((i) => i.status === "pending").length,
-    syncing: all.filter((i) => i.status === "syncing").length,
-    failed: all.filter((i) => i.status === "failed").length,
-    total: all.length,
+    pending: scoped.filter((i) => i.status === "pending").length,
+    syncing: scoped.filter((i) => i.status === "syncing").length,
+    failed: scoped.filter((i) => i.status === "failed").length,
+    total: scoped.length,
   };
 }
 

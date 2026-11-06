@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -170,6 +171,39 @@ class WorkflowInstanceStartSerializer(serializers.Serializer):
     subject_type = serializers.CharField(max_length=60)
     subject_id = serializers.UUIDField()
     comment = serializers.CharField(required=False, allow_blank=True, default='')
+
+    # subject_type -> (app_label, model_name)
+    _SUBJECT_MODELS: dict[str, tuple[str, str]] = {
+        'budget_change': ('cost_control', 'BudgetChangeRequest'),
+        'ipc_approval': ('contracts', 'IPC'),
+        'payment_approval': ('contracts', 'IPC'),
+        'purchase_request': ('procurement', 'RequisitionHeader'),
+        'schedule_change': ('schedule', 'ScheduleChangeRequest'),
+    }
+
+    def validate(self, attrs):
+        from permissions.project import assert_same_project
+
+        project_id = self.context.get('project_id')
+        subject_type = (attrs.get('subject_type') or '').strip()
+        subject_id = attrs.get('subject_id')
+        if not subject_type or subject_id is None:
+            return attrs
+        mapped = self._SUBJECT_MODELS.get(subject_type)
+        if not mapped:
+            return attrs
+        model = apps.get_model(*mapped)
+        try:
+            obj = model.objects.get(pk=subject_id)
+        except model.DoesNotExist:
+            raise serializers.ValidationError({'subject_id': 'Subject not found.'})
+        if hasattr(obj, 'project_id'):
+            assert_same_project(project_id, obj.project_id, field='subject')
+        elif hasattr(obj, 'contract_id'):
+            contract = getattr(obj, 'contract', None)
+            if contract is not None:
+                assert_same_project(project_id, contract.project_id, field='subject')
+        return attrs
 
 
 class WorkflowCommentSerializer(serializers.Serializer):

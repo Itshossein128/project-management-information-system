@@ -29,7 +29,7 @@ from documents.serializers import (
 from documents.services.correspondence_service import generate_corr_number, respond_to_correspondence
 from documents.services.document_service import create_project_document, create_document_revision
 from documents.services.meeting_action_service import list_open_meeting_actions, mark_meeting_action_done
-from permissions.project import HasProjectPermission
+from permissions.project import HasProjectPermission, IsProjectMember
 
 
 class DocScopedViewSet(ProjectScopedViewSet):
@@ -49,6 +49,11 @@ def _visible_documents_qs(project_id, user):
 
 class ProjectDocumentViewSet(DocScopedViewSet):
     parser_classes = [MultiPartParser, FormParser]
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['request'] = self.request
+        return ctx
 
     def get_queryset(self):
         qs = _visible_documents_qs(self.kwargs['project_pk'], self.request.user)
@@ -72,13 +77,14 @@ class ProjectDocumentViewSet(DocScopedViewSet):
 
     def list(self, request, *args, **kwargs):
         qs = self.get_queryset()
-        return Response({'results': ProjectDocumentSerializer(qs, many=True).data})
+        ser = ProjectDocumentSerializer(qs, many=True, context=self.get_serializer_context())
+        return Response({'results': ser.data})
 
     @extend_schema(summary='Upload project document', tags=['Documents'])
     def create(self, request, *args, **kwargs):
         serializer = ProjectDocumentSerializer(
             data=request.data,
-            context={'project_id': self.kwargs['project_pk']},
+            context={**self.get_serializer_context(), 'project_id': self.kwargs['project_pk']},
         )
         serializer.is_valid(raise_exception=True)
         doc = create_project_document(
@@ -87,11 +93,14 @@ class ProjectDocumentViewSet(DocScopedViewSet):
             data=serializer.validated_data,
             file_obj=request.FILES.get('file'),
         )
-        return Response(ProjectDocumentDetailSerializer(doc).data, status=201)
+        return Response(
+            ProjectDocumentDetailSerializer(doc, context=self.get_serializer_context()).data,
+            status=201,
+        )
 
 
 class DocumentRevisionUploadView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'upload_documents'
     parser_classes = [MultiPartParser, FormParser]
 
@@ -106,7 +115,12 @@ class DocumentRevisionUploadView(APIView):
             data=request.data,
             file_obj=request.FILES.get('file'),
         )
-        return Response(ProjectDocumentDetailSerializer(doc).data)
+        return Response(
+            ProjectDocumentDetailSerializer(
+                doc,
+                context={'request': request, 'project_id': str(project_pk)},
+            ).data,
+        )
 
 
 class CorrespondenceViewSet(DocScopedViewSet):
@@ -150,7 +164,7 @@ class CorrespondenceViewSet(DocScopedViewSet):
 
 
 class CorrespondenceRespondView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_correspondence'
 
     def post(self, request, project_pk=None, pk=None):

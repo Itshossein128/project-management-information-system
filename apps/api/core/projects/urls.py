@@ -64,6 +64,8 @@ position_detail = ProjectPositionViewSet.as_view(
 
 # Project Members (User Assignments)
 member_list = ProjectMemberViewSet.as_view({'get': 'list', 'post': 'create'})
+invitation_connect = ProjectMemberViewSet.as_view({'post': 'connect_invitation'})
+invitation_cancel = ProjectMemberViewSet.as_view({'post': 'cancel_invitation'})
 local_role_list = LocalRoleViewSet.as_view({'get': 'list', 'post': 'create'})
 local_role_detail = LocalRoleViewSet.as_view({'patch': 'partial_update', 'delete': 'destroy'})
 local_role_impact = LocalRoleViewSet.as_view({'get': 'impact'})
@@ -165,6 +167,16 @@ urlpatterns = [
         name='project-access-changes',
     ),
     path('<uuid:project_pk>/members/', member_list, name='project-member-list'),
+    path(
+        '<uuid:project_pk>/members/invitations/<uuid:member_id>/connect/',
+        invitation_connect,
+        name='project-member-invitation-connect',
+    ),
+    path(
+        '<uuid:project_pk>/members/invitations/<uuid:member_id>/cancel/',
+        invitation_cancel,
+        name='project-member-invitation-cancel',
+    ),
     path('<uuid:project_pk>/members/<uuid:user_id>/', member_detail, name='project-member-detail'),
     path(
         '<uuid:project_pk>/members/<uuid:user_id>/permissions/',

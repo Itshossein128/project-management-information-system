@@ -164,12 +164,12 @@ def test_global_route_cannot_read_or_manage_local_role_and_rename_is_recorded(
 
     outsider = _client(other_user)
     assert outsider.get(f'/api/v1/roles/{role_id}/').status_code == status.HTTP_404_NOT_FOUND
-    assert outsider.get(f'/api/v1/roles/{role_id}/impact/').status_code == status.HTTP_403_FORBIDDEN
+    assert outsider.get(f'/api/v1/roles/{role_id}/impact/').status_code == status.HTTP_404_NOT_FOUND
     assert outsider.patch(
         f'/api/v1/roles/{role_id}/',
         {'role_name': 'نقش دزدیده'},
         format='json',
-    ).status_code == status.HTTP_403_FORBIDDEN
+    ).status_code == status.HTTP_404_NOT_FOUND
 
     for actor in (
         _org_user('localstaff', '+989120000051', staff=True),

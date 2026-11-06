@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from master_data.models import MemberStatus, ProjectMember, Role
+from master_data.models import ProjectMember, Role
 from permissions.project import ActiveMemberPermission, IsProjectMember
 from permissions.services import set_permission_override
 from projects.member_serializers import (
@@ -23,10 +23,16 @@ from projects.member_serializers import (
     RoleSerializer,
 )
 from projects.services import (
+    AlreadyMember,
+    InvitationInvalid,
     PositionSelectionError,
     RoleProjectMismatch,
     UnknownRoles,
     assign_roles_to_member,
+    cancel_invitation,
+    change_member_status,
+    connect_invitation,
+    create_project_member,
     missing_role_ids,
     replace_member_positions,
 )
@@ -86,10 +92,28 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         members = (
             ProjectMember.objects.filter(project_id=project_pk)
             .select_related('user')
-            .prefetch_related('member_roles__role')
+            .prefetch_related('member_roles__role', 'positions')
             .order_by('-joined_at')
         )
-        return Response(ProjectMemberListSerializer(members, many=True).data)
+        return Response(
+            ProjectMemberListSerializer(
+                members,
+                many=True,
+                context={'request': request, 'view': self},
+            ).data
+        )
+
+    def _already_member_response(self):
+        return Response(
+            {
+                'error': {
+                    'code': 'already_member',
+                    'message': _('This person already has a membership in this project.'),
+                    'details': {},
+                },
+            },
+            status=status.HTTP_409_CONFLICT,
+        )
 
     def create(self, request, project_pk=None):
         missing = missing_role_ids((request.data or {}).get('role_ids') or [])
@@ -98,44 +122,21 @@ class ProjectMemberViewSet(viewsets.ViewSet):
         serializer = ProjectMemberCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        role_ids = data['role_ids']
-
         user_id = data.get('user_id')
-        email = (data.get('email') or '').strip()
-
+        if user_id and not User.objects.filter(pk=user_id).exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
         try:
-            with transaction.atomic():
-                if user_id:
-                    user = get_object_or_404(User, pk=user_id)
-                    if ProjectMember.objects.filter(project_id=project_pk, user=user).exists():
-                        return Response(
-                            {'error': {'code': 'validation_error', 'message': 'User is already a member.', 'details': {}}},
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
-                    member = ProjectMember.objects.create(
-                        project_id=project_pk,
-                        user=user,
-                        status=MemberStatus.ACTIVE,
-                    )
-                else:
-                    if ProjectMember.objects.filter(
-                        project_id=project_pk,
-                        invited_email__iexact=email,
-                        status=MemberStatus.INVITED,
-                    ).exists():
-                        return Response(
-                            {'error': {'code': 'validation_error', 'message': 'Invitation already sent.', 'details': {}}},
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
-                    member = ProjectMember.objects.create(
-                        project_id=project_pk,
-                        user=None,
-                        invited_email=email,
-                        status=MemberStatus.INVITED,
-                    )
-                assign_roles_to_member(member, role_ids, actor=request.user)
-                if data.get('position_ids'):
-                    replace_member_positions(member, data['position_ids'], actor=request.user)
+            member = create_project_member(
+                project_id=project_pk,
+                actor=request.user,
+                user_id=user_id,
+                email=data.get('email') or '',
+                mobile=data.get('mobile') or '',
+                role_ids=data['role_ids'],
+                position_ids=data.get('position_ids') or [],
+            )
+        except AlreadyMember:
+            return self._already_member_response()
         except UnknownRoles as exc:
             return self._unknown_role_response(exc.missing_ids)
         except RoleProjectMismatch as exc:
@@ -160,7 +161,61 @@ class ProjectMemberViewSet(viewsets.ViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response(ProjectMemberListSerializer(member).data, status=status.HTTP_201_CREATED)
+        return Response(
+            ProjectMemberListSerializer(member, context={'request': request, 'view': self}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def connect_invitation(self, request, project_pk=None, member_id=None):
+        user_id = (request.data or {}).get('user_id')
+        if not user_id or not User.objects.filter(pk=user_id).exists():
+            return Response(
+                {'error': {'code': 'validation_error', 'message': _('A person is required.'), 'details': {}}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            member = connect_invitation(
+                project_id=project_pk,
+                member_id=member_id,
+                user_id=user_id,
+                actor=request.user,
+                role_ids=(request.data or {}).get('role_ids'),
+                position_ids=(request.data or {}).get('position_ids'),
+            )
+        except ProjectMember.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except InvitationInvalid:
+            return Response(
+                {
+                    'error': {
+                        'code': 'invitation_invalid',
+                        'message': _('This invitation can no longer be used.'),
+                        'details': {},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except AlreadyMember:
+            return self._already_member_response()
+        return Response(ProjectMemberListSerializer(member, context={'request': request, 'view': self}).data)
+
+    def cancel_invitation(self, request, project_pk=None, member_id=None):
+        try:
+            member = cancel_invitation(project_id=project_pk, member_id=member_id, actor=request.user)
+        except ProjectMember.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except InvitationInvalid:
+            return Response(
+                {
+                    'error': {
+                        'code': 'invitation_invalid',
+                        'message': _('This invitation can no longer be used.'),
+                        'details': {},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(ProjectMemberListSerializer(member, context={'request': request, 'view': self}).data)
 
     def partial_update(self, request, project_pk=None, user_id=None):
         member = self._get_member_by_user(user_id)
@@ -180,8 +235,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
                 if 'position_ids' in data:
                     replace_member_positions(member, data['position_ids'], actor=request.user)
                 if 'status' in data:
-                    member.status = data['status']
-                    member.save(update_fields=['status'])
+                    change_member_status(member, data['status'], request.user)
         except UnknownRoles as exc:
             return self._unknown_role_response(exc.missing_ids)
         except RoleProjectMismatch as exc:
@@ -208,7 +262,7 @@ class ProjectMemberViewSet(viewsets.ViewSet):
             )
 
         member.refresh_from_db()
-        return Response(ProjectMemberListSerializer(member).data)
+        return Response(ProjectMemberListSerializer(member, context={'request': request, 'view': self}).data)
 
     @extend_schema(summary='Get member effective permissions', tags=['Project members'])
     @action(detail=True, methods=['get', 'post', 'delete'], url_path='permissions')
@@ -253,30 +307,76 @@ class RoleListView(APIView):
 
 
 class UserLookupView(APIView):
-    """Search users by name or email for member invitation."""
+    """Search users by name for member invitation (A6-P4 person-directory policy)."""
 
     permission_classes = [IsAuthenticated]
 
     @extend_schema(summary='Search users for member assignment', tags=['Project members'])
     def get(self, request):
+        from permissions.project import active_member_has_codename
+
+        from authentication.permissions import IsOrganizationalAccountAdmin
+
+        project_id = (
+            request.query_params.get('project_id')
+            or request.query_params.get('project')
+            or ''
+        ).strip()
+        is_account_admin = IsOrganizationalAccountAdmin().has_permission(request, self)
+        if project_id:
+            if not active_member_has_codename(request.user, project_id, 'manage_members'):
+                return Response(
+                    {
+                        'error': {
+                            'code': 'permission_denied',
+                            'message': _(
+                                'You do not have permission to search people for this project.'
+                            ),
+                            'details': {},
+                        }
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            can_see_contacts = active_member_has_codename(
+                request.user, project_id, 'view_person_contacts'
+            )
+        elif is_account_admin:
+            # Full organization directory search for explicit account administrators.
+            can_see_contacts = True
+        else:
+            return Response(
+                {
+                    'error': {
+                        'code': 'permission_denied',
+                        'message': _('You do not have permission to search people.'),
+                        'details': {},
+                    }
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         q = (request.query_params.get('q') or request.query_params.get('search') or '').strip()
         if len(q) < 2:
             return Response([])
 
-        users = User.objects.filter(
+        base_q = (
             Q(full_name__icontains=q)
-            | Q(email__icontains=q)
-            | Q(mobile__icontains=q)
             | Q(username__icontains=q)
-        ).order_by('full_name')[:20]
-
-        results = [
-            {
+        )
+        if can_see_contacts:
+            base_q |= Q(email__icontains=q) | Q(mobile__icontains=q)
+        users = User.objects.filter(base_q).order_by('full_name')[:20]
+        results = []
+        for u in users:
+            row = {
                 'user_id': str(u.id),
                 'full_name': u.full_name,
-                'email': u.email or '',
-                'mobile': u.mobile or '',
             }
-            for u in users
-        ]
+            if can_see_contacts:
+                row['email'] = u.email or ''
+                row['mobile'] = u.mobile or ''
+            elif getattr(u, 'organization', None):
+                # Non-sensitive disambiguator for duplicate display names.
+                row['organization_label'] = u.organization
+            results.append(row)
         return Response(results)

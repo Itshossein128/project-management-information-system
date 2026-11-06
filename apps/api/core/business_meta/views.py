@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
 from common.mixins import ProjectNestedViewSetMixin
-from permissions.project import ActiveMemberPermission
+from permissions.project import ActiveMemberPermission, HasProjectPermission
 from projects.permissions import IsProjectMember
 from master_data.models import ProjectMember, ProjectPosition
 from .models import TableDefinition, FieldDefinition, RelationDefinition
@@ -37,8 +37,14 @@ class TableDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ('list', 'retrieve', 'by_slug'):
-            return [IsAuthenticated(), IsProjectMember()]
-        return [IsBusinessSetup()]
+            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
+        if self.action in ('list', 'retrieve', 'by_slug'):
+            return 'view_project'
+        return 'edit_project'
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -105,9 +111,13 @@ class FieldDefinitionViewSet(ProjectNestedViewSetMixin, viewsets.ModelViewSet):
     nested_model_field = 'table_id'
 
     def get_permissions(self):
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
+
+    @property
+    def required_permission(self):
         if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember()]
-        return [IsBusinessSetup()]
+            return 'view_project'
+        return 'edit_project'
 
 
 @extend_schema_view(

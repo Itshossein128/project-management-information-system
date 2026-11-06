@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.viewsets import ProjectScopedViewSet
-from permissions.project import HasProjectPermission, IsProjectMember, member_has_codename
+from permissions.project import HasProjectPermission, IsProjectMember, assert_same_project, member_has_codename
 from workflow.models import ManagementDecision, WorkflowDefinition, WorkflowInstance, WorkflowInstanceStatus
 from workflow.serializers import (
     ManagementDecisionSerializer,
@@ -28,9 +28,7 @@ class WorkflowReadMixin:
     edit_permission = 'edit_project'
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     @property
     def required_permission(self):
@@ -117,7 +115,7 @@ class WorkflowDefinitionViewSet(WorkflowReadMixin, ProjectScopedViewSet):
 
 
 class WorkflowDefinitionActivateView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     edit_permission = 'edit_project'
 
     @property
@@ -137,7 +135,7 @@ class WorkflowDefinitionActivateView(APIView):
 
 
 class WorkflowDefinitionRetireView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     edit_permission = 'edit_project'
 
     @property
@@ -191,11 +189,13 @@ class WorkflowInstanceViewSet(WorkflowReadMixin, ProjectScopedViewSet):
         return Response({'results': WorkflowInstanceSerializer(qs, many=True).data})
 
     def create(self, request, *args, **kwargs):
-        serializer = WorkflowInstanceStartSerializer(data=request.data)
+        serializer = WorkflowInstanceStartSerializer(
+            data=request.data,
+            context={'project_id': self.get_project_id()},
+        )
         serializer.is_valid(raise_exception=True)
         definition = serializer.validated_data['definition']
-        if str(definition.project_id) != str(self.get_project_id()):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        assert_same_project(self.get_project_id(), definition.project_id, field='definition')
         instance = instance_service.start_instance(
             definition=definition,
             project_id=self.get_project_id(),
@@ -221,7 +221,7 @@ class WorkflowInstanceActionView(APIView):
         may_act = instance_service.user_can_act_on_stage(
             instance, request.user, instance.current_stage_order,
         )
-        if action_name in ('approve', 'reject') and not (may_edit or may_act):
+        if action_name in ('approve', 'reject') and not may_act:
             return Response(
                 {'detail': 'You do not have permission to perform this action.'},
                 status=status.HTTP_403_FORBIDDEN,

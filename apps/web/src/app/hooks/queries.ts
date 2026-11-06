@@ -68,13 +68,14 @@ async function getLocalSnapshot(reportId: string) {
 }
 
 export interface HrUserRow {
-  id: number;
+  id: string;
   phone_number: string;
   first_name: string;
   last_name: string;
   full_name: string;
   created_at: string;
   is_active: boolean;
+  status?: "active" | "inactive" | "suspended";
   roles: string[];
   assignments_preview?: UserBusinessAssignment[];
 }

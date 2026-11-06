@@ -123,6 +123,21 @@ class PersonDossierSerializer(serializers.ModelSerializer):
             'default_capacity_percent',
         ]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        project_id = self.context.get('project_id') or self.context.get('project_pk')
+        if request is None or project_id is None:
+            data.pop('email', None)
+            data.pop('mobile', None)
+            return data
+        from permissions.project import active_member_has_codename
+
+        if not active_member_has_codename(request.user, project_id, 'view_person_contacts'):
+            data.pop('email', None)
+            data.pop('mobile', None)
+        return data
+
 
 class ResourceAllocationSerializer(serializers.ModelSerializer):
     person_id = serializers.UUIDField(read_only=True)

@@ -1,0 +1,146 @@
+{
+  "prepared_on": "2026-11-05",
+  "basis_commit": "2e9a82e97e92ac4410e040298ffbdfba2bfa85ca",
+  "prompts": [
+    {
+      "phase": "A6-P1",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/01-a6-p1-access-policy.md",
+      "primary_requirements": [
+        "A6-R10",
+        "A6-R29",
+        "A6-R31",
+        "A6-R32",
+        "A6-R36",
+        "A6-R37"
+      ],
+      "scenario_ids": [
+        "A6-P1-AC01",
+        "A6-P1-AC02",
+        "A6-P1-AC03",
+        "A6-P1-AC04",
+        "A6-P1-AC05"
+      ]
+    },
+    {
+      "phase": "A6-P2",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/02-a6-p2-project-roles.md",
+      "primary_requirements": [
+        "A6-R09",
+        "A6-R11",
+        "A6-R12",
+        "A6-R13",
+        "A6-R14",
+        "A6-R15",
+        "A6-R16",
+        "A6-R17",
+        "A6-R26",
+        "A6-R27",
+        "A6-R28"
+      ],
+      "scenario_ids": [
+        "A6-P2-AC01",
+        "A6-P2-AC02",
+        "A6-P2-AC03",
+        "A6-P2-AC04",
+        "A6-P2-AC05",
+        "A6-P2-AC06"
+      ]
+    },
+    {
+      "phase": "A6-P3",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/03-a6-p3-team-lifecycle.md",
+      "primary_requirements": [
+        "A6-R01",
+        "A6-R02",
+        "A6-R03",
+        "A6-R04",
+        "A6-R05",
+        "A6-R06",
+        "A6-R07",
+        "A6-R08",
+        "A6-R18",
+        "A6-R19",
+        "A6-R20",
+        "A6-R21",
+        "A6-R22",
+        "A6-R23",
+        "A6-R24",
+        "A6-R25"
+      ],
+      "scenario_ids": [
+        "A6-P3-AC01",
+        "A6-P3-AC02",
+        "A6-P3-AC03",
+        "A6-P3-AC04",
+        "A6-P3-AC05",
+        "A6-P3-AC06",
+        "A6-P3-AC07"
+      ]
+    },
+    {
+      "phase": "A6-P4",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/04-a6-p4-module-access.md",
+      "primary_requirements": [
+        "A6-R30",
+        "A6-R33",
+        "A6-R34",
+        "A6-R35",
+        "A6-R38",
+        "A6-R39",
+        "A6-R40",
+        "A6-R41",
+        "A6-R42",
+        "A6-R43",
+        "A6-R44",
+        "A6-R45",
+        "A6-R46"
+      ],
+      "scenario_ids": [
+        "A6-P4-AC01",
+        "A6-P4-AC02",
+        "A6-P4-AC03",
+        "A6-P4-AC04",
+        "A6-P4-AC05",
+        "A6-P4-AC06",
+        "A6-P4-AC07"
+      ]
+    },
+    {
+      "phase": "A6-P5",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/05-a6-p5-access-history.md",
+      "primary_requirements": [
+        "A6-R47",
+        "A6-R48",
+        "A6-R49",
+        "A6-R50",
+        "A6-R51"
+      ],
+      "scenario_ids": [
+        "A6-P5-AC01",
+        "A6-P5-AC02",
+        "A6-P5-AC03",
+        "A6-P5-AC04",
+        "A6-P5-AC05",
+        "A6-P5-AC06"
+      ]
+    },
+    {
+      "phase": "A6-P6",
+      "file": "/home/hossein/Desktop/projects/building-management/output/a6-requirements-2026-11-04/prompts/06-a6-p6-delivery-acceptance.md",
+      "primary_requirements": [
+        "A6-R52",
+        "A6-R53"
+      ],
+      "scenario_ids": [
+        "A6-P6-AC01",
+        "A6-P6-AC02",
+        "A6-P6-AC03",
+        "A6-P6-AC04",
+        "A6-P6-AC05",
+        "A6-P6-AC06"
+      ]
+    }
+  ],
+  "scope": "prompt authoring only; no Spec Kit execution",
+  "retrieval": "current context call failed with local embedding HTTP 502; fresh index status and directly read audit/planning artifacts used"
+}

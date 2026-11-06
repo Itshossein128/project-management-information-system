@@ -4,9 +4,11 @@ from decimal import Decimal
 
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from cost_control.models import Budget, BudgetVersion, BudgetVersionKind, BudgetVersionStatus
 from cost_control.serializers import BudgetVersionSerializer
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole
 
 
 @pytest.fixture
@@ -16,7 +18,9 @@ def costs_base(project):
 
 @pytest.mark.django_db
 class TestBudgetVersions:
-    def test_create_submit_approve_locks(self, auth_client, costs_base, wbs, project):
+    def test_create_submit_approve_locks(
+        self, auth_client, costs_base, wbs, project, other_user, project_manager_role
+    ):
         create = auth_client.post(
             f'{costs_base}budget-versions/',
             {'kind': 'initial', 'name': 'Initial', 'currency': 'IRR'},
@@ -42,7 +46,23 @@ class TestBudgetVersions:
         assert submit.status_code == status.HTTP_200_OK
         assert submit.data['status'] == 'submitted'
 
-        approve = auth_client.post(f'{costs_base}budget-versions/{vid}/approve/', {}, format='json')
+        # SoD: final approve must be a different active member than the creator.
+        approver_member = ProjectMember.objects.create(
+            project=project,
+            user=other_user,
+            status=MemberStatus.ACTIVE,
+        )
+        ProjectMemberRole.objects.create(member=approver_member, role=project_manager_role)
+        approver_client = APIClient()
+        approver_client.force_authenticate(user=other_user)
+
+        deny_self = auth_client.post(f'{costs_base}budget-versions/{vid}/approve/', {}, format='json')
+        assert deny_self.status_code == status.HTTP_400_BAD_REQUEST
+        assert deny_self.data.get('error', {}).get('code') == 'sod_self_approve' or 'sod_self_approve' in str(
+            deny_self.content
+        )
+
+        approve = approver_client.post(f'{costs_base}budget-versions/{vid}/approve/', {}, format='json')
         assert approve.status_code == status.HTTP_200_OK, approve.content
         assert approve.data['status'] == 'approved'
         assert approve.data['is_control'] is True

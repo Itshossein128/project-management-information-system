@@ -203,7 +203,13 @@ def _advance_or_complete(instance: WorkflowInstance, user, comment: str = '') ->
         from permissions.sod import assert_not_self_final_approve
 
         creator_id = instance.started_by_id or instance.created_by_id
-        assert_not_self_final_approve(creator_id, user)
+        assert_not_self_final_approve(
+            creator_id,
+            user,
+            project=instance.project,
+            record_id=str(instance.id),
+            record_type='workflow_instance',
+        )
         instance.status = WorkflowInstanceStatus.APPROVED
         instance.completed_at = timezone.now()
         instance.current_stage_order = current_order

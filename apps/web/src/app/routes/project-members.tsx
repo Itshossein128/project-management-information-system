@@ -16,7 +16,7 @@ import {
   type ProjectMember,
   type Role,
 } from "@/app/lib/api/members";
-import { formatDisplayDate } from "@/app/lib/jalali-utils";
+import { formatLocaleDateTime } from "@/app/lib/jalali-utils";
 import { fetchPermissionCatalog } from "@/app/lib/api/roles";
 import { formatPermissionLabel } from "@/app/lib/permission-labels";
 import { formatRoleLabel } from "@/app/lib/role-labels";
@@ -33,7 +33,7 @@ import { useToast } from "@/components/ui/toast";
 import { useActiveProjectPermission } from "@/app/contexts/project-context";
 
 export default function ProjectMembersPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { projectId = "" } = useParams();
   const { has } = useActiveProjectPermission(projectId);
   const canManageMembers = has("manage_members");
@@ -44,6 +44,7 @@ export default function ProjectMembersPage() {
   const [deactivateTarget, setDeactivateTarget] =
     useState<ProjectMember | null>(null);
   const [localRoleName, setLocalRoleName] = useState("");
+  const [memberQuery, setMemberQuery] = useState("");
 
   const { data: members = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["members", projectId],
@@ -118,11 +119,7 @@ export default function ProjectMembersPage() {
       render: (row: ProjectMember) => (
         <Badge
           variant={row.status === "active" ? "success" : "neutral"}
-          label={
-            row.status === "active"
-              ? t("projectMembers.active")
-              : t("projectMembers.inactive")
-          }
+          label={t(`projectMembers.statuses.${row.status}`, row.status)}
         />
       ),
     },
@@ -130,30 +127,54 @@ export default function ProjectMembersPage() {
       key: "joined_at",
       label: t("projectMembers.joinedAt"),
       render: (r: ProjectMember) =>
-        formatDisplayDate(r.joined_at?.slice(0, 10)),
+        formatLocaleDateTime(r.joined_at, i18n.language),
     },
     {
       key: "last_login",
       label: t("projectMembers.lastLogin"),
       render: (r: ProjectMember) =>
-        formatDisplayDate(r.last_login?.slice(0, 10)),
+        r.last_login ? formatLocaleDateTime(r.last_login, i18n.language) : "",
     },
     {
       key: "actions",
       label: t("projectMembers.actions"),
       render: (row: ProjectMember) =>
-        canManageMembers && row.user_id ? (
+        canManageMembers ? (
           <div className='flex gap-1'>
             <Button
               variant='ghost'
               size='sm'
+              disabled={Boolean(row.invite_cancelled_at)}
               onClick={() => {
+                if (row.invite_cancelled_at) return;
                 setEditMember(row);
                 setDrawerOpen(true);
               }}
             >
-              {t("projectMembers.edit")}
+              {row.invite_cancelled_at
+              ? t("projectMembers.invitationCancelled")
+              : row.user_id
+                ? t("projectMembers.edit")
+                : t("projectMembers.connectInvitation")}
             </Button>
+            {row.user_id ? (
+              <select
+                aria-label={t("projectMembers.status")}
+                value={row.status}
+                onChange={(event) => {
+                  void updateMember(projectId, row.user_id!, { status: event.target.value }).then(() => {
+                    void qc.invalidateQueries({ queryKey: ["members", projectId] });
+                    void qc.invalidateQueries({ queryKey: ["access-changes", projectId] });
+                  }).catch((error: Error) => toast.error(error.message));
+                }}
+              >
+                {["active", "inactive", "invited", "suspended", "archived"].map((status) => (
+                  <option key={status} value={status}>
+                    {t(`projectMembers.statuses.${status}`)}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             {row.status === "active" ? (
               <Button
                 variant='ghost'
@@ -326,7 +347,7 @@ export default function ProjectMembersPage() {
             <ul className="space-y-1 text-xs text-muted-foreground">
               {changes.slice(0, 5).map((change) => (
                 <li key={change.id}>
-                  {change.created_at} — {change.actor_name || "—"} — {change.subject_name || change.role_name} — {change.action}
+                  {formatLocaleDateTime(change.created_at, i18n.language)} — {change.actor_name || "—"} — {change.subject_name || change.role_name} — {change.action}
                 </li>
               ))}
             </ul>
@@ -352,13 +373,29 @@ export default function ProjectMembersPage() {
           ) : undefined}
         />
       ) : (
+        <>
+        <label className="mb-3 block text-sm">
+          <span className="mb-1 block">{t("projectMembers.searchTeam")}</span>
+          <input
+            className="w-full max-w-sm rounded border border-border px-3 py-2"
+            value={memberQuery}
+            onChange={(event) => setMemberQuery(event.target.value)}
+          />
+        </label>
         <DataTable
           columns={canManageMembers ? columns : columns.filter((column) => column.key !== "actions")}
-          data={members}
+          data={members.filter((member) => {
+            const needle = memberQuery.trim().toLowerCase();
+            if (!needle) return true;
+            return [member.full_name, member.mobile, member.invited_mobile, member.email]
+              .filter(Boolean)
+              .some((value) => String(value).toLowerCase().includes(needle));
+          })}
           loading={isLoading}
-          rowKey={(r) => r.user_id ?? r.invited_email ?? r.full_name}
+          rowKey={(r) => r.id ?? r.user_id ?? r.invited_email ?? r.full_name}
           emptyMessage={t("projectMembers.empty")}
         />
+        </>
       )}
 
       <AddMemberDrawer

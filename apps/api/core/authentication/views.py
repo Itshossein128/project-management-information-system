@@ -6,12 +6,16 @@ Uses phone_number as identifier (no username/email).
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView as SimpleJWTTokenRefreshView
 from django.db.models import Prefetch
 from rest_framework.exceptions import ValidationError
@@ -27,20 +31,51 @@ from .serializers import (
     ChangePasswordSerializer,
     ForgotPasswordSerializer,
     ResetPasswordSerializer,
+    AccountTokenRefreshSerializer,
 )
 from business_meta.serializers import ProjectMemberReadSerializer
 from master_data.models import ProjectMember
-from .permissions import IsHrOrAdmin
+from .permissions import IsHrOrAdmin, IsOrganizationalAccountAdmin
 from .services import (
     UserRegistrationService,
     PasswordResetService,
     PasswordChangeService,
-    LoginService
+    LoginService,
+    account_can_authenticate,
+    blacklist_user_tokens,
 )
+from permissions.role_services import record_access_change
+from projects.member_serializers import ProjectMemberListSerializer
+from projects.services import AlreadyMember, InvitationInvalid, accept_invitation
 from .utils import authenticate_user, get_tokens_for_user
 from .ratelimit_handlers import auth_ratelimit
 
 User = get_user_model()
+
+
+def _first_message(errors) -> str:
+    if isinstance(errors, dict):
+        for value in errors.values():
+            if isinstance(value, (list, tuple)) and value:
+                return str(value[0])
+            if value:
+                return str(value)
+    if isinstance(errors, (list, tuple)) and errors:
+        return str(errors[0])
+    return str(errors or _('Validation error.'))
+
+
+def _error_envelope(message, code='validation_error', details=None, http_status=status.HTTP_400_BAD_REQUEST):
+    return Response(
+        localize_api_payload({
+            'error': {
+                'code': code,
+                'message': str(message),
+                'details': details or {},
+            },
+        }),
+        status=http_status,
+    )
 
 
 @auth_ratelimit('10/m')
@@ -172,10 +207,7 @@ class LoginView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(
-                localize_api_payload(serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return _error_envelope(_first_message(serializer.errors), details=serializer.errors)
 
         login = serializer.validated_data['login']
         password = serializer.validated_data['password']
@@ -184,9 +216,11 @@ class LoginView(generics.GenericAPIView):
         try:
             user, tokens = service.authenticate_and_issue_tokens(login, password)
         except ValidationError as e:
-            return Response(
-                localize_api_payload(e.detail),
-                status=status.HTTP_401_UNAUTHORIZED
+            return _error_envelope(
+                _first_message(e.detail),
+                code='authentication_failed',
+                details=e.detail if isinstance(e.detail, dict) else {},
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
         return Response({
             'access': tokens['access'],
@@ -247,10 +281,7 @@ class ChangePasswordView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(
-                localize_api_payload(serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return _error_envelope(_first_message(serializer.errors), details=serializer.errors)
 
         old_password = serializer.validated_data['old_password']
         new_password = serializer.validated_data['new_password']
@@ -264,15 +295,10 @@ class ChangePasswordView(generics.GenericAPIView):
             )
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except DjangoValidationError as e:
-            return Response(
-                localize_api_payload(e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            details = e.message_dict if hasattr(e, 'message_dict') else {'password': e.messages}
+            return _error_envelope(_first_message(details), details=details)
         except ValidationError as e:
-            return Response(
-                localize_api_payload(e.detail),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return _error_envelope(_first_message(e.detail), details=e.detail if isinstance(e.detail, dict) else {})
 
 
 @auth_ratelimit('5/m')
@@ -324,10 +350,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(
-                localize_api_payload(serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return _error_envelope(_first_message(serializer.errors), details=serializer.errors)
 
         phone_number = serializer.validated_data['phone_number']
 
@@ -380,10 +403,7 @@ class ResetPasswordView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
 
         if not serializer.is_valid():
-            return Response(
-                localize_api_payload(serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return _error_envelope(_first_message(serializer.errors), details=serializer.errors)
 
         token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
@@ -392,15 +412,10 @@ class ResetPasswordView(generics.GenericAPIView):
             result = service.reset_password(token=token, new_password=new_password)
             return Response(localize_api_payload(result), status=status.HTTP_200_OK)
         except DjangoValidationError as e:
-            return Response(
-                localize_api_payload(e.message_dict if hasattr(e, 'message_dict') else {'error': e.messages}),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            details = e.message_dict if hasattr(e, 'message_dict') else {'password': e.messages}
+            return _error_envelope(_first_message(details), details=details)
         except ValidationError as e:
-            return Response(
-                localize_api_payload(e.detail),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _error_envelope(_first_message(e.detail), details=e.detail if isinstance(e.detail, dict) else {})
 
 
 @auth_ratelimit('30/m')
@@ -408,6 +423,7 @@ class TokenRefreshView(SimpleJWTTokenRefreshView):
     """JWT refresh with IP rate limiting."""
 
     permission_classes = [AllowAny]
+    serializer_class = AccountTokenRefreshSerializer
 
 
 class LogoutView(generics.GenericAPIView):
@@ -421,14 +437,16 @@ class LogoutView(generics.GenericAPIView):
                 localize_api_payload({'error': _('Refresh token is required.')}),
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        from rest_framework_simplejwt.tokens import RefreshToken
         try:
-            RefreshToken(refresh).blacklist()
-        except Exception:
-            return Response(
-                localize_api_payload({'error': _('Invalid refresh token.')}),
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            token = RefreshToken(refresh)
+        except TokenError:
+            return _error_envelope(_('Invalid refresh token.'))
+        if str(token.get(api_settings.USER_ID_CLAIM)) != str(request.user.pk):
+            return _error_envelope(_('Invalid refresh token.'))
+        try:
+            token.blacklist()
+        except TokenError:
+            return _error_envelope(_('Invalid refresh token.'))
         return Response(
             localize_api_payload({'message': _('Logged out successfully.')}),
             status=status.HTTP_200_OK,
@@ -500,6 +518,12 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return super().patch(request, *args, **kwargs)
 
 
+class AccountAdministrationDenied(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_code = 'account_forbidden'
+    default_detail = _('You cannot manage organizational accounts.')
+
+
 class UserListView(generics.ListCreateAPIView):
     """
     Paginated list of all application users (phone-based accounts).
@@ -507,7 +531,10 @@ class UserListView(generics.ListCreateAPIView):
 
     Also supports HR/admin creation of new user accounts.
     """
-    permission_classes = [IsAuthenticated, IsHrOrAdmin]
+    permission_classes = [IsAuthenticated, IsOrganizationalAccountAdmin]
+
+    def permission_denied(self, request, message=None, code=None):
+        raise AccountAdministrationDenied()
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -567,8 +594,82 @@ class UserListView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            user = serializer.save()
+        except DjangoValidationError as exc:
+            details = exc.message_dict if hasattr(exc, 'message_dict') else {'password': exc.messages}
+            return _error_envelope(_first_message(details), details=details)
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+class AccountStatusView(APIView):
+    """Change the visible account status. Sign-in follows that status."""
+
+    permission_classes = [IsAuthenticated, IsOrganizationalAccountAdmin]
+
+    def permission_denied(self, request, message=None, code=None):
+        raise AccountAdministrationDenied()
+
+    @extend_schema(summary='Set organizational account status', tags=['Authentication'])
+    def patch(self, request, user_id):
+        next_status = (request.data or {}).get('status')
+        if next_status not in ('active', 'inactive', 'suspended'):
+            return Response(
+                {'error': {'code': 'validation_error', 'message': _('Status must be active, inactive, or suspended.'), 'details': {}}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = get_object_or_404(User, pk=user_id)
+        before = user.status
+        sign_in_matches = user.is_active == (next_status == 'active')
+        if before == next_status and sign_in_matches:
+            return Response({'status': user.status, 'can_sign_in': account_can_authenticate(user)})
+        user.status = next_status
+        user.is_active = next_status == 'active'
+        user.save(update_fields=['status', 'is_active'])
+        if next_status in ('inactive', 'suspended'):
+            blacklist_user_tokens(user)
+        record_access_change(
+            actor=request.user,
+            project=None,
+            subject_user=user,
+            role=None,
+            action='account_status_changed',
+            before={'status': before},
+            after={'status': next_status},
+        )
+        return Response({'status': user.status, 'can_sign_in': account_can_authenticate(user)})
+
+
+class InvitationAcceptView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(summary='Accept a project invitation', tags=['Authentication'])
+    def post(self, request):
+        try:
+            member = accept_invitation(token=(request.data or {}).get('token') or '', user=request.user)
+        except InvitationInvalid:
+            return Response(
+                {
+                    'error': {
+                        'code': 'invitation_invalid',
+                        'message': _('This invitation can no longer be used.'),
+                        'details': {},
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except AlreadyMember:
+            return Response(
+                {
+                    'error': {
+                        'code': 'already_member',
+                        'message': _('This person already has a membership in this project.'),
+                        'details': {},
+                    },
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        return Response(ProjectMemberListSerializer(member).data)
 
 
 class UserAssignmentsListView(generics.ListAPIView):
@@ -578,9 +679,11 @@ class UserAssignmentsListView(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         u = self.request.user
-        if str(u.pk) != str(user_id) and not IsHrOrAdmin().has_permission(self.request, self):
+        if str(u.pk) != str(user_id) and not IsOrganizationalAccountAdmin().has_permission(
+            self.request, self
+        ):
             raise PermissionDenied(
-                _('You can only list your own assignments unless you are HR or admin.')
+                _('You can only list your own assignments unless you are an account administrator.')
             )
         return (
             ProjectMember.objects.filter(user_id=user_id)

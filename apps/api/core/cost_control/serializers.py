@@ -5,6 +5,7 @@ from decimal import Decimal
 from rest_framework import serializers
 
 from common.serializers import JalaliDateField
+from permissions.project import assert_same_project
 from cost_control.models import (
     ActualCost,
     Budget,
@@ -373,6 +374,19 @@ class CommitmentSerializer(serializers.ModelSerializer):
         from cost_control.cbs_services import posted_payments_total
 
         return float(Decimal(obj.amount) - posted_payments_total(obj))
+
+    def validate(self, attrs):
+        project = self.context.get('project')
+        project_id = project.id if project is not None else None
+        if project_id is None and self.instance is not None:
+            project_id = self.instance.project_id
+        for field in ('wbs', 'cbs', 'contract', 'requisition'):
+            related = attrs.get(field)
+            if related is None and self.instance is not None:
+                related = getattr(self.instance, field, None)
+            if related is not None and project_id is not None:
+                assert_same_project(project_id, getattr(related, 'project_id', None), field=field)
+        return attrs
 
     def validate_requisition(self, value):
         if value is None:

@@ -16,6 +16,7 @@ from django.utils import timezone
 
 from master_data.models import ProjectMember
 from permissions.project import member_has_codename
+from permissions.role_services import record_access_change
 from projects.models import Project
 from sub_reports.models import OfflineOperationReceipt
 
@@ -209,6 +210,15 @@ def _receipt_result(operation_id, project, actor):
 def dispatch_operations(*, project, actor, body):
     """Run each operation in its own transaction and return the v2 envelope."""
     if not member_has_codename(actor, project.id, 'edit_reports'):
+        record_access_change(
+            actor=actor,
+            project=project,
+            subject_user=actor,
+            role=None,
+            action='offline_sync_permission_denied',
+            before={'reason': 'edit_reports', 'endpoint': 'sync_operations_v2'},
+            after={},
+        )
         raise PermissionDenied('Current project edit permission is required')
     operations = body.get('operations') if isinstance(body, dict) else None
     if not isinstance(operations, list) or body.get('contract_version') != 2:

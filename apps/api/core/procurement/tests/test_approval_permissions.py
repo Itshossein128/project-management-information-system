@@ -16,19 +16,19 @@ User = get_user_model()
 
 @pytest.mark.django_db
 class TestHasProcurementStepRole:
-    def test_superuser_has_role(self, db):
+    def test_superuser_without_step_role_denied(self, db):
         superuser = User.objects.create_superuser(username='admin_user', password='pass')
-        assert has_procurement_step_role(superuser, None, 'block_engineer') is True
+        assert has_procurement_step_role(superuser, None, 'block_engineer') is False
 
-    def test_staff_has_role(self, db):
+    def test_staff_without_step_role_denied(self, db):
         staff = User.objects.create_user(username='staff_user', password='pass', is_staff=True)
-        assert has_procurement_step_role(staff, None, 'block_engineer') is True
+        assert has_procurement_step_role(staff, None, 'block_engineer') is False
 
-    def test_admin_group_has_role(self, db):
+    def test_admin_group_without_step_role_denied(self, db):
         user = User.objects.create_user(username='admin_grp', password='pass')
         admin_group, _ = Group.objects.get_or_create(name='admin')
         user.groups.add(admin_group)
-        assert has_procurement_step_role(user, None, 'block_engineer') is True
+        assert has_procurement_step_role(user, None, 'block_engineer') is False
 
     def test_django_group_role_match(self, db):
         user = User.objects.create_user(username='eng_user', password='pass')

@@ -183,7 +183,12 @@ class ProjectAccessChangeListView(APIView):
                     'action': row.action,
                     'role_name': row.role_name,
                     'actor_name': row.actor.full_name if row.actor_id else '',
-                    'subject_name': row.subject_user.full_name if row.subject_user_id else '',
+                    'subject_name': (
+                        row.subject_user.full_name if row.subject_user_id
+                        else (row.after or {}).get('invited_email')
+                        or (row.after or {}).get('invited_mobile')
+                        or ''
+                    ),
                     'before': row.before,
                     'after': row.after,
                     'created_at': row.created_at.isoformat(),

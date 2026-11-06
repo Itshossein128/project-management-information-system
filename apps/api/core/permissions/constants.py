@@ -20,6 +20,7 @@ PERMISSIONS: dict[str, str] = {
     'approve_reports': 'Approve reports',
     'view_contracts': 'View contracts',
     'edit_contracts': 'Edit contracts',
+    'approve_contracts': 'Approve contracts and change orders',
     'view_ipcs': 'View IPCs',
     'edit_ipcs': 'Edit IPCs',
     'approve_ipcs': 'Approve IPCs',
@@ -33,6 +34,7 @@ PERMISSIONS: dict[str, str] = {
     'view_correspondence': 'View correspondence',
     'edit_correspondence': 'Edit correspondence',
     'view_sensitive_contacts': 'View stakeholder sensitive contact fields',
+    'view_person_contacts': 'View person and employee contact fields',
     'view_dashboard': 'View dashboard',
     'view_hr': 'View HR & capacity',
     'edit_hr': 'Edit HR & capacity',
@@ -45,8 +47,10 @@ PERMISSIONS: dict[str, str] = {
 
 ALL_PERMISSION_CODENAMES = frozenset(PERMISSIONS.keys())
 
+_DEFAULT_PM_EXCLUDED = frozenset({'view_person_contacts'})
+
 DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
-    'project_manager': list(PERMISSIONS.keys()),
+    'project_manager': [c for c in PERMISSIONS if c not in _DEFAULT_PM_EXCLUDED],
     'planning_engineer': [
         'view_project',
         'view_wbs',
@@ -87,6 +91,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'edit_suppliers',
         'view_contracts',
         'edit_contracts',
+        'approve_contracts',
         'view_ipcs',
         'edit_ipcs',
         'approve_ipcs',
@@ -131,6 +136,7 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, list[str]] = {
         'view_costs',
         'view_cashflow',
         'view_contracts',
+        'approve_contracts',
         'view_reports',
         'approve_project',
         'approve_costs',

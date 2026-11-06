@@ -69,12 +69,21 @@ class ProjectReportRunView(APIView):
     @extend_schema(summary='Run standard report (JSON)', tags=['Reports'])
     def get(self, request, project_pk=None, report_type=None):
         get_object_or_404(Project, pk=project_pk)
+        from permissions.redaction import redact_sensitive_payload
+
         perms = _user_project_permissions(request.user, project_pk)
         body = run_report(
             report_type,
             project_id=project_pk,
             query_params=request.query_params,
             user_permissions=perms,
+        )
+        body = redact_sensitive_payload(
+            body,
+            perms,
+            redact_wages=True,
+            redact_stakeholder_contacts=True,
+            redact_person_contacts=True,
         )
         return Response(body)
 
@@ -162,9 +171,23 @@ class ProjectReportExportDownloadView(APIView):
 
     @extend_schema(summary='Download report export envelope', tags=['Reports'])
     def get(self, request, project_pk=None, export_id=None):
+        from permissions.redaction import redact_sensitive_payload
+
         version = get_object_or_404(
             ReportExportVersion,
             pk=export_id,
             project_id=project_pk,
         )
-        return Response(export_download_payload(version))
+        perms = _user_project_permissions(request.user, project_pk)
+        payload = export_download_payload(version)
+        data = payload.get('data') if isinstance(payload, dict) else None
+        if isinstance(data, dict):
+            payload = dict(payload)
+            payload['data'] = redact_sensitive_payload(
+                data,
+                perms,
+                redact_wages=True,
+                redact_stakeholder_contacts=True,
+                redact_person_contacts=True,
+            )
+        return Response(payload)

@@ -14,12 +14,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router";
-import { apiFetch } from "~/lib/api-client";
+import { apiJson } from "~/lib/api-client";
 
 export default function ForgotPassword() {
   const { t } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [sent, setSent] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,22 +29,18 @@ export default function ForgotPassword() {
     setError(null);
     setSubmitting(true);
     try {
-      const res = await apiFetch("/auth/forgot-password/", {
+      const data = await apiJson<{
+        delivery_status?: string;
+        message?: string;
+      }>("/auth/forgot-password/", {
         method: "POST",
         body: JSON.stringify({ phone_number: phoneNumber }),
       });
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as {
-          phone_number?: string[];
-        };
-        setError(
-          data.phone_number?.[0] ??
-            res.statusText ??
-            t("forgotPassword.failed"),
-        );
+      if (data.delivery_status === "sent") {
+        setSent(true);
         return;
       }
-      setSent(true);
+      setNotice(data.message || t("forgotPassword.notSent"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("forgotPassword.failed"));
     } finally {
@@ -92,6 +89,11 @@ export default function ForgotPassword() {
             {error && (
               <p className='text-sm text-destructive' role='alert'>
                 {error}
+              </p>
+            )}
+            {notice && (
+              <p className='text-sm text-muted-foreground' role='status'>
+                {notice}
               </p>
             )}
             <div className='grid gap-2'>

@@ -15,14 +15,14 @@ from notifications.models import Notification
 BASE = '/api/v1/projects/{project_id}/contracts'
 
 
-def test_change_order_approve_increases_adjusted_amount(finance_client, project, contract, user):
+def test_change_order_approve_increases_adjusted_amount(finance_client, project, contract, user, other_user):
     co = ChangeOrder.objects.create(
         contract=contract,
         change_number=1,
         description='Scope increase',
         amount_change=Decimal('100000000'),
-        status=ChangeOrderStatus.DRAFT,
-        created_by=user,
+        status=ChangeOrderStatus.SUBMITTED,
+        created_by=other_user,
         updated_by=user,
     )
     url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
@@ -32,7 +32,7 @@ def test_change_order_approve_increases_adjusted_amount(finance_client, project,
     assert float(contract.adjusted_amount) == pytest.approx(1100000000.0)
 
 
-def test_change_order_approve_negative_delta_reduces_adjusted_amount(finance_client, project, user):
+def test_change_order_approve_negative_delta_reduces_adjusted_amount(finance_client, project, user, other_user):
     contract = Contract.objects.create(
         project=project,
         contract_number='C-NEG',
@@ -48,8 +48,8 @@ def test_change_order_approve_negative_delta_reduces_adjusted_amount(finance_cli
         change_number=1,
         description='Scope reduction',
         amount_change=Decimal('-200000'),
-        status=ChangeOrderStatus.DRAFT,
-        created_by=user,
+        status=ChangeOrderStatus.SUBMITTED,
+        created_by=other_user,
         updated_by=user,
     )
     url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
@@ -59,7 +59,7 @@ def test_change_order_approve_negative_delta_reduces_adjusted_amount(finance_cli
     assert float(contract.adjusted_amount) == pytest.approx(800000.0)
 
 
-def test_change_order_approve_negative_adjusted_amount_returns_400(finance_client, project, user):
+def test_change_order_approve_negative_adjusted_amount_returns_400(finance_client, project, user, other_user):
     contract = Contract.objects.create(
         project=project,
         contract_number='C-ZERO',
@@ -75,8 +75,8 @@ def test_change_order_approve_negative_adjusted_amount_returns_400(finance_clien
         change_number=1,
         description='Too large reduction',
         amount_change=Decimal('-60000'),
-        status=ChangeOrderStatus.DRAFT,
-        created_by=user,
+        status=ChangeOrderStatus.SUBMITTED,
+        created_by=other_user,
         updated_by=user,
     )
     url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
@@ -105,6 +105,38 @@ def test_change_order_reject_reverses_approved_adjustment(finance_client, projec
     assert resp.status_code == 200
     contract.refresh_from_db()
     assert float(contract.adjusted_amount) == pytest.approx(1000000000.0)
+
+
+def test_change_order_approve_rejects_draft_status(finance_client, project, contract, user, other_user):
+    co = ChangeOrder.objects.create(
+        contract=contract,
+        change_number=88,
+        description='Not submitted',
+        amount_change=Decimal('1000'),
+        status=ChangeOrderStatus.DRAFT,
+        created_by=other_user,
+        updated_by=user,
+    )
+    url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
+    resp = finance_client.post(url, {}, format='json')
+    assert resp.status_code == 400
+    assert resp.data.get('code') == 'change_order_invalid_status'
+
+
+def test_change_order_self_approve_blocked(finance_client, project, contract, user, other_user):
+    co = ChangeOrder.objects.create(
+        contract=contract,
+        change_number=89,
+        description='Submitted same creator',
+        amount_change=Decimal('5000'),
+        status=ChangeOrderStatus.SUBMITTED,
+        created_by=user,
+        updated_by=user,
+    )
+    url = f'{BASE.format(project_id=project.id)}/{contract.id}/change-orders/{co.id}/approve/'
+    resp = finance_client.post(url, {}, format='json')
+    assert resp.status_code == 400
+    assert resp.data.get('code') == 'sod_self_approve'
 
 
 def test_main_contract_ipc_pay_creates_inflow(finance_client, project, contract, user):

@@ -4,7 +4,7 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.project import HasProjectPermission, IsProjectMember, assert_same_project
 
 
 class ProjectScopedViewSet(viewsets.ModelViewSet):
@@ -17,7 +17,8 @@ class ProjectScopedViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
             return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+        # Writes require HasProjectPermission which no longer grants observation bypass.
+        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     @property
     def required_permission(self):
@@ -38,16 +39,20 @@ class ProjectScopedViewSet(viewsets.ModelViewSet):
         pass
 
     def perform_create(self, serializer, **kwargs):
-        serializer.save(
-            project_id=self.get_project_id(),
+        pid = self.get_project_id()
+        instance = serializer.save(
+            project_id=pid,
             created_by=self.request.user,
             updated_by=self.request.user,
             **kwargs
         )
+        assert_same_project(pid, getattr(instance, 'project_id', None))
         self.post_save(serializer.instance)
 
     def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+        pid = self.get_project_id()
+        instance = serializer.save(updated_by=self.request.user)
+        assert_same_project(pid, getattr(instance, 'project_id', None))
         self.post_save(serializer.instance)
 
     def destroy(self, request, *args, **kwargs):

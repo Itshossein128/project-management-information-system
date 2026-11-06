@@ -32,38 +32,77 @@ def project_requires_cost_document(project) -> bool:
     return row.mode != CapabilityMode.DISABLED
 
 
-def approve_actual_cost(actual: ActualCost, user) -> ActualCost:
+def approve_actual_cost(
+    actual: ActualCost,
+    user,
+    *,
+    break_glass_reason: str | None = None,
+) -> ActualCost:
+    from django.db import transaction
+
+    from permissions.role_services import record_access_change
     from permissions.sod import assert_not_self_final_approve
 
-    assert_not_self_final_approve(actual.created_by_id, user)
-    if actual.status == ActualCostStatus.VOID:
-        raise ValidationError(
-            {
-                'code': 'invalid_status_transition',
-                'message': 'Cannot approve a void actual cost.',
-            }
-        )
-    if actual.status == ActualCostStatus.APPROVED:
-        return actual
-    if not actual.wbs_id and not actual.cbs_id:
-        raise ValidationError(
-            {
-                'code': 'wbs_or_cbs_required',
-                'message': 'Approve requires wbs or cbs.',
-            }
-        )
-    if project_requires_cost_document(actual.project):
-        doc = (actual.invoice_number or '').strip() or (actual.document_ref or '').strip()
-        if not doc:
+    with transaction.atomic():
+        actual = ActualCost.objects.select_for_update().get(pk=actual.pk)
+        if actual.status == ActualCostStatus.VOID:
             raise ValidationError(
                 {
-                    'code': 'cost_document_required',
-                    'message': 'Supporting document is required by project policy.',
+                    'code': 'invalid_status_transition',
+                    'message': 'Cannot approve a void actual cost.',
                 }
             )
-    actual.status = ActualCostStatus.APPROVED
-    actual.approved_by = user
-    actual.save(update_fields=['status', 'approved_by', 'updated_at'])
+        if actual.status == ActualCostStatus.APPROVED:
+            return actual
+        if not actual.wbs_id and not actual.cbs_id:
+            raise ValidationError(
+                {
+                    'code': 'wbs_or_cbs_required',
+                    'message': 'Approve requires wbs or cbs.',
+                }
+            )
+        if project_requires_cost_document(actual.project):
+            doc = (actual.invoice_number or '').strip() or (actual.document_ref or '').strip()
+            if not doc:
+                raise ValidationError(
+                    {
+                        'code': 'cost_document_required',
+                        'message': 'Supporting document is required by project policy.',
+                    }
+                )
+        before = {'status': actual.status}
+        decision = assert_not_self_final_approve(
+            actual.created_by_id,
+            user,
+            break_glass_reason=break_glass_reason,
+            project=actual.project,
+            record_id=str(actual.id),
+            record_type='actual_cost',
+        )
+        if decision.used_break_glass:
+            try:
+                record_access_change(
+                    actor=user,
+                    project=actual.project,
+                    subject_user=actual.created_by,
+                    role=None,
+                    action='sod_break_glass',
+                    before=before,
+                    after={
+                        'reason': decision.reason,
+                        'exception': True,
+                        'record_id': str(actual.id),
+                        'record_type': 'actual_cost',
+                        'status': 'approved',
+                    },
+                )
+            except Exception:
+                raise ValidationError(
+                    {'code': 'audit_failed', 'message': 'Break-glass approval could not be recorded.'}
+                ) from None
+        actual.status = ActualCostStatus.APPROVED
+        actual.approved_by = user
+        actual.save(update_fields=['status', 'approved_by', 'updated_at'])
     _invalidate_evm_caches(actual.project_id)
     return actual
 

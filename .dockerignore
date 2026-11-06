@@ -30,3 +30,5 @@ coverage/
 **/dist/
 **/test-results/
 **/playwright-report/
+Dockerfile*
+.dockerignore

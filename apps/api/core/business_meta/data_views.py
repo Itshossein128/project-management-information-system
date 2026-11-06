@@ -5,15 +5,29 @@ Excel export/import for table rows.
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from projects.mixins import PROJECT_MEMBER_PERMISSIONS
 from common.validators import validate_xlsx_upload
 import logging
 from django.http import HttpResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
+from permissions.project import HasProjectPermission, IsProjectMember
+
 from .models import Project, TableDefinition, DynamicTableRow
+
+
+class _DynamicTablePermissionMixin:
+    """Active membership + view/edit_reports for dynamic table rows."""
+
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        if self.request.method in SAFE_METHODS:
+            return 'view_reports'
+        return 'edit_reports'
 
 logger = logging.getLogger(__name__)
 from .services import validate_row_data
@@ -46,9 +60,8 @@ def parse_row_id(row_id):
         return None
 
 
-class DynamicRowsView(APIView):
+class DynamicRowsView(_DynamicTablePermissionMixin, APIView):
     """GET list, POST create for rows of a dynamic table."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(
         summary='List rows',
@@ -111,9 +124,8 @@ class DynamicRowsView(APIView):
         return Response(serialize_row(row), status=status.HTTP_201_CREATED)
 
 
-class DynamicRowsExportView(APIView):
+class DynamicRowsExportView(_DynamicTablePermissionMixin, APIView):
     """GET export table rows as .xlsx file."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(
         summary='Export rows to Excel',
@@ -132,9 +144,8 @@ class DynamicRowsExportView(APIView):
         return response
 
 
-class DynamicRowsImportView(APIView):
+class DynamicRowsImportView(_DynamicTablePermissionMixin, APIView):
     """POST import rows from .xlsx file (multipart)."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
     parser_classes = [MultiPartParser, FormParser]
 
     @extend_schema(
@@ -166,9 +177,8 @@ class DynamicRowsImportView(APIView):
         return Response({'created': created, 'errors': errors})
 
 
-class DynamicRowDetailView(APIView):
+class DynamicRowDetailView(_DynamicTablePermissionMixin, APIView):
     """GET, PUT, PATCH, DELETE a single row by id."""
-    permission_classes = PROJECT_MEMBER_PERMISSIONS
 
     @extend_schema(summary='Get row', tags=['Dynamic data'])
     def get(self, request, project_pk, table_slug, row_id):

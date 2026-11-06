@@ -4,7 +4,7 @@ from celery.result import AsyncResult
 from django.db import models
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -34,11 +34,22 @@ class EconomicSnapshotView(APIView):
         as_of_raw = request.query_params.get('as_of')
         as_of = parse_jalali_or_gregorian(as_of_raw) if as_of_raw else date.today()
         refresh = request.query_params.get('refresh', '').lower() in ('1', 'true', 'yes')
-        snapshot = None if refresh else EconomicSnapshot.objects.filter(
+        # Observers with view_dashboard may read existing snapshots only.
+        # Persisting a refresh requires edit_cashflow (active membership write).
+        snapshot = EconomicSnapshot.objects.filter(
             project_id=project_pk, snapshot_date=as_of
         ).first()
-        if not snapshot:
-            snapshot = generate_snapshot(project_pk, as_of)
+        if refresh or not snapshot:
+            from permissions.project import active_member_has_codename
+
+            if not active_member_has_codename(request.user, project_pk, 'edit_cashflow'):
+                if snapshot is None:
+                    return Response(
+                        {'detail': 'No snapshot available.', 'result': None},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+            else:
+                snapshot = generate_snapshot(project_pk, as_of)
         inflation_detail = inflation_detail_by_category(project_pk, as_of)
         return Response({
             **EconomicSnapshotSerializer(snapshot).data,
@@ -193,7 +204,7 @@ class InflationMappingDetailView(APIView):
 
 class SimulateView(APIView):
     permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
-    required_permission = 'view_dashboard'
+    required_permission = 'edit_cashflow'
 
     def post(self, request, project_pk=None):
         iterations = int(request.data.get('iterations', 5000))
@@ -209,7 +220,13 @@ class SimulateStatusView(APIView):
     def get(self, request, project_pk=None, task_id=None):
         result = AsyncResult(task_id)
         if result.ready():
-            return Response({'status': 'done', 'result': result.result})
+            payload = result.result
+            declared = None
+            if isinstance(payload, dict):
+                declared = payload.get('project_id') or payload.get('project_pk')
+            if declared is not None and str(declared) != str(project_pk):
+                return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'status': 'done', 'result': payload})
         return Response({'status': result.status})
 
 
@@ -225,9 +242,16 @@ class LatestSimulationView(APIView):
 
 
 class InflationIndexUpsertView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    """Org inflation catalog upsert — explicit account admin, not bare staff."""
+
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, name=None, index_date=None):
+        from authentication.permissions import IsOrganizationalAccountAdmin
+        from rest_framework.exceptions import PermissionDenied
+
+        if not IsOrganizationalAccountAdmin().has_permission(request, self):
+            raise PermissionDenied('Organizational account admin required.')
         parsed_date = parse_jalali_or_gregorian(index_date)
         obj, _ = InflationIndex.objects.update_or_create(
             index_name=name,

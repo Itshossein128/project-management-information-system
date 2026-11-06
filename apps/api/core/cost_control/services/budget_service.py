@@ -8,7 +8,10 @@ from django.db import transaction
 from django.db.models import Sum
 
 from config.exceptions import CodedValidationError
-from cost_control.models import Budget, BudgetLineLevel, BudgetVersionStatus
+from cost_control.models import Budget, BudgetLineLevel, BudgetVersionStatus, CostBreakdownNode
+from contracts.models import Contract
+from permissions.project import assert_same_project
+from projects.models import Activity, WBS
 from cost_control.services.budget_version_service import (
     assert_version_editable,
     ensure_working_draft,
@@ -120,7 +123,24 @@ def bulk_upsert_budgets(project_id, entries, user, version_id=None) -> tuple[lis
     assert_version_editable(version)
 
     saved: list[Budget] = []
+    pid = str(project_id)
     for entry in entries:
+        if entry.get('wbs_id'):
+            wb = WBS.objects.filter(pk=entry['wbs_id'], is_deleted=False).first()
+            if wb:
+                assert_same_project(pid, wb.project_id, field='wbs')
+        if entry.get('activity_id'):
+            act = Activity.objects.filter(pk=entry['activity_id'], is_deleted=False).first()
+            if act:
+                assert_same_project(pid, act.project_id, field='activity')
+        if entry.get('cbs_id'):
+            node = CostBreakdownNode.objects.filter(pk=entry['cbs_id'], is_deleted=False).first()
+            if node:
+                assert_same_project(pid, node.project_id, field='cbs')
+        if entry.get('contract_id'):
+            ctr = Contract.objects.filter(pk=entry['contract_id'], is_deleted=False).first()
+            if ctr:
+                assert_same_project(pid, ctr.project_id, field='contract')
         level = _infer_level(entry)
         _validate_level(entry, level)
         lookup = {

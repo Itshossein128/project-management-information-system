@@ -14,6 +14,7 @@ import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { usePermission } from "@/app/contexts/project-context";
 import { useTranslation } from "react-i18next";
 import { PATHS } from "@/app/routeVars";
+import { getStoredActorId } from "@/app/lib/auth-storage";
 import { warmProjectCache } from "@/app/lib/offlineCache";
 import {
   getFailedQueue,
@@ -130,9 +131,10 @@ export default function DailyReportsListPage() {
   const loadOffline = useCallback(async () => {
     if (!isOfflineDBAvailable() || !projectId) return;
     try {
+      const actorId = getStoredActorId();
       const [rows, stats] = await Promise.all([
         getOfflineReportsByProject(projectId),
-        getQueueStats(),
+        getQueueStats(actorId),
       ]);
       setOfflineRows(rows.filter((r) => r._offline));
       setPendingCount(stats.pending + stats.failed);
@@ -154,9 +156,9 @@ export default function DailyReportsListPage() {
     try {
       const result = await syncPendingQueue();
       if (result.synced > 0)
-        toast.success(`${result.synced} مورد همگام‌سازی شد`);
+        toast.success(t("toast.manualSyncSynced", { count: result.synced }));
       if (result.conflicts > 0)
-        toast.error(`${result.conflicts} تعارض شناسایی شد`);
+        toast.error(t("toast.manualSyncConflicts", { count: result.conflicts }));
       await queryClient.invalidateQueries({
         queryKey: ["daily-reports", projectId],
       });

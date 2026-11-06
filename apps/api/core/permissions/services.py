@@ -1,6 +1,6 @@
 from permissions.constants import ALL_PERMISSION_CODENAMES, PERMISSIONS
 
-from master_data.models import ProjectMember, ProjectMemberPermissionOverride, RolePermission
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride, RolePermission
 
 
 def get_role_permission_codenames(member: ProjectMember) -> set[str]:
@@ -36,6 +36,9 @@ def get_effective_permissions(member: ProjectMember) -> dict[str, bool | None]:
     Return permission map: True/False for explicit override, or inherited bool from roles.
     Keys are all known permission codenames.
     """
+    if member.status != MemberStatus.ACTIVE:
+        return {codename: False for codename in ALL_PERMISSION_CODENAMES}
+
     inherited = get_inherited_codenames(member)
     overrides = {
         o.permission_codename: o.is_granted
@@ -63,6 +66,8 @@ def permission_origin(member: ProjectMember, codename: str) -> str:
 
 def member_has_permission(member: ProjectMember, codename: str) -> bool:
     if codename not in ALL_PERMISSION_CODENAMES:
+        return False
+    if member.status != MemberStatus.ACTIVE:
         return False
 
     # ⚡ Bolt: Iterate over prefetched .all() to avoid hitting the DB with .filter()

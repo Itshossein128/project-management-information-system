@@ -14,6 +14,8 @@ from .views import (
     UserListView,
     UserAssignmentsListView,
     SystemRolesListView,
+    AccountStatusView,
+    InvitationAcceptView,
 )
 
 # Application namespace for reversing URLs.
@@ -56,6 +58,8 @@ urlpatterns = [
 
     # List project assignments for a specific user
     path('users/<uuid:user_id>/assignments/', UserAssignmentsListView.as_view(), name='user-assignments-list'),
+    path('users/<uuid:user_id>/account-status/', AccountStatusView.as_view(), name='user-account-status'),
+    path('invitations/accept/', InvitationAcceptView.as_view(), name='invitation-accept'),
 
     # List all users (HR/Admin)
     path('users/', UserListView.as_view(), name='user-list'),

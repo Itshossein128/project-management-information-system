@@ -54,9 +54,54 @@ def delete_cbs_node(node: CostBreakdownNode, user=None):
     node.soft_delete(user=user)
 
 
-def approve_commitment(commitment: Commitment):
+@transaction.atomic
+def approve_commitment(commitment: Commitment, user=None, *, break_glass_reason: str | None = None):
+    from permissions.role_services import record_access_change
+    from permissions.sod import assert_not_self_final_approve
+
+    if user is None:
+        raise ValidationError(
+            {'code': 'sod_actor_required', 'message': 'An actor is required for final approval.'}
+        )
+    commitment = Commitment.objects.select_for_update().get(pk=commitment.pk)
+    if commitment.status == CommitmentStatus.APPROVED:
+        return commitment
+    if commitment.status != CommitmentStatus.DRAFT:
+        raise ValidationError(
+            {'code': 'invalid_status_transition', 'message': 'Only draft commitments can be approved.'}
+        )
     if not commitment.wbs_id and not commitment.cbs_id:
         raise ValidationError({'code': 'wbs_or_cbs_required', 'message': 'Approve requires wbs or cbs.'})
+    before = {'status': commitment.status}
+    decision = assert_not_self_final_approve(
+        commitment.created_by_id,
+        user,
+        break_glass_reason=break_glass_reason,
+        project=commitment.project,
+        record_id=str(commitment.id),
+        record_type='commitment',
+    )
+    if decision.used_break_glass:
+        try:
+            record_access_change(
+                actor=user,
+                project=commitment.project,
+                subject_user=commitment.created_by,
+                role=None,
+                action='sod_break_glass',
+                before=before,
+                after={
+                    'reason': decision.reason,
+                    'exception': True,
+                    'record_id': str(commitment.id),
+                    'record_type': 'commitment',
+                    'status': 'approved',
+                },
+            )
+        except Exception:
+            raise ValidationError(
+                {'code': 'audit_failed', 'message': 'Break-glass approval could not be recorded.'}
+            ) from None
     commitment.status = CommitmentStatus.APPROVED
     commitment.save(update_fields=['status', 'updated_at'])
     return commitment

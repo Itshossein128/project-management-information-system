@@ -6,15 +6,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.viewsets import ProjectScopedViewSet
-from permissions.project import HasProjectPermission, IsProjectMember, member_has_codename
+from permissions.project import HasProjectPermission, IsProjectMember, assert_same_project, member_has_codename
 from projects.contractor_utils import normalize_stakeholder_role
 from projects.models import CommunicationPlan, Stakeholder
 
 
 def _user_may_view_sensitive_contacts(user, project_id) -> bool:
-    return member_has_codename(user, project_id, 'view_sensitive_contacts') or member_has_codename(
-        user, project_id, 'edit_project'
-    )
+    return member_has_codename(user, project_id, 'view_sensitive_contacts')
 
 
 class StakeholderSerializer(serializers.ModelSerializer):
@@ -131,12 +129,24 @@ class CommunicationPlanSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
 
+    def validate_stakeholder(self, value):
+        if value is None:
+            return value
+        project_pk = self.context.get('project_pk')
+        assert_same_project(project_pk, getattr(value, 'project_id', None), field='stakeholder')
+        return value
+
 
 class CommunicationPlanViewSet(ProjectScopedViewSet):
     queryset = CommunicationPlan.objects.all()
     serializer_class = CommunicationPlanSerializer
     view_permission = 'view_project'
     edit_permission = 'edit_project'
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['project_pk'] = self.kwargs['project_pk']
+        return ctx
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())

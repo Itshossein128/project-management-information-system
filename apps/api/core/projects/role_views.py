@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from authentication.permissions import IsHrOrAdmin
+from authentication.permissions import IsOrganizationalAccountAdmin
 from master_data.models import Role
 from permissions.constants import PERMISSIONS
 from permissions.role_services import (
@@ -38,15 +38,28 @@ class RoleViewSet(viewsets.ViewSet):
     lookup_field = 'pk'
 
     def get_permissions(self):
-        if self.action in ('list', 'retrieve'):
+        # Detail routes authenticate first so a project-local role id returns 404
+        # instead of leaking existence through a 403 from the org-admin gate.
+        if self.action in (
+            'list',
+            'retrieve',
+            'impact',
+            'partial_update',
+            'destroy',
+            'permissions',
+        ):
             return [IsAuthenticated()]
-        return [IsAuthenticated(), IsHrOrAdmin()]
+        return [IsAuthenticated(), IsOrganizationalAccountAdmin()]
 
     def _get_role(self, pk):
         return get_object_or_404(
             Role.objects.filter(project__isnull=True).prefetch_related('role_permissions'),
             pk=pk,
         )
+
+    def _require_org_admin(self, request):
+        if not IsOrganizationalAccountAdmin().has_permission(request, self):
+            self.permission_denied(request)
 
     def list(self, request):
         roles = Role.objects.filter(project__isnull=True).prefetch_related('role_permissions').order_by('role_name')
@@ -80,6 +93,7 @@ class RoleViewSet(viewsets.ViewSet):
 
     def partial_update(self, request, pk=None):
         role = self._get_role(pk)
+        self._require_org_admin(request)
         if is_system_role(role):
             return Response(
                 {'error': {'code': 'forbidden', 'message': 'System roles cannot be modified.', 'details': {}}},
@@ -110,6 +124,7 @@ class RoleViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         role = self._get_role(pk)
+        self._require_org_admin(request)
         if is_system_role(role):
             return Response(
                 {'error': {'code': 'forbidden', 'message': 'System roles cannot be deleted.', 'details': {}}},
@@ -139,6 +154,7 @@ class RoleViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['put', 'patch'], url_path='permissions')
     def permissions(self, request, pk=None):
         role = self._get_role(pk)
+        self._require_org_admin(request)
         if is_system_role(role):
             return Response(
                 {'error': {'code': 'forbidden', 'message': 'System role permissions cannot be modified.', 'details': {}}},

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, CloudOff, RefreshCw } from "lucide-react";
 import { cn } from "@/app/lib/utils";
+import { getStoredActorId } from "@/app/lib/auth-storage";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import {
   countUnresolvedConflicts,
@@ -33,7 +34,7 @@ export function OfflineIndicator() {
     const refresh = async () => {
       try {
         const [nextStats, nextConflicts] = await Promise.all([
-          getQueueStats(),
+          getQueueStats(getStoredActorId()),
           countUnresolvedConflicts(),
         ]);
         if (!active) return;

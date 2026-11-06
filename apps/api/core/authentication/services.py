@@ -25,6 +25,19 @@ def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def account_can_authenticate(user) -> bool:
+    """Sign-in is allowed only when the visible status is active and the account is enabled."""
+    if user is None or not getattr(user, 'is_active', False):
+        return False
+    return getattr(user, 'status', None) == 'active'
+
+
+def align_account_rows(user_model) -> None:
+    """Make status the authority without enabling a blocked person."""
+    user_model.objects.filter(status='active', is_active=False).update(status='inactive')
+    user_model.objects.filter(status__in=['inactive', 'suspended'], is_active=True).update(is_active=False)
+
+
 def blacklist_user_tokens(user) -> None:
     for token in OutstandingToken.objects.filter(user=user):
         BlacklistedToken.objects.get_or_create(token=token)
@@ -55,17 +68,32 @@ class UserRegistrationService:
         tokens = get_tokens_for_user(user)
         return user, tokens
 
+def locate_user(login: str):
+    try:
+        return User.objects.get(username=login)
+    except User.DoesNotExist:
+        try:
+            return User.objects.get(mobile=login)
+        except User.DoesNotExist:
+            return None
+
+
 class LoginService:
     def authenticate_and_issue_tokens(self, login: str, password: str):
         from authentication.utils import authenticate_user, get_tokens_for_user
         from rest_framework.exceptions import ValidationError
+        from django.contrib.auth.models import update_last_login
         from django.utils.translation import gettext_lazy as _
 
         user = authenticate_user(login, password)
         if not user:
+            located = locate_user(login)
+            if located is not None and located.check_password(password) and not account_can_authenticate(located):
+                raise ValidationError({'error': _('User account is disabled.')})
             raise ValidationError({'error': _('Invalid credentials. Please check your phone number and password.')})
-        if not user.is_active:
+        if not account_can_authenticate(user):
             raise ValidationError({'error': _('User account is disabled.')})
+        update_last_login(None, user)
         tokens = get_tokens_for_user(user)
         return user, tokens
 
@@ -77,26 +105,44 @@ class PasswordResetService:
         return secrets.token_urlsafe(32)
 
     def send_reset_sms(self, user, reset_token: str) -> bool:
-        logger.warning('Password reset SMS delivery is not configured')
-        return False
+        from notifications.services.delivery import deliver_account_message
+        status = deliver_account_message(
+            recipient=getattr(user, 'mobile', '') or '',
+            subject='Password reset',
+            body=reset_token,
+        )
+        return status == 'sent'
+
+    def _reset_response(self, delivery_status: str) -> dict:
+        if delivery_status == 'sent':
+            message = _('If an account exists with this phone number, a reset code has been sent.')
+        elif delivery_status == 'not_configured':
+            message = _(
+                'If an account exists for this phone number, no message was sent because delivery is not configured.'
+            )
+        else:
+            message = _('If an account exists for this phone number, the message was not sent.')
+        return {'success': True, 'message': message, 'delivery_status': delivery_status}
 
     def initiate_password_reset(self, phone_number: str) -> dict:
-        response = {
-            'success': True,
-            'message': _('If an account exists with this phone number, a reset code has been sent.'),
-        }
+        from notifications.services.delivery import delivery_plan
+        plan = delivery_plan(phone_number)
         try:
             user = User.objects.get(mobile=phone_number)
         except User.DoesNotExist:
-            return response
+            user = None
+        if user is None:
+            return self._reset_response('not_configured' if plan == 'not_configured' else 'not_sent')
         reset_token = self.generate_reset_token()
         PasswordResetToken.objects.create(
             user=user,
             token_hash=_hash_token(reset_token),
             expires_at=timezone.now() + timedelta(hours=self.token_expiry_hours),
         )
-        self.send_reset_sms(user, reset_token)
-        return response
+        sent = self.send_reset_sms(user, reset_token)
+        if sent:
+            return self._reset_response('sent')
+        return self._reset_response('not_configured' if plan == 'not_configured' else 'not_sent')
 
     @transaction.atomic
     def reset_password(self, token: str, new_password: str) -> dict:

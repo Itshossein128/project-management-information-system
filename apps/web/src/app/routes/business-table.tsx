@@ -4,6 +4,7 @@ import { GridPagination } from "@/components/grid";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "src/app/contexts/auth-context";
+import { useActiveProjectPermission } from "@/app/contexts/project-context";
 import {
   apiBlob,
   apiFetch,
@@ -11,7 +12,6 @@ import {
   apiUploadFile,
 } from "src/app/lib/api-client";
 import { PATHS } from "src/app/routeVars";
-import { ROLES } from "@/config/roles";
 
 interface FieldDef {
   id: number;
@@ -42,7 +42,8 @@ export default function BusinessTablePage() {
   const { t, i18n } = useTranslation();
   const { businessId, tableSlug } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const { has: projectWrite } = useActiveProjectPermission(businessId ?? "");
   const [schema, setSchema] = useState<TableSchema | null>(null);
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
@@ -57,8 +58,7 @@ export default function BusinessTablePage() {
   const importInputRef = useRef<HTMLInputElement>(null);
   const pageSize = 20;
   const REQUEST_TIMEOUT_MS = 20_000;
-  const canEdit =
-    hasRole(ROLES.MANAGER) || hasRole(ROLES.BUSINESS_SETUP);
+  const canEdit = Boolean(businessId) && projectWrite("edit_project");
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

@@ -436,7 +436,13 @@ def approve_ipc(ipc, user, *, approved_amount=None, approval_variance_note='', p
 
     from permissions.sod import assert_not_self_final_approve
 
-    assert_not_self_final_approve(ipc.created_by_id, user)
+    assert_not_self_final_approve(
+        ipc.created_by_id,
+        user,
+        project=ipc.project,
+        record_id=str(ipc.id),
+        record_type='ipc',
+    )
 
     if ipc.status not in (IPCStatus.SUBMITTED, IPCStatus.UNDER_REVIEW):
         raise CodedValidationError(

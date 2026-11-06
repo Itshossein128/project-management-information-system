@@ -8,9 +8,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.jalali import parse_jalali_or_gregorian
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.constants import PERMISSIONS
+from permissions.project import HasProjectPermission, IsProjectMember, member_has_codename
+from permissions.redaction import redact_sensitive_payload
 from projects.models import Project
 from projects.services.dashboard_pack_service import build_portfolio_dashboard, build_project_pack
+
+
+def _user_project_permissions(user, project_id) -> set[str]:
+    return {c for c in PERMISSIONS if member_has_codename(user, project_id, c)}
 
 
 class ProjectDashboardPackView(APIView):
@@ -23,7 +29,17 @@ class ProjectDashboardPackView(APIView):
         as_of_raw = request.query_params.get('as_of')
         as_of = parse_jalali_or_gregorian(as_of_raw) if as_of_raw else timezone.localdate()
         pack = request.query_params.get('pack')
-        return Response(build_project_pack(project_pk, request.user, as_of=as_of, pack=pack))
+        body = build_project_pack(project_pk, request.user, as_of=as_of, pack=pack)
+        perms = _user_project_permissions(request.user, project_pk)
+        return Response(
+            redact_sensitive_payload(
+                body,
+                perms,
+                redact_wages=True,
+                redact_stakeholder_contacts=True,
+                redact_person_contacts=True,
+            )
+        )
 
 
 class PortfolioDashboardView(APIView):

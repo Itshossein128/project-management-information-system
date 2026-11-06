@@ -7,6 +7,10 @@ User = get_user_model()
 class UsernameOrMobileBackend(ModelBackend):
     """Authenticate by username or mobile number."""
 
+    def user_can_authenticate(self, user):
+        from authentication.services import account_can_authenticate
+        return account_can_authenticate(user)
+
     def authenticate(self, request, username=None, password=None, **kwargs):
         login = kwargs.get('login') or username or kwargs.get('mobile') or kwargs.get('phone_number')
         if login is None or password is None:

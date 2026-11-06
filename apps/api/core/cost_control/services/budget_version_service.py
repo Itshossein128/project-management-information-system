@@ -162,7 +162,13 @@ def approve_version(
             code='invalid_budget_version_status',
         )
 
-    assert_not_self_final_approve(version.created_by_id, user)
+    assert_not_self_final_approve(
+        version.created_by_id,
+        user,
+        project=version.project,
+        record_id=str(version.id),
+        record_type='budget_version',
+    )
 
     become_control = False
     if version.kind == BudgetVersionKind.FINAL_FORECAST:

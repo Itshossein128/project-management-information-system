@@ -1,12 +1,20 @@
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+from django.test import RequestFactory
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 
-from documents.models import Correspondence, MeetingMinutes
-from documents.serializers import CorrespondenceSerializer, MeetingMinutesSerializer
+from documents.models import AccessLevel, Correspondence, MeetingMinutes, ProjectDocument
+from documents.serializers import (
+    CorrespondenceSerializer,
+    DocumentRevisionSerializer,
+    MeetingMinutesSerializer,
+    ProjectDocumentSerializer,
+)
 from documents.services.correspondence_service import respond_to_correspondence
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride
 
 
 @pytest.mark.parametrize('serializer_class', [CorrespondenceSerializer, MeetingMinutesSerializer])
@@ -46,6 +54,94 @@ def test_correspondence_response_rejects_private_key_before_mutation(project, us
     corr.refresh_from_db()
     assert corr.status == 'open'
     assert corr.file_url == ''
+
+
+def _drf_request(user):
+    factory = RequestFactory()
+    req = factory.get('/')
+    req.user = user
+    return Request(req)
+
+
+@pytest.mark.django_db
+def test_project_document_no_presign_without_view_documents(project, user, monkeypatch):
+    """Policy-only: without ``view_documents``, do not call MinIO presign."""
+    doc = ProjectDocument.objects.create(
+        project=project,
+        title='T',
+        file_url='documents/x/y.pdf',
+        uploaded_by=user,
+        created_by=user,
+        updated_by=user,
+    )
+    membership = ProjectMember.objects.get(project=project, user=user)
+    ProjectMemberPermissionOverride.objects.update_or_create(
+        member=membership,
+        permission_codename='view_documents',
+        defaults={'is_granted': False},
+    )
+    mock_presign = MagicMock(return_value='https://signed.example/o')
+    monkeypatch.setattr('documents.file_access.presign_get_url', mock_presign)
+    data = ProjectDocumentSerializer(doc, context={'request': _drf_request(user)}).data
+    assert data['file_url'] == ''
+    mock_presign.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_revision_no_presign_for_restricted_without_allowlist(project, user, other_user):
+    """RESTRICTED doc: non-uploader not on allowlist gets empty URL (no presign)."""
+    from documents.models import DocumentRevision
+
+    doc = ProjectDocument.objects.create(
+        project=project,
+        title='R',
+        access_level=AccessLevel.RESTRICTED,
+        file_url='documents/r/1.pdf',
+        uploaded_by=user,
+        created_by=user,
+        updated_by=user,
+    )
+    rev = DocumentRevision.objects.create(
+        document=doc,
+        revision_label='A',
+        revision_date=date.today(),
+        file_url='documents/r/1.pdf',
+        uploaded_by=user,
+    )
+    ProjectMember.objects.get_or_create(
+        project=project,
+        user=other_user,
+        defaults={'status': MemberStatus.ACTIVE},
+    )
+    data = DocumentRevisionSerializer(rev, context={'request': _drf_request(other_user)}).data
+    assert data['file_url'] == ''
+
+
+@pytest.mark.django_db
+def test_cross_project_document_no_presign(user, other_user, monkeypatch):
+    """Serializer redacts when user is not an active member of the document's project."""
+    from projects.services import create_project_with_creator
+
+    p_b = create_project_with_creator(
+        creator=other_user,
+        project_code='PRJ-B',
+        project_name='Project B',
+        employer='X',
+        start_date='2024-01-01',
+    )
+    doc = ProjectDocument.objects.create(
+        project=p_b,
+        title='B-only',
+        file_url='documents/b/only.pdf',
+        uploaded_by=other_user,
+        created_by=other_user,
+        updated_by=other_user,
+    )
+    mock_presign = MagicMock(return_value='https://signed.example/o')
+    monkeypatch.setattr('documents.file_access.presign_get_url', mock_presign)
+    data = ProjectDocumentSerializer(doc, context={'request': _drf_request(user)}).data
+    assert data['file_url'] == ''
+    mock_presign.assert_not_called()
 
 
 @pytest.mark.parametrize('serializer_class', [CorrespondenceSerializer, MeetingMinutesSerializer])

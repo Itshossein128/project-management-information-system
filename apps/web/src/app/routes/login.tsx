@@ -52,7 +52,12 @@ export default function Login() {
     setError(null);
     setSubmitting(true);
     try {
-      await login({ phone_number: phoneNumber, password });
+      const identity = phoneNumber.trim();
+      await login(
+        /[A-Za-z]/.test(identity)
+          ? { username: identity, password }
+          : { phone_number: identity, password },
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : t("login.failed"));
       setSubmitting(false);
@@ -110,12 +115,13 @@ export default function Login() {
               </p>
             )}
             <div className='grid gap-2'>
-              <Label htmlFor='login-phone'>{t("common.phoneNumber")}</Label>
+              <Label htmlFor='login-phone'>{t("login.identity")}</Label>
               <Input
                 id='login-phone' data-testid='login-phone-input'
                 name='phone_number'
-                type='tel'
-                autoComplete='tel'
+                type='text'
+                autoComplete='username'
+                maxLength={60}
                 placeholder={t("login.phonePlaceholder")}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}

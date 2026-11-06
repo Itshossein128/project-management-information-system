@@ -1,5 +1,6 @@
 import { useAuth } from "@/app/contexts/auth-context";
 import { useCreateHrUser, useHrUsersQuery } from "@/app/hooks/queries";
+import { updateAccountStatus } from "@/app/lib/api/members";
 import type { UserBusinessAssignment } from "@/app/lib/api-types";
 import { splitAssignmentsForTablePreview } from "@/app/lib/assignment-preview";
 import { formatDisplayDateTime } from "@/app/lib/jalali-utils";
@@ -23,13 +24,14 @@ import { useNavigate } from "react-router";
 import { z } from "zod";
 
 export interface HrUserRow {
-  id: number;
+  id: string;
   phone_number: string;
   first_name: string;
   last_name: string;
   full_name: string;
   created_at: string;
   is_active: boolean;
+  status?: "active" | "inactive" | "suspended";
   roles: string[];
   assignments_preview?: UserBusinessAssignment[];
 }
@@ -46,8 +48,8 @@ export function meta() {
 export default function HrUsersPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
-  const canAccess = hasRole(ROLES.HR) || hasRole(ROLES.ADMIN);
+  const { isAuthenticated, isLoading, hasRole, user } = useAuth();
+  const canAccess = hasRole(ROLES.HR) || hasRole(ROLES.ADMIN) || Boolean(user?.is_superuser);
 
   const [createOpen, setCreateOpen] = useState(false);
   const createUser = useCreateHrUser();
@@ -197,18 +199,23 @@ export default function HrUsersPage() {
         id: "status",
         header: t("hrUsers.columnStatus"),
         cell: ({ row }) => (
-          <span
-            id={`text-hrUserStatus-${row.index}`}
-            className={
-              row.original.is_active
-                ? "text-success"
-                : "text-muted-foreground"
-            }
+          <select
+            id={`select-hrUserStatus-${row.index}`}
+            aria-label={t("hrUsers.columnStatus")}
+            value={row.original.status ?? (row.original.is_active ? "active" : "inactive")}
+            onChange={(event) => {
+              const next = event.target.value as "active" | "inactive" | "suspended";
+              void updateAccountStatus(String(row.original.id), next)
+                .then(() => usersQuery.refetch())
+                .catch((error: Error) => {
+                  window.alert(error.message);
+                });
+            }}
           >
-            {row.original.is_active
-              ? t("hrUsers.statusActive")
-              : t("hrUsers.statusInactive")}
-          </span>
+            <option value="active">{t("hrUsers.statusActive")}</option>
+            <option value="inactive">{t("hrUsers.statusInactive")}</option>
+            <option value="suspended">{t("hrUsers.statusSuspended")}</option>
+          </select>
         ),
       },
     ],

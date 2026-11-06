@@ -192,16 +192,16 @@ def run_report(
 
 
 def _redact_wage_fields(payload: dict, permissions: set[str]) -> dict:
-    if 'view_wage' in permissions:
-        return payload
-    # Shallow redaction marker for wage-bearing exports
-    if isinstance(payload, dict):
-        out = dict(payload)
-        if 'wage' in out:
-            out['wage'] = None
-            out['wage_redacted'] = True
-        return out
-    return payload
+    """Nested export redaction aligned with ProjectReportRunView (A6-P4)."""
+    from permissions.redaction import redact_sensitive_payload
+
+    return redact_sensitive_payload(
+        payload,
+        permissions,
+        redact_wages=True,
+        redact_stakeholder_contacts=True,
+        redact_person_contacts=True,
+    )
 
 
 def create_export(

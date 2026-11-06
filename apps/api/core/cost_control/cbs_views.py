@@ -84,6 +84,12 @@ class CommitmentViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
+    @property
+    def required_permission(self):
+        if getattr(self, 'action', None) == 'approve':
+            return 'approve_costs'
+        return super().required_permission
+
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         try:
@@ -102,8 +108,13 @@ class CommitmentViewSet(ProjectScopedViewSet):
     @extend_schema(summary='Approve commitment', tags=['Central Data'])
     def approve(self, request, project_pk=None, pk=None):
         commitment = self.get_object()
+        reason = (request.data or {}).get('break_glass_reason')
         try:
-            approve_commitment(commitment)
+            approve_commitment(
+                commitment,
+                request.user,
+                break_glass_reason=reason,
+            )
         except ValidationError as exc:
             return Response(exc.detail, status=400)
         return Response(CommitmentSerializer(commitment).data)

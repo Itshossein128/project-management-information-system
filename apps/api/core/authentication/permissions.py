@@ -75,16 +75,28 @@ class IsManagerOrHR(permissions.BasePermission):
 
 class IsHrOrAdmin(permissions.BasePermission):
     """
-    HR / admin user listing: Django groups `admin` or `hr`, or staff / superuser.
-    Matches the HR users area in the frontend.
+    Explicit org HR/admin gate: Django groups `admin` or `hr`, or superuser.
+    Bare staff does not qualify (A6-P4 / P3 account admin separation).
     """
     def has_permission(self, request, view) -> bool:
         if not request.user or not request.user.is_authenticated:
             return False
         u = cast(User, request.user)
-        if u.is_superuser or u.is_staff:
+        if u.is_superuser:
             return True
         return u.groups.filter(name__in=("admin", "hr")).exists()
+
+
+class IsOrganizationalAccountAdmin(permissions.BasePermission):
+    """Account create/status and org directory. Staff and bare hr do not qualify."""
+
+    def has_permission(self, request, view) -> bool:
+        if not request.user or not request.user.is_authenticated:
+            return False
+        user = cast(User, request.user)
+        if user.is_superuser:
+            return True
+        return user.groups.filter(name='admin').exists()
 
 
 # Apply per view when you add route/endpoint/operation checks, e.g.:

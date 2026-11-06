@@ -2,8 +2,10 @@ import { apiJson } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
 
 export interface ProjectMember {
+  id: string;
   user_id: string | null;
   full_name: string;
+  position_titles?: string[];
   email: string;
   mobile: string;
   roles: string[];
@@ -11,6 +13,11 @@ export interface ProjectMember {
   joined_at: string;
   last_login: string | null;
   invited_email?: string;
+  invited_mobile?: string;
+  delivery_status?: "not_configured" | "not_sent" | "sent" | string;
+  invite_expires_at?: string | null;
+  invite_cancelled_at?: string | null;
+  position_ids?: string[];
 }
 
 export interface Role {
@@ -25,8 +32,9 @@ export interface Role {
 export interface UserLookupResult {
   user_id: string;
   full_name: string;
-  email: string;
-  mobile: string;
+  email?: string;
+  mobile?: string;
+  organization_label?: string;
 }
 
 export interface PermissionSummary {
@@ -42,7 +50,13 @@ export function fetchMembers(projectId: string) {
 
 export function addMember(
   projectId: string,
-  payload: { user_id?: string; email?: string; role_ids: string[]; position_ids?: string[] },
+  payload: {
+    user_id?: string;
+    email?: string;
+    mobile?: string;
+    role_ids: string[];
+    position_ids?: string[];
+  },
 ) {
   return apiJson<ProjectMember>(`/${PATHS.API_PROJECTS}/${projectId}/members/`, {
     method: "POST",
@@ -168,6 +182,50 @@ export function fetchSelectablePositions(projectId: string) {
   );
 }
 
-export function lookupUsers(q: string) {
-  return apiJson<UserLookupResult[]>(`/v1/users/lookup/?q=${encodeURIComponent(q)}`);
+export function lookupUsers(q: string, projectId?: string) {
+  const params = new URLSearchParams({ q });
+  if (projectId) params.set("project_id", projectId);
+  return apiJson<UserLookupResult[]>(`/v1/users/lookup/?${params.toString()}`);
+}
+
+export function connectInvitation(
+  projectId: string,
+  memberId: string,
+  userId: string,
+  payload?: { role_ids?: string[]; position_ids?: string[] },
+) {
+  return apiJson<ProjectMember>(
+    `/${PATHS.API_PROJECTS}/${projectId}/members/invitations/${memberId}/connect/`,
+    { method: "POST", body: JSON.stringify({ user_id: userId, ...payload }) },
+  );
+}
+
+export function cancelInvitation(projectId: string, memberId: string) {
+  return apiJson<ProjectMember>(
+    `/${PATHS.API_PROJECTS}/${projectId}/members/invitations/${memberId}/cancel/`,
+    { method: "POST" },
+  );
+}
+
+export function createOrganizationalUser(payload: {
+  phone_number: string;
+  first_name: string;
+  last_name: string;
+  username?: string;
+  email?: string;
+  password: string;
+  password_confirm: string;
+  status?: "active" | "inactive" | "suspended";
+}) {
+  return apiJson<{ id: string }>(`/${PATHS.API_AUTH_USERS}/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateAccountStatus(userId: string, status: "active" | "inactive" | "suspended") {
+  return apiJson<{ status: string; can_sign_in: boolean }>(
+    `/auth/users/${userId}/account-status/`,
+    { method: "PATCH", body: JSON.stringify({ status }) },
+  );
 }

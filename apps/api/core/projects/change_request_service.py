@@ -234,7 +234,13 @@ def approve_change_request(cr: ProjectChangeRequest, user, decision_notes: str =
         user = require_authority(user, project.pk, 'undo_completion')
     assert_not_archived_mutable(project, user)
     try:
-        assert_not_self_final_approve(cr.requested_by_id, user)
+        assert_not_self_final_approve(
+            cr.requested_by_id,
+            user,
+            project=cr.project,
+            record_id=str(cr.id),
+            record_type='project_change_request',
+        )
     except CodedValidationError:
         if project.status == ProjectStatus.ARCHIVED or cr.restore_completion_event_id:
             raise CodedValidationError({'detail': _('Another authorized person must approve this change request.')}, code='sod_self_approve')

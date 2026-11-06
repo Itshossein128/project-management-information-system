@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/components/ui/toast";
 import { useOnlineStatus } from "@/app/hooks/useOnlineStatus";
 import { getStoredAccessToken, getStoredActorId } from "@/app/lib/auth-storage";
@@ -10,6 +11,7 @@ import { syncPendingQueue, syncPendingUnitOperations } from "@/app/lib/syncServi
  * Reports the outcome via toasts (Sprint 4, Section 1.6).
  */
 export function useAutoSync(): void {
+  const { t } = useTranslation();
   const isOnline = useOnlineStatus();
   const toast = useToast();
   const wasOnline = useRef(isOnline);
@@ -39,10 +41,10 @@ export function useAutoSync(): void {
         };
       })
       .then((result) => {
-        if (result.synced > 0) toast.success(`${result.synced} مورد همگام‌سازی شد`);
-        if (result.failed > 0) toast.warning(`${result.failed} مورد همگام‌سازی نشد`);
+        if (result.synced > 0) toast.success(t("toast.syncSynced", { count: result.synced }));
+        if (result.failed > 0) toast.warning(t("toast.syncFailed", { count: result.failed }));
         if (result.conflicts > 0)
-          toast.error(`${result.conflicts} تعارض داده شناسایی شد — بررسی کنید`);
+          toast.error(t("toast.syncConflicts", { count: result.conflicts }));
       })
       .catch(() => {
         /* offline DB not ready or network dropped mid-sync; ignore */

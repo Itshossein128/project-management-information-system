@@ -118,6 +118,12 @@ def delete_custom_role(role: Role, actor=None) -> None:
 
 
 def record_access_change(*, actor, project, subject_user, role, action, before, after) -> None:
+    """Persist a base access-history row.
+
+    Break-glass final approve (A6-P4) uses ``action='sod_break_glass'`` with
+    ``after`` containing at least ``reason``, ``exception``: true, and
+    ``record_id``. Full history UI remains A6-P5.
+    """
     RoleAccessChange.objects.create(
         actor=actor if getattr(actor, 'is_authenticated', False) else None,
         project=project,

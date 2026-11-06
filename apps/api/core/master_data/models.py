@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.functions import Lower
 
 from common.models import TimeStampedModel, UUIDModel
 
@@ -184,12 +185,22 @@ class ProjectMember(UUIDModel):
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='project_memberships',
         null=True,
         blank=True,
     )
     invited_email = models.EmailField(max_length=254, blank=True, default='')
+    invited_mobile = models.CharField(max_length=20, blank=True, default='')
+    invite_expires_at = models.DateTimeField(null=True, blank=True)
+    invite_token_hash = models.CharField(max_length=64, blank=True, default='')
+    invite_cancelled_at = models.DateTimeField(null=True, blank=True)
+    invite_accepted_at = models.DateTimeField(null=True, blank=True)
+    delivery_status = models.CharField(
+        max_length=20,
+        blank=True,
+        default='not_configured',
+    )
     status = models.CharField(max_length=20, choices=MemberStatus.choices, default=MemberStatus.ACTIVE)
     joined_at = models.DateTimeField(auto_now_add=True)
     position = models.ForeignKey(
@@ -219,6 +230,23 @@ class ProjectMember(UUIDModel):
                 fields=['project', 'user'],
                 condition=models.Q(user__isnull=False),
                 name='unique_project_user_member',
+            ),
+            models.UniqueConstraint(
+                Lower('invited_email'),
+                'project',
+                condition=(
+                    models.Q(user__isnull=True, status=MemberStatus.INVITED, invite_cancelled_at__isnull=True)
+                    & ~models.Q(invited_email='')
+                ),
+                name='unique_pending_project_invite_email',
+            ),
+            models.UniqueConstraint(
+                fields=['project', 'invited_mobile'],
+                condition=(
+                    models.Q(user__isnull=True, status=MemberStatus.INVITED, invite_cancelled_at__isnull=True)
+                    & ~models.Q(invited_mobile='')
+                ),
+                name='unique_pending_project_invite_mobile',
             ),
         ]
 

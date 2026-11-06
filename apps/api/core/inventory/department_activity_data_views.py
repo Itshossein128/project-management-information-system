@@ -20,10 +20,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from business_meta.models import Project
-from business_meta.permissions import CanViewBusinessAssignments, IsHrOrAdminOrReadOnly, IsVisitorReadOnly
 from common.jalali import parse_jalali_or_gregorian
 from common.validators import validate_xlsx_upload
 from permissions.project import HasProjectPermission, IsProjectMember
+from rest_framework.permissions import SAFE_METHODS
 
 from .department_activity_io import (
     department_display_label,
@@ -64,15 +64,13 @@ def _parse_query_date(raw_date: str | None) -> date | None:
 
 
 class _DepartmentActivityDataBase(APIView):
-    permission_classes = [
-        IsAuthenticated,
-        IsProjectMember,
-        HasProjectPermission,
-        CanViewBusinessAssignments,
-        IsVisitorReadOnly,
-        IsHrOrAdminOrReadOnly,
-    ]
-    required_permission = 'view_reports'
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
+
+    @property
+    def required_permission(self):
+        if self.request.method in SAFE_METHODS:
+            return 'view_reports'
+        return 'edit_reports'
 
     def _get_business(self, project_pk: int) -> Project | None:
         try:
