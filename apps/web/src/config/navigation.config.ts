@@ -7,6 +7,13 @@ import { ROLES } from "./roles";
  */
 export const mainSidebarNavigation: NavigationItem[] = [
   {
+    label: "برنامه تحویل ولورا",
+    section: "workspace",
+    icon: "projects",
+    path: "delivery-plan",
+    activeExact: true,
+  },
+  {
     label: "Projects",
     section: "workspace",
     labelI18nKey: "nav.sidebarProjects",

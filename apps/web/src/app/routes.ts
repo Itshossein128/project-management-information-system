@@ -22,6 +22,7 @@ export default [
   layout(ROUTES.AUTH_LAYOUT, [
     layout(ROUTES.PROTECTED_LAYOUT, [
       route(PATHS.HOME, ROUTES.HOME),
+      route("delivery-plan", "routes/delivery-plan.tsx"),
       route(PATHS.PORTFOLIO_LIQUIDITY, ROUTES.PORTFOLIO_LIQUIDITY),
       route(PATHS.EXECUTIVE_DASHBOARD, ROUTES.EXECUTIVE_DASHBOARD),
       ...projectRoutes,
