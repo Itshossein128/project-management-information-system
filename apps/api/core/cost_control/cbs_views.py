@@ -84,6 +84,13 @@ class CommitmentViewSet(ProjectScopedViewSet):
     view_permission = 'view_costs'
     edit_permission = 'edit_costs'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action in ('list', 'retrieve'):
+            # ⚡ Bolt: Prefetch payments to eliminate N+1 queries when computing commitment remaining balance
+            qs = qs.prefetch_related('payments')
+        return qs
+
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
         try:

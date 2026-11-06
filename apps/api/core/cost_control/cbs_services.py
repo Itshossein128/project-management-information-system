@@ -63,6 +63,13 @@ def approve_commitment(commitment: Commitment):
 
 
 def posted_payments_total(commitment: Commitment) -> Decimal:
+    # ⚡ Bolt: Fast-path using prefetched payments cache to eliminate N+1 queries during list serialization
+    if hasattr(commitment, '_prefetched_objects_cache') and 'payments' in commitment._prefetched_objects_cache:
+        total = sum(
+            p.amount for p in commitment.payments.all()
+            if not p.is_deleted and p.status == PaymentStatus.POSTED
+        )
+        return Decimal(total)
     total = (
         Payment.objects.filter(
             commitment=commitment,
