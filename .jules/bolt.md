@@ -50,3 +50,7 @@
 ## 2026-07-31 - Optimize payload in SerializerMethodField using .only()
 **Learning:** In DRF `SerializerMethodField` methods that query secondary models with `select_related` (like fetching recent activities with `report`), retrieving all model columns (e.g., large notes or photo file paths) creates unnecessary DB I/O and memory overhead.
 **Action:** Chain `.only()` to explicitly fetch only the required scalar fields and related model foreign keys/fields needed for the API payload response.
+
+## 2026-08-01 - Memoize computed related attributes in SerializerMethodFields
+**Learning:** When multiple `SerializerMethodField` methods on a DRF serializer (such as `get_latest_score` and `get_latest_score_date`) calculate derived properties from the same related collection, each field re-executes Python filtering and `max()` sorting per row.
+**Action:** Add a private helper method on the serializer (e.g., `_latest_score`) that caches the computed result directly on the model instance (e.g., `obj._cached_latest_score`) to compute the value once per object across all serializer fields.
