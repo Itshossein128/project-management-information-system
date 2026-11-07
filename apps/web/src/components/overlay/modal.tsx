@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface ModalProps {
   open: boolean;
@@ -50,16 +51,21 @@ export function Modal({
           >
             {title}
           </DialogTitle>
-          <Button
-            id={`button-close${idBase.charAt(0).toUpperCase() + idBase.slice(1)}Modal`}
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("common.close")}
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="size-4" aria-hidden />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                id={`button-close${idBase.charAt(0).toUpperCase() + idBase.slice(1)}Modal`}
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t("common.close")}
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="size-4" aria-hidden />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("common.close")}</TooltipContent>
+          </Tooltip>
         </DialogHeader>
         <div
           id={`modal-${idBase}Content`}
