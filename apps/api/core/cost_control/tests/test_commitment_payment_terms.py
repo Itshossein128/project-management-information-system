@@ -58,7 +58,7 @@ def test_commitment_payment_terms_round_trip(auth_client, project, user):
 
 
 @pytest.mark.django_db
-def test_approved_commitment_reduces_remaining(auth_client, project, wbs, user):
+def test_approved_commitment_reduces_remaining(auth_client, project_approver_client, project, wbs, user):
     version = BudgetVersion.objects.create(
         project=project,
         kind=BudgetVersionKind.APPROVED,
@@ -92,7 +92,7 @@ def test_approved_commitment_reduces_remaining(auth_client, project, wbs, user):
     )
     assert create.status_code == status.HTTP_201_CREATED, create.content
     cid = create.json()['id']
-    approve = auth_client.post(f'/api/v1/projects/{project.id}/commitments/{cid}/approve/')
+    approve = project_approver_client.post(f'/api/v1/projects/{project.id}/commitments/{cid}/approve/')
     assert approve.status_code == status.HTTP_200_OK, approve.content
 
     remaining = auth_client.get(f'/api/v1/projects/{project.id}/budgets/remaining/')

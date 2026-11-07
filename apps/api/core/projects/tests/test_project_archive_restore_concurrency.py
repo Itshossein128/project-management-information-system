@@ -6,7 +6,7 @@ from django.db import close_old_connections, connections
 from config.exceptions import CodedValidationError
 from projects import lifecycle_service as life
 from projects.models import Project
-from .archive_restore_helpers import actor, ready_project
+from .archive_restore_helpers import actor, ready_project, grant_project_access
 
 pytestmark = pytest.mark.django_db(transaction=True, serialized_rollback=True)
 
@@ -76,7 +76,9 @@ def test_stale_cr_approval_preserves_archive_metadata():
     # Force the old related object to be cached before the archive.
     assert cr.project.status == 'active'
     archived = life.archive(project, user)
-    crs.approve_change_request(cr, user)
+    approver = actor(superuser=True)
+    grant_project_access(approver, project)
+    crs.approve_change_request(cr, approver)
     current = Project.objects.get(pk=project.pk)
     assert current.status == 'archived'
     assert current.archive_cycle_id == archived.archive_cycle_id
@@ -127,10 +129,11 @@ def test_restore_serializes_with_other_project_writers(monkeypatch,writer):
     from .archive_restore_helpers import client_for, base
     from .test_project_archive_restore import confirmation, body
     u=actor(superuser=True);p=ready_project(u)
-    cr=None
+    cr=None;cr_approver=u
     if writer=='cr':
         cr=crs.create_change_request(project=p,user=u,reason='Correct employer before archive',proposed_changes={'employer':'Verified employer'})
         cr=crs.submit_change_request(cr,u)
+        cr_approver=actor(superuser=True);grant_project_access(cr_approver,p)
     resume_body=None
     if writer=='resume':p,resume_body=consumed_resume_context(p,u)
     p=life.archive(p,u);original_cycle=p.archive_cycle_id
@@ -156,7 +159,7 @@ def test_restore_serializes_with_other_project_writers(monkeypatch,writer):
     def write_request():
         close_old_connections()
         try:
-            c=client_for(u)
+            c=client_for(cr_approver if writer=='cr' else u)
             if writer=='patch':return c.patch(base(p),{'project_name':'Renamed after restore'},format='json').status_code
             if writer=='manager':return c.patch(base(p),{'project_manager':None},format='json').status_code
             if writer=='delete':return c.delete(base(p)).status_code
@@ -195,10 +198,11 @@ def test_other_writer_wins_root_lock_before_restore(monkeypatch,writer):
     from projects.models import ProjectArchiveRestore
     from .archive_restore_helpers import client_for,base
     from .test_project_archive_restore import confirmation,body
-    u=actor(superuser=True);p=ready_project(u);cr=None
+    u=actor(superuser=True);p=ready_project(u);cr=None;cr_approver=u
     if writer=='cr':
         cr=crs.create_change_request(project=p,user=u,reason='Approved scope correction',proposed_changes={'scope_description':'New approved scope'})
         cr=crs.submit_change_request(cr,u)
+        cr_approver=actor(superuser=True);grant_project_access(cr_approver,p)
     resume_body=None
     if writer=='resume':p,resume_body=consumed_resume_context(p,u)
     p=life.archive(p,u);payload=body(confirmation(client_for(u),p))
@@ -215,7 +219,7 @@ def test_other_writer_wins_root_lock_before_restore(monkeypatch,writer):
     def send(restoring):
         close_old_connections()
         try:
-            c=client_for(u)
+            c=client_for(cr_approver if writer=='cr' and not restoring else u)
             if restoring:return c.post(base(p)+'restore/',payload,format='json').status_code
             if writer=='patch':return c.patch(base(p),{'project_name':'Changed before restore'},format='json').status_code
             if writer=='manager':return c.patch(base(p),{'project_manager':None},format='json').status_code

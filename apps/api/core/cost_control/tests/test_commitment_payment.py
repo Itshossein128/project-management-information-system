@@ -26,7 +26,7 @@ def test_approve_requires_wbs_or_cbs(auth_client, project):
 
 
 @pytest.mark.django_db
-def test_approve_with_cbs(auth_client, project, user):
+def test_approve_with_cbs(auth_client, project_approver_client, project, user):
     node = create_cbs_node(
         project_id=project.id,
         cbs_code='C.10',
@@ -45,8 +45,9 @@ def test_approve_with_cbs(auth_client, project, user):
     )
     assert create.status_code == 201, create.content
     cid = create.json()['id']
-    approve = auth_client.post(f'/api/v1/projects/{project.id}/commitments/{cid}/approve/')
+    approve = project_approver_client.post(f'/api/v1/projects/{project.id}/commitments/{cid}/approve/')
     assert approve.status_code == 200, approve.content
+    assert approve.json()['status'] == CommitmentStatus.APPROVED
     assert Commitment.objects.get(pk=cid).status == CommitmentStatus.APPROVED
 
 

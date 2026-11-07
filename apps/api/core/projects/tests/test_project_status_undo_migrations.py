@@ -50,6 +50,8 @@ def test_required_fk_receipt_constraints_and_deletion_collector():
     # A CR may have only one protected repair binding.
     with pytest.raises(IntegrityError),transaction.atomic():
         ProjectChangeRequest.objects.create(project=project,requested_by=user,reason='Missing scope repair',restore_archive_cycle_id=uuid4(),restore_completion_event=source)
+    from master_data.models import ProjectMember
+    ProjectMember.objects.filter(user=user).delete()
     user.delete();row.refresh_from_db()
     assert row.actor_id is None and row.actor_snapshot['display_name']=='Original'
     source_id=source.pk;project.delete()

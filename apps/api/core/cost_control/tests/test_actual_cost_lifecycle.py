@@ -31,7 +31,7 @@ def test_approve_requires_wbs_or_cbs(auth_client, project):
 
 
 @pytest.mark.django_db
-def test_approve_and_void_with_classification(auth_client, project, wbs):
+def test_approve_and_void_with_classification(auth_client, project_approver_client, project, wbs):
     create = auth_client.post(
         f'/api/v1/projects/{project.id}/costs/',
         {
@@ -46,7 +46,7 @@ def test_approve_and_void_with_classification(auth_client, project, wbs):
     )
     assert create.status_code == status.HTTP_201_CREATED, create.content
     cid = create.json()['id']
-    approve = auth_client.post(f'/api/v1/projects/{project.id}/costs/{cid}/approve/')
+    approve = project_approver_client.post(f'/api/v1/projects/{project.id}/costs/{cid}/approve/')
     assert approve.status_code == status.HTTP_200_OK, approve.content
     assert approve.json()['status'] == ActualCostStatus.APPROVED
     void = auth_client.post(f'/api/v1/projects/{project.id}/costs/{cid}/void/')

@@ -207,10 +207,10 @@ def test_approver_does_not_need_edit_permission(api_client, pending_project, oth
     assert response.json()['budget_approved_by'] == str(other_user.id)
 
 
-def test_missing_project_reports_not_found(auth_client, user, language):
+def test_missing_project_approval_requires_project_authority(auth_client, user, language):
     user.is_superuser = True
     user.save()
-    error_payload(auth_client.post(f'/api/v1/projects/{uuid4()}/approve/', **language), 404, 'not_found')
+    error_payload(auth_client.post(f'/api/v1/projects/{uuid4()}/approve/', **language), 403, 'permission_denied')
 
 
 def test_complete_missing_information_then_retry_approval(auth_client, pending_project, language):

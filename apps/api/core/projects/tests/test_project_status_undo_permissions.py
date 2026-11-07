@@ -10,6 +10,7 @@ pytestmark=pytest.mark.django_db
 def test_actual_authority(kind,operation):
     owner=actor(admin=True);p=source_project(owner,operation);user=actor(admin=kind=='admin',superuser=kind=='superuser')
     codes={'editor':['edit_project'],'approver':['approve_project'],'viewer':['view_project']}.get(kind,[])
+    if kind in ('admin','superuser'):codes=['view_project','edit_project','approve_project']
     if codes:member(user,p,*codes)
     if kind=='manager':p.project_manager=user;p.save(update_fields=['project_manager'])
     if kind=='inactive':user.is_active=False;user.save()
@@ -46,6 +47,8 @@ def test_zero_valid_nonactive_target_unrestricted_and_fresh_revocation():
     result=client.post(base(p)+'resume/',body,format='json')
     assert result.status_code==409
     user.groups.clear()
+    from master_data.models import ProjectMember
+    ProjectMember.objects.filter(user=user,project=p).update(status='inactive')
     assert client.post(base(p)+'resume/',body,format='json').status_code==403
     owner=actor(admin=True);p=source_project(owner,'undo_completion','suspended')
     p.project_manager=None;p.scope_description='';p.contract_amount=None;p.save()
@@ -74,6 +77,8 @@ def test_editor_confirmation_rechecks_real_grant_account_and_manager_deletion(ch
     elif change=='actor_inactive':
         editor.is_active=False;editor.save(update_fields=['is_active'])
     else:
+        from master_data.models import ProjectMember
+        ProjectMember.objects.filter(project=p, user=owner).delete()
         owner.delete()
     before=state(p)
     result=client.post(base(p)+'resume/',body,format='json')

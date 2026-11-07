@@ -58,7 +58,7 @@ class TestBudgetChangeRequests:
         )
 
     def test_cr_approve_creates_revised_control(
-        self, auth_client, costs_base, control_budget, wbs
+        self, auth_client, project_approver_client, costs_base, control_budget, wbs
     ):
         version, line = control_budget
         create = auth_client.post(
@@ -85,7 +85,7 @@ class TestBudgetChangeRequests:
         )
         assert submit.status_code == status.HTTP_200_OK
 
-        approve = auth_client.post(
+        approve = project_approver_client.post(
             f'{costs_base}budget-change-requests/{cr_id}/approve/', {}, format='json'
         )
         assert approve.status_code == status.HTTP_200_OK, approve.content

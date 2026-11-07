@@ -86,6 +86,8 @@ def test_receipt_uniqueness_reason_and_actor_snapshot():
         data = values();data.update(request_id=uuid4(), archive_cycle_id=uuid4(), reason=reason)
         with pytest.raises(IntegrityError), transaction.atomic():
             ProjectArchiveRestore.objects.create(**data)
+    from master_data.models import ProjectMember
+    ProjectMember.objects.filter(user=user).delete()
     user.delete()
     row.refresh_from_db()
     assert row.actor_id is None and row.actor_snapshot['display_name'] == 'Original'

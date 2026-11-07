@@ -144,6 +144,7 @@ def test_contract_viewset_helpers(user, project):
     contract_vs.request = MagicMock(user=user)
     contract_vs.kwargs = {'project_pk': str(project.id)}
     serializer = MagicMock()
+    serializer.save.return_value.project_id = project.id
     contract_vs.perform_create(serializer)
     contract_vs.perform_update(serializer)
     assert serializer.save.call_count == 2

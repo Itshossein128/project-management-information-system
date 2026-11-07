@@ -29,6 +29,7 @@ def test_localized_actionable_errors_keep_stable_machine_codes(language,monkeypa
 def test_completed_remediation_http_errors_are_localized(language,case):
     from projects.tests.test_project_status_undo_remediation import snapshot
     owner=actor(admin=True);other=actor(admin=True);p=source_project(owner,'undo_completion')
+    member(other,p,'view_project','edit_project','approve_project')
     p.scope_description='';p.contract_amount=None;p.save()
     c=client_for(owner);c.defaults['HTTP_ACCEPT_LANGUAGE']=language
     collection=base(p)+'change-requests/'

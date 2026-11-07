@@ -432,6 +432,7 @@ class TestSegregationOfDuties:
         self, admin_superuser, project,
     ):
         """Superuser break-glass allows approving even if superuser created and submitted it."""
+        make_member(project, admin_superuser, permissions=['view_reports', 'approve_reports'])
         report = DisciplineSubReport.objects.create(
             project=project,
             unit='buildings',
@@ -448,7 +449,7 @@ class TestSegregationOfDuties:
         client = make_client(admin_superuser)
         base = BASE.format(project_id=project.id, unit='buildings')
 
-        res = client.post(f'{base}{report.id}/approve/')
+        res = client.post(f'{base}{report.id}/approve/', {'break_glass_reason': 'Emergency approval documented'}, format='json')
         assert res.status_code == status.HTTP_200_OK
         assert res.data['status'] == SubReportStatus.APPROVED
         assert res.data['audit']['approved_by']['id'] == str(admin_superuser.id)

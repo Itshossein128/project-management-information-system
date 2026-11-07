@@ -22,7 +22,7 @@ def test_create_ipc(finance_client, project, contract):
     assert resp.data['ipc_number'] == 1
 
 
-def test_ipc_workflow_creates_cash_transaction(finance_client, project, ipc, user):
+def test_ipc_workflow_creates_cash_transaction(finance_client, finance_approver_client, project, ipc, user):
     ipc.gross_amount = Decimal('1000000')
     ipc.net_amount = Decimal('800000')
     ipc.save(update_fields=['gross_amount', 'net_amount'])
@@ -32,7 +32,7 @@ def test_ipc_workflow_creates_cash_transaction(finance_client, project, ipc, use
     assert submit.status_code == 200
     assert submit.data['status'] == 'submitted'
 
-    approve = finance_client.post(f'{base}/approve/')
+    approve = finance_approver_client.post(f'{base}/approve/')
     assert approve.status_code == 200
     assert approve.data['status'] == 'approved'
 

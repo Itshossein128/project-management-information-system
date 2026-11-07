@@ -26,6 +26,7 @@ def test_old_exact_result_precedes_current_state_but_new_request_cannot_apply(op
 @pytest.mark.parametrize('operation',['resume','undo_completion'])
 def test_owned_lookup_recovers_real_commit_privately_under_current_authority(operation):
     user=actor(admin=True);other=actor(admin=True);p=source_project(user,operation);c=client_for(user);body=confirmed_body(c,p,operation)
+    member(other,p,'view_project','edit_project')
     actual=post(c,p,operation,body);assert actual.status_code==200 and ProjectStatusUndo.objects.filter(project=p,request_id=body['request_id']).exists()
     p.refresh_from_db();lifecycle.archive(p,user)
     url=base(p)+f"status-undo-attempts/{operation}/{body['request_id']}/"
@@ -34,7 +35,7 @@ def test_owned_lookup_recovers_real_commit_privately_under_current_authority(ope
     assert result['Cache-Control']=='no-store'
     private=client_for(other).get(url);assert private.data['outcome']=='not_recorded' and private.data['receipt'] is None
     absent=c.get(base(p)+f'status-undo-attempts/{operation}/{uuid4()}/');assert absent.data['outcome']=='not_recorded'
-    user.groups.clear();assert c.get(url).status_code==403
+    user.groups.clear();p.members.filter(user=user).update(status='inactive');assert c.get(url).status_code==403
 
 
 def test_canonical_decoded_context_has_no_clock_cutoff_and_no_cross_scope():
@@ -46,7 +47,7 @@ def test_canonical_decoded_context_has_no_clock_cutoff_and_no_cross_scope():
     other=actor(admin=True);assert post(client_for(other),p,'resume',body).status_code==403
     foreign=source_project(user);assert post(c,foreign,'resume',body).status_code==403
     assert post(c,p,'undo_completion',body).status_code==403
-    user.groups.clear();assert post(c,p,'resume',body).status_code==403
+    user.groups.clear();p.members.filter(user=user).update(status='inactive');assert post(c,p,'resume',body).status_code==403
 
 @pytest.mark.parametrize('corruption',['foreign','kind','version','association'])
 def test_invalid_original_audit_cannot_be_used(corruption):

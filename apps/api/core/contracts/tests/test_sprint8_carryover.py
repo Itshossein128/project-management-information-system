@@ -205,7 +205,7 @@ def test_ipc_pay_twice_updates_existing_transaction(finance_client, project, ipc
 
 
 def test_monitor_ipc_payment_delays_notifies_finance_and_pm(
-    db, project, contract, user, other_user, finance_manager_role, project_manager_role
+    db, project, contract, user, other_user, finance_manager_role, project_manager_role, contract_alert_rules
 ):
     finance_member = ProjectMember.objects.get(project=project, user=user)
     ProjectMemberRole.objects.create(member=finance_member, role=finance_manager_role)
@@ -247,7 +247,7 @@ def test_monitor_ipc_payment_delays_skips_paid_ipc(db, project, contract, user, 
     assert Notification.objects.filter(project=project).count() == 0
 
 
-def test_monitor_guarantee_expiry_within_threshold(db, project, user, finance_manager_role):
+def test_monitor_guarantee_expiry_within_threshold(db, project, user, finance_manager_role, contract_alert_rules):
     member = ProjectMember.objects.get(project=project, user=user)
     ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     Contract.objects.create(

@@ -51,7 +51,7 @@ def control_budget(db, project, wbs, user):
 @pytest.mark.django_db
 class TestBudgetChangeRequestRequired:
     def test_cannot_approve_revised_when_control_exists(
-        self, auth_client, costs_base, control_budget, wbs
+        self, auth_client, project_approver_client, costs_base, control_budget, wbs
     ):
         create = auth_client.post(
             f'{costs_base}budget-versions/',
@@ -73,7 +73,7 @@ class TestBudgetChangeRequestRequired:
         assert line.status_code == status.HTTP_201_CREATED
         submit = auth_client.post(f'{costs_base}budget-versions/{vid}/submit/', {}, format='json')
         assert submit.status_code == status.HTTP_200_OK
-        approve = auth_client.post(f'{costs_base}budget-versions/{vid}/approve/', {}, format='json')
+        approve = project_approver_client.post(f'{costs_base}budget-versions/{vid}/approve/', {}, format='json')
         assert approve.status_code == status.HTTP_400_BAD_REQUEST
         assert approve.data.get('code') == 'budget_change_request_required' or (
             'budget_change_request_required' in str(approve.data)
@@ -119,7 +119,7 @@ class TestProjectCeiling:
             'project_ceiling_exceeded' in str(resp.data)
         )
 
-    def test_cr_approve_can_raise_ceiling(self, auth_client, costs_base, control_budget):
+    def test_cr_approve_can_raise_ceiling(self, auth_client, project_approver_client, costs_base, control_budget):
         _version, line = control_budget
         create = auth_client.post(
             f'{costs_base}budget-change-requests/',
@@ -140,7 +140,7 @@ class TestProjectCeiling:
         assert create.status_code == status.HTTP_201_CREATED
         cr_id = create.data['id']
         auth_client.post(f'{costs_base}budget-change-requests/{cr_id}/submit/', {}, format='json')
-        approve = auth_client.post(
+        approve = project_approver_client.post(
             f'{costs_base}budget-change-requests/{cr_id}/approve/', {}, format='json'
         )
         assert approve.status_code == status.HTTP_200_OK, approve.content

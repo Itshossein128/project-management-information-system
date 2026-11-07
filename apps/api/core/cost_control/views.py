@@ -258,7 +258,7 @@ class ActualCostViewSet(CostScopedViewSet):
 
         actual = self.get_object()
         try:
-            approve_actual_cost(
+            actual = approve_actual_cost(
                 actual,
                 request.user,
                 break_glass_reason=(request.data or {}).get('break_glass_reason'),

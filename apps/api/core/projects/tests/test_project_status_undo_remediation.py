@@ -10,6 +10,7 @@ def snapshot(project):
 @pytest.mark.parametrize('changes',[{'scope_description':'Fixed scope'},{'contract_amount':'0'},{'scope_description':'Scope','contract_amount':'25.00'}])
 def test_completed_repair_is_bound_missing_only_and_other_approved(changes):
     owner=actor(admin=True);other=actor(admin=True);p=source_project(owner,'undo_completion');c=client_for(owner)
+    member(other,p,'view_project','edit_project','approve_project')
     p.scope_description='';p.contract_amount=None;p.project_manager=None;p.save()
     budget=(p.budget_approved_at,p.budget_approved_by_id)
     r=c.post(base(p)+'change-requests/',{'reason':'Repair missing activation data','proposed_changes':changes},format='json')
@@ -28,6 +29,7 @@ def test_completed_repair_is_bound_missing_only_and_other_approved(changes):
 def test_stale_binding_rejects_without_partial_write(action,invalid):
     from projects import change_request_service as crs
     owner=actor(admin=True);other=actor(admin=True);p=source_project(owner,'undo_completion');p.scope_description='';p.save()
+    member(other,p,'view_project','edit_project','approve_project')
     cr=crs.create_change_request(project=p,user=owner,reason='Repair missing activation scope',proposed_changes={'scope_description':'Restored'})
     if action=='approve':cr=crs.submit_change_request(cr,owner)
     if invalid=='filled':p.scope_description='Independently repaired';p.save()

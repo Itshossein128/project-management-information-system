@@ -217,7 +217,7 @@ class TestProgressService:
         actual.cbs = cbs
         actual.save(update_fields=['cbs', 'updated_at'])
         # Final approval must use a different actor from the cost creator.
-        approve_actual_cost(actual, other_user)
+        actual = approve_actual_cost(actual, other_user)
         assert actual.approved_by_id == other_user.id
         assert project.id in calls
 

@@ -110,7 +110,7 @@ class CommitmentViewSet(ProjectScopedViewSet):
         commitment = self.get_object()
         reason = (request.data or {}).get('break_glass_reason')
         try:
-            approve_commitment(
+            commitment = approve_commitment(
                 commitment,
                 request.user,
                 break_glass_reason=reason,

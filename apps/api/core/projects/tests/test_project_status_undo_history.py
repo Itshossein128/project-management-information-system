@@ -25,6 +25,7 @@ def test_safe_projection_never_serializes_internal_snapshot_extensions():
 
 def test_history_view_only_scope_and_original_undo_snapshots_survive_rename_account_deletion():
     owner=actor(admin=True);undoer=actor(admin=True);p=source_project(owner);original=p.suspension_event
+    membership=member(undoer,p,'view_project','edit_project')
     result=apply(undoer,p);receipt=result['receipt']
     viewer=actor();member(viewer,p,'view_project');c=client_for(viewer)
     response=c.get(base(p)+'status-undo-history/');assert response.status_code==200,getattr(response,'data',response.content)
@@ -33,7 +34,7 @@ def test_history_view_only_scope_and_original_undo_snapshots_survive_rename_acco
     assert receipt['source_event']['occurred_at']==original.created_at.isoformat() and receipt['source_event']['from_status']=='active' and receipt['from_status']=='suspended'
     assert c.get(base(p)+'resume-preview/').status_code==403
     assert client_for(actor()).get(base(p)+'status-undo-history/').status_code==403
-    p.project_name='Renamed after correction';p.save(update_fields=['project_name']);undoer.delete()
+    p.project_name='Renamed after correction';p.save(update_fields=['project_name']);membership.delete();undoer.delete()
     response=c.get(base(p)+'status-undo-history/');assert response['Cache-Control']=='no-store' and response.data['results']==[receipt]
     assert receipt['project_name']!='Renamed after correction'
     source_id=original.pk;p.delete();original.refresh_from_db();assert original.pk==source_id and original.project_id is None

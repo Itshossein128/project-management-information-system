@@ -42,9 +42,12 @@ def test_send_ipc_delay_notification(db, project, contract, user, finance_manage
     )
     send_ipc_delay_notification(str(ipc.id), 7)
     assert Notification.objects.filter(project=project).exists()
+    count = Notification.objects.filter(project=project).count()
+    send_ipc_delay_notification(str(ipc.id), 7)
+    assert Notification.objects.filter(project=project).count() == count
 
 
-def test_monitor_ipc_payment_delays(db, project, contract, user, finance_manager_role):
+def test_monitor_ipc_payment_delays(db, project, contract, user, finance_manager_role, contract_alert_rules):
     member = ProjectMember.objects.get(project=project, user=user)
     ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     IPC.objects.create(
@@ -61,7 +64,7 @@ def test_monitor_ipc_payment_delays(db, project, contract, user, finance_manager
     assert Notification.objects.filter(project=project).exists()
 
 
-def test_monitor_guarantee_expiry(db, project, user, finance_manager_role):
+def test_monitor_guarantee_expiry(db, project, user, finance_manager_role, contract_alert_rules):
     member = ProjectMember.objects.get(project=project, user=user)
     ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     Contract.objects.create(
@@ -69,9 +72,11 @@ def test_monitor_guarantee_expiry(db, project, user, finance_manager_role):
         contract_number='G-1',
         status=ContractStatus.ACTIVE,
         performance_guarantee_expiry=date.today() + timedelta(days=7),
+        advance_guarantee_expiry=date.today() + timedelta(days=5),
         created_by=user,
         updated_by=user,
     )
     monitor_guarantee_expiry()
     assert AlertLog.objects.filter(project=project, message__contains='حسن انجام کار').exists()
+    assert AlertLog.objects.filter(project=project, message__contains='پیش‌پرداخت').exists()
     assert Notification.objects.filter(project=project).exists()

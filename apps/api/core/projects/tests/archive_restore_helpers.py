@@ -25,6 +25,19 @@ def client_for(user):
     return client
 
 
+def grant_project_access(user, project):
+    """Lifecycle writers need active project permissions in addition to their account role."""
+    from master_data.models import ProjectMember, ProjectMemberPermissionOverride
+    member, _ = ProjectMember.objects.get_or_create(
+        user=user, project=project, defaults={'status': 'active'},
+    )
+    for code in ('view_project', 'edit_project', 'approve_project'):
+        ProjectMemberPermissionOverride.objects.update_or_create(
+            member=member, permission_codename=code, defaults={'is_granted': True},
+        )
+    return member
+
+
 def ready_project(user, origin='active'):
     project = Project.objects.create(
         project_code=uuid4().hex[:20], project_name='Archive test project',
@@ -32,6 +45,7 @@ def ready_project(user, origin='active'):
         contract_amount=Decimal('1000.00'), budget_approved_at=timezone.now(),
         budget_approved_by=user, status='active',
     )
+    grant_project_access(user, project)
 
     if origin == 'suspended': project = lifecycle_service.suspend(project, user)
     elif origin == 'completed': project = lifecycle_service.complete(project, user)

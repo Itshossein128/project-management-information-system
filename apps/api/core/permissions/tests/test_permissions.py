@@ -30,12 +30,13 @@ class TestPermissions:
         )
         assert response.status_code == 201
 
-    def test_project_manager_has_all_permissions(self, project, user):
+    def test_project_manager_has_declared_defaults(self, project, user):
         member = project.members.get(user=user)
-        from permissions.constants import ALL_PERMISSION_CODENAMES
+        from permissions.constants import DEFAULT_ROLE_PERMISSIONS
 
-        for codename in ALL_PERMISSION_CODENAMES:
+        for codename in DEFAULT_ROLE_PERMISSIONS['project_manager']:
             assert member.has_permission(codename) is True
+        assert member.has_permission('view_person_contacts') is False
 
     def test_custom_override_deny(self, member):
         set_permission_override(member, 'view_project', False)

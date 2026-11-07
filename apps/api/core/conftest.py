@@ -108,6 +108,19 @@ def project(db, user, project_manager_role):
 
 
 @pytest.fixture
+def project_approver_client(other_user, project, project_manager_role):
+    from rest_framework.test import APIClient
+
+    member, _ = ProjectMember.objects.get_or_create(
+        project=project, user=other_user, defaults={'status': MemberStatus.ACTIVE},
+    )
+    ProjectMemberRole.objects.get_or_create(member=member, role=project_manager_role)
+    client = APIClient()
+    client.force_authenticate(user=other_user)
+    return client
+
+
+@pytest.fixture
 def member(db, project, other_user, viewer_role):
     m = ProjectMember.objects.create(
         project=project,

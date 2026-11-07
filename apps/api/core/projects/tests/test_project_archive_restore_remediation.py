@@ -1,6 +1,6 @@
 import pytest
 from projects.models import Project, ProjectChangeRequest
-from .archive_restore_helpers import actor, archived_project, client_for, base
+from .archive_restore_helpers import actor, archived_project, client_for, base, grant_project_access
 from .test_project_archive_restore import confirmation, body
 pytestmark=pytest.mark.django_db
 
@@ -9,8 +9,20 @@ def incomplete(u):
     p=archived_project(u);p.project_manager=None;p.scope_description='';p.contract_amount=None;p.save();return p
 
 
-def test_nonmember_admin_can_complete_information_through_existing_controls():
+def test_nonmember_admin_cannot_write_restore_remediation():
+    from master_data.models import ProjectMember
+    from .archive_restore_helpers import state
+    owner=actor(admin=True);observer=actor(admin=True);p=incomplete(owner);c=client_for(observer)
+    assert not ProjectMember.objects.filter(project=p,user=observer).exists()
+    before=state(p)
+    assert c.patch(base(p),{'scope_description':'Changed'},format='json').status_code==403
+    assert c.post(base(p)+'change-requests/',{'reason':'Restore information','proposed_changes':{'scope_description':'Changed'}},format='json').status_code==403
+    assert state(p)==before and not ProjectChangeRequest.objects.filter(project=p).exists()
+
+
+def test_member_admin_can_complete_information_through_existing_controls():
     requester=actor(admin=True);approver=actor(admin=True);p=incomplete(requester);c=client_for(requester)
+    grant_project_access(approver, p)
     stamps=(p.budget_approved_at,p.budget_approved_by_id)
     r=c.patch(base(p),{'scope_description':'Direct bypass'},format='json');assert r.status_code==400
     r=c.post(base(p)+'change-requests/',{'reason':'Complete missing approved information','proposed_changes':{'scope_description':'Restored scope','contract_amount':'0.00'}},format='json')
@@ -48,9 +60,9 @@ def test_bound_remediation_rechecks_current_context_without_partial_writes(actio
     from .archive_restore_helpers import state
     requester=actor(admin=True);approver=actor(admin=True);p=incomplete(requester)
     for user in (requester,approver):
-        member=ProjectMember.objects.create(project=p,user=user,status='active')
+        member, _=ProjectMember.objects.get_or_create(project=p,user=user,defaults={'status':'active'})
         for code in ('view_project','edit_project','approve_project'):
-            ProjectMemberPermissionOverride.objects.create(member=member,permission_codename=code,is_granted=True)
+            ProjectMemberPermissionOverride.objects.update_or_create(member=member,permission_codename=code,defaults={'is_granted':True})
     c=client_for(requester)
     response=c.post(base(p)+'change-requests/',{'reason':'Repair this exact archive cycle','proposed_changes':{'scope_description':'Completed scope','contract_amount':'100.00'}},format='json')
     assert response.status_code==201,response.content

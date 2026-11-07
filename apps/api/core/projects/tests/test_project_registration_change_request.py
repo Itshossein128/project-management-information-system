@@ -49,6 +49,8 @@ class TestProjectRegistrationChangeRequest:
         from django.contrib.auth.models import Group
         from rest_framework.test import APIClient
         other_user.groups.add(Group.objects.get_or_create(name='admin')[0])
+        from projects.tests.archive_restore_helpers import grant_project_access
+        grant_project_access(other_user, project)
         approver = APIClient()
         approver.force_authenticate(other_user)
         approve = approver.post(f'{base}{cr_id}/approve/')

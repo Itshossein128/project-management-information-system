@@ -51,6 +51,10 @@ class DepartmentActivityReportsTests(TestCase):
         self.contractor_b = make_active_contractor(self.project, self.user, name='نوین بتن')
 
         self.client.force_authenticate(user=self.user)
+        member = ProjectMember.objects.create(project=self.project, user=self.user, status='active')
+        from master_data.models import ProjectMemberPermissionOverride
+        for code in ('view_reports', 'edit_reports'):
+            ProjectMemberPermissionOverride.objects.create(member=member, permission_codename=code, is_granted=True)
 
     def test_executed_quantity_model_and_serializer(self):
         """FR-001: Model & serializer persist positive decimal executed_quantity with 3 decimals."""

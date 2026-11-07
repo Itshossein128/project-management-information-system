@@ -2,12 +2,19 @@ import pytest
 from decimal import Decimal
 
 from contracts.models import Contract, ContractItem, ContractType, IPC, IPCItem, IPCStatus
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole
 
 
 @pytest.fixture
-def finance_manager_role(db):
-    return Role.objects.get(role_name='finance_manager')
+def contract_alert_rules(db):
+    from alerts.models import AlertRule
+
+    for alert_type, threshold in (('ipc_payment_overdue', 0), ('guarantee_expiring', 30)):
+        AlertRule.objects.get_or_create(
+            project=None, alert_type=alert_type,
+            defaults={'name': alert_type, 'threshold': threshold,
+                      'notify_roles': 'project_manager,finance_manager'},
+        )
 
 
 @pytest.fixture
@@ -16,6 +23,19 @@ def finance_client(api_client, user, project, finance_manager_role):
     ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
     api_client.force_authenticate(user=user)
     return api_client
+
+
+@pytest.fixture
+def finance_approver_client(other_user, project, finance_manager_role):
+    from rest_framework.test import APIClient
+
+    member = ProjectMember.objects.create(
+        project=project, user=other_user, status=MemberStatus.ACTIVE,
+    )
+    ProjectMemberRole.objects.create(member=member, role=finance_manager_role)
+    client = APIClient()
+    client.force_authenticate(user=other_user)
+    return client
 
 
 @pytest.fixture
