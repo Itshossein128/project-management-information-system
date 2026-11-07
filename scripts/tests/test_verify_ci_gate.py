@@ -194,6 +194,8 @@ def test_verify_ci_gate_no_runs_found_timeout():
 
 
 def test_main_cli_missing_args(monkeypatch):
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
     monkeypatch.setattr(sys, "argv", ["verify_ci_gate.py"])
     exit_code = verify_ci_gate.main()
     assert exit_code == 2
