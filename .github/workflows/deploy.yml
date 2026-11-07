@@ -47,7 +47,7 @@ jobs:
             --sha "$COMMIT_SHA" \
             --workflow-name "CI" \
             --required-jobs "web,api" \
-            --timeout 1200 \
+            --timeout 3600 \
             --poll-interval 15
 
   deploy:

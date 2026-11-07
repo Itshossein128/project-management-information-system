@@ -5,6 +5,7 @@ import time
 import pytest
 from django.db import connections,close_old_connections,transaction
 from projects.tests.status_undo_helpers import *
+from projects.tests.archive_restore_helpers import grant_project_access
 from projects.models import Project,ProjectStatusUndo
 from projects import status_undo_service as service, change_request_service as crs
 from audit.models import AuditLog
@@ -14,6 +15,7 @@ pytestmark=pytest.mark.django_db(transaction=True,serialized_rollback=True)
 @pytest.mark.parametrize('different_request,different_actor',[(False,False),(True,False),(False,True),(True,True)])
 def test_parallel_requests_commit_one_success(operation,different_request,different_actor):
     user=actor(admin=True);other=actor(admin=True) if different_actor else user;p=source_project(user,operation)
+    if different_actor:grant_project_access(other,p)
     first=confirmed_body(client_for(user),p,operation);second=confirmed_body(client_for(other),p,operation)
     second['request_id']=str(uuid4()) if different_request else first['request_id']
     if not different_actor:second['confirmation_token']=first['confirmation_token']
@@ -35,12 +37,13 @@ def test_parallel_requests_commit_one_success(operation,different_request,differ
 @pytest.mark.parametrize('first',['undo','writer'])
 def test_project_writers_serialize_with_both_root_lock_orders(monkeypatch,operation,writer,first):
     user=actor(superuser=True);p=ready_project(user)
-    cr=None
+    cr=None;cr_approver=user
     if writer=='bound_cr':
         p=lifecycle.complete(p,user);p.scope_description='';p.save(update_fields=['scope_description'])
     if writer in ('cr','bound_cr'):
         cr=crs.create_change_request(project=p,user=user,reason='Existing scope correction',proposed_changes={'scope_description':'Approved independent scope'})
         cr=crs.submit_change_request(cr,user)
+        cr_approver=actor(superuser=True);grant_project_access(cr_approver,p)
     if writer!='bound_cr':p=lifecycle.suspend(p,user) if operation=='resume' else lifecycle.complete(p,user)
     body=confirmed_body(client_for(user),p,operation)
     restore_body=None
@@ -61,7 +64,7 @@ def test_project_writers_serialize_with_both_root_lock_orders(monkeypatch,operat
     def send(action):
         close_old_connections()
         try:
-            c=client_for(user)
+            c=client_for(cr_approver if writer in ('cr','bound_cr') and action!='undo' else user)
             if action=='undo':return c.post(base(p)+('resume/' if operation=='resume' else 'undo-completion/'),body,format='json').status_code
             if writer=='name':return c.patch(base(p),{'project_name':'Independent rename'},format='json').status_code
             if writer=='manager':return c.patch(base(p),{'project_manager':None},format='json').status_code
@@ -115,7 +118,9 @@ def test_authority_revoked_while_waiting_is_rechecked(monkeypatch,operation):
         finally:connections.close_all()
     with ThreadPoolExecutor(max_workers=1) as pool:
         pending=pool.submit(send)
-        try:assert entered.wait(10);user.groups.clear()
+        try:
+            assert entered.wait(10);user.groups.clear()
+            p.members.filter(user=user).update(status='inactive')
         finally:release.set()
         assert pending.result(timeout=15)==403
     assert not p.status_undos.exists()
