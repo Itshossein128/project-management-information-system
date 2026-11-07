@@ -462,6 +462,10 @@ class TestUnitReportConcurrency:
 
         conc_user.is_superuser = True
         conc_user.save(update_fields=['is_superuser'])
+        from master_data.models import ProjectMember, ProjectMemberPermissionOverride
+        for actor, permission in ((conc_user, 'edit_reports'), (conc_reviewer, 'approve_reports')):
+            membership = ProjectMember.objects.create(project=conc_project, user=actor, status='active')
+            ProjectMemberPermissionOverride.objects.create(member=membership, permission_codename=permission, is_granted=True)
         report = DisciplineSubReport.objects.create(
             project=conc_project, unit=SpecialtyUnit.BUILDINGS, discipline='civil',
             report_date=date(2026, 10, 21), status=SubReportStatus.SUBMITTED, is_current=True,

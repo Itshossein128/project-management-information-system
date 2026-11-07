@@ -52,7 +52,7 @@ def test_forward_reverse_preserves_valid_project():
     p = ready_project(actor())
     original = (p.project_name, p.scope_description, p.contract_amount)
     before = [('projects', '0014_reportexportversion')]
-    after = MigrationExecutor(connection).loader.graph.leaf_nodes('projects')
+    after = MigrationExecutor(connection).loader.graph.leaf_nodes()
     try:
         executor = MigrationExecutor(connection)
         executor.migrate(before)
@@ -111,7 +111,7 @@ def test_final_schema_reverse_after_real_restore_preserves_business_data():
     assert receipt.restored_at==receipt.audit_log.created_at
     assert receipt.audit_log.changes['actor']==receipt.actor_snapshot
     audit_id=receipt.audit_log_id
-    latest=MigrationExecutor(connection).loader.graph.leaf_nodes('projects')
+    latest=MigrationExecutor(connection).loader.graph.leaf_nodes()
     try:
         executor=MigrationExecutor(connection);executor.migrate([('projects','0014_reportexportversion')])
         old=executor.loader.project_state([('projects','0014_reportexportversion')]).apps
