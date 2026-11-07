@@ -100,18 +100,26 @@ jobs:
       CELERY_TASK_ALWAYS_EAGER: "true"
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.2"
+          cache: false
       - name: Start MinIO for API integration tests
         run: |
-          docker run -d --name ci-minio -p 9000:9000 \
-            -e MINIO_ROOT_USER=ipcas -e MINIO_ROOT_PASSWORD=ipcas-secret \
-            quay.io/minio/minio:latest server /data
+          # Upstream community container images are no longer publicly available.
+          # Build a fixed upstream release instead of relying on a third-party image.
+          export GOBIN="$RUNNER_TEMP/minio-bin"
+          go install github.com/minio/minio@RELEASE.2025-09-07T16-13-09Z
+          MINIO_ROOT_USER=ipcas MINIO_ROOT_PASSWORD=ipcas-secret MINIO_BROWSER=off \
+            "$GOBIN/minio" server "$RUNNER_TEMP/minio-data" --address 127.0.0.1:9000 \
+            > "$RUNNER_TEMP/minio.log" 2>&1 &
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://localhost:9000/minio/health/live; then
               exit 0
             fi
             sleep 1
           done
-          docker logs ci-minio
+          cat "$RUNNER_TEMP/minio.log"
           exit 1
       - uses: actions/setup-python@v7
         with:
