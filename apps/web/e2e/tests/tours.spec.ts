@@ -31,6 +31,7 @@ const TOURS = [
   { id: "project-contracts", path: "contracts" },
   { id: "project-contract-detail", path: "contracts/mock-contract-id" },
   { id: "project-ipc-detail", path: "ipcs/mock-ipc-id" },
+  { id: "project-barriers", path: "barriers" },
 ] as const;
 
 /** An untranslated step renders the raw i18n key instead of a sentence. */
@@ -96,6 +97,27 @@ test.describe("Product tours", () => {
           net_amount: 135000000,
           items: [],
           deductions: [],
+        }),
+      });
+    });
+
+    await page.route(/\/api\/v1\/projects\/[^\/]+\/barriers\//, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          count: 1,
+          results: [
+            {
+              id: "mock-barrier-id",
+              log_date: "1402/10/15",
+              category: "weather",
+              description: "بارندگی شدید و تعلیق عملیات بتن‌ریزی",
+              impact_on_schedule: true,
+              impact_on_cost: false,
+              status: "open",
+            },
+          ],
         }),
       });
     });
