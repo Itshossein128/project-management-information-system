@@ -3,7 +3,7 @@ import pytest
 from django.apps import apps
 from django.db import IntegrityError, transaction
 from projects.models import Project
-from .archive_restore_helpers import actor, ready_project
+from .archive_restore_helpers import actor, ready_project, migration_restore_targets
 
 pytestmark = pytest.mark.django_db
 
@@ -52,7 +52,7 @@ def test_forward_reverse_preserves_valid_project():
     p = ready_project(actor())
     original = (p.project_name, p.scope_description, p.contract_amount)
     before = [('projects', '0014_reportexportversion')]
-    after = MigrationExecutor(connection).loader.graph.leaf_nodes()
+    after = migration_restore_targets(MigrationExecutor(connection), before)
     try:
         executor = MigrationExecutor(connection)
         executor.migrate(before)
@@ -111,10 +111,11 @@ def test_final_schema_reverse_after_real_restore_preserves_business_data():
     assert receipt.restored_at==receipt.audit_log.created_at
     assert receipt.audit_log.changes['actor']==receipt.actor_snapshot
     audit_id=receipt.audit_log_id
-    latest=MigrationExecutor(connection).loader.graph.leaf_nodes()
+    prior_targets=[('projects','0014_reportexportversion')]
+    latest=migration_restore_targets(MigrationExecutor(connection), prior_targets)
     try:
-        executor=MigrationExecutor(connection);executor.migrate([('projects','0014_reportexportversion')])
-        old=executor.loader.project_state([('projects','0014_reportexportversion')]).apps
+        executor=MigrationExecutor(connection);executor.migrate(prior_targets)
+        old=executor.loader.project_state(prior_targets).apps
         assert old.get_model('projects','Project').objects.get(pk=p.pk).status=='active'
         # Current CR model contains a field intentionally removed by reversal; use historical model for it.
         assert old.get_model('projects','ProjectChangeRequest').objects.get(pk=records[-2].pk).status=='approved'

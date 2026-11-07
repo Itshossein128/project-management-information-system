@@ -1,6 +1,7 @@
 import pytest
 from django.db import IntegrityError, transaction
 from projects.tests.status_undo_helpers import actor,ready_project
+from projects.tests.archive_restore_helpers import migration_restore_targets
 
 pytestmark=pytest.mark.django_db
 
@@ -73,7 +74,7 @@ def test_0016_forward_reverse_preserves_prior_business_and_archive_receipt():
     receipt=ProjectArchiveRestore.objects.create(project=project,archive_cycle_id=uuid4(),request_id=uuid4(),request_fingerprint='a'*64,confirmation_version=0,actor=user,actor_snapshot={'id':str(user.pk)},project_snapshot={'project_name':project.project_name},reason='Prior archive restoration',from_status='archived',to_status='active',restored_at=audit.created_at,audit_log=audit)
     saved=ProjectArchiveRestore.objects.filter(pk=receipt.pk).values().get()
     old=[('projects','0016_bind_archive_remediation')]
-    executor=MigrationExecutor(connection);latest=executor.loader.graph.leaf_nodes()
+    executor=MigrationExecutor(connection);latest=migration_restore_targets(executor, old)
     try:
         executor.migrate(old)
         historical=executor.loader.project_state(old).apps
@@ -105,10 +106,10 @@ def test_reverse_after_real_undos_and_bound_repair_preserves_old_business_and_al
     v=undo.preview(p,owner,'undo_completion');undo.undo(p,owner,'undo_completion',request_id=uuid4(),confirmation_token=v['confirmation_token'],reason='Correct completion');p.refresh_from_db()
     assert ProjectStatusUndo.objects.filter(project=p).count()==2 and repair.restore_completion_event_id==p.completion_event_id
     records += [clear,repair];before=business_snapshot(records)
-    root=Project.objects.filter(pk=p.pk).values().get();old_fields={k:v for k,v in root.items() if k not in {'suspension_event_id','completion_event_id','completed_from_status'}}
+    root=Project.objects.filter(pk=p.pk).values().get();old_fields={k:v for k,v in root.items() if k not in {'suspension_event_id','completion_event_id','completed_from_status','contractor_ref_id'}}
     audits=list(AuditLog.objects.filter(project=p).order_by('id').values());archives=list(ProjectArchiveRestore.objects.filter(project=p).values())
     draft=ready_project(owner);draft.status='draft';draft.save();archived=life.archive(ready_project(owner),owner)
-    old=[('projects','0016_bind_archive_remediation')];latest=MigrationExecutor(connection).loader.graph.leaf_nodes()
+    old=[('projects','0016_bind_archive_remediation')];latest=migration_restore_targets(MigrationExecutor(connection), old)
     try:
         executor=MigrationExecutor(connection);executor.migrate(old);apps=executor.loader.project_state(old).apps
         assert apps.get_model('projects','Project').objects.filter(pk=p.pk).values().get()==old_fields
@@ -126,7 +127,7 @@ def test_reverse_after_real_undos_and_bound_repair_preserves_old_business_and_al
         if label=='projects.ProjectChangeRequest':
             rows=[{k:v for k,v in row.items() if k!='restore_completion_event_id'} for row in rows];old_rows=[{k:v for k,v in row.items() if k!='restore_completion_event_id'} for row in old_rows]
         assert rows==old_rows,label
-    assert Project.objects.filter(pk=p.pk).values().get()=={**old_fields,'suspension_event_id':None,'completion_event_id':None,'completed_from_status':None}
+    assert Project.objects.filter(pk=p.pk).values().get()=={**old_fields,'suspension_event_id':None,'completion_event_id':None,'completed_from_status':None,'contractor_ref_id':None}
     assert not ProjectStatusUndo.objects.filter(project=p).exists()
     assert list(AuditLog.objects.filter(project=p).order_by('id').values())==audits
     assert list(ProjectArchiveRestore.objects.filter(project=p).values())==archives

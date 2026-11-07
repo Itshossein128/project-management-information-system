@@ -38,6 +38,16 @@ def grant_project_access(user, project):
     return member
 
 
+def migration_restore_targets(executor, prior_targets):
+    """Restore every app actually rewound, including dependencies of project migrations."""
+    rewound_apps = {
+        migration.app_label
+        for migration, backwards in executor.migration_plan(prior_targets)
+        if backwards
+    }
+    return [node for node in executor.loader.graph.leaf_nodes() if node[0] in rewound_apps]
+
+
 def ready_project(user, origin='active'):
     project = Project.objects.create(
         project_code=uuid4().hex[:20], project_name='Archive test project',
