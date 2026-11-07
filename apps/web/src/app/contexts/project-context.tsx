@@ -4,6 +4,7 @@ import { fetchProject, type ProjectDetail } from "@/app/lib/api/projects";
 import { fetchMemberPermissions, fetchMembers } from "@/app/lib/api/members";
 import { useAuth } from "@/app/contexts/auth-context";
 import { ApiRequestError } from "@/app/lib/api-client";
+import { ROLES } from "@/config/roles";
 
 interface ProjectContextValue {
   project: ProjectDetail | undefined;
@@ -50,7 +51,7 @@ export function usePermission(projectId: string) {
   const { user } = useAuth();
   const userId = user?.id != null ? String(user.id) : undefined;
   const isObserver =
-    user?.roles?.includes("admin") === true || user?.is_superuser === true;
+    user?.roles?.includes(ROLES.ADMIN) === true || user?.is_superuser === true;
 
   const { data: members } = useQuery({
     queryKey: ["members", projectId],

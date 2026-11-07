@@ -83,18 +83,6 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 8
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: ipcas
-          MINIO_ROOT_PASSWORD: ipcas-secret
-        ports:
-          - 9000:9000
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       DATABASE_URL: postgres://ipcas:ipcas@localhost:5432/ipcas_test
       SECRET_KEY: ci-test-secret
@@ -112,6 +100,19 @@ jobs:
       CELERY_TASK_ALWAYS_EAGER: "true"
     steps:
       - uses: actions/checkout@v7
+      - name: Start MinIO for API integration tests
+        run: |
+          docker run -d --name ci-minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=ipcas -e MINIO_ROOT_PASSWORD=ipcas-secret \
+            quay.io/minio/minio:latest server /data
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://localhost:9000/minio/health/live; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs ci-minio
+          exit 1
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
