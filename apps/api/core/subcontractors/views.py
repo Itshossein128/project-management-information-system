@@ -82,13 +82,7 @@ class SubcontractorViewSet(SubScopedViewSet):
 
 
 class ScoreListCreateView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
-    required_permission = 'edit_contracts'
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
 
     @property
     def required_permission(self):
@@ -118,7 +112,7 @@ class ScoreListCreateView(APIView):
 
 
 class ScoreDetailView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_contracts'
 
     def patch(self, request, project_pk=None, pk=None, scid=None):
@@ -150,12 +144,7 @@ class ScoreDetailView(APIView):
 
 
 class WarningListCreateView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
-
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
-        return [IsAuthenticated(), HasProjectPermission()]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
 
     @property
     def required_permission(self):
