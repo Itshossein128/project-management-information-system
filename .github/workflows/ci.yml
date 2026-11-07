@@ -132,7 +132,8 @@ jobs:
           apps/api/.venv/bin/pip install -r apps/api/requirements.txt pytest pytest-django pytest-cov PyYAML
           echo "$GITHUB_WORKSPACE/apps/api/.venv/bin" >> "$GITHUB_PATH"
       - name: Gate and smoke runner regression tests
-        run: apps/api/.venv/bin/python -m pytest scripts/tests
+        timeout-minutes: 3
+        run: apps/api/.venv/bin/python -m pytest scripts/tests -vv -o faulthandler_timeout=30
       - run: python manage.py check
         working-directory: apps/api/core
       - run: python manage.py migrate --noinput
