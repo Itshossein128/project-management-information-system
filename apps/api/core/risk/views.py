@@ -93,15 +93,9 @@ class BarrierLogViewSet(ProjectScopedViewSet):
     def perform_create(self, serializer):
         super().perform_create(serializer, event_type=EventType.BARRIER)
 
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        validate_barrier_update(instance, serializer.validated_data)
-
-        self.perform_update(serializer)
-        return Response(serializer.data)
+    def perform_update(self, serializer):
+        validate_barrier_update(serializer.instance, serializer.validated_data)
+        super().perform_update(serializer)
 
 
 @extend_schema_view(
@@ -169,19 +163,13 @@ class RiskEventViewSet(ProjectScopedViewSet):
             qs = qs.filter(Q(event_date__lte=date_to) | Q(due_date__lte=date_to))
         return qs.order_by('-event_date', '-created_at')
 
-    def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
+    def perform_update(self, serializer):
         validate_risk_update(
-            instance,
+            serializer.instance,
             serializer.validated_data,
-            acknowledge_open_actions=bool(request.data.get('acknowledge_open_actions'))
+            acknowledge_open_actions=bool(self.request.data.get('acknowledge_open_actions'))
         )
-
-        self.perform_update(serializer)
-        return Response(serializer.data)
+        super().perform_update(serializer)
 
 
 class RiskMatrixView(APIView):
