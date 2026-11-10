@@ -87,18 +87,13 @@ class WorkflowDefinitionViewSet(WorkflowReadMixin, ProjectScopedViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         stages_validated = serializer.validated_data.pop('stages', [])
-        definition = WorkflowDefinition.objects.create(
+
+        definition = definition_service.create_definition(
             project_id=self.get_project_id(),
-            created_by=request.user,
-            updated_by=request.user,
-            **serializer.validated_data,
+            user=request.user,
+            validated_data=serializer.validated_data,
+            stages=stages_validated or stages,
         )
-        if stages_validated or stages:
-            definition_service.replace_stages(
-                definition,
-                stages_validated or stages,
-            )
-        definition.refresh_from_db()
         return Response(WorkflowDefinitionSerializer(definition).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
@@ -106,13 +101,13 @@ class WorkflowDefinitionViewSet(WorkflowReadMixin, ProjectScopedViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         stages = serializer.validated_data.pop('stages', None)
-        for key, value in serializer.validated_data.items():
-            setattr(instance, key, value)
-        instance.updated_by = request.user
-        instance.save()
-        if stages is not None:
-            definition_service.replace_stages(instance, stages)
-        instance.refresh_from_db()
+
+        instance = definition_service.update_definition(
+            definition=instance,
+            user=request.user,
+            validated_data=serializer.validated_data,
+            stages=stages,
+        )
         return Response(WorkflowDefinitionSerializer(instance).data)
 
 

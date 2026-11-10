@@ -46,6 +46,32 @@ def retire_definition(definition: WorkflowDefinition, user) -> WorkflowDefinitio
 
 
 @transaction.atomic
+def create_definition(project_id, user, validated_data: dict, stages: list[dict] = None) -> WorkflowDefinition:
+    definition = WorkflowDefinition.objects.create(
+        project_id=project_id,
+        created_by=user,
+        updated_by=user,
+        **validated_data,
+    )
+    if stages:
+        replace_stages(definition, stages)
+    definition.refresh_from_db()
+    return definition
+
+
+@transaction.atomic
+def update_definition(definition: WorkflowDefinition, user, validated_data: dict, stages: list[dict] | None = None) -> WorkflowDefinition:
+    for key, value in validated_data.items():
+        setattr(definition, key, value)
+    definition.updated_by = user
+    definition.save()
+    if stages is not None:
+        replace_stages(definition, stages)
+    definition.refresh_from_db()
+    return definition
+
+
+@transaction.atomic
 def replace_stages(definition: WorkflowDefinition, stages_data: list[dict]) -> WorkflowDefinition:
     definition.stages.all().delete()
     for row in stages_data:
