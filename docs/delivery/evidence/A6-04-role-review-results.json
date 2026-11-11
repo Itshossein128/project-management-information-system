@@ -1,0 +1,1828 @@
+{
+  "date": "2026-11-11",
+  "version_id": "057d15c60c48522f482ac04646d0241e4d96b321",
+  "tree_dirty": true,
+  "initial_run": {
+    "stats": {
+      "startTime": "2026-11-11T17:40:14.285Z",
+      "duration": 363621.28,
+      "expected": 20,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "test": "fa: create, assign, exception, revoke, and history through the screen",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 12335,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "en: create, assign, exception, revoke, and history through the screen",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 10438,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "project_manager: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19930,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "planning_engineer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19823,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "site_supervisor: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19968,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "field_supervisor: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 20809,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "finance_manager: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 23122,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "procurement_officer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 22353,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "document_controller: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 21825,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "viewer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19961,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "executive_approver: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19424,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "project_controls: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 20293,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "site_specialist: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 18691,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "supervisor_consultant: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 20968,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "hr_officer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 18544,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "viewer in B, inactive member, and nonmember cannot gain project write access",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 6095,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "edit-only activity user saves in the browser while delete and approval stay denied",
+        "outcome": "unexpected",
+        "results": [
+          {
+            "status": "failed",
+            "duration_ms": 15955,
+            "errors": [
+              "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed"
+            ]
+          }
+        ]
+      },
+      {
+        "test": "admin: organization authority stays separate from project writes",
+        "outcome": "unexpected",
+        "results": [
+          {
+            "status": "failed",
+            "duration_ms": 29759,
+            "errors": [
+              "Error: organization account creation",
+              "TimeoutError: locator.click: Timeout 15000ms exceeded."
+            ]
+          }
+        ]
+      },
+      {
+        "test": "hr: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 5657,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "superuser: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 5328,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "staff: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 4515,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "test": "visitor: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 5349,
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "role_observations": [
+      {
+        "actor": "project_manager",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "planning_engineer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "site_supervisor",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "field_supervisor",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "finance_manager",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "procurement_officer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "document_controller",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "viewer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "executive_approver",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "project_controls",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "site_specialist",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "supervisor_consultant",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      },
+      {
+        "actor": "hr_officer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/bb0e2610-dedf-49a0-acf3-d015f24c2ef3/daily-reports"
+          }
+        ],
+        "hydrationMessages": 10,
+        "otherErrors": []
+      }
+    ]
+  },
+  "overall_a6_04": "implemented_and_browser_verified",
+  "manual_browser_finding": "B01 resolved: project navigation now filters effective read permissions; final browser checks cover all 13 roles and grant/deny/project changes.",
+  "editor_recheck": {
+    "stats": {
+      "startTime": "2026-11-11T17:49:04.911Z",
+      "duration": 9412.344000000001,
+      "expected": 1,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "result": "passed",
+    "correction": "The original assertion looked for the activity name inside its code-only button. The corrected check verifies visible name and persisted API value; browser save and refused delete/approval passed."
+  },
+  "admin_recheck": {
+    "stats": {
+      "startTime": "2026-11-11T17:52:03.205Z",
+      "duration": 32334.099000000002,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "result": "blocked_test_environment",
+    "evidence": "Fresh isolated Vite browser failed to load react-dom/client and react-router/dom with HTTP 504 Outdated Optimize Dep. Initial admin attempt also recorded an invalid React hook. API account listing returned 200. No browser pass is claimed."
+  },
+  "confirmed_scenarios": 23,
+  "unconfirmed_scenarios": [],
+  "final_run": {
+    "stats": {
+      "startTime": "2026-11-11T18:52:18.561Z",
+      "duration": 329712.33900000004,
+      "expected": 23,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "test": "fa: create, assign, exception, revoke, and history through the screen",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 11755
+          }
+        ]
+      },
+      {
+        "test": "en: create, assign, exception, revoke, and history through the screen",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 10558
+          }
+        ]
+      },
+      {
+        "test": "project_manager: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 22844
+          }
+        ]
+      },
+      {
+        "test": "planning_engineer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 21361
+          }
+        ]
+      },
+      {
+        "test": "site_supervisor: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 21805
+          }
+        ]
+      },
+      {
+        "test": "field_supervisor: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 20944
+          }
+        ]
+      },
+      {
+        "test": "finance_manager: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 20644
+          }
+        ]
+      },
+      {
+        "test": "procurement_officer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19867
+          }
+        ]
+      },
+      {
+        "test": "document_controller: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 18800
+          }
+        ]
+      },
+      {
+        "test": "viewer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 18813
+          }
+        ]
+      },
+      {
+        "test": "executive_approver: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19541
+          }
+        ]
+      },
+      {
+        "test": "project_controls: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19619
+          }
+        ]
+      },
+      {
+        "test": "site_specialist: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19453
+          }
+        ]
+      },
+      {
+        "test": "supervisor_consultant: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 19839
+          }
+        ]
+      },
+      {
+        "test": "hr_officer: browser journeys and server parity",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 18819
+          }
+        ]
+      },
+      {
+        "test": "viewer in B, inactive member, and nonmember cannot gain project write access",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 5714
+          }
+        ]
+      },
+      {
+        "test": "navigation follows project changes and effective grant/deny overrides",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 11003
+          }
+        ]
+      },
+      {
+        "test": "edit-only activity user saves in the browser while delete and approval stay denied",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 5443
+          }
+        ]
+      },
+      {
+        "test": "admin: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 4733
+          }
+        ]
+      },
+      {
+        "test": "hr: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 4357
+          }
+        ]
+      },
+      {
+        "test": "superuser: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 4574
+          }
+        ]
+      },
+      {
+        "test": "staff: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 4020
+          }
+        ]
+      },
+      {
+        "test": "visitor: organization authority stays separate from project writes",
+        "outcome": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "duration_ms": 3977
+          }
+        ]
+      }
+    ],
+    "role_observations": [
+      {
+        "actor": "project_manager",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "planning_engineer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "site_supervisor",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "field_supervisor",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "finance_manager",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "procurement_officer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "document_controller",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "viewer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "executive_approver",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "project_controls",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "site_specialist",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "supervisor_consultant",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      },
+      {
+        "actor": "hr_officer",
+        "observations": [
+          {
+            "scope": "activities",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/activities"
+          },
+          {
+            "scope": "costs",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/costs"
+          },
+          {
+            "scope": "documents",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/documents"
+          },
+          {
+            "scope": "contracts",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/contracts"
+          },
+          {
+            "scope": "procurement",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/procurement"
+          },
+          {
+            "scope": "resource-allocations",
+            "read": true,
+            "http": 200,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/resource-allocations"
+          },
+          {
+            "scope": "daily-reports",
+            "read": false,
+            "http": 403,
+            "url": "/projects/7bdddebf-6ead-4b0f-9cd6-f942efbbe182/daily-reports"
+          }
+        ],
+        "hydrationMessages": 0,
+        "otherErrors": []
+      }
+    ],
+    "database": "velora_a6_p1_e2e_1794422884_512850",
+    "unit_tests_passed": 4,
+    "typecheck": "pass",
+    "web_build": "pass",
+    "technical_result": "pass",
+    "version_id": "057d15c60c48522f482ac04646d0241e4d96b321",
+    "tree_dirty": true
+  },
+  "delivery_page_verification": {
+    "url": "http://localhost:5173/delivery-plan",
+    "a6_implemented": 5,
+    "a6_remaining": 0,
+    "total_implemented": 25,
+    "total_remaining": 64,
+    "remaining_filter": "pass",
+    "runtime_errors": 0
+  }
+}

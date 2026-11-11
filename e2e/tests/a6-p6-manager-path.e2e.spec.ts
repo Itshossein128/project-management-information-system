@@ -66,6 +66,8 @@ for (const lang of ["fa", "en"] as const) {
   const person = lang === "fa" ? f.users.new : f.users.writer;
 
   test(`${lang}: create, assign, exception, revoke, and history through the screen`, async ({ page, request }) => {
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", error => runtimeErrors.push(error.message));
     const text = copy[lang];
     await browserLogin(page, lang);
     await page.goto(`/projects/${f.project_a}/settings/members`);
@@ -128,5 +130,6 @@ for (const lang of ["fa", "en"] as const) {
     await page.goto(`/projects/${f.project_a}/settings/access-history`);
     await expect(page.getByRole("heading", { name: text.history })).toBeVisible();
     await expect(page.getByRole("listitem").filter({ hasText: person.name }).first()).toBeVisible();
+    expect(runtimeErrors).toEqual([]);
   });
 }

@@ -15,21 +15,11 @@ export const languageNames: Record<SupportedLanguage, string> = {
 
 export const isRTL = (lang: string = i18n.language): boolean => lang === "fa";
 
-function resolveStoredLanguage(): SupportedLanguage | null {
-  if (typeof window === "undefined") return null;
-  const stored =
-    window.localStorage.getItem("app-language") ??
-    window.localStorage.getItem("i18nextLng");
-  if (stored === "fa" || stored === "en") return stored;
-  return null;
-}
-
 /**
  * Always boot with the same default on server + first client paint to avoid
  * hydration mismatches. I18nSync / language store then apply the stored lang.
  */
 const BOOT_LNG: SupportedLanguage = "fa";
-const initialStoredLanguage = resolveStoredLanguage();
 
 i18n
   .use(LanguageDetector)
@@ -53,14 +43,5 @@ i18n
       lookupLocalStorage: "app-language",
     },
   });
-
-if (typeof window !== "undefined") {
-  if (initialStoredLanguage && initialStoredLanguage !== BOOT_LNG) {
-    // Defer until after hydration so <html lang/dir> match SSR markup.
-    queueMicrotask(() => {
-      void i18n.changeLanguage(initialStoredLanguage);
-    });
-  }
-}
 
 export default i18n;

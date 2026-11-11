@@ -1,11 +1,18 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useLanguageStore } from "src/app/store/languageStore";
+import { LANGUAGE_STORAGE_KEY, useLanguageStore } from "src/app/store/languageStore";
 
 /** Keeps i18next language in sync with the Zustand language store. */
 export default function I18nSync() {
   const { i18n } = useTranslation();
   const language = useLanguageStore((state) => state.language);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? localStorage.getItem("i18nextLng");
+    if (stored === "fa" || stored === "en") {
+      useLanguageStore.getState().setLanguage(stored);
+    }
+  }, []);
 
   useEffect(() => {
     const current = (i18n.language || "").split("-")[0];

@@ -9,21 +9,9 @@ interface LanguageState {
 /** Single storage key shared with i18next detector + API Accept-Language. */
 export const LANGUAGE_STORAGE_KEY = "app-language";
 
-const getInitialLanguage = (): SupportedLanguage => {
-  if (typeof window === "undefined") {
-    return "fa";
-  }
-  const stored =
-    localStorage.getItem(LANGUAGE_STORAGE_KEY) ??
-    localStorage.getItem("i18nextLng");
-  if (stored === "fa" || stored === "en") {
-    return stored;
-  }
-  return "fa";
-};
-
 export const useLanguageStore = create<LanguageState>((set) => ({
-  language: getInitialLanguage(),
+  // I18nSync restores browser preferences after hydration.
+  language: "fa",
 
   setLanguage: (lang) => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);

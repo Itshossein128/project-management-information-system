@@ -8,7 +8,6 @@ import {
   clearStoredAuth,
   getStoredAccessToken,
   getStoredRefreshToken,
-  getStoredUser,
   hasStoredSession,
   setStoredAuth,
   subscribeAuthStorage,
@@ -57,17 +56,10 @@ function normalizeRoles(roles: string[] | undefined): ROLES[] {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<AuthUser | null>(() => {
-    const token = getStoredAccessToken();
-    const stored = getStoredUser();
-    if (token && stored) {
-      return { ...stored, roles: normalizeRoles(stored.roles) };
-    }
-    return null;
-  });
-
-  // Stay in loading while a stored session is validated — avoids flashing protected UI with dead tokens.
-  const [isLoading, setIsLoading] = React.useState(() => hasStoredSession());
+  // SSR and the first client render must agree. Restore browser-only storage
+  // after mounting and keep protected UI hidden until the server validates it.
+  const [user, setUser] = React.useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
   // Offline/unit-report queues are actor-scoped (see offlineWrite/offlineDB).
   // On account switch or logout, clear project session queries so the next
   // account cannot submit or display the previous actor's queued work.

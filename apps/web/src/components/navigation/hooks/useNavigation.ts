@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { useLocation } from "react-router";
+import { usePermission } from "@/app/contexts/project-context";
 import {
   listCapabilities,
   type ProjectCapability,
@@ -8,6 +9,7 @@ import {
 import { buildBusinessNavItems } from "@/config/business-departments.config";
 import { buildProjectNavItems } from "@/config/project-navigation.config";
 import { mainSidebarNavigation } from "@/config/navigation.config";
+import { filterProjectNavByPermissions } from "@/config/project-navigation-permissions";
 import type { ROLES } from "@/config/roles";
 import type { NavigationChildItem, NavigationItem } from "@/types/navigation";
 
@@ -56,6 +58,7 @@ export function useNavigation(roles: ROLES[] | undefined): NavigationItem[] {
 export function useProjectNavigation() {
   const { pathname } = useLocation();
   const projectId = pathname.match(PROJECT_WITH_ID)?.[1];
+  const { has } = usePermission(projectId ?? "");
   const capabilities = useQuery({
     queryKey: ["project-capabilities", projectId],
     queryFn: () => listCapabilities(projectId!),
@@ -66,7 +69,7 @@ export function useProjectNavigation() {
     if (!projectId) return [];
     const projectItems = filterNavByCapabilities(buildProjectNavItems(projectId), capabilities.data);
     const departments = buildBusinessNavItems(projectId);
-    return [
+    return filterProjectNavByPermissions([
       ...projectItems.filter((item) => item.labelI18nKey !== "nav.projectAdmin"),
       {
         label: "Departments",
@@ -76,7 +79,7 @@ export function useProjectNavigation() {
         children: departments.map(({ label, labelI18nKey, path }) => ({ label, labelI18nKey, path })),
       },
       ...projectItems.filter((item) => item.labelI18nKey === "nav.projectAdmin"),
-    ];
-  }, [projectId, capabilities.data]);
+    ], has);
+  }, [projectId, capabilities.data, has]);
   return { projectId, items, capabilities };
 }

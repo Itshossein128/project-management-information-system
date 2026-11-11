@@ -62,7 +62,7 @@ export default function DeliveryPlanPage() {
           ))}
         </div>
       </section>
-      <p className="text-xs leading-6 text-muted-foreground">«پیاده‌سازی‌شده» نشان‌دهنده قابلیت موجود است؛ بررسی و تأیید نهایی آن در کارهای باقی‌مانده هر مرحله آمده است.</p>
+      <p className="text-xs leading-6 text-muted-foreground">«پیاده‌سازی‌شده» نشان‌دهنده قابلیت موجود است؛ تأیید نهایی هر مرحله به بررسی خروجی‌ها و تکمیل موارد باز آن وابسته است.</p>
 
       <div className="space-y-5" aria-live="polite">
         {phases.map((phase) => (
@@ -70,12 +70,13 @@ export default function DeliveryPlanPage() {
             <header className="space-y-3 border-b border-border bg-muted/30 p-4 sm:p-5">
               <div className="flex items-start gap-3"><span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{number(deliveryPlan.phases.findIndex((item) => item.id === phase.id) + 1)}</span><div><span className="text-xs text-muted-foreground" dir="ltr">{phase.id}</span><h2 id={`phase-title-${phase.id}`} className="text-base font-semibold sm:text-lg">{phase.title}</h2></div></div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs leading-6 text-muted-foreground sm:text-sm"><span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 shrink-0" aria-hidden="true" />{formatDate(phase.start)} تا {formatDate(phase.finish)}</span><span>موعد بررسی و تأیید: {formatDate(phase.acceptance)}</span></div>
+              {phase.note && <p className="text-xs leading-6 text-muted-foreground">{phase.note}</p>}
             </header>
             <ul className="divide-y divide-border">
               {phase.tasks.map((task) => (
                 <li key={task.id} data-delivery-status={task.status} className="flex items-start gap-3 px-4 py-4 sm:px-5">
                   {task.status === "implemented" ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" /> : <Circle className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden="true" />}
-                  <div className="min-w-0 flex-1 space-y-1.5"><h3 className="text-sm font-medium leading-7">{task.title}</h3><div className="flex flex-wrap gap-x-4 gap-y-1 text-xs leading-6 text-muted-foreground"><span className={task.status === "implemented" ? "font-medium text-primary" : ""}>{task.status === "implemented" ? "پیاده‌سازی‌شده" : "نیازمند تکمیل"}</span>{task.start && task.finish && <span>{formatDate(task.start)} تا {formatDate(task.finish)}</span>}</div></div>
+                  <div className="min-w-0 flex-1 space-y-1.5"><h3 className="text-sm font-medium leading-7">{task.title}</h3><div className="flex flex-wrap gap-x-4 gap-y-1 text-xs leading-6 text-muted-foreground"><span className={task.status === "implemented" ? "font-medium text-primary" : ""}>{task.status === "implemented" ? "پیاده‌سازی‌شده" : "نیازمند تکمیل"}</span>{task.start && task.finish && <span>{formatDate(task.start)} تا {formatDate(task.finish)}</span>}</div>{task.note && <p className="text-xs leading-6 text-muted-foreground">{task.note}</p>}</div>
                 </li>
               ))}
             </ul>

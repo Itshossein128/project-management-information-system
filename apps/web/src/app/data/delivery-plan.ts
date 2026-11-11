@@ -1,12 +1,13 @@
-export type DeliveryTask = { id: string; title: string; status: "implemented" | "remaining"; start?: string; finish?: string };
-export type DeliveryPhase = { id: string; title: string; start: string; finish: string; acceptance: string; tasks: DeliveryTask[] };
+export type DeliveryTask = { id: string; title: string; status: "implemented" | "remaining"; note?: string; start?: string; finish?: string };
+export type DeliveryPhase = { id: string; title: string; start: string; finish: string; acceptance: string; note?: string; tasks: DeliveryTask[] };
 
 // Employer-facing snapshot of the reviewed minimum scenario. Existing capabilities
 // are separate from remaining work; implementation does not imply final acceptance.
+// R.0/A.6 review evidence: docs/delivery/delivery-plan-status-review-2026-11-11.md.
 export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: string; phases: DeliveryPhase[] } = {
   "baselineStart": "2026-11-04",
   "finish": "2027-03-10",
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-11",
   "phases": [
     {
       "id": "R.0",
@@ -14,6 +15,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
       "start": "2026-11-04",
       "finish": "2026-11-07",
       "acceptance": "2026-11-09",
+      "note": "چهار کار این مرحله در محدوده آماده‌سازی و آزمون محلی تکمیل شده‌اند. انتشار هر نسخه همچنان به موفقیت آزمون‌های الزامی همان نسخه وابسته است.",
       "tasks": [
         {
           "id": "R.0-available-1",
@@ -23,28 +25,32 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
         {
           "id": "R.0.01",
           "title": "توافق بر فهرست خروجی‌ها و مسئول تأیید",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "دامنه، گزارش‌های مرجع و روال تأیید در سند مصوب تحویل ثبت شده‌اند.",
           "start": "2026-11-04",
           "finish": "2026-11-04"
         },
         {
           "id": "R.0.02",
           "title": "کنترل آماده‌بودن نسخه‌ها پیش از انتشار",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "انتشار به موفقیت آزمون‌های الزامی همان نسخه وابسته شده و جلوگیری از انتشار نسخه ناموفق آزموده شده است.",
           "start": "2026-11-04",
           "finish": "2026-11-05"
         },
         {
           "id": "R.0.03",
           "title": "آماده‌سازی محیط بررسی کارفرما",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "محیط مستقل و حساب‌های نقش مرجع طبق مبنای پذیرفته‌شده آماده شده‌اند؛ این تیک به معنی تأیید نهایی کارفرما نیست.",
           "start": "2026-11-05",
           "finish": "2026-11-06"
         },
         {
           "id": "R.0.04",
           "title": "بررسی سلامت نسخه پیش از ارائه",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "آزمون محلی سلامت با ۳۱ بررسی موفق و سناریوهای شکست عمدی ثبت شده است.",
           "start": "2026-11-06",
           "finish": "2026-11-07"
         }
@@ -56,6 +62,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
       "start": "2026-11-07",
       "finish": "2026-11-15",
       "acceptance": "2026-11-17",
+      "note": "مرور نقش‌های پروژه و سازمان و هماهنگی منو با مجوزها تکمیل شد. شواهد آزمون واقعی فایل و ارسال پیام و تأیید کارفرما برای پذیرش نهایی این مرحله جداگانه پیگیری می‌شوند.",
       "tasks": [
         {
           "id": "A.6-available-1",
@@ -65,28 +72,32 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
         {
           "id": "A.6.01",
           "title": "تعیین اختیارات هر نقش",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "ماتریس نقش و عملیات، نقش‌های محلی پروژه، چندنقشی و استثناهای مجوز ثبت و آزموده شده‌اند.",
           "start": "2026-11-07",
           "finish": "2026-11-09"
         },
         {
           "id": "A.6.02",
           "title": "تکمیل محدودیت ثبت و ویرایش اطلاعات",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "محدودیت نوشتن کاتالوگ مشترک و کنترل مجوز عملیات در سرور اعمال و با درخواست مستقیم بررسی شده‌اند.",
           "start": "2026-11-09",
           "finish": "2026-11-11"
         },
         {
           "id": "A.6.03",
           "title": "بررسی محرمانگی اطلاعات و دسترسی پروژه‌ها",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "مرز پروژه‌ها و پنهان‌سازی تماس و دستمزد با درخواست مستقیم بررسی شده‌اند؛ آزمون دانلود واقعی فایل همچنان مدرک جداگانه می‌خواهد.",
           "start": "2026-11-11",
           "finish": "2026-11-13"
         },
         {
           "id": "A.6.04",
           "title": "بررسی کار با نقش‌های مختلف",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "مرور ۱۳ نقش پروژه، حساب‌های سازمانی، تغییر پروژه و مجوز و مسیر مدیر در فارسی و انگلیسی با موفقیت انجام شد.",
           "start": "2026-11-14",
           "finish": "2026-11-15"
         }
