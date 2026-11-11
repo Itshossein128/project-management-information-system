@@ -216,7 +216,10 @@ export default function ProjectCreateWizardPage() {
     if (template) {
       setForm((f) => ({
         ...f,
-        contract_type: template.project_type === "epc" ? "EPC" : f.contract_type,
+        contract_type:
+          template.project_type === "epc" && contractTypes.some((ct) => ct.code === "EPC")
+            ? "EPC"
+            : f.contract_type,
       }));
     }
   };

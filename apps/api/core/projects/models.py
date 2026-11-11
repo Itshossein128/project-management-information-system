@@ -111,6 +111,13 @@ class Project(UUIDModel, TimeStampedModel):
         blank=True,
         related_name='owned_projects',
     )
+    approval_submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='projects_submitted_for_approval',
+    )
 
     class Meta:
         db_table = 'projects'

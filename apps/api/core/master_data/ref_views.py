@@ -23,9 +23,6 @@ class OrganizationUnitListCreateView(APIView):
     def post(self, request):
         serializer = OrganizationUnitSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        parent = serializer.validated_data.get('parent')
-        if parent and parent.parent_id == parent.id:
-            return Response({'code': 'invalid_parent'}, status=400)
         obj = OrganizationUnit.objects.create(
             **serializer.validated_data,
             created_by=request.user,
@@ -67,10 +64,17 @@ class ManagedContractTypeListCreateView(APIView):
         return Response(ManagedContractTypeSerializer(obj).data, status=status.HTTP_201_CREATED)
 
 
-class UnitListView(APIView):
-    permission_classes = [IsAuthenticated]
+class UnitListCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsOrgRefWriterOrReadOnly]
 
     @extend_schema(summary='List measurement units', tags=['Central Data'])
     def get(self, request):
         qs = Unit.objects.all().order_by('unit_name')
         return Response(UnitSerializer(qs, many=True).data)
+
+    @extend_schema(summary='Create measurement unit', tags=['Central Data'])
+    def post(self, request):
+        serializer = UnitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save()
+        return Response(UnitSerializer(obj).data, status=status.HTTP_201_CREATED)

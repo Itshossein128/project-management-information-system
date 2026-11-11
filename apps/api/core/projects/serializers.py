@@ -1,5 +1,6 @@
-from rest_framework import serializers
+from django.db.models.functions import Trim
 from django.utils.translation import gettext as _
+from rest_framework import serializers
 
 from config.exceptions import CodedValidationError
 from projects.models import (
@@ -19,6 +20,41 @@ PROTECTED_WHEN_STATUSES = {
     ProjectStatus.COMPLETED,
     ProjectStatus.ARCHIVED,
 }
+
+
+def _project_code_unique_message():
+    field = Project._meta.get_field('project_code')
+    return field.error_messages['unique'] % {
+        'model_name': field.model._meta.verbose_name,
+        'field_label': field.verbose_name,
+    }
+
+
+def _validate_project_code_value(value, *, instance):
+    """Trim before uniqueness so surrounding spaces do not create another code."""
+    value = (value or '').strip()
+    if not value:
+        raise serializers.ValidationError(_('Project code is required.'))
+    conflict = Project.objects.annotate(trimmed_code=Trim('project_code')).filter(trimmed_code=value)
+    if instance is not None:
+        conflict = conflict.exclude(pk=instance.pk)
+    if conflict.exists():
+        raise serializers.ValidationError(_project_code_unique_message())
+    return value
+
+
+def _validate_project_contract_type(value, *, previous):
+    """Blank stays blank. A changed value must be an active catalog code."""
+    value = (value or '').strip()
+    if not value:
+        return ''
+    if previous is not None and value == previous:
+        return value
+    from master_data.models import ManagedContractType
+
+    if not ManagedContractType.objects.filter(code=value, is_active=True).exists():
+        raise serializers.ValidationError(_('Select an active contract type from the catalog.'))
+    return value
 
 
 def _apply_project_contractor_ref(attrs, *, project_id):
@@ -214,6 +250,12 @@ class ProjectLifecycleWriteGuard:
 
     def to_internal_value(self, data):
         self.assert_writable(data)
+        code = data.get('project_code') if hasattr(data, 'get') else None
+        if isinstance(code, str):
+            trimmed = code.strip()
+            if trimmed and trimmed != code:
+                data = data.copy()
+                data['project_code'] = trimmed
         return super().to_internal_value(data)
 
 
@@ -242,10 +284,10 @@ class ProjectCreateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
         ]
 
     def validate_project_code(self, value):
-        value = value.strip()
-        if not value:
-            raise serializers.ValidationError(_('Project code is required.'))
-        return value
+        return _validate_project_code_value(value, instance=None)
+
+    def validate_contract_type(self, value):
+        return _validate_project_contract_type(value, previous=None)
 
     def validate(self, attrs):
         if not attrs.get('project_name'):
@@ -288,6 +330,15 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'cut_off_date',
             'owning_unit',
         ]
+
+    def validate_project_code(self, value):
+        return _validate_project_code_value(value, instance=self.instance)
+
+    def validate_contract_type(self, value):
+        previous = None
+        if self.instance is not None:
+            previous = self.instance.contract_type or ''
+        return _validate_project_contract_type(value, previous=previous)
 
     def validate(self, attrs):
         instance: Project = self.instance

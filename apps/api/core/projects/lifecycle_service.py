@@ -7,6 +7,7 @@ from uuid import uuid4
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from config.exceptions import CodedValidationError
 from permissions.project import _is_global_admin
@@ -65,7 +66,8 @@ def submit_for_approval(project: Project, user) -> Project:
     assert_not_archived_mutable(project, user)
     _transition(project, allowed_from={ProjectStatus.DRAFT}, to=ProjectStatus.PENDING_APPROVAL)
     project.status = ProjectStatus.PENDING_APPROVAL
-    save_project(project, ['status'])
+    project.approval_submitted_by = user
+    save_project(project, ['status', 'approval_submitted_by'])
     return project
 
 
@@ -74,6 +76,14 @@ def approve(project: Project, user) -> Project:
     project = lock_project(project)
     assert_not_archived_mutable(project, user)
     _transition(project, allowed_from={ProjectStatus.PENDING_APPROVAL}, to=ProjectStatus.ACTIVE)
+    if project.approval_submitted_by_id and project.approval_submitted_by_id == user.pk:
+        raise CodedValidationError(
+            {
+                'code': 'submitter_cannot_approve',
+                'detail': _('The person who submitted this project cannot approve it.'),
+            },
+            code='submitter_cannot_approve',
+        )
     missing = activation_missing(project)
     if missing:
         raise CodedValidationError(
@@ -98,7 +108,8 @@ def reject(project: Project, user, reason: str = '') -> Project:
     assert_not_archived_mutable(project, user)
     _transition(project, allowed_from={ProjectStatus.PENDING_APPROVAL}, to=ProjectStatus.DRAFT)
     project.status = ProjectStatus.DRAFT
-    save_project(project, ['status'])
+    project.approval_submitted_by = None
+    save_project(project, ['status', 'approval_submitted_by'])
     return project
 
 

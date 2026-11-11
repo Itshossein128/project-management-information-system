@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Tasks>
+    <Task>
+      <UID>1</UID>
+      <Name>Parent</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <OutlineNumber>1</OutlineNumber>
+      <WBS>1</WBS>
+      <Summary>1</Summary>
+    </Task>
+    <Task>
+      <UID>2</UID>
+      <Name>Start milestone</Name>
+      <OutlineLevel>2</OutlineLevel>
+      <OutlineNumber>1.1</OutlineNumber>
+      <WBS>1.1</WBS>
+      <Summary>0</Summary>
+      <Milestone>1</Milestone>
+      <Duration>PT0H0M0S</Duration>
+    </Task>
+  </Tasks>
+</Project>

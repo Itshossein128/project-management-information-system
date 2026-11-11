@@ -1,0 +1,45 @@
+{
+  "a7-p1-project-reference": {
+    "phase": "A.7-P1",
+    "feature_directory": "specs/051-a7-p1-project-reference",
+    "audit_ids": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+      "P07",
+      "P09",
+      "P10",
+      "P11",
+      "W01",
+      "W02",
+      "W03",
+      "W05",
+      "W06",
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "D01"
+    ],
+    "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/01-project-reference.md"
+  },
+  "a7-p2-import-safety": {
+    "phase": "A.7-P2",
+    "feature_directory": "specs/052-a7-p2-import-safety",
+    "audit_ids": [
+      "P08",
+      "W04",
+      "S05",
+      "I06",
+      "I07",
+      "I08",
+      "I11",
+      "I14",
+      "I18"
+    ],
+    "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/02-import-safety.md"
+  }
+}

@@ -7,11 +7,11 @@ from authentication.permissions import IsBusinessSetup, IsHrOrAdmin
 
 class IsOrgRefWriterOrReadOnly(permissions.BasePermission):
     """
-    Organization units and managed contract types.
+    Organization units, managed contract types, and measurement units.
 
-    Any authenticated user may read. Writes are limited to staff, superuser,
-    and the groups that can open Organization references: admin, hr, and
-    business-setup.
+    Any authenticated user may read. Writes are limited to superuser and the
+    groups that maintain organization references: admin, hr, and business-setup.
+    The staff marker alone does not grant write access.
     """
 
     def has_permission(self, request, view) -> bool:

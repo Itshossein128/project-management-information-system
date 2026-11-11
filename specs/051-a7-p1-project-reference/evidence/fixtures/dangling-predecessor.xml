@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Tasks>
+    <Task>
+      <UID>20</UID>
+      <Name>Successor only</Name>
+      <OutlineLevel>1</OutlineLevel>
+      <OutlineNumber>1</OutlineNumber>
+      <WBS>1</WBS>
+      <Summary>0</Summary>
+      <Duration>PT8H0M0S</Duration>
+      <PredecessorLink>
+        <PredecessorUID>99</PredecessorUID>
+        <Type>1</Type>
+      </PredecessorLink>
+    </Task>
+  </Tasks>
+</Project>

@@ -4,7 +4,10 @@ Business logic for project meta. Template application and validation.
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
+from rest_framework.exceptions import ValidationError as DRFValidationError
+
 from projects.models import Project
+from projects.serializers import _validate_project_code_value
 from projects.services import attach_creator_as_member
 from .models import TableDefinition, FieldDefinition, FieldType
 
@@ -53,8 +56,13 @@ def create_project_from_template(
 ) -> Project:
     if template_id not in TEMPLATES:
         raise ValueError(f'Unknown template: {template_id}. Available: {list(TEMPLATES.keys())}')
-    if Project.objects.filter(project_code=project_code).exists():
-        raise ValueError(f'Project with code "{project_code}" already exists.')
+    project_code = (project_code or '').strip()
+    if not project_code:
+        raise ValueError('Project code is required.')
+    try:
+        project_code = _validate_project_code_value(project_code, instance=None)
+    except DRFValidationError as exc:
+        raise ValueError(f'Project with code "{project_code}" already exists.') from exc
 
     template = TEMPLATES[template_id]
     project = Project.objects.create(project_name=name, project_code=project_code)

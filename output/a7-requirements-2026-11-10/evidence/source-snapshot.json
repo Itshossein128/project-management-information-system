@@ -1,0 +1,7 @@
+{
+  "commit": "b4ec9b963586c8222f8ff3f08f5f877b5da309f7",
+  "real_fixture": "real-data/plan.mpp",
+  "fixture_sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553",
+  "requirements": 56,
+  "counts_are_not_progress_percentages": true
+}

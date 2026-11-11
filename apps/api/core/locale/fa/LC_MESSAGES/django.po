@@ -440,3 +440,18 @@ msgstr "تغییر دسترسی ذخیره نشد چون تاریخچه آن ث�
 
 msgid "You cannot view this access history."
 msgstr "اجازه دیدن این تاریخچه دسترسی را ندارید."
+
+msgid "Select an active contract type from the catalog."
+msgstr "یک نوع قرارداد فعال از فهرست مرجع انتخاب کنید."
+
+msgid "Unit name is required."
+msgstr "نام واحد اندازه‌گیری الزامی است."
+
+msgid "A measurement unit with this name already exists."
+msgstr "واحد اندازه‌گیری با این نام وجود دارد."
+
+msgid "An organization unit cannot be its own parent."
+msgstr "یک واحد سازمانی نمی‌تواند والد خودش باشد."
+
+msgid "The person who submitted this project cannot approve it."
+msgstr "کسی که این پروژه را برای تأیید فرستاده نمی‌تواند خودش آن را تأیید کند."

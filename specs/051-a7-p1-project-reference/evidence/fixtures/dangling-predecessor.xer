@@ -1,0 +1,7 @@
+ERMHDR	18.8	2026-01-01	Project
+%T	TASK
+%F	task_id	wbs_id	task_code	task_name	target_drtn_hr_cnt
+%R	20	1	S	Successor only	8
+%T	TASKPRED
+%F	task_id	pred_task_id	pred_type	lag_hr_cnt
+%R	20	99	PR_FS	0

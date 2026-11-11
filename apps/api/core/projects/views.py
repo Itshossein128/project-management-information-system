@@ -383,6 +383,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 safe_message = 'Unknown template. Please choose a valid template.'
             elif 'already exists' in error_message:
                 safe_message = 'A project with this code already exists.'
+            elif 'Project code is required' in error_message:
+                safe_message = 'Project code is required.'
             else:
                 safe_message = 'Failed to create project from template. Please check the provided data.'
             return Response({'error': safe_message}, status=status.HTTP_400_BAD_REQUEST)

@@ -69,6 +69,25 @@ export function fetchContractTypes() {
   );
 }
 
+export interface MeasurementUnit {
+  id: string;
+  unit_name: string;
+  unit_symbol: string;
+}
+
+export function fetchMeasurementUnits() {
+  return apiJson<MeasurementUnit[] | { results: MeasurementUnit[] }>(
+    `/v1/measurement-units/`,
+  );
+}
+
+export function createMeasurementUnit(body: { unit_name: string; unit_symbol?: string }) {
+  return apiJson<MeasurementUnit>(`/v1/measurement-units/`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
 export function createContractType(body: {
   code: string;
   name_fa: string;

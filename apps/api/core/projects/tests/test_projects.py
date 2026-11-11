@@ -4,6 +4,7 @@ from rest_framework import status
 
 from master_data.models import MemberStatus, ProjectMember, Role
 from projects.models import Project
+from projects.services import create_project_with_creator
 
 
 @pytest.mark.django_db
@@ -121,6 +122,70 @@ class TestProjectFromTemplate:
 
         detail = api_client.get(f'/api/v1/projects/{project_id}/')
         assert detail.status_code == status.HTTP_200_OK
+
+    def test_from_template_refuses_trimmed_duplicate_codes(self, api_client, user):
+        from business_meta.models import FieldDefinition, TableDefinition
+
+        Group.objects.get_or_create(name='business-setup')
+        user.groups.add(Group.objects.get(name='business-setup'))
+        api_client.force_authenticate(user=user)
+        existing = create_project_with_creator(
+            creator=user,
+            project_code='A7P1-TMPL',
+            project_name='Existing',
+            employer='Employer',
+            start_date='2026-05-01',
+        )
+        padded = create_project_with_creator(
+            creator=user,
+            project_code=' A7P1-PADTMPL ',
+            project_name='Padded',
+            employer='Employer',
+            start_date='2026-05-02',
+        )
+        before_projects = set(Project.objects.values_list('id', flat=True))
+        before_members = ProjectMember.objects.count()
+        before_tables = TableDefinition.objects.count()
+        before_fields = FieldDefinition.objects.count()
+
+        spaced = api_client.post(
+            '/api/v1/projects/from_template/',
+            {'name': 'Spaced', 'slug': '  A7P1-TMPL  ', 'template': 'warehouse'},
+            format='json',
+        )
+        assert spaced.status_code == status.HTTP_400_BAD_REQUEST
+        assert 'already exists' in spaced.json()['error'].lower() or 'already exists' in str(spaced.data).lower()
+
+        legacy = api_client.post(
+            '/api/v1/projects/from_template/',
+            {'name': 'Legacy', 'project_code': 'A7P1-PADTMPL', 'template': 'warehouse'},
+            format='json',
+        )
+        assert legacy.status_code == status.HTTP_400_BAD_REQUEST
+
+        blank = api_client.post(
+            '/api/v1/projects/from_template/',
+            {'name': 'Blank', 'slug': '   ', 'template': 'warehouse'},
+            format='json',
+        )
+        assert blank.status_code == status.HTTP_400_BAD_REQUEST
+        assert set(Project.objects.values_list('id', flat=True)) == before_projects
+        assert ProjectMember.objects.count() == before_members
+        assert TableDefinition.objects.count() == before_tables
+        assert FieldDefinition.objects.count() == before_fields
+        assert Project.objects.get(pk=existing.id).project_code == 'A7P1-TMPL'
+        assert Project.objects.get(pk=padded.id).project_code == ' A7P1-PADTMPL '
+
+        created = api_client.post(
+            '/api/v1/projects/from_template/',
+            {'name': 'Fresh warehouse', 'slug': ' A7P1-FRESH ', 'template': 'warehouse'},
+            format='json',
+        )
+        assert created.status_code == status.HTTP_201_CREATED, created.content
+        fresh = Project.objects.get(project_code='A7P1-FRESH')
+        assert TableDefinition.objects.filter(project=fresh).exists()
+        assert FieldDefinition.objects.filter(table__project=fresh).exists()
+        assert ProjectMember.objects.filter(project=fresh, user=user, status=MemberStatus.ACTIVE).exists()
 
 
 @pytest.mark.django_db

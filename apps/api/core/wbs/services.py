@@ -123,7 +123,13 @@ def create_wbs_node(
     parent = None
     new_depth = 1
     if parent_id:
-        parent = WBS.objects.get(pk=parent_id, project_id=project_id, is_deleted=False)
+        try:
+            parent = WBS.objects.get(pk=parent_id, project_id=project_id, is_deleted=False)
+        except WBS.DoesNotExist as exc:
+            raise WBSValidationError(
+                'parent must belong to this project.',
+                code='invalid_parent',
+            ) from exc
         new_depth = parent.depth + 1
 
     project = Project.objects.get(pk=project_id)
@@ -318,7 +324,13 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
     """
     target_parent = None
     if new_parent_id:
-        target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id, is_deleted=False)
+        try:
+            target_parent = WBS.objects.get(pk=new_parent_id, project_id=node.project_id, is_deleted=False)
+        except WBS.DoesNotExist as exc:
+            raise WBSValidationError(
+                'parent must belong to this project.',
+                code='invalid_parent',
+            ) from exc
 
     pos = position.replace('-', '_')
 

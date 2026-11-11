@@ -1228,14 +1228,17 @@
     "influence": "نفوذ (۱–۵)",
     "owningUnit": "واحد سازمانی مالک",
     "orgRefs": "مراجع سازمانی",
-    "orgRefsSubtitle": "واحدهای سازمانی و انواع قرارداد مدیریت‌شده",
+    "orgRefsSubtitle": "واحدهای سازمانی، انواع قرارداد و واحدهای اندازه‌گیری",
     "organizationUnits": "واحدهای سازمانی",
     "contractTypes": "انواع قرارداد",
     "code": "کد",
     "nameFa": "نام فارسی",
     "nameEn": "نام انگلیسی",
     "unitCreated": "واحد سازمانی ایجاد شد",
-    "typeCreated": "نوع قرارداد ایجاد شد"
+    "typeCreated": "نوع قرارداد ایجاد شد",
+    "measurementUnits": "واحدهای اندازه‌گیری",
+    "symbol": "نماد",
+    "measureCreated": "واحد اندازه‌گیری ایجاد شد"
   },
   "collab": {
     "relationshipOwner": "مالک ارتباط",

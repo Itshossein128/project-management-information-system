@@ -1228,14 +1228,17 @@
     "influence": "Influence (1–5)",
     "owningUnit": "Owning organization unit",
     "orgRefs": "Organization references",
-    "orgRefsSubtitle": "Organization units and managed contract types",
+    "orgRefsSubtitle": "Organization units, contract types, and measurement units",
     "organizationUnits": "Organization units",
     "contractTypes": "Contract types",
     "code": "Code",
     "nameFa": "Persian name",
     "nameEn": "English name",
     "unitCreated": "Organization unit created",
-    "typeCreated": "Contract type created"
+    "typeCreated": "Contract type created",
+    "measurementUnits": "Measurement units",
+    "symbol": "Symbol",
+    "measureCreated": "Measurement unit created"
   },
   "collab": {
     "relationshipOwner": "Relationship owner",

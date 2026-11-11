@@ -32,8 +32,8 @@ def test_create_organization_unit_as_staff(staff_client):
         {'code': 'STF', 'name': 'Staff unit'},
         format='json',
     )
-    assert resp.status_code == 201, resp.content
-    assert OrganizationUnit.objects.filter(code='STF').exists()
+    assert resp.status_code == 403, resp.content
+    assert not OrganizationUnit.objects.filter(code='STF').exists()
 
 
 @pytest.mark.django_db
@@ -95,3 +95,38 @@ def test_organization_unit_code_unique(hr_client):
         format='json',
     )
     assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_organization_unit_accepts_a_different_parent(hr_client):
+    parent = hr_client.post(
+        '/api/v1/organization-units/',
+        {'code': 'PAR', 'name': 'Parent'},
+        format='json',
+    )
+    assert parent.status_code == 201, parent.content
+    child = hr_client.post(
+        '/api/v1/organization-units/',
+        {'code': 'CHD', 'name': 'Child', 'parent': parent.json()['id']},
+        format='json',
+    )
+    assert child.status_code == 201, child.content
+    assert str(OrganizationUnit.objects.get(code='CHD').parent_id) == parent.json()['id']
+
+
+@pytest.mark.django_db
+def test_organization_unit_cannot_be_its_own_parent(hr_client):
+    created = hr_client.post(
+        '/api/v1/organization-units/',
+        {'code': 'SELF', 'name': 'Self'},
+        format='json',
+    )
+    assert created.status_code == 201, created.content
+    unit_id = created.json()['id']
+    resp = hr_client.patch(
+        f'/api/v1/organization-units/{unit_id}/',
+        {'parent': unit_id},
+        format='json',
+    )
+    assert resp.status_code == 400, resp.content
+    assert OrganizationUnit.objects.get(pk=unit_id).parent_id is None

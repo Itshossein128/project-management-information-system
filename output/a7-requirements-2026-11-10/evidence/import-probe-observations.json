@@ -1,0 +1,113 @@
+{
+  "cyclic_invalid_dates_import": {
+    "wbs_nodes_created": 1,
+    "activities_created": 2,
+    "relations_created": 2,
+    "warnings": [
+      "Could not parse duration \"PT0H0M0S\" for task Milestone."
+    ]
+  },
+  "persisted_relations": [
+    {
+      "predecessor__activity_code": "1.1",
+      "successor__activity_code": "1.2",
+      "lag_days": 0
+    },
+    {
+      "predecessor__activity_code": "1.2",
+      "successor__activity_code": "1.1",
+      "lag_days": 4800
+    }
+  ],
+  "persisted_activity_fields": [
+    {
+      "activity_code": "1.1",
+      "duration_days": null,
+      "is_milestone": false,
+      "working_calendar_id": null,
+      "planned_start": "2026-01-03",
+      "planned_finish": "2026-01-01"
+    },
+    {
+      "activity_code": "1.2",
+      "duration_days": null,
+      "is_milestone": false,
+      "working_calendar_id": null,
+      "planned_start": null,
+      "planned_finish": null
+    }
+  ],
+  "repeat": {
+    "result": {
+      "wbs_nodes_created": 0,
+      "activities_created": 0,
+      "relations_created": 0,
+      "warnings": [
+        "Could not parse duration \"PT0H0M0S\" for task Milestone.",
+        "Duplicate WBS code \"1\" — skipped.",
+        "Duplicate activity code \"1.1\" — skipped.",
+        "Duplicate activity code \"1.2\" — skipped."
+      ]
+    },
+    "baseline_count": 2
+  },
+  "replacement_result": {
+    "wbs_nodes_created": 1,
+    "activities_created": 1,
+    "relations_created": 0,
+    "warnings": []
+  },
+  "replacement_history": {
+    "locked_baseline_exists": true,
+    "locked_baseline_rows_before": 2,
+    "locked_baseline_rows_after": 0,
+    "old_activities_including_deleted": 0
+  },
+  "p6_zero_duration": [
+    {
+      "code": "T10",
+      "duration": 1
+    }
+  ],
+  "p6_result": {
+    "wbs_nodes_created": 3,
+    "activities_created": 1,
+    "relations_created": 0,
+    "warnings": []
+  },
+  "p6_parent_mapping": {
+    "expected": "P",
+    "actual": "Q"
+  },
+  "real_mpp_import": {
+    "wbs_nodes_created": 6,
+    "activities_created": 74,
+    "relations_created": 79,
+    "warnings": [
+      "Could not parse duration \"PT0H0M0S\" for task شروع.",
+      "Could not parse duration \"PT0H0M0S\" for task پایان.",
+      "Predecessor UID 8055 not found for پایان.",
+      "Predecessor UID 8084 not found for پایان.",
+      "Predecessor UID 8102 not found for پایان.",
+      "Predecessor UID 8120 not found for پایان."
+    ]
+  },
+  "real_mpp_parsed_totals": {
+    "summary_tasks": 6,
+    "leaf_activities": 74,
+    "predecessor_links_in_parsed_source": 83
+  },
+  "archived_project_import_http_status": 202,
+  "archived_project_import_response": {
+    "task_id": "8fe8fcaa-8b48-477a-9b10-f6470011cd44",
+    "status": "queued"
+  },
+  "real_mpp": {
+    "parsed_tasks": 80,
+    "warnings": [
+      "Could not parse duration \"PT0H0M0S\" for task شروع.",
+      "Could not parse duration \"PT0H0M0S\" for task پایان."
+    ],
+    "leaf_activities": 74
+  }
+}

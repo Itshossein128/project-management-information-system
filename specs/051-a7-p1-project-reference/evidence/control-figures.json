@@ -1,0 +1,38 @@
+{
+  "method": "Employer file fingerprint is SHA-256 of the unchanged bytes. Container text is the libmagic description, not the product importer. XML counts are local-name counts of Task, Summary=1, Milestone=1, and PredecessorLink. XER counts are %R rows under each %T table. Neither count calls the schedule importer.",
+  "employer_file": {
+    "path": "real-data/plan.mpp",
+    "sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553",
+    "size_bytes": 777216,
+    "container": "Composite Document File V2 Document, Little Endian, Os: Windows, Version 10.0",
+    "creating_application": "Microsoft Project",
+    "revision_number": "193",
+    "create_time": "2024-07-10",
+    "last_saved_time": "2026-09-19",
+    "modified_by_this_phase": false
+  },
+  "xml": {
+    "branch.xml": {"tasks": 3, "summaries": 1, "milestones": 0, "predecessor_links": 0},
+    "milestone.xml": {"tasks": 2, "summaries": 1, "milestones": 1, "predecessor_links": 0, "zero_duration": "PT0H0M0S"},
+    "relation.xml": {"tasks": 2, "summaries": 0, "milestones": 0, "predecessor_links": 1, "predecessor_uids": ["10"]},
+    "dangling-predecessor.xml": {"tasks": 1, "summaries": 0, "milestones": 0, "predecessor_links": 1, "predecessor_uids": ["99"]},
+    "not-a-project.xml": {"root": "Note"}
+  },
+  "xer": {
+    "branch.xer": {"PROJWBS": 3, "TASK": 2},
+    "milestone.xer": {"PROJWBS": 1, "TASK": 1, "zero_duration_hours": "0"},
+    "relation.xer": {"TASK": 2, "TASKPRED": 1, "pred_task_ids": ["10"]},
+    "dangling-predecessor.xer": {"TASK": 1, "TASKPRED": 1, "pred_task_ids": ["99"]},
+    "not-a-project.xer": {"starts_with_ermhdr": false}
+  },
+  "historical_probe_not_a_target": [
+    {"id": "H-COUNT-80", "observation": "80 parsed tasks, 6 summary and 74 leaves", "cause": "2026-11-10 importer-family probe"},
+    {"id": "H-LINK-83-79", "observation": "83 predecessor links in the parsed source and 79 relations created", "cause": "four links were not created; historical observation, not an approved target"},
+    {"id": "H-PRED-8055", "observation": "Predecessor UID 8055 not found for پایان", "cause": "UID 8055 is present as summary task تکمیل تاسیسات و نازک کاری بلوک 31-30; the import activity map contains only leaves", "classification": "present_summary"},
+    {"id": "H-PRED-8084", "observation": "Predecessor UID 8084 not found for پایان", "cause": "UID 8084 is present as summary task تکمیل تاسیسات و نازک کاری بلوک 39-38; the import activity map contains only leaves", "classification": "present_summary"},
+    {"id": "H-PRED-8102", "observation": "Predecessor UID 8102 not found for پایان", "cause": "UID 8102 is present as summary task تکمیل تاسیسات و نازک کاری بلوک 29-28; the import activity map contains only leaves", "classification": "present_summary"},
+    {"id": "H-PRED-8120", "observation": "Predecessor UID 8120 not found for پایان", "cause": "UID 8120 is present as summary task تکمیل تاسیسات و نازک کاری بلوک 37-36; the import activity map contains only leaves", "classification": "present_summary"},
+    {"id": "H-DUR-شروع", "observation": "Duration PT0H0M0S not parsed for شروع", "cause": "zero-duration form is outside the current duration rule"},
+    {"id": "H-DUR-پایان", "observation": "Duration PT0H0M0S not parsed for پایان", "cause": "zero-duration form is outside the current duration rule"}
+  ]
+}

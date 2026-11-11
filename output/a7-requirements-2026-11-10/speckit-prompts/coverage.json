@@ -1,0 +1,345 @@
+{
+  "audit": "/home/hossein/Desktop/projects/building-management/output/a7-requirements-2026-11-10/requirements.json",
+  "row_count": 56,
+  "primary_owner_count": 56,
+  "final_review_phase": 6,
+  "note": "Each row has one primary implementation owner; phase 6 reviews all 56. Related items can require verification only, not new scope.",
+  "rows": [
+    {
+      "id": "P01",
+      "title": "ثبت مشخصات کامل پروژه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P02",
+      "title": "کد یکتای پروژه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P03",
+      "title": "پیش‌نویس، ارسال و چرخه وضعیت",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P04",
+      "title": "شرط فعال‌سازی و تصویب بودجه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P05",
+      "title": "جلوگیری از تعهد یا خط مبنای قطعی پیش از تصویب",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P06",
+      "title": "برگه آغاز پروژه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P07",
+      "title": "تغییر کنترل‌شده اطلاعات مصوب",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P08",
+      "title": "فقط‌خواندنی بودن پروژه بایگانی‌شده",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "P09",
+      "title": "خروج از بایگانی با مقصد و مجوز صحیح",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P10",
+      "title": "حفظ سوابق، تکرار ایمن و پیگیری بازگردانی",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "P11",
+      "title": "ازسرگیری تعلیق و بازگردانی خاتمه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W01",
+      "title": "درخت چندسطحی و تفکیک دامنه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W02",
+      "title": "مشخصات و مسئول بسته کاری",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W03",
+      "title": "کد یکتا، والد معتبر و ممنوعیت دور",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W04",
+      "title": "محافظت از گره وابسته",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "W05",
+      "title": "قالب مستقل و قابل استفاده مجدد",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W06",
+      "title": "جابه‌جایی، مسیر و کدگذاری مجدد",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "W07",
+      "title": "عمق، وزن‌ها و هشدار ساختار خالی",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "M01",
+      "title": "واحد سازمانی و واحد مالک پروژه",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "M02",
+      "title": "نوع قرارداد و واحد اندازه‌گیری قابل مدیریت",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "M03",
+      "title": "وضعیت‌های مرجع و چرخه مجاز",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "M04",
+      "title": "جداول و فیلدهای پویا و Excel آنها",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "S01",
+      "title": "فعالیت متصل به بسته با مدت و تقویم",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S02",
+      "title": "روابط و تأخیر بین فعالیت‌ها",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S03",
+      "title": "تاریخ ناممکن، دور و فعالیت بی‌والد",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S04",
+      "title": "تفکیک تاریخ برنامه‌ای، واقعی و پیش‌بینی",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S05",
+      "title": "نسخه مصوب و قفل‌شده با حفظ تاریخچه",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "S06",
+      "title": "درخواست تغییر زمان و نسخه جدید",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S07",
+      "title": "گزارش نقاط عطف، تأخیر و پیش‌بینی پایان",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "S08",
+      "title": "اعتبار مسیر بحرانی",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I01",
+      "title": "پذیرش MPP، MSP XML و P6 XER",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I02",
+      "title": "جریان انتخاب، پیش‌نمایش، تأیید، پیشرفت و نتیجه",
+      "owner": "A.7-P4",
+      "prompt": "04-import-experience.md"
+    },
+    {
+      "id": "I03",
+      "title": "یکسان بودن تفسیر پیش‌نمایش و ثبت",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I04",
+      "title": "حفظ کامل داده‌های پشتیبانی‌شده فایل",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I05",
+      "title": "Summary به WBS و برگ/نقطه عطف به فعالیت",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I06",
+      "title": "افزودن و برخورد با کدهای تکراری",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I07",
+      "title": "جایگزینی ایمن",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I08",
+      "title": "پیش‌نمایش بدون تغییر دائمی",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I09",
+      "title": "Job و پیشرفت پس‌زمینه",
+      "owner": "A.7-P5",
+      "prompt": "05-import-operations.md"
+    },
+    {
+      "id": "I10",
+      "title": "شمارش‌ها و گزارش هشدار قابل تطبیق",
+      "owner": "A.7-P4",
+      "prompt": "04-import-experience.md"
+    },
+    {
+      "id": "I11",
+      "title": "عضویت، edit_wbs و جداسازی پروژه‌ها",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I12",
+      "title": "سقف ۵۰ مگابایت و اصالت فایل",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I13",
+      "title": "خطاهای متمایز و قابل اقدام",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I14",
+      "title": "اتمی بودن خطا و امکان تلاش بعدی",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I15",
+      "title": "زبان فعال و راه بازیابی خطا",
+      "owner": "A.7-P4",
+      "prompt": "04-import-experience.md"
+    },
+    {
+      "id": "I16",
+      "title": "نمایش پردازش و جلوگیری از ارسال دوباره",
+      "owner": "A.7-P4",
+      "prompt": "04-import-experience.md"
+    },
+    {
+      "id": "I17",
+      "title": "صفحه‌کلید، RTL/LTR و موبایل",
+      "owner": "A.7-P4",
+      "prompt": "04-import-experience.md"
+    },
+    {
+      "id": "I18",
+      "title": "ردیابی اقدام و نتیجه واردسازی",
+      "owner": "A.7-P2",
+      "prompt": "02-import-safety.md"
+    },
+    {
+      "id": "I19",
+      "title": "نگهداری و پاک‌سازی فایل‌ها",
+      "owner": "A.7-P5",
+      "prompt": "05-import-operations.md"
+    },
+    {
+      "id": "I20",
+      "title": "حد زمان و منابع پردازش",
+      "owner": "A.7-P5",
+      "prompt": "05-import-operations.md"
+    },
+    {
+      "id": "I21",
+      "title": "مجموعه نمونه سازگاری و برابری MPP/XML",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "I22",
+      "title": "فایل واقعی کارفرما و ارقام کنترل",
+      "owner": "A.7-P3",
+      "prompt": "03-import-fidelity.md"
+    },
+    {
+      "id": "D01",
+      "title": "ماتریس نمونه، نگاشت و اختلاف‌ها",
+      "owner": "A.7-P1",
+      "prompt": "01-project-reference.md"
+    },
+    {
+      "id": "D02",
+      "title": "آمادگی محیط واقعی تبدیل و worker",
+      "owner": "A.7-P5",
+      "prompt": "05-import-operations.md"
+    },
+    {
+      "id": "D03",
+      "title": "آزمون مرورگری یک پروژه مرجع",
+      "owner": "A.7-P6",
+      "prompt": "06-delivery-acceptance.md"
+    },
+    {
+      "id": "D04",
+      "title": "نسخه تحویلی، راهنمای تست و نتیجه پذیرش",
+      "owner": "A.7-P6",
+      "prompt": "06-delivery-acceptance.md"
+    }
+  ]
+}

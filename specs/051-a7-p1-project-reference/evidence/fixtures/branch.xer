@@ -1,0 +1,10 @@
+ERMHDR	18.8	2026-01-01	Project
+%T	PROJWBS
+%F	wbs_id	parent_wbs_id	wbs_short_name	wbs_name
+%R	1		1	Parent
+%R	2	1	1.1	Branch A
+%R	3	1	1.2	Branch B
+%T	TASK
+%F	task_id	wbs_id	task_code	task_name	target_drtn_hr_cnt
+%R	10	2	A	Branch A work	16
+%R	11	3	B	Branch B work	8

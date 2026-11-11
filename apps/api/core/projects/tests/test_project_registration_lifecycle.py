@@ -1,6 +1,8 @@
 import pytest
 from rest_framework import status
+from rest_framework.test import APIClient
 
+from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole
 from permissions.constants import PERMISSIONS
 from projects.models import Project, ProjectStatus
 from projects.services import create_project_with_creator
@@ -46,7 +48,7 @@ class TestProjectRegistrationLifecycle:
     def test_approve_project_permission_exists(self):
         assert 'approve_project' in PERMISSIONS
 
-    def test_submit_and_approve_with_gates(self, auth_client, user):
+    def test_submit_and_approve_with_gates(self, auth_client, user, django_user_model, project_manager_role):
         project = create_project_with_creator(
             creator=user,
             project_code='LIFE-001',
@@ -59,13 +61,39 @@ class TestProjectRegistrationLifecycle:
         project.project_manager = None
         project.scope_description = ''
         project.contract_amount = None
+        project.budget_approved_at = None
+        project.budget_approved_by = None
         project.save()
 
         submit = auth_client.post(f'/api/v1/projects/{project.id}/submit/')
         assert submit.status_code == status.HTTP_200_OK
         assert submit.data['status'] == 'pending_approval'
+        project.refresh_from_db()
+        assert project.approval_submitted_by_id == user.id
 
-        bad = auth_client.post(f'/api/v1/projects/{project.id}/approve/')
+        same_actor = auth_client.post(f'/api/v1/projects/{project.id}/approve/')
+        assert same_actor.status_code == status.HTTP_400_BAD_REQUEST
+        assert same_actor.data['error']['code'] == 'submitter_cannot_approve'
+        project.refresh_from_db()
+        assert project.status == ProjectStatus.PENDING_APPROVAL
+        assert project.budget_approved_at is None
+        assert project.budget_approved_by_id is None
+
+        approver = django_user_model.objects.create_user(
+            username='life-approver',
+            mobile='+989121230799',
+            password='password',
+        )
+        member = ProjectMember.objects.create(
+            project=project,
+            user=approver,
+            status=MemberStatus.ACTIVE,
+        )
+        ProjectMemberRole.objects.create(member=member, role=project_manager_role)
+        approver_client = APIClient()
+        approver_client.force_authenticate(user=approver)
+
+        bad = approver_client.post(f'/api/v1/projects/{project.id}/approve/')
         assert bad.status_code == status.HTTP_400_BAD_REQUEST
         err = bad.data.get('error') or {}
         assert err.get('code') == 'activation_gates_failed' or 'activation_gates' in str(bad.data)
@@ -76,14 +104,16 @@ class TestProjectRegistrationLifecycle:
             if isinstance(nested, dict):
                 missing = nested.get('missing')
         assert missing is None or 'project_manager' in missing
-
         project.refresh_from_db()
+        assert project.status == ProjectStatus.PENDING_APPROVAL
+        assert project.budget_approved_at is None
+
         project.project_manager = user
         project.scope_description = 'Full scope'
         project.contract_amount = 1000
         project.save()
 
-        ok = auth_client.post(f'/api/v1/projects/{project.id}/approve/')
+        ok = approver_client.post(f'/api/v1/projects/{project.id}/approve/')
         assert ok.status_code == status.HTTP_200_OK
         assert ok.data['status'] == 'active'
         assert ok.data['budget_approved_at']

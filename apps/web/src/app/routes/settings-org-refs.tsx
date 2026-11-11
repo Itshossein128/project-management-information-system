@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import {
   asList,
   createContractType,
+  createMeasurementUnit,
   createOrganizationUnit,
   fetchContractTypes,
+  fetchMeasurementUnits,
   fetchOrganizationUnits,
 } from "@/app/lib/api/central-data";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
@@ -24,6 +26,8 @@ export default function SettingsOrgRefsPage() {
   const [typeCode, setTypeCode] = useState("");
   const [typeNameFa, setTypeNameFa] = useState("");
   const [typeNameEn, setTypeNameEn] = useState("");
+  const [measureName, setMeasureName] = useState("");
+  const [measureSymbol, setMeasureSymbol] = useState("");
 
   const { data: unitsRaw, isLoading: unitsLoading } = useQuery({
     queryKey: ["organization-units"],
@@ -36,6 +40,12 @@ export default function SettingsOrgRefsPage() {
     queryFn: fetchContractTypes,
   });
   const types = asList(typesRaw ?? []);
+
+  const { data: measuresRaw, isLoading: measuresLoading } = useQuery({
+    queryKey: ["measurement-units"],
+    queryFn: fetchMeasurementUnits,
+  });
+  const measures = asList(measuresRaw ?? []);
 
   const createUnit = useMutation({
     mutationFn: () =>
@@ -67,6 +77,21 @@ export default function SettingsOrgRefsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const createMeasure = useMutation({
+    mutationFn: () =>
+      createMeasurementUnit({
+        unit_name: measureName.trim(),
+        unit_symbol: measureSymbol.trim(),
+      }),
+    onSuccess: () => {
+      toast.success(t("centralData.measureCreated", "واحد اندازه‌گیری ایجاد شد"));
+      setMeasureName("");
+      setMeasureSymbol("");
+      void qc.invalidateQueries({ queryKey: ["measurement-units"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return (
     <main
       className="page-main page-shell mx-auto max-w-4xl px-4 py-8"
@@ -82,7 +107,7 @@ export default function SettingsOrgRefsPage() {
         title={t("centralData.orgRefs", "مراجع سازمانی")}
         subtitle={t(
           "centralData.orgRefsSubtitle",
-          "واحدهای سازمانی و انواع قرارداد مدیریت‌شده",
+          "واحدهای سازمانی، انواع قرارداد و واحدهای اندازه‌گیری",
         )}
       />
 
@@ -209,6 +234,64 @@ export default function SettingsOrgRefsPage() {
             {types.map((ct) => (
               <li key={ct.id} className="px-4 py-2 text-sm">
                 {ct.code} — {ct.name_fa || ct.name_en}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-10 space-y-4">
+        <h2 className="text-base font-semibold">
+          {t("centralData.measurementUnits", "واحدهای اندازه‌گیری")}
+        </h2>
+        <form
+          className="grid gap-3 sm:grid-cols-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!measureName.trim()) return;
+            createMeasure.mutate();
+          }}
+        >
+          <div>
+            <Label htmlFor="measure-name">{t("centralData.name", "نام")}</Label>
+            <Input
+              id="measure-name"
+              data-testid="measure-name"
+              value={measureName}
+              onChange={(e) => setMeasureName(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="measure-symbol">{t("centralData.symbol", "نماد")}</Label>
+            <Input
+              id="measure-symbol"
+              data-testid="measure-symbol"
+              value={measureSymbol}
+              onChange={(e) => setMeasureSymbol(e.target.value)}
+            />
+          </div>
+          <div className="flex items-end">
+            <Button
+              type="submit"
+              data-testid="measure-create-btn"
+              loading={createMeasure.isPending}
+            >
+              {t("common.create", "ایجاد")}
+            </Button>
+          </div>
+        </form>
+        {measuresLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+        ) : (
+          <ul
+            className="divide-y divide-border rounded-lg border border-border"
+            data-testid="measure-list"
+          >
+            {measures.map((unit) => (
+              <li key={unit.id} className="px-4 py-2 text-sm">
+                {unit.unit_name}
+                {unit.unit_symbol ? ` (${unit.unit_symbol})` : ""}
               </li>
             ))}
           </ul>
