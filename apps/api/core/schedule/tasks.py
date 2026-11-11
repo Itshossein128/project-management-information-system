@@ -1,7 +1,11 @@
 from celery import shared_task
 from datetime import timedelta
 
+from django.db import transaction
+
+from projects.models import Project
 from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus, P6ImportJob
+from schedule.services.import_safety import ImportSafetyError, assert_can_import
 from schedule.services.msp_import import execute_msp_import
 from schedule.services.p6_import import execute_p6_import
 
@@ -39,7 +43,9 @@ def compute_baseline_progress(baseline_id):
 
 
 def _run_import_task(task_instance, job_model, job_id, execute_func):
-    job = job_model.objects.select_related('project').get(pk=job_id)
+    job = job_model.objects.select_related('project', 'created_by').get(pk=job_id)
+    if job.status == MspImportStatus.DONE:
+        return job.result
     job.status = MspImportStatus.RUNNING
     job.task_id = task_instance.request.id or ''
     job.save(update_fields=['status', 'task_id', 'updated_at'])
@@ -51,20 +57,30 @@ def _run_import_task(task_instance, job_model, job_id, execute_func):
         job.save(update_fields=['progress_pct', 'updated_at'])
 
     try:
-        result = execute_func(
-            job.project,
-            file_bytes,
-            filename=job.filename,
-            replace=job.replace_existing,
-            progress_callback=on_progress,
-            user=job.created_by,
-        )
+        with transaction.atomic():
+            project = Project.objects.select_for_update().get(pk=job.project_id)
+            assert_can_import(project, job.created_by)
+            result = execute_func(
+                project,
+                file_bytes,
+                filename=job.filename,
+                replace=job.replace_existing,
+                progress_callback=on_progress,
+                user=job.created_by,
+            )
         job.status = MspImportStatus.DONE
         job.progress_pct = 100
         job.result = result
         job.error_code = ''
-        job.save(update_fields=['status', 'progress_pct', 'result', 'error_code', 'updated_at'])
+        job.error_message = ''
+        job.save(update_fields=['status', 'progress_pct', 'result', 'error_code', 'error_message', 'updated_at'])
         return result
+    except ImportSafetyError as exc:
+        job.status = MspImportStatus.FAILED
+        job.error_code = exc.code
+        job.error_message = exc.message
+        job.save(update_fields=['status', 'error_code', 'error_message', 'updated_at'])
+        return {'error_code': exc.code}
     except Exception as exc:
         from schedule.services.mpp_errors import IMPORT_FAILED, MppImportError
 

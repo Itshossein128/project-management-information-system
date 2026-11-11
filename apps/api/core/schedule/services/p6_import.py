@@ -6,10 +6,16 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django.db import transaction
-from django.utils import timezone
 
 from projects.models import Activity, ActivityRelation, Project, RelationType, WBS
-from schedule.models import BaselineActivity, BaselineSchedule
+from schedule.models import BaselineActivity
+from schedule.services.import_safety import (
+    baseline_rows_for,
+    duplicate_messages,
+    guard_and_maybe_replace,
+    open_working_copy,
+    result_flags,
+)
 from schedule.services.msp_import import ParseResult, ParsedTask, build_preview
 from schedule.services.shared_import import extract_activities_from_tasks, bulk_create_relations
 
@@ -173,24 +179,16 @@ def execute_p6_import(
     progress_callback=None,
     user=None,
 ) -> dict:
+    removed = guard_and_maybe_replace(project, user, replace)
+    audit_user = user
+
     parsed = parse_p6_xer(file_bytes)
     warnings = list(parsed.warnings)
-
-    if replace:
-        ActivityRelation._base_manager.filter(predecessor__project=project).delete()
-        Activity._base_manager.filter(project=project).delete()
-        WBS.objects.filter(project=project).delete()
-
-    audit_user = user
-    if audit_user is None:
-        from django.contrib.auth import get_user_model
-        audit_user = get_user_model().objects.order_by('created_at').first()
 
     uid_to_activity: dict[str, Activity] = {}
     outline_to_wbs: dict[str, WBS] = {}
     wbs_count = 0
     activity_count = 0
-    relation_count = 0
     level_parents: dict[int, WBS] = {}
 
     summary_tasks = [t for t in parsed.tasks if t.is_summary]
@@ -207,10 +205,17 @@ def execute_p6_import(
             continue
         level = task.outline_level
         parent = level_parents.get(level - 1) if level > 1 else None
+        node_fields = {
+            'project_id': project.id,
+            'wbs_code': code,
+            'wbs_name': task.name,
+            'created_by': audit_user,
+            'updated_by': audit_user,
+        }
         if parent:
-            wbs = parent.add_child(project_id=project.id, wbs_code=code, wbs_name=task.name)
+            wbs = parent.add_child(**node_fields)
         else:
-            wbs = WBS.add_root(project_id=project.id, wbs_code=code, wbs_name=task.name)
+            wbs = WBS.add_root(**node_fields)
         outline_to_wbs[task.outline_number] = wbs
         level_parents[level] = wbs
         wbs_count += 1
@@ -239,30 +244,6 @@ def execute_p6_import(
         outline_to_wbs, warnings, audit_user, done, activity_count, get_wbs_p6
     )
 
-    baseline = BaselineSchedule.objects.create(
-        project=project,
-        version_name=f'P6 Import — {filename} — {timezone.now().strftime("%Y-%m-%d %H:%M")}',
-        is_current=True,
-        created_by=audit_user,
-        updated_by=audit_user,
-    )
-
-    baseline_activities_to_create = []
-    for task in leaf_tasks:
-        if task.uid not in uid_to_activity:
-            continue
-        act = uid_to_activity[task.uid]
-        baseline_activities_to_create.append(BaselineActivity(
-            baseline=baseline,
-            activity=act,
-            planned_start=task.start,
-            planned_finish=task.finish,
-            planned_duration=task.duration_days,
-            planned_progress=task.percent_complete,
-        ))
-
-    BaselineActivity.objects.bulk_create(baseline_activities_to_create)
-
     relations_to_create = []
     for task in leaf_tasks:
         if task.uid not in uid_to_activity:
@@ -282,11 +263,21 @@ def execute_p6_import(
                 created_by=audit_user,
                 updated_by=audit_user,
             ))
-            relation_count += 1
-
-    return bulk_create_relations(
-        relations_to_create, wbs_count, activity_count, relation_count, warnings, progress_callback
+    relation_result = bulk_create_relations(
+        relations_to_create, wbs_count, activity_count, warnings, progress_callback
     )
+    created_any = any(
+        relation_result[key] for key in ('wbs_nodes_created', 'activities_created', 'relations_created')
+    )
+    baseline = open_working_copy(project, audit_user, filename, 'P6 Import', created_any)
+    if baseline is not None:
+        BaselineActivity.objects.bulk_create(
+            baseline_rows_for(baseline, leaf_tasks, uid_to_activity)
+        )
+    return {
+        **relation_result,
+        **result_flags(removed, relation_result, baseline, duplicate_messages(warnings)),
+    }
 
 
 __all__ = ['parse_p6_xer', 'build_preview', 'execute_p6_import']

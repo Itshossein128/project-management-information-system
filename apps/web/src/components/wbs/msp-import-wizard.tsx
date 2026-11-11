@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { FileUp, Upload } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import {
   fetchMspImportStatus,
@@ -34,6 +35,7 @@ export function MspImportWizard({
   projectId,
   onComplete,
 }: MspImportWizardProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [step, setStep] = useState<Step>(1);
   const [file, setFile] = useState<File | null>(null);
@@ -45,6 +47,7 @@ export function MspImportWizard({
     wbs_nodes_created: number;
     activities_created: number;
     warnings: string[];
+    nothing_changed?: boolean;
   } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -79,10 +82,15 @@ export function MspImportWizard({
         ? startP6Import(projectId, opts.file, opts.replace)
         : startMspImport(projectId, opts.file, opts.replace),
     onSuccess: (data) => {
+      setImportError(null);
       setTaskId(data.task_id);
       setStep(3);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const message = e.message || t("scheduleImport.refused", "واردسازی رد شد.");
+      setImportError(message);
+      toast.error(message);
+    },
   });
 
   useEffect(() => {
@@ -101,6 +109,7 @@ export function MspImportWizard({
             wbs_nodes_created: status.result.wbs_nodes_created,
             activities_created: status.result.activities_created,
             warnings: status.result.warnings,
+            nothing_changed: Boolean(status.result.nothing_changed),
           });
           onComplete?.();
           return;
@@ -270,6 +279,12 @@ export function MspImportWizard({
             </label>
           </div>
 
+          {importError ? (
+            <p className="text-destructive text-sm" data-testid="msp-import-refusal">
+              {importError}
+            </p>
+          ) : null}
+
           <div className="flex justify-between gap-2">
             <Button variant="ghost" onClick={() => setStep(1)} disabled={isProcessing}>
               قبلی
@@ -311,7 +326,11 @@ export function MspImportWizard({
             </div>
           ) : summary ? (
             <div className="space-y-2 text-sm">
-              <p>وارد کردن با موفقیت انجام شد.</p>
+              <p>
+                {summary.nothing_changed
+                  ? t("scheduleImport.nothingChanged", "برنامه تغییری نکرد.")
+                  : t("scheduleImport.imported", "وارد کردن با موفقیت انجام شد.")}
+              </p>
               <ul className="list-inside list-disc text-muted-foreground">
                 <li>{summary.wbs_nodes_created} گره WBS</li>
                 <li>{summary.activities_created} فعالیت</li>

@@ -1,4 +1,5 @@
 """MSP XML / native MPP and P6 import API views."""
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
@@ -13,6 +14,13 @@ from common.validators import MSG_FILE_TOO_LARGE, MSG_INVALID_TYPE, validate_msp
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Project
 from schedule.models import MspImportJob, MspImportStatus, P6ImportJob
+from schedule.services.import_safety import (
+    ImportSafetyError,
+    find_inflight_job,
+    guard_and_maybe_replace,
+    message_for,
+    replacement_block_code,
+)
 from schedule.services.msp_import import build_preview, parse_msp_family
 from schedule.services.mpp_errors import (
     CONVERSION_FAILED,
@@ -129,16 +137,43 @@ class BaseImportStartView(APIView):
             return _error_response(self.invalid_code, msg)
 
         replace = request.data.get('replace', 'false') in (True, 'true', '1', 1)
-        job = self.job_model.objects.create(
-            project=project,
-            filename=filename or self.default_filename,
-            replace_existing=replace,
-            file_data=file_bytes,
-            created_by=request.user,
-            status=MspImportStatus.PENDING,
-        )
+        filename = filename or self.default_filename
+        with transaction.atomic():
+            project = Project.objects.select_for_update().get(pk=project.pk)
+            try:
+                guard_and_maybe_replace(project, request.user, replace=False)
+                if replace:
+                    code = replacement_block_code(project)
+                    if code:
+                        raise ImportSafetyError(code, message_for(code))
+            except ImportSafetyError as exc:
+                job = self.job_model.objects.create(
+                    project=project,
+                    filename=filename,
+                    replace_existing=replace,
+                    file_data=file_bytes,
+                    created_by=request.user,
+                    status=MspImportStatus.FAILED,
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+                return _error_response(exc.code, exc.message, details={'task_id': str(job.id)})
+            inflight = find_inflight_job(self.job_model, project, request.user, replace, file_bytes)
+            if inflight is not None:
+                return Response(
+                    {'task_id': str(inflight.id), 'status': 'queued'},
+                    status=status.HTTP_202_ACCEPTED,
+                )
+            job = self.job_model.objects.create(
+                project=project,
+                filename=filename,
+                replace_existing=replace,
+                file_data=file_bytes,
+                created_by=request.user,
+                status=MspImportStatus.PENDING,
+            )
         async_result = self.task_func.delay(str(job.id))
-        job.task_id = async_result.id
+        job.task_id = async_result.id or ''
         job.save(update_fields=['task_id', 'updated_at'])
         return Response({'task_id': str(job.id), 'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
 

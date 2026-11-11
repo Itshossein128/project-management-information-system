@@ -3000,6 +3000,11 @@
       "complete": "خاتمهٔ اولیه"
     }
   },
+  "scheduleImport": {
+    "nothingChanged": "برنامه تغییری نکرد.",
+    "imported": "برنامه وارد شد.",
+    "refused": "واردسازی رد شد."
+  },
   "contractors": {
     "emptyPlaceholder": "پیمانکاری ثبت نشده",
     "emptyHelp": "پیمانکاری ثبت نشده است. ابتدا در صفحه ذینفعان اضافه کنید.",

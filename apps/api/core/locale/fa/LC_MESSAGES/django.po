@@ -455,3 +455,27 @@ msgstr "یک واحد سازمانی نمی‌تواند والد خودش با�
 
 msgid "The person who submitted this project cannot approve it."
 msgstr "کسی که این پروژه را برای تأیید فرستاده نمی‌تواند خودش آن را تأیید کند."
+
+msgid "Cannot replace a schedule that has progress recorded."
+msgstr "نمی‌توان برنامه‌ای را جایگزین کرد که پیشرفت ثبت‌شده دارد."
+
+msgid "Cannot replace a schedule that has cost records."
+msgstr "نمی‌توان برنامه‌ای را جایگزین کرد که سابقه هزینه دارد."
+
+msgid "Cannot replace a schedule that has linked documents."
+msgstr "نمی‌توان برنامه‌ای را جایگزین کرد که سند وابسته دارد."
+
+msgid "Cannot replace a schedule that has activities."
+msgstr "نمی‌توان برنامه‌ای را جایگزین کرد که فعالیت دارد."
+
+msgid "Cannot replace a schedule that has a locked or approved baseline."
+msgstr "نمی‌توان برنامه‌ای را جایگزین کرد که خط مبنای قفل‌شده یا مصوب دارد."
+
+msgid "Archived projects are read-only."
+msgstr "پروژه بایگانی‌شده فقط خواندنی است."
+
+msgid "You no longer have permission to import into this project."
+msgstr "دیگر اجازه وارد کردن برنامه در این پروژه را ندارید."
+
+msgid "The import has no confirming user."
+msgstr "واردسازی کاربر تأییدکننده ندارد."

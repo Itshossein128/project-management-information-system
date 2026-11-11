@@ -43,6 +43,7 @@ export interface MspImportStatusResult {
     activities_created: number;
     relations_created: number;
     warnings: string[];
+    nothing_changed?: boolean;
   };
   error?: string;
 }

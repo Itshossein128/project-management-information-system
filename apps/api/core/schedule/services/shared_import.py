@@ -41,12 +41,24 @@ def extract_activities_from_tasks(tasks, project, existing_activities, uid_to_ac
 
     return done, activity_count
 
-def bulk_create_relations(relations_to_create, wbs_count, activity_count, relation_count, warnings, progress_callback):
+def bulk_create_relations(relations_to_create, wbs_count, activity_count, warnings, progress_callback):
     """
-    Bulk create relations and return the summary dictionary.
-    This logic is shared between msp_import and p6_import.
+    Insert relationships that are not already active and return the stored counts.
     """
-    ActivityRelation.objects.bulk_create(relations_to_create, ignore_conflicts=True)
+    existing = set(
+        ActivityRelation.objects.filter(is_deleted=False).values_list('predecessor_id', 'successor_id')
+    )
+    to_create = []
+    for relation in relations_to_create:
+        key = (relation.predecessor_id, relation.successor_id)
+        if key in existing:
+            code = getattr(relation.successor, 'activity_code', None) or str(relation.successor_id)
+            warnings.append(f'Duplicate relation "{code}" — skipped.')
+            continue
+        existing.add(key)
+        to_create.append(relation)
+    if to_create:
+        ActivityRelation.objects.bulk_create(to_create)
 
     if progress_callback:
         progress_callback(100)
@@ -54,6 +66,6 @@ def bulk_create_relations(relations_to_create, wbs_count, activity_count, relati
     return {
         'wbs_nodes_created': wbs_count,
         'activities_created': activity_count,
-        'relations_created': relation_count,
+        'relations_created': len(to_create),
         'warnings': warnings,
     }

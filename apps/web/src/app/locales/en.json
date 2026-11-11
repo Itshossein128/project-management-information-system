@@ -3008,6 +3008,11 @@
       "complete": "Original completion"
     }
   },
+  "scheduleImport": {
+    "nothingChanged": "Nothing in the schedule changed.",
+    "imported": "The schedule was imported.",
+    "refused": "The import was refused."
+  },
   "contractors": {
     "emptyPlaceholder": "No contractors yet",
     "emptyHelp": "No contractors yet. Add them on the stakeholders page.",
