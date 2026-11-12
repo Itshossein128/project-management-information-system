@@ -60,6 +60,7 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
             'dependencies': ','.join(dep_codes),
             'wbs_code': act.wbs.wbs_code if act.wbs_id else '',
             'is_critical': act.id in critical_ids,
+            'is_milestone': act.is_milestone,
             'baseline_start': ba.planned_start.isoformat() if ba and ba.planned_start else None,
             'baseline_end': ba.planned_finish.isoformat() if ba and ba.planned_finish else None,
             'status': act.status,

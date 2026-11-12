@@ -5,6 +5,7 @@ from django.db import transaction
 
 from projects.models import Project
 from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus, P6ImportJob
+from schedule.services.import_fidelity import ImportFidelityError
 from schedule.services.import_safety import ImportSafetyError, assert_can_import
 from schedule.services.msp_import import execute_msp_import
 from schedule.services.p6_import import execute_p6_import
@@ -75,6 +76,13 @@ def _run_import_task(task_instance, job_model, job_id, execute_func):
         job.error_message = ''
         job.save(update_fields=['status', 'progress_pct', 'result', 'error_code', 'error_message', 'updated_at'])
         return result
+    except ImportFidelityError as exc:
+        job.status = MspImportStatus.FAILED
+        job.error_code = exc.code
+        job.error_message = exc.message
+        job.result = {'blocking': exc.as_dicts()}
+        job.save(update_fields=['status', 'error_code', 'error_message', 'result', 'updated_at'])
+        return {'error_code': exc.code, 'blocking': exc.as_dicts()}
     except ImportSafetyError as exc:
         job.status = MspImportStatus.FAILED
         job.error_code = exc.code

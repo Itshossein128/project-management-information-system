@@ -415,6 +415,35 @@ export function ActivityDrawer({
         </section>
 
         </fieldset>
+        {activity ? (
+          <section className="space-y-2 text-sm" data-testid="activity-import-facts">
+            <h3 className="text-sm font-semibold text-muted-foreground">{t("activities.importedFacts", "Imported schedule facts")}</h3>
+            <dl className="grid grid-cols-2 gap-2">
+              <div>
+                <dt>{t("activities.plannedPercent", "Planned percent")}</dt>
+                <dd>{activity.planned_percent ?? t("activities.unknown", "Unknown")}</dd>
+              </div>
+              <div>
+                <dt>{t("activities.critical", "Critical")}</dt>
+                <dd>
+                  {activity.is_critical == null
+                    ? t("activities.unknown", "Unknown")
+                    : activity.is_critical
+                      ? t("activities.criticalYes", "Yes")
+                      : t("activities.criticalNo", "No")}
+                </dd>
+              </div>
+              <div>
+                <dt>{t("activities.totalSlack", "Total slack (days)")}</dt>
+                <dd>{activity.total_slack_days ?? t("activities.unknown", "Unknown")}</dd>
+              </div>
+              <div>
+                <dt>{t("activities.freeSlack", "Free slack (days)")}</dt>
+                <dd>{activity.free_slack_days ?? t("activities.unknown", "Unknown")}</dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
         {isEdit && activity ? (
           <MeasurementEditor projectId={projectId} activityId={activity.activity_id} />
         ) : (

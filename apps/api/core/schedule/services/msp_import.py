@@ -1,7 +1,6 @@
 """Microsoft Project XML import parser and executor."""
 from __future__ import annotations
 
-import re
 import defusedxml.ElementTree as ET
 from defusedxml.common import DefusedXmlException, DTDForbidden
 from dataclasses import dataclass, field
@@ -11,7 +10,7 @@ from typing import Any
 
 from django.db import transaction
 
-from projects.models import Activity, ActivityRelation, Project, RelationType, WBS
+from projects.models import Activity, ActivityRelation, Project, WBS
 from schedule.models import BaselineActivity
 from schedule.services.import_safety import (
     baseline_rows_for,
@@ -20,19 +19,18 @@ from schedule.services.import_safety import (
     open_working_copy,
     result_flags,
 )
+from schedule.services.import_fidelity import (
+    ImportFidelityError,
+    days_from_msp_duration,
+    note_existing,
+    refresh_cached_wbs,
+    unchanged_result,
+    days_from_tenths,
+    preview_payload,
+    relation_type_for,
+    resolve,
+)
 from schedule.services.shared_import import extract_activities_from_tasks, bulk_create_relations
-
-MSP_RELATION_MAP = {
-    '1': RelationType.FS,
-    '2': RelationType.SS,
-    '3': RelationType.FF,
-    '4': RelationType.SF,
-    0: RelationType.FS,
-    1: RelationType.FS,
-    2: RelationType.SS,
-    3: RelationType.FF,
-    4: RelationType.SF,
-}
 
 
 def _local(tag: str) -> str:
@@ -61,17 +59,18 @@ def _parse_msp_date(value: str) -> date | None:
 
 
 def _parse_duration_days(value: str) -> int | None:
-    if not value:
+    days, inexact = days_from_msp_duration(value)
+    if inexact:
         return None
-    # PT480H0M0S or P10D
-    m = re.match(r'P(?:(\d+)D)?(?:T(?:(\d+)H)?)?', value)
-    if m:
-        days = int(m.group(1) or 0)
-        hours = int(m.group(2) or 0)
-        if days:
-            return days
-        if hours:
-            return max(1, round(hours / 8))
+    return days
+
+
+def _child(el, name: str):
+    if el is None:
+        return None
+    for child in el:
+        if _local(child.tag) == name:
+            return child
     return None
 
 
@@ -89,14 +88,29 @@ class ParsedTask:
     percent_complete: Decimal | None = None
     total_slack: int | None = None
     free_slack: int | None = None
-    is_critical: bool = False
+    is_critical: bool | None = None
     predecessors: list[dict] = field(default_factory=list)
+    node_key: str = ''
+    parent_key: str | None = None
+    is_milestone: bool = False
+    milestone_flag: bool = False
+    duration_inexact: bool = False
+    actual_start: date | None = None
+    actual_finish: date | None = None
+    percent_invalid: bool = False
+    critical_known: bool = False
+    total_slack_days: int | None = None
+    free_slack_days: int | None = None
+    slack_inexact: bool = False
+    free_slack_inexact: bool = False
+    weight_invalid: bool = False
 
 
 @dataclass
 class ParseResult:
     tasks: list[ParsedTask]
     warnings: list[str] = field(default_factory=list)
+    has_calendar: bool = False
 
 
 def is_mpp_bytes(file_bytes: bytes) -> bool:
@@ -127,6 +141,7 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
 
     if _local(root.tag) != 'Project':
         raise ValueError('File must be a Microsoft Project XML export with <Project> root.')
+    has_calendar = any(_local(element.tag) == 'Calendar' for element in root.iter())
 
     tasks_el = None
     for child in root:
@@ -144,7 +159,7 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
         if not uid or uid == '0':
             continue
         outline_level = int(_text(task_el, 'OutlineLevel', '1') or '1')
-        outline_number = _text(task_el, 'OutlineNumber') or _text(task_el, 'WBS')
+        outline_number = _text(task_el, 'OutlineNumber')
         wbs_code = _text(task_el, 'WBS') or outline_number
         name = _text(task_el, 'Name')
         if not name:
@@ -152,20 +167,49 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
             continue
         summary = _text(task_el, 'Summary', '0') in ('1', 'true', 'True')
         duration_raw = _text(task_el, 'Duration')
-        duration_days = _parse_duration_days(duration_raw)
-        if duration_raw and duration_days is None:
-            warnings.append(f'Could not parse duration "{duration_raw}" for task {name}.')
+        duration_days, duration_inexact = days_from_msp_duration(duration_raw)
+        if outline_number:
+            node_key = outline_number
+            parent_key = outline_number.rsplit('.', 1)[0] if '.' in outline_number else None
+        else:
+            node_key = f'uid:{uid}'
+            parent_key = None
+        weight_text = _text(task_el, 'Weight')
+        weight_invalid = False
+        if weight_text:
+            try:
+                share = Decimal(weight_text)
+            except Exception:
+                weight_invalid = True
+            else:
+                weight_invalid = share < 0 or share > 1
 
         preds = []
         for rel in task_el:
-            if _local(rel.tag) == 'PredecessorLink':
-                preds.append({
-                    'uid': _text(rel, 'PredecessorUID'),
-                    'type': _text(rel, 'Type', '1'),
-                    'lag': int(_text(rel, 'LinkLag', '0') or '0'),
-                })
+            if _local(rel.tag) != 'PredecessorLink':
+                continue
+            raw_lag = int(_text(rel, 'LinkLag', '0') or '0')
+            lag_days, lag_inexact = days_from_tenths(raw_lag)
+            preds.append({
+                'uid': _text(rel, 'PredecessorUID'),
+                'type': _text(rel, 'Type', ''),
+                'relation_type': relation_type_for(_text(rel, 'Type', ''), prima=False),
+                'lag_days': lag_days,
+                'lag_exact': not lag_inexact,
+            })
 
         pct = _text(task_el, 'PercentComplete')
+        percent = Decimal(pct) if pct else None
+        percent_invalid = percent is not None and (percent < 0 or percent > 100)
+        critical_el = _child(task_el, 'Critical')
+        total_el = _child(task_el, 'TotalSlack')
+        free_el = _child(task_el, 'FreeSlack')
+        total_days, total_inexact = (None, False)
+        free_days, free_inexact = (None, False)
+        if total_el is not None and (total_el.text or '').strip():
+            total_days, total_inexact = days_from_tenths(int((total_el.text or '0').strip()))
+        if free_el is not None and (free_el.text or '').strip():
+            free_days, free_inexact = days_from_tenths(int((free_el.text or '0').strip()))
         tasks.append(
             ParsedTask(
                 uid=uid,
@@ -176,54 +220,38 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
                 is_summary=summary,
                 start=_parse_msp_date(_text(task_el, 'Start')),
                 finish=_parse_msp_date(_text(task_el, 'Finish')),
-                duration_days=duration_days,
-                percent_complete=Decimal(pct) if pct else None,
-                total_slack=int(_text(task_el, 'TotalSlack', '0') or '0') or None,
-                free_slack=int(_text(task_el, 'FreeSlack', '0') or '0') or None,
-                is_critical=_text(task_el, 'Critical', '0') in ('1', 'true'),
+                duration_days=None if duration_inexact else duration_days,
+                percent_complete=None if percent_invalid else percent,
+                total_slack=None if total_inexact else total_days,
+                free_slack=None if free_inexact else free_days,
+                is_critical=(
+                    (critical_el.text or '').strip() in ('1', 'true', 'True')
+                    if critical_el is not None else None
+                ),
                 predecessors=preds,
+                node_key=node_key,
+                parent_key=parent_key,
+                milestone_flag=_text(task_el, 'Milestone', '0') in ('1', 'true', 'True'),
+                duration_inexact=duration_inexact,
+                actual_start=_parse_msp_date(_text(task_el, 'ActualStart')),
+                actual_finish=_parse_msp_date(_text(task_el, 'ActualFinish')),
+                percent_invalid=percent_invalid,
+                critical_known=critical_el is not None,
+                total_slack_days=None if total_inexact else total_days,
+                free_slack_days=None if free_inexact else free_days,
+                slack_inexact=total_inexact,
+                free_slack_inexact=free_inexact,
+                weight_invalid=weight_invalid,
             )
         )
 
-    return ParseResult(tasks=tasks, warnings=warnings)
+    return ParseResult(tasks=tasks, warnings=warnings, has_calendar=has_calendar)
 
 
-def build_preview(parsed: ParseResult) -> dict:
-    """Non-destructive preview tree."""
-    wbs_tree: list[dict] = []
-    stack: dict[int, dict] = {}
-
-    for task in sorted(parsed.tasks, key=lambda t: t.outline_number):
-        node = {
-            'wbs_code': task.wbs_code or task.outline_number,
-            'wbs_name': task.name,
-            'depth': task.outline_level,
-            'is_summary': task.is_summary,
-            'activities': [] if task.is_summary else [{
-                'activity_code': task.wbs_code or task.uid,
-                'activity_name': task.name,
-                'duration_days': task.duration_days,
-            }],
-            'children': [],
-        }
-        level = max(task.outline_level - 1, 0)
-        if level == 0:
-            wbs_tree.append(node)
-        elif level - 1 in stack:
-            stack[level - 1]['children'].append(node)
-        stack[level] = node
-
-    activities = [
-        {
-            'activity_code': t.wbs_code or t.uid,
-            'activity_name': t.name,
-            'outline_number': t.outline_number,
-            'duration_days': t.duration_days,
-        }
-        for t in parsed.tasks
-        if not t.is_summary
-    ]
-    return {'wbs_tree': wbs_tree, 'activities': activities, 'warnings': parsed.warnings}
+def build_preview(parsed: ParseResult, max_depth: int | None = None, existing_wbs_codes=None, existing_activity_codes=None) -> dict:
+    """Non-destructive preview tree from the same plan confirm will store."""
+    plan = note_existing(resolve(parsed, max_depth=max_depth), existing_wbs_codes, existing_activity_codes)
+    return preview_payload(plan)
 
 
 @transaction.atomic
@@ -236,98 +264,89 @@ def execute_msp_import(
     progress_callback=None,
     user=None,
 ) -> dict:
+    parsed = parse_msp_family(file_bytes, filename=filename)
+    plan = note_existing(
+        resolve(parsed, max_depth=project.max_depth),
+        WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
+        Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+    )
+    if plan.blocking:
+        raise ImportFidelityError(plan.blocking)
+    if not plan.packages and not plan.activities:
+        from schedule.services.import_safety import assert_can_import
+        assert_can_import(project, user)
+        return unchanged_result(plan)
     removed = guard_and_maybe_replace(project, user, replace)
     audit_user = user
-
-    parsed = parse_msp_family(file_bytes, filename=filename)
     warnings = list(parsed.warnings)
+    warnings.extend(plan.warning_texts())
 
     uid_to_activity: dict[str, Activity] = {}
     outline_to_wbs: dict[str, WBS] = {}
     wbs_count = 0
     activity_count = 0
-
-    summary_tasks = [t for t in parsed.tasks if t.is_summary]
-    if not summary_tasks:
-        summary_tasks = parsed.tasks
-
-    level_parents: dict[int, WBS] = {}
-
-    total = len(summary_tasks) + len([t for t in parsed.tasks if not t.is_summary])
-    done = 0
-
     existing_wbs = {wbs.wbs_code: wbs for wbs in WBS.objects.filter(project=project)}
-    for task in sorted(summary_tasks, key=lambda t: t.outline_number):
-        code = task.wbs_code or task.outline_number
-        if not code:
-            warnings.append(f'Summary task "{task.name}" has no WBS code.')
-            continue
-        if code in existing_wbs:
-            warnings.append(f'Duplicate WBS code "{code}" — skipped.')
-            outline_to_wbs[task.outline_number] = existing_wbs[code]
-            continue
+    pending = list(plan.packages)
+    while pending:
+        progressed = False
+        next_pending = []
+        for task in pending:
+            refresh_cached_wbs(outline_to_wbs)
+            parent = outline_to_wbs.get(task.parent_key) if task.parent_key else None
+            if task.parent_key and parent is None:
+                next_pending.append(task)
+                continue
+            code = task.wbs_code or task.outline_number
+            if code in existing_wbs:
+                warnings.append(f'Duplicate WBS code "{code}" — skipped.')
+                outline_to_wbs[task.node_key] = existing_wbs[code]
+                progressed = True
+                continue
+            node_fields = {
+                'project_id': project.id,
+                'wbs_code': code,
+                'wbs_name': task.name,
+                'created_by': audit_user,
+                'updated_by': audit_user,
+            }
+            if parent is not None:
+                wbs = parent.add_child(**node_fields)
+            else:
+                wbs = WBS.add_root(**node_fields)
+            outline_to_wbs[task.node_key] = wbs
+            existing_wbs[code] = wbs
+            wbs_count += 1
+            progressed = True
+        if not progressed:
+            break
+        pending = next_pending
 
-        level = task.outline_level
-        parent = level_parents.get(level - 1) if level > 1 else None
-
-        if project.max_depth is not None and level > project.max_depth:
-            warnings.append(f'WBS "{code}" exceeds project max_depth — skipped.')
-            continue
-
-        node_fields = {
-            'project_id': project.id,
-            'wbs_code': code,
-            'wbs_name': task.name,
-            'created_by': audit_user,
-            'updated_by': audit_user,
-        }
-        if parent:
-            wbs = parent.add_child(**node_fields)
-        else:
-            wbs = WBS.add_root(**node_fields)
-
-        outline_to_wbs[task.outline_number] = wbs
-        level_parents[level] = wbs
-        wbs_count += 1
-        done += 1
-        if progress_callback:
-            progress_callback(int(done / max(total, 1) * 80))
-
-    existing_activities = set(Activity.objects.filter(project=project).values_list('activity_code', flat=True))
-    def get_wbs_msp(task, outline_to_wbs, warnings):
-        parent_key = '.'.join(task.outline_number.split('.')[:-1])
-        wbs = outline_to_wbs.get(parent_key)
-        if wbs is None and outline_to_wbs:
-            wbs = list(outline_to_wbs.values())[0]
+    def get_wbs_msp(task, outline_map, warning_list):
+        wbs = outline_map.get(task.parent_key)
         if wbs is None:
-            warnings.append(f'Activity "{task.name}" has no WBS parent.')
+            warning_list.append(f'activity_without_parent: {task.name}')
             return None
         return wbs
 
+    existing_activities = set(Activity.objects.filter(project=project).values_list('activity_code', flat=True))
     done, activity_count = extract_activities_from_tasks(
-        parsed.tasks, project, existing_activities, uid_to_activity,
-        outline_to_wbs, warnings, audit_user, done, activity_count, get_wbs_msp
+        plan.activities, project, existing_activities, uid_to_activity,
+        outline_to_wbs, warnings, audit_user, 0, activity_count, get_wbs_msp,
     )
-
     relations_to_create = []
-    for task in parsed.tasks:
-        if task.uid not in uid_to_activity:
+    for link in plan.links:
+        predecessor = uid_to_activity.get(link['predecessor_uid'])
+        successor = uid_to_activity.get(link['successor_uid'])
+        if predecessor is None or successor is None:
             continue
-        successor = uid_to_activity[task.uid]
-        for pred in task.predecessors:
-            predecessor = uid_to_activity.get(pred['uid'])
-            if predecessor is None:
-                warnings.append(f'Predecessor UID {pred["uid"]} not found for {task.name}.')
-                continue
-            rel_type = MSP_RELATION_MAP.get(pred['type'], RelationType.FS)
-            relations_to_create.append(ActivityRelation(
-                predecessor=predecessor,
-                successor=successor,
-                relation_type=rel_type,
-                lag_days=pred.get('lag', 0),
-                created_by=audit_user,
-                updated_by=audit_user,
-            ))
+        relations_to_create.append(ActivityRelation(
+            predecessor=predecessor,
+            successor=successor,
+            relation_type=link['relation_type'],
+            lag_days=link['lag_days'],
+            created_by=audit_user,
+            updated_by=audit_user,
+        ))
     relation_result = bulk_create_relations(
         relations_to_create, wbs_count, activity_count, warnings, progress_callback
     )
@@ -342,4 +361,7 @@ def execute_msp_import(
     return {
         **relation_result,
         **result_flags(removed, relation_result, baseline, duplicate_messages(warnings)),
+        'warning_items': [{'code': note.code, 'row': note.row} for note in plan.warnings],
+        'blocking': [],
+        **plan.counts(),
     }

@@ -106,7 +106,14 @@ class MspImportPreviewView(APIView):
             return _error_response(exc.code, exc.message)
         except ValueError:
             return _error_response(MSP_INVALID_XML, str(INVALID_XML_MESSAGE))
-        return Response(build_preview(parsed))
+        project = get_object_or_404(Project, pk=project_pk)
+        from projects.models import Activity, WBS
+        return Response(build_preview(
+            parsed,
+            max_depth=project.max_depth,
+            existing_wbs_codes=WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
+            existing_activity_codes=Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+        ))
 
 
 class BaseImportStartView(APIView):
@@ -195,6 +202,7 @@ class BaseImportStatusView(APIView):
             payload['error'] = job.error_message
             if getattr(job, 'error_code', None):
                 payload['error_code'] = job.error_code
+            payload['blocking'] = (job.result or {}).get('blocking') or []
         return Response(payload)
 
 
@@ -259,7 +267,14 @@ class P6ImportPreviewView(APIView):
                 {'error': {'code': 'validation_error', 'message': str(exc) or INVALID_XER_MESSAGE, 'details': {}}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response(build_preview(parsed))
+        project = get_object_or_404(Project, pk=project_pk)
+        from projects.models import Activity, WBS
+        return Response(build_preview(
+            parsed,
+            max_depth=project.max_depth,
+            existing_wbs_codes=WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
+            existing_activity_codes=Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+        ))
 
 
 class P6ImportStartView(BaseImportStartView):

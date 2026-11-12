@@ -454,6 +454,10 @@ class Activity(AuditSoftDeleteModel):
     actual_finish = models.DateField(null=True, blank=True)
     duration_days = models.IntegerField(null=True, blank=True)
     is_milestone = models.BooleanField(default=False)
+    planned_percent = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+    is_critical = models.BooleanField(null=True, blank=True)
+    total_slack_days = models.IntegerField(null=True, blank=True)
+    free_slack_days = models.IntegerField(null=True, blank=True)
     forecast_start = models.DateField(null=True, blank=True)
     forecast_finish = models.DateField(null=True, blank=True)
     working_calendar = models.ForeignKey(

@@ -479,3 +479,54 @@ msgstr "دیگر اجازه وارد کردن برنامه در این پروژ�
 
 msgid "The import has no confirming user."
 msgstr "واردسازی کاربر تأییدکننده ندارد."
+
+msgid "A finish date is before its start."
+msgstr "تاریخ پایان پیش از شروع است."
+
+msgid "The file contains a cycle."
+msgstr "فایل دور دارد."
+
+msgid "The file contains a duplicate identifier or code."
+msgstr "فایل شناسه یا کد تکراری دارد."
+
+msgid "A row has no resolvable parent."
+msgstr "ردیف والد قابل تشخیص ندارد."
+
+msgid "A predecessor is not in the file."
+msgstr "پیش‌نیاز در فایل نیست."
+
+msgid "A predecessor is a summary work package."
+msgstr "پیش‌نیاز یک بسته کاری خلاصه است."
+
+msgid "A relationship type is not supported."
+msgstr "نوع رابطه پشتیبانی نمی‌شود."
+
+msgid "A delay is not an exact number of eight-hour days."
+msgstr "تأخیر تعداد دقیق روز هشت‌ساعته نیست."
+
+msgid "A row is deeper than the project allows."
+msgstr "ردیف عمیق‌تر از حد پروژه است."
+
+msgid "A duration is not an exact number of eight-hour days."
+msgstr "مدت تعداد دقیق روز هشت‌ساعته نیست."
+
+msgid "Slack is not an exact number of eight-hour days."
+msgstr "شناوری تعداد دقیق روز هشت‌ساعته نیست."
+
+msgid "A percent is outside 0 through 100."
+msgstr "درصد خارج از ۰ تا ۱۰۰ است."
+
+msgid "A milestone mark does not have zero duration."
+msgstr "علامت نقطه عطف با مدت صفر همراه نیست."
+
+msgid "The file calendar was not applied."
+msgstr "تقویم فایل اعمال نشد."
+
+msgid "The file did not contain a schedule to store."
+msgstr "فایل برنامه‌ای برای ثبت نداشت."
+
+msgid "A code already exists in the project and was left unchanged."
+msgstr "این کد از قبل در پروژه است و تغییر نکرد."
+
+msgid "A parent-share weight is outside 0 through 1."
+msgstr "وزن سهم والد خارج از ۰ تا ۱ است."

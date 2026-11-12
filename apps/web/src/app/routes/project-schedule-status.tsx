@@ -73,6 +73,11 @@ function ScheduleStatusContent() {
           data-testid="critical-path-not-valid"
         >
           {t("schedule.criticalPathNotValid")}
+          {data.critical_path.reason_codes?.map((code) => (
+            <span key={code} className="ms-2">
+              {t(`schedule.criticalReasons.${code}`, code)}
+            </span>
+          ))}
         </div>
       ) : null}
 

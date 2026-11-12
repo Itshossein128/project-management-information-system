@@ -201,9 +201,9 @@ def baseline_rows_for(baseline, tasks, uid_to_activity) -> list[BaselineActivity
             planned_start=task.start,
             planned_finish=task.finish,
             planned_duration=getattr(task, 'duration_days', None),
-            planned_progress=getattr(task, 'percent_complete', None),
-            total_float=getattr(task, 'total_slack', None),
-            free_float=getattr(task, 'free_slack', None),
-            is_critical=bool(getattr(task, 'is_critical', False)),
+            planned_progress=None if getattr(task, 'percent_invalid', False) else getattr(task, 'percent_complete', None),
+            total_float=getattr(task, 'total_slack_days', getattr(task, 'total_slack', None)),
+            free_float=getattr(task, 'free_slack_days', getattr(task, 'free_slack', None)),
+            is_critical=bool(task.is_critical) if getattr(task, 'critical_known', False) else bool(getattr(task, 'is_critical', False)),
         ))
     return rows

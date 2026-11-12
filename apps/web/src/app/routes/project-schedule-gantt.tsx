@@ -160,20 +160,21 @@ function GanttContent() {
   useEffect(() => {
     if (!data?.tasks?.length || !containerRef.current) return;
     const taskByCode = new Map(data.tasks.map((t) => [t.id, t]));
+    const milestoneLabel = t("scheduleImport.milestone", "Milestone");
     const tasks = data.tasks
-      .filter((t) => t.start && t.end)
-      .filter((t) => !criticalOnly || t.is_critical)
-      .map((t) => ({
-        id: t.id,
-        name: `${t.wbs_code ? `${t.wbs_code} — ` : ""}${t.name}`,
-        start: t.start!,
-        end: t.end!,
-        progress: t.progress,
-        dependencies: t.dependencies || undefined,
+      .filter((task) => task.start && task.end)
+      .filter((task) => !criticalOnly || task.is_critical)
+      .map((task) => ({
+        id: task.id,
+        name: `${task.wbs_code ? `${task.wbs_code} — ` : ""}${task.name}${task.is_milestone ? ` · ${milestoneLabel}` : ""}`,
+        start: task.start!,
+        end: task.end!,
+        progress: task.progress,
+        dependencies: task.dependencies || undefined,
         custom_class:
-          t.is_critical
+          task.is_critical
             ? "bar-critical"
-            : t.status === "completed"
+            : task.status === "completed"
               ? "bar-done"
               : "bar-normal",
       }));
@@ -192,7 +193,7 @@ function GanttContent() {
         if (row) setSelectedTask(row);
       },
     });
-  }, [data, viewMode, criticalOnly]);
+  }, [data, viewMode, criticalOnly, t]);
 
   const exportPdf = async () => {
     const blob = await downloadGanttPdf(projectId, baselineId || undefined);
@@ -310,6 +311,11 @@ function GanttContent() {
           data-testid="gantt-critical-path-invalid"
         >
           {t("schedule.criticalPathNotValid")}
+          {data.critical_path.reason_codes?.map((code) => (
+            <span key={code} className="ms-2">
+              {t(`schedule.criticalReasons.${code}`, code)}
+            </span>
+          ))}
         </div>
       ) : null}
 

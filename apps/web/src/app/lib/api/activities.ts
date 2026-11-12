@@ -28,6 +28,10 @@ export interface Activity {
   forecast_finish: string | null;
   duration_days: number | null;
   is_milestone: boolean;
+  planned_percent: string | null;
+  is_critical: boolean | null;
+  total_slack_days: number | null;
+  free_slack_days: number | null;
   working_calendar_id: string | null;
   planned_duration: number | null;
   actual_duration: number | null;

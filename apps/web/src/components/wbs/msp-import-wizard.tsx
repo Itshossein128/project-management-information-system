@@ -47,9 +47,11 @@ export function MspImportWizard({
     wbs_nodes_created: number;
     activities_created: number;
     warnings: string[];
+    warning_items?: { code: string; row: string }[];
     nothing_changed?: boolean;
   } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [failureItems, setFailureItems] = useState<{ code: string; row: string }[]>([]);
 
   const reset = useCallback(() => {
     setStep(1);
@@ -60,6 +62,7 @@ export function MspImportWizard({
     setProgress(0);
     setSummary(null);
     setImportError(null);
+    setFailureItems([]);
   }, []);
 
   useEffect(() => {
@@ -109,13 +112,21 @@ export function MspImportWizard({
             wbs_nodes_created: status.result.wbs_nodes_created,
             activities_created: status.result.activities_created,
             warnings: status.result.warnings,
+            warning_items: status.result.warning_items,
             nothing_changed: Boolean(status.result.nothing_changed),
           });
           onComplete?.();
           return;
         }
         if (status.status === "failed") {
-          setImportError(status.error ?? "Import failed");
+          const blocking = status.blocking ?? [];
+          if (blocking.length > 0) {
+            setFailureItems(blocking);
+          } else if (status.error_code) {
+            setFailureItems([{ code: status.error_code, row: "" }]);
+          } else {
+            setImportError(status.error ?? t("scheduleImport.refused"));
+          }
           return;
         }
         setTimeout(poll, 2000);
@@ -166,7 +177,11 @@ export function MspImportWizard({
             key={s}
             className={`rounded px-2 py-1 ${step === s ? "bg-primary/10 font-medium" : "text-muted-foreground"}`}
           >
-            {s === 1 ? "بارگذاری" : s === 2 ? "پیش‌نمایش" : "پیشرفت"}
+            {s === 1
+              ? t("scheduleImport.stepUpload", "Upload")
+              : s === 2
+                ? t("scheduleImport.stepPreview", "Preview")
+                : t("scheduleImport.stepProgress", "Progress")}
           </span>
         ))}
       </div>
@@ -174,7 +189,7 @@ export function MspImportWizard({
       {step === 1 && (
         <div className="space-y-4">
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
-            قالب‌های پذیرفته‌شده: Microsoft Project (‎.mpp و ‎.xml) و Primavera P6 (‎.xer).
+            {t("scheduleImport.acceptedFormats", "Accepted formats: Microsoft Project (.mpp and .xml) and Primavera P6 (.xer).")}
           </div>
 
           <div
@@ -184,7 +199,7 @@ export function MspImportWizard({
           >
             <Upload className="size-10 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              فایل ‎.mpp، ‎.xml یا ‎.xer را اینجا رها کنید یا انتخاب کنید
+              {t("scheduleImport.dropFile", "Drop a .mpp, .xml, or .xer file here, or choose one")}
             </p>
             <label className="cursor-pointer">
               <input
@@ -196,7 +211,7 @@ export function MspImportWizard({
               />
               <span className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm hover:bg-muted/80 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
                 <FileUp className="size-4" />
-                انتخاب فایل
+                {t("scheduleImport.chooseFile", "Choose file")}
               </span>
             </label>
             {file ? (
@@ -213,13 +228,13 @@ export function MspImportWizard({
               role="status"
               aria-live="polite"
             >
-              در حال آماده‌سازی پیش‌نمایش…
+              {t("scheduleImport.preparing", "Preparing preview…")}
             </div>
           ) : null}
 
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isProcessing}>
-              انصراف
+              {t("scheduleImport.cancel", "Cancel")}
             </Button>
             <Button
               variant="primary"
@@ -227,7 +242,7 @@ export function MspImportWizard({
               loading={previewMutation.isPending}
               onClick={() => file && previewMutation.mutate(file)}
             >
-              پیش‌نمایش
+              {t("scheduleImport.preview", "Preview")}
             </Button>
           </div>
         </div>
@@ -235,14 +250,33 @@ export function MspImportWizard({
 
       {step === 2 && preview && (
         <div className="space-y-4">
-          {preview.warnings.length > 0 && (
+          {(preview.blocking?.length ?? 0) > 0 && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive" data-testid="msp-import-blocking">
+              <ul className="list-inside list-disc">
+                {preview.blocking?.map((item) => (
+                  <li key={`${item.code}-${item.row}`}>
+                    {t(`scheduleImport.codes.${item.code}`, item.code)}
+                    {item.row ? ` (${item.row})` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {(preview.warning_items?.length ?? preview.warnings.length) > 0 && (
             <div
               className="rounded-md border border-warning-200 bg-warning-50 p-3 text-sm text-warning-900 dark:border-warning-900/50 dark:bg-warning-950/30 dark:text-warning-200"
               data-testid="msp-import-warnings"
             >
-              <p className="font-medium">هشدارها</p>
+              <p className="font-medium">{t("scheduleImport.warnings", "Warnings")}</p>
               <ul className="mt-1 list-inside list-disc">
-                {preview.warnings.map((w) => (
+                {(preview.warning_items ?? []).map((item) => (
+                  <li key={`${item.code}-${item.row}`}>
+                    {t(`scheduleImport.codes.${item.code}`, item.code)}
+                    {item.row ? ` (${item.row})` : ""}
+                  </li>
+                ))}
+                {preview.warning_items ? null : preview.warnings.map((w) => (
                   <li key={w}>{w}</li>
                 ))}
               </ul>
@@ -258,7 +292,7 @@ export function MspImportWizard({
           <TemplateWBSPreviewTree nodes={preview.wbs_tree} />
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">نحوه وارد کردن</p>
+            <p className="text-sm font-medium">{t("scheduleImport.importMode", "How to import")}</p>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
               <input
                 type="radio"
@@ -266,7 +300,7 @@ export function MspImportWizard({
                 checked={replace}
                 onChange={() => setReplace(true)}
               />
-              جایگزینی کامل — حذف WBS و فعالیت‌های موجود
+              {t("scheduleImport.replace", "Replace the current schedule")}
             </label>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
               <input
@@ -275,7 +309,7 @@ export function MspImportWizard({
                 checked={!replace}
                 onChange={() => setReplace(false)}
               />
-              افزودن به ساختار موجود — رد کردن کدهای تکراری
+              {t("scheduleImport.append", "Add to the current schedule and skip duplicate codes")}
             </label>
           </div>
 
@@ -287,15 +321,15 @@ export function MspImportWizard({
 
           <div className="flex justify-between gap-2">
             <Button variant="ghost" onClick={() => setStep(1)} disabled={isProcessing}>
-              قبلی
+              {t("scheduleImport.back", "Back")}
             </Button>
             <Button
               variant="primary"
               loading={importMutation.isPending}
-              disabled={!file || isProcessing}
+              disabled={!file || isProcessing || (preview.blocking?.length ?? 0) > 0}
               onClick={() => file && importMutation.mutate({ file, replace })}
             >
-              وارد کردن
+              {t("scheduleImport.confirm", "Import")}
             </Button>
           </div>
         </div>
@@ -303,9 +337,20 @@ export function MspImportWizard({
 
       {step === 3 && (
         <div className="space-y-4">
-          {importError ? (
+          {failureItems.length > 0 || importError ? (
             <div className="space-y-3" data-testid="msp-import-fatal-error">
-              <p className="text-destructive text-sm">{importError}</p>
+              {failureItems.length > 0 ? (
+                <ul className="list-inside list-disc text-sm text-destructive">
+                  {failureItems.map((item) => (
+                    <li key={`${item.code}-${item.row}`}>
+                      {t(`scheduleImport.codes.${item.code}`, item.code)}
+                      {item.row ? ` (${item.row})` : ""}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-destructive text-sm">{importError}</p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="ghost"
@@ -317,10 +362,10 @@ export function MspImportWizard({
                     setStep(1);
                   }}
                 >
-                  انتخاب فایل دیگر
+                  {t("scheduleImport.chooseAnother", "Choose another file")}
                 </Button>
                 <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                  بستن
+                  {t("scheduleImport.close", "Close")}
                 </Button>
               </div>
             </div>
@@ -332,16 +377,27 @@ export function MspImportWizard({
                   : t("scheduleImport.imported", "وارد کردن با موفقیت انجام شد.")}
               </p>
               <ul className="list-inside list-disc text-muted-foreground">
-                <li>{summary.wbs_nodes_created} گره WBS</li>
-                <li>{summary.activities_created} فعالیت</li>
-                {summary.warnings.length > 0 ? (
-                  <li>{summary.warnings.length} هشدار</li>
-                ) : null}
+                <li>
+                  {t("scheduleImport.wbsNodes", "{{count}} work packages", {
+                    count: summary.wbs_nodes_created,
+                  })}
+                </li>
+                <li>
+                  {t("scheduleImport.activities", "{{count}} activities", {
+                    count: summary.activities_created,
+                  })}
+                </li>
+                {(summary.warning_items ?? []).map((item) => (
+                  <li key={`${item.code}-${item.row}`}>
+                    {t(`scheduleImport.codes.${item.code}`, item.code)}
+                    {item.row ? ` (${item.row})` : ""}
+                  </li>
+                ))}
               </ul>
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">در حال وارد کردن...</p>
+              <p className="text-sm text-muted-foreground">{t("scheduleImport.importing", "Importing…")}</p>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full bg-primary transition-all"
@@ -356,12 +412,12 @@ export function MspImportWizard({
             {summary ? (
               <Link to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_WBS}`}>
                 <Button variant="primary" onClick={() => onOpenChange(false)}>
-                  مشاهده WBS
+                  {t("scheduleImport.viewWbs", "View work breakdown")}
                 </Button>
               </Link>
             ) : !importError ? (
               <Button variant="ghost" onClick={() => onOpenChange(false)}>
-                بستن
+                {t("scheduleImport.close", "Close")}
               </Button>
             ) : null}
           </div>

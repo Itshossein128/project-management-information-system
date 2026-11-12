@@ -26,6 +26,15 @@ export interface MspPreviewResult {
     duration_days: number | null;
   }[];
   warnings: string[];
+  warning_items?: { code: string; row: string }[];
+  blocking?: { code: string; row: string }[];
+  counts?: {
+    created_packages: number;
+    created_activities: number;
+    created_links: number;
+    omitted_count: number;
+    warned_count: number;
+  };
 }
 
 export interface MspImportStartResult {
@@ -43,9 +52,12 @@ export interface MspImportStatusResult {
     activities_created: number;
     relations_created: number;
     warnings: string[];
+    warning_items?: { code: string; row: string }[];
     nothing_changed?: boolean;
   };
   error?: string;
+  error_code?: string;
+  blocking?: { code: string; row: string }[];
 }
 
 function mspBase(projectId: string) {

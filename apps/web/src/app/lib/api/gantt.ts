@@ -12,6 +12,7 @@ export interface GanttTask {
   dependencies: string;
   wbs_code: string;
   is_critical: boolean;
+  is_milestone?: boolean;
   baseline_start: string | null;
   baseline_end: string | null;
   status: string;
