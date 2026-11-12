@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Calendars><Calendar><Name>File calendar</Name></Calendar></Calendars>
+  <Tasks>
+    <Task>
+      <UID>1</UID><ID>1</ID><Name>Root</Name>
+      <OutlineLevel>1</OutlineLevel><OutlineNumber>1</OutlineNumber>
+      <WBS>ZZ1</WBS><Summary>1</Summary>
+    </Task>
+    <Task>
+      <UID>2</UID><ID>2</ID><Name>Leaf A</Name>
+      <OutlineLevel>2</OutlineLevel><OutlineNumber>1.1</OutlineNumber>
+      <WBS>ZZ1.1</WBS><Summary>0</Summary><Duration>PT8H0M0S</Duration>
+      <PredecessorLink><PredecessorUID>9</PredecessorUID><Type>1</Type></PredecessorLink>
+    </Task>
+    <Task>
+      <UID>3</UID><ID>3</ID><Name>Leaf B</Name>
+      <OutlineLevel>2</OutlineLevel><OutlineNumber>1.2</OutlineNumber>
+      <WBS>ZZ1.2</WBS><Summary>0</Summary><Duration>PT8H0M0S</Duration>
+    </Task>
+  </Tasks>
+</Project>

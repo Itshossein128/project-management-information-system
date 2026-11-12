@@ -74,6 +74,26 @@ def assert_can_import(project: Project, user) -> None:
         raise ImportSafetyError(IMPORT_NOT_PERMITTED, message_for(IMPORT_NOT_PERMITTED))
 
 
+def replacement_projection(project: Project) -> dict:
+    """Read-only counts for a replacement. This does not write."""
+    code = replacement_block_code(project)
+    if code:
+        return {
+            'blocked': code,
+            'wbs_nodes_removed': 0,
+            'activities_removed': 0,
+            'relations_removed': 0,
+        }
+    return {
+        'blocked': None,
+        'wbs_nodes_removed': WBS.objects.filter(project=project, is_deleted=False).count(),
+        'activities_removed': Activity.objects.filter(project=project, is_deleted=False).count(),
+        'relations_removed': ActivityRelation.objects.filter(
+            predecessor__project=project, is_deleted=False,
+        ).count(),
+    }
+
+
 def replacement_block_code(project: Project) -> str | None:
     """Return the first protection code, or None when replacement may proceed."""
     live_activities = Activity.objects.filter(project=project, is_deleted=False)

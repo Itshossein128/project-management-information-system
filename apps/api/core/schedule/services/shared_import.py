@@ -57,11 +57,12 @@ def bulk_create_relations(relations_to_create, wbs_count, activity_count, warnin
         ActivityRelation.objects.filter(is_deleted=False).values_list('predecessor_id', 'successor_id')
     )
     to_create = []
+    relation_warning_items = []
     for relation in relations_to_create:
         key = (relation.predecessor_id, relation.successor_id)
         if key in existing:
             code = getattr(relation.successor, 'activity_code', None) or str(relation.successor_id)
-            warnings.append(f'Duplicate relation "{code}" — skipped.')
+            relation_warning_items.append({'code': 'duplicate_relation', 'row': str(code)})
             continue
         existing.add(key)
         to_create.append(relation)
@@ -76,4 +77,5 @@ def bulk_create_relations(relations_to_create, wbs_count, activity_count, warnin
         'activities_created': activity_count,
         'relations_created': len(to_create),
         'warnings': warnings,
+        'relation_warning_items': relation_warning_items,
     }

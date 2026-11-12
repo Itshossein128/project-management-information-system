@@ -1,0 +1,10 @@
+ERMHDR	18.8	2024-01-01	Project
+%T	PROJWBS
+%F	wbs_id	parent_wbs_id	wbs_short_name	wbs_name	seq_num
+%R	1		ZZ1	Project Root	1
+%R	2	1	ZZ1.1	Phase 1	2
+%T	TASK
+%F	task_id	wbs_id	task_code	task_name	target_drtn_hr_cnt
+%R	100	2	A100	Excavation	40
+%T	TASKPRED
+%F	task_id	pred_task_id	pred_type	lag_hr_cnt

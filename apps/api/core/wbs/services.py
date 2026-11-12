@@ -334,13 +334,14 @@ def move_wbs_node(node: WBS, new_parent_id, position: str) -> WBS:
 
     pos = position.replace('-', '_')
 
-    # treebeard requires sorted-* positions when node_order_by is set on the model.
+    # Honor structural positions. Keep the legacy sorted_child API spelling
+    # as an append alias; display codes are derived after the move.
     pos_map = {
-        'first_child': 'sorted-child',
-        'sorted_child': 'sorted-child',
-        'last_child': 'sorted-child',
-        'left': 'sorted-sibling',
-        'right': 'sorted-sibling',
+        'first_child': 'first-child',
+        'sorted_child': 'last-child',
+        'last_child': 'last-child',
+        'left': 'left',
+        'right': 'right',
     }
 
     if pos not in pos_map:

@@ -1,0 +1,54 @@
+[
+  {
+    "width": 1280,
+    "lang": "en",
+    "task": "d337aa6c-672f-48fa-b809-9c35c5af91d6",
+    "starts": 2,
+    "previewRequests": 1,
+    "stalePreviewDiscarded": true,
+    "formats": [
+      "mpp",
+      "xer"
+    ],
+    "success": true
+  },
+  {
+    "width": 1280,
+    "lang": "fa",
+    "task": "3709c941-15e1-43cb-984c-3a094401245a",
+    "starts": 2,
+    "previewRequests": 1,
+    "stalePreviewDiscarded": true,
+    "formats": [
+      "mpp",
+      "xer"
+    ],
+    "success": true
+  },
+  {
+    "width": 390,
+    "lang": "en",
+    "task": "4c15f903-cc59-40ac-a6d5-3b54b5c18849",
+    "starts": 2,
+    "previewRequests": 1,
+    "stalePreviewDiscarded": true,
+    "formats": [
+      "mpp",
+      "xer"
+    ],
+    "success": true
+  },
+  {
+    "width": 390,
+    "lang": "fa",
+    "task": "01a6b665-f0b7-4213-9a44-9eab8c983c8e",
+    "starts": 2,
+    "previewRequests": 1,
+    "stalePreviewDiscarded": true,
+    "formats": [
+      "mpp",
+      "xer"
+    ],
+    "success": true
+  }
+]

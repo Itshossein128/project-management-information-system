@@ -64,6 +64,8 @@ Planned dates and actual dates stay on their own fields. Forecast dates are not 
 - Calendars, including the Shamsi calendar in the employer file, are `calendar_not_applied`. No substitute is assigned.
 - Predecessor identifiers 8055, 8084, 8102, and 8120 are `predecessor_is_summary`. They are not activity links, and the summaries are not turned into activities.
 - The historical observation of 83 source links and 79 stored relationships is not a pass count.
-- The known zero duration on شروع and پایان is stored as 0 days. A milestone mark is stored only when the file sets it.
+- The known zero-duration form parses as 0 days and is stored as 0 days only for activities with a valid source parent. The actual employer-file rows شروع and پایان have no parent: both preview and the saved result report row-identified `activity_without_parent` warnings, and neither activity is stored. No parent is invented. A milestone mark is stored only when the file sets it.
+
+**Scope decision (2026-11-12)**: The user confirmed: “Keep omitting them with row warnings; store zero duration only for activities with a valid parent.” This resolves T034 and supersedes the earlier unconditional employer-row storage wording in FR-015 and US6/AC5.
 
 Existing file-size, password, corrupt, renamed, and unsupported rejections stay on their current contract. This contract does not weaken them.

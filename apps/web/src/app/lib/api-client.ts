@@ -257,7 +257,16 @@ export async function apiFormData<T>(
       detail ??
       (raw && raw.trim() ? raw.trim() : null) ??
       (res.statusText || "Request failed");
-    throw new Error(message);
+    const payload =
+      typeof apiError.error === "object" && apiError.error !== null
+        ? (apiError.error as Record<string, unknown>)
+        : undefined;
+    throw new ApiRequestError(
+      message,
+      res.status,
+      typeof payload?.code === "string" ? payload.code : undefined,
+      payload?.details,
+    );
   }
   if (!raw) return {} as T;
   return data as T;

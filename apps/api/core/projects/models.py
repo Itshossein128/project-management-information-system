@@ -341,7 +341,9 @@ class WBS(UUIDModel, TimeStampedModel, MP_Node):
         related_name='+',
     )
 
-    node_order_by = ['wbs_code']
+    # Codes are mutable (renumbering and soft deletion). Tree position is the
+    # source of ordering; sorting paths by a mutable code breaks insertion.
+    node_order_by = []
 
     class Meta:
         db_table = 'wbs'

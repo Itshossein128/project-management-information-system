@@ -24,6 +24,21 @@ FIXTURES = Path(__file__).resolve().parents[5] / 'specs/051-a7-p1-project-refere
 MPP_FIXTURES = Path(__file__).parent / 'fixtures' / 'mpp'
 
 
+def _convert_reference_mpp(raw):
+    from schedule.services.mpp_convert import convert_mpp_to_mspdi
+    from schedule.services.mpp_errors import CONVERSION_FAILED, MppImportError
+
+    try:
+        return convert_mpp_to_mspdi(raw)
+    except MppImportError as exc:
+        if exc.code == CONVERSION_FAILED and exc.message in {
+            'MPP conversion is unavailable (MPXJ/JRE not configured).',
+            'Java runtime is required to process MPP files.',
+        }:
+            pytest.skip(f'MPP converter unavailable: {exc.message}')
+        raise
+
+
 def _project(user, suffix):
     project = create_project_with_creator(
         creator=user,
@@ -356,18 +371,12 @@ def test_stored_mpp_xml_match_when_converter_runs(user):
     mpp_path = Path(__file__).resolve().parents[5] / 'real-data' / 'plan.mpp'
     if not mpp_path.is_file():
         pytest.skip('employer file missing')
-    from schedule.services.mpp_convert import convert_mpp_to_mspdi
-    from schedule.services.mpp_errors import MppImportError
-
     raw = mpp_path.read_bytes()
-    try:
-        xml_bytes = convert_mpp_to_mspdi(raw)
-    except (MppImportError, OSError) as exc:
-        pytest.skip(f'MPP converter unavailable: {type(exc).__name__}')
+    xml_bytes = _convert_reference_mpp(raw)
     left = _project(user, 'MPP')
     right = _project(user, 'XMLT')
-    execute_msp_import(left, raw, filename='plan.mpp', replace=False, user=user)
-    execute_msp_import(right, xml_bytes, filename='plan.xml', replace=False, user=user)
+    left_result = execute_msp_import(left, raw, filename='plan.mpp', replace=False, user=user)
+    right_result = execute_msp_import(right, xml_bytes, filename='plan.xml', replace=False, user=user)
     assert Activity.objects.filter(project=left, is_deleted=False).exists()
     assert WBS.objects.filter(project=left, is_deleted=False).exists()
 
@@ -377,7 +386,13 @@ def test_stored_mpp_xml_match_when_converter_runs(user):
             for node in WBS.objects.filter(project=project, is_deleted=False)
         )
         activities = sorted(
-            (act.activity_code, act.wbs.wbs_code, act.duration_days, act.is_milestone, act.planned_start, act.planned_finish)
+            (
+                act.activity_code, act.wbs.wbs_code, act.duration_days, act.is_milestone,
+                act.planned_start, act.planned_finish, act.actual_start, act.actual_finish,
+                act.forecast_start, act.forecast_finish, act.planned_percent,
+                act.is_critical, act.total_slack_days, act.free_slack_days,
+                act.working_calendar_id, act.weight,
+            )
             for act in Activity.objects.filter(project=project, is_deleted=False).select_related('wbs')
         )
         links = sorted(
@@ -388,6 +403,11 @@ def test_stored_mpp_xml_match_when_converter_runs(user):
 
     assert snapshot(left) == snapshot(right)
     assert snapshot(left)[1]
+    assert snapshot(left)[2]
+    assert sorted((item['code'], item['row']) for item in left_result['warning_items']) == sorted(
+        (item['code'], item['row']) for item in right_result['warning_items']
+    )
+    assert sorted(left_result['warnings']) == sorted(right_result['warnings'])
 
 
 def test_empty_replace_keeps_existing_nodes(user):
@@ -551,17 +571,21 @@ def test_employer_summary_links_keep_the_file_unchanged(user):
     raw = path.read_bytes()
     digest = hashlib.sha256(raw).hexdigest()
     assert digest == '3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553'
-    from schedule.services.mpp_convert import convert_mpp_to_mspdi
-    from schedule.services.mpp_errors import MppImportError
-
-    try:
-        xml_bytes = convert_mpp_to_mspdi(raw)
-    except (MppImportError, OSError) as exc:
-        pytest.skip(f'MPP converter unavailable: {type(exc).__name__}')
+    xml_bytes = _convert_reference_mpp(raw)
     parsed = parse_msp_xml(xml_bytes)
     preview = build_preview(parsed)
     project = _project(user, 'EMP')
     result = execute_msp_import(project, raw, filename='plan.mpp', replace=False, user=user)
+    employer_edges = [task for task in parsed.tasks if task.name in ('شروع', 'پایان')]
+    assert {task.name for task in employer_edges} == {'شروع', 'پایان'}
+    for task in employer_edges:
+        assert not task.parent_key
+        assert task.duration_days == 0
+        assert not task.duration_inexact
+        note = {'code': 'activity_without_parent', 'row': task.uid}
+        assert note in preview['warning_items']
+        assert note in result['warning_items']
+        assert f'activity_without_parent: {task.uid}' in result['warnings']
     for uid in ('8055', '8084', '8102', '8120'):
         assert any(item['code'] == 'predecessor_is_summary' and uid in item['row'] for item in preview['warning_items'])
         assert any(item.startswith('predecessor_is_summary:') and uid in item for item in result['warnings'])

@@ -19,7 +19,8 @@ from schedule.services.import_safety import (
 from schedule.services.import_fidelity import (
     ImportFidelityError,
     days_from_hours,
-    note_existing,
+    annotate_project,
+    display_result,
     refresh_cached_wbs,
     relation_type_for,
     resolve,
@@ -208,7 +209,9 @@ def parse_p6_xer(file_bytes: bytes) -> ParseResult:
             )
         )
 
-    return ParseResult(tasks=parsed_tasks, warnings=warnings, has_calendar='CALENDAR' in tables)
+    parsed = ParseResult(tasks=parsed_tasks, warnings=warnings, has_calendar='CALENDAR' in tables)
+    parsed.recognized_kind = 'xer'
+    return parsed
 
 
 @transaction.atomic
@@ -222,11 +225,7 @@ def execute_p6_import(
     user=None,
 ) -> dict:
     parsed = parse_p6_xer(file_bytes)
-    plan = note_existing(
-        resolve(parsed, max_depth=project.max_depth),
-        WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
-        Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
-    )
+    plan = resolve(parsed, max_depth=project.max_depth)
     if plan.blocking:
         raise ImportFidelityError(plan.blocking)
     if not plan.packages and not plan.activities:
@@ -234,6 +233,7 @@ def execute_p6_import(
         assert_can_import(project, user)
         return unchanged_result(plan)
     removed = guard_and_maybe_replace(project, user, replace)
+    plan = annotate_project(plan, project)
     audit_user = user
     warnings = list(parsed.warnings)
     warnings.extend(plan.warning_texts())
@@ -318,9 +318,7 @@ def execute_p6_import(
     return {
         **relation_result,
         **result_flags(removed, relation_result, baseline, duplicate_messages(warnings)),
-        'warning_items': [{'code': note.code, 'row': note.row} for note in plan.warnings],
-        'blocking': [],
-        **plan.counts(),
+        **display_result(plan, relation_result),
     }
 
 

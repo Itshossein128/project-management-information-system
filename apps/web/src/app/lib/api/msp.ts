@@ -17,8 +17,28 @@ export interface MspPreviewWBSNode {
   children: MspPreviewWBSNode[];
 }
 
+export interface ImportCounts {
+  created_packages: number;
+  created_activities: number;
+  created_links: number;
+  omitted_count: number;
+  warned_count: number;
+  rows_read: number;
+  relationships_kept: number;
+  duplicate_count: number;
+  rows_omitted: number;
+}
+
+export interface ReplacementProjection {
+  blocked: string | null;
+  wbs_nodes_removed: number;
+  activities_removed: number;
+  relations_removed: number;
+}
+
 export interface MspPreviewResult {
   wbs_tree: MspPreviewWBSNode[];
+  recognized_kind?: "mpp" | "xml" | "xer";
   activities: {
     activity_code: string;
     activity_name: string;
@@ -28,13 +48,9 @@ export interface MspPreviewResult {
   warnings: string[];
   warning_items?: { code: string; row: string }[];
   blocking?: { code: string; row: string }[];
-  counts?: {
-    created_packages: number;
-    created_activities: number;
-    created_links: number;
-    omitted_count: number;
-    warned_count: number;
-  };
+  counts?: ImportCounts;
+  counts_if_replaced?: ImportCounts;
+  replacement?: ReplacementProjection;
 }
 
 export interface MspImportStartResult {
@@ -51,6 +67,13 @@ export interface MspImportStatusResult {
     wbs_nodes_created: number;
     activities_created: number;
     relations_created: number;
+    relationships_kept?: number;
+    rows_read?: number;
+    duplicate_count?: number;
+    rows_omitted?: number;
+    wbs_nodes_removed?: number;
+    activities_removed?: number;
+    relations_removed?: number;
     warnings: string[];
     warning_items?: { code: string; row: string }[];
     nothing_changed?: boolean;

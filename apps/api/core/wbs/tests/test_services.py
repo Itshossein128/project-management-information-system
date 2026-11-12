@@ -103,7 +103,7 @@ class TestWBSServices:
                 node = WBS.add_root(project_id=project.id, wbs_code=code, wbs_name=f'Root {code}')
             else:
                 node = roots[-1].add_sibling(
-                    'sorted-sibling',
+                    'last-sibling',
                     project_id=project.id,
                     wbs_code=code,
                     wbs_name=f'Root {code}',
@@ -177,7 +177,7 @@ class TestWBSServicesExtended:
         assert total == Decimal('0.8')
 
     def test_move_wbs_node_reparent_under_sibling(self, project):
-        """last_child / first_child map to sorted-child when node_order_by is set."""
+        """Explicit child positions preserve structural ordering."""
         root, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
         child1, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.1', wbs_name='Child 1')
         child2, _ = create_wbs_node(project_id=project.id, parent_id=root.id, wbs_code='1.2', wbs_name='Child 2')

@@ -64,5 +64,17 @@
       "I22"
     ],
     "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/03-import-fidelity.md"
+  },
+  "a7-p4-import-experience": {
+    "phase": "A.7-P4",
+    "feature_directory": "specs/054-a7-p4-import-experience",
+    "audit_ids": [
+      "I02",
+      "I10",
+      "I15",
+      "I16",
+      "I17"
+    ],
+    "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/04-import-experience.md"
   }
 }

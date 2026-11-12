@@ -29,7 +29,9 @@ MILESTONE_DURATION_CONFLICT = 'milestone_duration_conflict'
 CALENDAR_NOT_APPLIED = 'calendar_not_applied'
 EMPTY_IMPORT = 'empty_import'
 DUPLICATE_EXISTING = 'duplicate_existing'
+DUPLICATE_RELATION = 'duplicate_relation'
 INVALID_WEIGHT = 'invalid_weight'
+DUPLICATE_CODES = {DUPLICATE_EXISTING, DUPLICATE_RELATION}
 OMITTED_LINK_CODES = {
     PREDECESSOR_MISSING,
     PREDECESSOR_IS_SUMMARY,
@@ -153,6 +155,8 @@ class ResolvedPlan:
     warnings: list[PlanNote] = field(default_factory=list)
     existing_wbs_codes: set[str] = field(default_factory=set)
     existing_activity_codes: set[str] = field(default_factory=set)
+    existing_relation_pairs: set[tuple[str, str]] = field(default_factory=set)
+    source_rows: int = 0
 
     def warning_texts(self) -> list[str]:
         return [note.as_text() for note in [*self.blocking, *self.warnings]]
@@ -160,14 +164,44 @@ class ResolvedPlan:
     def _new(self, rows, existing: set[str]) -> list:
         return [row for row in rows if _task_code(row) not in existing]
 
+    def _activity_codes_by_uid(self) -> dict[str, str]:
+        found = {}
+        for task in self.activities:
+            if task.uid:
+                found[task.uid] = _task_code(task)
+        return found
+
+    def _kept_link_count(self) -> int:
+        codes = self._activity_codes_by_uid()
+        seen: set[tuple[str, str]] = set()
+        kept = 0
+        for link in self.links:
+            pred = codes.get(link['predecessor_uid'])
+            succ = codes.get(link['successor_uid'])
+            if not pred or not succ:
+                continue
+            pair = (pred, succ)
+            if pair in seen or pair in self.existing_relation_pairs:
+                continue
+            if pred in self.existing_activity_codes or succ in self.existing_activity_codes:
+                continue
+            seen.add(pair)
+            kept += 1
+        return kept
+
     def counts(self) -> dict:
-        omitted = [note for note in self.warnings if note.code != DUPLICATE_EXISTING]
+        omitted = [note for note in self.warnings if note.code not in DUPLICATE_CODES]
+        duplicate_count = sum(1 for note in self.warnings if note.code in DUPLICATE_CODES)
         return {
             'created_packages': len(self._new(self.packages, self.existing_wbs_codes)),
             'created_activities': len(self._new(self.activities, self.existing_activity_codes)),
             'created_links': len(self.links),
             'omitted_count': len(omitted),
             'warned_count': len(self.warnings),
+            'rows_read': self.source_rows,
+            'relationships_kept': self._kept_link_count(),
+            'duplicate_count': duplicate_count,
+            'rows_omitted': len(omitted),
         }
 
 
@@ -272,7 +306,7 @@ def _duplicate_rows(tasks) -> list[PlanNote]:
 
 def resolve(parsed, max_depth: int | None = None) -> ResolvedPlan:
     tasks = list(parsed.tasks)
-    plan = ResolvedPlan()
+    plan = ResolvedPlan(source_rows=len(tasks))
     if getattr(parsed, 'has_calendar', False):
         plan.warnings.append(PlanNote(CALENDAR_NOT_APPLIED, ''))
 
@@ -471,7 +505,77 @@ def preview_payload(plan: ResolvedPlan) -> dict:
         'warning_items': [{'code': note.code, 'row': note.row} for note in plan.warnings],
         'blocking': [{'code': note.code, 'row': note.row} for note in plan.blocking],
         'counts': plan.counts(),
+        'counts_if_replaced': _counts_if_replaced(plan),
     }
+
+
+def _counts_if_replaced(plan: ResolvedPlan) -> dict:
+    """Created figures after an allowed replacement clears current codes."""
+    saved_codes = (plan.existing_wbs_codes, plan.existing_activity_codes, plan.existing_relation_pairs)
+    saved_warnings = list(plan.warnings)
+    plan.existing_wbs_codes = set()
+    plan.existing_activity_codes = set()
+    plan.existing_relation_pairs = set()
+    plan.warnings = [note for note in plan.warnings if note.code not in DUPLICATE_CODES]
+    try:
+        return plan.counts()
+    finally:
+        plan.existing_wbs_codes, plan.existing_activity_codes, plan.existing_relation_pairs = saved_codes
+        plan.warnings = saved_warnings
+
+
+def display_result(plan: ResolvedPlan, relation_result: dict) -> dict:
+    """Figures for a finished attempt. relationships_kept is the number inserted."""
+    counts = plan.counts()
+    warning_items = [{'code': note.code, 'row': note.row} for note in plan.warnings]
+    seen = {(item['code'], item['row']) for item in warning_items}
+    extra = 0
+    for item in relation_result.get('relation_warning_items') or []:
+        key = (item.get('code'), item.get('row'))
+        if key in seen:
+            continue
+        warning_items.append({'code': item.get('code'), 'row': item.get('row') or ''})
+        seen.add(key)
+        if item.get('code') == DUPLICATE_RELATION:
+            extra += 1
+    counts['relationships_kept'] = relation_result.get('relations_created', 0)
+    counts['duplicate_count'] = counts['duplicate_count'] + extra
+    return {
+        'warning_items': warning_items,
+        'blocking': [],
+        **counts,
+    }
+
+
+def annotate_project(plan: ResolvedPlan, project) -> ResolvedPlan:
+    from projects.models import Activity, ActivityRelation, WBS
+
+    return note_existing_relations(
+        note_existing(
+            plan,
+            WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
+            Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+        ),
+        ActivityRelation.objects.filter(predecessor__project=project, is_deleted=False).values_list(
+            'predecessor__activity_code', 'successor__activity_code',
+        ),
+    )
+
+
+def note_existing_relations(plan: ResolvedPlan, pairs) -> ResolvedPlan:
+    plan.existing_relation_pairs = {tuple(pair) for pair in (pairs or []) if pair and pair[0] and pair[1]}
+    codes = plan._activity_codes_by_uid()
+    seen: set[tuple[str, str]] = set()
+    for link in plan.links:
+        pred = codes.get(link['predecessor_uid'])
+        succ = codes.get(link['successor_uid'])
+        if not pred or not succ:
+            continue
+        pair = (pred, succ)
+        if pair in plan.existing_relation_pairs and pair not in seen:
+            plan.warnings.append(PlanNote(DUPLICATE_RELATION, succ))
+            seen.add(pair)
+    return plan
 
 
 def note_existing(plan: ResolvedPlan, wbs_codes, activity_codes) -> ResolvedPlan:

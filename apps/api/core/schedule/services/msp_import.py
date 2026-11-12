@@ -17,16 +17,20 @@ from schedule.services.import_safety import (
     duplicate_messages,
     guard_and_maybe_replace,
     open_working_copy,
+    replacement_projection,
     result_flags,
 )
 from schedule.services.import_fidelity import (
     ImportFidelityError,
     days_from_msp_duration,
+    annotate_project,
+    display_result,
     note_existing,
+    note_existing_relations,
+    preview_payload,
     refresh_cached_wbs,
     unchanged_result,
     days_from_tenths,
-    preview_payload,
     relation_type_for,
     resolve,
 )
@@ -111,6 +115,7 @@ class ParseResult:
     tasks: list[ParsedTask]
     warnings: list[str] = field(default_factory=list)
     has_calendar: bool = False
+    recognized_kind: str = ''
 
 
 def is_mpp_bytes(file_bytes: bytes) -> bool:
@@ -126,8 +131,12 @@ def parse_msp_family(file_bytes: bytes, *, filename: str = '') -> ParseResult:
         from schedule.services.mpp_convert import convert_mpp_to_mspdi
 
         xml_bytes = convert_mpp_to_mspdi(file_bytes)
-        return parse_msp_xml(xml_bytes)
-    return parse_msp_xml(file_bytes)
+        parsed = parse_msp_xml(xml_bytes)
+        parsed.recognized_kind = 'mpp'
+        return parsed
+    parsed = parse_msp_xml(file_bytes)
+    parsed.recognized_kind = 'xml'
+    return parsed
 
 
 def parse_msp_xml(file_bytes: bytes) -> ParseResult:
@@ -248,10 +257,25 @@ def parse_msp_xml(file_bytes: bytes) -> ParseResult:
     return ParseResult(tasks=tasks, warnings=warnings, has_calendar=has_calendar)
 
 
-def build_preview(parsed: ParseResult, max_depth: int | None = None, existing_wbs_codes=None, existing_activity_codes=None) -> dict:
+def build_preview(
+    parsed: ParseResult,
+    max_depth: int | None = None,
+    existing_wbs_codes=None,
+    existing_activity_codes=None,
+    existing_relation_pairs=None,
+    project=None,
+) -> dict:
     """Non-destructive preview tree from the same plan confirm will store."""
-    plan = note_existing(resolve(parsed, max_depth=max_depth), existing_wbs_codes, existing_activity_codes)
-    return preview_payload(plan)
+    plan = note_existing_relations(
+        note_existing(resolve(parsed, max_depth=max_depth), existing_wbs_codes, existing_activity_codes),
+        existing_relation_pairs,
+    )
+    payload = preview_payload(plan)
+    if parsed.recognized_kind in {'mpp', 'xml', 'xer'}:
+        payload['recognized_kind'] = parsed.recognized_kind
+    if project is not None:
+        payload['replacement'] = replacement_projection(project)
+    return payload
 
 
 @transaction.atomic
@@ -265,11 +289,7 @@ def execute_msp_import(
     user=None,
 ) -> dict:
     parsed = parse_msp_family(file_bytes, filename=filename)
-    plan = note_existing(
-        resolve(parsed, max_depth=project.max_depth),
-        WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
-        Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
-    )
+    plan = resolve(parsed, max_depth=project.max_depth)
     if plan.blocking:
         raise ImportFidelityError(plan.blocking)
     if not plan.packages and not plan.activities:
@@ -277,6 +297,7 @@ def execute_msp_import(
         assert_can_import(project, user)
         return unchanged_result(plan)
     removed = guard_and_maybe_replace(project, user, replace)
+    plan = annotate_project(plan, project)
     audit_user = user
     warnings = list(parsed.warnings)
     warnings.extend(plan.warning_texts())
@@ -361,7 +382,5 @@ def execute_msp_import(
     return {
         **relation_result,
         **result_flags(removed, relation_result, baseline, duplicate_messages(warnings)),
-        'warning_items': [{'code': note.code, 'row': note.row} for note in plan.warnings],
-        'blocking': [],
-        **plan.counts(),
+        **display_result(plan, relation_result),
     }

@@ -8,6 +8,12 @@
 
 **Input**: User description: "A.7-P3 — import a supported schedule file with the correct meaning for work-breakdown parents, activities, durations, relationships, and dates. Audit owners: W07, S01, S02, S03, S04, S06, S07, S08, I01, I03, I04, I05, I12, I13, I21, I22. Source prompt: output/a7-requirements-2026-11-10/speckit-prompts/03-import-fidelity.md."
 
+## Clarifications
+
+### Session 2026-11-12
+
+- Q: Should the parentless employer-file activities شروع and پایان be stored? → A: Keep omitting them with row warnings; store zero duration only for activities with a valid parent. FR-015 and US6/AC5 below reflect this decision; the required-parent rule stays in force.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The file's parent is the stored parent (Priority: P1)
@@ -113,7 +119,7 @@ A planner submits a file that is too large, empty, corrupt, password-protected, 
 2. **Given** a paired native schedule file and XML file with the same supported content, **When** both are imported on separate trial projects, **Then** the saved hierarchy, dates, durations, milestones, relationships, and warnings have no unexplained difference.
 3. **Given** the unchanged employer schedule file, **When** it is imported on a trial project, **Then** each of predecessor identifiers 8055, 8084, 8102, and 8120 is reported as a present summary work package on the successor پایان. The summary stays a work package. No activity relationship is created for that link.
 4. **Given** the historical observation of 83 source links and 79 stored relationships, **When** the result is judged, **Then** those historical counts are evidence of the old mismatch. They are not the pass target. The pass target is the independent schedule reference and the decision in scenario 3.
-5. **Given** the tasks شروع and پایان on the employer file, **When** their zero duration is imported, **Then** each stored duration is zero days. The old unparsed-duration warning is not the remaining outcome for that known zero form.
+5. **Given** the parentless tasks شروع and پایان on the unchanged employer file, **When** the file is previewed and imported, **Then** each row is omitted with its row identity and `activity_without_parent`. No parent is invented. Their known duration parses as zero, not as an unparsed duration. A zero-duration activity is stored as zero days only when its source parent resolves to a valid work package.
 
 ---
 
@@ -164,7 +170,7 @@ A planner submits a file that is too large, empty, corrupt, password-protected, 
 - **FR-012**: Oversized, empty, corrupt, password-protected, renamed, unsupported, and non-genuine files MUST be rejected with a distinct actionable message and with no project change. Password-protected files MUST NOT be decrypted. Readable samples of each accepted file type MUST still be accepted. The product MUST NOT claim that every Microsoft Project year is supported.
 - **FR-013**: A paired native schedule file and XML file with the same supported content MUST produce the same stored hierarchy, dates, durations, milestones, relationships, and warnings. Comparison of the preview alone MUST NOT satisfy this requirement.
 - **FR-014**: On the unchanged employer schedule file, predecessor identifiers 8055, 8084, 8102, and 8120 MUST each be reported, in preview and in the saved result, as a present summary work package on the successor پایان. The summary MUST remain a work package. No activity relationship MUST be created for that link. The historical counts of 83 source links and 79 stored relationships MUST remain historical evidence and MUST NOT be the pass target.
-- **FR-015**: The known zero-duration form on the employer-file tasks شروع and پایان MUST be stored as zero days.
+- **FR-015**: The known zero-duration form MUST parse as zero days. An activity with a valid source parent MUST store that duration as zero days. The parentless employer-file tasks شروع and پایان MUST instead be omitted with row-identified `activity_without_parent` warnings in preview and the saved result, per FR-003; no parent MUST be invented to store them.
 - **FR-016**: The employer schedule file MUST remain byte-for-byte unchanged.
 - **FR-017**: User-facing dates, milestone marks, warnings, and blocking reasons MUST be understandable in Persian and in English, with the same meaning in the active language.
 - **FR-018**: An independent spreadsheet import, a rewritten preview, a live Primavera connection, a new earned-value or finance report, and any weakening of the current access policy or of the import-safety rules are outside this feature.
@@ -203,10 +209,10 @@ A planner submits a file that is too large, empty, corrupt, password-protected, 
 - Microsoft Project link delay is tenths of a minute in that format. 4800 tenths of a minute are 480 minutes, which are one agreed day. Primavera delay uses the unit stated on the link.
 - Working calendars and their exceptions stay outside the current support contract. This feature reports that fact and assigns no substitute. Transferring a file calendar, including the Shamsi calendar in the employer file, is a contract change for the next phase if the employer requires it. Dates already in the file are still stored as planned dates.
 - A predecessor that is a summary work package cannot become an activity relationship, because a summary is a work package and a link exists between activities. The four employer links are that case. They are reported and omitted. Turning every summary into an activity, or omitting the link with no reason, is not the decision.
-- The known zero form on شروع and پایان is a duration of zero. The milestone mark is stored only when the file marks the row as a milestone.
+- The known zero form on شروع and پایان is a duration of zero. Those employer-file rows have no parent and are omitted with row warnings. Zero is stored only for an activity with a valid source parent. The milestone mark is stored only when the file marks the row as a milestone.
 - A file with no summary rows keeps the summary-versus-activity presentation: the file's own parent identity places each row, and a missing parent does not borrow another row.
 - Import safety remains in force: protected history is not replaced, preview and cancel write nothing, a repeated empty result is not a new current plan, and an archived project stays unchanged. This feature does not restate those rules as new behavior.
-- The reference phase is ready for review and did not change import behavior. The import-safety phase has a completed task list and a verification note, and it has no handoff. This specification assumes those safety outcomes remain the baseline. Implementation of this feature waits until that baseline is the integrated behavior.
+- The reference phase is ready for review and did not change import behavior. The import-safety phase's integrated baseline and verification limits are recorded in [its handoff](../052-a7-p2-import-safety/handoff.md). This feature preserves that safety baseline.
 - Who may import stays the current membership and work-breakdown edit permission. This feature does not change access.
 - An independent spreadsheet path for the work breakdown, a new preview flow, a live Primavera connection, and full earned-value or financial reporting stay outside the approved delivery boundary.
 - Contract decisions made here, especially calendar non-support and the summary-link decision, are handed to the next phase as contract changes. They are not silent importer behavior.

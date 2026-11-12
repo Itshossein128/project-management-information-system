@@ -107,12 +107,16 @@ class MspImportPreviewView(APIView):
         except ValueError:
             return _error_response(MSP_INVALID_XML, str(INVALID_XML_MESSAGE))
         project = get_object_or_404(Project, pk=project_pk)
-        from projects.models import Activity, WBS
+        from projects.models import Activity, ActivityRelation, WBS
         return Response(build_preview(
             parsed,
             max_depth=project.max_depth,
             existing_wbs_codes=WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
             existing_activity_codes=Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+            existing_relation_pairs=ActivityRelation.objects.filter(
+                predecessor__project=project, is_deleted=False,
+            ).values_list('predecessor__activity_code', 'successor__activity_code'),
+            project=project,
         ))
 
 
@@ -258,22 +262,21 @@ class P6ImportPreviewView(APIView):
             file_bytes, _filename = _read_validated_p6_file(request)
             parsed = parse_p6_xer(file_bytes)
         except ValidationError as exc:
-            return Response(
-                {'error': {'code': 'validation_error', 'message': str(exc.detail), 'details': exc.detail}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            code, msg = _validation_error_to_code(exc)
+            return _error_response(code, msg, details=exc.detail)
         except ValueError as exc:
-            return Response(
-                {'error': {'code': 'validation_error', 'message': str(exc) or INVALID_XER_MESSAGE, 'details': {}}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return _error_response('invalid_file_type', str(exc) or str(INVALID_XER_MESSAGE))
         project = get_object_or_404(Project, pk=project_pk)
-        from projects.models import Activity, WBS
+        from projects.models import Activity, ActivityRelation, WBS
         return Response(build_preview(
             parsed,
             max_depth=project.max_depth,
             existing_wbs_codes=WBS.objects.filter(project=project, is_deleted=False).values_list('wbs_code', flat=True),
             existing_activity_codes=Activity.objects.filter(project=project, is_deleted=False).values_list('activity_code', flat=True),
+            existing_relation_pairs=ActivityRelation.objects.filter(
+                predecessor__project=project, is_deleted=False,
+            ).values_list('predecessor__activity_code', 'successor__activity_code'),
+            project=project,
         ))
 
 
