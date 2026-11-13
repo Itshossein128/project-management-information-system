@@ -530,3 +530,15 @@ msgstr "این کد از قبل در پروژه است و تغییر نکرد."
 
 msgid "A parent-share weight is outside 0 through 1."
 msgstr "وزن سهم والد خارج از ۰ تا ۱ است."
+
+msgid "Processing exceeded the available limit. Try again or export XML."
+msgstr "پردازش از حد مجاز گذشت. دوباره تلاش کنید یا XML صادر کنید."
+
+msgid "Processing was interrupted. Upload the file again to retry."
+msgstr "پردازش قطع شد. برای تلاش دوباره فایل را بارگذاری کنید."
+
+msgid "Schedule processing is busy. Wait and try again."
+msgstr "پردازش برنامه مشغول است. کمی بعد دوباره تلاش کنید."
+
+msgid "The uploaded file is no longer available. Upload it again to retry."
+msgstr "فایل بارگذاری‌شده دیگر در دسترس نیست. برای تلاش دوباره آن را بارگذاری کنید."

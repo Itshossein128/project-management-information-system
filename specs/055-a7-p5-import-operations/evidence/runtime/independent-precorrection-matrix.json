@@ -1,0 +1,229 @@
+{
+  "status": "incomplete",
+  "database": "a7p5_import",
+  "eager": false,
+  "containment": "cgroup",
+  "problems": [],
+  "not_run": [],
+  "profile": "a7-p5-v1",
+  "effective_limits": {
+    "IMPORT_ADMISSION_REQUIRES_CATCHUP": true,
+    "IMPORT_APPLY_STATEMENT_SECONDS": 90,
+    "IMPORT_CONTAINMENT_REQUIRED": true,
+    "IMPORT_DIAGNOSTIC_LIMIT_BYTES": 65536,
+    "IMPORT_DISPATCH_DEADLINE_SECONDS": 300,
+    "IMPORT_EXECUTION_HARD_SECONDS": 180,
+    "IMPORT_EXECUTION_SOFT_SECONDS": 170,
+    "IMPORT_HELPER_HEAP_BYTES": 536870912,
+    "IMPORT_HELPER_MEMORY_BYTES": 1073741824,
+    "IMPORT_HELPER_PIDS": 32,
+    "IMPORT_HELPER_SWAP_BYTES": 0,
+    "IMPORT_LOCK_WAIT_SECONDS": 3,
+    "IMPORT_MAINTENANCE_BATCH_SIZE": 100,
+    "IMPORT_MAINTENANCE_GAP_SECONDS": 0,
+    "IMPORT_MAINTENANCE_ITEM_SECONDS": 10,
+    "IMPORT_OUTPUT_LIMIT_BYTES": 134217728,
+    "IMPORT_PREPARATION_SLOTS": 1,
+    "IMPORT_PREPARE_GRACE_SECONDS": 2,
+    "IMPORT_PREPARE_INLINE": false,
+    "IMPORT_PREPARE_TIMEOUT_SECONDS": 75,
+    "IMPORT_PUBLISH_BUDGET_SECONDS": 5,
+    "IMPORT_PURGE_INTERVAL_SECONDS": 3600,
+    "IMPORT_RECONCILE_INTERVAL_SECONDS": 60,
+    "IMPORT_REDIS_VISIBILITY_SECONDS": 600,
+    "IMPORT_RETENTION_HOURS": 168,
+    "IMPORT_SCRATCH_QUOTA_BYTES": 268435456,
+    "IMPORT_UPLOAD_LIMIT_BYTES": 52428800
+  },
+  "conversion_timeout_seconds": 60,
+  "conversion_routes": [
+    "JPype",
+    "configured MPXJ Java CLI"
+  ],
+  "queues": [
+    "a7p5-import",
+    "a7p5-maintenance"
+  ],
+  "matrix": {
+    "valid_native": "pass",
+    "unreadable": "pass",
+    "admitted_failure": "pass",
+    "timeout": "pass",
+    "resource_limit": "fail",
+    "duplicate_delivery": "pass",
+    "worker_loss": "not-run",
+    "cleanup": "not-run",
+    "expiry": "not-run",
+    "healthy_follow_up": "not-run"
+  },
+  "scenario_evidence": {
+    "valid_native": {
+      "status": "pass",
+      "observed": {
+        "job": "f7aa1a06-2607-4bfe-91b9-5287d006ca7c",
+        "counts": [
+          6,
+          72,
+          72
+        ],
+        "source_sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553",
+        "result": {
+          "blocking": [],
+          "warnings": [
+            "calendar_not_applied",
+            "activity_without_parent: 7916",
+            "activity_without_parent: 7873",
+            "predecessor_missing: 7918 / 7916",
+            "predecessor_missing: 8053 / 7916",
+            "predecessor_missing: 8052 / 7916",
+            "predecessor_missing: 8056 / 7916",
+            "predecessor_missing: 8057 / 7916",
+            "predecessor_missing: 8103 / 7916",
+            "predecessor_is_summary: 7873 / 8055",
+            "predecessor_is_summary: 7873 / 8084",
+            "predecessor_is_summary: 7873 / 8102",
+            "predecessor_is_summary: 7873 / 8120"
+          ],
+          "rows_read": 80,
+          "duplicates": [],
+          "baseline_id": "c8295b9c-4b72-4b9b-aa1a-bc420e1bf329",
+          "rows_omitted": 13,
+          "warned_count": 13,
+          "created_links": 72,
+          "omitted_count": 13,
+          "warning_items": [
+            {
+              "row": "",
+              "code": "calendar_not_applied"
+            },
+            {
+              "row": "7916",
+              "code": "activity_without_parent"
+            },
+            {
+              "row": "7873",
+              "code": "activity_without_parent"
+            },
+            {
+              "row": "7918 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8053 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8052 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8056 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8057 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8103 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "7873 / 8055",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8084",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8102",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8120",
+              "code": "predecessor_is_summary"
+            }
+          ],
+          "duplicate_count": 0,
+          "nothing_changed": false,
+          "created_packages": 6,
+          "relations_created": 72,
+          "relations_removed": 0,
+          "wbs_nodes_created": 6,
+          "wbs_nodes_removed": 0,
+          "activities_created": 72,
+          "activities_removed": 0,
+          "created_activities": 72,
+          "relationships_kept": 72,
+          "relation_warning_items": [],
+          "schedule_version_changed": true
+        },
+        "cli_fallback_job": "8653df0c-1204-4447-9213-a912f1034bbe",
+        "cli_counts": [
+          6,
+          72,
+          72
+        ],
+        "p6_job": "07986ac7-00c1-4533-9ca1-a2e45de3e3d7",
+        "p6_counts": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "unreadable": {
+      "status": "pass",
+      "observed": {
+        "http_status": 400,
+        "code": "conversion_failed"
+      }
+    },
+    "admitted_failure": {
+      "status": "pass",
+      "observed": {
+        "job": "831bf3d7-4476-4f67-b6a7-03ae3c03bd6b",
+        "error_code": "import_not_permitted",
+        "healthy_follow_up": "dba52b8a-0911-47eb-b29a-405e8ff47cf9"
+      }
+    },
+    "duplicate_delivery": {
+      "status": "pass",
+      "observed": {
+        "job": "7e313615-ecb0-42de-b178-2c55d83de718",
+        "committed_counts": [
+          1,
+          1,
+          0
+        ],
+        "same_inflight_id": true,
+        "immutable_completion": true
+      }
+    },
+    "timeout": {
+      "status": "pass",
+      "observed": {
+        "job": "8dd0d114-8f61-4a9e-ba73-c243750f7d47",
+        "error_code": "processing_timeout",
+        "helper_mode": "sleep",
+        "healthy_follow_up": "6da03a6c-298f-4550-869a-0e6cb9f96168"
+      }
+    },
+    "resource_limit": {
+      "status": "fail",
+      "exception_type": "AssertionError",
+      "reason": "processing_timeout"
+    }
+  },
+  "versions": {
+    "Django": "4.2.11",
+    "celery": "5.7.0",
+    "mpxj": "16.10.0",
+    "JPype1": "1.7.1",
+    "redis": "8.1.0"
+  },
+  "python": "3.12.15",
+  "java": "openjdk version \"21.0.13\" 2026-10-20",
+  "source_tree_sha256": "a032f0294118279cb2d6a568e6f578fc12413ad94d07a84a25a3300d53bb818a"
+}

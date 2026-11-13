@@ -5,6 +5,11 @@
 **Status**: Ready for review. Employer acceptance stays with A.7 phase 6.  
 **Next phase**: Do not start automatically. Phase 2 owns import replace safety. Phase 3 owns import fidelity against `contracts/schedule-reference.md`.
 
+
+**Current downstream readiness after P4 handoff (2026-11-12)**: The integrated local baseline from this phase is ready for A.7-P5 implementation on HEAD `ea38dda2eda939184afd502fa027680b40af7870`. The fresh combined [P1–P4 recheck](../054-a7-p4-import-experience/evidence/handoff-recheck.md) passed 93 tests without skips/failures/errors and typecheck. This confirms the local import prerequisites, not every original phase acceptance metric or employer/production acceptance. Earlier code versions and “P4 work remains” wording below are historical; current P4 handoff and its explicit verification limits take precedence for downstream readiness. No product code or predecessor task marker was changed for this supplement.
+
+The earlier “No migration” sentence is not a current schema inventory: the integrated tree includes `projects.0019_project_approval_submitted_by` and later committed migrations, applied by fresh pytest database setup. This recheck generated no migration and changed no shared schema.
+
 ## What changed
 
 - Staff-only creation of an organization unit stays forbidden. The old test expected success; it now expects 403 and no row. The permission text matches that rule.

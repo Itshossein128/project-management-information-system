@@ -86,12 +86,12 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
 }
 
 function GanttContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const { projectId, project, isLoading } = useProject();
+  const { projectId, project, isLoading, isError: projectError, error: projectErr, refetch: refetchProject } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_activities");
-  const canEdit = has("edit_activities");
+  const canEdit = has("edit_activities") && project?.status !== "archived";
   const toast = useToast();
   const qc = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -108,17 +108,18 @@ function GanttContent() {
     data,
     isLoading: loadingGantt,
     isError,
+    error,
     refetch,
   } = useQuery({
     queryKey: ["gantt", projectId, baselineId],
     queryFn: () => fetchGantt(projectId, baselineId || undefined),
-    enabled: canView,
+    enabled: Boolean(project) && canView,
   });
 
   const { data: baselines = [] } = useQuery({
     queryKey: ["baselines", projectId],
     queryFn: () => fetchBaselines(projectId),
-    enabled: canView,
+    enabled: Boolean(project) && canView,
   });
 
   const approveLockMut = useMutation({
@@ -184,7 +185,7 @@ function GanttContent() {
     containerRef.current.innerHTML = "";
     ganttRef.current = new Gantt(containerRef.current, tasks, {
       view_mode: viewMode,
-      language: "fa",
+      language: i18n.language === "en" ? "en" : "fa",
       readonly: true,
       bar_height: 24,
       padding: 18,
@@ -193,7 +194,7 @@ function GanttContent() {
         if (row) setSelectedTask(row);
       },
     });
-  }, [data, viewMode, criticalOnly, t]);
+  }, [data, viewMode, criticalOnly, t, i18n.language]);
 
   const exportPdf = async () => {
     const blob = await downloadGanttPdf(projectId, baselineId || undefined);
@@ -206,6 +207,7 @@ function GanttContent() {
   };
 
   if (isLoading || loadingGantt) return <LoadingSkeleton rows={12} />;
+  if (projectError) return <QueryErrorState error={projectErr} onRetry={refetchProject} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
@@ -218,7 +220,7 @@ function GanttContent() {
     );
   }
   if (isError) {
-    return <QueryErrorState onRetry={() => void refetch()} />;
+    return <QueryErrorState error={error} onRetry={() => void refetch()} />;
   }
 
   return (
@@ -335,7 +337,7 @@ function GanttContent() {
                     {b.version_name || b.id.slice(0, 8)}
                   </span>
                   {b.is_current ? (
-                    <span className="ms-2 text-xs text-muted-foreground">(جاری)</span>
+                    <span className="ms-2 text-xs text-muted-foreground">({t("schedule.current")})</span>
                   ) : null}
                   <span className="ms-2 text-xs text-muted-foreground">
                     {b.is_locked
@@ -379,8 +381,8 @@ function GanttContent() {
 
       {chartTasks.length === 0 ? (
         <EmptyState
-          title="فعالیتی برای نمایش در گانت نیست"
-          description="فعالیت‌ها باید تاریخ شروع و پایان برنامه‌ای داشته باشند."
+          title={t("schedule.ganttEmptyTitle")}
+          description={t("schedule.ganttEmptyDescription")}
         />
       ) : (
         <div
@@ -399,7 +401,7 @@ function GanttContent() {
         .bar-critical .bar { fill: var(--palette-danger-600) !important; }
         .bar-done .bar { fill: var(--palette-success-600) !important; }
         .bar-normal .bar { fill: var(--palette-info-600) !important; }
-        .gantt-container .grid-row { direction: rtl; }
+        .gantt-container .grid-row { direction: ${i18n.dir()}; }
       `}</style>
 
       {selectedTask ? (
@@ -409,18 +411,18 @@ function GanttContent() {
           title={selectedTask.name}
         >
           <dl className="grid gap-2 text-sm">
-            <div><dt className="text-muted-foreground">کد WBS</dt><dd>{selectedTask.wbs_code || "—"}</dd></div>
-            <div><dt className="text-muted-foreground">شروع برنامه</dt><dd>{selectedTask.start ? formatDisplayDate(selectedTask.start) : "—"}</dd></div>
-            <div><dt className="text-muted-foreground">پایان برنامه</dt><dd>{selectedTask.end ? formatDisplayDate(selectedTask.end) : "—"}</dd></div>
-            <div><dt className="text-muted-foreground">شروع مبنا</dt><dd>{selectedTask.baseline_start ? formatDisplayDate(selectedTask.baseline_start) : "—"}</dd></div>
-            <div><dt className="text-muted-foreground">پایان مبنا</dt><dd>{selectedTask.baseline_end ? formatDisplayDate(selectedTask.baseline_end) : "—"}</dd></div>
-            <div><dt className="text-muted-foreground">پیشرفت</dt><dd>{selectedTask.progress}٪</dd></div>
-            <div><dt className="text-muted-foreground">مسئول</dt><dd>{selectedTask.responsible || "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.wbsCode")}</dt><dd>{selectedTask.wbs_code || "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.colPlannedStart")}</dt><dd>{selectedTask.start ? formatDisplayDate(selectedTask.start) : "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.colPlannedFinish")}</dt><dd>{selectedTask.end ? formatDisplayDate(selectedTask.end) : "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.colBaselineStart")}</dt><dd>{selectedTask.baseline_start ? formatDisplayDate(selectedTask.baseline_start) : "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.colBaselineFinish")}</dt><dd>{selectedTask.baseline_end ? formatDisplayDate(selectedTask.baseline_end) : "—"}</dd></div>
+            <div><dt className="text-muted-foreground">{t("schedule.progress")}</dt><dd>{selectedTask.progress}%</dd></div>
+            <div><dt className="text-muted-foreground">{t("common.owner")}</dt><dd>{selectedTask.responsible || "—"}</dd></div>
             {selectedActivity ? (
-              <div><dt className="text-muted-foreground">وضعیت</dt><dd>{selectedActivity.status}</dd></div>
+              <div><dt className="text-muted-foreground">{t("common.status")}</dt><dd>{selectedActivity.status}</dd></div>
             ) : null}
           </dl>
-          <p className="mt-4 text-xs text-muted-foreground">نمایش فقط‌خواندنی — برای ویرایش به صفحه فعالیت‌ها بروید.</p>
+          <p className="mt-4 text-xs text-muted-foreground">{t("schedule.ganttDrawerHint")}</p>
         </Drawer>
       ) : null}
     </div>

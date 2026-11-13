@@ -9,6 +9,9 @@ import { ROLES } from "@/config/roles";
 interface ProjectContextValue {
   project: ProjectDetail | undefined;
   isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  refetch: () => void;
   projectId: string;
 }
 
@@ -21,14 +24,18 @@ export function ProjectProvider({
   projectId: string;
   children: React.ReactNode;
 }) {
-  const { data: project, isLoading } = useQuery({
+  const { data: project, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["project", projectId],
     queryFn: () => fetchProject(projectId),
+    retry: (failureCount, err) =>
+      err instanceof ApiRequestError && (err.status === 403 || err.status === 404)
+        ? false
+        : failureCount < 2,
   });
 
   const value = useMemo(
-    () => ({ project, isLoading, projectId }),
-    [project, isLoading, projectId],
+    () => ({ project, isLoading, isError, error, refetch: () => void refetch(), projectId }),
+    [project, isLoading, isError, error, refetch, projectId],
   );
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;

@@ -44,13 +44,13 @@ function ProjectSettingsContent() {
   const toast = useToast();
   const qc = useQueryClient();
   const { has } = usePermission(id);
-  const canEdit = has("edit_project");
 
-  const { data: project, isLoading, isError, refetch } = useQuery({
+  const { data: project, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["project", id],
     queryFn: () => fetchProject(id),
     enabled: Boolean(id),
   });
+  const canEdit = has("edit_project") && project?.status !== "archived";
 
   const {
     data: capabilities = [],
@@ -138,7 +138,7 @@ function ProjectSettingsContent() {
     return <LoadingSkeleton rows={6} />;
   }
   if (isError) {
-    return <QueryErrorState onRetry={() => void refetch()} />;
+    return <QueryErrorState error={error} onRetry={() => void refetch()} />;
   }
   if (!project) {
     return <EmptyState title={t("common.projectNotFound")} />;

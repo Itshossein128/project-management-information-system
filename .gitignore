@@ -6,6 +6,7 @@
 !.env.*.example
 .pytest_cache/
 coverage/
+apps/api/core/var/
 *.tmp
 
 # Node
@@ -78,3 +79,5 @@ logs/
 .knowledge/
 knowledge/sources/
 
+
+ops/a7-p5/.runtime-auth.json

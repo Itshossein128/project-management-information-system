@@ -111,13 +111,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://ipcas:ipcas@localhost:5433/ipcas'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+if os.environ.get('IMPORT_HELPER') == '1':
+    # Model import asks the backend for identifier limits. An empty in-memory
+    # database satisfies that without credentials or a project connection.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL', 'postgres://ipcas:ipcas@localhost:5433/ipcas'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 if 'TEST_DATABASE_NAME' in os.environ:
     DATABASES['default']['TEST'] = {'NAME': os.environ['TEST_DATABASE_NAME']}
 
@@ -251,6 +261,83 @@ AUDIT_LOG_ASYNC = os.environ.get('AUDIT_LOG_ASYNC', 'true').lower() in ('1', 'tr
 # MSP native MPP conversion (MPXJ); wall-clock bound for untrusted uploads
 MPP_CONVERT_TIMEOUT_SECONDS = int(os.environ.get('MPP_CONVERT_TIMEOUT_SECONDS', '60'))
 
+
+def _import_int(name: str, default: str) -> int:
+    raw = os.environ.get(name, default)
+    try:
+        return int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ImproperlyConfigured(f'{name} must be an integer') from exc
+
+
+def _import_bool(name: str, default: str = 'false') -> bool:
+    return os.environ.get(name, default).lower() in ('1', 'true', 'yes')
+
+
+# Initial isolated acceptance profile. These are safety bounds, not a customer SLA.
+IMPORT_PREPARE_TIMEOUT_SECONDS = _import_int('IMPORT_PREPARE_TIMEOUT_SECONDS', '75')
+IMPORT_PREPARE_GRACE_SECONDS = _import_int('IMPORT_PREPARE_GRACE_SECONDS', '2')
+IMPORT_HELPER_MEMORY_BYTES = _import_int('IMPORT_HELPER_MEMORY_BYTES', str(1024 ** 3))
+IMPORT_HELPER_SWAP_BYTES = _import_int('IMPORT_HELPER_SWAP_BYTES', '0')
+IMPORT_HELPER_PIDS = _import_int('IMPORT_HELPER_PIDS', '32')
+IMPORT_HELPER_HEAP_BYTES = _import_int('IMPORT_HELPER_HEAP_BYTES', str(512 * 1024 * 1024))
+IMPORT_SCRATCH_QUOTA_BYTES = _import_int('IMPORT_SCRATCH_QUOTA_BYTES', str(256 * 1024 * 1024))
+IMPORT_OUTPUT_LIMIT_BYTES = _import_int('IMPORT_OUTPUT_LIMIT_BYTES', str(128 * 1024 * 1024))
+IMPORT_DIAGNOSTIC_LIMIT_BYTES = _import_int('IMPORT_DIAGNOSTIC_LIMIT_BYTES', str(64 * 1024))
+IMPORT_PREPARATION_SLOTS = _import_int('IMPORT_PREPARATION_SLOTS', '1')
+IMPORT_EXECUTION_SOFT_SECONDS = _import_int('IMPORT_EXECUTION_SOFT_SECONDS', '170')
+IMPORT_EXECUTION_HARD_SECONDS = _import_int('IMPORT_EXECUTION_HARD_SECONDS', '180')
+IMPORT_APPLY_STATEMENT_SECONDS = _import_int('IMPORT_APPLY_STATEMENT_SECONDS', '90')
+IMPORT_LOCK_WAIT_SECONDS = _import_int('IMPORT_LOCK_WAIT_SECONDS', '3')
+IMPORT_DISPATCH_DEADLINE_SECONDS = _import_int('IMPORT_DISPATCH_DEADLINE_SECONDS', '300')
+IMPORT_PUBLISH_BUDGET_SECONDS = _import_int('IMPORT_PUBLISH_BUDGET_SECONDS', '5')
+IMPORT_RECONCILE_INTERVAL_SECONDS = _import_int('IMPORT_RECONCILE_INTERVAL_SECONDS', '60')
+IMPORT_MAINTENANCE_BATCH_SIZE = _import_int('IMPORT_MAINTENANCE_BATCH_SIZE', '100')
+IMPORT_PURGE_INTERVAL_SECONDS = _import_int('IMPORT_PURGE_INTERVAL_SECONDS', '3600')
+IMPORT_RETENTION_HOURS = _import_int('IMPORT_RETENTION_HOURS', '168')
+IMPORT_REDIS_VISIBILITY_SECONDS = _import_int('IMPORT_REDIS_VISIBILITY_SECONDS', '600')
+IMPORT_MAINTENANCE_ITEM_SECONDS = _import_int('IMPORT_MAINTENANCE_ITEM_SECONDS', '10')
+IMPORT_MAINTENANCE_GAP_SECONDS = _import_int('IMPORT_MAINTENANCE_GAP_SECONDS', '0')
+IMPORT_UPLOAD_LIMIT_BYTES = _import_int('IMPORT_UPLOAD_LIMIT_BYTES', str(50 * 1024 * 1024))
+IMPORT_CONTAINMENT_REQUIRED = _import_bool('IMPORT_CONTAINMENT_REQUIRED', 'false')
+IMPORT_PREPARE_INLINE = _import_bool('IMPORT_PREPARE_INLINE', 'false')
+IMPORT_ADMISSION_REQUIRES_CATCHUP = _import_bool('IMPORT_ADMISSION_REQUIRES_CATCHUP', 'false')
+IMPORT_CGROUP_ROOT = os.environ.get('IMPORT_CGROUP_ROOT', '')
+IMPORT_SCRATCH_ROOT = os.environ.get('IMPORT_SCRATCH_ROOT', str(BASE_DIR / 'var' / 'import-scratch'))
+IMPORT_EXECUTION_QUEUE = os.environ.get('IMPORT_EXECUTION_QUEUE', 'celery')
+IMPORT_MAINTENANCE_QUEUE = os.environ.get('IMPORT_MAINTENANCE_QUEUE', 'celery')
+IMPORT_PROFILE_ID = 'a7-p5-v1'
+
+_import_profile_errors = []
+if IMPORT_PREPARE_TIMEOUT_SECONDS < MPP_CONVERT_TIMEOUT_SECONDS:
+    _import_profile_errors.append('preparation budget must cover conversion')
+if IMPORT_PREPARE_GRACE_SECONDS < 0 or IMPORT_PREPARE_GRACE_SECONDS >= IMPORT_PREPARE_TIMEOUT_SECONDS:
+    _import_profile_errors.append('kill grace must fit inside preparation')
+if IMPORT_EXECUTION_SOFT_SECONDS >= IMPORT_EXECUTION_HARD_SECONDS:
+    _import_profile_errors.append('execution soft limit must be below the hard limit')
+if IMPORT_EXECUTION_HARD_SECONDS < IMPORT_PREPARE_TIMEOUT_SECONDS:
+    _import_profile_errors.append('execution budget must cover preparation')
+if IMPORT_APPLY_STATEMENT_SECONDS <= 0 or IMPORT_APPLY_STATEMENT_SECONDS > 90:
+    _import_profile_errors.append('application statement budget must be 1..90 seconds')
+if IMPORT_LOCK_WAIT_SECONDS <= 0 or IMPORT_LOCK_WAIT_SECONDS > 3:
+    _import_profile_errors.append('lock wait must be 1..3 seconds')
+if IMPORT_MAINTENANCE_BATCH_SIZE < 1 or IMPORT_MAINTENANCE_BATCH_SIZE > 100:
+    _import_profile_errors.append('maintenance batch size must be 1..100')
+if IMPORT_MAINTENANCE_ITEM_SECONDS <= 0:
+    _import_profile_errors.append('per-item maintenance budget must be positive')
+if IMPORT_MAINTENANCE_GAP_SECONDS < 0 or IMPORT_MAINTENANCE_GAP_SECONDS > 1:
+    _import_profile_errors.append('inter-batch delay must be 0..1 seconds')
+if IMPORT_RETENTION_HOURS != 168:
+    _import_profile_errors.append('original retention is fixed at 168 hours')
+if IMPORT_REDIS_VISIBILITY_SECONDS < IMPORT_EXECUTION_HARD_SECONDS:
+    _import_profile_errors.append('Redis visibility must exceed the execution hard limit')
+if IMPORT_HELPER_MEMORY_BYTES < IMPORT_HELPER_HEAP_BYTES:
+    _import_profile_errors.append('helper memory must cover the JVM heap')
+if IMPORT_PREPARATION_SLOTS < 1:
+    _import_profile_errors.append('at least one preparation slot is required')
+if _import_profile_errors:
+    raise ImproperlyConfigured('Import profile is inconsistent: ' + '; '.join(_import_profile_errors))
+
 # Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get(
@@ -260,6 +347,15 @@ CELERY_RESULT_BACKEND = os.environ.get(
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_ALWAYS_EAGER = os.environ.get('CELERY_TASK_ALWAYS_EAGER', 'false').lower() in ('1', 'true', 'yes')
 CELERY_RESULT_EXTENDED = True
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': IMPORT_REDIS_VISIBILITY_SECONDS}
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {'visibility_timeout': IMPORT_REDIS_VISIBILITY_SECONDS}
+CELERY_TASK_ROUTES = {
+    'schedule.tasks.run_msp_import_task': {'queue': IMPORT_EXECUTION_QUEUE},
+    'schedule.tasks.run_p6_import_task': {'queue': IMPORT_EXECUTION_QUEUE},
+    'schedule.tasks.reconcile_import_jobs': {'queue': IMPORT_MAINTENANCE_QUEUE},
+    'schedule.tasks.purge_import_originals': {'queue': IMPORT_MAINTENANCE_QUEUE},
+    'schedule.tasks.reconcile_import_scratch': {'queue': IMPORT_MAINTENANCE_QUEUE},
+}
 
 from celery.schedules import crontab  # noqa: E402
 
@@ -287,6 +383,18 @@ CELERY_BEAT_SCHEDULE = {
     'generate-daily-economic-snapshots': {
         'task': 'economic.tasks.generate_daily_snapshots',
         'schedule': crontab(hour=1, minute=0),
+    },
+    'reconcile-import-jobs': {
+        'task': 'schedule.tasks.reconcile_import_jobs',
+        'schedule': float(IMPORT_RECONCILE_INTERVAL_SECONDS),
+    },
+    'reconcile-import-scratch': {
+        'task': 'schedule.tasks.reconcile_import_scratch',
+        'schedule': float(IMPORT_RECONCILE_INTERVAL_SECONDS),
+    },
+    'purge-import-originals': {
+        'task': 'schedule.tasks.purge_import_originals',
+        'schedule': crontab(minute=0),
     },
 }
 

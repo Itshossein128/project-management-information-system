@@ -17,15 +17,16 @@ function DateCell({ value }: { value: string | null | undefined }) {
 
 function ScheduleStatusContent() {
   const { t } = useTranslation();
-  const { projectId, project, isLoading } = useProject();
+  const { projectId, project, isLoading, isError: projectError, error: projectErr, refetch: refetchProject } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_activities");
-  const canEdit = has("edit_activities");
+  const canEdit = has("edit_activities") && project?.status !== "archived";
 
   const {
     data,
     isLoading: loadingStatus,
     isError,
+    error,
     refetch,
   } = useQuery({
     queryKey: ["schedule-status", projectId],
@@ -34,6 +35,7 @@ function ScheduleStatusContent() {
   });
 
   if (isLoading || loadingStatus) return <LoadingSkeleton rows={10} />;
+  if (projectError) return <QueryErrorState error={projectErr} onRetry={refetchProject} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
   if (!canView) {
     return (
@@ -44,7 +46,7 @@ function ScheduleStatusContent() {
     );
   }
   if (isError || !data) {
-    return <QueryErrorState onRetry={() => void refetch()} />;
+    return <QueryErrorState error={error} onRetry={() => void refetch()} />;
   }
 
   return (

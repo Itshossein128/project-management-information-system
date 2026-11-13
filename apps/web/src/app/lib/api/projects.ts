@@ -19,6 +19,7 @@ export interface ProjectListItem {
   project_name: string;
   employer: string;
   status: ProjectLifecycleStatus | string;
+  approval_submitted_by?: string | null;
   start_date: string | null;
   planned_finish_date: string | null;
   contract_amount: string | null;

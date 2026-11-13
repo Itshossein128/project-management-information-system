@@ -17,7 +17,7 @@ import {
   applyProjectTemplate,
   fetchProjectTemplate,
   fetchProjectTemplates,
-  projectTypeLabels,
+  getProjectTypeLabel,
   type ProjectTemplateListItem,
 } from "@/app/lib/api/templates";
 import { fetchRoles, lookupUsers, type Role, type UserLookupResult } from "@/app/lib/api/members";
@@ -241,12 +241,12 @@ export default function ProjectCreateWizardPage() {
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
           <PageHeader title={t("projectWizard.title")} />
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">اطلاعات پروژه را در سه مرحله وارد کنید. جزئیات تکمیلی را می‌توانید بعداً ویرایش کنید.</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">{t("projectWizard.subtitle")}</p>
         </div>
-        <span className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">مرحله {step} از ۳</span>
+        <span className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">{t("projectWizard.stepProgress", { step, total: 3 })}</span>
       </div>
 
-      <nav aria-label="مراحل ایجاد پروژه" className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
+      <nav aria-label={t("projectWizard.title")} className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
         {steps.map((label, i) => {
           const Icon = [Building2, CalendarDays, Users][i];
           const active = step === i + 1;
@@ -256,7 +256,7 @@ export default function ProjectCreateWizardPage() {
               <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${active ? "bg-primary-foreground/15" : "bg-muted"}`}>
                 {complete ? <Check className="size-4" /> : <Icon className="size-4" />}
               </span>
-              <span className="min-w-0"><span className="hidden text-xs opacity-75 sm:block">مرحله {i + 1}</span><span className="block text-xs font-semibold sm:text-sm">{label}</span></span>
+              <span className="min-w-0"><span className="hidden text-xs opacity-75 sm:block">{t("projectWizard.stepNumber", { number: i + 1 })}</span><span className="block text-xs font-semibold sm:text-sm">{label}</span></span>
             </div>
           );
         })}
@@ -266,12 +266,12 @@ export default function ProjectCreateWizardPage() {
         <div className="space-y-5">
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
             <div className="mb-6 border-b border-border pb-4">
-              <h2 className="text-lg font-semibold">اطلاعات اصلی پروژه</h2>
-              <p className="mt-1 text-sm text-muted-foreground">برای شناسایی پروژه، این اطلاعات را وارد کنید. فیلدهای ستاره‌دار الزامی هستند.</p>
+              <h2 className="text-lg font-semibold">{t("projectWizard.basicSectionTitle")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("projectWizard.basicSectionHint")}</p>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-name">نام پروژه *</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-name">{t("projectWizard.projectName")} *</Label>
             <Input
               id="wizard-project-name"
               value={form.project_name}
@@ -286,7 +286,7 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-code">کد پروژه *</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-project-code">{t("projectWizard.projectCode")} *</Label>
             <Input
               id="wizard-project-code"
               value={form.project_code}
@@ -294,7 +294,7 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-employer">کارفرما *</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-employer">{t("projectWizard.employer")} *</Label>
             <Input
               id="wizard-employer"
               value={form.employer}
@@ -304,8 +304,8 @@ export default function ProjectCreateWizardPage() {
             </div>
           </section>
           <details className="rounded-lg border border-border bg-card p-4">
-            <summary className="cursor-pointer font-medium">{t("projectWizard.useTemplate")} <span className="text-sm font-normal text-muted-foreground">(اختیاری)</span></summary>
-            <p className="mt-2 text-sm text-muted-foreground">برای شروع از ساختار آماده، یک قالب انتخاب کنید.</p>
+            <summary className="cursor-pointer font-medium">{t("projectWizard.useTemplate")} <span className="text-sm font-normal text-muted-foreground">({t("projectWizard.optional")})</span></summary>
+            <p className="mt-2 text-sm text-muted-foreground">{t("projectWizard.templateHint")}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {templates.map((tpl) => (
                 <button
@@ -335,7 +335,7 @@ export default function ProjectCreateWizardPage() {
                       <div className="mt-2">
                         <Badge
                           variant="info"
-                          label={projectTypeLabels[tpl.project_type]}
+                          label={getProjectTypeLabel(tpl.project_type, t)}
                         />
                       </div>
                     </div>
@@ -352,7 +352,7 @@ export default function ProjectCreateWizardPage() {
           </details>
 
           <section className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
-            <div className="mb-6 border-b border-border pb-4"><h2 className="text-lg font-semibold">جزئیات پروژه</h2><p className="mt-1 text-sm text-muted-foreground">این اطلاعات اختیاری هستند و بعداً نیز قابل تکمیل‌اند.</p></div>
+            <div className="mb-6 border-b border-border pb-4"><h2 className="text-lg font-semibold">{t("projectWizard.detailsSectionTitle")}</h2><p className="mt-1 text-sm text-muted-foreground">{t("projectWizard.detailsSectionHint")}</p></div>
             <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <Label className="mb-2.5 leading-5" htmlFor="wizard-purpose">{t("project.purpose", "هدف پروژه")}</Label>
@@ -376,16 +376,13 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div className="sm:col-span-2 rounded-lg bg-muted/50 p-4" data-testid="wizard-contractor-deferred">
-            <Label>{t("project.contractor", "پیمانکار")}</Label>
+            <Label>{t("projectWizard.contractor")}</Label>
             <p className="mt-1 text-sm text-muted-foreground">
-              {t(
-                "projectWizard.contractorDeferredHelp",
-                "پس از ایجاد پروژه، پیمانکار را از صفحه ذینفعان با نقش پیمانکار ثبت کنید؛ سپس در تنظیمات پروژه انتخاب کنید. تایپ آزاد مجاز نیست.",
-              )}
+              {t("projectWizard.contractorDeferredHelp")}
             </p>
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-consultant">مشاور</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-consultant">{t("projectWizard.consultant")}</Label>
             <Input id="wizard-consultant"
               value={form.consultant}
               onChange={(e) => setForm((f) => ({ ...f, consultant: e.target.value }))}
@@ -401,24 +398,24 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-contract-type">نوع قرارداد</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-contract-type">{t("projectWizard.contractType")}</Label>
             <Select dir={i18n.dir()} value={form.contract_type || "__none__"} onValueChange={(value) => setForm((f) => ({ ...f, contract_type: value === "__none__" ? "" : value }))}>
               <SelectTrigger id="wizard-contract-type" data-testid="wizard-contract-type" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
-              <SelectContent position="popper"><SelectItem value="__none__">انتخاب نشده</SelectItem>{contractTypes.map((ct) => <SelectItem key={ct.id} value={ct.code}>{ct.code} — {ct.name_fa || ct.name_en}</SelectItem>)}</SelectContent>
+              <SelectContent position="popper"><SelectItem value="__none__">{t("projectWizard.notSelected")}</SelectItem>{contractTypes.map((ct) => <SelectItem key={ct.id} value={ct.code}>{ct.code} — {i18n.language === "en" ? ct.name_en || ct.name_fa : ct.name_fa || ct.name_en}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-currency">{t("projectSettings.currency", "واحد پول")}</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-currency">{t("projectSettings.currency")}</Label>
             <Select dir={i18n.dir()} value={form.currency ?? "IRR"} onValueChange={(value) => setForm((f) => ({ ...f, currency: value as ProjectCurrency }))}>
               <SelectTrigger id="wizard-currency" data-testid="wizard-currency" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
-              <SelectContent position="popper"><SelectItem value="IRR">{t("projectSettings.currencyIrr", "ریال (IRR)")}</SelectItem><SelectItem value="IRT">{t("projectSettings.currencyIrt", "تومان (IRT)")}</SelectItem></SelectContent>
+              <SelectContent position="popper"><SelectItem value="IRR">{t("projectSettings.currencyIrr")}</SelectItem><SelectItem value="IRT">{t("projectSettings.currencyIrt")}</SelectItem></SelectContent>
             </Select>
           </div>
           <div>
             <Label className="mb-2.5 leading-5" htmlFor="wizard-owning-unit">{t("centralData.owningUnit", "واحد سازمانی مالک")}</Label>
             <Select dir={i18n.dir()} value={form.owning_unit || "__none__"} onValueChange={(value) => setForm((f) => ({ ...f, owning_unit: value === "__none__" ? null : value }))}>
               <SelectTrigger id="wizard-owning-unit" data-testid="wizard-owning-unit" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
-              <SelectContent position="popper"><SelectItem value="__none__">انتخاب نشده</SelectItem>{orgUnits.map((u) => <SelectItem key={u.id} value={u.id}>{u.code} — {u.name}</SelectItem>)}</SelectContent>
+              <SelectContent position="popper"><SelectItem value="__none__">{t("projectWizard.notSelected")}</SelectItem>{orgUnits.map((u) => <SelectItem key={u.id} value={u.id}>{u.code} — {u.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2" data-testid="wizard-project-manager">
@@ -441,7 +438,9 @@ export default function ProjectCreateWizardPage() {
             ) : null}
             {pmResults.length > 0 ? (
               <ul className="rounded-md border border-border">
-                {pmResults.map((u) => (
+                {pmResults.map((u) => {
+                  const extra = u.email || u.mobile || u.organization_label;
+                  return (
                   <li key={u.user_id}>
                     <button
                       type="button"
@@ -453,15 +452,16 @@ export default function ProjectCreateWizardPage() {
                         setPmSearch("");
                       }}
                     >
-                      {u.full_name} — {u.email || u.mobile}
+                      {u.full_name}{extra ? ` — ${extra}` : ""}
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : null}
           </div>
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-location">موقعیت</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-location">{t("projectWizard.location")}</Label>
             <Input id="wizard-location"
               value={form.location}
               onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
@@ -471,14 +471,14 @@ export default function ProjectCreateWizardPage() {
           </section>
           <div className="flex justify-end gap-2 border-t border-border pt-5">
             <Link to={`/${PATHS.PROJECT}`}>
-              <Button variant="ghost">انصراف</Button>
+              <Button variant="ghost">{t("common.cancel")}</Button>
             </Link>
             <Button
               variant="primary"
               onClick={() => setStep(2)}
               disabled={!form.project_name.trim() || !form.project_code.trim() || !form.employer.trim()}
             >
-              بعدی
+              {t("projectWizard.next")}
             </Button>
           </div>
         </div>
@@ -486,23 +486,23 @@ export default function ProjectCreateWizardPage() {
 
       {step === 2 && (
         <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
-          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">زمان‌بندی و مبلغ قرارداد</h2><p className="mt-1 text-sm text-muted-foreground">تاریخ شروع الزامی است؛ سایر موارد را می‌توانید بعداً تکمیل کنید.</p></div>
+          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">{t("projectWizard.datesSectionTitle")}</h2><p className="mt-1 text-sm text-muted-foreground">{t("projectWizard.datesSectionHint")}</p></div>
           <JalaliDatePicker
             name="start_date"
             fieldClassName="gap-2.5"
-            label="تاریخ شروع *"
+            label={`${t("projectWizard.startDate")} *`}
             value={form.start_date}
             onChange={(v) => setForm((f) => ({ ...f, start_date: v }))}
           />
           <JalaliDatePicker
             name="planned_finish_date"
             fieldClassName="gap-2.5"
-            label="تاریخ پایان برنامه‌ای"
+            label={t("projectWizard.plannedFinish")}
             value={form.planned_finish_date ?? ""}
             onChange={(v) => setForm((f) => ({ ...f, planned_finish_date: v }))}
           />
           <div>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-amount">مبلغ قرارداد</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-amount">{t("projectWizard.contractAmount")}</Label>
             <Input id="wizard-amount"
               type="text"
               inputMode="decimal"
@@ -511,17 +511,17 @@ export default function ProjectCreateWizardPage() {
             />
           </div>
           {form.start_date && form.planned_finish_date && durationDays === null ? (
-            <p role="alert" className="text-sm text-destructive">تاریخ پایان نمی‌تواند پیش از تاریخ شروع باشد.</p>
+            <p role="alert" className="text-sm text-destructive">{t("projectWizard.finishBeforeStartError")}</p>
           ) : null}
           {durationDays != null ? (
-            <p className="text-sm text-muted-foreground">مدت قرارداد: {durationDays} روز</p>
+            <p className="text-sm text-muted-foreground">{t("projectWizard.durationDays", { days: durationDays })}</p>
           ) : null}
           <div className="flex justify-between gap-2 pt-4">
             <Button variant="ghost" onClick={() => setStep(1)}>
-              قبلی
+              {t("common.back")}
             </Button>
             <Button variant="primary" onClick={() => setStep(3)} disabled={!form.start_date || (Boolean(form.planned_finish_date) && durationDays === null)}>
-              بعدی
+              {t("projectWizard.next")}
             </Button>
           </div>
         </div>
@@ -529,34 +529,36 @@ export default function ProjectCreateWizardPage() {
 
       {step === 3 && (
         <div className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7">
-          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">تیم اولیه پروژه</h2><p className="mt-1 text-sm text-muted-foreground">افزودن اعضا اختیاری است و می‌توانید بعداً هم تیم را تکمیل کنید.</p></div>
+          <div className="border-b border-border pb-4"><h2 className="text-lg font-semibold">{t("projectWizard.stepTeam")}</h2><p className="mt-1 text-sm text-muted-foreground">{t("projectWizard.teamSectionHint")}</p></div>
           <div className="rounded-lg border border-border p-3 text-sm">
-            <p className="font-medium">شما — مدیر پروژه</p>
-            <p className="text-muted-foreground">به‌صورت خودکار اضافه می‌شوید</p>
+            <p className="font-medium">{t("projectWizard.youAsPm")}</p>
+            <p className="text-muted-foreground">{t("projectWizard.autoAdded")}</p>
           </div>
 
           <div className="space-y-2">
-            <p className="font-medium">افزودن عضو (اختیاری)</p>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-role">نقش عضو</Label>
+            <p className="font-medium">{t("projectWizard.addMember")}</p>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-role">{t("projectWizard.memberRole")}</Label>
             <Select dir={i18n.dir()} value={selectedRoleId} onValueChange={setSelectedRoleId}>
-              <SelectTrigger id="wizard-member-role" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue placeholder="نقش عضو را انتخاب کنید" /></SelectTrigger>
+              <SelectTrigger id="wizard-member-role" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue placeholder={t("projectWizard.selectMemberRole")} /></SelectTrigger>
               <SelectContent position="popper">{roles.map((r: Role) => <SelectItem key={r.id} value={r.id}>{formatRoleLabel(r.role_name, t)}</SelectItem>)}</SelectContent>
             </Select>
-            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-search">جستجوی عضو</Label>
+            <Label className="mb-2.5 leading-5" htmlFor="wizard-member-search">{t("projectWizard.memberSearchLabel")}</Label>
             <div className="flex gap-2">
               <Input
                 id="wizard-member-search"
-                placeholder="جستجو با نام یا ایمیل"
+                placeholder={t("projectWizard.searchPlaceholder")}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setSearchResults([]); setSearched(false); }}
               />
               <Button variant="secondary" onClick={handleSearch}>
-                جستجو
+                {t("projectWizard.search")}
               </Button>
             </div>
             {searchResults.length > 0 && (
               <ul className="rounded-md border border-border">
-                {searchResults.map((u) => (
+                {searchResults.map((u) => {
+                  const extra = u.email || u.mobile || u.organization_label;
+                  return (
                   <li key={u.user_id}>
                     <button
                       type="button"
@@ -564,25 +566,26 @@ export default function ProjectCreateWizardPage() {
                       disabled={!selectedRoleId}
                       onClick={() => addSearchedMember(u)}
                     >
-                      {u.full_name} — {u.email || u.mobile}
+                      {u.full_name}{extra ? ` — ${extra}` : ""}
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
             {searched && searchResults.length === 0 && (
               <div className="space-y-2 rounded-md border border-dashed border-border p-3">
-                <p className="text-sm text-muted-foreground">کاربر یافت نشد — دعوت‌نامه ارسال کنید</p>
-                <Label className="mb-2.5 leading-5" htmlFor="wizard-invite-email">ایمیل دعوت‌شونده</Label>
+                <p className="text-sm text-muted-foreground">{t("projectWizard.userNotFound")}</p>
+                <Label className="mb-2.5 leading-5" htmlFor="wizard-invite-email">{t("projectWizard.inviteEmailLabel")}</Label>
                 <Input
                   id="wizard-invite-email"
                   type="email"
-                  placeholder="ایمیل"
+                  placeholder={t("projectWizard.email")}
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
                 <Button variant="secondary" size="sm" disabled={!selectedRoleId || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail)} onClick={addInviteMember}>
-                  افزودن دعوت‌نامه
+                  {t("projectWizard.addInvite")}
                 </Button>
               </div>
             )}
@@ -599,7 +602,7 @@ export default function ProjectCreateWizardPage() {
                     const roleName = roles.find((r) => r.id === m.roleId)?.role_name;
                     return roleName ? formatRoleLabel(roleName, t) : null;
                   })()}</span>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setMembers((prev) => prev.filter((_, index) => index !== i))} aria-label={`حذف ${m.user?.full_name || m.email || "عضو"}`}>حذف</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setMembers((prev) => prev.filter((_, index) => index !== i))} aria-label={`${t("common.remove")} ${m.user?.full_name || m.email || ""}`}>{t("common.remove")}</Button>
                 </li>
               ))}
             </ul>
@@ -607,12 +610,12 @@ export default function ProjectCreateWizardPage() {
 
           <div className="flex flex-wrap justify-between gap-2 pt-4">
             <Button variant="ghost" onClick={() => setStep(2)}>
-              قبلی
+              {t("common.back")}
             </Button>
             <div className="flex gap-2">
 
               <Button variant="primary" loading={createMutation.isPending} onClick={() => createMutation.mutate()}>
-                ایجاد پروژه
+                {t("projectWizard.createProject")}
               </Button>
             </div>
           </div>

@@ -6,7 +6,7 @@ import {
   createProjectTemplate,
   deleteProjectTemplate,
   fetchProjectTemplates,
-  projectTypeLabels,
+  getProjectTypeLabel,
   type ProjectType,
 } from "@/app/lib/api/templates";
 import { Breadcrumb, PageHeader } from "@/components/layout/page-header";
@@ -104,7 +104,7 @@ export default function SettingsTemplatesPage() {
                     <Lock className="size-4 text-muted-foreground" aria-label={t("templates.systemTemplate")} />
                   ) : null}
                   <span className="font-medium">{tpl.template_name}</span>
-                  <Badge variant="info" label={projectTypeLabels[tpl.project_type]} />
+                  <Badge variant="info" label={getProjectTypeLabel(tpl.project_type, t)} />
                 </div>
                 {tpl.description ? (
                   <p className="mt-1 text-sm text-muted-foreground">{tpl.description}</p>
@@ -160,7 +160,7 @@ export default function SettingsTemplatesPage() {
             >
               {PROJECT_TYPES.map((pt) => (
                 <option key={pt} value={pt}>
-                  {projectTypeLabels[pt]}
+                  {getProjectTypeLabel(pt, t)}
                 </option>
               ))}
             </select>

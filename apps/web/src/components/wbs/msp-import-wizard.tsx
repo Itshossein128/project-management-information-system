@@ -45,7 +45,12 @@ type PreviewRequest = {
   userId: string;
   generation: number;
 };
-type StartRequest = PreviewRequest & { replace: boolean; recognizedKind: string };
+type StartRequest = PreviewRequest & {
+  replace: boolean;
+  recognizedKind: string;
+  intent: "new" | "retry";
+  retryOf?: string;
+};
 
 interface ImportSummary {
   wbs_nodes_created: number;
@@ -99,6 +104,7 @@ export function MspImportWizard({
   const [failureItems, setFailureItems] = useState<{ code: string; row: string }[]>([]);
   const [interrupted, setInterrupted] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
+  const [retryOf, setRetryOf] = useState<string | null>(null);
 
   const codeMessage = useCallback(
     (code: string) =>
@@ -120,6 +126,7 @@ export function MspImportWizard({
     setSummary(null);
     setFailureItems([]);
     setInterrupted(false);
+    setRetryOf(null);
   }, []);
 
   useEffect(() => {
@@ -159,10 +166,12 @@ export function MspImportWizard({
   });
 
   const importMutation = useMutation({
-    mutationFn: (opts: StartRequest) =>
-      isP6File(opts.file)
-        ? startP6Import(opts.projectId, opts.file, opts.replace)
-        : startMspImport(opts.projectId, opts.file, opts.replace),
+    mutationFn: (opts: StartRequest) => {
+      const options = { intent: opts.intent, retryOf: opts.retryOf };
+      return isP6File(opts.file)
+        ? startP6Import(opts.projectId, opts.file, opts.replace, options)
+        : startMspImport(opts.projectId, opts.file, opts.replace, options);
+    },
     onSuccess: (data, opts) => {
       const saved: ImportAttemptSession = {
         user_id: opts.userId,
@@ -273,9 +282,33 @@ export function MspImportWizard({
     if (fileIdentity(file) !== previewKey.current) return;
     if ((preview.blocking?.length ?? 0) > 0) return;
     if (replace && preview.replacement?.blocked) return;
+    if (retryOf) {
+      const failedKind = attempt?.recognized_kind;
+      const fileIsP6 = isP6File(file);
+      if ((failedKind === "xer") !== fileIsP6) {
+        toast.error(t("scheduleImport.retrySameFormat"));
+        return;
+      }
+    }
     requestLock.current = true;
-    importMutation.mutate({ file, replace, userId, projectId,
-      generation: scope.current.generation, recognizedKind: preview.recognized_kind ?? (isP6File(file) ? "xer" : "xml") });
+    importMutation.mutate({
+      file, replace, userId, projectId,
+      generation: scope.current.generation,
+      recognizedKind: preview.recognized_kind ?? (isP6File(file) ? "xer" : "xml"),
+      intent: retryOf ? "retry" : "new",
+      retryOf: retryOf ?? undefined,
+    });
+  };
+
+  const beginBusinessRetry = () => {
+    if (!taskId) return;
+    setRetryOf(taskId);
+    setFile(null);
+    setPreview(null);
+    setSummary(null);
+    setFailureItems([]);
+    setInterrupted(false);
+    setStep(1);
   };
 
   const chooseAnother = () => {
@@ -325,6 +358,9 @@ export function MspImportWizard({
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
             {t("scheduleImport.acceptedFormats")}
           </div>
+          {retryOf ? (
+            <p className="text-sm" data-testid="msp-import-retry-hint">{t("scheduleImport.retryNeedsFile")}</p>
+          ) : null}
           <div
             className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border p-8"
             onDragOver={(e) => e.preventDefault()}
@@ -339,6 +375,7 @@ export function MspImportWizard({
                 className="peer sr-only"
                 disabled={busy}
                 aria-label={t("scheduleImport.fileLabel")}
+                data-testid="msp-import-file"
                 onChange={(e) => onFileSelect(e.target.files?.[0] ?? null)}
               />
               <span className="inline-flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-sm hover:bg-muted/80 peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
@@ -504,6 +541,9 @@ export function MspImportWizard({
               <div className="flex flex-wrap gap-2">
                 <Button variant="ghost" onClick={chooseAnother}>
                   {t("scheduleImport.chooseAnother")}
+                </Button>
+                <Button variant="primary" onClick={beginBusinessRetry} data-testid="msp-import-business-retry">
+                  {t("scheduleImport.retryWithFile")}
                 </Button>
                 <Button variant="ghost" onClick={() => onOpenChange(false)}>
                   {t("scheduleImport.close")}

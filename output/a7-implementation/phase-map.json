@@ -76,5 +76,25 @@
       "I17"
     ],
     "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/04-import-experience.md"
+  },
+  "a7-p5-import-operations": {
+    "phase": "A.7-P5",
+    "feature_directory": "specs/055-a7-p5-import-operations",
+    "audit_ids": [
+      "I09",
+      "I19",
+      "I20",
+      "D02"
+    ],
+    "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/05-import-operations.md"
+  },
+  "a7-p6-delivery-acceptance": {
+    "phase": "A.7-P6",
+    "feature_directory": "specs/056-a7-p6-delivery-acceptance",
+    "audit_ids": [
+      "D03",
+      "D04"
+    ],
+    "prompt": "output/a7-requirements-2026-11-10/speckit-prompts/06-delivery-acceptance.md"
   }
 }

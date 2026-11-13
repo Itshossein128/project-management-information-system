@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/app/contexts/auth-context";
+import { ROLES } from "@/config/roles";
 import {
   asList,
   createContractType,
@@ -17,7 +19,13 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 
 export default function SettingsOrgRefsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { user, hasRole } = useAuth();
+  const canManage =
+    Boolean(user?.is_superuser) ||
+    hasRole(ROLES.ADMIN) ||
+    hasRole(ROLES.HR) ||
+    hasRole(ROLES.BUSINESS_SETUP);
   const toast = useToast();
   const qc = useQueryClient();
 
@@ -105,16 +113,24 @@ export default function SettingsOrgRefsPage() {
       />
       <PageHeader
         title={t("centralData.orgRefs", "مراجع سازمانی")}
-        subtitle={t(
-          "centralData.orgRefsSubtitle",
-          "واحدهای سازمانی، انواع قرارداد و واحدهای اندازه‌گیری",
-        )}
+        subtitle={
+          canManage
+            ? t(
+                "centralData.orgRefsSubtitle",
+                "واحدهای سازمانی، انواع قرارداد و واحدهای اندازه‌گیری",
+              )
+            : `${t(
+                "centralData.orgRefsSubtitle",
+                "واحدهای سازمانی، انواع قرارداد و واحدهای اندازه‌گیری",
+              )} — ${t("common.readOnly")}`
+        }
       />
 
       <section className="mb-10 space-y-4">
         <h2 className="text-base font-semibold">
           {t("centralData.organizationUnits", "واحدهای سازمانی")}
         </h2>
+        {canManage ? (
         <form
           className="grid gap-3 sm:grid-cols-3"
           onSubmit={(e) => {
@@ -153,6 +169,7 @@ export default function SettingsOrgRefsPage() {
             </Button>
           </div>
         </form>
+        ) : null}
         {unitsLoading ? (
           <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : (
@@ -173,6 +190,7 @@ export default function SettingsOrgRefsPage() {
         <h2 className="text-base font-semibold">
           {t("centralData.contractTypes", "انواع قرارداد")}
         </h2>
+        {canManage ? (
         <form
           className="grid gap-3 sm:grid-cols-4"
           onSubmit={(e) => {
@@ -224,6 +242,7 @@ export default function SettingsOrgRefsPage() {
             </Button>
           </div>
         </form>
+        ) : null}
         {typesLoading ? (
           <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : (
@@ -233,7 +252,7 @@ export default function SettingsOrgRefsPage() {
           >
             {types.map((ct) => (
               <li key={ct.id} className="px-4 py-2 text-sm">
-                {ct.code} — {ct.name_fa || ct.name_en}
+                {ct.code} — {i18n.language === "en" ? ct.name_en || ct.name_fa : ct.name_fa || ct.name_en}
               </li>
             ))}
           </ul>
@@ -244,6 +263,7 @@ export default function SettingsOrgRefsPage() {
         <h2 className="text-base font-semibold">
           {t("centralData.measurementUnits", "واحدهای اندازه‌گیری")}
         </h2>
+        {canManage ? (
         <form
           className="grid gap-3 sm:grid-cols-3"
           onSubmit={(e) => {
@@ -281,6 +301,7 @@ export default function SettingsOrgRefsPage() {
             </Button>
           </div>
         </form>
+        ) : null}
         {measuresLoading ? (
           <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : (

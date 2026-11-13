@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { apiFormData, apiJson } from "@/app/lib/api-client";
 
 export type ProjectType =
@@ -55,6 +56,15 @@ export const projectTypeLabels: Record<ProjectType, string> = {
   epc: "EPC",
   other: "سایر",
 };
+
+export function getProjectTypeLabel(
+  projectType: ProjectType,
+  t: TFunction,
+): string {
+  return t(`templates.projectTypes.${projectType}`, {
+    defaultValue: projectTypeLabels[projectType],
+  });
+}
 
 export function fetchProjectTemplates(params?: {
   project_type?: string;

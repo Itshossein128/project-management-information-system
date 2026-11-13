@@ -20,11 +20,11 @@ import { Button } from "@/components/ui/sprint-button";
 import { cn } from "@/app/lib/utils";
 import { MeasurementEditor } from "@/components/progress/MeasurementEditor";
 
-const STATUS_OPTIONS: { value: ActivityStatus; label: string }[] = [
-  { value: "not_started", label: "شروع نشده" },
-  { value: "in_progress", label: "در حال اجرا" },
-  { value: "suspended", label: "متوقف" },
-  { value: "completed", label: "تکمیل شده" },
+const STATUS_OPTIONS_KEYS: { value: ActivityStatus; key: string }[] = [
+  { value: "not_started", key: "activities.statusNotStarted" },
+  { value: "in_progress", key: "activities.statusInProgress" },
+  { value: "suspended", key: "activities.statusSuspended" },
+  { value: "completed", key: "activities.statusCompleted" },
 ];
 
 function weightToPercent(weight: string | null | undefined): string {
@@ -234,12 +234,18 @@ export function ActivityDrawer({
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? (readOnly ? `${t("common.view")} ${t("pages.activities.title")}` : "ویرایش فعالیت") : "افزودن فعالیت"}
+      title={
+        isEdit
+          ? readOnly
+            ? `${t("common.view")} ${t("pages.activities.title")}`
+            : t("activities.editActivity")
+          : t("activities.addActivity")
+      }
       footer={
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>لغو</Button>
+          <Button variant="secondary" onClick={onClose}>{t("common.cancel")}</Button>
           {!readOnly ? <Button onClick={() => void handleSave()} disabled={saving}>
-            {saving ? "در حال ذخیره…" : "ذخیره"}
+            {saving ? t("common.loading") : t("common.save")}
           </Button> : null}
         </div>
       }
@@ -247,36 +253,36 @@ export function ActivityDrawer({
       <div className="space-y-6">
         <fieldset disabled={readOnly} className="space-y-6">
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">اطلاعات پایه</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("projectWizard.stepBasic")}</h3>
           <div className="space-y-2">
-            <Label htmlFor="act-code">کد فعالیت</Label>
+            <Label htmlFor="act-code">{t("activities.colCode")}</Label>
             <Input id="act-code" value={code} onChange={(e) => setCode(e.target.value)} className="font-mono" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="act-name">نام فعالیت</Label>
+            <Label htmlFor="act-name">{t("activities.colName")}</Label>
             <Input id="act-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="act-unit">واحد</Label>
+              <Label htmlFor="act-unit">{t("common.unit")}</Label>
               <Input id="act-unit" value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="—" disabled />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="act-qty">مقدار کل</Label>
+              <Label htmlFor="act-qty">{t("activities.colTotalQty")}</Label>
               <Input id="act-qty" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="act-weight">وزن (%)</Label>
+            <Label htmlFor="act-weight">{t("activities.weightPercent")}</Label>
             <Input
               id="act-weight"
               value={weightPct}
               onChange={(e) => setWeightPct(e.target.value)}
-              placeholder="مثلاً 12.5"
+              placeholder="12.5"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="act-desc">توضیحات</Label>
+            <Label htmlFor="act-desc">{t("activities.description")}</Label>
             <textarea
               id="act-desc"
               className="min-h-20 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
@@ -287,19 +293,20 @@ export function ActivityDrawer({
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">زمان‌بندی</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("activities.scheduleSection")}</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>شروع برنامه</Label>
+              <Label>{t("schedule.colPlannedStart")}</Label>
               <JalaliDatePicker name="planned_start" value={plannedStart} onChange={setPlannedStart} />
             </div>
             <div className="space-y-2">
-              <Label>پایان برنامه</Label>
+              <Label>{t("schedule.colPlannedFinish")}</Label>
               <JalaliDatePicker name="planned_finish" value={plannedFinish} onChange={setPlannedFinish} />
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            مدت برنامه: {plannedDuration != null ? `${plannedDuration} روز` : "—"}
+            {t("activities.plannedDuration")}:{" "}
+            {plannedDuration != null ? t("activities.daysCount", { count: plannedDuration }) : "—"}
           </p>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
@@ -340,11 +347,11 @@ export function ActivityDrawer({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>شروع واقعی</Label>
+              <Label>{t("activities.actualStart")}</Label>
               <JalaliDatePicker name="actual_start" value={actualStart} onChange={setActualStart} />
             </div>
             <div className="space-y-2">
-              <Label>پایان واقعی</Label>
+              <Label>{t("activities.actualFinish")}</Label>
               <JalaliDatePicker name="actual_finish" value={actualFinish} onChange={setActualFinish} />
             </div>
           </div>
@@ -368,7 +375,7 @@ export function ActivityDrawer({
         </section>
 
         <section className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground">مسئول</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("common.owner")}</h3>
           <select
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             value={responsibleId}
@@ -384,7 +391,7 @@ export function ActivityDrawer({
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground">WBS</h3>
           <Input
-            placeholder="جستجوی WBS…"
+            placeholder={t("activities.searchWbs")}
             value={wbsSearch}
             onChange={(e) => setWbsSearch(e.target.value)}
           />
@@ -402,14 +409,14 @@ export function ActivityDrawer({
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground">وضعیت</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{t("common.status")}</h3>
           <select
             className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
             value={status}
             onChange={(e) => setStatus(e.target.value as ActivityStatus)}
           >
-            {STATUS_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+            {STATUS_OPTIONS_KEYS.map((o) => (
+              <option key={o.value} value={o.value}>{t(o.key)}</option>
             ))}
           </select>
         </section>
@@ -448,15 +455,15 @@ export function ActivityDrawer({
           <MeasurementEditor projectId={projectId} activityId={activity.activity_id} />
         ) : (
           <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
-            پس از ذخیره فعالیت، روش اندازه‌گیری فیزیکی و تأیید مبنای آن را در همین ویرایشگر تنظیم کنید.
+            {t("activities.measurementAfterSaveHint")}
           </p>
         )}
 
         {weightSummary ? (
           <div className="rounded-lg border border-border p-3">
             <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-              <span>مجموع وزن فعالیت‌ها</span>
-              <span>{Math.round(weightSummary.total_weight * 1000) / 10}٪</span>
+              <span>{t("activities.totalWeight")}</span>
+              <span>{Math.round(weightSummary.total_weight * 1000) / 10}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div

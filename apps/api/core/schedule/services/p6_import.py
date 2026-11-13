@@ -223,8 +223,9 @@ def execute_p6_import(
     replace: bool = False,
     progress_callback=None,
     user=None,
+    prepared=None,
 ) -> dict:
-    parsed = parse_p6_xer(file_bytes)
+    parsed = prepared if prepared is not None else parse_p6_xer(file_bytes)
     plan = resolve(parsed, max_depth=project.max_depth)
     if plan.blocking:
         raise ImportFidelityError(plan.blocking)

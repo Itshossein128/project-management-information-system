@@ -158,7 +158,7 @@ def file_sha256(file_bytes: bytes) -> str:
 
 
 def find_inflight_job(job_model, project, user, replace: bool, file_bytes: bytes):
-    """Return a pending or running job with the same bytes. The hash is not stored."""
+    """Return a pending or running job with the same bytes in this project and family."""
     digest = file_sha256(file_bytes)
     candidates = job_model.objects.filter(
         project=project,
@@ -166,7 +166,10 @@ def find_inflight_job(job_model, project, user, replace: bool, file_bytes: bytes
         replace_existing=replace,
         status__in=(MspImportStatus.PENDING, MspImportStatus.RUNNING),
     )
-    for job in candidates:
+    stored = candidates.filter(source_sha256=digest).first()
+    if stored is not None:
+        return stored
+    for job in candidates.filter(source_sha256__isnull=True).only('id', 'file_data', 'source_sha256'):
         if file_sha256(bytes(job.file_data or b'')) == digest:
             return job
     return None

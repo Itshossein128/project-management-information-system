@@ -33,3 +33,7 @@ The request callbacks now capture their originating account, project, file, mode
 ## Root-cause correction and final acceptance recheck
 
 The prior T021 blocker is resolved. Integrated WBS and import pytest: **74 passed**, no skips, 2 dependency warnings, 94.29 seconds; full command is in [wbs-path-root-cause.md](wbs-path-root-cause.md). All four language/width browser combinations now pass XML, real native MPP and XER. The first MPP success created 6 packages, 72 activities and 72 relationships; repeated imports created none. Database reads confirmed the stored figures. No reset, tree rebuild, dependency upgrade, or migration was needed. `projects` migration dry-run reported no changes; the repository-wide check separately detects existing storage model drift and no migration was generated. Frontend code is unchanged since the passing typecheck. Extension configuration still has no before/after hooks.
+
+## Current downstream handoff recheck
+
+The user requested preparation of the missing P4 handoff. A fresh combined P1–P4 run on the integrated committed code passed **93 tests, no skips/failures/errors**, and **pnpm typecheck** passed. See [handoff-recheck.md](handoff-recheck.md) and [JUnit results](handoff-pytest.xml). Browser observations above were reviewed, not repeated. The actual [handoff](../handoff.md) hands the local import baseline forward to P5 with explicit limits; it is not a claim of full employer acceptance or actual independent-worker readiness.

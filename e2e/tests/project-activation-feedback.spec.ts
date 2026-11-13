@@ -56,6 +56,9 @@ test.beforeEach(async ({ page }, info) => {
   test.skip(info.project.name === "pwa-offline", "Live frontend with intercepted API traffic");
   await session(page, ["admin"], "fa");
   await mockProject(page);
+  await page.route(`**${base}/members/`, route => route.fulfill({ json: [
+    { user_id: "navigation-user", full_name: "Navigation tester", status: "active", roles: ["admin"] },
+  ] }));
   await page.route(`**${base}/members/*/permissions/`, route => route.fulfill({ json: {
     effective: { view_project: true, edit_project: true, approve_project: true },
   } }));

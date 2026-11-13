@@ -287,8 +287,9 @@ def execute_msp_import(
     replace: bool = False,
     progress_callback=None,
     user=None,
+    prepared: ParseResult | None = None,
 ) -> dict:
-    parsed = parse_msp_family(file_bytes, filename=filename)
+    parsed = prepared if prepared is not None else parse_msp_family(file_bytes, filename=filename)
     plan = resolve(parsed, max_depth=project.max_depth)
     if plan.blocking:
         raise ImportFidelityError(plan.blocking)

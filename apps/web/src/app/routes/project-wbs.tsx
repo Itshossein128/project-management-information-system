@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useMemo, useState } from "react";
-import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
+import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import { fetchWBSTree, type WBSNode } from "@/app/lib/api/wbs";
 import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
@@ -28,27 +28,31 @@ function collectLeafPackages(nodes: WBSNode[]): WBSNode[] {
 function ProjectWBSContent() {
   const { t } = useTranslation();
 
-  const { projectId } = useProjectParams();
+  const { projectId, project, isLoading: projectLoading, isError: projectError, error: projectErr, refetch: refetchProject } = useProject();
   const { has } = usePermission(projectId);
-  const canEditWBS = has("edit_wbs");
+  const canEditWBS = has("edit_wbs") && project?.status !== "archived";
   const qc = useQueryClient();
   const [mspOpen, setMspOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
-  const { data: tree = [], isLoading, isError, refetch } = useQuery({
+  const { data: tree = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ["wbs", projectId],
     queryFn: () => fetchWBSTree(projectId),
+    enabled: Boolean(project),
   });
 
   const leafPackages = useMemo(() => collectLeafPackages(tree), [tree]);
+
+  if (projectLoading) return <LoadingSkeleton rows={10} />;
+  if (projectError) return <QueryErrorState error={projectErr} onRetry={refetchProject} />;
 
   return (
     <>
       <Breadcrumb
         items={[
-          { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
+          { label: t("nav.sidebarProjects"), href: `/${PATHS.PROJECT}` },
           {
-            label: "نمای کلی",
+            label: project?.project_name ?? t("nav.projectOverview"),
             href: `/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_OVERVIEW}`,
           },
           { label: "WBS" },
@@ -64,14 +68,14 @@ function ProjectWBSContent() {
                 variant='secondary'
                 onClick={() => setSaveTemplateOpen(true)}
               >
-                ذخیره به‌عنوان قالب
+                {t("wbs.saveAsTemplate")}
               </Button>
               <Button
                 variant='secondary'
                 onClick={() => setMspOpen(true)}
                 data-testid="msp-import-btn"
               >
-                بارگذاری از MSP / P6
+                {t("wbs.importFromMsp")}
               </Button>
             </div>
           ) : undefined
@@ -81,7 +85,7 @@ function ProjectWBSContent() {
       {isLoading ? (
         <LoadingSkeleton rows={10} />
       ) : isError ? (
-        <QueryErrorState onRetry={() => void refetch()} />
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
       ) : tree.length === 0 ? (
         canEditWBS ? (
           <>
@@ -98,7 +102,7 @@ function ProjectWBSContent() {
         ) : (
           <EmptyState
             title={t("pages.wbs.empty")}
-            description="این صفحه فقط‌خواندنی است؛ برای ایجاد ساختار به مجوز ویرایش نیاز دارید."
+            description={t("wbs.readOnlyEmptyDescription")}
           />
         )
       ) : (

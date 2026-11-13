@@ -1,0 +1,133 @@
+[
+  {
+    "fixture_id": "real_data_plan_mpp",
+    "file_path": "real-data/plan.mpp",
+    "sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553",
+    "size_bytes": 777216,
+    "source_counts": {
+      "total_tasks": 80,
+      "summary_tasks": 6,
+      "leaf_tasks": 74,
+      "parentless_milestones_omitted": 2,
+      "raw_predecessor_links": 83,
+      "summary_predecessor_links_skipped": 4,
+      "dangling_links_skipped": 7
+    },
+    "preview_counts": {
+      "wbs_count": 6,
+      "activity_count": 72,
+      "relation_count": 72,
+      "warning_count": 9
+    },
+    "stored_counts": {
+      "wbs_count": 6,
+      "activity_count": 72,
+      "relation_count": 72
+    },
+    "repeat_append_result": {
+      "nothing_changed": true,
+      "duplicate_wbs": 0,
+      "duplicate_activities": 0,
+      "duplicate_relations": 0,
+      "extra_baselines": 0
+    },
+    "expected_warning_codes": [
+      "activity_without_parent",
+      "predecessor_is_summary",
+      "calendar_not_applied"
+    ]
+  },
+  {
+    "fixture_id": "valid_msp_xml",
+    "file_path": "specs/051-a7-p1-project-reference/evidence/fixtures/branch.xml",
+    "sha256": "fddc1cacb4eb608c80f0ded9390f3317b31b02e4a52976ebb36808f5c085a6c2",
+    "size_bytes": 781,
+    "source_counts": {
+      "total_tasks": 3,
+      "summary_tasks": 1,
+      "leaf_tasks": 2,
+      "raw_predecessor_links": 0
+    },
+    "preview_counts": {
+      "wbs_count": 1,
+      "activity_count": 2,
+      "relation_count": 0
+    },
+    "stored_counts": {
+      "wbs_count": 1,
+      "activity_count": 2,
+      "relation_count": 0
+    },
+    "repeat_append_result": {
+      "nothing_changed": true,
+      "duplicate_wbs": 0,
+      "duplicate_activities": 0,
+      "duplicate_relations": 0,
+      "extra_baselines": 0
+    },
+    "expected_warning_codes": [
+      "calendar_not_applied"
+    ]
+  },
+  {
+    "fixture_id": "valid_p6_xer",
+    "file_path": "specs/051-a7-p1-project-reference/evidence/fixtures/branch.xer",
+    "sha256": "a7cae14d13b93abe4c966d48be227deae9935a488dffb06ed71974e155f40469",
+    "size_bytes": 263,
+    "source_counts": {
+      "projwbs_rows": 3,
+      "task_rows": 2,
+      "taskpred_rows": 0
+    },
+    "preview_counts": {
+      "wbs_count": 3,
+      "activity_count": 2,
+      "relation_count": 0
+    },
+    "stored_counts": {
+      "wbs_count": 3,
+      "activity_count": 2,
+      "relation_count": 0
+    },
+    "repeat_append_result": {
+      "nothing_changed": true,
+      "duplicate_wbs": 0,
+      "duplicate_activities": 0,
+      "duplicate_relations": 0,
+      "extra_baselines": 0
+    },
+    "expected_warning_codes": [
+      "calendar_not_applied"
+    ]
+  },
+  {
+    "fixture_id": "valid_p6_xml",
+    "file_path": "apps/api/core/schedule/tests/fixtures/mpp/duration-test9.xml",
+    "sha256": "8c8dc05c56e3d8b7f69bc45bed2c6756e56116d6c1aff35d10fc8d05e6b375d4",
+    "size_bytes": 58666,
+    "source_counts": {
+      "format": "xml_schedule",
+      "verified_equivalence_fixture": true
+    },
+    "preview_counts": {
+      "wbs_count": 1,
+      "activity_count": 5,
+      "relation_count": 0
+    },
+    "stored_counts": {
+      "wbs_count": 1,
+      "activity_count": 5,
+      "relation_count": 0
+    },
+    "repeat_append_result": {
+      "nothing_changed": true,
+      "duplicate_wbs": 0,
+      "duplicate_activities": 0,
+      "duplicate_relations": 0,
+      "extra_baselines": 0
+    },
+    "expected_warning_codes": [
+      "calendar_not_applied"
+    ]
+  }
+]

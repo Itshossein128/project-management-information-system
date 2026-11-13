@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { useAuth } from "@/app/contexts/auth-context";
 import { usePermission } from "@/app/contexts/project-context";
 import { ApiRequestError } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
@@ -29,11 +30,17 @@ interface Props {
 
 export function ProjectLifecycleBar({ project }: Props) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const toast = useToast();
   const queryClient = useQueryClient();
   const { has } = usePermission(project.project_id);
   const canEdit = has("edit_project");
   const canApprove = has("approve_project");
+  const isSubmitter = Boolean(
+    project.approval_submitted_by &&
+      user?.id &&
+      String(project.approval_submitted_by) === String(user.id),
+  );
 
   const run = useMutation({
     mutationFn: async (action: LifecycleAction) => {
@@ -122,6 +129,14 @@ export function ProjectLifecycleBar({ project }: Props) {
         </button>
       ) : null}
       {canApprove && status === "pending_approval" ? (
+        isSubmitter ? (
+          <span
+            className="text-xs text-muted-foreground"
+            data-testid="project-sod-hint"
+          >
+            {t("project.sodApprovalHint")}
+          </span>
+        ) : (
         <>
           <button
             type="button"
@@ -142,6 +157,7 @@ export function ProjectLifecycleBar({ project }: Props) {
             {t("project.reject", "رد")}
           </button>
         </>
+        )
       ) : null}
       {canEdit && status === "active" ? (
         <>

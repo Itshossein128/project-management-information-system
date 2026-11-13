@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import logging
 import os
+import zipfile
 import subprocess
 import tempfile
 import threading
+import time
 from pathlib import Path
 
 from django.conf import settings
@@ -32,6 +34,12 @@ _jvm_started = False
 
 
 def _timeout_seconds() -> int:
+    deadline = os.environ.get('IMPORT_HELPER_CONVERT_DEADLINE')
+    if deadline:
+        remaining = float(deadline) - time.monotonic()
+        if remaining <= 0:
+            raise MppImportError(PROCESSING_TIMEOUT, 'Schedule processing timed out.')
+        return remaining
     return int(getattr(settings, 'MPP_CONVERT_TIMEOUT_SECONDS', 60) or 60)
 
 
@@ -70,7 +78,8 @@ def _ensure_jvm() -> None:
         import mpxj  # noqa: F401 — registers jars on classpath
 
         if not jpype.isJVMStarted():
-            jpype.startJVM()
+            heap = int(os.environ.get('IMPORT_HELPER_HEAP_BYTES', str(512 * 1024 * 1024)))
+            jpype.startJVM(f'-Xmx{heap}', '-XX:+UseSerialGC', f'-Djava.io.tmpdir={os.environ.get("TMPDIR", "/tmp")}')
         _jvm_started = True
 
 
@@ -155,22 +164,33 @@ def _convert_with_java_cli(mpp_bytes: bytes) -> bytes:
         in_path = Path(tmp) / 'input.mpp'
         out_path = Path(tmp) / 'output.xml'
         in_path.write_bytes(mpp_bytes)
+        # MPXJ moved its Java packages from net.sf.mpxj to org.mpxj.
+        # Select from the configured jars rather than assuming an old release.
+        main_class = 'net.sf.mpxj.sample.MpxjConvert'
+        for part in cp.split(os.pathsep):
+            candidates = Path(part[:-1]).glob('*.jar') if part.endswith('*') else [Path(part)]
+            for jar in candidates:
+                if jar.is_file() and zipfile.is_zipfile(jar):
+                    with zipfile.ZipFile(jar) as archive:
+                        if 'org/mpxj/sample/MpxjConvert.class' in archive.namelist():
+                            main_class = 'org.mpxj.sample.MpxjConvert'
         cmd = [
             'java',
+            '-Xmx512m',
+            '-XX:+UseSerialGC',
+            f'-Djava.io.tmpdir={tmp}',
             '-cp',
             cp,
-            'net.sf.mpxj.sample.MpxjConvert',
+            main_class,
             str(in_path),
             str(out_path),
         ]
         try:
-            proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=_timeout_seconds(),
-                check=False,
-            )
+            with (Path(tmp) / 'java.log').open('wb') as diagnostic:
+                proc = subprocess.run(
+                    cmd, stdout=diagnostic, stderr=subprocess.STDOUT,
+                    timeout=_timeout_seconds(), check=False,
+                )
         except subprocess.TimeoutExpired as exc:
             raise MppImportError(
                 PROCESSING_TIMEOUT,
@@ -182,7 +202,8 @@ def _convert_with_java_cli(mpp_bytes: bytes) -> bytes:
                 'Java runtime is required to process MPP files.',
             ) from exc
 
-        combined = (proc.stdout or '') + '\n' + (proc.stderr or '')
+        with (Path(tmp) / 'java.log').open('rb') as diagnostic:
+            combined = diagnostic.read(64 * 1024).decode('utf-8', errors='replace')
         if proc.returncode != 0 or not out_path.is_file():
             raise _map_exception_message(combined.strip() or f'exit {proc.returncode}')
         data = out_path.read_bytes()
@@ -191,8 +212,57 @@ def _convert_with_java_cli(mpp_bytes: bytes) -> bytes:
         return data
 
 
+def _fallback_allowed(exc: BaseException) -> bool:
+    """Timeout and resource failures must not start a second conversion route."""
+    if isinstance(exc, MppImportError) and exc.code in {PROCESSING_TIMEOUT, 'processing_resource_limit'}:
+        return False
+    return True
+
+
+def _convert_in_process(mpp_bytes: bytes) -> bytes:
+    # Only the isolated exec helper may be terminated by this watchdog.
+    timer = None
+    if os.environ.get('IMPORT_HELPER') == '1':
+        timer = threading.Timer(_timeout_seconds(), lambda: os._exit(124))
+        timer.daemon = True
+        timer.start()
+    try:
+        return _convert_routes(mpp_bytes)
+    finally:
+        if timer is not None:
+            timer.cancel()
+
+
+def _convert_routes(mpp_bytes: bytes) -> bytes:
+    """JPype first, then the configured CLI, sharing one deadline."""
+    try:
+        import jpype  # noqa: F401
+        import mpxj  # noqa: F401
+
+        return _convert_with_jpype(mpp_bytes)
+    except MppImportError as exc:
+        if not _fallback_allowed(exc):
+            raise
+        raise
+    except ImportError:
+        logger.info('mpxj/JPype not installed; trying Java CLI conversion')
+    except Exception as exc:  # noqa: BLE001
+        if not _fallback_allowed(exc):
+            raise
+        logger.warning('JPype MPP conversion failed: %s', type(exc).__name__)
+    try:
+        return _convert_with_java_cli(mpp_bytes)
+    except MppImportError:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        raise _map_exception_message('conversion failed') from exc
+
+
 def convert_mpp_to_mspdi(mpp_bytes: bytes) -> bytes:
     """Convert MPP file bytes to MSPDI XML bytes.
+
+    The API/worker process does not start a JVM. Inline mode and the helper
+    process are the only in-process routes.
 
     Raises:
         MppImportError: with a stable ``code`` for API mapping.
@@ -204,24 +274,10 @@ def convert_mpp_to_mspdi(mpp_bytes: bytes) -> bytes:
             MPP_CORRUPT,
             'The Microsoft Project file is corrupt or unreadable.',
         )
+    in_helper = os.environ.get('IMPORT_HELPER') == '1'
+    inline = bool(getattr(settings, 'IMPORT_PREPARE_INLINE', False))
+    if in_helper or inline:
+        return _convert_in_process(mpp_bytes)
+    from schedule.services.import_process import convert_contained
 
-    # Prefer in-process JPype when packages are installed.
-    try:
-        import jpype  # noqa: F401
-        import mpxj  # noqa: F401
-
-        return _convert_with_jpype(mpp_bytes)
-    except MppImportError:
-        raise
-    except ImportError:
-        logger.info('mpxj/JPype not installed; trying Java CLI conversion')
-    except Exception as exc:  # noqa: BLE001
-        # Fall through to CLI if JVM path fails unexpectedly
-        logger.warning('JPype MPP conversion failed: %s', exc)
-
-    try:
-        return _convert_with_java_cli(mpp_bytes)
-    except MppImportError:
-        raise
-    except Exception as exc:  # noqa: BLE001
-        raise _map_exception_message(str(exc)) from exc
+    return convert_contained(mpp_bytes)

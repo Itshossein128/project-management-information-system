@@ -32,7 +32,7 @@ import {
 } from "@/app/lib/api/activities";
 import { fetchMembers } from "@/app/lib/api/members";
 import { fetchWBSFlat } from "@/app/lib/api/wbs";
-import { useActiveProjectPermission } from "@/app/contexts/project-context";
+import { useActiveProjectPermission, useProject } from "@/app/contexts/project-context";
 import { ActivityDrawer } from "@/components/activities/activity-drawer";
 import { AddRelationModal } from "@/components/activities/add-relation-modal";
 import { NetworkDiagramView } from "@/components/activities/network-diagram-view";
@@ -61,16 +61,16 @@ function getScrollParent(el: HTMLElement | null): Element | null {
   return null;
 }
 
-const STATUS_LABELS: Record<ActivityStatus, { label: string; variant: "neutral" | "info" | "warning" | "success" }> = {
-  not_started: { label: "شروع نشده", variant: "neutral" },
-  in_progress: { label: "در حال اجرا", variant: "info" },
-  suspended: { label: "متوقف", variant: "warning" },
-  completed: { label: "تکمیل شده", variant: "success" },
+const STATUS_META: Record<ActivityStatus, { key: string; variant: "neutral" | "info" | "warning" | "success" }> = {
+  not_started: { key: "activities.statusNotStarted", variant: "neutral" },
+  in_progress: { key: "activities.statusInProgress", variant: "info" },
+  suspended: { key: "activities.statusSuspended", variant: "warning" },
+  completed: { key: "activities.statusCompleted", variant: "success" },
 };
 
 function formatWeight(weight: string | null): string {
   if (weight == null || weight === "") return "—";
-  return `${Math.round(parseFloat(weight) * 10000) / 100}٪`;
+  return `${Math.round(parseFloat(weight) * 10000) / 100}%`;
 }
 
 export interface ActivitiesGridProps {
@@ -81,9 +81,11 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const qc = useQueryClient();
+  const { project } = useProject();
+  const isArchived = project?.status === "archived";
   const { has } = useActiveProjectPermission(projectId);
-  const canEdit = has("edit_activities");
-  const canDelete = has("delete_activities");
+  const canEdit = has("edit_activities") && !isArchived;
+  const canDelete = has("delete_activities") && !isArchived;
 
   const [viewMode, setViewMode] = useState<"table" | "network">("table");
   const [search, setSearch] = useState("");
@@ -124,9 +126,9 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     try {
       await run();
       invalidateActivityQueries();
-      toast.success("تغییر بازگردانده شد");
+      toast.success(t("activities.undoSuccess"));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "بازگردانی ممکن نشد");
+      toast.error(e instanceof Error ? e.message : t("activities.undoError"));
     } finally {
       undoingRef.current = false;
       setUndoing(false);
@@ -138,7 +140,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     setCanUndo(true);
     toast.success(message, {
       action: {
-        label: "بازگردانی",
+        label: t("activities.undo"),
         onClick: () => {
           void performUndo();
         },
@@ -161,6 +163,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
     isFetching,
     isFetchingNextPage,
     isError,
+    error,
     refetch,
     fetchNextPage,
     hasNextPage,
@@ -221,11 +224,11 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
       setDeleteTarget(null);
       invalidateActivityQueries();
       if (canEdit) {
-        offerUndo("فعالیت حذف شد", async () => {
+        offerUndo(t("activities.deleted"), async () => {
           await restoreActivity(projectId, act.activity_id);
         });
       } else {
-        toast.success("فعالیت حذف شد");
+        toast.success(t("activities.deleted"));
       }
     },
     onError: (e: Error) => toast.error(e.message),
@@ -266,14 +269,14 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
         <div className="flex flex-wrap items-end gap-3">
           {viewMode === "table" ? (
             <>
-              <Field name="activity_search" label="جستجو" htmlFor="activity-search">
+              <Field name="activity_search" label={t("common.search")} htmlFor="activity-search">
                 {() => (
                   <div className="relative">
                     <Search className="absolute start-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id="activity-search"
                       className="w-48 ps-8"
-                      placeholder="جستجو…"
+                      placeholder={`${t("common.search")}…`}
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />
@@ -288,7 +291,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   setWbsFilter(e.target.value === "all" ? "" : e.target.value);
                 }}
                 options={[
-                  { value: "all", label: "همه WBS" },
+                  { value: "all", label: t("activities.allWbs") },
                   ...wbsFlat.map((n) => ({
                     value: n.wbs_id,
                     label: `${n.wbs_code} — ${n.wbs_name}`,
@@ -298,7 +301,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
               />
               <Select
                 name="status_filter"
-                label="وضعیت"
+                label={t("common.status")}
                 value={statusFilter || "all"}
                 onChange={(e) => {
                   setStatusFilter(
@@ -308,17 +311,17 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   );
                 }}
                 options={[
-                  { value: "all", label: "همه وضعیت‌ها" },
-                  ...Object.entries(STATUS_LABELS).map(([k, v]) => ({
+                  { value: "all", label: t("activities.allStatuses") },
+                  ...Object.entries(STATUS_META).map(([k, v]) => ({
                     value: k,
-                    label: v.label,
+                    label: t(v.key),
                   })),
                 ]}
                 fieldClassName="min-w-[9rem]"
               />
               <Select
                 name="responsible_filter"
-                label="مسئول"
+                label={t("common.owner")}
                 value={responsibleFilter || "all"}
                 onChange={(e) => {
                   setResponsibleFilter(
@@ -326,7 +329,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                   );
                 }}
                 options={[
-                  { value: "all", label: "همه مسئولین" },
+                  { value: "all", label: t("activities.allOwners") },
                   ...members
                     .filter((m) => m.user_id)
                     .map((m) => ({
@@ -338,7 +341,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
               />
               <Checkbox
                 name="overdue_only"
-                label="فقط معوق"
+                label={t("activities.overdueOnly")}
                 checked={overdueOnly}
                 onChange={(e) => {
                   setOverdueOnly(
@@ -359,7 +362,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
               onClick={() => setViewMode("table")}
             >
               <LayoutGrid className="size-4" />
-              جدول
+              {t("activities.tableView")}
             </Button>
             <Button
               variant={viewMode === "network" ? "primary" : "ghost"}
@@ -367,16 +370,18 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
               onClick={() => setViewMode("network")}
             >
               <Network className="size-4" />
-              شبکه
+              {t("activities.networkView")}
             </Button>
           </div>
           <Button variant="secondary" size="sm" onClick={() => setWeightModalOpen(true)}>
             <Scale className="size-4" />
-            وزن‌سنجی
+            {t("activities.weights")}
           </Button>
-          {/* {canEdit ? (
-            <Button size="sm" onClick={openCreate}>افزودن فعالیت</Button>
-          ) : null} */}
+          {canEdit ? (
+            <Button size="sm" onClick={openCreate} data-testid="add-activity-btn">
+              {t("activities.addActivity")}
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -385,22 +390,21 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
       ) : isLoading ? (
         <LoadingSkeleton rows={8} />
       ) : isError ? (
-        <QueryErrorState onRetry={() => void refetch()} />
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
       ) : activities.length === 0 ? (
         <EmptyState
-          title="فعالیتی یافت نشد"
+          title={t("activities.emptyTitle")}
           description={
             canEdit
-              ? "فعالیت جدیدی اضافه کنید یا فیلترها را تغییر دهید."
-              : "با فیلترهای فعلی فعالیتی برای نمایش نیست."
+              ? t("activities.emptyEditDescription")
+              : t("activities.emptyReadOnlyDescription")
           }
           action={
-            // canEdit ? (
-            //   <Button variant="primary" onClick={openCreate}>
-            //     افزودن فعالیت
-            //   </Button>
-            // ) : null
-            null
+            canEdit ? (
+              <Button variant="primary" onClick={openCreate} data-testid="add-activity-empty-btn">
+                {t("activities.addActivity")}
+              </Button>
+            ) : null
           }
         />
       ) : (
@@ -409,23 +413,24 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
             <table className="w-full min-w-[960px] text-sm">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 text-start font-medium">کد</th>
-                  <th className="px-3 py-2 text-start font-medium">نام فعالیت</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("activities.colCode")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("activities.colName")}</th>
                   <th className="px-3 py-2 text-start font-medium">WBS</th>
-                  <th className="px-3 py-2 text-start font-medium">واحد</th>
-                  <th className="px-3 py-2 text-start font-medium">مقدار کل</th>
-                  <th className="px-3 py-2 text-start font-medium">وزن</th>
-                  <th className="px-3 py-2 text-start font-medium">شروع برنامه</th>
-                  <th className="px-3 py-2 text-start font-medium">پایان برنامه</th>
-                  <th className="px-3 py-2 text-start font-medium">مدت</th>
-                  <th className="px-3 py-2 text-start font-medium">مسئول</th>
-                  <th className="px-3 py-2 text-start font-medium">وضعیت</th>
-                  <th className="px-3 py-2 text-start font-medium">عملیات</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("common.unit")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("activities.colTotalQty")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("activities.colWeight")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("schedule.colPlannedStart")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("schedule.colPlannedFinish")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("activities.colDuration")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("common.owner")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("common.status")}</th>
+                  <th className="px-3 py-2 text-start font-medium">{t("common.actions")}</th>
                 </tr>
               </thead>
               <tbody>
               {activities.map((act) => {
-                const st = STATUS_LABELS[act.status];
+                const meta = STATUS_META[act.status];
+                const st = { label: t(meta.key), variant: meta.variant };
                 const expanded = expandedId === act.activity_id;
                 const detail = expanded && expandedDetail?.activity_id === act.activity_id
                   ? expandedDetail
@@ -461,13 +466,15 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                       <td className="px-3 py-2">{act.planned_start ?? "—"}</td>
                       <td className="px-3 py-2">{act.planned_finish ?? "—"}</td>
                       <td className="px-3 py-2">
-                        {act.planned_duration != null ? `${act.planned_duration} روز` : "—"}
+                        {act.planned_duration != null
+                          ? t("activities.daysCount", { count: act.planned_duration })
+                          : "—"}
                       </td>
                       <td className="px-3 py-2">{act.responsible_full_name ?? "—"}</td>
                       <td className="px-3 py-2">
                         <span className="inline-flex items-center gap-1">
                           <Badge variant={st.variant} label={st.label} />
-                          {act.is_overdue ? <Clock className="size-4 text-danger-500" aria-label="معوق" /> : null}
+                          {act.is_overdue ? <Clock className="size-4 text-danger-500" aria-label={t("activities.overdue")} /> : null}
                         </span>
                       </td>
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
@@ -476,29 +483,29 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                             <>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label="ویرایش">
+                                  <Button variant="ghost" size="icon-sm" onClick={() => void openEdit(act)} aria-label={t("common.edit")}>
                                     <Pencil className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>ویرایش</TooltipContent>
+                                <TooltipContent>{t("common.edit")}</TooltipContent>
                               </Tooltip>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label="ارتباط">
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setRelationAnchor(act)} aria-label={t("activities.relation")}>
                                     <GitBranchPlus className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>ارتباط</TooltipContent>
+                                <TooltipContent>{t("activities.relation")}</TooltipContent>
                               </Tooltip>
                             </>
                           ) : null}
                           {canDelete ? <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label="حذف">
+                                  <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(act)} aria-label={t("common.delete")}>
                                     <Trash2 className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent>حذف</TooltipContent>
+                                <TooltipContent>{t("common.delete")}</TooltipContent>
                               </Tooltip> : null}
                         </div>
                       </td>
@@ -508,15 +515,15 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                         <td colSpan={12} className="px-4 py-3 text-sm">
                           <div className="grid gap-3 md:grid-cols-2">
                             <div>
-                              <p className="font-medium text-muted-foreground">توضیحات</p>
+                              <p className="font-medium text-muted-foreground">{t("activities.description")}</p>
                               <p>{detail.description || "—"}</p>
                             </div>
                             <div>
-                              <p className="font-medium text-muted-foreground">شروع/پایان واقعی</p>
+                              <p className="font-medium text-muted-foreground">{t("activities.actualDates")}</p>
                               <p>{detail.actual_start ?? "—"} / {detail.actual_finish ?? "—"}</p>
                             </div>
                             <div>
-                              <p className="font-medium text-muted-foreground">پیش‌نیازها</p>
+                              <p className="font-medium text-muted-foreground">{t("activities.predecessors")}</p>
                               <ul className="list-inside list-disc">
                                 {(detail.predecessors ?? []).length === 0 ? (
                                   <li className="list-none text-muted-foreground">—</li>
@@ -524,14 +531,14 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                                   detail.predecessors!.map((p) => (
                                     <li key={p.activity_id}>
                                       {p.activity_code} → {p.activity_name} ({p.relation_type}
-                                      {p.lag_days ? `, ${p.lag_days}روز` : ""})
+                                      {p.lag_days ? `, ${t("activities.daysCount", { count: p.lag_days })}` : ""})
                                     </li>
                                   ))
                                 )}
                               </ul>
                             </div>
                             <div>
-                              <p className="font-medium text-muted-foreground">جانشین‌ها</p>
+                              <p className="font-medium text-muted-foreground">{t("activities.successors")}</p>
                               <ul className="list-inside list-disc">
                                 {(detail.successors ?? []).length === 0 ? (
                                   <li className="list-none text-muted-foreground">—</li>
@@ -556,7 +563,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           </div>
           <div className="flex items-center justify-between border-t border-border px-3 py-2 text-sm text-muted-foreground">
             <span>
-              {activities.length} از {totalCount} مورد
+              {t("activities.showingCount", { shown: activities.length, total: totalCount })}
             </span>
           </div>
           <div
@@ -567,12 +574,12 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
             {isFetchingNextPage ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" aria-hidden />
-                در حال بارگذاری…
+                {t("common.loading")}
               </span>
             ) : hasNextPage ? (
-              "اسکرول برای بارگذاری بیشتر"
+              t("activities.scrollForMore")
             ) : activities.length > 0 ? (
-              "همه موارد بارگذاری شد"
+              t("activities.allLoaded")
             ) : null}
           </div>
         </div>
@@ -590,16 +597,16 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           invalidateActivityQueries();
           if (mode === "create") {
             if (canDelete) {
-              offerUndo("فعالیت ایجاد شد", async () => {
+              offerUndo(t("activities.created"), async () => {
                 await deleteActivity(projectId, saved.activity_id);
               });
             } else {
-              toast.success("فعالیت ایجاد شد");
+              toast.success(t("activities.created"));
             }
             return;
           }
           if (previous) {
-            offerUndo("فعالیت به‌روزرسانی شد", async () => {
+            offerUndo(t("activities.updated"), async () => {
               await updateActivity(
                 projectId,
                 previous.activity_id,
@@ -607,7 +614,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
               );
             });
           } else {
-            toast.success("فعالیت به‌روزرسانی شد");
+            toast.success(t("activities.updated"));
           }
         }}
         onError={(msg) => toast.error(msg)}
@@ -621,7 +628,7 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
           onClose={() => setRelationAnchor(null)}
           onSuccess={({ relationId, anchorId }) => {
             invalidateActivityQueries();
-            offerUndo("ارتباط ثبت شد", async () => {
+            offerUndo(t("activities.relationCreated"), async () => {
               await deleteActivityRelation(projectId, anchorId, relationId);
             });
           }}
@@ -631,18 +638,18 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
       <Modal
         open={deleteTarget !== null}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
-        title="حذف فعالیت"
+        title={t("activities.deleteTitle")}
         idBase="deleteActivity"
       >
-        <p className="text-sm">آیا از حذف «{deleteTarget?.activity_name}» مطمئن هستید؟</p>
+        <p className="text-sm">{t("activities.deleteConfirm", { name: deleteTarget?.activity_name ?? "" })}</p>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>لغو</Button>
+          <Button variant="secondary" onClick={() => setDeleteTarget(null)}>{t("common.cancel")}</Button>
           <Button
             variant="danger"
             disabled={deleteMutation.isPending}
             onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
           >
-            حذف
+            {t("common.delete")}
           </Button>
         </div>
       </Modal>
@@ -650,14 +657,14 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
       <Modal
         open={weightModalOpen}
         onOpenChange={setWeightModalOpen}
-        title="وزن‌سنجی فعالیت‌ها"
+        title={t("activities.weightSummaryTitle")}
         idBase="activityWeightSummary"
       >
         {weightSummary ? (
           <div className="space-y-3 text-sm">
-            <p>مجموع وزن: <strong>{Math.round(weightSummary.total_weight * 1000) / 10}٪</strong></p>
-            <p>باقی‌مانده: <strong>{Math.round(Math.abs(weightSummary.remaining) * 1000) / 10}٪</strong></p>
-            <p>متعادل: {weightSummary.is_balanced ? "بله" : "خیر"}</p>
+            <p>{t("activities.totalWeight")}: <strong>{Math.round(weightSummary.total_weight * 1000) / 10}%</strong></p>
+            <p>{t("activities.remainingWeight")}: <strong>{Math.round(Math.abs(weightSummary.remaining) * 1000) / 10}%</strong></p>
+            <p>{t("activities.isBalanced")}: {weightSummary.is_balanced ? t("common.yes") : t("common.no")}</p>
             {weightSummary.warning ? (
               <p className="text-warning-700 dark:text-warning-400">{weightSummary.warning}</p>
             ) : null}

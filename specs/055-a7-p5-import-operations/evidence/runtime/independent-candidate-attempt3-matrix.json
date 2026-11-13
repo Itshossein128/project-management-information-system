@@ -1,0 +1,279 @@
+{
+  "status": "incomplete",
+  "database": "a7p5_import",
+  "eager": false,
+  "containment": "cgroup",
+  "problems": [],
+  "not_run": [],
+  "profile": "a7-p5-v1",
+  "effective_limits": {
+    "IMPORT_ADMISSION_REQUIRES_CATCHUP": true,
+    "IMPORT_APPLY_STATEMENT_SECONDS": 90,
+    "IMPORT_CONTAINMENT_REQUIRED": true,
+    "IMPORT_DIAGNOSTIC_LIMIT_BYTES": 65536,
+    "IMPORT_DISPATCH_DEADLINE_SECONDS": 300,
+    "IMPORT_EXECUTION_HARD_SECONDS": 180,
+    "IMPORT_EXECUTION_SOFT_SECONDS": 170,
+    "IMPORT_HELPER_HEAP_BYTES": 536870912,
+    "IMPORT_HELPER_MEMORY_BYTES": 1073741824,
+    "IMPORT_HELPER_PIDS": 32,
+    "IMPORT_HELPER_SWAP_BYTES": 0,
+    "IMPORT_LOCK_WAIT_SECONDS": 3,
+    "IMPORT_MAINTENANCE_BATCH_SIZE": 100,
+    "IMPORT_MAINTENANCE_GAP_SECONDS": 0,
+    "IMPORT_MAINTENANCE_ITEM_SECONDS": 10,
+    "IMPORT_OUTPUT_LIMIT_BYTES": 134217728,
+    "IMPORT_PREPARATION_SLOTS": 1,
+    "IMPORT_PREPARE_GRACE_SECONDS": 2,
+    "IMPORT_PREPARE_INLINE": false,
+    "IMPORT_PREPARE_TIMEOUT_SECONDS": 75,
+    "IMPORT_PUBLISH_BUDGET_SECONDS": 5,
+    "IMPORT_PURGE_INTERVAL_SECONDS": 3600,
+    "IMPORT_RECONCILE_INTERVAL_SECONDS": 60,
+    "IMPORT_REDIS_VISIBILITY_SECONDS": 600,
+    "IMPORT_RETENTION_HOURS": 168,
+    "IMPORT_SCRATCH_QUOTA_BYTES": 268435456,
+    "IMPORT_UPLOAD_LIMIT_BYTES": 52428800
+  },
+  "conversion_timeout_seconds": 60,
+  "conversion_routes": [
+    "JPype",
+    "configured MPXJ Java CLI"
+  ],
+  "queues": [
+    "a7p5-import",
+    "a7p5-maintenance"
+  ],
+  "matrix": {
+    "valid_native": "pass",
+    "unreadable": "pass",
+    "admitted_failure": "pass",
+    "timeout": "pass",
+    "resource_limit": "fail",
+    "duplicate_delivery": "pass",
+    "worker_loss": "not-run",
+    "cleanup": "not-run",
+    "expiry": "not-run",
+    "healthy_follow_up": "not-run"
+  },
+  "scenario_evidence": {
+    "valid_native": {
+      "status": "pass",
+      "observed": {
+        "job": "19bf716f-3f97-43c7-8f7e-220ece1d3a91",
+        "counts": [
+          6,
+          72,
+          72
+        ],
+        "source_sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553",
+        "result": {
+          "blocking": [],
+          "warnings": [
+            "calendar_not_applied",
+            "activity_without_parent: 7916",
+            "activity_without_parent: 7873",
+            "predecessor_missing: 7918 / 7916",
+            "predecessor_missing: 8053 / 7916",
+            "predecessor_missing: 8052 / 7916",
+            "predecessor_missing: 8056 / 7916",
+            "predecessor_missing: 8057 / 7916",
+            "predecessor_missing: 8103 / 7916",
+            "predecessor_is_summary: 7873 / 8055",
+            "predecessor_is_summary: 7873 / 8084",
+            "predecessor_is_summary: 7873 / 8102",
+            "predecessor_is_summary: 7873 / 8120"
+          ],
+          "rows_read": 80,
+          "duplicates": [],
+          "baseline_id": "97a0e787-928b-4afe-863c-d4aa3b8e5d7d",
+          "rows_omitted": 13,
+          "warned_count": 13,
+          "created_links": 72,
+          "omitted_count": 13,
+          "warning_items": [
+            {
+              "row": "",
+              "code": "calendar_not_applied"
+            },
+            {
+              "row": "7916",
+              "code": "activity_without_parent"
+            },
+            {
+              "row": "7873",
+              "code": "activity_without_parent"
+            },
+            {
+              "row": "7918 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8053 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8052 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8056 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8057 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "8103 / 7916",
+              "code": "predecessor_missing"
+            },
+            {
+              "row": "7873 / 8055",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8084",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8102",
+              "code": "predecessor_is_summary"
+            },
+            {
+              "row": "7873 / 8120",
+              "code": "predecessor_is_summary"
+            }
+          ],
+          "duplicate_count": 0,
+          "nothing_changed": false,
+          "created_packages": 6,
+          "relations_created": 72,
+          "relations_removed": 0,
+          "wbs_nodes_created": 6,
+          "wbs_nodes_removed": 0,
+          "activities_created": 72,
+          "activities_removed": 0,
+          "created_activities": 72,
+          "relationships_kept": 72,
+          "relation_warning_items": [],
+          "schedule_version_changed": true
+        },
+        "cli_fallback_job": "e380af87-5fb4-49e6-9957-1468390fe30d",
+        "cli_counts": [
+          6,
+          72,
+          72
+        ],
+        "p6_job": "138e11c1-d43f-49ae-85e2-1de245f3dc1f",
+        "p6_counts": [
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    "unreadable": {
+      "status": "pass",
+      "observed": {
+        "rejections": [
+          {
+            "fixture": "bad.xml",
+            "bytes": 14,
+            "http_status": 400,
+            "code": "msp_invalid_xml"
+          },
+          {
+            "fixture": "readme.txt",
+            "bytes": 14,
+            "http_status": 400,
+            "code": "invalid_file_type"
+          },
+          {
+            "fixture": "password-protected.mpp",
+            "bytes": 74240,
+            "http_status": 400,
+            "code": "mpp_password_protected"
+          },
+          {
+            "fixture": "truncated-ole.mpp",
+            "bytes": 8,
+            "http_status": 400,
+            "code": "mpp_unsupported"
+          },
+          {
+            "fixture": "renamed-not-mpp.mpp",
+            "bytes": 15,
+            "http_status": 400,
+            "code": "invalid_file_type"
+          }
+        ],
+        "maximum_admitted_bytes": 52428800,
+        "maximum_job": "df0af7eb-c6be-4e4b-9626-cf92275f3570",
+        "oversized_rejected": true,
+        "healthy_follow_up": "5f240152-bf01-4df7-b50d-9ad82cffb4c5"
+      }
+    },
+    "admitted_failure": {
+      "status": "pass",
+      "observed": {
+        "job": "d4180ab2-93bc-4e35-b2aa-b5f045fc83c8",
+        "error_code": "import_not_permitted",
+        "healthy_follow_up": "baaa5a22-55b4-4a2f-9b5c-da68cda66cc8"
+      }
+    },
+    "duplicate_delivery": {
+      "status": "pass",
+      "observed": {
+        "cases": [
+          {
+            "family": "msp",
+            "job": "437daabb-d4cb-4f59-8f9e-3dddb9d062fb",
+            "committed_counts": [
+              1,
+              1,
+              0
+            ],
+            "same_inflight_id": true,
+            "immutable_completion": true
+          },
+          {
+            "family": "p6",
+            "job": "6c62c71a-ddf2-406c-a873-3b71283b4240",
+            "committed_counts": [
+              2,
+              1,
+              0
+            ],
+            "same_inflight_id": true,
+            "immutable_completion": true
+          }
+        ]
+      }
+    },
+    "timeout": {
+      "status": "pass",
+      "observed": {
+        "job": "3d1a7ded-07af-421c-836c-5b0e5d103257",
+        "error_code": "processing_timeout",
+        "helper_mode": "sleep",
+        "healthy_follow_up": "f99f09f3-9610-4504-bf8b-fbaf52bd5d99"
+      }
+    },
+    "resource_limit": {
+      "status": "fail",
+      "exception_type": "AssertionError",
+      "reason": "{'error': {'code': 'invalid_file_type', 'message': 'File type is not allowed.', 'details': {'file': ErrorDetail(string='File type is not allowed.', code='invalid')}}}"
+    }
+  },
+  "versions": {
+    "Django": "4.2.11",
+    "celery": "5.7.0",
+    "mpxj": "16.10.0",
+    "JPype1": "1.7.1",
+    "redis": "8.1.0"
+  },
+  "python": "3.12.15",
+  "java": "openjdk version \"21.0.13\" 2026-10-20",
+  "source_tree_sha256": "55f75f8993e730f70c02188a522309d969fc223188d1e1c6f7c19e93613a6b83"
+}

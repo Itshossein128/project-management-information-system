@@ -1,12 +1,11 @@
 from celery import shared_task
 from datetime import timedelta
 
-from django.db import transaction
+from django.conf import settings
 
-from projects.models import Project
-from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, MspImportStatus, P6ImportJob
-from schedule.services.import_fidelity import ImportFidelityError
-from schedule.services.import_safety import ImportSafetyError, assert_can_import
+from schedule.models import ActivityProgress, BaselineSchedule, MspImportJob, P6ImportJob
+from schedule.services.import_operations import run_claimed_import, run_maintenance
+from schedule.services.import_process import reconcile_abandoned_scratch
 from schedule.services.msp_import import execute_msp_import
 from schedule.services.p6_import import execute_p6_import
 
@@ -43,71 +42,36 @@ def compute_baseline_progress(baseline_id):
     return {'baseline_id': str(baseline_id), 'rows': count}
 
 
-def _run_import_task(task_instance, job_model, job_id, execute_func):
-    job = job_model.objects.select_related('project', 'created_by').get(pk=job_id)
-    if job.status == MspImportStatus.DONE:
-        return job.result
-    job.status = MspImportStatus.RUNNING
-    job.task_id = task_instance.request.id or ''
-    job.save(update_fields=['status', 'task_id', 'updated_at'])
-
-    file_bytes = bytes(job.file_data or b'')
-
-    def on_progress(pct: int):
-        job.progress_pct = min(pct, 99)
-        job.save(update_fields=['progress_pct', 'updated_at'])
-
-    try:
-        with transaction.atomic():
-            project = Project.objects.select_for_update().get(pk=job.project_id)
-            assert_can_import(project, job.created_by)
-            result = execute_func(
-                project,
-                file_bytes,
-                filename=job.filename,
-                replace=job.replace_existing,
-                progress_callback=on_progress,
-                user=job.created_by,
-            )
-        job.status = MspImportStatus.DONE
-        job.progress_pct = 100
-        job.result = result
-        job.error_code = ''
-        job.error_message = ''
-        job.save(update_fields=['status', 'progress_pct', 'result', 'error_code', 'error_message', 'updated_at'])
-        return result
-    except ImportFidelityError as exc:
-        job.status = MspImportStatus.FAILED
-        job.error_code = exc.code
-        job.error_message = exc.message
-        job.result = {'blocking': exc.as_dicts()}
-        job.save(update_fields=['status', 'error_code', 'error_message', 'result', 'updated_at'])
-        return {'error_code': exc.code, 'blocking': exc.as_dicts()}
-    except ImportSafetyError as exc:
-        job.status = MspImportStatus.FAILED
-        job.error_code = exc.code
-        job.error_message = exc.message
-        job.save(update_fields=['status', 'error_code', 'error_message', 'updated_at'])
-        return {'error_code': exc.code}
-    except Exception as exc:
-        from schedule.services.mpp_errors import IMPORT_FAILED, MppImportError
-
-        job.status = MspImportStatus.FAILED
-        if isinstance(exc, MppImportError):
-            job.error_code = exc.code
-            job.error_message = exc.message
-        else:
-            job.error_code = IMPORT_FAILED
-            job.error_message = str(exc)
-        job.save(update_fields=['status', 'error_message', 'error_code', 'updated_at'])
-        raise
-
-
-@shared_task(bind=True)
+@shared_task(
+    bind=True,
+    acks_late=True,
+    soft_time_limit=settings.IMPORT_EXECUTION_SOFT_SECONDS,
+    time_limit=settings.IMPORT_EXECUTION_HARD_SECONDS,
+)
 def run_msp_import_task(self, job_id: str):
-    return _run_import_task(self, MspImportJob, job_id, execute_msp_import)
+    return run_claimed_import(MspImportJob, job_id, execute_msp_import, 'msp')
 
 
-@shared_task(bind=True)
+@shared_task(
+    bind=True,
+    acks_late=True,
+    soft_time_limit=settings.IMPORT_EXECUTION_SOFT_SECONDS,
+    time_limit=settings.IMPORT_EXECUTION_HARD_SECONDS,
+)
 def run_p6_import_task(self, job_id: str):
-    return _run_import_task(self, P6ImportJob, job_id, execute_p6_import)
+    return run_claimed_import(P6ImportJob, job_id, execute_p6_import, 'p6')
+
+
+@shared_task
+def reconcile_import_jobs():
+    return run_maintenance('recovery')
+
+
+@shared_task
+def purge_import_originals():
+    return run_maintenance('purge')
+
+
+@shared_task
+def reconcile_import_scratch():
+    return reconcile_abandoned_scratch()

@@ -127,3 +127,25 @@ def test_inactive_member_effective_permissions_are_empty(auth_client, user, proj
     assert response.status_code == status.HTTP_200_OK
     effective = response.json()['effective']
     assert all(v is False for v in effective.values())
+
+
+@pytest.mark.django_db
+def test_global_lookup_allows_project_creator_without_contacts_and_blocks_visitor(
+    api_client, user, other_user
+):
+    from django.contrib.auth.models import Group
+
+    other_user.email = 'creator.hidden@example.com'
+    other_user.mobile = '+989122222222'
+    other_user.save(update_fields=['email', 'mobile'])
+
+    api_client.force_authenticate(user=user)
+    ok_res = api_client.get('/api/v1/users/lookup/', {'q': other_user.full_name[:4]})
+    assert ok_res.status_code == status.HTTP_200_OK
+    row = next(r for r in ok_res.data if str(r['user_id']) == str(other_user.id))
+    assert 'email' not in row and 'mobile' not in row
+
+    visitor_group, _ = Group.objects.get_or_create(name='visitor')
+    user.groups.add(visitor_group)
+    blocked_res = api_client.get('/api/v1/users/lookup/', {'q': other_user.full_name[:4]})
+    assert blocked_res.status_code == status.HTTP_403_FORBIDDEN

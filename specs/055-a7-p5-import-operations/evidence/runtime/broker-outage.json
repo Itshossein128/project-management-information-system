@@ -1,0 +1,22 @@
+{
+  "job": "d21fa655-a397-43fa-96bc-c784427e96e3",
+  "project": "ccb754c9-0071-4c9c-a891-16775e79fdf5",
+  "user": "8c84eee3-2823-4d66-b644-1936fa8ae546",
+  "http_elapsed_seconds": 8.784679584990954,
+  "dispatch_deadline": "2026-11-13T13:09:33.080550+00:00",
+  "status": "pass",
+  "terminal": "done",
+  "recovery": {
+    "operation": "recovery",
+    "status": "ok",
+    "cutoff": "2026-11-13T13:04:46.568031+00:00",
+    "n": 0,
+    "processed_ids": [],
+    "deferred": [],
+    "unfinished": [],
+    "elapsed_seconds": 0.009435662999749184,
+    "bound_seconds": 540
+  },
+  "healthy_follow_up": "b9fc4792-9d3e-4299-8578-6a3a68d27b9d",
+  "fixed_dispatch_deadline": true
+}

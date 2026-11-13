@@ -1,0 +1,876 @@
+[
+  {
+    "audit_id": "P01",
+    "title": "ثبت مشخصات کامل پروژه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-001 (PRJ, PROJECT_CODE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P02",
+    "title": "کد یکتای پروژه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-007 (PRJ, PROJECT_CODE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P03",
+    "title": "پیش‌نویس، ارسال و چرخه وضعیت",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-002/003؛ 008 FR-002/008/010 (PRJ, LIFECYCLE, TEST, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P04",
+    "title": "شرط فعال‌سازی و تصویب بودجه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-003؛ SC-PRJ-002 (PRJ, LIFECYCLE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P05",
+    "title": "جلوگیری از تعهد یا خط مبنای قطعی پیش از تصویب",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-004 (PRJ, BASELINE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P06",
+    "title": "برگه آغاز پروژه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-005 (PRJ, CHARTER, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P07",
+    "title": "تغییر کنترل‌شده اطلاعات مصوب",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-PRJ-006؛ SC-PRJ-003 (PRJ, PRJCR, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P08",
+    "title": "فقط‌خواندنی بودن پروژه بایگانی‌شده",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "008 FR-009؛ قاعده مرزی FR-PRJ (PRJ, LIFECYCLE, IMPORT_API, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P09",
+    "title": "خروج از بایگانی با مقصد و مجوز صحیح",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-RPA-001–006/014 (RESTORE, LIFECYCLE, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P10",
+    "title": "حفظ سوابق، تکرار ایمن و پیگیری بازگردانی",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-RPA-007–013 (RESTORE, LIFECYCLE, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "P11",
+    "title": "ازسرگیری تعلیق و بازگردانی خاتمه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-UPS-001–015 (UNDO, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W01",
+    "title": "درخت چندسطحی و تفکیک دامنه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-WBS-001/003 (WBS, WBS_CODE, TEST, SOURCE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W02",
+    "title": "مشخصات و مسئول بسته کاری",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-WBS-002/004 (WBS, WBS_CODE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W03",
+    "title": "کد یکتا، والد معتبر و ممنوعیت دور",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-WBS-005 (WBS, WBS_CODE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W04",
+    "title": "محافظت از گره وابسته",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "FR-WBS-006 (WBS, WBS_CODE, EXEC, PROBE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W05",
+    "title": "قالب مستقل و قابل استفاده مجدد",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-WBS-007 (WBS, TEMPLATE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W06",
+    "title": "جابه‌جایی، مسیر و کدگذاری مجدد",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "004 SC-004 و edge cases (WBS, WBS_CODE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "W07",
+    "title": "عمق، وزن‌ها و هشدار ساختار خالی",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "004 edge cases؛ 029 edge cases (WBS, WBS_CODE, EXEC, P6)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "M01",
+    "title": "واحد سازمانی و واحد مالک پروژه",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-DATA-003؛ FR-PRJ-001 (DATA, REF, PROJECT_CODE, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "M02",
+    "title": "نوع قرارداد و واحد اندازه‌گیری قابل مدیریت",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-DATA-003؛ SC-DATA-004 (DATA, REF, PROJECT_CODE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "M03",
+    "title": "وضعیت‌های مرجع و چرخه مجاز",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "FR-DATA-003 در برابر FR-PRJ-002 (DATA, PRJ, PROJECT_CODE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "M04",
+    "title": "جداول و فیلدهای پویا و Excel آنها",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "قابلیت موجود وابسته به اطلاعات پایه (DYNAMIC, CORRECTION)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S01",
+    "title": "فعالیت متصل به بسته با مدت و تقویم",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-001 (SCH, ACT, CAL, SHARED, TEST, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S02",
+    "title": "روابط و تأخیر بین فعالیت‌ها",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-002 (SCH, REL, EXEC, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S03",
+    "title": "تاریخ ناممکن، دور و فعالیت بی‌والد",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-003 (SCH, REL, EXEC, P6, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "قبلاً موجود و تأییدشده روی نسخه حاضر",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S04",
+    "title": "تفکیک تاریخ برنامه‌ای، واقعی و پیش‌بینی",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-004 (SCH, ACT, MSP, P6, SHARED)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S05",
+    "title": "نسخه مصوب و قفل‌شده با حفظ تاریخچه",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "FR-SCH-005 (SCH, BASELINE, EXEC, PROBE, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S06",
+    "title": "درخواست تغییر زمان و نسخه جدید",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-006 (SCH, SCHED_CR, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S07",
+    "title": "گزارش نقاط عطف، تأخیر و پیش‌بینی پایان",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-007؛ SC-SCH-003 (SCH, STATUS, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "S08",
+    "title": "اعتبار مسیر بحرانی",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "FR-SCH-008 (SCH, CRITICAL, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I01",
+    "title": "پذیرش MPP، MSP XML و P6 XER",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-001/002/022 (MPP, R0, MSP, P6, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I02",
+    "title": "جریان انتخاب، پیش‌نمایش، تأیید، پیشرفت و نتیجه",
+    "owning_phase": "A.7-P4",
+    "source_requirement": "029 FR-003 (MPP, UI, IMPORT_API)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/054-a7-p4-import-experience/traceability.md",
+      "specs/054-a7-p4-import-experience/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p4_import_experience.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I03",
+    "title": "یکسان بودن تفسیر پیش‌نمایش و ثبت",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-004 (MPP, PREVIEW, EXEC, P6, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I04",
+    "title": "حفظ کامل داده‌های پشتیبانی‌شده فایل",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-005 (MPP, SHARED, MSP, P6, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I05",
+    "title": "Summary به WBS و برگ/نقطه عطف به فعالیت",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-006 (MPP, EXEC, P6, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I06",
+    "title": "افزودن و برخورد با کدهای تکراری",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 FR-007؛ A.7.03 (MPP, EXEC, SHARED, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I07",
+    "title": "جایگزینی ایمن",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 FR-007/010؛ FR-WBS-006؛ FR-CORE-007 (MPP, EXEC, P6, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I08",
+    "title": "پیش‌نمایش بدون تغییر دائمی",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 US1/3؛ FR-003/004 (MPP, PREVIEW, IMPORT_API, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I09",
+    "title": "Job و پیشرفت پس‌زمینه",
+    "owning_phase": "A.7-P5",
+    "source_requirement": "029 FR-007/011 (MPP, TASK, IMPORT_API, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/055-a7-p5-import-operations/traceability.md",
+      "specs/055-a7-p5-import-operations/evidence/verification.md",
+      "specs/055-a7-p5-import-operations/evidence/reproduction.md",
+      "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I10",
+    "title": "شمارش‌ها و گزارش هشدار قابل تطبیق",
+    "owning_phase": "A.7-P4",
+    "source_requirement": "029 FR-007/016؛ A.7.01/04 (MPP, PREVIEW, SHARED, UI, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/054-a7-p4-import-experience/traceability.md",
+      "specs/054-a7-p4-import-experience/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p4_import_experience.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I11",
+    "title": "عضویت، edit_wbs و جداسازی پروژه‌ها",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 FR-007/018؛ FR-CORE-009 (MPP, IMPORT_API, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I12",
+    "title": "سقف ۵۰ مگابایت و اصالت فایل",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-008/009 (MPP, IMPORT_API, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I13",
+    "title": "خطاهای متمایز و قابل اقدام",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-010/013/022 (MPP, CONVERT, IMPORT_API, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I14",
+    "title": "اتمی بودن خطا و امکان تلاش بعدی",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 FR-010/011 (MPP, EXEC, TASK, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I15",
+    "title": "زبان فعال و راه بازیابی خطا",
+    "owning_phase": "A.7-P4",
+    "source_requirement": "029 FR-012/016 (MPP, UI, MSP, P6)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/054-a7-p4-import-experience/traceability.md",
+      "specs/054-a7-p4-import-experience/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p4_import_experience.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I16",
+    "title": "نمایش پردازش و جلوگیری از ارسال دوباره",
+    "owning_phase": "A.7-P4",
+    "source_requirement": "029 FR-015 (MPP, UI)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/054-a7-p4-import-experience/traceability.md",
+      "specs/054-a7-p4-import-experience/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p4_import_experience.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I17",
+    "title": "صفحه‌کلید، RTL/LTR و موبایل",
+    "owning_phase": "A.7-P4",
+    "source_requirement": "029 FR-017؛ SC-008 (MPP, UI)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/054-a7-p4-import-experience/traceability.md",
+      "specs/054-a7-p4-import-experience/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p4_import_experience.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I18",
+    "title": "ردیابی اقدام و نتیجه واردسازی",
+    "owning_phase": "A.7-P2",
+    "source_requirement": "029 FR-014؛ FR-CORE-003/014 (MPP, EXEC, TASK, CORE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/052-a7-p2-import-safety/traceability.md",
+      "specs/052-a7-p2-import-safety/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p2_import_safety.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I19",
+    "title": "نگهداری و پاک‌سازی فایل‌ها",
+    "owning_phase": "A.7-P5",
+    "source_requirement": "029 FR-019 (MPP, CONVERT, TASK)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/055-a7-p5-import-operations/traceability.md",
+      "specs/055-a7-p5-import-operations/evidence/verification.md",
+      "specs/055-a7-p5-import-operations/evidence/reproduction.md",
+      "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I20",
+    "title": "حد زمان و منابع پردازش",
+    "owning_phase": "A.7-P5",
+    "source_requirement": "029 FR-020؛ SC-006 (MPP, CONVERT)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/055-a7-p5-import-operations/traceability.md",
+      "specs/055-a7-p5-import-operations/evidence/verification.md",
+      "specs/055-a7-p5-import-operations/evidence/reproduction.md",
+      "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I21",
+    "title": "مجموعه نمونه سازگاری و برابری MPP/XML",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "029 FR-021؛ SC-002/003/005 (MPP, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "I22",
+    "title": "فایل واقعی کارفرما و ارقام کنترل",
+    "owning_phase": "A.7-P3",
+    "source_requirement": "A.7.01/02؛ R.0.01 (R0, PLAN, PROBE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/053-a7-p3-import-fidelity/traceability.md",
+      "specs/053-a7-p3-import-fidelity/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "D01",
+    "title": "ماتریس نمونه، نگاشت و اختلاف‌ها",
+    "owning_phase": "A.7-P1",
+    "source_requirement": "A.7.01 (PLAN, R0)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/051-a7-p1-project-reference/traceability.md",
+      "specs/051-a7-p1-project-reference/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "D02",
+    "title": "آمادگی محیط واقعی تبدیل و worker",
+    "owning_phase": "A.7-P5",
+    "source_requirement": "A.7.02؛ 029 FR-020 (PLAN, CONVERT, TEST)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/055-a7-p5-import-operations/traceability.md",
+      "specs/055-a7-p5-import-operations/evidence/verification.md",
+      "specs/055-a7-p5-import-operations/evidence/reproduction.md",
+      "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "D03",
+    "title": "آزمون مرورگری یک پروژه مرجع",
+    "owning_phase": "A.7-P6",
+    "source_requirement": "A.7.04؛ SC-PRJ/WBS/SCH/MPP (PLAN, TEST, EXTRA)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/056-a7-p6-delivery-acceptance/traceability.md",
+      "specs/056-a7-p6-delivery-acceptance/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  },
+  {
+    "audit_id": "D04",
+    "title": "نسخه تحویلی، راهنمای تست و نتیجه پذیرش",
+    "owning_phase": "A.7-P6",
+    "source_requirement": "معیار پذیرش A.7؛ FR-CORE-002/008/009 (PLAN, R0, CORE)",
+    "disposition": "تأیید فنی",
+    "employer_bucket": "در A.7 اصلاح/تکمیل شد",
+    "testable_by_employer": true,
+    "evidence_refs": [
+      "specs/056-a7-p6-delivery-acceptance/traceability.md",
+      "specs/056-a7-p6-delivery-acceptance/evidence/verification.md",
+      "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py"
+    ],
+    "version_id": "ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70"
+  }
+]

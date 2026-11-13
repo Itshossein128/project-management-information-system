@@ -36,7 +36,7 @@ import { ProjectLifecycleBar } from "@/components/projects/ProjectLifecycleBar";
 
 function OverviewContent() {
   const { t } = useTranslation();
-  const { projectId, project, isLoading } = useProject();
+  const { projectId, project, isLoading, isError: projectError, error: projectErr, refetch: refetchProject } = useProject();
   const { has } = usePermission(projectId);
   const isOnline = useOnlineStatus();
   const toast = useToast();
@@ -49,27 +49,29 @@ function OverviewContent() {
   const { data: members = [] } = useQuery({
     queryKey: ["members", projectId],
     queryFn: () => fetchMembers(projectId),
+    enabled: Boolean(project),
   });
 
   const {
     data: kpis,
     isLoading: kpisLoading,
     isError: kpisError,
+    error: kpisErrorObj,
     refetch: refetchKpis,
   } = useQuery({
     queryKey: ["project-kpis", projectId],
     queryFn: () => fetchProjectKpis(projectId),
-    enabled: Boolean(projectId) && canViewDashboard,
+    enabled: Boolean(projectId && project) && canViewDashboard,
   });
 
   useEffect(() => {
-    if (!projectId || !isOnline || warmedRef.current) return;
+    if (!projectId || !project || !isOnline || warmedRef.current) return;
     if (!isOfflineDBAvailable()) return;
     warmedRef.current = true;
     void warmProjectCache(projectId).then(() => {
-      toast.success("💾 پروژه برای استفاده آفلاین ذخیره شد");
+      toast.success(t("projectOverview.offlineSaved"));
     });
-  }, [projectId, isOnline, toast]);
+  }, [projectId, project, isOnline, toast, t]);
 
   const MODULES = [
     {
@@ -110,6 +112,7 @@ function OverviewContent() {
   ];
 
   if (isLoading) return <LoadingSkeleton rows={8} />;
+  if (projectError) return <QueryErrorState error={projectErr} onRetry={refetchProject} />;
   if (!project) return <EmptyState title={t("project.notFound")} />;
 
   return (
@@ -151,7 +154,7 @@ function OverviewContent() {
         kpisLoading ? (
           <LoadingSkeleton rows={3} />
         ) : kpisError ? (
-          <QueryErrorState onRetry={() => void refetchKpis()} />
+          <QueryErrorState error={kpisErrorObj} onRetry={() => void refetchKpis()} />
         ) : kpis ? (
           <ExecutiveKpiPanel
             projectId={projectId}
@@ -244,7 +247,7 @@ function OverviewContent() {
               >
                 <span>{m.full_name}</span>
                 <span className='text-muted-foreground'>
-                  {m.roles[0] ? formatRoleLabel(m.roles[0], t) : "—"}
+                  {m.roles?.[0] ? formatRoleLabel(m.roles[0], t) : "—"}
                 </span>
               </li>
             ))}

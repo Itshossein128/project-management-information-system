@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "actual_import_consumers": 2,
+  "cases": [
+    {
+      "family": "msp",
+      "job": "78c7e844-ee6e-4f02-8b43-235c930a3e19",
+      "live_duplicate_result": {
+        "duplicate": true
+      },
+      "committed_counts": [
+        1,
+        1,
+        0
+      ],
+      "immutable_completion": true
+    },
+    {
+      "family": "p6",
+      "job": "fcb88eaf-6aa5-4109-ae58-b7f8b2c7a151",
+      "live_duplicate_result": {
+        "duplicate": true
+      },
+      "committed_counts": [
+        2,
+        1,
+        0
+      ],
+      "immutable_completion": true
+    }
+  ],
+  "healthy_follow_up": "45cc673b-fe38-41a6-93bf-7126903236ca"
+}

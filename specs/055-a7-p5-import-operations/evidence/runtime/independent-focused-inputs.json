@@ -1,0 +1,38 @@
+{
+  "rejections": [
+    {
+      "fixture": "bad.xml",
+      "bytes": 14,
+      "http_status": 400,
+      "code": "msp_invalid_xml"
+    },
+    {
+      "fixture": "readme.txt",
+      "bytes": 14,
+      "http_status": 400,
+      "code": "invalid_file_type"
+    },
+    {
+      "fixture": "password-protected.mpp",
+      "bytes": 74240,
+      "http_status": 400,
+      "code": "mpp_password_protected"
+    },
+    {
+      "fixture": "truncated-ole.mpp",
+      "bytes": 8,
+      "http_status": 400,
+      "code": "mpp_unsupported"
+    },
+    {
+      "fixture": "renamed-not-mpp.mpp",
+      "bytes": 15,
+      "http_status": 400,
+      "code": "invalid_file_type"
+    }
+  ],
+  "maximum_admitted_bytes": 52428800,
+  "maximum_job": "7793afce-1be1-4327-89e1-5e33b21fe7aa",
+  "oversized_rejected": true,
+  "healthy_follow_up": "9c1777df-72d2-4382-8958-daa8dfbc0c43"
+}

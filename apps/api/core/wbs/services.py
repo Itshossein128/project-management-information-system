@@ -96,6 +96,19 @@ def _resolve_responsible_id(project_id, responsible_id):
     return responsible_id
 
 
+def _normalize_and_validate_wbs_code(project_id, wbs_code: str, *, exclude_id=None) -> str:
+    """Trim and validate WBS code format (no whitespace) and per-project uniqueness."""
+    normalized = (wbs_code or '').strip()
+    if not normalized or any(ch.isspace() for ch in normalized):
+        raise WBSValidationError('wbs_code must not be empty or contain whitespace.')
+    qs = WBS.objects.filter(project_id=project_id, wbs_code=normalized, is_deleted=False)
+    if exclude_id is not None:
+        qs = qs.exclude(pk=exclude_id)
+    if qs.exists():
+        raise WBSValidationError('wbs_code must be unique within the project.')
+    return normalized
+
+
 @transaction.atomic
 def create_wbs_node(
     *,
@@ -116,9 +129,7 @@ def create_wbs_node(
     Validates max depth constraints and returns any weight capacity warnings.
     If parent_id is provided, it's added as a child; otherwise, it's created as a root node.
     """
-    wbs_code = wbs_code.strip()
-    if WBS.objects.filter(project_id=project_id, wbs_code=wbs_code, is_deleted=False).exists():
-        raise WBSValidationError('wbs_code must be unique within the project.')
+    wbs_code = _normalize_and_validate_wbs_code(project_id, wbs_code)
 
     parent = None
     new_depth = 1
@@ -181,6 +192,10 @@ def update_wbs_node(node: WBS, **fields) -> tuple[WBS, list[str]]:
     any weight warnings based on its siblings. Returns the updated node
     and a list of warnings (if any).
     """
+    if 'wbs_code' in fields and fields['wbs_code'] is not None:
+        fields['wbs_code'] = _normalize_and_validate_wbs_code(
+            node.project_id, fields['wbs_code'], exclude_id=node.pk
+        )
     if 'responsible' in fields:
         fields['responsible_id'] = _resolve_responsible_id(node.project_id, fields.pop('responsible'))
     for key, value in fields.items():

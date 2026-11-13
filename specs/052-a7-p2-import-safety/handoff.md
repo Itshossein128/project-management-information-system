@@ -5,6 +5,9 @@
 **Phase map key**: `a7-p2-import-safety`  
 **Status**: The integrated import-safety baseline is ready for A.7-P4 implementation on the local tree, with the verification limits below. This is not production or employer acceptance.
 
+
+**Current downstream readiness after P4 handoff (2026-11-12)**: The integrated local baseline from this phase is ready for A.7-P5 implementation on HEAD `ea38dda2eda939184afd502fa027680b40af7870`. The fresh combined [P1–P4 recheck](../054-a7-p4-import-experience/evidence/handoff-recheck.md) passed 93 tests without skips/failures/errors and typecheck. This confirms the local import prerequisites, not every original phase acceptance metric or employer/production acceptance. Earlier code versions and “P4 work remains” wording below are historical; current P4 handoff and its explicit verification limits take precedence for downstream readiness. No product code or predecessor task marker was changed for this supplement.
+
 ## Baseline handed forward
 
 - Microsoft Project XML/native MPP and Primavera XER share the server-side safety gate in `apps/api/core/schedule/services/import_safety.py`.

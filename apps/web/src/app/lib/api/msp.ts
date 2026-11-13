@@ -93,10 +93,17 @@ export function previewMspImport(projectId: string, file: File) {
   return apiFormData<MspPreviewResult>(`${mspBase(projectId)}/preview/`, form);
 }
 
-export function startMspImport(projectId: string, file: File, replace: boolean) {
+export function startMspImport(
+  projectId: string,
+  file: File,
+  replace: boolean,
+  options?: { intent?: "new" | "retry"; retryOf?: string },
+) {
   const form = new FormData();
   form.append("file", file);
   form.append("replace", replace ? "true" : "false");
+  form.append("intent", options?.intent ?? "new");
+  if (options?.intent === "retry" && options.retryOf) form.append("retry_of", options.retryOf);
   return apiFormData<MspImportStartResult>(`${mspBase(projectId)}/`, form);
 }
 
@@ -116,10 +123,17 @@ export function previewP6Import(projectId: string, file: File) {
   return apiFormData<MspPreviewResult>(`${p6Base(projectId)}/preview/`, form);
 }
 
-export function startP6Import(projectId: string, file: File, replace: boolean) {
+export function startP6Import(
+  projectId: string,
+  file: File,
+  replace: boolean,
+  options?: { intent?: "new" | "retry"; retryOf?: string },
+) {
   const form = new FormData();
   form.append("file", file);
   form.append("replace", replace ? "true" : "false");
+  form.append("intent", options?.intent ?? "new");
+  if (options?.intent === "retry" && options.retryOf) form.append("retry_of", options.retryOf);
   return apiFormData<MspImportStartResult>(`${p6Base(projectId)}/`, form);
 }
 

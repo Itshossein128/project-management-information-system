@@ -1,5 +1,4 @@
 """MSP XML / native MPP and P6 import API views."""
-from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from rest_framework import status
@@ -14,27 +13,26 @@ from common.validators import MSG_FILE_TOO_LARGE, MSG_INVALID_TYPE, validate_msp
 from permissions.project import HasProjectPermission, IsProjectMember
 from projects.models import Project
 from schedule.models import MspImportJob, MspImportStatus, P6ImportJob
-from schedule.services.import_safety import (
-    ImportSafetyError,
-    find_inflight_job,
-    guard_and_maybe_replace,
-    message_for,
-    replacement_block_code,
-)
-from schedule.services.msp_import import build_preview, parse_msp_family
+from schedule.services.import_operations import RetryRejected, begin_import
+from schedule.services.import_process import ProcessingBusy, prepare_bytes
+from schedule.services.msp_import import build_preview
 from schedule.services.mpp_errors import (
     CONVERSION_FAILED,
     FILE_TOO_LARGE,
     IMPORT_FAILED,
+    INPUT_EXPIRED,
     INVALID_FILE_TYPE,
     MPP_CORRUPT,
     MPP_PASSWORD_PROTECTED,
     MPP_UNSUPPORTED,
     MSP_INVALID_XML,
+    PROCESSING_BUSY,
+    PROCESSING_INTERRUPTED,
+    PROCESSING_RESOURCE_LIMIT,
     PROCESSING_TIMEOUT,
+    PUBLIC_MESSAGES,
     MppImportError,
 )
-from schedule.services.p6_import import parse_p6_xer
 from schedule.tasks import run_msp_import_task, run_p6_import_task
 
 INVALID_XML_MESSAGE = _('Invalid or suspicious XML file')
@@ -56,6 +54,10 @@ ERROR_MESSAGES = {
     ),
     CONVERSION_FAILED: _('Could not process the Microsoft Project file. Try again or export to XML.'),
     IMPORT_FAILED: _('Schedule import failed.'),
+    PROCESSING_RESOURCE_LIMIT: _(PUBLIC_MESSAGES[PROCESSING_RESOURCE_LIMIT]),
+    PROCESSING_INTERRUPTED: _(PUBLIC_MESSAGES[PROCESSING_INTERRUPTED]),
+    PROCESSING_BUSY: _(PUBLIC_MESSAGES[PROCESSING_BUSY]),
+    INPUT_EXPIRED: _(PUBLIC_MESSAGES[INPUT_EXPIRED]),
 }
 
 
@@ -98,10 +100,12 @@ class MspImportPreviewView(APIView):
     def post(self, request, project_pk=None):
         try:
             file_bytes, filename = _read_validated_msp_file(request)
-            parsed = parse_msp_family(file_bytes, filename=filename)
+            parsed = prepare_bytes(file_bytes, filename, 'msp')
         except ValidationError as exc:
             code, msg = _validation_error_to_code(exc)
             return _error_response(code, msg, details=exc.detail)
+        except ProcessingBusy:
+            return _error_response(PROCESSING_BUSY, str(ERROR_MESSAGES[PROCESSING_BUSY]), http_status=status.HTTP_503_SERVICE_UNAVAILABLE)
         except MppImportError as exc:
             return _error_response(exc.code, exc.message)
         except ValueError:
@@ -129,6 +133,7 @@ class BaseImportStartView(APIView):
     task_func = None
     read_file_func = None
     parse_func = None
+    family = 'msp'
     invalid_message = 'فایل نامعتبر است'
     invalid_code = MSP_INVALID_XML
     default_filename = 'import.file'
@@ -137,56 +142,42 @@ class BaseImportStartView(APIView):
         project = get_object_or_404(Project, pk=project_pk)
         try:
             file_bytes, filename = self.read_file_func(request)
-            self.parse_func(file_bytes, filename=filename)
         except ValidationError as exc:
             code, msg = _validation_error_to_code(exc)
             return _error_response(code, msg, details=exc.detail)
+        replace = request.data.get('replace', 'false') in (True, 'true', '1', 1)
+        filename = filename or self.default_filename
+        intent = str(request.data.get('intent') or 'new')
+        retry_of = str(request.data.get('retry_of') or '')
+        try:
+            outcome = begin_import(
+                job_model=self.job_model,
+                task=self.task_func,
+                project=project,
+                user=request.user,
+                file_bytes=file_bytes,
+                filename=filename,
+                replace=replace,
+                intent=intent,
+                retry_of=retry_of,
+                family=self.family,
+            )
+        except RetryRejected:
+            return _error_response(IMPORT_FAILED, str(ERROR_MESSAGES[IMPORT_FAILED]))
+        except ProcessingBusy:
+            return _error_response(
+                PROCESSING_BUSY,
+                str(ERROR_MESSAGES[PROCESSING_BUSY]),
+                http_status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
         except MppImportError as exc:
             return _error_response(exc.code, exc.message)
         except ValueError as exc:
             msg = str(exc) if str(exc) else str(self.invalid_message)
             return _error_response(self.invalid_code, msg)
-
-        replace = request.data.get('replace', 'false') in (True, 'true', '1', 1)
-        filename = filename or self.default_filename
-        with transaction.atomic():
-            project = Project.objects.select_for_update().get(pk=project.pk)
-            try:
-                guard_and_maybe_replace(project, request.user, replace=False)
-                if replace:
-                    code = replacement_block_code(project)
-                    if code:
-                        raise ImportSafetyError(code, message_for(code))
-            except ImportSafetyError as exc:
-                job = self.job_model.objects.create(
-                    project=project,
-                    filename=filename,
-                    replace_existing=replace,
-                    file_data=file_bytes,
-                    created_by=request.user,
-                    status=MspImportStatus.FAILED,
-                    error_code=exc.code,
-                    error_message=exc.message,
-                )
-                return _error_response(exc.code, exc.message, details={'task_id': str(job.id)})
-            inflight = find_inflight_job(self.job_model, project, request.user, replace, file_bytes)
-            if inflight is not None:
-                return Response(
-                    {'task_id': str(inflight.id), 'status': 'queued'},
-                    status=status.HTTP_202_ACCEPTED,
-                )
-            job = self.job_model.objects.create(
-                project=project,
-                filename=filename,
-                replace_existing=replace,
-                file_data=file_bytes,
-                created_by=request.user,
-                status=MspImportStatus.PENDING,
-            )
-        async_result = self.task_func.delay(str(job.id))
-        job.task_id = async_result.id or ''
-        job.save(update_fields=['task_id', 'updated_at'])
-        return Response({'task_id': str(job.id), 'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
+        if outcome.kind == 'refused':
+            return _error_response(outcome.code, outcome.message, details={'task_id': str(outcome.job.id)})
+        return Response({'task_id': str(outcome.job.id), 'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
 
 
 class BaseImportStatusView(APIView):
@@ -213,6 +204,7 @@ class BaseImportStatusView(APIView):
 class MspImportStartView(BaseImportStartView):
     job_model = MspImportJob
     task_func = run_msp_import_task
+    family = 'msp'
 
     @staticmethod
     def read_file_func(request):
@@ -259,8 +251,16 @@ class P6ImportPreviewView(APIView):
     @extend_schema(summary='Preview P6 XER import', tags=['P6 Import'])
     def post(self, request, project_pk=None):
         try:
-            file_bytes, _filename = _read_validated_p6_file(request)
-            parsed = parse_p6_xer(file_bytes)
+            file_bytes, filename = _read_validated_p6_file(request)
+            parsed = prepare_bytes(file_bytes, filename, 'p6')
+        except ProcessingBusy:
+            return _error_response(
+                PROCESSING_BUSY,
+                str(ERROR_MESSAGES[PROCESSING_BUSY]),
+                http_status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except MppImportError as exc:
+            return _error_response(exc.code, exc.message)
         except ValidationError as exc:
             code, msg = _validation_error_to_code(exc)
             return _error_response(code, msg, details=exc.detail)
@@ -283,6 +283,7 @@ class P6ImportPreviewView(APIView):
 class P6ImportStartView(BaseImportStartView):
     job_model = P6ImportJob
     task_func = run_p6_import_task
+    family = 'p6'
 
     @staticmethod
     def read_file_func(request):

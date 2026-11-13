@@ -1,0 +1,543 @@
+[
+  {
+    "scenario_id": "POS-01",
+    "title": "ایجاد کاتالوگ‌های مرجع، ثبت پروژه در وضعیت پیش‌نویس و ذخیره ۶ بخش منشور آغازین",
+    "category": "positive",
+    "audit_ids": [
+      "P01",
+      "P02",
+      "P04",
+      "M01",
+      "M02",
+      "M03"
+    ],
+    "role_persona": "multi_role",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_positive_reference_journey_pos01_to_pos10 (POS-01)",
+    "expected_outcome": "ایجاد واحد سازمانی، نوع قرارداد و واحد سنجش توسط راهبر داده‌های پایه؛ ثبت پروژه مرجع در وضعیت draft و ذخیره هر ۶ بخش منشور آغازین.",
+    "observed_outcome": "واحد سازمانی (201)، نوع قرارداد (201)، واحد سنجش (201)، پروژه در وضعیت draft (201) و هر ۶ بخش منشور آغازین (200) ایجاد و بازخوانی شدند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-02",
+    "title": "ارسال پروژه برای تصویب، تصویب توسط تصویب‌کننده مستقل و قفل فیلدهای پایه همراه با روال تغییر رسمی",
+    "category": "positive",
+    "audit_ids": [
+      "P03",
+      "P05",
+      "P06",
+      "P10",
+      "P11",
+      "M03"
+    ],
+    "role_persona": "multi_role",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_positive_reference_journey_pos01_to_pos10 (POS-02)",
+    "expected_outcome": "انتقال draft به pending_approval، رد خودتصویبی ایجادکننده با 403، تصویب توسط تصویب‌کننده مستقل به active، قفل مستقیم فیلدهای پایه و اعمال تغییر صرفاً از مسیر درخواست تغییر مصوب.",
+    "observed_outcome": "پروژه به pending_approval منتقل شد (200)، خودتصویبی ایجادکننده با 403 مسدود شد، تصویب‌کننده مستقل پروژه را active کرد (200) و درخواست تغییر رسمی پس از تصویب اعمال شد (200).",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-03",
+    "title": "مدیریت دستی درخت WBS سه‌سطحی، بازترتیب و جابه‌جایی ایمن زیرشاخه",
+    "category": "positive",
+    "audit_ids": [
+      "W01",
+      "W02",
+      "W04"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_positive_reference_journey_pos01_to_pos10 (POS-03)",
+    "expected_outcome": "ایجاد ساختار WBS در سه سطح با متادیتا، واحد مسئول و واحد سنجش؛ بازترتیب گره‌ها و جابه‌جایی زیرشاخه به والد جدید با حفظ یکپارچگی درخت.",
+    "observed_outcome": "گره‌های سطح ۱ تا ۳ ایجاد شدند، بازترتیب و جابه‌جایی زیرشاخه با موفقیت انجام شد و ساختار درخت در پایگاه داده و API یکپارچه ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-04",
+    "title": "ایجاد قالب WBS و اعمال کپی مستقل روی پروژه مقصد بدون وابستگی مرجع",
+    "category": "positive",
+    "audit_ids": [
+      "W06",
+      "M04"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_positive_reference_journey_pos01_to_pos10 (POS-04)",
+    "expected_outcome": "ایجاد قالب WBS و اعمال آن روی پروژه مقصد؛ تغییرات بعدی روی قالب یا پروژه مبدأ نباید ساختار WBS پروژه مقصد را تغییر دهد.",
+    "observed_outcome": "قالب ایجاد و روی پروژه مقصد اعمال شد (201)؛ تغییر نام گره در پروژه مبدأ و قالب هیچ تغییری در گره‌های پروژه مقصد ایجاد نکرد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-05",
+    "title": "پیش‌نمایش بدون تغییر داده برای فایل‌های MSP XML، Primavera P6 XER/XML و فایل مرجع real-data/plan.mpp",
+    "category": "positive",
+    "audit_ids": [
+      "I01",
+      "I02",
+      "I05",
+      "I12",
+      "D01",
+      "D02"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "real-data/plan.mpp + valid-msp.xml + valid-p6.xer + valid-p6.xml",
+    "expected_outcome": "پیش‌نمایش ساختار، شمارش دقیق ردیف‌ها و هشدارهای ساختاریافته بدون ایجاد هیچ تغییر در جداول WBS، فعالیت، رابطه یا خط مبنا.",
+    "observed_outcome": "پیش‌نمایش هر ۴ فایل شمارش‌های دقیق (ازجمله ۶ بسته کاری، ۷۲ فعالیت و ۷۲ رابطه برای plan.mpp) را بازگرداند و شمارش رکوردهای پایگاه داده قبل و بعد از پیش‌نمایش صفر باقی ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-06",
+    "title": "ورود قطعی و ثبت اولیه خط مبنا برای فایل مرجع real-data/plan.mpp و فیکسچرهای XML/XER",
+    "category": "positive",
+    "audit_ids": [
+      "I03",
+      "I04",
+      "I07",
+      "I11",
+      "I13",
+      "I14",
+      "I15",
+      "I16",
+      "I17",
+      "I18",
+      "I19",
+      "I20",
+      "I21",
+      "S02"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "real-data/plan.mpp (sha256:3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553)",
+    "expected_outcome": "ذخیره دقیقاً ۶ گره WBS، ۷۲ فعالیت، ۷۲ رابطه و ۱ خط مبنای اولیه برای plan.mpp همراه با هشدارهای ساختاریافته برای شروع/پایان بدون والد و پیش‌نیازهای خلاصه.",
+    "observed_outcome": "دقیقاً ۶ گره WBS، ۷۲ فعالیت، ۷۲ رابطه و ۱ خط مبنای اولیه ذخیره شد و هشدارهای activity_without_parent، predecessor_is_summary و calendar_not_applied ثبت گردید.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-07",
+    "title": "تکرار ورود در حالت الحاقی (Repeat Append Idempotency) بدون ایجاد رکورد یا خط مبنای تکراری",
+    "category": "positive",
+    "audit_ids": [
+      "W05",
+      "I06",
+      "I08",
+      "S02"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "real-data/plan.mpp (repeat append replace=false)",
+    "expected_outcome": "اجرای مجدد ورود الحاقی همان فایل باید nothing_changed=true برگرداند و هیچ گره WBS، فعالیت، رابطه یا خط مبنای تکراری نسازد.",
+    "observed_outcome": "خروجی nothing_changed=true دریافت شد و شمارش رکوردها بدون تغییر روی ۶ گره WBS، ۷۲ فعالیت، ۷۲ رابطه و ۱ خط مبنا باقی ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-08",
+    "title": "جایگزینی ایمن (Replace Mode): مجاز روی پروژه بدون سابقه محافظت‌شده و مسدود روی پروژه دارای فعالیت/خط مبنای قفل‌شده",
+    "category": "positive",
+    "audit_ids": [
+      "W05",
+      "S03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "specs/051-a7-p1-project-reference/evidence/fixtures/milestone.xml (replace=true)",
+    "expected_outcome": "در پروژه فاقد فعالیت/پیشرفت/هزینه/خط مبنای قفل‌شده، گره قدیمی soft-delete شده و ساختار جدید جایگزین شود؛ در پروژه دارای سابقه محافظت‌شده، جایگزینی با کد خطای صریح مسدود شود.",
+    "observed_outcome": "در پروژه بدون سابقه، گره قدیمی با is_deleted=True بایگانی و ساختار جدید جایگزین شد؛ در پروژه دارای خط مبنای قفل‌شده و فعالیت، جایگزینی با ImportSafetyError مسدود و داده‌ها حفظ شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-09",
+    "title": "تاریخ‌های ۴گانه فعالیت، مایلستون، گزارش تأخیر، خروجی گانت و گیت اعتبار مسیر بحرانی",
+    "category": "positive",
+    "audit_ids": [
+      "S01",
+      "S04",
+      "S05",
+      "S06",
+      "S07",
+      "S08"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_positive_reference_journey_pos01_to_pos10 (POS-09)",
+    "expected_outcome": "پشتیبانی از تاریخ‌های برنامه‌ای، خط مبنا، واقعی و پیش‌بینی؛ نمایش ۷۲ فعالیت در سرویس گانت، گزارش وضعیت زمان‌بندی و ارزیابی صریح اعتبار مسیر بحرانی همراه با کد علت‌ها.",
+    "observed_outcome": "هر ۴ دسته تاریخ روی فعالیت ثبت و بازخوانی شد، خروجی گانت هر ۷۲ فعالیت را برگرداند و گیت اعتبار مسیر بحرانی وضعیت و reason_codes را گزارش کرد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "POS-10",
+    "title": "چرخه عمر کامل وضعیت‌های پروژه (تعلیق/رفع تعلیق، تکمیل/لغو تکمیل، بایگانی/بازگردانی) با حفظ ۱۰۰٪ داده‌ها",
+    "category": "positive",
+    "audit_ids": [
+      "P07",
+      "P08",
+      "P09",
+      "M03"
+    ],
+    "role_persona": "multi_role",
+    "channel": "combined",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py + e2e/tests/a7-p6-delivery-acceptance.spec.ts",
+    "expected_outcome": "انجام گذارهای active -> suspended -> active، active -> completed -> active و active -> archived -> active با توکن تأیید و ثبت دلیل الزامی، بدون از دست رفتن هیچ گره WBS، فعالیت، رابطه یا خط مبنا.",
+    "observed_outcome": "تمامی گذارها در API و رابط کاربری مرورگر با موفقیت انجام شد و شمارش ۶ گره WBS، ۷۲ فعالیت، ۷۲ رابطه و ۱ خط مبنا پس از بازگردانی ۱۰۰٪ دست‌نخورده باقی ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/lifecycle-archived-restore-fa-1280.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-01",
+    "title": "مسدودسازی تصویب پروژه دارای اطلاعات پایه ناقص (گیت‌های فعال‌سازی)",
+    "category": "negative",
+    "audit_ids": [
+      "P04",
+      "P05"
+    ],
+    "role_persona": "independent_approver",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-01)",
+    "expected_outcome": "رد درخواست تصویب پروژه فاقد مدیر پروژه، شرح دامنه یا بودجه مصوب با خطای 400 و کد activation_gates_failed همراه با فهرست فیلدهای ناقص.",
+    "observed_outcome": "درخواست تصویب با وضعیت 400 و کد activation_gates_failed رد شد و پروژه در وضعیت pending_approval باقی ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-02",
+    "title": "مسدودسازی خودتصویبی ایجادکننده پروژه (جداسازی وظایف)",
+    "category": "access_boundary",
+    "audit_ids": [
+      "P05"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-02)",
+    "expected_outcome": "رد تلاش ایجادکننده برای تصویب پروژه خودش با کد وضعیت 403.",
+    "observed_outcome": "فراخوانی endpoint تصویب توسط ایجادکننده با وضعیت 403 مسدود شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-03",
+    "title": "رد کد تکراری WBS، نام خالی و ایجاد چرخه در درخت WBS",
+    "category": "negative",
+    "audit_ids": [
+      "W01",
+      "W02"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-03)",
+    "expected_outcome": "رد کد تکراری در یک پروژه، رد نام خالی و رد انتقال گره والد به زیرشاخه فرزند خود (جلوگیری از چرخه).",
+    "observed_outcome": "کد تکراری و نام خالی با 400 رد شدند و انتقال والد به زیرشاخه فرزند با WBSValidationError مسدود گردید.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-04",
+    "title": "مسدودسازی حذف گره WBS دارای زیرشاخه، فعالیت، پیشرفت، هزینه یا خط مبنای قفل‌شده",
+    "category": "negative",
+    "audit_ids": [
+      "W03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-04)",
+    "expected_outcome": "رد حذف گره WBS متصل به فعالیت یا خط مبنای قفل‌شده با وضعیت 400/409 و حفظ کامل رکورد.",
+    "observed_outcome": "درخواست DELETE روی گره دارای وابستگی با وضعیت 400 رد شد و گره در پایگاه داده فعال باقی ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-05",
+    "title": "مسدودسازی جایگزینی کامل WBS (Replace) در صورت وجود سابقه محافظت‌شده",
+    "category": "negative",
+    "audit_ids": [
+      "W05",
+      "S03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-05)",
+    "expected_outcome": "رد جایگزینی جدول WBS در حضور فعالیت یا خط مبنای قفل‌شده و اعلام blocked در پیش‌نمایش جایگزینی.",
+    "observed_outcome": "پیش‌نمایش مقدار replacement.blocked را برگرداند و اجرای replace=true با ImportSafetyError بدون تغییر در داده‌های موجود مسدود شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-06",
+    "title": "رد فایل‌های نامعتبر، خالی، آسیب‌دیده، پسوند غیرمجاز، بیش از سقف حجم، چرخه وابستگی و بدون ساختار قابل ورود",
+    "category": "negative",
+    "audit_ids": [
+      "I01",
+      "I07",
+      "I22"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "notes.txt, empty.xml, broken.xml, not-a-project.xml, >50MB payload, cycle.xml, summary-only.xml",
+    "expected_outcome": "رد هر ورودی نامعتبر با کد خطای ساختاریافته (invalid_file_type, empty_import_file, msp_invalid_xml, file_too_large, dependency_cycle, nothing_to_import) بدون تغییر در پروژه.",
+    "observed_outcome": "تمامی ۷ حالت ورودی نامعتبر با کدهای خطای دقیق در API و ویزارد مرورگر رد شدند و شمارش رکوردهای پروژه ثابت ماند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-07",
+    "title": "تراکنش اتمی، Rollback کامل در خطای میانی و بازیابی در همان نشست بدون رکورد یتیم",
+    "category": "negative",
+    "audit_ids": [
+      "I09",
+      "I22"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py (NEG-07) + e2e/tests/a7-p6-delivery-acceptance.spec.ts",
+    "expected_outcome": "در صورت بروز خطا در میانه ورود، هیچ رکورد جزئی از WBS یا فعالیت باقی نماند و کاربر بتواند بلافاصله فایل معتبر را در همان نشست وارد کند.",
+    "observed_outcome": "خطای تزریق‌شده در میانه تراکنش باعث rollback کامل شد و بلافاصله فایل معتبر در همان نشست با موفقیت وارد گردید.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-1280.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-08",
+    "title": "مهار استثناهای مفسر/مبدل خارجی، محدودیت منابع (cgroup/scratch) و بازیافت کارهای ناتمام",
+    "category": "operational",
+    "audit_ids": [
+      "I03",
+      "I22"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "real_worker",
+    "input_ref": "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json",
+    "expected_outcome": "مهار خطاهای مبدل MPXJ/JVM، اعمال سقف حافظه و فضای موقت، پاک‌سازی فایل‌های scratch و تعیین تکلیف کارهای ناتمام بدون نشت مسیرهای داخلی سرور.",
+    "observed_outcome": "در ماتریس ۱۳گانه زمان اجرا روی کانتینر ایزوله و تست‌های نگارش ۵، تمامی سناریوهای timeout، سقف حافظه، دیسک موقت و بازیافت worker با موفقیت تأیید شدند.",
+    "evidence_ref": "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-09",
+    "title": "حفظ زمینه کاربر/پروژه در صف، قفل هم‌زمانی هر پروژه و جلوگیری از اجرای موازی تکراری",
+    "category": "concurrency",
+    "audit_ids": [
+      "I08",
+      "I10",
+      "I11"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py (NEG-09) + specs/055-a7-p5-import-operations/evidence/runtime/concurrent-delivery.json",
+    "expected_outcome": "ارسال مجدد همان فایل در حین اجرای کار فعال، همان task_id فعال را برگرداند و ارسال هم‌زمان از دو نشست تنها یک کار در حال اجرا ایجاد کند.",
+    "observed_outcome": "ارسال تکراری همان task_id فعال را برگرداند و در تست هم‌زمانی دو واردکننده، تنها یک کار اجرا و دیگری بدون ایجاد رکورد تکراری مهار شد.",
+    "evidence_ref": "specs/055-a7-p5-import-operations/evidence/runtime/concurrent-delivery.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-10",
+    "title": "لغو ایمن کار صف‌بندی‌شده در صورت سلب مجوز کاربر یا بایگانی پروژه پیش از شروع پردازش",
+    "category": "access_boundary",
+    "audit_ids": [
+      "I10",
+      "P09"
+    ],
+    "role_persona": "viewer",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-10)",
+    "expected_outcome": "اگر کاربری که کار در صف دارد پیش از اجرای worker مجوزش سلب شود یا پروژه بایگانی شود، کار با کد import_not_permitted یا project_archived متوقف شود.",
+    "observed_outcome": "اجرای کار صف‌بندی‌شده برای کاربر فاقد مجوز ورود با وضعیت failed و کد خطای import_not_permitted بدون تغییر در داده‌های پروژه متوقف شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-11",
+    "title": "جداسازی کامل بین دو پروژه مستقل (Project A در برابر Project B) در API و مرورگر",
+    "category": "access_boundary",
+    "audit_ids": [
+      "I10",
+      "P02"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "combined",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py (NEG-11) + e2e/tests/a7-p6-delivery-acceptance.spec.ts",
+    "expected_outcome": "عدم دسترسی عضو پروژه A به WBS یا وضعیت کار ورود پروژه B (403/404) و عدم نشت وضعیت ویزارد ورود بین دو پروژه در مرورگر.",
+    "observed_outcome": "درخواست‌های متقاطع بین پروژه A و B با 403/404 مسدود شدند و جابه‌جایی بین دو پروژه در مرورگر هیچ وضعیت مشترکی در ویزارد نشان نداد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-12",
+    "title": "محدودیت نقش مشاهده‌گر (Viewer / view_only) در برابر تغییر WBS و ورود فایل زمان‌بندی",
+    "category": "access_boundary",
+    "audit_ids": [
+      "W01",
+      "I10"
+    ],
+    "role_persona": "viewer",
+    "channel": "combined",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py (NEG-12) + e2e/tests/a7-p6-delivery-acceptance.spec.ts",
+    "expected_outcome": "امکان مشاهده فقط‌خواندنی درخت WBS (200) برای مشاهده‌گر، عدم نمایش دکمه بارگذاری زمان‌بندی در رابط کاربری و رد درخواست‌های ایجاد WBS یا ورود فایل با 403.",
+    "observed_outcome": "مشاهده‌گر درخت WBS را در حالت فقط‌خواندنی دید، دکمه msp-import-btn نمایش داده نشد و درخواست‌های POST ایجاد WBS و پیش‌نمایش ورود با 403 رد شدند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/viewer-readonly-fa-1280.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-13",
+    "title": "استثنای مشاهده مدیر سامانه (System Admin) و انحصار عملیات لغو تکمیل و بازگردانی از بایگانی",
+    "category": "access_boundary",
+    "audit_ids": [
+      "P07",
+      "P09",
+      "I10"
+    ],
+    "role_persona": "system_admin",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-13)",
+    "expected_outcome": "امکان مشاهده پروژه‌ها توسط مدیر سامانه و مسدود بودن عملیات undo-completion و restore برای کاربران غیر مدیر سامانه با 403.",
+    "observed_outcome": "مدیر سامانه به مشاهده پروژه دسترسی داشت (200) و تلاش کاربر غیر مدیر سامانه برای undo-completion و restore با 403 رد شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "NEG-14",
+    "title": "فقط‌خواندنی بودن کامل پروژه بایگانی‌شده در برابر ویرایش اطلاعات پایه و ورود زمان‌بندی",
+    "category": "access_boundary",
+    "audit_ids": [
+      "P09",
+      "M03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "api_db",
+    "input_ref": "apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py::test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14 (NEG-14)",
+    "expected_outcome": "رد هرگونه ویرایش پروژه یا شروع ورود زمان‌بندی در وضعیت archived با کد خطای project_archived تا زمان بازگردانی رسمی.",
+    "observed_outcome": "درخواست PATCH پروژه و POST ورود زمان‌بندی روی پروژه بایگانی‌شده با وضعیت 400 و کد project_archived مسدود شدند.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "OPS-01",
+    "title": "چیدمان راست‌به‌چپ فارسی (fa RTL) در عرض‌های دسکتاپ (1280x800) و موبایل (390x844) بدون سرریز افقی",
+    "category": "bilingual_ux",
+    "audit_ids": [
+      "I12",
+      "D03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "browser_e2e",
+    "input_ref": "e2e/tests/a7-p6-delivery-acceptance.spec.ts (fa 1280x800 & fa 390x844)",
+    "expected_outcome": "جهت سند dir='rtl'، ترجمه کامل فارسی بدون کلید خام، و عدم سرریز افقی در هر دو عرض 1280 و 390 پیکسل.",
+    "observed_outcome": "در هر دو عرض 1280 و 390 پیکسل، dir='rtl'، پیام‌های فارسی و عدم سرریز افقی (overflow <= 2px) در مرورگر واقعی تأیید و تصویربرداری شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-390.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "OPS-02",
+    "title": "چیدمان چپ‌به‌راست انگلیسی (en LTR) در عرض‌های دسکتاپ (1280x800) و موبایل (390x844) بدون سرریز افقی",
+    "category": "bilingual_ux",
+    "audit_ids": [
+      "I12",
+      "D03"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "browser_e2e",
+    "input_ref": "e2e/tests/a7-p6-delivery-acceptance.spec.ts (en 1280x800 & en 390x844)",
+    "expected_outcome": "جهت سند dir='ltr'، ترجمه کامل انگلیسی بدون کلید خام، و عدم سرریز افقی در هر دو عرض 1280 و 390 پیکسل.",
+    "observed_outcome": "در هر دو عرض 1280 و 390 پیکسل، dir='ltr'، پیام‌های انگلیسی و عدم سرریز افقی در مرورگر واقعی تأیید و تصویربرداری شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-1280.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "OPS-03",
+    "title": "دسترس‌پذیری صفحه‌کلید (Tab/Enter/Escape) و اعلام وضعیت زنده در دیالوگ‌های ورود و چرخه عمر",
+    "category": "bilingual_ux",
+    "audit_ids": [
+      "I11",
+      "I12",
+      "P07",
+      "P09"
+    ],
+    "role_persona": "creator_planner",
+    "channel": "browser_e2e",
+    "input_ref": "e2e/tests/a7-p6-delivery-acceptance.spec.ts (keyboard focus, Enter, Escape, role=dialog, role=status)",
+    "expected_outcome": "امکان باز کردن دیالوگ با کلید Enter، بستن با کلید Escape، فوکوس خودکار عنوان مرحله و اجرای پیش‌نمایش و تأیید نهایی با صفحه‌کلید.",
+    "observed_outcome": "باز و بسته شدن دیالوگ با Enter و Escape و اجرای کامل مراحل پیش‌نمایش و ورود با صفحه‌کلید در مرورگر واقعی تأیید شد.",
+    "evidence_ref": "specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-390.png",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  },
+  {
+    "scenario_id": "OPS-04",
+    "title": "نگهداری ۷روزه بایت‌های فایل خام پس از اتمام کار و پاک‌سازی فقط‌بایت با حفظ متادیتا و تاریخچه",
+    "category": "operational",
+    "audit_ids": [
+      "I10",
+      "I11",
+      "D04"
+    ],
+    "role_persona": "system_admin",
+    "channel": "real_worker",
+    "input_ref": "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json (retention_purge)",
+    "expected_outcome": "حفظ بایت‌های فایل برای کارهای جدیدتر از ۷ روز یا در حال اجرا، و پاک‌سازی فقط‌بایت (file_data=None, file_purged_at!=None) پس از ۱۶۸ ساعت با حفظ کامل متادیتا.",
+    "observed_outcome": "فرمان maintain_import_jobs و تست‌های نگهداری فاز ۵ پاک‌سازی فقط‌بایت پس از ۷ روز (۱۶۸ ساعت) و حفظ رکوردهای تاریخچه و خلاصه ورود را تأیید کردند.",
+    "evidence_ref": "specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json",
+    "technical_result": "pass",
+    "employer_result": "pending",
+    "defect_id": null
+  }
+]

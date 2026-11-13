@@ -20,6 +20,9 @@ def test_cache_backend(settings):
     settings.PASSWORD_HASHERS = [
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
+    settings.IMPORT_PREPARE_INLINE = True
+    settings.IMPORT_CONTAINMENT_REQUIRED = False
+    settings.IMPORT_ADMISSION_REQUIRES_CATCHUP = False
 
 
 @pytest.fixture

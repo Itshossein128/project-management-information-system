@@ -630,6 +630,26 @@ class BaseImportJob(UUIDModel, TimeStampedModel):
     result = models.JSONField(default=dict, blank=True)
     error_message = models.TextField(blank=True, default='')
     error_code = models.CharField(max_length=64, blank=True, default='')
+    source_sha256 = models.CharField(max_length=64, null=True, blank=True)
+    source_size = models.PositiveBigIntegerField(null=True, blank=True)
+    queued_at = models.DateTimeField(null=True, blank=True)
+    dispatch_deadline_at = models.DateTimeField(null=True, blank=True)
+    last_dispatched_at = models.DateTimeField(null=True, blank=True)
+    dispatch_count = models.PositiveIntegerField(default=0)
+    started_at = models.DateTimeField(null=True, blank=True)
+    execution_deadline_at = models.DateTimeField(null=True, blank=True)
+    execution_token = models.UUIDField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    retention_anchor_at = models.DateTimeField(null=True, blank=True)
+    retention_anchor_source = models.CharField(max_length=32, blank=True, default='')
+    file_purged_at = models.DateTimeField(null=True, blank=True)
+    retry_of = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name='%(class)s_retries',
+    )
 
     class Meta:
         abstract = True
@@ -648,6 +668,12 @@ class MspImportJob(BaseImportJob):
     class Meta:
         db_table = 'msp_import_jobs'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(
+                fields=['project', 'created_by', 'replace_existing', 'status', 'source_sha256'],
+                name='msp_import_scope_idx',
+            ),
+        ]
 
 
 class P6ImportJob(BaseImportJob):
@@ -663,3 +689,26 @@ class P6ImportJob(BaseImportJob):
     class Meta:
         db_table = 'p6_import_jobs'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(
+                fields=['project', 'created_by', 'replace_existing', 'status', 'source_sha256'],
+                name='p6_import_scope_idx',
+            ),
+        ]
+
+
+class ImportProcessingSlot(models.Model):
+    """Fixed preparation capacity. Never stores source bytes or credentials."""
+
+    slot_number = models.PositiveIntegerField(unique=True)
+    execution_token = models.UUIDField(null=True, blank=True)
+    family = models.CharField(max_length=16, blank=True, default='')
+    subject_id = models.UUIDField(null=True, blank=True)
+    owner_host = models.CharField(max_length=255, blank=True, default='')
+    reboot_id = models.CharField(max_length=64, blank=True, default='')
+    deadline = models.DateTimeField(null=True, blank=True)
+    containment_id = models.CharField(max_length=255, blank=True, default='')
+    quarantined = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'import_processing_slots'

@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   createActivityRelation,
   fetchActivities,
@@ -12,11 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/sprint-button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-const RELATION_TYPES: { value: RelationType; label: string }[] = [
-  { value: "FS", label: "پایان به شروع (FS)" },
-  { value: "SS", label: "شروع به شروع (SS)" },
-  { value: "FF", label: "پایان به پایان (FF)" },
-  { value: "SF", label: "شروع به پایان (SF)" },
+const RELATION_TYPE_META: { value: RelationType; key: string }[] = [
+  { value: "FS", key: "activities.relFS" },
+  { value: "SS", key: "activities.relSS" },
+  { value: "FF", key: "activities.relFF" },
+  { value: "SF", key: "activities.relSF" },
 ];
 
 export interface AddRelationModalProps {
@@ -34,6 +35,7 @@ export function AddRelationModal({
   onClose,
   onSuccess,
 }: AddRelationModalProps) {
+  const { t } = useTranslation();
   const [role, setRole] = useState<"predecessor" | "successor">("predecessor");
   const [search, setSearch] = useState("");
   const [otherId, setOtherId] = useState("");
@@ -85,18 +87,18 @@ export function AddRelationModal({
     <Modal
       open={isOpen}
       onOpenChange={(open) => { if (!open) onClose(); }}
-      title="افزودن ارتباط"
+      title={t("activities.addRelation")}
       idBase="addActivityRelation"
     >
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          فعالیت مرجع: <span className="font-mono font-medium text-foreground">{anchor.activity_code}</span>
+          {t("activities.anchorActivity")}: <span className="font-mono font-medium text-foreground">{anchor.activity_code}</span>
           {" — "}
           {anchor.activity_name}
         </p>
 
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium mb-1">این فعالیت نقش:</legend>
+          <legend className="text-sm font-medium mb-1">{t("activities.anchorRoleLabel")}:</legend>
           <ToggleGroup
             type="single"
             value={role}
@@ -106,18 +108,18 @@ export function AddRelationModal({
             className="justify-start gap-2"
           >
             <ToggleGroupItem value="predecessor" className="flex-1 sm:flex-none">
-              پیش‌نیاز (predecessor)
+              {t("activities.rolePredecessor")}
             </ToggleGroupItem>
             <ToggleGroupItem value="successor" className="flex-1 sm:flex-none">
-              جانشین (successor)
+              {t("activities.roleSuccessor")}
             </ToggleGroupItem>
           </ToggleGroup>
         </fieldset>
 
         <div className="space-y-2">
-          <Label>فعالیت مرتبط</Label>
+          <Label>{t("activities.relatedActivity")}</Label>
           <Input
-            placeholder="جستجو بر اساس کد یا نام…"
+            placeholder={t("activities.searchCodeOrName")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -125,7 +127,7 @@ export function AddRelationModal({
             name="otherId"
             value={otherId}
             onChange={(e) => setOtherId(e.target.value)}
-            placeholder="انتخاب فعالیت…"
+            placeholder={t("activities.selectActivity")}
             options={options.map((a) => ({
               value: a.activity_id,
               label: `${a.activity_code} — ${a.activity_name}`,
@@ -134,17 +136,17 @@ export function AddRelationModal({
         </div>
 
         <div className="space-y-2">
-          <Label>نوع ارتباط</Label>
+          <Label>{t("activities.relationType")}</Label>
           <Select
             name="relationType"
             value={relationType}
             onChange={(e) => setRelationType(e.target.value as RelationType)}
-            options={RELATION_TYPES}
+            options={RELATION_TYPE_META.map((rt) => ({ value: rt.value, label: t(rt.key) }))}
           />
         </div>
 
         <div className="space-y-2">
-          <Label>تأخیر (روز)</Label>
+          <Label>{t("activities.lagDays")}</Label>
           <Input
             type="number"
             value={lagDays}
@@ -159,7 +161,7 @@ export function AddRelationModal({
         ) : null}
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button variant="secondary" onClick={onClose}>لغو</Button>
+          <Button variant="secondary" onClick={onClose}>{t("common.cancel")}</Button>
           <Button
             disabled={!otherId || mutation.isPending}
             onClick={() => {
@@ -167,7 +169,7 @@ export function AddRelationModal({
               mutation.mutate();
             }}
           >
-            ذخیره
+            {t("common.save")}
           </Button>
         </div>
       </div>

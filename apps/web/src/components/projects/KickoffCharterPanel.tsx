@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { usePermission } from "@/app/contexts/project-context";
+import { usePermission, useProject } from "@/app/contexts/project-context";
 import { fetchKickoffCharter, saveKickoffCharter, type KickoffCharter } from "@/app/lib/api/projects";
 import { useToast } from "@/components/ui/toast";
 
@@ -22,8 +22,9 @@ export function KickoffCharterPanel({ projectId }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const { project } = useProject();
   const { has } = usePermission(projectId);
-  const canEdit = has("edit_project");
+  const canEdit = has("edit_project") && project?.status !== "archived";
   const [form, setForm] = useState<KickoffCharter>(EMPTY);
 
   const query = useQuery({

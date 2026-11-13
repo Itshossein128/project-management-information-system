@@ -212,3 +212,12 @@ class TestWBSServicesExtended:
             move_wbs_node(child2, new_parent_id=None, position='sorted_child')
         with pytest.raises(WBSValidationError, match="new_parent_id is required for last_child position."):
             move_wbs_node(child2, new_parent_id=None, position='last_child')
+
+    def test_wbs_code_rejects_empty_and_internal_whitespace(self, project):
+        with pytest.raises(WBSValidationError, match="whitespace"):
+            create_wbs_node(project_id=project.id, wbs_code='1 1', wbs_name='Spaced')
+        with pytest.raises(WBSValidationError, match="whitespace"):
+            create_wbs_node(project_id=project.id, wbs_code='   ', wbs_name='Blank')
+        root, _ = create_wbs_node(project_id=project.id, wbs_code='1', wbs_name='Root')
+        with pytest.raises(WBSValidationError, match="whitespace"):
+            update_wbs_node(root, wbs_code='1 2')

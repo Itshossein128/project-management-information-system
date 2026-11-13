@@ -343,6 +343,10 @@ class UserLookupView(APIView):
         elif is_account_admin:
             # Full organization directory search for explicit account administrators.
             can_see_contacts = True
+        elif not request.user.groups.filter(name='visitor').exists():
+            # Non-visitor authenticated users creating a new project need name-only lookup
+            # for PM/team selection before a project_id exists; contacts stay hidden.
+            can_see_contacts = False
         else:
             return Response(
                 {

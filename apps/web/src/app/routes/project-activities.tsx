@@ -5,15 +5,17 @@ import { PATHS } from "@/app/routeVars";
 import { ActivitiesGrid } from "@/components/activities/activities-grid";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { NotFoundState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { WorkingCalendarPanel } from "@/components/schedule/WorkingCalendarPanel";
 import { WbsEmptyBanner } from "@/components/wbs/wbs-empty-banner";
 
 function ActivitiesPageContent() {
   const { t } = useTranslation();
 
-  const { projectId, project, isLoading } = useProject();
+  const { projectId, project, isLoading, isError, error, refetch } = useProject();
 
   if (isLoading) return <LoadingSkeleton rows={6} />;
+  if (isError) return <QueryErrorState error={error} onRetry={refetch} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
 
   return (
