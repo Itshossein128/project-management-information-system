@@ -50,3 +50,7 @@
 ## 2026-07-31 - Optimize payload in SerializerMethodField using .only()
 **Learning:** In DRF `SerializerMethodField` methods that query secondary models with `select_related` (like fetching recent activities with `report`), retrieving all model columns (e.g., large notes or photo file paths) creates unnecessary DB I/O and memory overhead.
 **Action:** Chain `.only()` to explicitly fetch only the required scalar fields and related model foreign keys/fields needed for the API payload response.
+
+## 2026-08-01 - Per-Serializer Instance Caching for Multiple SerializerMethodFields
+**Learning:** Caching computed results directly on the model instance (`obj._cached_prop`) inside a serializer helper method can persist across separate serialization calls in memory if the same ORM instance is re-serialized after a state mutation.
+**Action:** Store computed results directly on the serializer instance (`self._cached_is_receipt_resolved = {}`) using a dictionary keyed by object primary key or ID (`cache_key = getattr(obj, 'pk', None) or id(obj)`). This scopes the cache strictly to a single serializer pass without risking stale cache leakage.
