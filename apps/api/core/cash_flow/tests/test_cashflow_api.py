@@ -153,3 +153,15 @@ def test_viewer_cannot_create_transaction(api_client, project, member, other_use
         format='json',
     )
     assert resp.status_code == 403
+
+
+def test_non_member_cannot_upsert_forecast(api_client, project, other_user):
+    # other_user is authenticated but not a member of project
+    api_client.force_authenticate(user=other_user)
+    url = f'{BASE.format(project_id=project.id)}/forecast/2024-06/'
+    resp = api_client.put(
+        url,
+        {'expected_inflow': '2000000', 'expected_outflow': '1500000', 'confidence_pct': '80'},
+        format='json',
+    )
+    assert resp.status_code == 403
