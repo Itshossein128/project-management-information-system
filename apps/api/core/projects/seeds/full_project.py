@@ -194,6 +194,8 @@ def _seed_schedule(project: Project, spec: DemoProjectSpec, activities: list[Act
             'approved_at': spec.start_date,
             'approved_by': user,
             'is_current': True,
+            'created_by': user,
+            'updated_by': user,
         },
     )
     if not baseline.is_current:
