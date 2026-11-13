@@ -11,9 +11,10 @@
 
 ## 1. Candidate Version & Environment Identity
 
-- **Base Git Commit**: `b0a894d23c9798aa44e06e1df7356e2b7eb38a66`
+- **Base Git Commit**: `5d89cd50359382a21000a8c2b1b43c47d6e84e04`
 - **Django Version Pin**: `4.2.11` (verified in `apps/api/.venv` and container runtime)
-- **Isolated Runtime Container Image**: `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5`
+- **Isolated Runtime Container Image**: `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed` (rebuilt cleanly on `5d89cd50` after UAT fixes; historical P5 `T049` independent second-operator reproduction ran on predecessor image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5` with identical non-test runtime files)
+- **Candidate Schedule-Tree SHA-256**: `36d0c71f841f3b9107fc8570ddb9a9c2f28aad39755d1392d4091f706b3b1793` (measured by `ops/a7-p5/run-acceptance.sh` on rebuilt image `sha256:0573a9bf...`)
 - **Product Schedule Source SHA-256**: `eb2a29edcb92f01711d8a3594c41c26e05b078601258a9ce45ebd4ebe635abb1`
 - **Reference Schedule File (`real-data/plan.mpp`)**:
   - SHA-256: `3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553`
@@ -27,12 +28,12 @@
 
 1. **A.7-P5 `T049` Independent Second-Operator Reproduction Closed**:
    - Independent second-operator subagent (`conversationId: de389ce3-d1d2-4991-b379-f9c719ecfb7d`) executed the full clean `quickstart.md` / `ops/a7-p5/README.md` sequence on image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5`: 13/13 runtime matrix groups, `check-broker-outage.py`, `check-concurrent-delivery.py`, 4/4 Playwright browser retry tests, `maintain_import_jobs`, `makemigrations --check`, 110/110 `check-host.sh`, and `pnpm typecheck`. Recorded in `specs/055-a7-p5-import-operations/evidence/reproduction.md` and `specs/055-a7-p5-import-operations/handoff.md`.
-2. **Combined P1–P5 Backend Non-Regression Suite (`T008`)**:
-   - `168 passed, 0 failed, 0 skipped` (`specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml`).
+2. **Combined P1–P5 Backend Non-Regression Suite (`T008`, rebuilt candidate `5d89cd50`)**:
+   - `193 passed, 0 failed, 0 skipped` (`specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml`), plus `69 passed` in archive/restore & status-undo concurrency suites (`test_project_archive_restore_concurrency.py`, `test_project_status_undo_concurrency.py`).
 3. **P6 Integrated Positive (`POS-01`–`POS-10`) & Negative (`NEG-01`–`NEG-14`) Backend Acceptance Suite (`T011`, `T013`, `T014`)**:
-   - `2 passed` in `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py` (`specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml`).
+   - `2 passed` (`84.68s`) in `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py` (`specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml`).
 4. **P6 Real-Stack Playwright Browser E2E Suite (`T015`, `T016`)**:
-   - `6 passed` in `e2e/tests/a7-p6-delivery-acceptance.spec.ts` against the isolated `a7p5-import` API (`127.0.0.1:18000`) and Vite (`127.0.0.1:15173`), covering:
+   - `6 passed` (`52.7s`) in `e2e/tests/a7-p6-delivery-acceptance.spec.ts` against the rebuilt isolated `a7p5-import` API (`127.0.0.1:18000`) and Vite (`127.0.0.1:15173`), plus `47 passed` (`1.2m`) in `e2e/tests/project-activation-feedback.spec.ts` (`chromium-desktop`), covering:
      - Live browser clicks for `Complete` → `Undo completion` (`P07`) and `Archive` → `Restore from archive` (`P09`) on `/projects/:projectId/overview`
      - Schedule import wizard preview, invalid file rejection/recovery, and append import across `fa` (`RTL`) and `en` (`LTR`) at `1280x800` and `390x844` viewports (`OPS-01`, `OPS-02`)
      - Keyboard-only navigation (`Tab`, `Enter`, `Escape`) (`OPS-03`)

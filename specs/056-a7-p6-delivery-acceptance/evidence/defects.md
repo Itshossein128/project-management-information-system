@@ -1,7 +1,7 @@
 # Defect Triage and Predecessor Convergence Log (`FR-010`)
 
 **Phase**: `A.7-P6` (`specs/056-a7-p6-delivery-acceptance`)  
-**Candidate Version**: `ea38dda2eda939184afd502fa027680b40af7870` (schedule-tree SHA-256 `52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70`)
+**Candidate Version**: `5d89cd50359382a21000a8c2b1b43c47d6e84e04` (schedule-tree SHA-256 `36d0c71f841f3b9107fc8570ddb9a9c2f28aad39755d1392d4091f706b3b1793`)
 
 ## 1. Predecessor Gate & Packaging Findings Resolved During P6 Entry
 
@@ -14,4 +14,4 @@
 
 | Defect ID | Audit IDs | Scenario IDs | Owning Phase | Blocking? | In Scope? | Status | Summary & Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| *None open* | — | — | — | `false` | `true` | `closed` | Zero open in-scope product defects on candidate tree `ea38dda2eda939184afd502fa027680b40af7870`. Any failure found during `T008`–`T016` execution must be logged here with before/after evidence. |
+| *None open* | — | — | — | `false` | `true` | `closed` | Zero open in-scope product defects on candidate tree `5d89cd50359382a21000a8c2b1b43c47d6e84e04` (after `ae728679` UAT & RBAC/WBS/lookup/SoD/UI fixes and `5d89cd50` `BaselineSchedule` seeder fix, with acceptance container rebuilt as `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed`). |

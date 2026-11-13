@@ -1,7 +1,7 @@
 # Graph Report - building-management  (2026-11-13)
 
 ## Corpus Check
-- 3540 files · ~2,614,216 words
+- 3540 files · ~2,614,328 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 215 file(s) not represented in the graph (top: .csv 155, .xml 19, (none) 13)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ea38dda2`
+- Built from commit: `5d89cd50`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -7828,15 +7828,15 @@ Nodes (3): Implementation for User Story 4, Phase 6: User Story 4 - Repeated and
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Existing coverage to reuse` connect `HasProjectPermission` to `Contract: Decision Runs (Execution Records)`, `Project`, `report_export_service.py`, `Createhruserpayload`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `apiJson()` (e.g. with `R5 — Separate new-response validation from historical compatibility` and `Phase 12: Convergence`) actually correct?**
   _`apiJson()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `ADMIN`, `MANAGER`, `ENGINEER` to the rest of the system?**
   _2839 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `create_project_with_creator` be split into smaller, more focused modules?**
   _Cohesion score 0.029887683228631258 - nodes in this community are weakly interconnected._
-- **Why does `apiJson()` connect `apiJson` to `react`, `Createhruserpayload`, `utils.ts`, `activities-grid.tsx`, `daily-reports.ts`, `offlineDB.ts`, `routeVars.ts`, `weather-icons.tsx`, `project-members.tsx`, `Research: Traceable Decision Execution Records`, `project.ts`, `ProjectMember`, `project-subcontractor-detail.tsx`, `.agents/skills/design/scripts/cip/core.py`, `queries.ts`, `cashflow.ts`, `Badge`, `cn`, `test_project_activation_feedback.py`, `dashboards.ts`, `central-data.ts`, `project-documents.tsx`?**
-  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Why does `Project` connect `Project` to `create_project_with_creator`, `HasProjectPermission`, `SubReportStatus`, `DailyReport`, `RolePermission`, `DailyReportDetailSerializer`, `MemberStatus`, `local_role_views.py`, `django_urls`, `cash_flow/views.py`, `TestHasProcurementStepRole`, `DisciplineSubReport`, `۲. داستان‌های کاربری اتمیک (Atomic User Stories)`, `Django Db`, `jalali.py`, `queries.ts`, `test_offline_receipt_service.py`, `IPC`, `Is Canonical Unit()`, `TestProjectList`, `offlineDB.ts`, `UUIDModel`, `DailyReportDetailSerializer`, `activities.ts`, `run_smoke_test.py`, `Stakeholder`, `UnitReportViewSet`, `test_concrete_qc_link.py`, `sub_reports/models.py`, `ProjectMember`, `datetime`, `ActualCost`, `cost_control/views.py`, `Component Tokens`, `🏗️ نقشه پیاده‌سازی: سیستم تدارکات و لجستیک هوشمند (Block-Based Traceability)`, `progress_views.py`, `member_has_codename`, `django_urls`, `rest_framework_exceptions`, `po_views.py`, `test_resource_allocations.py`, `Serializers`, `StorageIntegrationTests`, `unit-reports.ts`, `test_offline_target_isolation.py`, `ProjectScopedViewSet`, `cn`, `data_views.py`, `test_api.py`, `schedule/urls.py`, `Research: Core Domain Principles & Glossary`, `test_transfer.py`, `full_project.py`, `Research: Native Microsoft Project MPP Import`, `core/conftest.py`, `DepartmentActivityRecord`, `DepartmentActivityRecord`, `field_reports/services/__init__.py`, `django_utils`, `Phase 5: User Story 3 - Currency unit safety (Priority: P1)`, `Activity`, `hr/services/allocation_service.py`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
 - **Are the 220 inferred relationships involving `Project` (e.g. with `_resolve_recipients()` and `run_daily_alert_checks()`) actually correct?**
   _`Project` has 220 INFERRED edges - model-reasoned connections that need verification._
 - **Should `HasProjectPermission` be split into smaller, more focused modules?**

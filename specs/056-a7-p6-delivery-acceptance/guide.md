@@ -1,8 +1,8 @@
 # راهنمای کوتاه تست کارفرما — ماژول A.7 (ثبت پروژه، WBS و ورود زمان‌بندی)
 
 **فاز**: `A.7-P6` (`specs/056-a7-p6-delivery-acceptance`)  
-**نسخه نامزد تحویل (`version_id`)**: `ea38dda2eda939184afd502fa027680b40af7870-dirty+schedule:52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70`  
-**تصویر کانتینر پذیرش (`acceptance_image_digest`)**: `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5`  
+**نسخه نامزد تحویل (`version_id`)**: `5d89cd50359382a21000a8c2b1b43c47d6e84e04+schedule:36d0c71f841f3b9107fc8570ddb9a9c2f28aad39755d1392d4091f706b3b1793`  
+**تصویر کانتینر پذیرش (`acceptance_image_digest`)**: `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed`  
 **نسخه جنگو (`django_version`)**: `4.2.11`  
 **شناسه محیط پذیرش (`environment_id`)**: `local-isolated-postgres-5433+a7p5-import-compose-18000`
 

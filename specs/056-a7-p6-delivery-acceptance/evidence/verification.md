@@ -42,6 +42,8 @@
     apps/api/core/projects/tests/test_project_archive_restore.py \
     apps/api/core/projects/tests/test_project_registration_lifecycle.py \
     apps/api/core/projects/tests/test_project_contractor_ref.py \
+    apps/api/core/projects/tests/test_person_directory_acl.py \
+    apps/api/core/wbs/tests/test_services.py \
     apps/api/core/schedule/tests/test_a7_p2_import_safety.py \
     apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py \
     apps/api/core/schedule/tests/test_a7_p4_import_experience.py \
@@ -53,7 +55,7 @@
     -q --tb=short -p no:cacheprovider \
     --junitxml=specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml
   ```
-- **Result**: `168 passed, 0 failed, 0 skipped in 170.91s (0:02:50)`
+- **Result**: `193 passed, 0 failed, 0 skipped in 183.80s (0:03:03)` (plus `69 passed` in `test_project_archive_restore_concurrency.py` and `test_project_status_undo_concurrency.py` in `644.41s (0:10:44)`, and rebuilt `a7p5-import` matrix `run-acceptance.sh` on `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed` returned `{"status": "ready", "not_run": []}`)
 - **Evidence**: `specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml`
 
 ### 3.2 Integrated P6 Positive & Negative Acceptance Suite (`T011`, `T013`, `T014`)
@@ -64,7 +66,7 @@
     apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py \
     --junitxml=specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml
   ```
-- **Result**: `2 passed in 87.19s (0:01:27)`
+- **Result**: `2 passed in 84.68s (0:01:24)`
   - `test_a7_p6_positive_reference_journey_pos01_to_pos10`: `PASSED` (covers `POS-01` through `POS-10`, including `real-data/plan.mpp` 6 WBS / 72 activities / 72 relations / 1 initial baseline reconciliation, repeat append idempotency, safe replacement guard, 4-way dates/Gantt/CPM validity gate, and full `suspend` ↔ `resume`, `complete` → `undo-completion`, `archive` → `restore` lifecycle transitions with 100% data preservation).
   - `test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14`: `PASSED` (covers `NEG-01` through `NEG-14` across 5 separated role personas with zero unintended data mutations).
 - **Evidence**: `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml`
@@ -76,7 +78,7 @@
   A7P6_BROWSER_FIXTURES="$PWD/ops/a7-p5/.runtime-p6-auth.json" \
     pnpm exec playwright test --config=e2e/playwright.a7-p6.config.ts
   ```
-- **Result**: `6 passed (41.2s)`
+- **Result**: `6 passed (52.7s)` (plus `47 passed (1.2m)` in `pnpm exec playwright test --config=e2e/playwright.activation.config.ts --project=chromium-desktop`)
   1. `lifecycle complete -> undo_completion and archive -> restore in browser (POS-10)`: `PASSED` (`3.5s`)
   2. `schedule import wizard, invalid upload recovery, and responsive layout (fa 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`9.1s`)
   3. `schedule import wizard, invalid upload recovery, and responsive layout (en 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`9.1s`)
