@@ -165,14 +165,13 @@ class EquipmentLogViewSet(ProjectScopedViewSet):
         return qs.order_by('-log_date')
 
 
+from permissions.project import HasProjectPermission, IsProjectMember
+from rest_framework.permissions import IsAuthenticated
+
+
 class EquipmentLogSummaryView(APIView):
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     view_permission = 'view_reports'
-
-    def get_permissions(self):
-        from permissions.project import HasProjectPermission, IsProjectMember
-        from rest_framework.permissions import IsAuthenticated
-
-        return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     @property
     def required_permission(self):
