@@ -6,9 +6,9 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 
 ## Status Overview
 
-- **Completed**: 17 routes / workflows
-- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/ipcs/:ipcId`)
-- **Remaining**: 58 routes / workflows
+- **Completed**: 18 routes / workflows
+- **In Review (Current PR)**: 1 route / workflow (`/projects/:projectId/barriers`)
+- **Remaining**: 57 routes / workflows
 
 ---
 
@@ -32,12 +32,13 @@ Tracking the daily incremental implementation of Driver.js product tours and pra
 | `/projects/:projectId/costs` | `project-costs` | KPI Grid, Tabs, Versions Panel, Budget Grid, Change Requests | Decision Tree & Tour | Completed |
 | `/projects/:projectId/contracts` | `project-contracts` | KPI Grid, Tabs, Contracts/IPC Table, Receivables Panel | Decision Tree & Tour | Completed |
 | `/projects/:projectId/contracts/:contractId` | `project-contract-detail` | Header, Summary Cards, Tabs, Info Panel, Issue IPC | Decision Tree & Tour | Completed |
-| `/projects/:projectId/ipcs/:ipcId` | `project-ipc-detail` | Header, Gross/Net Amounts, Workflow Bar, Line Items, Deductions, Collections Panel | Decision Tree & Tour | **In Review (Today)** |
+| `/projects/:projectId/ipcs/:ipcId` | `project-ipc-detail` | Header, Gross/Net Amounts, Workflow Bar, Line Items, Deductions, Collections Panel | Decision Tree & Tour | Completed |
+| `/projects/:projectId/barriers` | `project-barriers` | Filters, Add Button, Table, Resolve Button | Decision Tree & Tour | **In Review (Today)** |
 
 ---
 
 ## High-Priority Backlog (Next Slices)
 
 1. **Schedule & WBS** (`/projects/:projectId/wbs` & `/schedule/gantt`): Work breakdown structure, progress entry, and Gantt baseline comparison.
-2. **Quality & HSE / Barrier Log** (`/projects/:projectId/barriers`): Non-conformance reporting, site barrier escalation, and closure workflow.
-3. **Project Settings & Permissions** (`/projects/:projectId/settings`): Access control, member role overrides, and project settings.
+2. **Project Settings & Permissions** (`/projects/:projectId/settings`): Access control, member role overrides, and project settings.
+3. **Subcontractors Portal** (`/projects/:projectId/subcontractors`): Contractor evaluation, warnings, and scoring history.
