@@ -62,7 +62,15 @@ class WBSViewSet(viewsets.ViewSet):
         nodes = build_tree_queryset(project_pk)
         return Response(WBSFlatSerializer(nodes, many=True).data)
 
+    def _reject_archived(self, project_pk):
+        from projects.lifecycle_service import assert_not_archived_mutable
+        from projects.models import Project
+
+        project = get_object_or_404(Project, pk=project_pk)
+        assert_not_archived_mutable(project, self.request.user)
+
     def create(self, request, project_pk=None):
+        self._reject_archived(project_pk)
         serializer = WBSCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -99,6 +107,7 @@ class WBSViewSet(viewsets.ViewSet):
 
     @extend_schema(summary='Update WBS node', tags=['WBS'])
     def partial_update(self, request, project_pk=None, wbs_id=None):
+        self._reject_archived(project_pk)
         node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         serializer = WBSUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -123,6 +132,7 @@ class WBSViewSet(viewsets.ViewSet):
 
     @extend_schema(summary='Delete WBS node', tags=['WBS'])
     def destroy(self, request, project_pk=None, wbs_id=None):
+        self._reject_archived(project_pk)
         node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         try:
             delete_wbs_node(node, user=request.user)
@@ -142,6 +152,7 @@ class WBSViewSet(viewsets.ViewSet):
     @extend_schema(summary='Move WBS node', tags=['WBS'])
     @action(detail=True, methods=['post'], url_path='move')
     def move(self, request, project_pk=None, wbs_id=None):
+        self._reject_archived(project_pk)
         node = get_object_or_404(WBS, pk=wbs_id, project_id=project_pk, is_deleted=False)
         serializer = WBSMoveSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

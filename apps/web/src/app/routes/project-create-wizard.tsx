@@ -6,6 +6,7 @@ import { addMember } from "@/app/lib/api/members";
 import {
   asList,
   fetchContractTypes,
+  fetchMeasurementUnits,
   fetchOrganizationUnits,
 } from "@/app/lib/api/central-data";
 import {
@@ -103,6 +104,8 @@ export default function ProjectCreateWizardPage() {
     queryFn: fetchContractTypes,
   });
   const contractTypes = asList(contractTypesRaw ?? []);
+  const { data: measurementUnitsRaw } = useQuery({ queryKey: ["measurement-units"], queryFn: fetchMeasurementUnits });
+  const measurementUnits = asList(measurementUnitsRaw ?? []);
   const { data: orgUnitsRaw } = useQuery({
     queryKey: ["organization-units"],
     queryFn: fetchOrganizationUnits,
@@ -120,6 +123,7 @@ export default function ProjectCreateWizardPage() {
   const createMutation = useMutation({
     mutationFn: async () => {
       const payload: CreateProjectPayload = {
+        measurement_unit: form.measurement_unit || null,
         project_code: form.project_code.trim(),
         project_name: form.project_name.trim(),
         employer: form.employer.trim(),
@@ -416,6 +420,13 @@ export default function ProjectCreateWizardPage() {
             <Select dir={i18n.dir()} value={form.owning_unit || "__none__"} onValueChange={(value) => setForm((f) => ({ ...f, owning_unit: value === "__none__" ? null : value }))}>
               <SelectTrigger id="wizard-owning-unit" data-testid="wizard-owning-unit" className="h-11 w-full rounded-lg border-border bg-background data-[size=default]:h-11"><SelectValue /></SelectTrigger>
               <SelectContent position="popper"><SelectItem value="__none__">{t("projectWizard.notSelected")}</SelectItem>{orgUnits.map((u) => <SelectItem key={u.id} value={u.id}>{u.code} — {u.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="wizard-measurement-unit">{t("centralData.measurementUnit")}</Label>
+            <Select dir={i18n.dir()} value={form.measurement_unit || "__none__"} onValueChange={value => setForm(f => ({ ...f, measurement_unit: value === "__none__" ? null : value }))}>
+              <SelectTrigger id="wizard-measurement-unit" data-testid="wizard-measurement-unit"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="__none__">{t("projectWizard.notSelected")}</SelectItem>{measurementUnits.map(u => <SelectItem key={u.id} value={u.id}>{u.unit_name} ({u.unit_symbol})</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2" data-testid="wizard-project-manager">

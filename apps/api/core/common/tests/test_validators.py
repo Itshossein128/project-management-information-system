@@ -126,3 +126,15 @@ def test_mime_detection_exception_handling():
     # It should fall back to content_type which is not present, returning None.
     # validate_msp_upload will still accept it if extension matches and detected mime is None
     validate_msp_upload(upload)
+
+
+@pytest.mark.parametrize('mime', ['audio/x-musepack', 'application/vnd.ms-office', 'application/octet-stream'])
+def test_mpp_header_does_not_override_ole_signature(mime, monkeypatch):
+    # .mpp is also a Musepack suffix on some desktop MIME databases.
+    monkeypatch.setattr('common.validators._detect_mime', lambda upload: upload.content_type)
+    ole = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1' + b'project-bytes'
+    upload = _FakeUpload('schedule.mpp', content=ole, content_type=mime)
+    validate_msp_upload(upload)
+    assert upload.tell() == 0
+    with pytest.raises(ValidationError):
+        validate_msp_upload(_FakeUpload('fake.mpp', content=b'not an OLE file', content_type=mime))

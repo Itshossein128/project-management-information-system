@@ -1,17 +1,17 @@
-# Defect Triage and Predecessor Convergence Log (`FR-010`)
+# A.7 final defect disposition — 2026-11-16
 
-**Phase**: `A.7-P6` (`specs/056-a7-p6-delivery-acceptance`)  
-**Candidate Version**: `5d89cd50359382a21000a8c2b1b43c47d6e84e04` (schedule-tree SHA-256 `36d0c71f841f3b9107fc8570ddb9a9c2f28aad39755d1392d4091f706b3b1793`)
+نسخه منبع: `2090da13f90756e9512070ffcd4feb87dcf5fd7a`؛ تصویر API: `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`؛ محیط: `a7p5-import:API18000/PostgreSQL55434/Redis56379/Web15173`؛ Django: `4.2.11`.
 
-## 1. Predecessor Gate & Packaging Findings Resolved During P6 Entry
+Known open in-scope technical defects: **0**. Human acceptance remains pending. Earlier dated runs in predecessor evidence are historical; the current lock is release-verification.json.
 
-| Defect / Gate ID | Audit IDs | Owning Phase | Severity | Status | Before Evidence | Remediation & After Evidence |
-| --- | --- | --- | --- | --- | --- | --- |
-| `P6-GATE-001` | `I09`, `I19`, `I20`, `D02` | `A.7-P5` (`055`) | `HIGH` (Blocking Predecessor Gate) | `fixed` | `specs/055-a7-p5-import-operations/handoff.md` had `T049` open because the rebuilt image `sha256:9f3b7c98...` had only been run by the implementer. | Independent second-operator agent executed clean teardown and full `quickstart.md` reproduction on `sha256:9f3b7c98...` (`specs/055-a7-p5-import-operations/evidence/reproduction.md`, `## Fifth clean run`: 13/13 matrix groups, broker outage, 2-importer duplicate delivery, 4/4 browser retry tests, 110 host pytest tests, `pnpm typecheck`). `T049` checked and `handoff.md` updated. |
-| `P6-DOC-001` | `P08`, `W04`, `S05`, `I06`–`I08`, `I11`, `I14`, `I18`, `W07`, `S01`–`S04`, `S06`–`S08`, `I01`, `I03`–`I05`, `I12`, `I13`, `I21`, `I22` | `A.7-P2` (`052`), `A.7-P3` (`053`) | `LOW` (Artifact Completeness) | `fixed` | `specs/052-a7-p2-import-safety/` and `specs/053-a7-p3-import-fidelity/` stored audit mappings in `handoff.md` and `evidence/verification.md` without standalone `traceability.md` files. | Backfilled standalone `specs/052-a7-p2-import-safety/traceability.md` (`T003`) and `specs/053-a7-p3-import-fidelity/traceability.md` (`T004`). |
+- P6-GATE-001: historical P5 independent reproduction retained. Current candidate additionally reruns all 13 real-worker groups, broker outage, duplicate consumers, host containment and browser recovery. The new runs are implementer-run.
+- P6-DOC-001: phase traceability artifacts exist; the final 56-row ledger now preserves exact original titles/acceptance and owning phases.
+- P6-CONV-001: protected replace rejects with baseline_replace_forbidden and retains baseline/progress/report/change-request/measurement history.
+- P6-CONV-002: missing lifecycle/charter, duplicate import, indirect-cycle rollback, cancel-without-job, actual offline/reload recovery, cross-project baseline/schedule and viewer project/baseline checks are executed. The final OPS-04 matrix is rebound to the final image/source hash.
+- P6-DELIVERY-001: measurement unit API field now has create/settings selectors, including clearing and reselecting; persisted FK is checked in the browser.
+- P6-DELIVERY-002: template/empty-WBS text is localized; template and charter fields have associated labels; project-list sort typecheck is fixed.
+- P6-DELIVERY-003: a valid MPP chosen through the native browser chooser was rejected because host MIME associated .mpp with audio/x-musepack. MPP detection now relies on extension plus mandatory OLE signature and the bounded parser; non-OLE remains rejected. MIME variants have regression tests and native upload passes.
+- P6-DELIVERY-004: archive read-only enforcement inadvertently blocked legitimate missing-data remediation. Only a missing manager on an active-origin archive may be repaired by a global admin with active project permission; scope/budget use an independently approved cycle-bound CR. Generic and stale serializer/CR writes remain denied under the root row lock. Cancelling stale completion remediation remains allowed without writing project data. Real concurrency tests pass.
+- P6-DELIVERY-005: stale audit/scenario mappings, file hashes/counts, role descriptions, version IDs and readiness summaries were regenerated and validator now enforces their ties to successful current reports.
 
-## 2. Integrated Product Defect Log (`POS-01`–`POS-10`, `NEG-01`–`NEG-14`, `OPS-01`–`OPS-04`)
-
-| Defect ID | Audit IDs | Scenario IDs | Owning Phase | Blocking? | In Scope? | Status | Summary & Evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| *None open* | — | — | — | `false` | `true` | `closed` | Zero open in-scope product defects on candidate tree `5d89cd50359382a21000a8c2b1b43c47d6e84e04` (after `ae728679` UAT & RBAC/WBS/lookup/SoD/UI fixes and `5d89cd50` `BaselineSchedule` seeder fix, with acceptance container rebuilt as `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed`). |
+Recorded policy boundaries (not defects): M03 fixed project lifecycle; M04 no dynamic Excel in the A.7 journey; calendar_not_applied; parentless-row omission; fixture-scoped compatibility. No unsupported behavior is presented as implemented.

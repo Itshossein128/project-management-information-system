@@ -4,7 +4,7 @@ Run from `/home/hossein/Desktop/projects/building-management`. The executable gu
 
 ## Private environment
 
-The Compose project is `a7p5-import`; services are `postgres`, `redis`, `api`, `import-worker`, `maintenance-worker`, `beat`. Database: `a7p5_import`; queues: `a7p5-import` and `a7p5-maintenance`; eager/inline preparation false; prefetch/concurrency one. Local ports: API18000, PostgreSQL55432, Redis56379, separate frontend15173. Shared services8000/5173/5433/6379 are untouched. The private env/auth fixture files are ignored and mode0600; never export resolved credentials.
+The Compose project is `a7p5-import`; services are `postgres`, `redis`, `api`, `import-worker`, `maintenance-worker`, `beat`. Database: `a7p5_import`; queues: `a7p5-import` and `a7p5-maintenance`; eager/inline preparation false; prefetch/concurrency one. Local ports: API18000, PostgreSQL55434, Redis56379, separate frontend15173. Shared services8000/5173/5433/6379 are untouched. The private env/auth fixture files are ignored and mode0600; never export resolved credentials.
 
 Linux cgroup v2, Docker Compose and narrow sudo are required. `prepare-host.sh` creates only transient `a7p5-containment.service`, delegates memory/pids/cpu controllers and mounts a dedicated256MiB tmpfs at `/run/a7p5-scratch`. API/importer/maintenance bind only that delegated subtree at `/var/a7p5-cgroup`, using host cgroup namespace and private PID namespaces. No whole-host writable cgroup, privileged container or Docker socket is provided. A deployment must supply equivalent narrow delegation and bounded storage.
 

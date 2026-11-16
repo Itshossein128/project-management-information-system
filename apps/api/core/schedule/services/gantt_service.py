@@ -51,11 +51,20 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
         prog = progress_map.get(act.id)
         progress_pct = int(float(prog.actual_progress or 0) * 100) if prog else 0
 
+        baseline_finish = ba.planned_finish if ba else None
+        compare_finish = act.forecast_finish or act.actual_finish
+        delay_days = (compare_finish - baseline_finish).days if compare_finish and baseline_finish else None
         tasks.append({
             'id': act.activity_code,
             'name': act.activity_name,
             'start': act.planned_start.isoformat() if act.planned_start else None,
             'end': act.planned_finish.isoformat() if act.planned_finish else None,
+            'planned_start': act.planned_start.isoformat() if act.planned_start else None,
+            'planned_finish': act.planned_finish.isoformat() if act.planned_finish else None,
+            'actual_start': act.actual_start.isoformat() if act.actual_start else None,
+            'actual_finish': act.actual_finish.isoformat() if act.actual_finish else None,
+            'forecast_start': act.forecast_start.isoformat() if act.forecast_start else None,
+            'forecast_finish': act.forecast_finish.isoformat() if act.forecast_finish else None,
             'progress': progress_pct,
             'dependencies': ','.join(dep_codes),
             'wbs_code': act.wbs.wbs_code if act.wbs_id else '',
@@ -63,6 +72,7 @@ def get_gantt_data(project_id, baseline_id=None) -> dict:
             'is_milestone': act.is_milestone,
             'baseline_start': ba.planned_start.isoformat() if ba and ba.planned_start else None,
             'baseline_end': ba.planned_finish.isoformat() if ba and ba.planned_finish else None,
+            'delay_days': delay_days,
             'status': act.status,
             'responsible': act.responsible.full_name if act.responsible_id else '',
             'activity_id': str(act.id),

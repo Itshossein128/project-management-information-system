@@ -985,6 +985,15 @@
     "endDate": "End date"
   },
   "wbs": {
+    "emptyHint": "Create a root WBS node or import an MSP / P6 schedule, including .mpp files.",
+    "addRoot": "Add root node",
+    "templateName": "Template name",
+    "templateDescription": "Description",
+    "templateType": "Project type",
+    "templateSaved": "Template saved",
+    "templateNamePlaceholder": "For example, residential project type 2",
+
+    "duplicateCode": "This WBS code is already used in this project.",
     "expand": "Expand node",
     "collapse": "Collapse node",
     "edit": "Edit",
@@ -1097,6 +1106,9 @@
     "startDate": "Start date",
     "plannedFinish": "Planned finish",
     "contractAmount": "Contract amount",
+    "bulkSelected": "{{count}} selected",
+    "bulkExport": "Export CSV",
+    "bulkDelete": "Delete",
     "notFound": "Project not found",
     "contractor": "Contractor",
     "consultant": "Consultant",
@@ -1233,6 +1245,7 @@
     "payment": "Payment against commitment"
   },
   "centralData": {
+    "measurementUnit": "Project measurement unit",
     "portfolioCount": "Visible projects",
     "budget": "Budget",
     "collections": "Partial collections",
@@ -1595,6 +1608,11 @@
     "colBaselineStart": "Baseline start",
     "colBaselineFinish": "Baseline finish",
     "colVarianceDays": "Variance (days)",
+    "colActual": "Actual",
+    "colForecast": "Forecast",
+    "colDelay": "Delay vs baseline",
+    "colMilestone": "Milestone",
+    "wbsSummaryTitle": "Schedule summary",
     "baseline": "Baseline",
     "baselineLocked": "Locked",
     "baselineUnlocked": "Unlocked",
@@ -3158,6 +3176,7 @@
       "wbs_has_documents": "Cannot replace a schedule that has linked documents.",
       "wbs_has_activities": "Cannot replace a schedule that has activities.",
       "baseline_history_protected": "Cannot replace a schedule that has a locked or approved baseline.",
+      "baseline_replace_forbidden": "Cannot replace a schedule that has protected execution history.",
       "duplicate_relation": "This relationship is already stored and was not created again."
     }
   },

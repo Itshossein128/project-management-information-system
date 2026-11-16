@@ -106,7 +106,7 @@ def test_reverse_after_real_undos_and_bound_repair_preserves_old_business_and_al
     v=undo.preview(p,owner,'undo_completion');undo.undo(p,owner,'undo_completion',request_id=uuid4(),confirmation_token=v['confirmation_token'],reason='Correct completion');p.refresh_from_db()
     assert ProjectStatusUndo.objects.filter(project=p).count()==2 and repair.restore_completion_event_id==p.completion_event_id
     records += [clear,repair];before=business_snapshot(records)
-    root=Project.objects.filter(pk=p.pk).values().get();old_fields={k:v for k,v in root.items() if k not in {'suspension_event_id','completion_event_id','completed_from_status','contractor_ref_id'}}
+    root=Project.objects.filter(pk=p.pk).values().get();old_fields={k:v for k,v in root.items() if k not in {'suspension_event_id','completion_event_id','completed_from_status','contractor_ref_id','approval_submitted_by_id','measurement_unit_id'}}
     audits=list(AuditLog.objects.filter(project=p).order_by('id').values());archives=list(ProjectArchiveRestore.objects.filter(project=p).values())
     draft=ready_project(owner);draft.status='draft';draft.save();archived=life.archive(ready_project(owner),owner)
     old=[('projects','0016_bind_archive_remediation')];latest=migration_restore_targets(MigrationExecutor(connection), old)
@@ -127,7 +127,7 @@ def test_reverse_after_real_undos_and_bound_repair_preserves_old_business_and_al
         if label=='projects.ProjectChangeRequest':
             rows=[{k:v for k,v in row.items() if k!='restore_completion_event_id'} for row in rows];old_rows=[{k:v for k,v in row.items() if k!='restore_completion_event_id'} for row in old_rows]
         assert rows==old_rows,label
-    assert Project.objects.filter(pk=p.pk).values().get()=={**old_fields,'suspension_event_id':None,'completion_event_id':None,'completed_from_status':None,'contractor_ref_id':None}
+    assert Project.objects.filter(pk=p.pk).values().get()=={**old_fields,'suspension_event_id':None,'completion_event_id':None,'completed_from_status':None,'contractor_ref_id':None,'approval_submitted_by_id':None,'measurement_unit_id':None}
     assert not ProjectStatusUndo.objects.filter(project=p).exists()
     assert list(AuditLog.objects.filter(project=p).order_by('id').values())==audits
     assert list(ProjectArchiveRestore.objects.filter(project=p).values())==archives

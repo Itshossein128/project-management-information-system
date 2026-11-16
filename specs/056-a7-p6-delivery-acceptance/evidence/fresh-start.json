@@ -1,0 +1,24 @@
+{
+  "status": "pass",
+  "project_name": "a7p6-delivery-smoke",
+  "fresh_database": true,
+  "ports": {
+    "api": 18010,
+    "postgres": 55444,
+    "redis": 56389
+  },
+  "separate_network_verified": true,
+  "preflight": "ready",
+  "fresh_project_created_via_api": true,
+  "counts": {
+    "wbs": 6,
+    "activities": 72,
+    "relations": 72,
+    "working_baselines": 1,
+    "charters": 1
+  },
+  "human_personas_provisioned": 5,
+  "native_mpp_job": "36556efc-741a-4df1-8f15-8ec7242f45ad",
+  "api_image_digest": "sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066",
+  "disposable_stack_removed": true
+}

@@ -6,7 +6,23 @@ x-app-logging: &app-logging
     max-size: "10m"
     max-file: "3"
 
+x-import-environment: &import-environment
+  IMPORT_CONTAINMENT_REQUIRED: "true"
+  IMPORT_PREPARE_INLINE: "false"
+  IMPORT_ADMISSION_REQUIRES_CATCHUP: "true"
+  IMPORT_EXECUTION_QUEUE: velora-imports
+  IMPORT_MAINTENANCE_QUEUE: velora-import-maintenance
+  IMPORT_SCRATCH_ROOT: /var/velora-import-scratch
+  IMPORT_CGROUP_ROOT: /var/velora-import-cgroup
+  IMPORT_RUNTIME_HOST_ID: ${IMPORT_RUNTIME_HOST_ID:-velora-production-singlehost}
+  MPP_MPXJ_JAR_DIR: /usr/local/lib/python3.12/site-packages/mpxj/lib
+
+x-import-volumes: &import-volumes
+  - /sys/fs/cgroup/system.slice/velora-import-containment.service:/var/velora-import-cgroup:rw
+  - /var/lib/velora/importscratch:/var/velora-import-scratch:rw
+
 x-api-environment: &api-environment
+  <<: *import-environment
   DEBUG: "false"
   SEED_DEMO_DATA: "false"
   SKIP_MIGRATIONS: "true"
@@ -21,8 +37,29 @@ x-api-environment: &api-environment
   CELERY_BROKER_URL: redis://redis:6379/0
   CELERY_RESULT_BACKEND: redis://redis:6379/0
 
+x-import-service: &import-service
+  image: ${VELORA_API_IMAGE:-ipcas-api}
+  init: true
+  restart: unless-stopped
+  cgroup: host
+  volumes: *import-volumes
+  environment:
+    <<: *api-environment
+    DATABASE_URL: postgres://${POSTGRES_USER:-ipcas}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ipcas}
+    SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY}
+    RABBITMQ_URL: amqp://${RABBITMQ_DEFAULT_USER:-ipcas}:${RABBITMQ_DEFAULT_PASS:?Set RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/
+  depends_on:
+    api:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  logging: *app-logging
+
 services:
   api:
+    init: true
+    cgroup: host
+    volumes: *import-volumes
     image: ${VELORA_API_IMAGE:-ipcas-api}
     environment: *api-environment
     command: [gunicorn, config.wsgi:application, --bind, "0.0.0.0:8000", --workers, "2", --threads, "2", --timeout, "60", --max-requests, "1000", --max-requests-jitter, "100"]
@@ -81,6 +118,14 @@ services:
     volumes:
       - celery_beat:/var/lib/celery
     logging: *app-logging
+
+  import-worker:
+    <<: *import-service
+    command: [celery, -A, config, worker, -l, info, -Q, velora-imports, -c, "1", --prefetch-multiplier, "1"]
+
+  import-maintenance:
+    <<: *import-service
+    command: [celery, -A, config, worker, -l, info, -Q, velora-import-maintenance, -c, "1", --prefetch-multiplier, "1"]
 
   minio:
     environment:

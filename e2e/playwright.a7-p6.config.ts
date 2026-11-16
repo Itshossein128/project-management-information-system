@@ -6,7 +6,7 @@ if (!process.env.A7P6_BROWSER_FIXTURES) {
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: 'a7-p6-delivery-acceptance.spec.ts',
+  testMatch: ['a7-p6-delivery-acceptance.spec.ts', 'a7-delivery-journey.spec.ts'],
   workers: 1,
   fullyParallel: false,
   retries: 0,
@@ -14,7 +14,7 @@ export default defineConfig({
   reporter: 'list',
   outputDir: '../test-results/a7-p6',
   use: {
-    baseURL: 'http://127.0.0.1:15173',
+    baseURL: process.env.A7P6_WEB_BASE ?? 'http://127.0.0.1:15173',
     headless: true,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',

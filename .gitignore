@@ -81,3 +81,7 @@ knowledge/sources/
 
 
 ops/a7-p5/.runtime-auth.json
+
+# Large immutable delivery binaries are published as GitHub Release assets.
+output/a7-delivery-2026-11-16.tar
+output/a7-delivery-2026-11-16/*.tar.gz

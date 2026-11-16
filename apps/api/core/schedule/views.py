@@ -100,6 +100,8 @@ class MspImportPreviewView(APIView):
     def post(self, request, project_pk=None):
         try:
             file_bytes, filename = _read_validated_msp_file(request)
+            if not file_bytes:
+                return _error_response('empty_import', 'The upload is empty.')
             parsed = prepare_bytes(file_bytes, filename, 'msp')
         except ValidationError as exc:
             code, msg = _validation_error_to_code(exc)
@@ -111,6 +113,11 @@ class MspImportPreviewView(APIView):
         except ValueError:
             return _error_response(MSP_INVALID_XML, str(INVALID_XML_MESSAGE))
         project = get_object_or_404(Project, pk=project_pk)
+        from schedule.services.import_safety import ImportSafetyError, assert_can_import
+        try:
+            assert_can_import(project, request.user)
+        except ImportSafetyError as exc:
+            return _error_response(exc.code, exc.message)
         from projects.models import Activity, ActivityRelation, WBS
         return Response(build_preview(
             parsed,
@@ -177,7 +184,10 @@ class BaseImportStartView(APIView):
             return _error_response(self.invalid_code, msg)
         if outcome.kind == 'refused':
             return _error_response(outcome.code, outcome.message, details={'task_id': str(outcome.job.id)})
-        return Response({'task_id': str(outcome.job.id), 'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
+        body = {'task_id': str(outcome.job.id), 'status': 'queued'}
+        if outcome.reused:
+            body['code'] = outcome.code or 'import_already_active'
+        return Response(body, status=status.HTTP_202_ACCEPTED)
 
 
 class BaseImportStatusView(APIView):
@@ -252,6 +262,8 @@ class P6ImportPreviewView(APIView):
     def post(self, request, project_pk=None):
         try:
             file_bytes, filename = _read_validated_p6_file(request)
+            if not file_bytes:
+                return _error_response('empty_import', 'The upload is empty.')
             parsed = prepare_bytes(file_bytes, filename, 'p6')
         except ProcessingBusy:
             return _error_response(
@@ -267,6 +279,11 @@ class P6ImportPreviewView(APIView):
         except ValueError as exc:
             return _error_response('invalid_file_type', str(exc) or str(INVALID_XER_MESSAGE))
         project = get_object_or_404(Project, pk=project_pk)
+        from schedule.services.import_safety import ImportSafetyError, assert_can_import
+        try:
+            assert_can_import(project, request.user)
+        except ImportSafetyError as exc:
+            return _error_response(exc.code, exc.message)
         from projects.models import Activity, ActivityRelation, WBS
         return Response(build_preview(
             parsed,

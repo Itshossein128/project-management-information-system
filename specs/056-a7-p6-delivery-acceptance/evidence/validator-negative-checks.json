@@ -1,0 +1,36 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "case": "faithful_original_audit_titles",
+      "status": "pass",
+      "rejected_reason": "differs from the original audit"
+    },
+    {
+      "case": "matching_candidate_version",
+      "status": "pass",
+      "rejected_reason": "version does not match package"
+    },
+    {
+      "case": "no_unrun_scenario_when_ready",
+      "status": "pass",
+      "rejected_reason": "ready_for_acceptance requires pass"
+    },
+    {
+      "case": "immutable_final_report_hash",
+      "status": "pass",
+      "rejected_reason": "missing or changed final report"
+    },
+    {
+      "case": "complete_immutable_source_manifest",
+      "status": "pass",
+      "rejected_reason": "complete candidate source tree"
+    },
+    {
+      "case": "reject_failure_even_after_report_rehash",
+      "status": "pass",
+      "rejected_reason": "did not pass without skips"
+    }
+  ],
+  "restored_package_passes": true
+}

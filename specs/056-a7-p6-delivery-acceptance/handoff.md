@@ -1,68 +1,15 @@
-# Phase Handoff: Integrated Acceptance and Employer Delivery Package (A.7-P6)
+# A.7 final technical handoff
 
-**Phase**: `A.7-P6` (`specs/056-a7-p6-delivery-acceptance`)  
-**Title**: پذیرش یکپارچه و بسته تحویل کارفرما (Integrated Acceptance and Employer Delivery Package)  
-**Direct Audit IDs**: `D03`, `D04`  
-**Integrated Audit Scope**: All 56 items (`P01`–`P11`, `W01`–`W07`, `M01`–`M04`, `S01`–`S08`, `I01`–`I22`, `D01`–`D04`) from `output/a7-requirements-2026-11-10/requirements.json`  
-**Status**: Technical Acceptance Complete (`technical_readiness = "ready_for_acceptance"`); Employer Sign-Off Pending (`employer_decision = "pending"`)  
-**Date**: 2026-11-13
+نسخه منبع: `2090da13f90756e9512070ffcd4feb87dcf5fd7a`؛ تصویر API: `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`؛ محیط: `a7p5-import:API18000/PostgreSQL55434/Redis56379/Web15173`؛ Django: `4.2.11`.
 
----
+Technical readiness: `ready_for_acceptance`. Employer decision: `pending`; signer and signing time are blank. All 56 original audit IDs have faithful titles/acceptance criteria and technical dispositions in audit-disposition.json; all 28 catalog scenarios pass. There are no known open in-scope technical defects. M04 is an explicitly resolved conditional scope item, not a claim that general Excel import was tested.
 
-## 1. Candidate Version & Environment Identity
+The source commit is immutable and was created through a separate Git index; the shared develop branch and unrelated staged work were preserved. release-verification.json binds API/web/ops/test source hashes, image identity and actual final test reports. The delivery archive includes the final evidence overlay and source candidate. The original requirements audit is unchanged.
 
-- **Base Git Commit**: `5d89cd50359382a21000a8c2b1b43c47d6e84e04`
-- **Django Version Pin**: `4.2.11` (verified in `apps/api/.venv` and container runtime)
-- **Isolated Runtime Container Image**: `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed` (rebuilt cleanly on `5d89cd50` after UAT fixes; historical P5 `T049` independent second-operator reproduction ran on predecessor image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5` with identical non-test runtime files)
-- **Candidate Schedule-Tree SHA-256**: `36d0c71f841f3b9107fc8570ddb9a9c2f28aad39755d1392d4091f706b3b1793` (measured by `ops/a7-p5/run-acceptance.sh` on rebuilt image `sha256:0573a9bf...`)
-- **Product Schedule Source SHA-256**: `eb2a29edcb92f01711d8a3594c41c26e05b078601258a9ce45ebd4ebe635abb1`
-- **Reference Schedule File (`real-data/plan.mpp`)**:
-  - SHA-256: `3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553`
-  - Size: `777216` bytes
-  - Stored Reconciliation Counts: **6 WBS nodes, 72 activities, 72 relationships, 1 initial baseline**
-  - Expected Structured Warnings: `activity_without_parent` (`شروع`, `پایان`), `predecessor_is_summary` (`8055`, `8084`, `8102`, `8120`), `calendar_not_applied`
+Evidence: final-core-junit.xml; P5 runtime/host-pytest.xml; final-browser-general/recovery/viewer/retry.json; P5 runtime/manifest.json, broker-outage.json and concurrent-delivery.json; web-checks.json; source-files.json; package-validator.json. Historical P5 independent reproduction stays in the P5 reproduction document; final runs are implementer-run and do not replace human employer sign-off.
 
----
+The compiled frontend in the exported web image was served for final browser acceptance. Five distinct personas logged in through the real form. The reference UI journey covers governed measurement unit, six charter sections, independent approval and CR, three-level WBS metadata/move, template independence, native MPP chooser/import, protected replace, idempotent repeat, four-date views and all six lifecycle transitions with retained charter/schedule data. Strict real-worker offline/reload recovery, cross-project schedule/baseline isolation and 15 viewer-denied writes have separate fixtures.
 
-## 2. Predecessor & Integrated Verification Summary
+Reference plan.mpp is unchanged (777216 bytes; SHA-256 3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553). Reconciled target is 6 WBS / 72 activities / 72 relations / one working baseline. Unsupported parentless milestones/calendar behavior is explicit in guide.md and reconciliation.md. Compatibility is limited to the declared corpus, not every MPP version or arbitrary P6 XML.
 
-1. **A.7-P5 `T049` Independent Second-Operator Reproduction Closed**:
-   - Independent second-operator subagent (`conversationId: de389ce3-d1d2-4991-b379-f9c719ecfb7d`) executed the full clean `quickstart.md` / `ops/a7-p5/README.md` sequence on image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5`: 13/13 runtime matrix groups, `check-broker-outage.py`, `check-concurrent-delivery.py`, 4/4 Playwright browser retry tests, `maintain_import_jobs`, `makemigrations --check`, 110/110 `check-host.sh`, and `pnpm typecheck`. Recorded in `specs/055-a7-p5-import-operations/evidence/reproduction.md` and `specs/055-a7-p5-import-operations/handoff.md`.
-2. **Combined P1–P5 Backend Non-Regression Suite (`T008`, rebuilt candidate `5d89cd50`)**:
-   - `193 passed, 0 failed, 0 skipped` (`specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml`), plus `69 passed` in archive/restore & status-undo concurrency suites (`test_project_archive_restore_concurrency.py`, `test_project_status_undo_concurrency.py`).
-3. **P6 Integrated Positive (`POS-01`–`POS-10`) & Negative (`NEG-01`–`NEG-14`) Backend Acceptance Suite (`T011`, `T013`, `T014`)**:
-   - `2 passed` (`84.68s`) in `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py` (`specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml`).
-4. **P6 Real-Stack Playwright Browser E2E Suite (`T015`, `T016`)**:
-   - `6 passed` (`52.7s`) in `e2e/tests/a7-p6-delivery-acceptance.spec.ts` against the rebuilt isolated `a7p5-import` API (`127.0.0.1:18000`) and Vite (`127.0.0.1:15173`), plus `47 passed` (`1.2m`) in `e2e/tests/project-activation-feedback.spec.ts` (`chromium-desktop`), covering:
-     - Live browser clicks for `Complete` → `Undo completion` (`P07`) and `Archive` → `Restore from archive` (`P09`) on `/projects/:projectId/overview`
-     - Schedule import wizard preview, invalid file rejection/recovery, and append import across `fa` (`RTL`) and `en` (`LTR`) at `1280x800` and `390x844` viewports (`OPS-01`, `OPS-02`)
-     - Keyboard-only navigation (`Tab`, `Enter`, `Escape`) (`OPS-03`)
-     - Live project-switch and Viewer account-switch isolation (`I10`, `NEG-11`, `NEG-12`)
-   - Screenshots saved in `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/`.
-5. **Frontend Typecheck**:
-   - `pnpm typecheck` exited with code `0`.
-6. **Deterministic Delivery Package Validator (`T019`)**:
-   - `python3 specs/056-a7-p6-delivery-acceptance/evidence/validate_package.py` exited with code `0` (`56` audit items verified, `28` scenarios verified, `4` reconciliation fixtures verified, `secret_scan: "clean"`, `output/a7-requirements-2026-11-10/` untouched, and all 6 phases preserved in `output/a7-implementation/phase-map.json`).
-
----
-
-## 3. Employer Delivery Package Index (`D03`, `D04`)
-
-| Deliverable | Path | Purpose |
-| --- | --- | --- |
-| Persian Employer Test Guide | `specs/056-a7-p6-delivery-acceptance/guide.md` | Self-contained step-by-step employer acceptance guide with startup/reset commands, 5-persona setup, control figures, and 4-category status summary |
-| Unsigned Acceptance Minutes | `specs/056-a7-p6-delivery-acceptance/evidence/minutes.md` | Employer sign-off template with `decision: pending` and blank signature fields |
-| Package Metadata | `specs/056-a7-p6-delivery-acceptance/evidence/package.json` | Machine-readable `EmployerDeliveryPackage` manifest |
-| 56-Item Audit Disposition | `specs/056-a7-p6-delivery-acceptance/evidence/audit-disposition.json` & `traceability.md` | Full traceability and disposition for `P01`–`D04` |
-| 28-Scenario Execution Matrix | `specs/056-a7-p6-delivery-acceptance/evidence/scenarios.json` & `scenarios.md` | Technical pass/fail and pending employer decision for `POS-01`–`POS-10`, `NEG-01`–`NEG-14`, `OPS-01`–`OPS-04` |
-| Schedule Reconciliation Ledger | `specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json` & `reconciliation.md` | Source vs. preview vs. stored vs. repeat-append figures for `real-data/plan.mpp` and XML/XER fixtures |
-| 5-Persona Account Provisioning | `specs/056-a7-p6-delivery-acceptance/evidence/accounts.md` | Secret-free provisioning & reset commands for the 5 acceptance personas |
-| Defect & Convergence Log | `specs/056-a7-p6-delivery-acceptance/evidence/defects.md` | Predecessor convergence and defect log (`0` open blocking defects) |
-| Package Validator | `specs/056-a7-p6-delivery-acceptance/evidence/validate_package.py` | Automated verifier for all package invariants and secret scanning |
-
----
-
-## 4. Residual Boundaries
-
-1. **Human Employer Acceptance Pending**: All technical checks (`technical_readiness = "ready_for_acceptance"`) are complete, but `employer_decision` remains `"pending"` until the employer representative executes `guide.md` and signs `evidence/minutes.md`.
-2. **Native OS File Chooser Dialog**: Automated Playwright tests attach files to the `<input type="file" data-testid="msp-import-file">` element directly; clicking the native OS file-picker window remains part of the human employer interactive walkthrough in `guide.md`.
+Start with the bundle README-fa.md, then guide.md and the unsigned minutes. This is a localhost isolated acceptance release. Production credentials, customer data migration, public deployment and the employer's decision are not performed by these tests.

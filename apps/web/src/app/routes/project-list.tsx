@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useDebounce } from "@/app/utils/useDebounce";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/form/Input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select } from "@/components/form/Select";
 import { DataTable } from "@/components/ui/data-table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,6 +47,12 @@ export default function ProjectListPage() {
   const rawSize = Number(searchParams.get("page_size") ?? 20);
   const pageSize = [10, 20, 50].includes(rawSize) ? rawSize : 20;
   const [searchInput, setSearchInput] = useState(search);
+  const debouncedSearch = useDebounce(searchInput, 300);
+
+  // Update URL params when debounced search changes
+  useEffect(() => {
+    updateParams({ search: debouncedSearch.trim() });
+  }, [debouncedSearch]);
   useEffect(() => setSearchInput(search), [search]);
   const number = (value: number) => value.toLocaleString(i18n.language);
 
@@ -62,6 +70,12 @@ export default function ProjectListPage() {
     updateParams({ search: "", status: "" });
   };
   const filtersActive = Boolean(search || status);
+
+  // Sorting state – persisted in URL params
+  const sortField = searchParams.get("sort") ?? "";
+  const sortOrder = searchParams.get("order") ?? "asc";
+  const sortAsc = sortOrder === "asc";
+
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["projects", { search, status, page, pageSize }],
     queryFn: () => fetchProjects({ search, status, page, page_size: pageSize }),
@@ -80,7 +94,53 @@ export default function ProjectListPage() {
   const totalPages = Math.max(1, Math.ceil(count / pageSize));
   const rangeStart = projects.length ? (page - 1) * pageSize + 1 : 0;
   const rangeEnd = projects.length ? rangeStart + projects.length - 1 : 0;
+
+  // Apply client-side sorting (API does not support sorting yet)
+  const sortedProjects = useMemo(() => {
+    if (!sortField) return projects;
+    const copy = [...projects];
+    copy.sort((a, b) => {
+      const key = sortField as keyof ProjectListItem;
+      let aVal: string | number = a[key] ?? "";
+      let bVal: string | number = b[key] ?? "";
+      if (sortField.includes("date")) {
+        aVal = new Date(String(aVal)).getTime();
+        bVal = new Date(String(bVal)).getTime();
+      }
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
+      if (aVal < bVal) return sortAsc ? -1 : 1;
+      if (aVal > bVal) return sortAsc ? 1 : -1;
+      return 0;
+    });
+    return copy;
+  }, [projects, sortField, sortAsc]);
+
+  // Use sorted data for both table and card view
+  const displayProjects = sortedProjects;
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
+  };
+
   const columns = [
+    {
+      key: "select",
+      label: "",
+      render: (row: ProjectListItem) => (
+        <Checkbox
+          checked={selectedIds.has(row.project_id)}
+          onCheckedChange={(checked) => toggleSelect(row.project_id)}
+          aria-label={t("project.name")}
+        />
+      ),
+    },
     {
       key: "project_code",
       label: t("project.code"),
@@ -374,6 +434,16 @@ export default function ProjectListPage() {
                   placeholder={t("project.list.searchPlaceholder")}
                   className="h-10 ps-9"
                 />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchInput("")}
+                    className="absolute inset-y-0 right-2 flex items-center"
+                    aria-label={t("common.close")}
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                  </button>
+                )}
               </div>
             </div>
             <div className="w-full lg:w-44">
@@ -461,15 +531,71 @@ export default function ProjectListPage() {
                   }))}
                 />
               </div>
+              {selectedIds.size > 0 ? (
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {t("project.bulkSelected", { count: selectedIds.size })}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      console.log("Export CSV", Array.from(selectedIds))
+                    }
+                  >
+                    {t("project.bulkExport")}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() =>
+                      console.log("Delete", Array.from(selectedIds))
+                    }
+                  >
+                    {t("project.bulkDelete")}
+                  </Button>
+                </div>
+              ) : null}
               {data ? pagination("top") : null}
             </div>
             <div aria-busy={isLoading} data-testid="project-results">
-              <DataTable
-                columns={columns}
-                data={projects}
-                loading={isLoading}
-                rowKey={(row) => row.project_id}
-              />
+              <div className="hidden sm:block">
+                <DataTable
+                  columns={columns}
+                  data={displayProjects}
+                  loading={isLoading}
+                  rowKey={(row) => row.project_id}
+                />
+              </div>
+              <div className="grid gap-4 sm:hidden">
+                {displayProjects.map((project) => (
+                  <article key={project.project_id} className="rounded-lg border p-4 shadow-sm hover:shadow-md">
+                    <header className="flex justify-between items-start">
+                      <h3 className="font-medium text-base">
+                        <Link to={overview(project)} className="hover:underline">
+                          {project.project_name}
+                        </Link>
+                      </h3>
+                      <Badge
+                        variant={projectStatusBadge[project.status] ?? "neutral"}
+                        className="whitespace-nowrap"
+                        label={t(projectStatusI18nKey[project.status] ?? project.status)}
+                      />
+                    </header>
+                    <dl className="mt-2 space-y-1 text-sm text-muted-foreground">
+                      <div><dt>{t("project.code")}</dt> <dd>{project.project_code}</dd></div>
+                      <div><dt>{t("project.employer")}</dt> <dd>{project.employer}</dd></div>
+                      <div><dt>{t("project.startDate")}</dt> <dd>{formatDisplayDate(project.start_date)}</dd></div>
+                      <div><dt>{t("project.plannedFinish")}</dt> <dd>{formatDisplayDate(project.planned_finish_date)}</dd></div>
+                      <div><dt>{t("project.contractAmount")}</dt> <dd>{project.contract_amount == null ? "—" : `${number(Number(project.contract_amount))} ${project.currency ?? ""}`}</dd></div>
+                    </dl>
+                    <Link
+                      to={overview(project)}
+                      className={buttonVariants({ variant: "ghost", size: "sm" })}
+                    >
+                      {t("project.view")} <ArrowUpRight className="size-4 rtl:-scale-x-100" aria-hidden="true" />
+                    </Link>
+                  </article>
+                ))}
+              </div>
             </div>
             {data && count > pageSize ? pagination("bottom") : null}
           </>

@@ -7,7 +7,7 @@ pytestmark=pytest.mark.django_db
 def snapshot(project):
     return state(project),list(ProjectChangeRequest.objects.filter(project=project).order_by('id').values()),list(ProjectStatusUndo.objects.filter(project=project).order_by('id').values()),list(AuditLog.objects.filter(project=project).order_by('id').values())
 
-@pytest.mark.parametrize('changes',[{'scope_description':'Fixed scope'},{'contract_amount':'0'},{'scope_description':'Scope','contract_amount':'25.00'}])
+@pytest.mark.parametrize('changes',[{'scope_description':'Fixed scope'},{'contract_amount':'100'},{'scope_description':'Scope','contract_amount':'25.00'}])
 def test_completed_repair_is_bound_missing_only_and_other_approved(changes):
     owner=actor(admin=True);other=actor(admin=True);p=source_project(owner,'undo_completion');c=client_for(owner)
     member(other,p,'view_project','edit_project','approve_project')
@@ -45,7 +45,7 @@ def test_stale_binding_rejects_without_partial_write(action,invalid):
     assert r.status_code in (400,403,409),r.data
     assert snapshot(p)==before
 
-@pytest.mark.parametrize('changes',[{'employer':'Other'},{'scope_description':'Already filled'},{'contract_amount':None},{'contract_amount':'NaN'},{'contract_amount':'Infinity'},{'contract_amount':'0','employer':'Other'}])
+@pytest.mark.parametrize('changes',[{'contract_amount':'0'},{'contract_amount':'-1'},{'employer':'Other'},{'scope_description':'Already filled'},{'contract_amount':None},{'contract_amount':'NaN'},{'contract_amount':'Infinity'},{'contract_amount':'0','employer':'Other'}])
 def test_completion_repair_does_not_broaden_protected_editing(changes):
     user=actor(admin=True);p=source_project(user,'undo_completion');p.contract_amount=None;p.save();c=client_for(user);before=snapshot(p)
     r=c.post(base(p)+'change-requests/',{'reason':'Repair only missing amount','proposed_changes':changes},format='json')

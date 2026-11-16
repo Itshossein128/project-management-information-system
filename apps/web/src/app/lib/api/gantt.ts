@@ -13,8 +13,15 @@ export interface GanttTask {
   wbs_code: string;
   is_critical: boolean;
   is_milestone?: boolean;
+  planned_start?: string | null;
+  planned_finish?: string | null;
+  actual_start?: string | null;
+  actual_finish?: string | null;
+  forecast_start?: string | null;
+  forecast_finish?: string | null;
   baseline_start: string | null;
   baseline_end: string | null;
+  delay_days?: number | null;
   status: string;
   responsible: string;
   activity_id: string;

@@ -78,6 +78,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
         return ctx
 
     def create(self, request, *args, **kwargs):
+        from projects.lifecycle_service import assert_not_archived_mutable
+        from projects.models import Project
+
+        assert_not_archived_mutable(Project.objects.get(pk=self.kwargs['project_pk']), request.user)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         activity = serializer.save()
@@ -87,6 +91,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
         return Response(output.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
+        from projects.lifecycle_service import assert_not_archived_mutable
+        from projects.models import Project
+
+        assert_not_archived_mutable(Project.objects.get(pk=self.kwargs['project_pk']), request.user)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

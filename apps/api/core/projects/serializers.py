@@ -147,13 +147,15 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     can_view_restore_history = serializers.SerializerMethodField()
 
     def _restore_admin_context(self, obj):
-        return self.get_can_restore_from_archive(obj) and obj.archived_from_status == ProjectStatus.ACTIVE
+        from permissions.project import active_member_has_codename
+        request = self.context.get('request')
+        return bool(request and self.get_can_restore_from_archive(obj) and obj.archived_from_status == ProjectStatus.ACTIVE and active_member_has_codename(request.user, obj.pk, 'edit_project'))
 
     def get_can_edit_manager_for_restore(self, obj):
         return bool(self._restore_admin_context(obj) and not obj.project_manager_id)
 
     def get_can_create_restore_remediation(self, obj):
-        return bool(self._restore_admin_context(obj) and (not (obj.scope_description or '').strip() or obj.contract_amount is None) and not obj.change_requests.filter(is_deleted=False, status__in=['draft', 'submitted']).exists())
+        return bool(self._restore_admin_context(obj) and (not (obj.scope_description or '').strip() or obj.contract_amount is None or obj.contract_amount <= 0) and not obj.change_requests.filter(is_deleted=False, status__in=['draft', 'submitted']).exists())
 
     def get_can_view_restore_history(self, obj):
         from permissions.project import member_has_codename
@@ -227,6 +229,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             'cut_off_date',
             'max_depth',
             'owning_unit',
+            'measurement_unit',
             'created_at',
             'updated_at',
         ]
@@ -283,6 +286,7 @@ class ProjectCreateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'location',
             'start_date',
             'owning_unit',
+            'measurement_unit',
         ]
 
     def validate_project_code(self, value):
@@ -331,6 +335,7 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
             'currency',
             'cut_off_date',
             'owning_unit',
+            'measurement_unit',
         ]
 
     def validate_project_code(self, value):
@@ -360,12 +365,11 @@ class ProjectUpdateSerializer(ProjectLifecycleWriteGuard, serializers.ModelSeria
 
     def update(self, instance, validated_data):
         from django.db import transaction
-        from projects.lifecycle_service import lock_project, save_project, assert_not_archived_mutable
+        from projects.lifecycle_service import lock_project, save_project, assert_project_patch_allowed
         with transaction.atomic():
             fresh = lock_project(instance)
             request = self.context.get('request')
-            if request:
-                assert_not_archived_mutable(fresh, request.user)
+            assert_project_patch_allowed(fresh, request.user if request else None, validated_data)
             self.instance = fresh
             validated_data = self.validate(validated_data)
             changed = [key for key, value in validated_data.items() if getattr(fresh, key) != value]

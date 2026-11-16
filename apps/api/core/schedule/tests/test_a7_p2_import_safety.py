@@ -37,6 +37,7 @@ PROTECTION_CODES = {
     'wbs_has_documents',
     'wbs_has_activities',
     'baseline_history_protected',
+    'baseline_replace_forbidden',
 }
 
 
@@ -86,7 +87,7 @@ def test_replacement_refuses_each_protection_before_any_change(user):
     progress_node = _node(progress_project)
     progress_activity = _activity(progress_project, progress_node, user)
     ActivityProgress.objects.create(activity=progress_activity, report_date=date(2026, 1, 2), actual_progress=1)
-    cases.append((progress_project, 'wbs_has_progress'))
+    cases.append((progress_project, 'baseline_replace_forbidden'))
 
     cost_project = _project(user, 'COST')
     cost_node = _node(cost_project)
@@ -127,7 +128,7 @@ def test_replacement_refuses_each_protection_before_any_change(user):
         created_by=user,
         updated_by=user,
     )
-    cases.append((baseline_project, 'baseline_history_protected'))
+    cases.append((baseline_project, 'baseline_replace_forbidden'))
 
     for project, expected in cases:
         before = _live_counts(project)
@@ -245,7 +246,7 @@ def test_inflight_start_returns_the_same_job(auth_client, user):
 
 
 @pytest.mark.django_db
-def test_archived_project_blocks_member_and_allows_admin_member_only_through_history_gate(
+def test_archived_project_blocks_member_and_admin_member(
     user, other_user, project_manager_role,
 ):
     project = _project(user, 'ARCH')
@@ -270,7 +271,8 @@ def test_archived_project_blocks_member_and_allows_admin_member_only_through_his
         {'file': SimpleUploadedFile('plan.xml', SAMPLE_MSP_XML, content_type='application/xml')},
         format='multipart',
     )
-    assert preview.status_code == 200
+    assert preview.status_code == 400
+    assert preview.data['error']['code'] == 'project_archived'
     assert _live_counts(project) == before
 
     outsider = APIClient()
@@ -292,8 +294,7 @@ def test_archived_project_blocks_member_and_allows_admin_member_only_through_his
         format='multipart',
     )
     assert allowed.status_code == 400
-    assert allowed.data['error']['code'] in PROTECTION_CODES
-    assert allowed.data['error']['code'] != 'project_archived'
+    assert allowed.data['error']['code'] == 'project_archived'
     assert _live_counts(project) == before
 
     with translation.override('fa'):

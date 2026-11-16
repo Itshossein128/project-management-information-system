@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  projectTypeLabels,
+  getProjectTypeLabel,
   saveProjectAsTemplate,
   type ProjectType,
 } from "@/app/lib/api/templates";
@@ -31,6 +32,7 @@ export function SaveAsTemplateModal({
   onOpenChange,
   projectId,
 }: SaveAsTemplateModalProps) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [templateName, setTemplateName] = useState("");
   const [description, setDescription] = useState("");
@@ -44,7 +46,7 @@ export function SaveAsTemplateModal({
         project_type: projectType,
       }),
     onSuccess: () => {
-      toast.success("قالب با موفقیت ذخیره شد");
+      toast.success(t("wbs.templateSaved"));
       onOpenChange(false);
       setTemplateName("");
       setDescription("");
@@ -57,41 +59,44 @@ export function SaveAsTemplateModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="ذخیره به‌عنوان قالب"
+      title={t("wbs.saveAsTemplate")}
       idBase="saveAsTemplate"
       className="max-w-lg"
     >
       <div className="space-y-4">
         <div>
-          <Label>نام قالب *</Label>
+          <Label htmlFor="template-name">{t("wbs.templateName")} *</Label>
           <Input
+            id="template-name"
             value={templateName}
             onChange={(e) => setTemplateName(e.target.value)}
-            placeholder="مثلاً پروژه مسکونی نوع ۲"
+            placeholder={t("wbs.templateNamePlaceholder")}
           />
         </div>
         <div>
-          <Label>توضیحات</Label>
+          <Label htmlFor="template-description">{t("wbs.templateDescription")}</Label>
           <Input
+            id="template-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
         <div>
-          <Label>نوع پروژه</Label>
+          <Label htmlFor="template-type">{t("wbs.templateType")}</Label>
           <Select
+            id="template-type"
             name="projectType"
             value={projectType}
             onChange={(e) => setProjectType(e.target.value as ProjectType)}
-            options={PROJECT_TYPES.map((t) => ({
-              value: t,
-              label: projectTypeLabels[t],
+            options={PROJECT_TYPES.map((type) => ({
+              value: type,
+              label: getProjectTypeLabel(type, t),
             }))}
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            انصراف
+            {t("common.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -99,7 +104,7 @@ export function SaveAsTemplateModal({
             disabled={!templateName.trim()}
             onClick={() => saveMutation.mutate()}
           >
-            ذخیره
+            {t("common.save")}
           </Button>
         </div>
       </div>

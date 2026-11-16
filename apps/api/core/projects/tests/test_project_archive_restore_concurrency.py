@@ -60,11 +60,13 @@ def test_stale_patch_preserves_archive_metadata():
     archived = life.archive(project, user)
     serializer = ProjectUpdateSerializer(stale, data={'project_name': 'Corrected name'}, partial=True)
     assert serializer.is_valid(), serializer.errors
-    saved = serializer.save()
-    assert saved.status == 'archived'
-    assert saved.archive_cycle_id == archived.archive_cycle_id
-    assert saved.archived_from_status == 'active'
-    assert saved.lifecycle_version > archived.lifecycle_version
+    with pytest.raises(CodedValidationError):
+        serializer.save()
+    project.refresh_from_db()
+    assert project.status == 'archived'
+    assert project.archive_cycle_id == archived.archive_cycle_id
+    assert project.archived_from_status == 'active'
+    assert project.lifecycle_version == archived.lifecycle_version
 
 
 def test_stale_cr_approval_preserves_archive_metadata():
@@ -78,11 +80,14 @@ def test_stale_cr_approval_preserves_archive_metadata():
     archived = life.archive(project, user)
     approver = actor(superuser=True)
     grant_project_access(approver, project)
-    crs.approve_change_request(cr, approver)
+    with pytest.raises(CodedValidationError):
+        crs.approve_change_request(cr, approver)
     current = Project.objects.get(pk=project.pk)
     assert current.status == 'archived'
     assert current.archive_cycle_id == archived.archive_cycle_id
-    assert current.employer == 'New name'
+    assert current.employer != 'New name'
+    cr.refresh_from_db()
+    assert cr.status == 'submitted'
 
 
 @pytest.mark.parametrize('different_request',[False,True])
@@ -233,11 +238,12 @@ def test_other_writer_wins_root_lock_before_restore(monkeypatch,writer):
             assert locked.wait(10);b=rp.submit(send,True);assert restore_entered.wait(10)
         finally:release.set()
         first,second=a.result(timeout=15),b.result(timeout=15)
-    if writer=='delete':assert (first,second)==(204,404);return
-    if writer in ('patch','manager','cr'):
-        assert (first,second)==(200,409)
-        assert Project.objects.get(pk=p.pk).status=='archived'
-        assert not ProjectArchiveRestore.objects.filter(project=p).exists()
+    if writer in ('patch','manager','cr','delete'):
+        # Generic archived writes fail under the same row lock; the original
+        # confirmation remains valid because the denied writer changed nothing.
+        assert (first,second)==(400,200)
+        assert Project.objects.get(pk=p.pk).status=='active'
+        assert ProjectArchiveRestore.objects.filter(project=p).count()==1
     else:
         assert (first,second)==(409 if writer=='resume' else 400,200)
         assert Project.objects.get(pk=p.pk).status=='active'
@@ -281,5 +287,5 @@ def test_postgresql_reports_real_root_lock_contention(monkeypatch,first):
                 time.sleep(0.01)
             assert waiting,'PostgreSQL must observe the overlapping root-row lock wait'
         finally:release.set()
-        assert f.result(timeout=15)==200
-        assert s.result(timeout=15)==(200 if first=='restore' else 409)
+        assert f.result(timeout=15)==(200 if first=='restore' else 400)
+        assert s.result(timeout=15)==200

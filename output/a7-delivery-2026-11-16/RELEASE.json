@@ -1,0 +1,13 @@
+{
+  "source_commit": "2090da13f90756e9512070ffcd4feb87dcf5fd7a",
+  "delivery_commit": "97dbc26b4c22c6843a970729b3d57008d8ce4069",
+  "branch": "codex/a7-delivery-20261116-2090da13",
+  "images": {
+    "a7p5-api:acceptance": "sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066",
+    "a7p5-web:acceptance": "sha256:6e12b7393c24d35cd85b7466633808c681c4d8b82c9a87fcc952cad68548e10d",
+    "postgres:16-alpine": "sha256:75f5a96988cdf694a215073c3e9c001b706b371e2f94df3967f2efdec2787f6b",
+    "redis:7-alpine": "sha256:5509c0097c6064aa8a3b1df58f1d950e67090fffa6678ae8f3f1dc2385f12deb"
+  },
+  "employer_decision": "pending",
+  "technical_readiness": "ready_for_acceptance"
+}

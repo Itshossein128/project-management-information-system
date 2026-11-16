@@ -523,6 +523,14 @@ export function ActivitiesGrid({ projectId }: ActivitiesGridProps) {
                               <p>{detail.actual_start ?? "—"} / {detail.actual_finish ?? "—"}</p>
                             </div>
                             <div>
+                              <p className="font-medium text-muted-foreground">{t("schedule.colForecast")}</p>
+                              <p>{detail.forecast_start ?? "—"} / {detail.forecast_finish ?? "—"}</p>
+                            </div>
+                            <div>
+                              <p className="font-medium text-muted-foreground">{t("schedule.colMilestone")}</p>
+                              <p>{detail.is_milestone ? t("schedule.colMilestone") : "—"}</p>
+                            </div>
+                            <div>
                               <p className="font-medium text-muted-foreground">{t("activities.predecessors")}</p>
                               <ul className="list-inside list-disc">
                                 {(detail.predecessors ?? []).length === 0 ? (

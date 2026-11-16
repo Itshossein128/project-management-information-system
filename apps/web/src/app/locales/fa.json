@@ -985,6 +985,15 @@
     "endDate": "تاریخ پایان"
   },
   "wbs": {
+    "emptyHint": "اولین گره ریشه WBS را اضافه کنید یا برنامه MSP / P6، شامل فایل .mpp، وارد کنید.",
+    "addRoot": "افزودن گره ریشه",
+    "templateName": "نام قالب",
+    "templateDescription": "توضیحات",
+    "templateType": "نوع پروژه",
+    "templateSaved": "قالب با موفقیت ذخیره شد",
+    "templateNamePlaceholder": "مثلاً پروژه مسکونی نوع ۲",
+
+    "duplicateCode": "این کد WBS قبلاً در این پروژه استفاده شده است.",
     "expand": "باز کردن گره",
     "collapse": "بستن گره",
     "edit": "ویرایش",
@@ -1097,6 +1106,9 @@
     "startDate": "تاریخ شروع",
     "plannedFinish": "پایان برنامه‌ای",
     "contractAmount": "مبلغ قرارداد",
+    "bulkSelected": "{{count}} مورد انتخاب شده",
+    "bulkExport": "خروجی CSV",
+    "bulkDelete": "حذف",
     "notFound": "پروژه یافت نشد",
     "contractor": "پیمانکار",
     "consultant": "مشاور",
@@ -1233,6 +1245,7 @@
     "payment": "پرداخت در برابر تعهد"
   },
   "centralData": {
+    "measurementUnit": "واحد اندازه‌گیری پروژه",
     "portfolioCount": "تعداد پروژه‌های قابل مشاهده",
     "budget": "بودجه",
     "collections": "وصول‌های جزئی",
@@ -1595,6 +1608,11 @@
     "colBaselineStart": "شروع مبنا",
     "colBaselineFinish": "پایان مبنا",
     "colVarianceDays": "انحراف (روز)",
+    "colActual": "واقعی",
+    "colForecast": "پیش‌بینی",
+    "colDelay": "تأخیر نسبت به خط مبنا",
+    "colMilestone": "مایلستون",
+    "wbsSummaryTitle": "خلاصه زمان‌بندی",
     "baseline": "خط مبنا",
     "baselineLocked": "قفل‌شده",
     "baselineUnlocked": "قفل‌نشده",
@@ -3150,6 +3168,7 @@
       "wbs_has_documents": "نمی‌توان برنامه‌ای را جایگزین کرد که سند پیوندخورده دارد.",
       "wbs_has_activities": "نمی‌توان برنامه‌ای را جایگزین کرد که فعالیت دارد.",
       "baseline_history_protected": "نمی‌توان برنامه‌ای را جایگزین کرد که خط مبنای قفل‌شده یا مصوب دارد.",
+      "baseline_replace_forbidden": "نمی‌توان برنامه‌ای را جایگزین کرد که سابقه اجرای محافظت‌شده دارد.",
       "duplicate_relation": "این رابطه از قبل ثبت شده و دوباره ایجاد نشد."
     }
   },

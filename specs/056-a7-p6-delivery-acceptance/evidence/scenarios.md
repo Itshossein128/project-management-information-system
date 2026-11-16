@@ -1,41 +1,227 @@
-# نتایج اجرای ۲۸ سناریوی پذیرش یکپارچه (A.7-P6 Acceptance Scenarios)
+# نتایج سناریوهای پذیرش A.7
 
-این سند نتایج اجرای فنی ۲۸ سناریوی پذیرش (`POS-01` تا `POS-10`، `NEG-01` تا `NEG-14` و `OPS-01` تا `OPS-04`) را به تفکیک نتیجه فنی و ستون تصمیم کارفرما ثبت می‌کند.
+نسخه: `2090da13f90756e9512070ffcd4feb87dcf5fd7a`؛ ۲۸ pass، صفر fail و صفر not_run. نتیجه انسانی همه موارد pending.
 
-| کد سناریو | عنوان سناریو | دسته | کدهای ممیزی | پرسونا | کانال آزمون | نتیجه فنی | تصمیم کارفرما | مدرک فنی |
-|---|---|---|---|---|---|---|---|---|
-| `POS-01` | ایجاد کاتالوگ‌های مرجع، ثبت پروژه در وضعیت پیش‌نویس و ذخیره ۶ بخش منشور آغازین | `positive` | `P01`, `P02`, `P04`, `M01`, `M02`, `M03` | `multi_role` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-02` | ارسال پروژه برای تصویب، تصویب توسط تصویب‌کننده مستقل و قفل فیلدهای پایه همراه با روال تغییر رسمی | `positive` | `P03`, `P05`, `P06`, `P10`, `P11`, `M03` | `multi_role` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-03` | مدیریت دستی درخت WBS سه‌سطحی، بازترتیب و جابه‌جایی ایمن زیرشاخه | `positive` | `W01`, `W02`, `W04` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-04` | ایجاد قالب WBS و اعمال کپی مستقل روی پروژه مقصد بدون وابستگی مرجع | `positive` | `W06`, `M04` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-05` | پیش‌نمایش بدون تغییر داده برای فایل‌های MSP XML، Primavera P6 XER/XML و فایل مرجع real-data/plan.mpp | `positive` | `I01`, `I02`, `I05`, `I12`, `D01`, `D02` | `creator_planner` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json` |
-| `POS-06` | ورود قطعی و ثبت اولیه خط مبنا برای فایل مرجع real-data/plan.mpp و فیکسچرهای XML/XER | `positive` | `I03`, `I04`, `I07`, `I11`, `I13`, `I14`, `I15`, `I16`, `I17`, `I18`, `I19`, `I20`, `I21`, `S02` | `creator_planner` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json` |
-| `POS-07` | تکرار ورود در حالت الحاقی (Repeat Append Idempotency) بدون ایجاد رکورد یا خط مبنای تکراری | `positive` | `W05`, `I06`, `I08`, `S02` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/reconciliation.json` |
-| `POS-08` | جایگزینی ایمن (Replace Mode): مجاز روی پروژه بدون سابقه محافظت‌شده و مسدود روی پروژه دارای فعالیت/خط مبنای قفل‌شده | `positive` | `W05`, `S03` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-09` | تاریخ‌های ۴گانه فعالیت، مایلستون، گزارش تأخیر، خروجی گانت و گیت اعتبار مسیر بحرانی | `positive` | `S01`, `S04`, `S05`, `S06`, `S07`, `S08` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `POS-10` | چرخه عمر کامل وضعیت‌های پروژه (تعلیق/رفع تعلیق، تکمیل/لغو تکمیل، بایگانی/بازگردانی) با حفظ ۱۰۰٪ داده‌ها | `positive` | `P07`, `P08`, `P09`, `M03` | `multi_role` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/lifecycle-archived-restore-fa-1280.png` |
-| `NEG-01` | مسدودسازی تصویب پروژه دارای اطلاعات پایه ناقص (گیت‌های فعال‌سازی) | `negative` | `P04`, `P05` | `independent_approver` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-02` | مسدودسازی خودتصویبی ایجادکننده پروژه (جداسازی وظایف) | `access_boundary` | `P05` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-03` | رد کد تکراری WBS، نام خالی و ایجاد چرخه در درخت WBS | `negative` | `W01`, `W02` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-04` | مسدودسازی حذف گره WBS دارای زیرشاخه، فعالیت، پیشرفت، هزینه یا خط مبنای قفل‌شده | `negative` | `W03` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-05` | مسدودسازی جایگزینی کامل WBS (Replace) در صورت وجود سابقه محافظت‌شده | `negative` | `W05`, `S03` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-06` | رد فایل‌های نامعتبر، خالی، آسیب‌دیده، پسوند غیرمجاز، بیش از سقف حجم، چرخه وابستگی و بدون ساختار قابل ورود | `negative` | `I01`, `I07`, `I22` | `creator_planner` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-07` | تراکنش اتمی، Rollback کامل در خطای میانی و بازیابی در همان نشست بدون رکورد یتیم | `negative` | `I09`, `I22` | `creator_planner` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-1280.png` |
-| `NEG-08` | مهار استثناهای مفسر/مبدل خارجی، محدودیت منابع (cgroup/scratch) و بازیافت کارهای ناتمام | `operational` | `I03`, `I22` | `creator_planner` | `real_worker` | `pass` | `pending` | `specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json` |
-| `NEG-09` | حفظ زمینه کاربر/پروژه در صف، قفل هم‌زمانی هر پروژه و جلوگیری از اجرای موازی تکراری | `concurrency` | `I08`, `I10`, `I11` | `creator_planner` | `combined` | `pass` | `pending` | `specs/055-a7-p5-import-operations/evidence/runtime/concurrent-delivery.json` |
-| `NEG-10` | لغو ایمن کار صف‌بندی‌شده در صورت سلب مجوز کاربر یا بایگانی پروژه پیش از شروع پردازش | `access_boundary` | `I10`, `P09` | `viewer` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-11` | جداسازی کامل بین دو پروژه مستقل (Project A در برابر Project B) در API و مرورگر | `access_boundary` | `I10`, `P02` | `creator_planner` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-12` | محدودیت نقش مشاهده‌گر (Viewer / view_only) در برابر تغییر WBS و ورود فایل زمان‌بندی | `access_boundary` | `W01`, `I10` | `viewer` | `combined` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/viewer-readonly-fa-1280.png` |
-| `NEG-13` | استثنای مشاهده مدیر سامانه (System Admin) و انحصار عملیات لغو تکمیل و بازگردانی از بایگانی | `access_boundary` | `P07`, `P09`, `I10` | `system_admin` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `NEG-14` | فقط‌خواندنی بودن کامل پروژه بایگانی‌شده در برابر ویرایش اطلاعات پایه و ورود زمان‌بندی | `access_boundary` | `P09`, `M03` | `creator_planner` | `api_db` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml` |
-| `OPS-01` | چیدمان راست‌به‌چپ فارسی (fa RTL) در عرض‌های دسکتاپ (1280x800) و موبایل (390x844) بدون سرریز افقی | `bilingual_ux` | `I12`, `D03` | `creator_planner` | `browser_e2e` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-390.png` |
-| `OPS-02` | چیدمان چپ‌به‌راست انگلیسی (en LTR) در عرض‌های دسکتاپ (1280x800) و موبایل (390x844) بدون سرریز افقی | `bilingual_ux` | `I12`, `D03` | `creator_planner` | `browser_e2e` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-1280.png` |
-| `OPS-03` | دسترس‌پذیری صفحه‌کلید (Tab/Enter/Escape) و اعلام وضعیت زنده در دیالوگ‌های ورود و چرخه عمر | `bilingual_ux` | `I11`, `I12`, `P07`, `P09` | `creator_planner` | `browser_e2e` | `pass` | `pending` | `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-390.png` |
-| `OPS-04` | نگهداری ۷روزه بایت‌های فایل خام پس از اتمام کار و پاک‌سازی فقط‌بایت با حفظ متادیتا و تاریخچه | `operational` | `I10`, `I11`, `D04` | `system_admin` | `real_worker` | `pass` | `pending` | `specs/055-a7-p5-import-operations/evidence/runtime/independent-complete-matrix.json` |
+## POS-01 — ثبت پیش‌نویس با داده‌های مرجع و شش بخش منشور
 
-## خلاصه وضعیت اجرای سناریوها
+شناسه‌ها: P01, P02, P06, M01, M02؛ کانال: api_db؛ نتیجه فنی: pass.
 
-- **تعداد کل سناریوها**: ۲۸ سناریو (`10` مثبت، `14` منفی/مرزی/هم‌زمانی، `4` دوزبانه/عملیاتی)
-- **تعداد سناریوهای قبول‌شده فنی (`pass`)**: ۲۸ از ۲۸
-- **تعداد نقص‌های باز مسدودکننده (`defect_id`)**: `0`
-- **وضعیت تصمیم کارفرما (`employer_result`)**: `pending` (در انتظار بررسی و امضای نماینده محترم کارفرما)
+واحد سنجش ساخته‌شده روی پیش‌نویس پروژه ذخیره شد و شش بخش منشور بازخوانی شد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-02 — ارسال، منع خودتصویبی، گیت‌های فعال‌سازی و تصویب مستقل
+
+شناسه‌ها: P03, P04, P05؛ کانال: api_db؛ نتیجه فنی: pass.
+
+خودتصویبی 400 با submitter_cannot_approve بود. حذف مدیر، خالی کردن دامنه، و بودجه صفر هر کدام جداگانه activation_gates_failed دادند. سپس تصویب‌کننده مستقل پروژه را active کرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-03 — درخواست تغییر پس از تصویب، همراه با رد و سابقه قبل و بعد
+
+شناسه‌ها: P07؛ کانال: api_db؛ نتیجه فنی: pass.
+
+درخواست تصویب‌شده کارفرما را عوض کرد و previous_values، requested_by، decided_by و decided_at داشت. درخواست دوم رد شد و مقدار کارفرما ماند.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-04 — WBS حداقل سه‌سطحی، جابه‌جایی، وزن صددرصد و کپی مستقل الگو
+
+شناسه‌ها: W01, W02, W05, W06؛ کانال: api_db؛ نتیجه فنی: pass.
+
+درخت سه‌سطحی با مسئول و معیار تکمیل ساخته شد و وزن خواهر و برادرها 0.6 و 0.4، جمع 1.0، بود. وزن 0.5 اضافه هشدار exceeds 1.0 داد و حذف شد. انتقال گره به ریشه کد را به 1.2 و عمق را به 2 تغییر داد و 1.1.1 در عمق 3 ماند. الگو از save-as-template ذخیره و روی پروژه دوم اعمال شد. تغییر نام در الگو و پروژه مبدأ نام فونداسیون پروژه مقصد را عوض نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-05 — پیش‌نمایش plan.mpp و فیکسچرهای XML و XER بدون نوشتن
+
+شناسه‌ها: I01, I03, I08, D01؛ کانال: api_db؛ نتیجه فنی: pass.
+
+پیش‌نمایش plan.mpp، branch.xml، branch.xer و duration-test9.xml بدون نوشتن فعالیت انجام شد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-06 — ورود افزایشی plan.mpp و فیکسچرهای XML و XER
+
+شناسه‌ها: W07, S01, S02, S03, S04, I03, I04, I05, I10, I18, I21, I22؛ کانال: api_db؛ نتیجه فنی: pass.
+
+plan.mpp با 6/72/72 و تبدیل تأخیر 480 دقیقه در روز ذخیره شد. branch.xml و branch.xer هم وارد شدند. duration-test9.xml به‌خاطر مدت غیرروزانه و ردیف بدون والد چیزی ذخیره نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-07 — ورود مجدد همان فایل بدون ردیف یا خط مبنای تکراری
+
+شناسه‌ها: I06, S05؛ کانال: api_db؛ نتیجه فنی: pass.
+
+ورود مجدد plan.mpp مقدار nothing_changed را true برگرداند و شمارش روی 6 گره، 72 فعالیت، 72 رابطه و 1 خط مبنا ماند.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-08 — جایگزینی محافظت‌شده با baseline_replace_forbidden
+
+شناسه‌ها: W04, I07, S05؛ کانال: api_db؛ نتیجه فنی: pass.
+
+روی پروژه بدون سابقه، جایگزینی milestone.xml گره قدیمی را نرم‌حذف کرد. خط مبنای قفل‌شده روی plan.mpp، پیشرفت، گزارش دوره، درخواست تغییر زمان‌بندی و رکورد سنجش هر کدام با baseline_replace_forbidden رد شدند و شمارش ردیف‌ها تغییر نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-09 — چهار مجموعه تاریخ، مایلستون، تأخیر و مسیر بحرانی در جدول و گانت و WBS
+
+شناسه‌ها: S04, S07, S08؛ کانال: api_db؛ نتیجه فنی: pass.
+
+جزئیات فعالیت تاریخ واقعی و پیش‌بینی را برگرداند. گانت همان فعالیت را با delay_days و is_milestone داد و گزارش وضعیت مایلستون، تأخیر و مسیر بحرانی دارد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## POS-10 — چرخه تعلیق، تکمیل، بازگردانی تکمیل، آرشیو و بازیابی با حفظ داده
+
+شناسه‌ها: P06, P09, P10, P11, M03؛ کانال: combined؛ نتیجه فنی: pass.
+
+در بک‌اند همه شش گذار و رد دسترسی غیرمدیر آزموده شد؛ اطلاعات پروژه، شش بخش منشور، تمام رکوردهای WBS، فعالیت، رابطه، خط مبنا و فعالیت‌های خط مبنا پس از هر گذار با پیش از آن برابر بودند. مرورگر مستقل هر شش گذار و بازخوانی منشور پس از بازیابی را اجرا کرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-01 — رد کد تکراری پروژه و WBS در ورود دستی و ورود فایل
+
+شناسه‌ها: P02, W03, I06؛ کانال: api_db؛ نتیجه فنی: pass.
+
+کد تکراری پروژه و WBS از API با خطای مشخص رد شد. در XML و XER کدهای تکراری پس از حذف فاصله در پیش‌نمایش و پردازش کار با duplicate_in_file و شناسه ردیف رد شدند؛ داده‌ها در حالت افزایشی و جایگزینی بدون تغییر ماندند. ورود مجدد فایل سالم نیز رکورد یا خط مبنای تکراری نساخت.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_neg01_duplicate_codes.py`
+
+## NEG-02 — رد والد WBS متعلق به پروژه دیگر
+
+شناسه‌ها: W03؛ کانال: api_db؛ نتیجه فنی: pass.
+
+والد واقعی متعلق به پروژه B با invalid_parent رد شد و گرهی در پروژه A ساخته نشد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-03 — رد چرخه WBS و چرخه پیش‌نیاز
+
+شناسه‌ها: W03, S03, I14؛ کانال: api_db؛ نتیجه فنی: pass.
+
+چرخه خودارجاعی، دوطرفه و سه‌مرحله‌ای در XML و XER با structure_cycle رد شد؛ پیش‌نمایش، اجرای افزایشی و جایگزینی، محتوای WBS، فعالیت، رابطه، خط مبنا و ردیف‌های خط مبنا را حفظ کردند. API جایگزینیِ پروژه دارای فعالیت را زودتر با wbs_has_activities رد کرد. انتقال WBS زیر خودش، فرزند و نوه رد شد. سناریوی یکپارچه نیز رد یال سوم از API فعالیت را تأیید کرد.
+
+شواهد: `specs/056-a7-p6-delivery-acceptance/evidence/neg03-neg07-verification.md`
+
+## NEG-04 — رد پایان قبل از شروع و مدت صفر برای غیرمایلستون
+
+شناسه‌ها: S03؛ کانال: api_db؛ نتیجه فنی: pass.
+
+فعالیت با پایان قبل از شروع پاسخ 400 و کد impossible_planned_dates گرفت. فعالیت غیرمایلستون با duration_days برابر 0 پاسخ 400 و کد zero_duration_non_milestone گرفت و تعداد فعالیت‌های پروژه تغییر نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-05 — بازگشت اتمی پیش‌نیاز ناموجود و پیش‌نیاز خلاصه
+
+شناسه‌ها: S02, S03, I05, I14؛ کانال: api_db؛ نتیجه فنی: pass.
+
+ورود dangling-predecessor.xml رابطه‌ای با پیش‌نیاز تهی نساخت و شمارش رابطه‌ها تغییر نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-06 — رد فایل خالی، خراب، پسوند غلط، OLE ناقص، رمزدار و بزرگ‌تر از ۵۰ مگابایت
+
+شناسه‌ها: I01, I12, I13؛ کانال: combined؛ نتیجه فنی: pass.
+
+فایل خالی پیش از ساخت کار با empty_import رد شد. فایل‌های خراب، پسوند غلط، رمزدار، ناقص و بزرگ هم رد شدند و شمارش ماند.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-07 — انصراف پس از پیش‌نمایش بدون کار و بدون نوشتن
+
+شناسه‌ها: I08؛ کانال: combined؛ نتیجه فنی: pass.
+
+پیش‌نمایش XML و XER در API هیچ کار MSP/P6 یا تغییر داده‌ای نساخت. چهار آزمون مرورگر (هر قالب با Escape و با بازگشت سپس انصراف) موفق شدند؛ مقایسه مستقیم پایگاه داده، حفظ رکوردهای پروژه و زمان‌بندی و فهرست تمام کارهای همان پروژه، حتی کارهای پایان‌یافته، را ثابت کرد. هیچ درخواست شروع ورود ارسال نشد و بازگشایی ویزارد خالی بود.
+
+شواهد: `specs/056-a7-p6-delivery-acceptance/evidence/neg03-neg07-verification.md`
+
+## NEG-08 — بازیابی همان تلاش پس از قطع اتصال یا بارگذاری دوباره
+
+شناسه‌ها: I09, I15, I16؛ کانال: combined؛ نتیجه فنی: pass.
+
+ورود XML و XER از خود ویزارد شروع شد و worker واقعی در محیط ایزوله موقتاً پیش از پردازش نگه داشته شد. قطع واقعی ارتباط در مرورگر، بازیابی polling و reload همگی همان task_id را در وضعیت running بازیابی کردند. پس از آزادسازی worker همان کار done شد؛ در هر قالب فقط یک درخواست شروع و یک رکورد کار جدید ثبت شد. هیچ شناسه‌ای دستی به sessionStorage تزریق نشد.
+
+شواهد: `specs/056-a7-p6-delivery-acceptance/evidence/neg08-neg11-verification.md`
+
+## NEG-09 — قفل ارسال مجدد و کشیدن‌ورهاکردن در حین ورود
+
+شناسه‌ها: I16؛ کانال: api_db؛ نتیجه فنی: pass.
+
+ارسال دوباره همان فایل 202 و همان task_id را با کد import_already_active برگرداند و کار دومی ساخته نشد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-10 — لغو کار صف‌شده پس از سلب مجوز یا آرشیو یا حذف پروژه
+
+شناسه‌ها: I11, P08, I14؛ کانال: api_db؛ نتیجه فنی: pass.
+
+کار مشاهده‌گر با import_not_permitted شکست. کار صف‌شده پس از آرشیو پروژه با project_archived شکست و شمارش تغییر نکرد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-11 — جداسازی پروژه A و پروژه B
+
+شناسه‌ها: I11؛ کانال: combined؛ نتیجه فنی: pass.
+
+با حساب عادی فقط‌عضو A، کنترل مثبت دسترسی A موفق بود؛ WBS، فعالیت‌ها، گانت، گزارش وضعیت، خط مبنا و وضعیت کار ورود B رد شدند. شناسه فعالیت، خط مبنا و کار B در مسیر A نیز داده‌ای افشا نکرد و تلاش تغییر ردیف خط مبنای B هیچ رکوردی را تغییر نداد. صفحات واقعی گانت و گزارش وضعیت B در مرورگر با دسترسی ردشده و بدون محتوای خصوصی نمایش داده شدند.
+
+شواهد: `specs/056-a7-p6-delivery-acceptance/evidence/neg08-neg11-verification.md`
+
+## NEG-12 — مشاهده‌گر نتواند پروژه، WBS، خط مبنا یا ورود را تغییر دهد
+
+شناسه‌ها: I11؛ کانال: combined؛ نتیجه فنی: pass.
+
+مشاهده‌گر عادیِ عضو پروژه، خواندن پروژه، منشور، WBS، فعالیت‌ها، گانت، گزارش وضعیت و خط مبنا را با 200 انجام داد. در مرورگر فارسی 1280 و انگلیسی 390، ویرایش پروژه غیرفعال و ساخت/تصویب خط مبنا و ورود فایل پنهان بود. هر ۱۵ درخواست نوشتن مستقیم مرورگر (تغییر/حذف پروژه، منشور، خط مبنا، ردیف خط مبنا، WBS، فعالیت و پیش‌نمایش/شروع MSP و P6) با 403 رد شد. محتوای پروژه، منشور، داده‌های زمان‌بندی، خط مبنا و کارهای ورود پیش و پس از تلاش‌ها برابر ماند.
+
+شواهد: `specs/056-a7-p6-delivery-acceptance/evidence/neg12-verification.md`
+
+## NEG-13 — مدیر غیرعضو فقط مشاهده و undo-complete و restore
+
+شناسه‌ها: P09, P11, I11؛ کانال: api_db؛ نتیجه فنی: pass.
+
+مدیر غیرعضو WBS را خواند، نوشتن WBS برایش 403 بود، و undo-complete و restore را انجام داد.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## NEG-14 — قفل پروژه آرشیوشده روی منشور، WBS، فعالیت، خط مبنا، پیش‌نمایش و ورود
+
+شناسه‌ها: P08؛ کانال: api_db؛ نتیجه فنی: pass.
+
+روی پروژه آرشیوشده منشور، WBS، فعالیت، خط مبنا، پیش‌نمایش و ورود، از جمله برای مدیر دارای edit_wbs، رد شدند.
+
+شواهد: `apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py`
+
+## OPS-01 — فارسی و انگلیسی برای چرخه عمر، WBS و ورود
+
+شناسه‌ها: I15, I17؛ کانال: browser_e2e؛ نتیجه فنی: pass.
+
+ویزارد ورود و صفحه چرخه عمر و WBS در فارسی راست‌به‌چپ و انگلیسی چپ‌به‌راست دیده شدند.
+
+شواهد: `e2e/tests/a7-p6-delivery-acceptance.spec.ts`
+
+## OPS-02 — عرض ۱۲۸۰ و ۳۹۰ برای چرخه عمر، WBS و ورود
+
+شناسه‌ها: I17؛ کانال: browser_e2e؛ نتیجه فنی: pass.
+
+همان صفحه‌ها در 1280x800 و 390x844 بدون سرریز افقی بیش از ۲ پیکسل دیده شدند.
+
+شواهد: `e2e/tests/a7-p6-delivery-acceptance.spec.ts`
+
+## OPS-03 — صفحه‌کلید شامل Shift+Tab روی دیالوگ چرخه عمر و ورود
+
+شناسه‌ها: I17؛ کانال: browser_e2e؛ نتیجه فنی: pass.
+
+روی نوار چرخه عمر و دیالوگ بازگردانی، Shift+Tab و Tab فوکوس را برگرداند و Enter دیالوگ ورود را جلو برد.
+
+شواهد: `e2e/tests/a7-p6-delivery-acceptance.spec.ts`
+
+## OPS-04 — پیوستگی worker و مهار و پاک‌سازی هفت‌روزه روی هش فعلی
+
+شناسه‌ها: I09, I19, I20, D02؛ کانال: real_worker؛ نتیجه فنی: pass.
+
+ماتریس ۱۳گروهی worker واقعی، cgroup، نگهداری ۱۶۸ساعته و پاک‌سازی در ساعت ۱۶۹ روی تصویر نهایی pass شد؛ قطع broker و تحویل هم‌زمان نیز مستقل بازاجرا شدند.
+
+شواهد: `specs/055-a7-p5-import-operations/evidence/runtime/manifest.json`

@@ -1,6 +1,6 @@
 # A.7-P5 isolated import runtime
 
-The stack owns only database `a7p5_import`, private Redis and queues `a7p5-import` / `a7p5-maintenance`. API: `127.0.0.1:18000`; PostgreSQL: `55432`; Redis: `56379`; separate browser frontend: `15173`. Existing services on 8000/5173/5433/6379 are not changed.
+The stack owns only database `a7p5_import`, private Redis and queues `a7p5-import` / `a7p5-maintenance`. API: `127.0.0.1:18000`; PostgreSQL: `55434`; Redis: `56379`; separate browser frontend: `15173`. Existing services on 8000/5173/5433/6379 are not changed.
 
 ## Host preparation and build
 

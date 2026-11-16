@@ -127,6 +127,7 @@ export default function Register() {
                 <Input
                   id='reg-first'
                   name='first_name'
+                  autoComplete='given-name'
                   value={form.first_name}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, first_name: e.target.value }))
@@ -144,6 +145,7 @@ export default function Register() {
                 <Input
                   id='reg-last'
                   name='last_name'
+                  autoComplete='family-name'
                   value={form.last_name}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, last_name: e.target.value }))
@@ -162,6 +164,7 @@ export default function Register() {
               <PasswordInput
                 id='reg-password'
                 name='password'
+                autoComplete='new-password'
                 value={form.password}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, password: e.target.value }))
@@ -181,6 +184,7 @@ export default function Register() {
               <PasswordInput
                 id='reg-password-confirm'
                 name='password_confirm'
+                autoComplete='new-password'
                 value={form.password_confirm}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, password_confirm: e.target.value }))

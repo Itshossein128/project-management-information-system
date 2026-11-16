@@ -69,3 +69,7 @@ The user explicitly confirmed: “Keep omitting them with row warnings; store ze
 The actual employer-file regression now asserts that both شروع and پایان parse as zero days without an inexact-duration flag, have no parent, and each appears with its source UID and `activity_without_parent` in preview, structured result warnings, and final warning text. Neither activity is stored. The existing parented fixture separately asserts that zero-day شروع and پایان activities with a valid source package are stored as zero. This does not substitute a synthetic fixture for the employer-file omission proof.
 
 The same six-module command above was rerun after the new assertions: **49 passed, no skips, 2 dependency deprecation warnings**, in **7.29 seconds**, using the isolated reused pytest database. Native conversion ran, and the employer-file fingerprint assertion passed with SHA-256 `3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553`. T034 is complete and the [handoff](../handoff.md) declares the integrated baseline ready for P4, subject to the verification limits already stated.
+
+## NEG-01 downstream correction — 2026-11-14
+
+XER WBS and activity codes are trimmed before duplicate detection and storage, consistent with MSP XML. `schedule/tests/test_a7_neg01_duplicate_codes.py` tests duplicate-in-file, project-data preservation, and idempotent append. P3 fidelity and P6 parser regressions passed. The isolated real-worker matrix requires a fresh run for this modified schedule tree.

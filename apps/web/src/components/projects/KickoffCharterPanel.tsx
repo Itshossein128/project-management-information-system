@@ -72,8 +72,9 @@ export function KickoffCharterPanel({ projectId }: Props) {
       <div className="space-y-3">
         {fields.map(({ key, label }) => (
           <div key={key}>
-            <label className="mb-1 block text-sm text-muted-foreground">{label}</label>
+            <label htmlFor={`charter-${key}`} className="mb-1 block text-sm text-muted-foreground">{label}</label>
             <textarea
+              id={`charter-${key}`}
               className="min-h-[64px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
               disabled={!canEdit}
               value={values[key]}

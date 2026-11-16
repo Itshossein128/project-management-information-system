@@ -1,0 +1,801 @@
+{
+  "config": {
+    "argv": [
+      "/home/hossein/.nvm/versions/node/v25.2.1/bin/node",
+      "/home/hossein/Desktop/projects/building-management/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config=e2e/playwright.a7-p6.config.ts",
+      "--reporter=list,json",
+      "--grep=lifecycle suspend|lifecycle and WBS|schedule import wizard|cancel after preview|project-switch and viewer|human login|reference project:"
+    ],
+    "configFile": "/home/hossein/Desktop/projects/building-management/e2e/playwright.a7-p6.config.ts",
+    "rootDir": "/home/hossein/Desktop/projects/building-management/e2e/tests",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/hossein/Desktop/projects/building-management/test-results/a7-p6",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/hossein/Desktop/projects/building-management/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "a7-p6-delivery-acceptance.spec.ts",
+          "a7-delivery-journey.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "a7-delivery-journey.spec.ts",
+      "file": "a7-delivery-journey.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "A7 employer delivery",
+          "file": "a7-delivery-journey.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [
+            {
+              "title": "human login works for creator_planner",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2044,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:37.907Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-c99e5b5a4d98e7cc86bb",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "human login works for independent_approver",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1799,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:40.372Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-6a918572eeb53b82b1f1",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "human login works for viewer",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1701,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:42.187Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-290ca00cb16c788c3690",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "human login works for system_admin",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1580,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:43.903Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-9009644191eb530c8d3d",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "human login works for org_reference_steward",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1549,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:45.494Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-d1a4a43881c371e3122b",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 25,
+              "column": 9
+            },
+            {
+              "title": "reference project: UI creation, charter, approval, template, native MPP and lifecycle",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 300000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 63180,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "A7 JOURNEY: create project\n"
+                        },
+                        {
+                          "text": "A7 JOURNEY: build WBS\n"
+                        },
+                        {
+                          "text": "A7 JOURNEY: template saved\n"
+                        },
+                        {
+                          "text": "A7 JOURNEY: template copied\n"
+                        },
+                        {
+                          "text": "A7 JOURNEY: file chosen\n"
+                        },
+                        {
+                          "text": "A7 JOURNEY: MPP preview ready\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-16T03:31:47.057Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b06b33754a94681597b8-753f4f4c2980de121b48",
+              "file": "a7-delivery-journey.spec.ts",
+              "line": 34,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "a7-p6-delivery-acceptance.spec.ts",
+      "file": "a7-p6-delivery-acceptance.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "lifecycle suspend, resume, complete, undo, archive and restore in browser (POS-10)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3842,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:32:50.285Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-68d49e54dcfe9934c552",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 55,
+          "column": 5
+        },
+        {
+          "title": "lifecycle and WBS screens (fa 1280px)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2271,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:32:54.145Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-1d75fc7754e77c0e6afa",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 175,
+          "column": 7
+        },
+        {
+          "title": "lifecycle and WBS screens (fa 390px)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1634,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:32:56.431Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-48f17bd97354cd04942b",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 175,
+          "column": 7
+        },
+        {
+          "title": "lifecycle and WBS screens (en 1280px)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1952,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:32:58.082Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-ac18e8339c2d84a1cabd",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 175,
+          "column": 7
+        },
+        {
+          "title": "lifecycle and WBS screens (en 390px)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1716,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:00.056Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-a08b71c9ddb6205bf622",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 175,
+          "column": 7
+        },
+        {
+          "title": "schedule import wizard, invalid upload recovery, and responsive layout (fa 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9726,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:01.787Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-a839a6edbed3a6387e6b",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 215,
+          "column": 7
+        },
+        {
+          "title": "schedule import wizard, invalid upload recovery, and responsive layout (fa 390px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8749,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:11.530Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-7e232da2909c93258f6e",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 215,
+          "column": 7
+        },
+        {
+          "title": "schedule import wizard, invalid upload recovery, and responsive layout (en 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9673,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:20.292Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-a8ff50a53a9f5420b857",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 215,
+          "column": 7
+        },
+        {
+          "title": "schedule import wizard, invalid upload recovery, and responsive layout (en 390px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8738,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:29.981Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-ba3949c2b23aeedea9f8",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 215,
+          "column": 7
+        },
+        {
+          "title": "cancel after preview creates no import job (msp, escape) (NEG-07)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7046,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:38.739Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-4a422afd85311f40d02d",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 354,
+          "column": 5
+        },
+        {
+          "title": "cancel after preview creates no import job (msp, cancel) (NEG-07)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6519,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:45.796Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-d8c3ec0b1f9e541df0e2",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 354,
+          "column": 5
+        },
+        {
+          "title": "cancel after preview creates no import job (p6, escape) (NEG-07)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6271,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:52.326Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-c5e763fbcfebcb6e6c96",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 354,
+          "column": 5
+        },
+        {
+          "title": "cancel after preview creates no import job (p6, cancel) (NEG-07)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6624,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:33:58.609Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-86c8a13188674e8aed7e",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 354,
+          "column": 5
+        },
+        {
+          "title": "project-switch and viewer account-switch isolation in browser (I10, NEG-11, NEG-12)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2005,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-16T03:34:05.245Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5644294c9ffe128d1472-31dbd2bce4001b27a30c",
+          "file": "a7-p6-delivery-acceptance.spec.ts",
+          "line": 539,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-16T03:31:37.381Z",
+    "duration": 149996.641,
+    "expected": 20,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
