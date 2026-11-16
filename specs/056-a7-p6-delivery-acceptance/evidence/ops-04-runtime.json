@@ -1,0 +1,27 @@
+{
+  "status": "pass",
+  "source_commit": "2090da13f90756e9512070ffcd4feb87dcf5fd7a",
+  "api_image_digest": "sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066",
+  "schedule_tree_sha256": "095000ea6961e55eb8b9c0a8ed67692a826bda99ba602a28321c1e06abb1dc10",
+  "matrix_groups": {
+    "valid_native": "pass",
+    "unreadable": "pass",
+    "admitted_failure": "pass",
+    "timeout": "pass",
+    "resource_limit": "pass",
+    "duplicate_delivery": "pass",
+    "worker_loss": "pass",
+    "cleanup": "pass",
+    "expiry": "pass",
+    "request_intent": "pass",
+    "maintenance_budget": "pass",
+    "scratch_quarantine": "pass",
+    "healthy_follow_up": "pass"
+  },
+  "runtime_report": "specs/055-a7-p5-import-operations/evidence/runtime/manifest.json",
+  "broker_report": "specs/055-a7-p5-import-operations/evidence/runtime/broker-outage.json",
+  "concurrent_report": "specs/055-a7-p5-import-operations/evidence/runtime/concurrent-delivery.json",
+  "retention_boundary_hours": 168,
+  "purge_test_hours": 169,
+  "age_acceleration": "Disposable terminal timestamps are aged explicitly; actual worker execution, cgroup containment, purge and retained history are real. This is not a claim of waiting seven days."
+}

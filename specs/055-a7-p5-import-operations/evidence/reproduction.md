@@ -1,3 +1,5 @@
+> **Current A.7 delivery overlay — 2026-11-16:** source `2090da13f90756e9512070ffcd4feb87dcf5fd7a`, API image `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`, schedule digest `095000ea6961e55eb8b9c0a8ed67692a826bda99ba602a28321c1e06abb1dc10`. Current matrix 13/13, broker/concurrent checks, 110 host regressions and 29 final browser checks pass; see `../056-a7-p6-delivery-acceptance/evidence/release-verification.json`. Earlier versions/independent-operator entries below are historical. Current final runs are implementer-run and do not imply employer sign-off.
+
 # Independent reproduction
 
 ## Implementer rerun — not a second operator

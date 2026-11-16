@@ -106,17 +106,17 @@
     "sha256": "8c8dc05c56e3d8b7f69bc45bed2c6756e56116d6c1aff35d10fc8d05e6b375d4",
     "size_bytes": 58666,
     "source_counts": {
-      "format": "xml_schedule",
+      "format": "Microsoft Project XML (MSPDI), not Primavera P6 XML",
       "verified_equivalence_fixture": true
     },
     "preview_counts": {
-      "wbs_count": 1,
-      "activity_count": 5,
+      "wbs_count": 0,
+      "activity_count": 0,
       "relation_count": 0
     },
     "stored_counts": {
-      "wbs_count": 1,
-      "activity_count": 5,
+      "wbs_count": 0,
+      "activity_count": 0,
       "relation_count": 0
     },
     "repeat_append_result": {
@@ -127,7 +127,11 @@
       "extra_baselines": 0
     },
     "expected_warning_codes": [
-      "calendar_not_applied"
-    ]
+      "calendar_not_applied",
+      "duration_not_whole_days",
+      "activity_without_parent",
+      "empty_import"
+    ],
+    "display_name": "MSP XML fractional-duration/parentless negative-equivalence fixture (legacy ID retained)"
   }
 ]

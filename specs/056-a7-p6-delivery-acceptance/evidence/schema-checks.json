@@ -1,0 +1,7 @@
+{
+  "status": "pass",
+  "source_commit": "2090da13f90756e9512070ffcd4feb87dcf5fd7a",
+  "scoped_makemigrations_exit_code": 0,
+  "blueprint_tables": "40/40",
+  "execution_output": "System check identified some issues:\n\nWARNINGS:\n?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported\nNo changes detected in apps 'schedule', 'projects', 'wbs', 'project_templates'\nSystem check identified some issues:\n\nWARNINGS:\n?: (django_ratelimit.W001) cache backend django.core.cache.backends.redis.RedisCache is not officially supported\nFound 40/40 blueprint tables.\nExtension tables present: 25\nAll blueprint tables present.\n"
+}

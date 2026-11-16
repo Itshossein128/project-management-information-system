@@ -1,98 +1,28 @@
-# Quickstart: Integrated Acceptance and Employer Delivery Package (A.7-P6)
+# Reproduce the A.7 acceptance release
 
-**Feature Directory**: `specs/056-a7-p6-delivery-acceptance`  
-**Direct Audit IDs**: `D03`, `D04`  
-**Contract Reference**: [`contracts/delivery-acceptance.md`](./contracts/delivery-acceptance.md)  
-**Data Model Reference**: [`data-model.md`](./data-model.md)
+نسخه منبع: `2090da13f90756e9512070ffcd4feb87dcf5fd7a`؛ تصویر API: `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`؛ محیط: `a7p5-import:API18000/PostgreSQL55434/Redis56379/Web15173`؛ Django: `4.2.11`.
 
----
+Use Linux/systemd with cgroup v2, Docker Compose, native PostgreSQL/Redis for host regressions, Node and pnpm. Preserve private environments. Do not run fault-control suites concurrently or against a shared/production database.
 
-## 1. Record Candidate Version Identity
-
-Before running any acceptance check, record the exact repository commit, working-tree status, and reference file digest from `/home/hossein/Desktop/projects/building-management`:
+From repository root:
 
 ```bash
-git rev-parse HEAD
-git status --short
-sha256sum real-data/plan.mpp
-```
-
-- Expected `real-data/plan.mpp` SHA-256: `3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553` (`777216` bytes).
-- Never modify `output/a7-requirements-2026-11-10/requirements.json` or `report.md`.
-- Keep Django pinned to `4.2.11` (`apps/api/.venv/bin/python -c "import django; assert django.__version__ == '4.2.11'"`).
-
----
-
-## 2. Verify Predecessor Gates (`051`–`055`)
-
-Verify that all 5 predecessor directories (`specs/051-a7-p1-project-reference` through `specs/055-a7-p5-import-operations`) contain `spec.md`, `handoff.md`, `evidence/verification.md`, and `traceability.md`, and that P5's `T049` second-operator reproduction is recorded in `specs/055-a7-p5-import-operations/evidence/reproduction.md`.
-
----
-
-## 3. Execute Integrated Backend & Reference Reconciliation Suite (`POS-01`–`POS-10`, `NEG-01`–`NEG-14`)
-
-Ensure native PostgreSQL (`:5433`) and Redis (`:6379`) are running:
-
-```bash
-sudo pg_ctlcluster 16 main start
-sudo redis-server /etc/redis/redis.conf --daemonize yes
-```
-
-Run the integrated P1–P6 backend acceptance and non-regression suite on an isolated PostgreSQL test database:
-
-```bash
-cd apps/api/core
-set -a && source ../../../.env && set +a
-../.venv/bin/python -m pytest \
-  projects/tests/test_project_registration_api.py \
-  projects/tests/test_charter_lifecycle.py \
-  projects/tests/test_project_lifecycle.py \
-  projects/tests/test_wbs_api.py \
-  projects/tests/test_wbs_move_api.py \
-  projects/tests/test_wbs_DragDrop_integration.py \
-  project_templates/tests.py \
-  schedule/tests/test_a7_p2_import_safety.py \
-  schedule/tests/test_a7_p3_import_fidelity.py \
-  schedule/tests/test_a7_p4_import_experience.py \
-  schedule/tests/test_a7_p5_import_api.py \
-  schedule/tests/test_a7_p5_lifecycle.py \
-  schedule/tests/test_a7_p5_migrations.py \
-  schedule/tests/test_a7_p5_preparation.py \
-  schedule/tests/test_a7_p5_recovery.py \
-  schedule/tests/test_a7_p5_retention.py \
-  schedule/tests/test_a7_p5_artifact_privacy.py \
-  schedule/tests/test_a7_p5_runtime_preflight.py \
-  schedule/tests/test_a7_p5_runtime_manifest.py \
-  schedule/tests/test_a7_p6_delivery_acceptance.py \
-  --junitxml=../../../specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml \
-  -q
-```
-
----
-
-## 4. Verify Real Worker & Containment Continuity (`OPS-04`)
-
-Confirm that the schedule runtime source tree matches the P5 acceptance manifest (`specs/055-a7-p5-import-operations/evidence/runtime/manifest.json` and `independent-complete-matrix.json`, schedule-tree SHA-256 `52669f25e2271f43a8fdd93501a7175d8bb695faa697618bcccdfe0a58b26e70`, image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5`). If any runtime file under `apps/api/core/schedule/` changed, re-run `ops/a7-p5/run-acceptance.sh` against the isolated `a7p5-import` Compose stack.
-
----
-
-## 5. Execute Real Browser End-to-End Acceptance Suite (`POS`, `NEG`, `OPS-01`–`OPS-03`)
-
-Run the Playwright end-to-end acceptance suite against the live API and web server (covering positive reference journey, P1 carry-over complete/undo-complete and archive/restore browser clicks, P4 carry-over account/project-switch observation, negative/adverse UX, keyboard navigation, and bilingual `fa` RTL / `en` LTR at `1280x800` and `390x844`):
-
-```bash
-pnpm exec playwright test e2e/tests/a7-p6-delivery-acceptance.spec.ts
+ops/a7-p5/run-acceptance.sh
+python3 ops/a7-p5/check-broker-outage.py
+python3 ops/a7-p5/check-concurrent-delivery.py
+ops/a7-p5/check-host.sh
+ops/a7-p5/check-delivery.sh
 pnpm typecheck
-```
-
----
-
-## 6. Validate the Employer Delivery Package (`D04`)
-
-Run the deterministic package validator to verify that all 56 audit dispositions, 28 scenario records, reference schedule reconciliation totals, 5 role personas, secret-scan rules, and unsigned employer sign-off fields satisfy [`data-model.md`](./data-model.md) and [`contracts/delivery-acceptance.md`](./contracts/delivery-acceptance.md):
-
-```bash
+VITE_API_BASE_URL=http://127.0.0.1:18000/api pnpm build
+# Separate terminal; test the compiled release:
+HOST=127.0.0.1 PORT=15173 pnpm --filter web start
+# Main terminal:
+ops/a7-p5/check-delivery-browser.sh
 python3 specs/056-a7-p6-delivery-acceptance/evidence/validate_package.py
 ```
 
-Expected exit code: `0` (`technical_readiness = "ready_for_acceptance"`, `employer_decision = "pending"`, `0` exposed secrets).
+The host scripts source `.env` but create uniquely named test databases. check-delivery runs project registration/lifecycle/restore/concurrency, WBS/template and schedule regressions; check-host runs containment-specific P5 regressions. Fresh migration seeds are important: a reused database flushed by transactional tests can lack permission catalog rows and produce misleading 403s. These test settings do not prove real background execution; the separate 13-group matrix, broker outage, duplicate-delivery and browser recovery tests do.
+
+The browser runner provisions distinct human logins, then runs positive/bilingual/cancellation, ordinary-planner recovery/isolation, ordinary-viewer and P5 retry suites sequentially. It saves credentials only in mode-0600 ignored files and secret-free JSON reports in evidence. Current server must use the matching build/API image. A passing package validator requires report checksums, zero failures/skips, matching source files and schedule-tree digest, all 56 faithful audit rows and all 28 scenarios pass. Employer fields remain pending/blank.
+
+`release-verification.json` is the final verification lock; changing tested source requires rerunning the affected checks and regenerating this lock, never copying old success labels. The original November-10 requirements snapshot stays untouched. Historical P5 independent-operator reproduction is retained separately; this final current-version execution is implementer-run. For delivery artifact loading and checksums use the bundle's README-fa.md.

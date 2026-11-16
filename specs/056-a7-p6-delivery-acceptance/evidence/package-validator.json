@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "audit_items_verified": 56,
+  "scenarios_verified": 28,
+  "reconciliation_fixtures_verified": 4,
+  "secret_scan": "clean",
+  "technical_readiness": "ready_for_acceptance",
+  "employer_decision": "pending"
+}

@@ -1,121 +1,19 @@
-# Verification Evidence: Integrated Acceptance and Employer Delivery Package (A.7-P6)
+# Final A.7 verification — 2026-11-16
 
-**Phase**: `A.7-P6` (`specs/056-a7-p6-delivery-acceptance`)  
-**Direct Audit IDs**: `D03`, `D04` (plus integrated closure of all 56 A.7 audit items `P01`–`P11`, `W01`–`W07`, `M01`–`M04`, `S01`–`S08`, `I01`–`I22`, `D01`–`D04`)  
-**Stage**: Implementation & Acceptance Verification Complete (`/speckit-implement` / `/speckit-converge`)  
-**Date**: 2026-11-13
+Source candidate: `2090da13f90756e9512070ffcd4feb87dcf5fd7a`. Base develop HEAD remains `d459cc0c25601e347421d1f2edab196d35f5936f`. The shared Git index was preserved when creating the candidate. Actual API image: `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`; compiled web image: `sha256:6e12b7393c24d35cd85b7466633808c681c4d8b82c9a87fcc952cad68548e10d`. Django 4.2.11, Node v25.2.1. Exact source/image/report binding: release-verification.json.
 
-## 1. Knowledge & Graph Context Verification
+- Main scoped regression: **732 passed**, zero failures/errors/skips. It covers registration/approval/gates/CR/charter, archive/undo/retry and actual PostgreSQL concurrency, WBS/templates, schedule/import and file validators. The separately run **20 migration checks passed** on another fresh DB; these overlap the main suite and are an extra recheck, not distinct acceptance requirements.
+- Host P5 regression: **110 passed**, zero failures/skips, including actual helper containment and storage/migration safeguards.
+- Browser on exported compiled web/API images: **29 passed** (20 general/reference/login/bilingual/cancel, 3 real-worker recovery/isolation, 2 viewer, 4 retry). No skipped/flaky/unexpected tests. Human login was exercised for all five separate personas. Native FileChooser selected the unchanged employer MPP. Full WBS metadata/move/template, safe replace, idempotent repeat and all six lifecycle transitions retain charter/schedule data.
+- Real-worker matrix: **13/13 pass**, zero not_run; eager and inline preparation off, actual cgroup memory/pids/time/scratch containment, process termination, recovery/one-time commit, retention and cleanup. The 168-hour retention/169-hour purge boundary uses explicitly aged disposable timestamps, not seven elapsed days.
+- Actual private broker outage and two-worker concurrent MSP/P6 delivery: pass; same job commits once and healthy follow-up succeeds.
+- Fresh installation: new containers, separate verified network, empty private PostgreSQL/Redis, offline existing images, five-persona provisioning and native MPP worker import all pass. Counts are 6 WBS / 72 activities / 72 relations / 1 working baseline / retained charter. The temporary stack/volume/scratch are removed. An initial smoke harness accidentally retained Compose's expanded original network name; it was corrected to a unique network and DNS/container IP assertions before the successful rerun. It did not reset the existing acceptance or shared databases. The harness also needed an explicit direct-localhost HTTP client and a new empty project: replacement of the seeded activity-bearing demo is correctly refused by the safety contract.
+- `pnpm typecheck` and the acceptance-origin production build pass. 1073 API Python files in the running image match the frozen source; all 293 compiled frontend files match the exported web image. web-checks.json records checksums and exact Node/image identity.
 
-1. **Knowledge CLI Context Lookup**:
-   - Checked `python3 scripts/knowledge/cli.py status` and refreshed `.knowledge/index.sqlite3` via `python3 scripts/knowledge/cli.py index` (`"mode": "lexical"`).
-   - Ran `python3 scripts/knowledge/cli.py context "/speckit-specify @[output/a7-requirements-2026-11-10/speckit-prompts/06-delivery-acceptance.md]" --lexical` and `python3 scripts/knowledge/cli.py context "$(cat output/a7-requirements-2026-11-10/speckit-prompts/06-delivery-acceptance.md)" --lexical --format markdown`.
-   - Result: `fresh: true`, `abstained: false`, `requires_clarification: false`.
-2. **Graphify Query**:
-   - Executed MCP `graphify:query_graph` with question: `"project lifecycle charter change request wbs template schedule baseline msp p6 import acceptance"` (2,382 connected nodes traversed).
+All 56 original audit titles/criteria are preserved in the final ledger. M03 uses the approved fixed project state machine. M04 is a conditional scope disposition: no generic dynamic-table/Excel flow is used by this A.7 journey; general Excel and independent WBS Excel import were not tested or claimed. Calendar execution and universal MPP/P6-version compatibility are not promised; structured omission warnings and the exact corpus/reconciliation figures are explicit.
 
-## 2. Predecessor Gate Audit (`051`–`055`)
+The four failures found in the prior broad run were obsolete test expectations for zero-budget activation, archived deletion and historical-schema field comparisons. They were corrected with negative assertions and full reruns. Product remediation was strengthened so nonpositive existing budgets can be repaired by an independently approved bounded CR; invalid repair values are refused. Archived generic/stale writes remain denied under the project root lock. No known open in-scope technical defect remains after these checks.
 
-| Phase | Directory | Inspected Files | Gate Status |
-| --- | --- | --- | --- |
-| `A.7-P1` | `specs/051-a7-p1-project-reference` | `spec.md`, `handoff.md`, `traceability.md`, `evidence/verification.md` | **Ready & Verified**: All P1 lifecycle, charter, change-request, reference catalog, and WBS tests pass; carry-over browser clicks (`complete` → `undo-complete` and `archive` → `restore`) verified in P6 Playwright E2E. |
-| `A.7-P2` | `specs/052-a7-p2-import-safety` | `spec.md`, `handoff.md`, `traceability.md`, `evidence/verification.md` | **Ready & Verified**: Standalone `traceability.md` backfilled (`T003`); all 49 P2 import safety, idempotency, replacement guard, and rollback tests pass. |
-| `A.7-P3` | `specs/053-a7-p3-import-fidelity` | `spec.md`, `handoff.md`, `traceability.md`, `evidence/verification.md` | **Ready & Verified**: Standalone `traceability.md` backfilled (`T004`); `T034` stakeholder policy verified against `real-data/plan.mpp` (`6` WBS, `72` activities, `72` relationships). |
-| `A.7-P4` | `specs/054-a7-p4-import-experience` | `spec.md`, `handoff.md`, `traceability.md`, `evidence/verification.md` | **Ready & Verified**: All P4 wizard, error-code, and bilingual UX tests pass; carry-over live account-switch and project-switch browser isolation verified in P6 Playwright E2E. |
-| `A.7-P5` | `specs/055-a7-p5-import-operations` | `spec.md`, `handoff.md`, `tasks.md`, `traceability.md`, `evidence/verification.md`, `evidence/reproduction.md` | **Ready & Verified (`T049` Closed)**: Independent second-operator subagent (`conversationId: de389ce3-d1d2-4991-b379-f9c719ecfb7d`) completed clean reproduction of `quickstart.md` on candidate image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5` (13/13 runtime matrix groups, `check-broker-outage.py`, `check-concurrent-delivery.py`, 4/4 Playwright retry tests, `maintain_import_jobs`, `makemigrations --check`, 110/110 `check-host.sh`, `pnpm typecheck`). All 64/64 P5 tasks (`T001`–`T064`) are `[x]`. |
+Technical readiness is ready_for_acceptance. Employer decision is pending and signature fields remain blank. Historical P5 independent-operator evidence is retained as historical; these final current-version runs are implementer-run. The employer's own walkthrough and decision are not inferred from automated tests. The original November-10 audit remains untouched.
 
-## 3. Executed Verification Suites & Evidence Artifacts
-
-### 3.1 Combined P1–P5 Non-Regression Backend Suite (`T008`)
-
-- **Command**:
-  ```bash
-  export TEST_DATABASE_NAME="test_a7p5_p6_regression_$(date +%s)_$$"
-  export AUDIT_LOG_ASYNC=false CELERY_TASK_ALWAYS_EAGER=true
-  export IMPORT_CGROUP_ROOT=/sys/fs/cgroup/system.slice/a7p5-containment.service
-  export A7P5_CGROUP_HOST_ROOT="$IMPORT_CGROUP_ROOT"
-  export IMPORT_SCRATCH_ROOT=/run/a7p5-host-regression
-  sudo -n --preserve-env=DATABASE_URL,REDIS_URL,TEST_DATABASE_NAME,AUDIT_LOG_ASYNC,CELERY_TASK_ALWAYS_EAGER,IMPORT_CGROUP_ROOT,A7P5_CGROUP_HOST_ROOT,IMPORT_SCRATCH_ROOT env PYTHONDONTWRITEBYTECODE=1 \
-    apps/api/.venv/bin/python -m pytest -c apps/api/core/pytest.ini \
-    apps/api/core/projects/tests/test_a7_p1_reference_project.py \
-    apps/api/core/projects/tests/test_project_status_undo.py \
-    apps/api/core/projects/tests/test_project_archive_restore.py \
-    apps/api/core/projects/tests/test_project_registration_lifecycle.py \
-    apps/api/core/projects/tests/test_project_contractor_ref.py \
-    apps/api/core/projects/tests/test_person_directory_acl.py \
-    apps/api/core/wbs/tests/test_services.py \
-    apps/api/core/schedule/tests/test_a7_p2_import_safety.py \
-    apps/api/core/schedule/tests/test_a7_p3_import_fidelity.py \
-    apps/api/core/schedule/tests/test_a7_p4_import_experience.py \
-    apps/api/core/schedule/tests/test_a7_p5_*.py \
-    apps/api/core/schedule/tests/test_msp_import.py \
-    apps/api/core/schedule/tests/test_p6_import.py \
-    apps/api/core/schedule/tests/test_mpp_import.py \
-    apps/api/core/schedule/tests/test_mpp_equivalence.py \
-    -q --tb=short -p no:cacheprovider \
-    --junitxml=specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml
-  ```
-- **Result**: `193 passed, 0 failed, 0 skipped in 183.80s (0:03:03)` (plus `69 passed` in `test_project_archive_restore_concurrency.py` and `test_project_status_undo_concurrency.py` in `644.41s (0:10:44)`, and rebuilt `a7p5-import` matrix `run-acceptance.sh` on `sha256:0573a9bf635af33bb7b43f601d64df6a521beafd5e77bd2c376a4572710ae3ed` returned `{"status": "ready", "not_run": []}`)
-- **Evidence**: `specs/056-a7-p6-delivery-acceptance/evidence/p1-p5-regression-junit.xml`
-
-### 3.2 Integrated P6 Positive & Negative Acceptance Suite (`T011`, `T013`, `T014`)
-
-- **Command**:
-  ```bash
-  apps/api/.venv/bin/python -m pytest -c apps/api/core/pytest.ini \
-    apps/api/core/schedule/tests/test_a7_p6_delivery_acceptance.py \
-    --junitxml=specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml
-  ```
-- **Result**: `2 passed in 84.68s (0:01:24)`
-  - `test_a7_p6_positive_reference_journey_pos01_to_pos10`: `PASSED` (covers `POS-01` through `POS-10`, including `real-data/plan.mpp` 6 WBS / 72 activities / 72 relations / 1 initial baseline reconciliation, repeat append idempotency, safe replacement guard, 4-way dates/Gantt/CPM validity gate, and full `suspend` ↔ `resume`, `complete` → `undo-completion`, `archive` → `restore` lifecycle transitions with 100% data preservation).
-  - `test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14`: `PASSED` (covers `NEG-01` through `NEG-14` across 5 separated role personas with zero unintended data mutations).
-- **Evidence**: `specs/056-a7-p6-delivery-acceptance/evidence/p6-pytest-junit.xml`
-
-### 3.3 Real-Stack Playwright Browser E2E Acceptance Suite (`T015`, `T016`)
-
-- **Command**:
-  ```bash
-  A7P6_BROWSER_FIXTURES="$PWD/ops/a7-p5/.runtime-p6-auth.json" \
-    pnpm exec playwright test --config=e2e/playwright.a7-p6.config.ts
-  ```
-- **Result**: `6 passed (52.7s)` (plus `47 passed (1.2m)` in `pnpm exec playwright test --config=e2e/playwright.activation.config.ts --project=chromium-desktop`)
-  1. `lifecycle complete -> undo_completion and archive -> restore in browser (POS-10)`: `PASSED` (`3.5s`)
-  2. `schedule import wizard, invalid upload recovery, and responsive layout (fa 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`9.1s`)
-  3. `schedule import wizard, invalid upload recovery, and responsive layout (en 1280px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`9.1s`)
-  4. `schedule import wizard, invalid upload recovery, and responsive layout (fa 390px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`8.5s`)
-  5. `schedule import wizard, invalid upload recovery, and responsive layout (en 390px) (POS-05, POS-06, NEG-06, NEG-07, OPS-01..03)`: `PASSED` (`8.3s`)
-  6. `project-switch and viewer account-switch isolation in browser (I10, NEG-11, NEG-12)`: `PASSED` (`1.9s`)
-- **Screenshots Captured**:
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/lifecycle-completed-undo-fa-1280.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/lifecycle-archived-restore-fa-1280.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-1280.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-1280.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-fa-390.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/import-en-390.png`
-  - `specs/056-a7-p6-delivery-acceptance/evidence/screenshots/viewer-readonly-fa-1280.png`
-
-### 3.4 Frontend Typecheck (`T015`)
-
-- **Command**: `pnpm typecheck` (`react-router typegen && tsc`)
-- **Result**: Exited with code `0` (`0` errors).
-
-### 3.5 Deterministic Delivery Package Validator (`T019`)
-
-- **Command**: `python3 specs/056-a7-p6-delivery-acceptance/evidence/validate_package.py`
-- **Output**:
-  ```json
-  {
-    "status": "passed",
-    "audit_items_verified": 56,
-    "scenarios_verified": 28,
-    "reconciliation_fixtures_verified": 4,
-    "secret_scan": "clean",
-    "technical_readiness": "ready_for_acceptance",
-    "employer_decision": "pending"
-  }
-  ```
-
-## 4. Separation of Technical Readiness vs. Human Employer Sign-Off (`FR-009`)
-
-- **Technical Readiness (`technical_readiness`)**: `ready_for_acceptance` — All 56 audit items (`P01`–`D04`) are `تأیید فنی` on the integrated candidate version, all 28 acceptance scenarios (`POS-01`–`POS-10`, `NEG-01`–`NEG-14`, `OPS-01`–`OPS-04`) have `technical_result = "pass"`, and `0` blocking defects remain open.
-- **Human Employer Decision (`employer_decision`)**: `pending` — `employer_signer_role` and `employer_signed_at` in `evidence/package.json` and `evidence/minutes.md` are intentionally left blank for the employer representative's independent execution of `guide.md`.
+The package validator and six adversarial negative controls pass; altered audit meaning, stale versions, unrun scenarios, changed evidence hashes, incomplete source inventories and genuinely failing rehashed JUnit reports are rejected. Original files are restored after every negative control. Web build/typecheck and scoped schema-check output is embedded in their versioned JSON reports, so ignored local log files are not required to review the delivered evidence.

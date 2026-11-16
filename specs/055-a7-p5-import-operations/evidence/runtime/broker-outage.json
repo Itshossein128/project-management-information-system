@@ -1,22 +1,24 @@
 {
-  "job": "d21fa655-a397-43fa-96bc-c784427e96e3",
-  "project": "ccb754c9-0071-4c9c-a891-16775e79fdf5",
-  "user": "8c84eee3-2823-4d66-b644-1936fa8ae546",
-  "http_elapsed_seconds": 8.784679584990954,
-  "dispatch_deadline": "2026-11-13T13:09:33.080550+00:00",
+  "job": "c458b157-14b1-4cab-98d7-54342472f069",
+  "project": "e7905cb6-dc9a-44f3-9c79-7f56cb611da6",
+  "user": "1e2abe9b-b399-43f2-82df-924292ed0441",
+  "http_elapsed_seconds": 8.869286312998156,
+  "dispatch_deadline": "2026-11-16T03:32:50.281112+00:00",
   "status": "pass",
   "terminal": "done",
   "recovery": {
     "operation": "recovery",
     "status": "ok",
-    "cutoff": "2026-11-13T13:04:46.568031+00:00",
-    "n": 0,
-    "processed_ids": [],
+    "cutoff": "2026-11-16T03:28:00.442969+00:00",
+    "n": 1,
+    "processed_ids": [
+      "c458b157-14b1-4cab-98d7-54342472f069"
+    ],
     "deferred": [],
     "unfinished": [],
-    "elapsed_seconds": 0.009435662999749184,
-    "bound_seconds": 540
+    "elapsed_seconds": 0.11333368399937171,
+    "bound_seconds": 551
   },
-  "healthy_follow_up": "b9fc4792-9d3e-4299-8578-6a3a68d27b9d",
+  "healthy_follow_up": "86a6fd8d-6387-4059-a7bd-677111d5f437",
   "fixed_dispatch_deadline": true
 }

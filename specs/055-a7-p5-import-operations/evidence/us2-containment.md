@@ -1,3 +1,5 @@
+> **Current A.7 delivery overlay — 2026-11-16:** source `2090da13f90756e9512070ffcd4feb87dcf5fd7a`, API image `sha256:0e4bef19068e6b36da9f7de2169486cd3fe73b7ec1f2f3a1c96ae60a62067066`, schedule digest `095000ea6961e55eb8b9c0a8ed67692a826bda99ba602a28321c1e06abb1dc10`. Current matrix 13/13, broker/concurrent checks, 110 host regressions and 29 final browser checks pass; see `../056-a7-p6-delivery-acceptance/evidence/release-verification.json`. Earlier versions/independent-operator entries below are historical. Current final runs are implementer-run and do not imply employer sign-off.
+
 # US2: effective containment
 
 The rebuilt image `sha256:9f3b7c98d5a7f6d4a6392a2830794c221730e7fa086f9efa0307030b3cfd03d5` passed the resource group, including memory, pids, output, disk, synchronous preview and start limits, and a healthy import afterward. JPype and the configured Java CLI both stored 6/72/72 from the unchanged reference file. Peaks and outcomes are in [runtime/manifest.json](runtime/manifest.json) group `resource_limit`.

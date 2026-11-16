@@ -4,7 +4,7 @@
   "cases": [
     {
       "family": "msp",
-      "job": "78c7e844-ee6e-4f02-8b43-235c930a3e19",
+      "job": "bb1a3620-9a77-4a4a-b9da-427efb1123d2",
       "live_duplicate_result": {
         "duplicate": true
       },
@@ -17,7 +17,7 @@
     },
     {
       "family": "p6",
-      "job": "fcb88eaf-6aa5-4109-ae58-b7f8b2c7a151",
+      "job": "fb3c9a6e-ee94-4b66-8359-ba5a216be06f",
       "live_duplicate_result": {
         "duplicate": true
       },
@@ -29,5 +29,5 @@
       "immutable_completion": true
     }
   ],
-  "healthy_follow_up": "45cc673b-fe38-41a6-93bf-7126903236ca"
+  "healthy_follow_up": "df94217c-ced8-46b1-a27e-6e41a8856ef7"
 }
