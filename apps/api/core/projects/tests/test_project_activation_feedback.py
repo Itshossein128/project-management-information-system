@@ -85,7 +85,7 @@ def test_whitespace_scope_is_missing(auth_client, pending_project, language):
     assert error['details']['missing'] == ['scope_description']
 
 
-@pytest.mark.parametrize('amount', [Decimal('0'), Decimal('1000.50')])
+@pytest.mark.parametrize('amount', [Decimal('0.01'), Decimal('1000.50')])
 def test_success_returns_active_project_and_records_approver(auth_client, pending_project, user, language, amount):
     pending_project.contract_amount = amount
     pending_project.save()
@@ -103,6 +103,16 @@ def test_success_returns_active_project_and_records_approver(auth_client, pendin
     assert pending_project.status == ProjectStatus.ACTIVE
     assert pending_project.budget_approved_at is not None
     assert pending_project.budget_approved_by_id == user.id
+
+
+@pytest.mark.parametrize('amount', [Decimal('0'), Decimal('-1')])
+def test_nonpositive_budget_cannot_activate(auth_client, pending_project, language, amount):
+    pending_project.contract_amount = amount
+    pending_project.save()
+    before = approval_state(pending_project)
+    error = error_payload(auth_client.post(approval_url(pending_project), **language), 400, 'activation_gates_failed')
+    assert error['details']['missing'] == ['budget_approved']
+    assert approval_state(pending_project) == before
 
 
 def test_success_preserves_existing_budget_approval(auth_client, pending_project, other_user, language):

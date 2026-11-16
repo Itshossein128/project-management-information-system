@@ -10,9 +10,17 @@ from django.utils.translation import gettext as _
 
 from cost_control.models import ActualCost, Budget
 from documents.models import ProjectDocument
-from permissions.project import active_member_has_codename, has_organizational_observation
+from permissions.project import active_member_has_codename
 from projects.models import Activity, ActivityRelation, Project, ProjectStatus, WBS
-from schedule.models import ActivityProgress, BaselineActivity, BaselineSchedule, MspImportStatus
+from schedule.models import (
+    ActivityMeasurementDefinition,
+    ActivityProgress,
+    BaselineActivity,
+    BaselineSchedule,
+    MspImportStatus,
+    ProjectPeriodReport,
+    ScheduleChangeRequest,
+)
 
 IMPORT_ACTOR_MISSING = 'import_actor_missing'
 IMPORT_NOT_PERMITTED = 'import_not_permitted'
@@ -22,6 +30,7 @@ WBS_HAS_COST = 'wbs_has_cost'
 WBS_HAS_DOCUMENTS = 'wbs_has_documents'
 WBS_HAS_ACTIVITIES = 'wbs_has_activities'
 BASELINE_HISTORY_PROTECTED = 'baseline_history_protected'
+BASELINE_REPLACE_FORBIDDEN = 'baseline_replace_forbidden'
 
 _BLOCK_ORDER = (
     WBS_HAS_PROGRESS,
@@ -48,6 +57,9 @@ def message_for(code: str) -> str:
         BASELINE_HISTORY_PROTECTED: _(
             'Cannot replace a schedule that has a locked or approved baseline.'
         ),
+        BASELINE_REPLACE_FORBIDDEN: _(
+            'Cannot replace a schedule that has protected execution history.'
+        ),
         PROJECT_ARCHIVED: _('Archived projects are read-only.'),
         IMPORT_NOT_PERMITTED: _('You no longer have permission to import into this project.'),
         IMPORT_ACTOR_MISSING: _('The import has no confirming user.'),
@@ -65,12 +77,9 @@ def _actor_exists(user) -> bool:
 def assert_can_import(project: Project, user) -> None:
     if not _actor_exists(user):
         raise ImportSafetyError(IMPORT_ACTOR_MISSING, message_for(IMPORT_ACTOR_MISSING))
-    allowed = active_member_has_codename(user, project.id, 'edit_wbs')
     if project.status == ProjectStatus.ARCHIVED:
-        if not (has_organizational_observation(user) and allowed):
-            raise ImportSafetyError(PROJECT_ARCHIVED, message_for(PROJECT_ARCHIVED))
-        return
-    if not allowed:
+        raise ImportSafetyError(PROJECT_ARCHIVED, message_for(PROJECT_ARCHIVED))
+    if not active_member_has_codename(user, project.id, 'edit_wbs'):
         raise ImportSafetyError(IMPORT_NOT_PERMITTED, message_for(IMPORT_NOT_PERMITTED))
 
 
@@ -94,11 +103,26 @@ def replacement_projection(project: Project) -> dict:
     }
 
 
+def _has_protected_execution_history(project: Project, live_activities) -> bool:
+    """History that must survive replacement: baseline, progress, reports, changes, measurement."""
+    if ActivityProgress.objects.filter(activity__in=live_activities).exists():
+        return True
+    if BaselineSchedule.objects.filter(project=project, is_deleted=False).filter(
+        Q(is_locked=True) | Q(approved_at__isnull=False)
+    ).exists():
+        return True
+    if ProjectPeriodReport.objects.filter(project=project, is_deleted=False).exists():
+        return True
+    if ScheduleChangeRequest.objects.filter(project=project, is_deleted=False).exists():
+        return True
+    return ActivityMeasurementDefinition.objects.filter(project=project, is_deleted=False).exists()
+
+
 def replacement_block_code(project: Project) -> str | None:
     """Return the first protection code, or None when replacement may proceed."""
     live_activities = Activity.objects.filter(project=project, is_deleted=False)
-    if ActivityProgress.objects.filter(activity__in=live_activities).exists():
-        return WBS_HAS_PROGRESS
+    if _has_protected_execution_history(project, live_activities):
+        return BASELINE_REPLACE_FORBIDDEN
     if (
         Budget.objects.filter(project=project, is_deleted=False).exists()
         or ActualCost.objects.filter(project=project, is_deleted=False).exists()
@@ -109,10 +133,6 @@ def replacement_block_code(project: Project) -> str | None:
         return WBS_HAS_DOCUMENTS
     if live_activities.exists():
         return WBS_HAS_ACTIVITIES
-    if BaselineSchedule.objects.filter(project=project, is_deleted=False).filter(
-        Q(is_locked=True) | Q(approved_at__isnull=False)
-    ).exists():
-        return BASELINE_HISTORY_PROTECTED
     return None
 
 

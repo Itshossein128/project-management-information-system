@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ApiRequestError } from "@/app/lib/api-client";
 import { createWBSNode, deleteWBSNode } from "@/app/lib/api/wbs";
 import { Input, Label } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
@@ -44,17 +45,19 @@ export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
         },
       });
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) => toast.error(
+      err instanceof ApiRequestError && err.code === "duplicate_wbs_code"
+        ? t("wbs.duplicateCode") : err.message,
+    ),
   });
 
   return (
     <div className='mx-auto max-w-md space-y-4 rounded-lg border border-border p-6'>
       <p className='text-muted-foreground text-sm'>
-        هنوز گره WBS ایجاد نشده است. اولین گره ریشه را اضافه کنید یا از MSP / P6
-        (شامل فایل ‎.mpp) بارگذاری کنید.
+        {t("wbs.emptyHint")}
       </p>
       <div>
-        <Label htmlFor='input-rootWbsCode'>کد WBS</Label>
+        <Label htmlFor='input-rootWbsCode'>{t('wbs.code')}</Label>
         <Input
           id='input-rootWbsCode'
           value={code}
@@ -62,7 +65,7 @@ export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
         />
       </div>
       <div>
-        <Label htmlFor='input-rootWbsName'>نام *</Label>
+        <Label htmlFor='input-rootWbsName'>{t('wbs.name')} *</Label>
         <Input
           id='input-rootWbsName'
           value={name}
@@ -77,7 +80,7 @@ export function WbsEmptyState({ projectId, onCreated }: WbsEmptyStateProps) {
         loading={createMutation.isPending}
         onClick={() => createMutation.mutate()}
       >
-        افزودن گره ریشه
+        {t("wbs.addRoot")}
       </Button>
     </div>
   );

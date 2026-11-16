@@ -129,12 +129,15 @@ def _peek_head(file, n: int = 8) -> bytes:
 
 def validate_msp_upload(file) -> None:
     """Validate MSP-family upload: Microsoft Project XML (.xml) or native MPP (.mpp)."""
+    ext = _extension(getattr(file, 'name', '') or '')
     validate_upload(
         file,
         allowed_extensions={'.xml', '.mpp'},
-        expected_mimes=MSP_FAMILY_MIMES,
+        # Desktop MIME databases also use .mpp for Musepack audio. The OLE
+        # signature below and the bounded MPP parser validate the actual bytes;
+        # a browser-supplied MIME label must not veto a valid Project file.
+        expected_mimes=None if ext == '.mpp' else MSP_FAMILY_MIMES,
     )
-    ext = _extension(getattr(file, 'name', '') or '')
     if ext == '.mpp':
         head = _peek_head(file, 8)
         if not head.startswith(OLE_MAGIC):

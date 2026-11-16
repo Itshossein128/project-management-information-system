@@ -65,6 +65,12 @@ def validate_activity_dates(
     if is_milestone and duration_days != 0:
         _raise('invalid_milestone', 'Milestone activities must have duration_days=0.')
 
+    if not is_milestone and duration_days == 0:
+        _raise(
+            'zero_duration_non_milestone',
+            'A non-milestone activity cannot have zero duration.',
+        )
+
     if planned_start and planned_finish and planned_finish < planned_start:
         if not is_milestone:
             _raise('impossible_planned_dates', 'planned_finish must be on or after planned_start.')

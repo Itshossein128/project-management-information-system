@@ -124,7 +124,7 @@ def parse_p6_xer(file_bytes: bytes) -> ParseResult:
 
     for row in sorted(projwbs, key=lambda r: (depth_for_wbs(r.get('wbs_id', '')), r.get('seq_num', ''))):
         wbs_id = row.get('wbs_id', '')
-        code = row.get('wbs_short_name') or row.get('wbs_id') or ''
+        code = (row.get('wbs_short_name') or '').strip() or (row.get('wbs_id') or '').strip()
         name = row.get('wbs_name') or code
         if not code:
             continue
@@ -144,14 +144,14 @@ def parse_p6_xer(file_bytes: bytes) -> ParseResult:
 
     for row in tasks:
         task_id = row.get('task_id', '')
-        code = row.get('task_code') or task_id
+        code = (row.get('task_code') or '').strip() or task_id.strip()
         name = row.get('task_name') or code
         if not name:
             warnings.append(f'Task {task_id} has no name — skipped.')
             continue
         wbs_id = row.get('wbs_id', '')
         wbs_row = wbs_by_id.get(wbs_id, {})
-        wbs_code = wbs_row.get('wbs_short_name') or ''
+        wbs_code = (wbs_row.get('wbs_short_name') or '').strip()
         depth = depth_for_wbs(wbs_id) + 1 if wbs_id else 1
         duration_days, duration_inexact = days_from_hours(row.get('target_drtn_hr_cnt', ''))
         percent = Decimal(row['phys_complete_pct']) if row.get('phys_complete_pct') else None

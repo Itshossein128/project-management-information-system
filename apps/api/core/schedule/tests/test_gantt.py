@@ -16,9 +16,10 @@ BASE = '/api/v1/projects/{project_id}/'
 @pytest.mark.django_db
 class TestGanttService:
     def test_get_gantt_data_includes_activity_and_baseline(self, project, activity, user, wbs):
+        activity.duration_days = 31
         activity.planned_start = date(2024, 1, 1)
         activity.planned_finish = date(2024, 1, 31)
-        activity.save(update_fields=['planned_start', 'planned_finish'])
+        activity.save(update_fields=['planned_start', 'planned_finish', 'duration_days'])
 
         baseline = BaselineSchedule.objects.create(
             project=project,
@@ -52,6 +53,7 @@ class TestGanttService:
         task = data['tasks'][0]
         assert task['id'] == activity.activity_code
         assert task['progress'] == 50
+        assert data['critical_path']['valid'] is True
         assert task['is_critical'] is True
         assert task['baseline_start'] == '2024-01-05'
         assert task['wbs_code'] == wbs.wbs_code

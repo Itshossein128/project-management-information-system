@@ -11,7 +11,7 @@ from django.utils.dateparse import parse_date
 
 from config.exceptions import CodedValidationError, ConflictError
 from permissions.sod import assert_not_self_final_approve
-from projects.lifecycle_service import assert_not_archived_mutable, lock_project, save_project, require_restore_admin
+from projects.lifecycle_service import assert_not_archived_mutable, lock_project, save_project, require_restore_admin, require_restore_writer
 from projects.models import (
     PROTECTED_PROJECT_FIELDS,
     Project,
@@ -38,8 +38,8 @@ def _assert_restore_remediation(project, user, proposed, cycle=None):
         raise ConflictError({'detail': _('The project changed. Review its current state and confirm again.')}, code='restore_context_changed')
     missing = set()
     if not (project.scope_description or '').strip(): missing.add('scope_description')
-    if project.contract_amount is None: missing.add('contract_amount')
-    if not proposed or not set(proposed) <= missing or ('scope_description' in proposed and not str(proposed['scope_description'] or '').strip()) or ('contract_amount' in proposed and proposed['contract_amount'] is None):
+    if project.contract_amount is None or project.contract_amount <= 0: missing.add('contract_amount')
+    if not proposed or not set(proposed) <= missing or ('scope_description' in proposed and not str(proposed['scope_description'] or '').strip()) or ('contract_amount' in proposed and (proposed['contract_amount'] is None or proposed['contract_amount'] <= 0)):
         raise CodedValidationError({'detail': _('Use a change request only to complete the missing scope or contract amount.')}, code='invalid_change_request_status')
 
 
@@ -52,8 +52,8 @@ def _assert_completion_remediation(project, user, proposed, event_id=None):
     source_context(project, 'undo_completion')
     missing = set()
     if not (project.scope_description or '').strip(): missing.add('scope_description')
-    if project.contract_amount is None: missing.add('contract_amount')
-    if not proposed or not set(proposed) <= missing or ('scope_description' in proposed and (not isinstance(proposed['scope_description'], str) or not proposed['scope_description'].strip())) or ('contract_amount' in proposed and proposed['contract_amount'] is None):
+    if project.contract_amount is None or project.contract_amount <= 0: missing.add('contract_amount')
+    if not proposed or not set(proposed) <= missing or ('scope_description' in proposed and (not isinstance(proposed['scope_description'], str) or not proposed['scope_description'].strip())) or ('contract_amount' in proposed and (proposed['contract_amount'] is None or proposed['contract_amount'] <= 0)):
         raise CodedValidationError({'detail': _('Use a change request only to complete the missing scope or contract amount.')}, code='invalid_change_request_status')
     if 'contract_amount' in proposed:
         try: Project._meta.get_field('contract_amount').clean(proposed['contract_amount'], project)
@@ -138,7 +138,10 @@ def list_change_requests(project_id):
 def create_change_request(*, project: Project, user, reason: str, proposed_changes: dict) -> ProjectChangeRequest:
     project = lock_project(project)
     if project.status == ProjectStatus.ARCHIVED: user = require_restore_admin(user)
-    assert_not_archived_mutable(project, user)
+    if project.status == ProjectStatus.ARCHIVED:
+        user = require_restore_writer(project, user)
+    else:
+        assert_not_archived_mutable(project, user)
     cleaned = _validate_proposed(proposed_changes)
     if project.status == ProjectStatus.ARCHIVED:
         _assert_restore_remediation(project, user, cleaned)
@@ -176,7 +179,10 @@ def update_change_request(cr: ProjectChangeRequest, user, **fields) -> ProjectCh
     if cr.restore_completion_event_id:
         from projects.status_undo_service import require_authority
         user = require_authority(user, project.pk, 'undo_completion')
-    assert_not_archived_mutable(project, user)
+    if cr.restore_archive_cycle_id:
+        user = require_restore_writer(project, user, 'edit_project')
+    else:
+        assert_not_archived_mutable(project, user)
     if cr.status != ProjectChangeRequestStatus.DRAFT:
         raise CodedValidationError(
             {'detail': _('Only draft change requests can be edited.')},
@@ -205,7 +211,10 @@ def submit_change_request(cr: ProjectChangeRequest, user) -> ProjectChangeReques
     if cr.restore_completion_event_id:
         from projects.status_undo_service import require_authority
         user = require_authority(user, project.pk, 'undo_completion')
-    assert_not_archived_mutable(project, user)
+    if cr.restore_archive_cycle_id:
+        user = require_restore_writer(project, user, 'edit_project')
+    else:
+        assert_not_archived_mutable(project, user)
     if cr.status != ProjectChangeRequestStatus.DRAFT:
         raise CodedValidationError(
             {'detail': _('Only draft change requests can be submitted.')},
@@ -232,7 +241,10 @@ def approve_change_request(cr: ProjectChangeRequest, user, decision_notes: str =
     if cr.restore_completion_event_id:
         from projects.status_undo_service import require_authority
         user = require_authority(user, project.pk, 'undo_completion')
-    assert_not_archived_mutable(project, user)
+    if cr.restore_archive_cycle_id:
+        user = require_restore_writer(project, user, 'approve_project')
+    else:
+        assert_not_archived_mutable(project, user)
     try:
         assert_not_self_final_approve(
             cr.requested_by_id,
@@ -270,7 +282,10 @@ def reject_change_request(cr: ProjectChangeRequest, user, decision_notes: str = 
     if project.status == ProjectStatus.ARCHIVED: user = require_restore_admin(user)
     cr = ProjectChangeRequest.objects.select_for_update().get(pk=cr.pk, project=project, is_deleted=False)
     cr.project = project
-    assert_not_archived_mutable(project, user)
+    if cr.restore_archive_cycle_id:
+        user = require_restore_writer(project, user, 'approve_project')
+    else:
+        assert_not_archived_mutable(project, user)
     if cr.status != ProjectChangeRequestStatus.SUBMITTED:
         raise CodedValidationError(
             {'detail': _('Only submitted change requests can be rejected.')},
@@ -294,7 +309,10 @@ def cancel_change_request(cr: ProjectChangeRequest, user) -> ProjectChangeReques
     if cr.restore_completion_event_id:
         from projects.status_undo_service import require_authority
         user = require_authority(user, project.pk, 'undo_completion')
-    assert_not_archived_mutable(project, user)
+    if cr.restore_archive_cycle_id:
+        user = require_restore_writer(project, user, 'edit_project')
+    elif not cr.restore_completion_event_id:
+        assert_not_archived_mutable(project, user)
     if cr.status not in OPEN_STATUSES:
         raise CodedValidationError(
             {'detail': _('Only open change requests can be cancelled.')},

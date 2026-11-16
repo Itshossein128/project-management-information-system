@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { useMemo, useState } from "react";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
+import { apiJson } from "@/app/lib/api-client";
 import { fetchWBSTree, type WBSNode } from "@/app/lib/api/wbs";
 import { PATHS } from "@/app/routeVars";
 import { WBSNodeRow } from "@/components/wbs/wbs-node";
@@ -42,6 +43,15 @@ function ProjectWBSContent() {
   });
 
   const leafPackages = useMemo(() => collectLeafPackages(tree), [tree]);
+  const { data: scheduleStatus } = useQuery({
+    queryKey: ["schedule-status", projectId],
+    queryFn: () => apiJson<{
+      critical_path?: { valid?: boolean };
+      milestones?: unknown[];
+      delays?: { delay_days?: number | null }[];
+    }>(`/${PATHS.API_PROJECTS}/${projectId}/schedule-status/`),
+    enabled: Boolean(projectId && project),
+  });
 
   if (projectLoading) return <LoadingSkeleton rows={10} />;
   if (projectError) return <QueryErrorState error={projectErr} onRetry={refetchProject} />;
@@ -58,6 +68,32 @@ function ProjectWBSContent() {
           { label: "WBS" },
         ]}
       />
+      {scheduleStatus ? (
+        <section
+          data-testid="wbs-schedule-summary"
+          aria-label={t("schedule.wbsSummaryTitle")}
+          className="mb-6 grid gap-3 sm:grid-cols-3"
+        >
+          {[
+            {
+              label: t("schedule.wbsSummaryTitle"),
+              value: scheduleStatus.critical_path?.valid
+                ? t("schedule.criticalPathValid")
+                : t("schedule.criticalPathNotValid"),
+              tone: scheduleStatus.critical_path?.valid
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-amber-700 dark:text-amber-400",
+            },
+            { label: t("schedule.colMilestone"), value: String(scheduleStatus.milestones?.length ?? 0) },
+            { label: t("schedule.colDelay"), value: String(scheduleStatus.delays?.length ?? 0) },
+          ].map((s) => (
+            <div key={s.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <p className="text-xs text-muted-foreground">{s.label}</p>
+              <p className={`mt-1 text-lg font-semibold tabular-nums ${s.tone ?? ""}`}>{s.value}</p>
+            </div>
+          ))}
+        </section>
+      ) : null}
       <PageHeader
         title={t("pages.wbs.title")}
         subtitle={!canEditWBS ? t("common.readOnly") : undefined}
@@ -106,10 +142,10 @@ function ProjectWBSContent() {
           />
         )
       ) : (
-        <div className="space-y-3">
+        <div role="tree" className="space-y-3">
           <WbsPackageMetaWarning nodes={leafPackages} />
-          <div className='overflow-x-auto rounded-lg border border-border'>
-            <div className='min-w-max'>
+          <div className='overflow-x-auto rounded-xl border border-border bg-card shadow-sm'>
+            <div className='min-w-[40rem]'>
               {tree.map((node) => (
                 <WBSNodeRow
                   key={node.wbs_id}

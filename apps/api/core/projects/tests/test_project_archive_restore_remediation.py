@@ -25,7 +25,7 @@ def test_member_admin_can_complete_information_through_existing_controls():
     grant_project_access(approver, p)
     stamps=(p.budget_approved_at,p.budget_approved_by_id)
     r=c.patch(base(p),{'scope_description':'Direct bypass'},format='json');assert r.status_code==400
-    r=c.post(base(p)+'change-requests/',{'reason':'Complete missing approved information','proposed_changes':{'scope_description':'Restored scope','contract_amount':'0.00'}},format='json')
+    r=c.post(base(p)+'change-requests/',{'reason':'Complete missing approved information','proposed_changes':{'scope_description':'Restored scope','contract_amount':'100.00'}},format='json')
     assert r.status_code==201,r.content
     cr_id=r.json()['id'];cr=ProjectChangeRequest.objects.get(pk=cr_id)
     assert cr.restore_archive_cycle_id==p.archive_cycle_id
@@ -87,3 +87,43 @@ def test_bound_remediation_rechecks_current_context_without_partial_writes(actio
     assert cancel.status_code==200,cancel.content
     assert cancel.json()['status']=='cancelled'
     assert state(p)==before[0] and list(ProjectArchiveRestore.objects.filter(project=p).values())==before[2]
+
+
+@pytest.mark.parametrize('amount', ['0', '-1'])
+def test_restore_remediation_rejects_nonpositive_amount(amount):
+    from .archive_restore_helpers import actor, archived_project, client_for, base, state
+    user = actor(admin=True)
+    project = archived_project(user)
+    project.contract_amount = 0
+    project.save(update_fields=['contract_amount'])
+    client = client_for(user)
+    assert client.get(base(project)).data['can_create_restore_remediation']
+    before = state(project)
+    result = client.post(base(project)+'change-requests/', {
+        'reason': 'Repair missing positive budget', 'proposed_changes': {'contract_amount': amount},
+    }, format='json')
+    assert result.status_code == 400
+    assert state(project) == before
+    assert not project.change_requests.exists()
+
+
+@pytest.mark.parametrize('origin', ['archive', 'completion'])
+def test_zero_budget_can_be_repaired_by_independent_approval(origin):
+    from .archive_restore_helpers import actor, archived_project, client_for, base, grant_project_access
+    from .status_undo_helpers import source_project
+    user, approver = actor(admin=True), actor(admin=True)
+    project = archived_project(user) if origin == 'archive' else source_project(user, 'undo_completion')
+    grant_project_access(approver, project)
+    project.contract_amount = 0
+    project.save(update_fields=['contract_amount'])
+    client = client_for(user)
+    response = client.post(base(project)+'change-requests/', {
+        'reason': 'Repair missing positive budget', 'proposed_changes': {'contract_amount': '100'},
+    }, format='json')
+    assert response.status_code == 201, response.data
+    path = base(project)+f"change-requests/{response.data['id']}/"
+    assert client.post(path+'submit/').status_code == 200
+    assert client.post(path+'approve/').status_code == 400
+    assert client_for(approver).post(path+'approve/').status_code == 200
+    preview = client.get(base(project)+('restore-preview/' if origin == 'archive' else 'undo-completion-preview/'))
+    assert preview.status_code == 200 and preview.data['can_confirm'], preview.data

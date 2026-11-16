@@ -34,17 +34,44 @@ def activation_missing(project: Project) -> list[str]:
         missing.append('project_manager')
     if not (project.scope_description or '').strip():
         missing.append('scope_description')
-    if project.contract_amount is None:
+    amount = project.contract_amount
+    if amount is None or amount <= 0:
         missing.append('budget_approved')
     return missing
 
 
 def assert_not_archived_mutable(project: Project, user) -> None:
-    if project.status == ProjectStatus.ARCHIVED and not _is_global_admin(user):
+    if project.status == ProjectStatus.ARCHIVED:
         raise CodedValidationError(
             {'code': 'project_archived', 'detail': 'Archived projects are read-only.'},
             code='project_archived',
         )
+
+
+
+def require_restore_writer(project, user, permission='edit_project'):
+    from permissions.project import active_member_has_codename
+    from rest_framework.exceptions import PermissionDenied
+    user = require_restore_admin(user)
+    if not active_member_has_codename(user, project.pk, permission):
+        raise PermissionDenied(_('Active project membership and permission are required.'))
+    return user
+
+
+def assert_project_patch_allowed(project, user, fields):
+    if project.status != ProjectStatus.ARCHIVED:
+        return
+    # This repairs only a missing manager for an existing active-origin archive.
+    # Approved scope and budget must use a cycle-bound, independently approved CR.
+    if (set(fields) != {'project_manager'} or project.project_manager_id
+            or not fields.get('project_manager') or not project.archive_cycle_id
+            or project.archived_from_status != ProjectStatus.ACTIVE):
+        assert_not_archived_mutable(project, user)
+    require_restore_writer(project, user)
+    from master_data.models import ProjectMember, MemberStatus
+    manager = getattr(fields['project_manager'], 'pk', fields['project_manager'])
+    if not ProjectMember.objects.filter(project=project, user_id=manager, status=MemberStatus.ACTIVE).exists():
+        raise CodedValidationError({'project_manager': _('Select an active project member.')}, code='invalid_project_manager')
 
 
 def _transition(project: Project, *, allowed_from: set[str], to: str, code='invalid_status_transition'):

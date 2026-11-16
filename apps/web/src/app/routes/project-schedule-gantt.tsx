@@ -33,7 +33,7 @@ function daysBetween(start: string | null, end: string | null): number | null {
 function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
   const { t } = useTranslation();
 
-  const rows = tasks.filter((t) => t.baseline_start || t.baseline_end);
+  const rows = tasks.filter((task) => task.baseline_start || task.baseline_end || task.start || task.actual_start || task.forecast_start);
   if (rows.length === 0) return null;
 
   return (
@@ -41,40 +41,41 @@ function BaselineComparisonTable({ tasks }: { tasks: GanttTask[] }) {
       <h3 className="border-b bg-muted/50 px-4 py-2 text-sm font-medium">
         {t("schedule.baselineCompareTitle")}
       </h3>
-      <table className="w-full min-w-[800px] text-sm">
+      <table className="w-full min-w-[1100px] text-sm">
         <thead className="bg-muted/30">
           <tr>
             {[
               t("schedule.colActivity"),
+              t("schedule.colMilestone"),
               t("schedule.colPlannedStart"),
               t("schedule.colPlannedFinish"),
+              t("schedule.colActual"),
+              t("schedule.colForecast"),
               t("schedule.colBaselineStart"),
               t("schedule.colBaselineFinish"),
-              t("schedule.colVarianceDays"),
-            ].map((h) => (
-              <th key={h} className="px-3 py-2 text-start">
-                {h}
+              t("schedule.colDelay"),
+            ].map((heading) => (
+              <th key={heading} className="px-3 py-2 text-start">
+                {heading}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((t) => {
-            const plannedDays = daysBetween(t.start, t.end);
-            const baselineDays = daysBetween(t.baseline_start, t.baseline_end);
-            const variance =
-              plannedDays != null && baselineDays != null ? plannedDays - baselineDays : null;
+          {rows.map((row) => {
+            const delay = row.delay_days;
             return (
-              <tr key={t.id} className="border-t">
-                <td className="px-3 py-2">{t.wbs_code ? `${t.wbs_code} — ` : ""}{t.name}</td>
-                <td className="px-3 py-2">{t.start ? formatDisplayDate(t.start) : "—"}</td>
-                <td className="px-3 py-2">{t.end ? formatDisplayDate(t.end) : "—"}</td>
-                <td className="px-3 py-2">{t.baseline_start ? formatDisplayDate(t.baseline_start) : "—"}</td>
-                <td className="px-3 py-2">{t.baseline_end ? formatDisplayDate(t.baseline_end) : "—"}</td>
-                <td
-                  className={`px-3 py-2 ${variance != null && variance > 0 ? "text-danger-600" : variance != null && variance < 0 ? "text-success-600" : ""}`}
-                >
-                  {variance != null ? `${variance > 0 ? "+" : ""}${variance}` : "—"}
+              <tr key={row.id} className="border-t">
+                <td className="px-3 py-2">{row.wbs_code ? `${row.wbs_code} — ` : ""}{row.name}</td>
+                <td className="px-3 py-2">{row.is_milestone ? t("schedule.colMilestone") : "—"}</td>
+                <td className="px-3 py-2">{row.start ? formatDisplayDate(row.start) : "—"}</td>
+                <td className="px-3 py-2">{row.end ? formatDisplayDate(row.end) : "—"}</td>
+                <td className="px-3 py-2">{row.actual_start || row.actual_finish ? `${row.actual_start ? formatDisplayDate(row.actual_start) : "—"} / ${row.actual_finish ? formatDisplayDate(row.actual_finish) : "—"}` : "—"}</td>
+                <td className="px-3 py-2">{row.forecast_start || row.forecast_finish ? `${row.forecast_start ? formatDisplayDate(row.forecast_start) : "—"} / ${row.forecast_finish ? formatDisplayDate(row.forecast_finish) : "—"}` : "—"}</td>
+                <td className="px-3 py-2">{row.baseline_start ? formatDisplayDate(row.baseline_start) : "—"}</td>
+                <td className="px-3 py-2">{row.baseline_end ? formatDisplayDate(row.baseline_end) : "—"}</td>
+                <td className={`px-3 py-2 ${delay != null && delay > 0 ? "text-danger-600" : ""}`}>
+                  {delay != null ? `${delay > 0 ? "+" : ""}${delay}` : "—"}
                 </td>
               </tr>
             );

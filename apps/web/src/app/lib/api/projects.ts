@@ -30,6 +30,7 @@ export interface ProjectListItem {
 }
 
 export interface ProjectDetail extends ProjectListItem {
+  measurement_unit?: string | null;
   can_resume_with_confirmation?: boolean;
   can_undo_completion?: boolean;
   can_view_status_undo_history?: boolean;
@@ -63,6 +64,7 @@ export interface ProjectDetail extends ProjectListItem {
 }
 
 export interface CreateProjectPayload {
+  measurement_unit?: string | null;
   project_code: string;
   project_name: string;
   employer: string;

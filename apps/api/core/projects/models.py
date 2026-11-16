@@ -111,6 +111,13 @@ class Project(UUIDModel, TimeStampedModel):
         blank=True,
         related_name='owned_projects',
     )
+    measurement_unit = models.ForeignKey(
+        'master_data.Unit',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='projects',
+    )
     approval_submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

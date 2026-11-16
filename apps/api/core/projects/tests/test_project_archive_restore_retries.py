@@ -51,8 +51,9 @@ def test_changed_submission_cannot_reuse_confirmation_or_receipt(change):
         payload={**payload,**({'reason':'Different reason'} if change=='reason' else {'request_id':str(uuid4())})}
         expected='restore_request_conflict' if change=='reason' else 'archive_already_restored'
     elif change=='snapshot':
-        c.patch(base(p),{'project_name':'Changed name'},format='json')
-        c.patch(base(p),{'project_name':p.project_name},format='json')
+        # Simulate an independently committed correction; archived HTTP edits are denied.
+        p.lifecycle_version += 1
+        p.save(update_fields=['lifecycle_version'])
         expected='restore_context_changed'
     elif change=='actor':c=client_for(actor(admin=True));expected='permission_denied'
     elif change=='project':p=archived_project(u);expected='permission_denied'

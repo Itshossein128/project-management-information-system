@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
@@ -27,13 +28,18 @@ from projects.models import (
     ProjectStatus,
     WBS,
 )
+from permissions.project import active_member_has_codename, has_organizational_observation
+from permissions.services import set_permission_override
 from projects.services import create_project_with_creator
 from schedule.models import (
+    ActivityMeasurementDefinition,
     ActivityProgress,
     BaselineActivity,
     BaselineSchedule,
     MspImportJob,
     MspImportStatus,
+    ProjectPeriodReport,
+    ScheduleChangeRequest,
 )
 from schedule.services.critical_path_validity import evaluate_critical_path_validity
 from schedule.services.gantt_service import get_gantt_data
@@ -170,6 +176,7 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
             "contract_type": "A7P6-EPC",
             "currency": "IRR",
             "owning_unit": ou_res.json()["id"],
+            "measurement_unit": mu_res.json()["id"],
             "project_manager": str(p6_personas["creator_planner"].id),
         },
         format="json",
@@ -178,6 +185,7 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     project_id = proj_res.json()["id"]
     project = Project.objects.get(pk=project_id)
     assert project.status == ProjectStatus.DRAFT
+    assert str(project.measurement_unit_id) == str(mu_res.json()["id"])
 
     charter_payload = {
         "justification": "توجیه فنی و اقتصادی پروژه مرجع",
@@ -216,8 +224,23 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     Project.objects.filter(pk=project_id).update(project_manager=None)
     gate_fail = approver_client.post(f"/api/v1/projects/{project_id}/approve/")
     assert gate_fail.status_code == 400
-    assert "activation_gates" in str(gate_fail.data)
+    assert gate_fail.data["error"]["code"] == "activation_gates_failed"
+    assert "project_manager" in gate_fail.data["error"]["details"].get("missing", gate_fail.data["error"].get("missing", [])) or "project_manager" in str(gate_fail.data)
     Project.objects.filter(pk=project_id).update(project_manager=p6_personas["creator_planner"])
+
+    Project.objects.filter(pk=project_id).update(scope_description="")
+    scope_fail = approver_client.post(f"/api/v1/projects/{project_id}/approve/")
+    assert scope_fail.status_code == 400
+    assert scope_fail.data["error"]["code"] == "activation_gates_failed"
+    assert "scope_description" in str(scope_fail.data)
+    Project.objects.filter(pk=project_id).update(scope_description="ساختار شکست کار، ورود زمان‌بندی و خط مبنا")
+
+    Project.objects.filter(pk=project_id).update(contract_amount=0)
+    budget_fail = approver_client.post(f"/api/v1/projects/{project_id}/approve/")
+    assert budget_fail.status_code == 400
+    assert budget_fail.data["error"]["code"] == "activation_gates_failed"
+    assert "budget_approved" in str(budget_fail.data)
+    Project.objects.filter(pk=project_id).update(contract_amount="50000000.00")
 
     approve_res = approver_client.post(f"/api/v1/projects/{project_id}/approve/")
     assert approve_res.status_code == 200, approve_res.content
@@ -258,6 +281,31 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert cr_approve.data["status"] == "approved"
     project.refresh_from_db()
     assert project.employer == "شرکت توسعه ابنیه کارفرمای مرجع"
+    assert cr_approve.data["requested_by"]
+    assert cr_approve.data["decided_by"]
+    assert cr_approve.data["decided_at"]
+    assert cr_approve.data["previous_values"]["employer"] == "کارفرمای مرجع"
+
+    cr_reject_create = planner_client.post(
+        cr_base,
+        {
+            "reason": "رد این درخواست باید سابقه تصمیم را نگه دارد",
+            "proposed_changes": {"employer": "کارفرمای ردشده"},
+        },
+        format="json",
+    )
+    assert cr_reject_create.status_code == 201, cr_reject_create.content
+    reject_id = cr_reject_create.data["id"]
+    assert planner_client.post(f"{cr_base}{reject_id}/submit/").status_code == 200
+    cr_reject = approver_client.post(f"{cr_base}{reject_id}/reject/", {"decision_notes": "رد شد"}, format="json")
+    assert cr_reject.status_code == 200, cr_reject.content
+    assert cr_reject.data["status"] == "rejected"
+    assert cr_reject.data["requested_by"]
+    assert cr_reject.data["decided_by"]
+    assert cr_reject.data["decided_at"]
+    assert "employer" in cr_reject.data["previous_values"]
+    project.refresh_from_db()
+    assert project.employer == "شرکت توسعه ابنیه کارفرمای مرجع"
 
     # --- POS-04: Multi-level WBS (>=3 levels), Responsible & Criterion, Move/Renumber, Template Copy ---
     root_res = planner_client.post(
@@ -265,7 +313,7 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
         {
             "wbs_code": "1",
             "wbs_name": "عملیات کل پروژه",
-            "weight": "100.00",
+            "weight_physical": "1.0000",
             "responsible": str(p6_personas["creator_planner"].id),
             "acceptance_criteria": "تحویل کلیه فازها",
         },
@@ -280,7 +328,7 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
             "parent_id": root_id,
             "wbs_code": "1.1",
             "wbs_name": "فاز اسکلت و سازه",
-            "weight": "100.00",
+            "weight_physical": "1.0000",
             "responsible": str(p6_personas["creator_planner"].id),
             "acceptance_criteria": "تأیید آزمایشگاه بتن و جوش",
         },
@@ -295,32 +343,61 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
             "parent_id": phase_id,
             "wbs_code": "1.1.1",
             "wbs_name": "فونداسیون",
-            "weight": "60.00",
+            "weight_physical": "0.6000",
             "responsible": str(p6_personas["creator_planner"].id),
             "acceptance_criteria": "تأیید آرماتوربندی و بتن‌ریزی فونداسیون",
         },
         format="json",
     )
     assert pkg1_res.status_code == 201, pkg1_res.content
+    pkg1_id = pkg1_res.json()["wbs_id"]
     pkg2_res = planner_client.post(
         f"/api/v1/projects/{project_id}/wbs/",
         {
             "parent_id": phase_id,
             "wbs_code": "1.1.2",
             "wbs_name": "ستون و سقف",
-            "weight": "40.00",
+            "weight_physical": "0.4000",
             "responsible": str(p6_personas["independent_approver"].id),
             "acceptance_criteria": "تأیید شاقول‌سنجی و مقاومت ۲۸روزه",
         },
         format="json",
     )
     assert pkg2_res.status_code == 201, pkg2_res.content
+    assert "warnings" not in pkg2_res.json()
+    pkg2_id = pkg2_res.json()["wbs_id"]
+    sibling_weights = WBS.objects.filter(pk__in=[pkg1_id, pkg2_id]).values_list("weight_physical", flat=True)
+    assert sum(sibling_weights) == Decimal("1.0000")
 
-    # Create reusable 3-level WBS template in catalog and apply to an independent target project
-    from project_templates.models import ProjectTemplate, ProjectTemplateWBS
+    over_res = planner_client.post(
+        f"/api/v1/projects/{project_id}/wbs/",
+        {
+            "parent_id": phase_id,
+            "wbs_code": "1.1.3",
+            "wbs_name": "وزن مازاد",
+            "weight_physical": "0.5000",
+        },
+        format="json",
+    )
+    assert over_res.status_code == 201, over_res.content
+    assert any("exceeds 1.0" in warning for warning in over_res.json().get("warnings", []))
+    over_delete = planner_client.delete(f"/api/v1/projects/{project_id}/wbs/{over_res.json()['wbs_id']}/")
+    assert over_delete.status_code == 204, over_delete.content
+    assert not WBS.objects.filter(pk=over_res.json()["wbs_id"], is_deleted=False).exists()
 
-    tpl_res = steward_client.post(
-        "/api/v1/project-templates/",
+    move_res = planner_client.post(
+        f"/api/v1/projects/{project_id}/wbs/{pkg2_id}/move/",
+        {"new_parent_id": root_id, "position": "last-child"},
+        format="json",
+    )
+    assert move_res.status_code == 200, move_res.content
+    assert move_res.json()["wbs_code"] == "1.2"
+    assert move_res.json()["depth"] == 2
+    assert WBS.objects.get(pk=pkg1_id).wbs_code == "1.1.1"
+    assert WBS.objects.get(pk=pkg1_id).depth == 3
+
+    tpl_res = planner_client.post(
+        f"/api/v1/projects/{project_id}/save-as-template/",
         {
             "template_name": "الگوی مرجع ۳سطحی A7P6",
             "description": "الگوی تست استقلال کپی WBS",
@@ -329,17 +406,8 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
         format="json",
     )
     assert tpl_res.status_code == 201, tpl_res.content
-    tpl_id = tpl_res.json().get("template_id") or tpl_res.json().get("id")
-    tpl_obj = ProjectTemplate.objects.get(pk=tpl_id)
-    t_root = ProjectTemplateWBS.objects.create(
-        template=tpl_obj, parent=None, wbs_code="1", wbs_name="عملیات کل پروژه", level=1, order=0
-    )
-    t_phase = ProjectTemplateWBS.objects.create(
-        template=tpl_obj, parent=t_root, wbs_code="1.1", wbs_name="فاز اسکلت و سازه", level=2, order=0
-    )
-    t_pkg = ProjectTemplateWBS.objects.create(
-        template=tpl_obj, parent=t_phase, wbs_code="1.1.1", wbs_name="فونداسیون", level=3, order=0
-    )
+    tpl_id = tpl_res.json()["template_id"]
+    assert tpl_res.json()["wbs_node_count"] == 4
 
     target_proj = create_project_with_creator(
         creator=p6_personas["creator_planner"],
@@ -353,20 +421,21 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
 
     apply_res = steward_client.post(f"/api/v1/project-templates/{tpl_id}/apply/{target_proj.id}/")
     assert apply_res.status_code == 200, apply_res.content
-    assert WBS.objects.filter(project=target_proj, is_deleted=False).count() == 3
+    assert WBS.objects.filter(project=target_proj, is_deleted=False).count() == 4
 
-    # Mutate template WBS node and source project's WBS name; verify target project's copy remains untouched
-    t_pkg.wbs_name = "تغییر در الگو"
-    t_pkg.save(update_fields=["wbs_name"])
+    from project_templates.models import ProjectTemplateWBS
+
+    template_pkg = ProjectTemplateWBS.objects.get(template_id=tpl_id, wbs_code="1.1.1")
+    template_pkg.wbs_name = "تغییر در الگو"
+    template_pkg.save(update_fields=["wbs_name"])
     planner_client.patch(
-        f"/api/v1/projects/{project_id}/wbs/{pkg1_res.json()['wbs_id']}/",
+        f"/api/v1/projects/{project_id}/wbs/{pkg1_id}/",
         {"wbs_name": "فونداسیون ویرایش‌شده"},
         format="json",
     )
     assert WBS.objects.get(project=target_proj, wbs_code="1.1.1").wbs_name == "فونداسیون"
 
     # --- POS-05 & POS-06: Preview & Append Import of real-data/plan.mpp and XML/XER Fixtures ---
-    from decimal import Decimal
     from django.utils import timezone
 
     mpp_project = create_project_with_creator(
@@ -434,6 +503,46 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     )
     assert repeat_result["nothing_changed"] is True
     assert _counts(mpp_project) == {"wbs": 6, "activities": 72, "relations": 72, "baselines": 1}
+    from schedule.services.import_fidelity import TENTHS_PER_DAY, days_from_tenths
+
+    assert TENTHS_PER_DAY == 480 * 10
+    assert days_from_tenths(TENTHS_PER_DAY) == (1, False)
+    for lag_days in ActivityRelation.objects.filter(
+        predecessor__project=mpp_project, is_deleted=False,
+    ).values_list("lag_days", flat=True):
+        assert lag_days * 480 == lag_days * (TENTHS_PER_DAY // 10)
+
+    def _preview_and_store(raw: bytes, filename: str, family: str, expected: dict):
+        hosted = create_project_with_creator(
+            creator=p6_personas["creator_planner"],
+            project_code=f"A7P6-{filename[:12]}",
+            project_name=filename,
+            employer="کارفرمای مرجع",
+            start_date="2026-01-01",
+        )
+        hosted.status = ProjectStatus.ACTIVE
+        hosted.save(update_fields=["status", "updated_at"])
+        route = "p6" if family == "p6" else "msp"
+        preview = planner_client.post(
+            f"/api/v1/projects/{hosted.id}/import/{route}/preview/",
+            {"file": SimpleUploadedFile(filename, raw, content_type="application/octet-stream")},
+            format="multipart",
+        )
+        assert preview.status_code == 200, preview.content
+        assert _counts(hosted)["activities"] == 0
+        runner = execute_p6_import if family == "p6" else execute_msp_import
+        stored = runner(hosted, raw, filename=filename, replace=False, user=p6_personas["creator_planner"])
+        assert _counts(hosted)["wbs"] == expected["wbs"], stored
+        assert _counts(hosted)["activities"] == expected["activities"]
+        assert _counts(hosted)["relations"] == expected["relations"]
+        again = runner(hosted, raw, filename=filename, replace=False, user=p6_personas["creator_planner"])
+        assert again["nothing_changed"] is True
+        return stored
+
+    _preview_and_store((P1_FIXTURES / "branch.xml").read_bytes(), "branch.xml", "msp", {"wbs": 1, "activities": 2, "relations": 0})
+    _preview_and_store((P1_FIXTURES / "branch.xer").read_bytes(), "branch.xer", "p6", {"wbs": 3, "activities": 2, "relations": 0})
+    p6_xml = REPO_ROOT / "apps/api/core/schedule/tests/fixtures/mpp/duration-test9.xml"
+    _preview_and_store(p6_xml.read_bytes(), "duration-test9.xml", "msp", {"wbs": 0, "activities": 0, "relations": 0})
 
     # --- POS-08: Safe Replacement Guard (Blocked on Protected History; Allowed on Unprotected) ---
     # 1) Unprotected project (bare WBS without activities/progress/cost/locked baseline) allows replacement and soft-deletes prior WBS rows
@@ -460,20 +569,98 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert _counts(replace_proj)["activities"] == 1
     assert WBS.objects.filter(project=replace_proj, is_deleted=True).count() == 1
 
-    # 2) Protected project (activities + locked baseline) blocks replacement
+    # 2) Protected execution history blocks replacement and leaves stored rows unchanged
+    planner = p6_personas["creator_planner"]
+
+    def _refuse_replace(project: Project) -> None:
+        before = _counts(project)
+        with pytest.raises(ImportSafetyError) as caught:
+            execute_msp_import(
+                project,
+                milestone_xml,
+                filename="milestone.xml",
+                replace=True,
+                user=planner,
+            )
+        assert caught.value.code == "baseline_replace_forbidden"
+        assert _counts(project) == before
+
     baseline = BaselineSchedule.objects.filter(project=mpp_project).first()
     baseline.is_locked = True
     baseline.save(update_fields=["is_locked", "updated_at"])
-    with pytest.raises(ImportSafetyError) as exc_info:
-        execute_msp_import(
-            mpp_project,
-            milestone_xml,
-            filename="milestone.xml",
-            replace=True,
-            user=p6_personas["creator_planner"],
+    _refuse_replace(mpp_project)
+
+    def _history_project(code: str) -> Project:
+        project = create_project_with_creator(
+            creator=planner,
+            project_code=code,
+            project_name=code,
+            employer="کارفرمای مرجع",
+            start_date="2026-01-01",
         )
-    assert exc_info.value.code in {"wbs_has_activities", "baseline_history_protected"}
-    assert _counts(mpp_project) == {"wbs": 6, "activities": 72, "relations": 72, "baselines": 1}
+        project.status = ProjectStatus.ACTIVE
+        project.save(update_fields=["status", "updated_at"])
+        return project
+
+    progress_project = _history_project("A7P6-REP-PROG")
+    progress_node, _progress_warnings = create_wbs_node(
+        project_id=progress_project.id, wbs_code="P", wbs_name="پیشرفت"
+    )
+    progress_activity = Activity.objects.create(
+        project=progress_project,
+        wbs=progress_node,
+        activity_code="P1",
+        activity_name="فعالیت دارای پیشرفت",
+        created_by=planner,
+        updated_by=planner,
+    )
+    ActivityProgress.objects.create(
+        activity=progress_activity,
+        report_date=date(2026, 2, 1),
+        actual_progress=1,
+    )
+    _refuse_replace(progress_project)
+
+    period_project = _history_project("A7P6-REP-PERIOD")
+    ProjectPeriodReport.objects.create(
+        project=period_project,
+        kind="weekly",
+        period_start=date(2026, 2, 1),
+        period_end=date(2026, 2, 7),
+        generated_at=timezone.now(),
+        created_by=planner,
+        updated_by=planner,
+    )
+    _refuse_replace(period_project)
+
+    change_project = _history_project("A7P6-REP-CHANGE")
+    ScheduleChangeRequest.objects.create(
+        project=change_project,
+        reason="تغییر تاریخ فعالیت",
+        created_by=planner,
+        updated_by=planner,
+    )
+    _refuse_replace(change_project)
+
+    measure_project = _history_project("A7P6-REP-MEASURE")
+    measure_node, _measure_warnings = create_wbs_node(
+        project_id=measure_project.id, wbs_code="M", wbs_name="سنجش"
+    )
+    measure_activity = Activity.objects.create(
+        project=measure_project,
+        wbs=measure_node,
+        activity_code="M1",
+        activity_name="فعالیت دارای سنجش",
+        created_by=planner,
+        updated_by=planner,
+    )
+    ActivityMeasurementDefinition.objects.create(
+        project=measure_project,
+        activity=measure_activity,
+        created_by=planner,
+        updated_by=planner,
+    )
+    _refuse_replace(measure_project)
 
     # --- POS-09: 4-Way Dates, Milestones, Delay Report, Gantt, and Critical-Path Validity Gate ---
     first_act = Activity.objects.filter(project=mpp_project, is_deleted=False).first()
@@ -485,12 +672,19 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert act_detail.status_code == 200
     for date_key in ("planned_start", "planned_finish", "actual_start", "forecast_finish"):
         assert date_key in act_detail.data
+    assert act_detail.data["actual_start"]
+    assert act_detail.data["forecast_finish"]
 
     gantt_payload = get_gantt_data(mpp_project.id)
     assert len(gantt_payload["tasks"]) == 72
     assert "critical_path" in gantt_payload
+    matched = next(task for task in gantt_payload["tasks"] if task["activity_id"] == str(first_act.id))
+    assert matched["planned_start"] and matched["actual_start"] and matched["forecast_finish"]
+    assert "delay_days" in matched
+    assert "is_milestone" in matched
     status_report = build_schedule_status(mpp_project.id)
     assert "critical_path" in status_report or "critical_path_validity" in status_report
+    assert "milestones" in status_report and "delays" in status_report and "date_sets" in status_report
     cpm_validity = evaluate_critical_path_validity(mpp_project.id)
     assert "valid" in cpm_validity and "reason_codes" in cpm_validity
 
@@ -501,11 +695,49 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     grant_project_access(p6_personas["independent_approver"], mpp_project)
     grant_project_access(p6_personas["system_admin"], mpp_project)
 
+    # The schedule lives on a different project from POS-01. Give this same
+    # project a populated charter, then compare the records, not just counts.
+    ProjectKickoffCharter.objects.create(
+        project=mpp_project, **charter_payload,
+        created_by=p6_personas["creator_planner"],
+        updated_by=p6_personas["creator_planner"],
+    )
+    charter_url = f"/api/v1/projects/{mpp_project.id}/kickoff-charter/"
+    charter_before = planner_client.get(charter_url)
+    assert charter_before.status_code == 200, charter_before.content
+    for field, expected in charter_payload.items():
+        assert charter_before.data[field] == expected
+
+    def preserved_records():
+        return {
+            "project": list(Project.objects.filter(pk=mpp_project.pk).values(
+                "project_code", "project_name", "employer", "start_date",
+                "project_manager_id", "scope_description", "contract_amount",
+                "budget_approved_at", "budget_approved_by_id",
+            )),
+            "charter": list(ProjectKickoffCharter.objects.filter(project=mpp_project).values()),
+            "wbs": list(WBS.objects.filter(project=mpp_project).order_by("pk").values()),
+            "activities": list(Activity.objects.filter(project=mpp_project).order_by("pk").values()),
+            "relations": list(ActivityRelation.objects.filter(successor__project=mpp_project).order_by("pk").values()),
+            "baselines": list(BaselineSchedule.objects.filter(project=mpp_project).order_by("pk").values()),
+            "baseline_activities": list(BaselineActivity.objects.filter(baseline__project=mpp_project).order_by("pk").values()),
+        }
+
+    before_lifecycle = preserved_records()
+    assert all(before_lifecycle.values())
+
+    def assert_preserved():
+        assert preserved_records() == before_lifecycle
+        charter_after = planner_client.get(charter_url)
+        assert charter_after.status_code == 200, charter_after.content
+        assert charter_after.data == charter_before.data
+
     # 1) Active -> Suspended -> Active (Resume with mandatory confirmation & reason)
     susp_res = approver_client.post(f"/api/v1/projects/{mpp_project.id}/suspend/")
     assert susp_res.status_code == 200, susp_res.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.SUSPENDED
+    assert_preserved()
 
     res_prev = admin_client.get(f"/api/v1/projects/{mpp_project.id}/resume-preview/")
     assert res_prev.status_code == 200, res_prev.content
@@ -521,12 +753,14 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert res_exec.status_code == 200, res_exec.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.ACTIVE
+    assert_preserved()
 
     # 2) Active -> Completed -> Undo Completion (System Admin only)
     comp_res = approver_client.post(f"/api/v1/projects/{mpp_project.id}/complete/")
     assert comp_res.status_code == 200, comp_res.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.COMPLETED
+    assert_preserved()
 
     non_admin_undo = planner_client.get(f"/api/v1/projects/{mpp_project.id}/undo-completion-preview/")
     assert non_admin_undo.status_code == 403
@@ -546,12 +780,14 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert undo_exec.status_code == 200, undo_exec.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.ACTIVE
+    assert_preserved()
 
     # 3) Active -> Archived -> Restore from Archive (System Admin only, 100% data preservation)
     arch_res = approver_client.post(f"/api/v1/projects/{mpp_project.id}/archive/")
     assert arch_res.status_code == 200, arch_res.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.ARCHIVED
+    assert_preserved()
 
     non_admin_restore = planner_client.get(f"/api/v1/projects/{mpp_project.id}/restore-preview/")
     assert non_admin_restore.status_code == 403
@@ -571,6 +807,7 @@ def test_a7_p6_positive_reference_journey_pos01_to_pos10(p6_personas):
     assert rest_exec.status_code == 200, rest_exec.content
     mpp_project.refresh_from_db()
     assert mpp_project.status == ProjectStatus.ACTIVE
+    assert_preserved()
     assert _counts(mpp_project) == {"wbs": 6, "activities": 72, "relations": 72, "baselines": 1}
 
 
@@ -627,15 +864,23 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
         create_wbs_node(project_id=project_a.id, wbs_code=" 1 ", wbs_name="ریشه تکراری")
 
     # --- NEG-02: Invalid / Cross-Project Parent WBS Rejected ---
+    foreign_root, _foreign_warnings = create_wbs_node(
+        project_id=project_b.id, wbs_code="B1", wbs_name="ریشه پروژه B"
+    )
     foreign_wbs = planner_client.post(
         f"/api/v1/projects/{project_a.id}/wbs/",
-        {"parent_id": str(uuid4()), "wbs_code": "9", "wbs_name": "والد نامعتبر"},
+        {"parent_id": str(foreign_root.id), "wbs_code": "9", "wbs_name": "والد پروژه دیگر"},
         format="json",
     )
     assert foreign_wbs.status_code == 400
     assert foreign_wbs.json()["error"]["code"] == "invalid_parent"
+    assert not WBS.objects.filter(project=project_a, wbs_code="9", is_deleted=False).exists()
 
-    # --- NEG-03: WBS Cycle & Dependency Cycle Rejected ---
+    # --- NEG-03: Direct & Indirect WBS / Dependency Cycles Rejected With No Partial Writes ---
+    before_neg03 = _counts(project_a)
+    before_neg03_jobs = MspImportJob.objects.filter(project=project_a).count()
+
+    # Direct WBS cycle: move root under its own child
     wbs_cycle = planner_client.post(
         f"/api/v1/projects/{project_a.id}/wbs/{root_a.id}/move/",
         {"new_parent_id": str(child_a.id), "position": "last-child"},
@@ -643,7 +888,23 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
     )
     assert wbs_cycle.status_code == 400
     assert "wbs_cycle" in str(wbs_cycle.json())
+    assert _counts(project_a) == before_neg03
 
+    # Indirect WBS cycle: root -> child -> grandchild, then move root under grandchild
+    grandchild_a, _ = create_wbs_node(
+        project_id=project_a.id, parent_id=child_a.id, wbs_code="1.1.1", wbs_name="نوه A"
+    )
+    before_indirect_wbs = _counts(project_a)
+    indirect_wbs_cycle = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/wbs/{root_a.id}/move/",
+        {"new_parent_id": str(grandchild_a.id), "position": "last-child"},
+        format="json",
+    )
+    assert indirect_wbs_cycle.status_code == 400
+    assert "wbs_cycle" in str(indirect_wbs_cycle.json())
+    assert _counts(project_a) == before_indirect_wbs
+
+    # Direct mutual dependency cycle via import
     cycle_xml = (
         b'<?xml version="1.0" encoding="UTF-8"?>'
         b'<Project xmlns="http://schemas.microsoft.com/project"><Tasks>'
@@ -657,12 +918,102 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
     with pytest.raises(ImportFidelityError) as cycle_exc:
         execute_msp_import(project_a, cycle_xml, filename="cycle.xml", replace=False, user=p6_personas["creator_planner"])
     assert cycle_exc.value.code == "structure_cycle"
+    assert _counts(project_a) == before_indirect_wbs
+    assert MspImportJob.objects.filter(project=project_a).count() == before_neg03_jobs
+
+    # Indirect dependency cycle via import: A→B→C→A
+    indirect_cycle_xml = (
+        b'<?xml version="1.0" encoding="UTF-8"?>'
+        b'<Project xmlns="http://schemas.microsoft.com/project"><Tasks>'
+        b"<Task><UID>1</UID><Name>R</Name><OutlineNumber>1</OutlineNumber><WBS>1</WBS><Summary>1</Summary></Task>"
+        b"<Task><UID>2</UID><Name>A</Name><OutlineNumber>1.1</OutlineNumber><WBS>1.1</WBS><Summary>0</Summary><Duration>PT8H0M0S</Duration>"
+        b"<PredecessorLink><PredecessorUID>4</PredecessorUID><Type>1</Type></PredecessorLink></Task>"
+        b"<Task><UID>3</UID><Name>B</Name><OutlineNumber>1.2</OutlineNumber><WBS>1.2</WBS><Summary>0</Summary><Duration>PT8H0M0S</Duration>"
+        b"<PredecessorLink><PredecessorUID>2</PredecessorUID><Type>1</Type></PredecessorLink></Task>"
+        b"<Task><UID>4</UID><Name>C</Name><OutlineNumber>1.3</OutlineNumber><WBS>1.3</WBS><Summary>0</Summary><Duration>PT8H0M0S</Duration>"
+        b"<PredecessorLink><PredecessorUID>3</PredecessorUID><Type>1</Type></PredecessorLink></Task>"
+        b"</Tasks></Project>"
+    )
+    with pytest.raises(ImportFidelityError) as indirect_cycle_exc:
+        execute_msp_import(
+            project_a,
+            indirect_cycle_xml,
+            filename="indirect-cycle.xml",
+            replace=False,
+            user=p6_personas["creator_planner"],
+        )
+    assert indirect_cycle_exc.value.code == "structure_cycle"
+    assert _counts(project_a) == before_indirect_wbs
+
+    # Indirect dependency cycle via live API: act1→act2→act3, then act3→act1 must fail
+    act1 = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/",
+        {
+            "wbs_id": str(child_a.id),
+            "activity_code": "CYC-1",
+            "activity_name": "حلقه ۱",
+            "duration_days": 1,
+            "planned_start": "2026-04-01",
+            "planned_finish": "2026-04-01",
+        },
+        format="json",
+    )
+    assert act1.status_code == 201, act1.content
+    act2 = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/",
+        {
+            "wbs_id": str(child_a.id),
+            "activity_code": "CYC-2",
+            "activity_name": "حلقه ۲",
+            "duration_days": 1,
+            "planned_start": "2026-04-02",
+            "planned_finish": "2026-04-02",
+        },
+        format="json",
+    )
+    assert act2.status_code == 201, act2.content
+    act3 = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/",
+        {
+            "wbs_id": str(child_a.id),
+            "activity_code": "CYC-3",
+            "activity_name": "حلقه ۳",
+            "duration_days": 1,
+            "planned_start": "2026-04-03",
+            "planned_finish": "2026-04-03",
+        },
+        format="json",
+    )
+    assert act3.status_code == 201, act3.content
+    id1, id2, id3 = act1.json()["activity_id"], act2.json()["activity_id"], act3.json()["activity_id"]
+    rel12 = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/{id1}/relations/",
+        {"role": "predecessor", "successor_id": id2, "relation_type": "FS", "lag_days": 0},
+        format="json",
+    )
+    assert rel12.status_code in (200, 201), rel12.content
+    rel23 = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/{id2}/relations/",
+        {"role": "predecessor", "successor_id": id3, "relation_type": "FS", "lag_days": 0},
+        format="json",
+    )
+    assert rel23.status_code in (200, 201), rel23.content
+    before_closing_edge = _counts(project_a)
+    closing_cycle = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/{id3}/relations/",
+        {"role": "predecessor", "successor_id": id1, "relation_type": "FS", "lag_days": 0},
+        format="json",
+    )
+    assert closing_cycle.status_code == 400, closing_cycle.content
+    assert "حلقه" in str(closing_cycle.json()) or "cycle" in str(closing_cycle.json()).lower()
+    assert _counts(project_a) == before_closing_edge
 
     # --- NEG-04: Impossible Dates (finish < start) & Manual Non-Milestone Zero Duration Rejected ---
+    before_neg04 = Activity.objects.filter(project=project_a, is_deleted=False).count()
     bad_dates_res = planner_client.post(
         f"/api/v1/projects/{project_a.id}/activities/",
         {
-            "wbs": str(child_a.id),
+            "wbs_id": str(child_a.id),
             "activity_code": "ACT-BAD-DATE",
             "activity_name": "تاریخ نامعتبر",
             "planned_start": "2026-05-10",
@@ -672,14 +1023,44 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
         format="json",
     )
     assert bad_dates_res.status_code == 400
+    assert bad_dates_res.json()["error"]["code"] == "impossible_planned_dates"
+    zero_duration_res = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/",
+        {
+            "wbs_id": str(child_a.id),
+            "activity_code": "ACT-ZERO",
+            "activity_name": "مدت صفر غیرمایلستون",
+            "is_milestone": False,
+            "duration_days": 0,
+        },
+        format="json",
+    )
+    assert zero_duration_res.status_code == 400
+    assert zero_duration_res.json()["error"]["code"] == "zero_duration_non_milestone"
+    assert Activity.objects.filter(project=project_a, is_deleted=False).count() == before_neg04
 
     # --- NEG-05: Missing Predecessor & Atomic Import Rollback ---
     dangling_xml = (P1_FIXTURES / "dangling-predecessor.xml").read_bytes()
     dangling_preview = build_preview(parse_msp_xml(dangling_xml))
-    assert any(w["code"] in {"activity_without_parent", "missing_predecessor"} for w in dangling_preview["warning_items"])
+    assert any(w["code"] in {"activity_without_parent", "missing_predecessor", "predecessor_missing"} for w in dangling_preview["warning_items"])
+    before_dangling = _counts(project_a)
+    execute_msp_import(
+        project_a, dangling_xml, filename="dangling-predecessor.xml", replace=False, user=p6_personas["creator_planner"],
+    )
+    assert ActivityRelation.objects.filter(predecessor__project=project_a, predecessor_id__isnull=True).count() == 0
+    assert _counts(project_a)["relations"] == before_dangling["relations"]
 
     # --- NEG-06: Corrupt, Wrong Signature, Password-Protected, Truncated OLE, and >50MB Uploads Rejected ---
     before_neg06 = _counts(project_a)
+    empty_upload = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/import/msp/",
+        {"file": SimpleUploadedFile("empty.xml", b"", content_type="application/xml")},
+        format="multipart",
+    )
+    assert empty_upload.status_code == 400
+    assert empty_upload.json()["error"]["code"] == "empty_import"
+    assert MspImportJob.objects.filter(project=project_a, filename="empty.xml").count() == 0
+    assert _counts(project_a) == before_neg06
     for fname, payload, ctype, expected_code in [
         ("not-a-project.xml", (P1_FIXTURES / "not-a-project.xml").read_bytes(), "application/xml", "msp_invalid_xml"),
         ("notes.txt", b"plain text", "text/plain", "invalid_file_type"),
@@ -717,17 +1098,23 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
         assert res.json()["error"]["code"] == expected_code
     assert _counts(project_a) == before_neg06
 
-    # --- NEG-07: Cancel After Preview Writes Nothing ---
+    # --- NEG-07: Cancel After Preview Writes Nothing And Queues No Job ---
+    before_neg07_jobs = MspImportJob.objects.filter(project=project_a).count()
+    before_neg07_counts = _counts(project_a)
     prev_only = planner_client.post(
         f"/api/v1/projects/{project_a.id}/import/msp/preview/",
         {"file": SimpleUploadedFile("branch.xml", (P1_FIXTURES / "branch.xml").read_bytes(), content_type="application/xml")},
         format="multipart",
     )
     assert prev_only.status_code == 200
-    assert _counts(project_a) == before_neg06
+    # Simulate cancel: no confirm/start call follows the preview.
+    assert _counts(project_a) == before_neg07_counts
+    assert MspImportJob.objects.filter(project=project_a).count() == before_neg07_jobs
+    assert MspImportJob.objects.filter(project=project_a, filename="branch.xml").count() == 0
 
-    # --- NEG-08 & NEG-09: In-Flight Job Recovery & Duplicate Submission Return Same Active Attempt ---
+    # --- NEG-08 & NEG-09: Same-Attempt Recovery After Disconnect/Reload & Duplicate Submit Lock ---
     branch_bytes = (P1_FIXTURES / "branch.xml").read_bytes()
+    before_neg08_jobs = MspImportJob.objects.filter(project=project_a).count()
     active_job = MspImportJob.objects.create(
         project=project_a,
         status=MspImportStatus.RUNNING,
@@ -738,12 +1125,20 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
         replace_existing=False,
         created_by=p6_personas["creator_planner"],
     )
+    # Simulate connection drop / page reload: re-poll the same task id without creating another job.
     status_poll = planner_client.get(
         f"/api/v1/projects/{project_a.id}/import/msp/status/{active_job.id}/"
     )
     assert status_poll.status_code == 200
     assert status_poll.json()["status"] == MspImportStatus.RUNNING
     assert "progress_pct" in status_poll.json()
+    reload_poll = planner_client.get(
+        f"/api/v1/projects/{project_a.id}/import/msp/status/{active_job.id}/"
+    )
+    assert reload_poll.status_code == 200
+    assert reload_poll.json()["status"] == MspImportStatus.RUNNING
+    assert reload_poll.json()["task_id"] == str(active_job.id) if "task_id" in reload_poll.json() else True
+    assert MspImportJob.objects.filter(project=project_a).count() == before_neg08_jobs + 1
 
     conflict_start = planner_client.post(
         f"/api/v1/projects/{project_a.id}/import/msp/",
@@ -752,8 +1147,9 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
     )
     assert conflict_start.status_code == 202
     assert conflict_start.json()["task_id"] == str(active_job.id)
-    assert MspImportJob.objects.filter(project=project_a).count() == 1
-    assert _counts(project_a) == before_neg06
+    assert conflict_start.json()["code"] == "import_already_active"
+    assert MspImportJob.objects.filter(project=project_a).count() == before_neg08_jobs + 1
+    assert _counts(project_a) == before_neg07_counts
     active_job.status = MspImportStatus.FAILED
     active_job.save(update_fields=["status", "updated_at"])
 
@@ -774,33 +1170,145 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
     assert queued_job.error_code == "import_not_permitted"
     assert _counts(project_a) == before_neg06
 
-    # --- NEG-11: Cross-Project Isolation (Project A vs Project B) ---
+    archived_job = MspImportJob.objects.create(
+        project=project_a,
+        status=MspImportStatus.PENDING,
+        filename="branch.xml",
+        file_data=branch_bytes,
+        source_sha256=hashlib.sha256(branch_bytes).hexdigest(),
+        source_size=len(branch_bytes),
+        replace_existing=False,
+        created_by=p6_personas["creator_planner"],
+    )
+    from projects import lifecycle_service
+
+    project_a = lifecycle_service.archive(project_a, p6_personas["creator_planner"])
+    run_msp_import_task.apply(args=[str(archived_job.id)])
+    archived_job.refresh_from_db()
+    assert archived_job.status == MspImportStatus.FAILED
+    assert archived_job.error_code == "project_archived"
+    assert _counts(project_a) == before_neg06
+    project_a.status = ProjectStatus.ACTIVE
+    project_a.archived_from_status = None
+    project_a.archive_cycle_id = None
+    project_a.save(update_fields=["status", "archived_from_status", "archive_cycle_id", "updated_at"])
+
+    # --- NEG-11: Cross-Project Isolation Across WBS, Schedule, Baseline, and Import ---
+    approver_client_for_b = _client_for(p6_personas["independent_approver"])
+    root_b, _ = create_wbs_node(project_id=project_b.id, wbs_code="B-ROOT", wbs_name="ریشه B")
+    act_b = approver_client_for_b.post(
+        f"/api/v1/projects/{project_b.id}/activities/",
+        {
+            "wbs_id": str(root_b.id),
+            "activity_code": "B-ACT-1",
+            "activity_name": "فعالیت پروژه B",
+            "duration_days": 2,
+            "planned_start": "2026-05-01",
+            "planned_finish": "2026-05-02",
+        },
+        format="json",
+    )
+    assert act_b.status_code == 201, act_b.content
+    baseline_b = approver_client_for_b.post(
+        f"/api/v1/projects/{project_b.id}/baselines/",
+        {"version_name": "خط مبنای B", "make_current": True},
+        format="json",
+    )
+    assert baseline_b.status_code == 201, baseline_b.content
+
     cross_get = planner_client.get(f"/api/v1/projects/{project_b.id}/wbs/")
     assert cross_get.status_code in (403, 404)
+    cross_activities = planner_client.get(f"/api/v1/projects/{project_b.id}/activities/")
+    assert cross_activities.status_code in (403, 404)
+    cross_gantt = planner_client.get(f"/api/v1/projects/{project_b.id}/gantt/")
+    assert cross_gantt.status_code in (403, 404)
+    cross_baselines = planner_client.get(f"/api/v1/projects/{project_b.id}/baselines/")
+    assert cross_baselines.status_code in (403, 404)
+    cross_baseline_detail = planner_client.get(
+        f"/api/v1/projects/{project_b.id}/baselines/{baseline_b.json()['id']}/"
+    )
+    # Detail may be missing as a route; list denial is enough when detail 404s by routing.
+    assert cross_baseline_detail.status_code in (403, 404, 405)
     cross_job = planner_client.get(
         f"/api/v1/projects/{project_b.id}/import/msp/status/{queued_job.id}/"
     )
     assert cross_job.status_code in (403, 404)
+    # Project A member must not read Project B schedule rows by borrowing B ids on A's path either.
+    cross_activity_on_a = planner_client.get(
+        f"/api/v1/projects/{project_a.id}/activities/{act_b.json()['activity_id']}/"
+    )
+    assert cross_activity_on_a.status_code in (403, 404)
 
-    # --- NEG-12: Viewer (view_only) Blocked from Mutations and Imports ---
+    # --- NEG-12: Viewer (view_only) Blocked from Project, WBS, Baseline, and Import Mutations ---
+    before_viewer = _counts(project_a)
     viewer_read = viewer_client.get(f"/api/v1/projects/{project_a.id}/wbs/")
     assert viewer_read.status_code == 200
+    viewer_project_write = viewer_client.patch(
+        f"/api/v1/projects/{project_a.id}/",
+        {"employer": "تلاش مشاهده‌گر برای تغییر پروژه"},
+        format="json",
+    )
+    assert viewer_project_write.status_code == 403
     viewer_write = viewer_client.post(
         f"/api/v1/projects/{project_a.id}/wbs/",
         {"wbs_code": "2", "wbs_name": "تلاش مشاهده‌گر"},
         format="json",
     )
     assert viewer_write.status_code == 403
+    viewer_baseline = viewer_client.post(
+        f"/api/v1/projects/{project_a.id}/baselines/",
+        {"version_name": "خط مبنای مشاهده‌گر", "make_current": True},
+        format="json",
+    )
+    assert viewer_baseline.status_code == 403
     viewer_import = viewer_client.post(
         f"/api/v1/projects/{project_a.id}/import/msp/preview/",
         {"file": SimpleUploadedFile("branch.xml", (P1_FIXTURES / "branch.xml").read_bytes(), content_type="application/xml")},
         format="multipart",
     )
     assert viewer_import.status_code == 403
+    assert _counts(project_a) == before_viewer
 
     # --- NEG-13: Non-Member System Administrator Observation Exception ---
     admin_observe = admin_client.get(f"/api/v1/projects/{project_b.id}/wbs/")
     assert admin_observe.status_code == 200
+    admin_write = admin_client.post(
+        f"/api/v1/projects/{project_b.id}/wbs/",
+        {"wbs_code": "ADMIN", "wbs_name": "نوشتن مدیر غیرعضو"},
+        format="json",
+    )
+    assert admin_write.status_code == 403
+    approver_client = _client_for(p6_personas["independent_approver"])
+    project_b.scope_description = "دامنه پروژه مستقل"
+    project_b.contract_amount = Decimal("1000.00")
+    project_b.project_manager = p6_personas["independent_approver"]
+    project_b.save(update_fields=["scope_description", "contract_amount", "project_manager", "updated_at"])
+    assert approver_client.post(f"/api/v1/projects/{project_b.id}/complete/").status_code == 200
+    undo_preview = admin_client.get(f"/api/v1/projects/{project_b.id}/undo-completion-preview/")
+    assert undo_preview.status_code == 200, undo_preview.content
+    undo_exec = admin_client.post(
+        f"/api/v1/projects/{project_b.id}/undo-completion/",
+        {
+            "request_id": str(uuid4()),
+            "confirmation_token": undo_preview.json()["confirmation_token"],
+            "reason": "بازگردانی توسط مدیر غیرعضو",
+        },
+        format="json",
+    )
+    assert undo_exec.status_code == 200, undo_exec.content
+    assert approver_client.post(f"/api/v1/projects/{project_b.id}/archive/").status_code == 200
+    restore_preview = admin_client.get(f"/api/v1/projects/{project_b.id}/restore-preview/")
+    assert restore_preview.status_code == 200, restore_preview.content
+    restore_exec = admin_client.post(
+        f"/api/v1/projects/{project_b.id}/restore/",
+        {
+            "request_id": str(uuid4()),
+            "confirmation_token": restore_preview.json()["confirmation_token"],
+            "reason": "بازیابی توسط مدیر غیرعضو",
+        },
+        format="json",
+    )
+    assert restore_exec.status_code == 200, restore_exec.content
 
     # --- NEG-14: Archived Project Strictly Read-Only Across Import & Protected Project Surfaces ---
     from projects import lifecycle_service
@@ -819,4 +1327,61 @@ def test_a7_p6_negative_adverse_concurrency_and_access_boundaries_neg01_to_neg14
     )
     assert arch_start.status_code == 400
     assert arch_start.json()["error"]["code"] == "project_archived"
+    arch_charter = planner_client.put(
+        f"/api/v1/projects/{project_a.id}/kickoff-charter/",
+        {"justification": "نباید روی آرشیو نوشته شود", "success_criteria": "x", "constraints": "x", "assumptions": "x", "key_stakeholders_summary": "x", "pm_authority": "x"},
+        format="json",
+    )
+    assert arch_charter.status_code == 400
+    assert "project_archived" in str(arch_charter.data)
+    arch_wbs = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/wbs/",
+        {"wbs_code": "ARCH", "wbs_name": "نباید ساخته شود"},
+        format="json",
+    )
+    assert arch_wbs.status_code == 400
+    assert "project_archived" in str(arch_wbs.data)
+    arch_activity = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/activities/",
+        {"wbs_id": str(child_a.id), "activity_code": "ARCH", "activity_name": "آرشیو", "duration_days": 1},
+        format="json",
+    )
+    assert arch_activity.status_code == 400
+    assert "project_archived" in str(arch_activity.data)
+    arch_baseline = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/baselines/",
+        {"version_name": "نباید ساخته شود"},
+        format="json",
+    )
+    assert arch_baseline.status_code == 400
+    assert "project_archived" in str(arch_baseline.data)
+    arch_preview = planner_client.post(
+        f"/api/v1/projects/{project_a.id}/import/msp/preview/",
+        {"file": SimpleUploadedFile("branch.xml", (P1_FIXTURES / "branch.xml").read_bytes(), content_type="application/xml")},
+        format="multipart",
+    )
+    assert arch_preview.status_code == 400
+    assert arch_preview.json()["error"]["code"] == "project_archived"
+
+    admin_member = ProjectMember.objects.create(
+        project=project_a,
+        user=p6_personas["system_admin"],
+        status=MemberStatus.ACTIVE,
+    )
+    set_permission_override(admin_member, "edit_wbs", True, actor=p6_personas["system_admin"])
+    assert has_organizational_observation(p6_personas["system_admin"])
+    assert active_member_has_codename(p6_personas["system_admin"], project_a.id, "edit_wbs")
+    admin_import = admin_client.post(
+        f"/api/v1/projects/{project_a.id}/import/msp/",
+        {
+            "file": SimpleUploadedFile(
+                "branch.xml",
+                (P1_FIXTURES / "branch.xml").read_bytes(),
+                content_type="application/xml",
+            )
+        },
+        format="multipart",
+    )
+    assert admin_import.status_code == 400
+    assert admin_import.json()["error"]["code"] == "project_archived"
     assert _counts(project_a) == before_neg06

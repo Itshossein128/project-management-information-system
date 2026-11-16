@@ -31,6 +31,10 @@ class BaselineListCreateView(APIView):
 
     @extend_schema(summary='Create baseline snapshot from live activities', tags=['Schedule Baselines'])
     def post(self, request, project_pk=None):
+        from projects.lifecycle_service import assert_not_archived_mutable
+        from projects.models import Project
+
+        assert_not_archived_mutable(get_object_or_404(Project, pk=project_pk), request.user)
         ser = BaselineCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         baseline = baseline_service.create_baseline_snapshot(

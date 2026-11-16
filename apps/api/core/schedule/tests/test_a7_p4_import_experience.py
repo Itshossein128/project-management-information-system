@@ -57,6 +57,7 @@ EXPERIENCE_CODES = [
     'wbs_has_documents',
     'wbs_has_activities',
     'baseline_history_protected',
+    'baseline_replace_forbidden',
     'duplicate_relation',
 ]
 

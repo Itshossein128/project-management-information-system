@@ -163,7 +163,10 @@ def save_project_as_template(
         created_by=created_by,
     )
 
-    wbs_nodes = list(WBS.get_tree(WBS.objects.filter(project_id=project.id)))
+    wbs_nodes: list[WBS] = []
+    roots = WBS.get_root_nodes().filter(project_id=project.id, is_deleted=False).order_by('path')
+    for root in roots:
+        wbs_nodes.extend(node for node in WBS.get_tree(root) if not node.is_deleted)
     wbs_to_template: dict[str, ProjectTemplateWBS] = {}
 
     for node in wbs_nodes:

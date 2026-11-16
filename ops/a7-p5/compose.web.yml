@@ -1,0 +1,14 @@
+# Compiled acceptance web release. Linux host networking keeps the baked
+# localhost API origin identical in browser and server-rendered requests.
+services:
+  web:
+    image: a7p5-web:acceptance
+    init: true
+    network_mode: host
+    environment:
+      HOST: 127.0.0.1
+      PORT: "15173"
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy

@@ -105,7 +105,7 @@ def _normalize_and_validate_wbs_code(project_id, wbs_code: str, *, exclude_id=No
     if exclude_id is not None:
         qs = qs.exclude(pk=exclude_id)
     if qs.exists():
-        raise WBSValidationError('wbs_code must be unique within the project.')
+        raise WBSValidationError('wbs_code must be unique within the project.', code='duplicate_wbs_code')
     return normalized
 
 

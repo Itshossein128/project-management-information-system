@@ -155,6 +155,21 @@ class TestActivityValidation:
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
         assert resp.data['error']['code'] == 'invalid_milestone'
 
+    def test_non_milestone_zero_duration_rejected(self, auth_client, project, wbs_root):
+        resp = auth_client.post(
+            ACTIVITIES.format(project_id=project.id),
+            {
+                'wbs_id': str(wbs_root.id),
+                'activity_code': 'A0',
+                'activity_name': 'Zero duration',
+                'is_milestone': False,
+                'duration_days': 0,
+            },
+            format='json',
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST
+        assert resp.data['error']['code'] == 'zero_duration_non_milestone'
+
     def test_milestone_null_duration_rejected(self, auth_client, project, wbs_root):
         resp = auth_client.post(
             ACTIVITIES.format(project_id=project.id),

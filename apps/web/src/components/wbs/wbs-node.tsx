@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Pencil, Plus, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ApiRequestError } from "@/app/lib/api-client";
 import { fetchMembers } from "@/app/lib/api/members";
 import {
   createWBSNode,
@@ -11,13 +12,33 @@ import {
   type WBSNode,
 } from "@/app/lib/api/wbs";
 import { Button } from "@/components/ui/sprint-button";
-import { Input } from "@/components/form";
+import { Field, Input, Select, TextArea } from "@/components/form";
 import { useToast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 const INDENT_PX = 24;
 const UNDO_DURATION_MS = 10_000;
+
+// Tailwind utility classes for consistent spacing and hover states
+const rowClasses =
+  "group flex min-h-12 items-center gap-3 py-2 transition-colors hover:bg-muted/60 focus-within:bg-muted/60";
+// Hidden until hover/focus on pointer devices; always visible on touch devices.
+const revealClasses =
+  "opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100";
+const NO_RESPONSIBLE = "__none__";
+const STATUS_STYLES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+  on_hold: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
+};
+const STATUS_KEYS: Record<string, string> = {
+  draft: "wbs.statusDraft",
+  active: "wbs.statusActive",
+  completed: "wbs.statusCompleted",
+  on_hold: "wbs.statusOnHold",
+};
+const indentStyle = (depth: number) => ({ paddingLeft: `${depth * INDENT_PX}px` });
 
 interface WBSNodeRowProps {
   node: WBSNode;
@@ -133,7 +154,10 @@ export function WBSNodeRow({
         await deleteWBSNode(projectId, created.wbs_id);
       });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(
+      e instanceof ApiRequestError && e.code === "duplicate_wbs_code"
+        ? t("wbs.duplicateCode") : e.message,
+    ),
   });
 
   const deleteMutation = useMutation({
@@ -202,9 +226,9 @@ export function WBSNodeRow({
 
   return (
     <Collapsible open={expanded} onOpenChange={setExpanded} asChild>
-      <div data-testid={`wbs-node-${node.wbs_code}`} data-wbs-id={node.wbs_id}>
+      <div role="treeitem" aria-expanded={hasChildren ? expanded : undefined} aria-level={depth + 1} tabIndex={0} onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) setExpanded(!expanded); }} data-testid={`wbs-node-${node.wbs_code}`} data-wbs-id={node.wbs_id}>
         <div
-        className="group flex flex-wrap items-center gap-2 border-b border-border/50 py-2 pe-2"
+        className={`${rowClasses} border-b border-border/50 pe-2 ${editing ? "items-start" : ""}`}
         style={{ paddingInlineStart: indent + 8 }}
         data-testid={`wbs-row-${node.wbs_code}`}
         draggable={canEdit}
@@ -249,110 +273,141 @@ export function WBSNodeRow({
             <CollapsibleTrigger asChild>
               <button
                 type="button"
-                className="rounded-sm text-muted-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 [&[data-state=open]>svg]:-rotate-90"
+                className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&[data-state=open]>svg]:-rotate-90"
                 aria-label={expanded ? t("wbs.collapse") : t("wbs.expand")}
               >
                 <ChevronLeft className="size-4 transition-transform duration-200" />
               </button>
             </CollapsibleTrigger>
           ) : (
-            <span className="w-4" />
+            <span className="inline-block size-6" aria-hidden="true" />
           )}
 
-          <span className="text-xs text-muted-foreground">{node.wbs_code}</span>
+          <span
+            dir="ltr"
+            className="shrink-0 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs tabular-nums text-muted-foreground"
+          >
+            {node.wbs_code}
+          </span>
 
         {editing && canEdit ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              className="h-8 max-w-xs"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-            />
-            <select
-              className="h-8 rounded border px-2 text-sm"
+          <div
+            className="grid min-w-0 flex-1 gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4"
+            data-testid={`wbs-edit-form-${node.wbs_code}`}
+          >
+            <Field
+              name={`wbs-name-${node.wbs_id}`}
+              label={t("wbs.name")}
+              htmlFor={`wbs-name-input-${node.wbs_id}`}
+              className="lg:col-span-2"
+            >
+              {() => (
+                <Input
+                  id={`wbs-name-input-${node.wbs_id}`}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoFocus
+                />
+              )}
+            </Field>
+            <Select
+              name={`wbs-status-${node.wbs_id}`}
+              label={t("wbs.status")}
+              aria-label={t("wbs.status")}
               value={status}
               onChange={(e) =>
                 setStatus(e.target.value as "draft" | "active" | "completed" | "on_hold")
               }
-              aria-label={t("wbs.status")}
-            >
-              <option value="draft">{t("wbs.statusDraft")}</option>
-              <option value="active">{t("wbs.statusActive")}</option>
-              <option value="completed">{t("wbs.statusCompleted")}</option>
-              <option value="on_hold">{t("wbs.statusOnHold")}</option>
-            </select>
-            <select
-              className="h-8 max-w-[12rem] rounded border px-2 text-sm"
-              value={responsible}
-              onChange={(e) => setResponsible(e.target.value)}
-              aria-label={t("wbs.responsible")}
-              data-testid={`wbs-responsible-select-${node.wbs_code}`}
-            >
-              <option value="">{t("wbs.responsibleNone")}</option>
-              {activeMembers.map((m) => (
-                <option key={m.user_id!} value={m.user_id!}>
-                  {m.full_name || m.email || m.user_id}
-                </option>
-              ))}
-            </select>
-            <Input
-              className="h-8 max-w-sm"
+              options={[
+                { value: "draft", label: t("wbs.statusDraft") },
+                { value: "active", label: t("wbs.statusActive") },
+                { value: "completed", label: t("wbs.statusCompleted") },
+                { value: "on_hold", label: t("wbs.statusOnHold") },
+              ]}
+            />
+            <div data-testid={`wbs-responsible-select-${node.wbs_code}`} className="min-w-0">
+              <Select
+                name={`wbs-responsible-${node.wbs_id}`}
+                label={t("wbs.responsible")}
+                aria-label={t("wbs.responsible")}
+                value={responsible || NO_RESPONSIBLE}
+                onChange={(e) =>
+                  setResponsible(e.target.value === NO_RESPONSIBLE ? "" : e.target.value)
+                }
+                options={[
+                  { value: NO_RESPONSIBLE, label: t("wbs.responsibleNone") },
+                  ...activeMembers.map((m) => ({
+                    value: m.user_id!,
+                    label: m.full_name || m.email || m.user_id!,
+                  })),
+                ]}
+              />
+            </div>
+            <TextArea
+              name={`wbs-description-field-${node.wbs_id}`}
+              label={t("wbs.description")}
+              fieldClassName="sm:col-span-2"
+              className="min-h-20 resize-y"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("wbs.description")}
-              aria-label={t("wbs.description")}
               data-testid={`wbs-description-${node.wbs_code}`}
             />
-            <Input
-              className="h-8 max-w-sm"
+            <TextArea
+              name={`wbs-acceptance-field-${node.wbs_id}`}
+              label={t("wbs.acceptanceCriteria")}
+              fieldClassName="sm:col-span-2"
+              className="min-h-20 resize-y"
               value={acceptance}
               onChange={(e) => setAcceptance(e.target.value)}
-              placeholder={t("wbs.acceptanceCriteria")}
-              aria-label={t("wbs.acceptanceCriteria")}
             />
-            <Button
-              size="sm"
-              variant="primary"
-              loading={updateMutation.isPending}
-              onClick={() => {
-                updateMutation.mutate({
-                  wbs_name: name.trim() || node.wbs_name,
-                  description,
-                  responsible: responsible || null,
-                  acceptance_criteria: acceptance,
-                  status,
-                });
-              }}
-            >
-              {t("wbs.save")}
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setEditing(false);
-                setName(node.wbs_name);
-                setDescription(node.description ?? "");
-                setAcceptance(node.acceptance_criteria ?? "");
-                setResponsible(node.responsible ?? "");
-                setStatus(node.status ?? "active");
-              }}
-            >
-              {t("wbs.cancel")}
-            </Button>
+            <div className="flex items-center justify-end gap-2 border-t border-border pt-3 sm:col-span-2 lg:col-span-4">
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setEditing(false);
+                  setName(node.wbs_name);
+                  setDescription(node.description ?? "");
+                  setAcceptance(node.acceptance_criteria ?? "");
+                  setResponsible(node.responsible ?? "");
+                  setStatus(node.status ?? "active");
+                }}
+              >
+                {t("wbs.cancel")}
+              </Button>
+              <Button
+                size="sm"
+                variant="primary"
+                loading={updateMutation.isPending}
+                onClick={() => {
+                  updateMutation.mutate({
+                    wbs_name: name.trim() || node.wbs_name,
+                    description,
+                    responsible: responsible || null,
+                    acceptance_criteria: acceptance,
+                    status,
+                  });
+                }}
+              >
+                {t("wbs.save")}
+              </Button>
+            </div>
           </div>
         ) : (
           <div
             className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5"
             onDoubleClick={canEdit ? () => setEditing(true) : undefined}
           >
-            <span className="font-medium">
+            <span className={depth === 0 ? "font-semibold" : "font-medium"}>
               {node.wbs_name}
-              {node.status && node.status !== "active" ? (
-                <span className="ms-2 text-xs text-muted-foreground">({node.status})</span>
-              ) : null}
             </span>
+            {node.status && node.status !== "active" ? (
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[node.status] ?? "bg-muted text-muted-foreground"}`}
+              >
+                {STATUS_KEYS[node.status] ? t(STATUS_KEYS[node.status]) : node.status}
+              </span>
+            ) : null}
             {(node.description ?? "").trim() ? (
               <span
                 className="max-w-md truncate text-xs text-muted-foreground"
@@ -364,10 +419,13 @@ export function WBSNodeRow({
             ) : null}
             {responsibleLabel ? (
               <span
-                className="text-xs text-muted-foreground"
+                className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                title={t("wbs.responsible")}
                 data-testid={`wbs-responsible-view-${node.wbs_code}`}
               >
-                {t("wbs.responsible")}: {responsibleLabel}
+                <User className="size-3" aria-hidden="true" />
+                <span className="sr-only">{t("wbs.responsible")}: </span>
+                {responsibleLabel}
               </span>
             ) : null}
             {(node.acceptance_criteria ?? "").trim() ? (
@@ -382,10 +440,10 @@ export function WBSNodeRow({
           </div>
         )}
 
-        {canEdit ? (
+        {canEdit && !editing ? (
           <button
             type="button"
-            className="rounded-sm opacity-0 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
+            className={`inline-flex size-7 items-center justify-center rounded-md hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${revealClasses}`}
             onClick={() => setEditing(true)}
             aria-label={t("wbs.edit")}
           >
@@ -393,21 +451,37 @@ export function WBSNodeRow({
           </button>
         ) : null}
 
-        {weightPct != null && (
-          <span className="text-xs text-muted-foreground">{weightPct}%</span>
-        )}
-
-        {weightWarning && (
-          <span
-            className="text-xs text-warning-600"
-            title={t("wbs.weightWarning")}
-          >
-            ⚠
-          </span>
-        )}
+        {!editing ? (
+        <div className="ms-auto flex shrink-0 items-center gap-3">
+          {weightWarning && (
+            <span
+              className="text-amber-600"
+              title={t("wbs.weightWarning")}
+              role="img"
+              aria-label={t("wbs.weightWarning")}
+            >
+              <AlertTriangle className="size-4" />
+            </span>
+          )}
+          {weightPct != null && (
+            <span
+              className="flex w-24 items-center gap-2"
+              title={`${weightPct}%`}
+            >
+              <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                <span
+                  className="block h-full rounded-full bg-primary"
+                  style={{ width: `${Math.min(100, weightPct)}%` }}
+                />
+              </span>
+              <span className="w-9 text-end text-xs tabular-nums text-muted-foreground">
+                {weightPct}%
+              </span>
+            </span>
+          )}
 
         {canEdit ? (
-          <div className="ms-auto flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
+          <div className={`flex gap-1 ${revealClasses}`}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -444,6 +518,8 @@ export function WBSNodeRow({
             </Tooltip>
           </div>
           ) : null}
+        </div>
+        ) : null}
         </div>
 
         <CollapsibleContent>

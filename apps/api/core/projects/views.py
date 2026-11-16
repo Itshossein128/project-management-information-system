@@ -193,7 +193,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         with transaction.atomic():
             instance = lifecycle_service.lock_project(instance)
-            lifecycle_service.assert_not_archived_mutable(instance, request.user)
+            lifecycle_service.assert_project_patch_allowed(instance, request.user, request.data)
             serializer = self.get_serializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)

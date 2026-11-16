@@ -17,11 +17,12 @@ from django.db import connection, models, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from projects.models import Project
+from projects.models import Project, ProjectStatus
 from schedule.models import MspImportJob, MspImportStatus, P6ImportJob
 from schedule.services.import_fidelity import ImportFidelityError
 from schedule.services.import_process import ProcessingBusy, prepare_bytes
 from schedule.services.import_safety import (
+    PROJECT_ARCHIVED,
     ImportSafetyError,
     assert_can_import,
     file_sha256,
@@ -56,6 +57,7 @@ class StartOutcome:
     job: object | None = None
     code: str = ''
     message: str = ''
+    reused: bool = False
 
 
 def recovery_bound(count: int) -> int:
@@ -142,6 +144,8 @@ def begin_import(*, job_model, task, project, user, file_bytes: bytes, filename:
     predecessor = resolve_retry(job_model, project, intent, retry_of or None)
     digest = file_sha256(file_bytes)
     size = len(file_bytes)
+    if size == 0:
+        raise MppImportError('empty_import', 'The upload is empty.')
     if size > int(settings.IMPORT_UPLOAD_LIMIT_BYTES):
         raise MppImportError('file_too_large', 'File size must not exceed 50 MB.')
     with transaction.atomic():
@@ -150,7 +154,7 @@ def begin_import(*, job_model, task, project, user, file_bytes: bytes, filename:
         if refusal is None:
             inflight = find_inflight_job(job_model, locked, user, replace, file_bytes)
             if inflight is not None:
-                return StartOutcome(kind='queued', job=inflight)
+                return StartOutcome(kind='queued', job=inflight, code='import_already_active', reused=True)
     if admission_closed():
         raise ProcessingBusy()
     prepare_bytes(file_bytes, filename, family)
@@ -178,7 +182,7 @@ def begin_import(*, job_model, task, project, user, file_bytes: bytes, filename:
             return StartOutcome(kind='refused', job=job, code=refusal, message=_safe_message(refusal))
         inflight = find_inflight_job(job_model, locked, user, replace, file_bytes)
         if inflight is not None:
-            return StartOutcome(kind='queued', job=inflight)
+            return StartOutcome(kind='queued', job=inflight, code='import_already_active', reused=True)
         delivery = uuid.uuid4()
         job = job_model.objects.create(
             project=locked,
@@ -291,6 +295,9 @@ def apply_prepared(job_model, job_id, token, prepared, execute) -> dict:
             return {'outcome': 'fenced', 'job': job}
         if job.execution_deadline_at and job.execution_deadline_at <= timezone.now():
             raise MppImportError(PROCESSING_TIMEOUT, PUBLIC_MESSAGES[PROCESSING_TIMEOUT])
+        project = Project.objects.filter(pk=job.project_id).first()
+        if project is None or project.status == ProjectStatus.ARCHIVED:
+            raise ImportSafetyError(PROJECT_ARCHIVED, message_for(PROJECT_ARCHIVED))
         apply_deadline = min(job.execution_deadline_at, timezone.now()+timedelta(seconds=float(settings.IMPORT_APPLY_STATEMENT_SECONDS)))
         _budgets(apply_deadline)
         barrier('during_apply')

@@ -7,6 +7,7 @@ import { ProjectProvider, usePermission } from "@/app/contexts/project-context";
 import {
   asList,
   fetchOrganizationUnits,
+  fetchMeasurementUnits,
 } from "@/app/lib/api/central-data";
 import {
   fetchProject,
@@ -75,6 +76,8 @@ function ProjectSettingsContent() {
     queryFn: fetchOrganizationUnits,
   });
   const orgUnits = asList(orgUnitsRaw ?? []);
+  const { data: measurementUnitsRaw } = useQuery({ queryKey: ["measurement-units"], queryFn: fetchMeasurementUnits });
+  const measurementUnits = asList(measurementUnitsRaw ?? []);
 
   const [form, setForm] = useState<Partial<CreateProjectPayload>>({});
   const [lockForm, setLockForm] = useState({
@@ -170,6 +173,7 @@ function ProjectSettingsContent() {
       form.contract_amount ?? project.contract_amount ?? "",
     currency: (form.currency ?? project.currency ?? "IRR") as ProjectCurrency,
     owning_unit: form.owning_unit ?? project.owning_unit ?? "",
+    measurement_unit: form.measurement_unit !== undefined ? form.measurement_unit : project.measurement_unit ?? null,
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -196,6 +200,7 @@ function ProjectSettingsContent() {
       contract_type: values.contract_type || undefined,
       currency: values.currency,
       owning_unit: values.owning_unit || null,
+      measurement_unit: values.measurement_unit || null,
     });
   };
 
@@ -404,6 +409,13 @@ function ProjectSettingsContent() {
               setForm((f) => ({ ...f, consultant: e.target.value }))
             }
           />
+        </div>
+        <div>
+          <Label htmlFor="input-measurement-unit">{t("centralData.measurementUnit")}</Label>
+          <select id="input-measurement-unit" data-testid="settings-measurement-unit" className="w-full rounded-md border border-input bg-background p-2" disabled={!canEdit} value={values.measurement_unit || ""} onChange={e => setForm(f => ({ ...f, measurement_unit: e.target.value || null }))}>
+            <option value="">{t("projectWizard.notSelected")}</option>
+            {measurementUnits.map(u => <option key={u.id} value={u.id}>{u.unit_name} ({u.unit_symbol})</option>)}
+          </select>
         </div>
         <div>
           <Label htmlFor='input-location'>

@@ -38,9 +38,12 @@ def test_all_missing_gates_exactly(missing,operation):
     assert state(p)==before
 
 
-def test_zero_valid_nonactive_target_unrestricted_and_fresh_revocation():
+def test_positive_budget_required_nonactive_target_unrestricted_and_fresh_revocation():
     user=actor(admin=True);p=source_project(user);client=client_for(user)
     p.contract_amount=0;p.save()
+    view=preview(client,p)
+    assert not view.data['can_confirm'] and 'budget_approved' in view.data['missing']
+    p.contract_amount=1;p.save()
     view=preview(client,p);assert view.data['can_confirm']
     body=confirmed_body(client,p)
     p.project_manager=None;p.save()
