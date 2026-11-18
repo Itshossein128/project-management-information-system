@@ -1,6 +1,6 @@
-import { Globe } from "lucide-react";
 import { useLanguageStore } from "src/app/store/languageStore";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/app/lib/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -13,40 +13,46 @@ const OPTIONS = [
 export const LanguageSwitcher = () => {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguageStore();
+  const isEn = language === "en";
 
   return (
-    <div className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background pe-1 ps-2.5 shadow-xs">
-      <Globe className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-      <ToggleGroup
-        id="container-languageSwitcher"
-        type="single"
-        value={language}
-        onValueChange={(val) => {
-          if (val) setLanguage(val as "en" | "fa");
-        }}
-        aria-label={t("language.select")}
-        dir="ltr"
-        className="gap-0.5 rounded-md bg-muted p-0.5"
-      >
-        {OPTIONS.map(({ lang, short, native }) => {
-          const label = lang === "en" ? t("language.english") : t("language.persian");
-          return (
-            <Tooltip key={lang}>
-              <TooltipTrigger asChild>
-                <ToggleGroupItem
-                  id={`button-language-${lang}`}
-                  value={lang}
-                  aria-label={label}
-                  className="h-7 min-w-9 rounded-[5px] px-2.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground aria-[checked=true]:bg-primary aria-[checked=true]:text-primary-foreground aria-[checked=true]:shadow-sm aria-[checked=true]:hover:bg-primary aria-[checked=true]:hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {short}
-                </ToggleGroupItem>
-              </TooltipTrigger>
-              <TooltipContent>{native}</TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </ToggleGroup>
-    </div>
+    <ToggleGroup
+      id="container-languageSwitcher"
+      type="single"
+      spacing={1}
+      value={language}
+      onValueChange={(val) => {
+        if (val) setLanguage(val as "en" | "fa");
+      }}
+      aria-label={t("language.select")}
+      dir="ltr"
+      className="relative inline-grid h-9 grid-cols-2 items-center rounded-full border border-border/70 bg-muted/80 p-1 shadow-2xs"
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-y-1 start-1 w-[calc(50%-4px)] rounded-full bg-background shadow-xs ring-1 ring-border/40 transition-transform duration-200 ease-out dark:bg-card",
+          isEn ? "translate-x-full" : "translate-x-0"
+        )}
+      />
+      {OPTIONS.map(({ lang, short, native }) => {
+        const label = lang === "en" ? t("language.english") : t("language.persian");
+        return (
+          <Tooltip key={lang}>
+            <TooltipTrigger asChild>
+              <ToggleGroupItem
+                id={`button-language-${lang}`}
+                value={lang}
+                aria-label={label}
+                className="relative z-10 h-7 min-w-9 cursor-pointer rounded-full bg-transparent px-2.5 text-xs leading-none font-semibold text-muted-foreground transition-colors hover:bg-transparent hover:text-foreground aria-[checked=true]:bg-transparent aria-[checked=true]:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {short}
+              </ToggleGroupItem>
+            </TooltipTrigger>
+            <TooltipContent>{native}</TooltipContent>
+          </Tooltip>
+        );
+      })}
+    </ToggleGroup>
   );
 };
