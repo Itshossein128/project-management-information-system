@@ -1,60 +1,60 @@
 {
-  "source_head": "3eda2a32f72acd645bbf07d80d9945dfe237459c",
-  "verified_at": "2026-11-18T16:13:08.176503+00:00",
-  "backup_path": "/opt/building-management-backups/20261116T044936Z-before-3eda2a32f72acd645bbf07d80d9945dfe237459c",
+  "source_head": "89ca65e7c3ab2884f1936f45139cb135730fc53c",
+  "verified_at": "2026-11-18T16:48:14.795823+00:00",
+  "backup_path": "/opt/building-management-backups/20261118T163839Z-before-89ca65e7c3ab2884f1936f45139cb135730fc53c",
   "containers": [
     {
-      "name": "ipcas-celery-beat-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "name": "ipcas-import-maintenance-1",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": null,
-      "restart_count": 0
-    },
-    {
-      "name": "ipcas-web-1",
-      "image": "ipcas-web:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:792a1de5b2df82e2a281e4dd8ca960a3f7be298e55cf38914c0b94c442642415",
-      "status": "running",
-      "health": "healthy",
       "restart_count": 0
     },
     {
       "name": "ipcas-import-worker-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": null,
       "restart_count": 0
     },
     {
-      "name": "ipcas-worker-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "name": "ipcas-celery-beat-1",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": null,
       "restart_count": 0
     },
     {
       "name": "ipcas-celery-worker-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": null,
       "restart_count": 0
     },
     {
-      "name": "ipcas-import-maintenance-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "name": "ipcas-web-1",
+      "image": "ipcas-web:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:ff384401980e33b30de8ab888f9545896c0595033a8dd0da3a23c0acd752a0cc",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-worker-1",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": null,
       "restart_count": 0
     },
     {
       "name": "ipcas-api-1",
-      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
-      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "image": "ipcas-api:89ca65e7c3ab2884f1936f45139cb135730fc53c",
+      "image_id": "sha256:f9f4579f7a1b8b0adf86e7acd05ff12ad3cf8086925599de788d899ce539868f",
       "status": "running",
       "health": "healthy",
       "restart_count": 0
@@ -104,6 +104,9 @@
   "scratch_mount": "tmpfs",
   "unrelated_traefik_route_preserved": true,
   "url": "https://www.toop-e-ghelgheli-2.ir",
+  "public_api_health": {
+    "status": "ok"
+  },
   "uploads_backup": {
     "status": "verified",
     "backup_path": "/opt/building-management-backups/20261118T161255Z-uploads-before-89ca65e7",
@@ -117,14 +120,14 @@
   "deployment_mode": "github_actions_after_exact_sha_ci_gate",
   "ci": {
     "conclusion": "success",
-    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/43802840089"
+    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/44342928880"
   },
   "deployment": {
     "conclusion": "success",
-    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/43802840050"
+    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/44342928865"
   },
   "browser": {
-    "verified_at": "2026-11-18T16:07:06.700Z",
+    "verified_at": "2026-11-18T16:46:01.697Z",
     "url": "https://www.toop-e-ghelgheli-2.ir",
     "public_login_http": 200,
     "projects_api_http": 200,
@@ -155,16 +158,27 @@
       }
     ],
     "public_asset_sha256": {
-      "/assets/root-CZ5Djvrf.css": "58e736ecb4f80076bd0248885d64f3808ca9b638721a86e12c9861d5595c60a7",
+      "/assets/root-DV0Jegas.css": "9ef65e78c09de70ba2caea370dff06324744e18f5be0d55bc099da7a4aeb3d4b",
       "/assets/entry.client-Devzq2Ym.js": "8d0f596566982c0ddf5dbfb4204d874f39647b1aaedcdb833a3480846b3415a3",
       "/assets/jsx-runtime-u17CrQMm.js": "158671ca747dc8bd9874f7dc436ba4576af1f90ea02dba567022f0b3b81e231f",
       "/assets/chunk-EPOLDU6W-DmLHHA1F.js": "2ddce16df7e1fd1e85e5ac0c558540f375a8966cd656fe8f1470adfc036b76be",
       "/assets/index-DyOMGDD2.js": "1bd6d17088b02291fb3f30afc32f42d8b4fe8755d1cc29e9da3b3bb629f248c0",
       "/assets/index-e805hzFi.js": "bc6840a0555e2cac2bdce17a17388d085153b6fd5ecbf75dca5ca6d256dd59f5",
-      "/assets/root-BCrV1F23.js": "cacf5f5b648d0ad3fcd96d2c593919c476ec5c4af6a2f44aa14c01e88c2f737a",
+      "/assets/root-B6lTJP5L.js": "cacf5f5b648d0ad3fcd96d2c593919c476ec5c4af6a2f44aa14c01e88c2f737a",
       "/assets/languageStore-DRFBVkxS.js": "36a9d3e67d3b84f3e7c86c912b9be1e480c25507fdd2a858623d4dc92ad80be0",
       "/assets/useTranslation-DPr5PT9Z.js": "5f44a703f2f642dda4ac3fbd4e41af45bf86728b04938082bc2b7ed86cde45bc"
     }
+  },
+  "browser_language": {
+    "status": "pass",
+    "browser": "Chromium",
+    "verified_at": "2026-11-18T16:47:32.792Z",
+    "english_ltr": true,
+    "persian_rtl": true,
+    "persists_after_reload": true,
+    "sliding_indicator_rendered": true,
+    "indicator_position_matches_language": true,
+    "page_errors": []
   },
   "import_runtime": {
     "status": "pass",
