@@ -1,6 +1,11 @@
 name: Publish immutable A7 artifact
 on:
   workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - .github/workflows/publish-a7-artifact.yml
+      - ops/a7-artifacts/assemble-release.sh
 permissions:
   contents: write
 jobs:
