@@ -4,10 +4,11 @@ export type DeliveryPhase = { id: string; title: string; start: string; finish: 
 // Employer-facing snapshot of the reviewed minimum scenario. Existing capabilities
 // are separate from remaining work; implementation does not imply final acceptance.
 // R.0/A.6 review evidence: docs/delivery/delivery-plan-status-review-2026-11-11.md.
+// A.7 review evidence: docs/delivery/A7-delivery-plan-status-review-2026-11-18.md.
 export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: string; phases: DeliveryPhase[] } = {
   "baselineStart": "2026-11-04",
   "finish": "2027-03-10",
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-18",
   "phases": [
     {
       "id": "R.0",
@@ -109,6 +110,7 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
       "start": "2026-11-15",
       "finish": "2026-11-20",
       "acceptance": "2026-11-22",
+      "note": "چهار کار این مرحله در محدوده نمونه‌های مرجع تکمیل و آزموده شده‌اند و نسخه برای بررسی در دسترس است. تیک‌ها نشان‌دهنده تکمیل فنی هستند؛ تأیید نهایی کارفرما هنوز ثبت نشده است.",
       "tasks": [
         {
           "id": "A.7-available-1",
@@ -123,28 +125,32 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
         {
           "id": "A.7.01",
           "title": "آماده‌سازی نمونه اطلاعات پروژه",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "نمونه مرجع پروژه و برنامه زمان‌بندی، همراه با راهنمای بررسی آماده شده‌اند.",
           "start": "2026-11-15",
           "finish": "2026-11-16"
         },
         {
           "id": "A.7.02",
           "title": "تکمیل ورود برنامه و ساختار شکست کار",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "ورود برنامه و ساختار شکست کار با فایل‌های مرجع MSP و P6 بررسی و شمار خروجی‌ها تطبیق داده شده است.",
           "start": "2026-11-16",
           "finish": "2026-11-17"
         },
         {
           "id": "A.7.03",
           "title": "بررسی ورود تکراری و بازیابی پروژه",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "ورود تکراری، قطع ارتباط، بارگذاری مجدد و حفظ اطلاعات در چرخه وضعیت پروژه آزموده شده‌اند.",
           "start": "2026-11-17",
           "finish": "2026-11-18"
         },
         {
           "id": "A.7.04",
           "title": "اجرای کامل ایجاد پروژه و ورود اطلاعات",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "مسیر کامل ایجاد پروژه، تأیید مستقل، ساختار شکست کار و ورود اطلاعات در مرورگر بررسی شده است.",
           "start": "2026-11-19",
           "finish": "2026-11-20"
         }

@@ -1,0 +1,12 @@
+{
+  "status": "pass",
+  "origin": "http://localhost:5173",
+  "verified_at": "2026-11-18T17:03:58.814Z",
+  "browser": "Chromium",
+  "a7_expected_status": "implemented",
+  "four_requested_rows_verified": true,
+  "implemented_rows": 6,
+  "filters_checked": true,
+  "employer_signoff_pending": true,
+  "page_errors": []
+}
