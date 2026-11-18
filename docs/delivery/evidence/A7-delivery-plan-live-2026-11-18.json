@@ -1,0 +1,15 @@
+{
+  "status": "pass",
+  "origin": "https://www.toop-e-ghelgheli-2.ir",
+  "verified_at": "2026-11-18T17:44:16.645Z",
+  "browser": "Chromium",
+  "a7_expected_status": "implemented",
+  "four_requested_rows_verified": true,
+  "implemented_rows": 6,
+  "filters_checked": true,
+  "employer_pending_notice_visible": true,
+  "page_errors": [],
+  "public_asset_sha256": {
+    "/assets/delivery-plan-CvTc_7ta.js": "47293b7db46196351d52ce32bf54078130c27e6582648bd1bf6c9c8154fc7def"
+  }
+}
