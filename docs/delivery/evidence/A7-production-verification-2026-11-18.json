@@ -1,0 +1,219 @@
+{
+  "source_head": "3eda2a32f72acd645bbf07d80d9945dfe237459c",
+  "verified_at": "2026-11-18T16:13:08.176503+00:00",
+  "backup_path": "/opt/building-management-backups/20261116T044936Z-before-3eda2a32f72acd645bbf07d80d9945dfe237459c",
+  "containers": [
+    {
+      "name": "ipcas-celery-beat-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-web-1",
+      "image": "ipcas-web:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:792a1de5b2df82e2a281e4dd8ca960a3f7be298e55cf38914c0b94c442642415",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-import-worker-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-worker-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-celery-worker-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-import-maintenance-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-api-1",
+      "image": "ipcas-api:3eda2a32f72acd645bbf07d80d9945dfe237459c",
+      "image_id": "sha256:b0239a8a1cadce0ff5f7c780f7c71cd9da8e7d6c680f3a8038f4b04c40504fc8",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-minio-1",
+      "image": "quay.io/minio/minio:latest",
+      "image_id": "sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-traefik-1",
+      "image": "traefik:v3.3",
+      "image_id": "sha256:2cd5cc75530c8d07ae0587c743d23eb30cae2436d07017a5ff78498b1a43d09f",
+      "status": "running",
+      "health": null,
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-postgres-1",
+      "image": "postgres:16-alpine",
+      "image_id": "sha256:3c5c8892d184f738f4fe282d14ddaa613a38f00f4189d2d94725ebe6f2909ddb",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-rabbitmq-1",
+      "image": "rabbitmq:3-management-alpine",
+      "image_id": "sha256:606d8c0d6b3c18d1da9afc53bc7cdb2a8d5486df91b5a9830e9e07626c9ae281",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    },
+    {
+      "name": "ipcas-redis-1",
+      "image": "redis:7-alpine",
+      "image_id": "sha256:520775a41a63e77e06c73e35d2fd9cc15921a609516818796b4ecbb813078bc7",
+      "status": "running",
+      "health": "healthy",
+      "restart_count": 0
+    }
+  ],
+  "persistent_cgroup_service": "active_enabled",
+  "scratch_mount": "tmpfs",
+  "unrelated_traefik_route_preserved": true,
+  "url": "https://www.toop-e-ghelgheli-2.ir",
+  "uploads_backup": {
+    "status": "verified",
+    "backup_path": "/opt/building-management-backups/20261118T161255Z-uploads-before-89ca65e7",
+    "archive": "minio-data.tar.gz",
+    "size_bytes": 7752,
+    "sha256": "beafef44d2986f65c8a7ff08cc7755f2e79b013b73865eab46ea1bb419c88dbf",
+    "entries": 56,
+    "created_at": "2026-11-18T16:12:55.151144+00:00",
+    "mode": "live_read_only_volume_archive"
+  },
+  "deployment_mode": "github_actions_after_exact_sha_ci_gate",
+  "ci": {
+    "conclusion": "success",
+    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/43802840089"
+  },
+  "deployment": {
+    "conclusion": "success",
+    "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/43802840050"
+  },
+  "browser": {
+    "verified_at": "2026-11-18T16:07:06.700Z",
+    "url": "https://www.toop-e-ghelgheli-2.ir",
+    "public_login_http": 200,
+    "projects_api_http": 200,
+    "project_detail_current_schema": true,
+    "accessible_projects": 4,
+    "browser": "Chromium",
+    "page_errors": [],
+    "checks": [
+      {
+        "page": "/projects",
+        "status": "pass"
+      },
+      {
+        "page": "/projects/:project/overview",
+        "status": "pass"
+      },
+      {
+        "page": "/projects/:project/wbs",
+        "status": "pass"
+      },
+      {
+        "page": "/projects/:project/schedule/gantt",
+        "status": "pass"
+      },
+      {
+        "page": "/projects/:project/schedule/status",
+        "status": "pass"
+      }
+    ],
+    "public_asset_sha256": {
+      "/assets/root-CZ5Djvrf.css": "58e736ecb4f80076bd0248885d64f3808ca9b638721a86e12c9861d5595c60a7",
+      "/assets/entry.client-Devzq2Ym.js": "8d0f596566982c0ddf5dbfb4204d874f39647b1aaedcdb833a3480846b3415a3",
+      "/assets/jsx-runtime-u17CrQMm.js": "158671ca747dc8bd9874f7dc436ba4576af1f90ea02dba567022f0b3b81e231f",
+      "/assets/chunk-EPOLDU6W-DmLHHA1F.js": "2ddce16df7e1fd1e85e5ac0c558540f375a8966cd656fe8f1470adfc036b76be",
+      "/assets/index-DyOMGDD2.js": "1bd6d17088b02291fb3f30afc32f42d8b4fe8755d1cc29e9da3b3bb629f248c0",
+      "/assets/index-e805hzFi.js": "bc6840a0555e2cac2bdce17a17388d085153b6fd5ecbf75dca5ca6d256dd59f5",
+      "/assets/root-BCrV1F23.js": "cacf5f5b648d0ad3fcd96d2c593919c476ec5c4af6a2f44aa14c01e88c2f737a",
+      "/assets/languageStore-DRFBVkxS.js": "36a9d3e67d3b84f3e7c86c912b9be1e480c25507fdd2a858623d4dc92ad80be0",
+      "/assets/useTranslation-DPr5PT9Z.js": "5f44a703f2f642dda4ac3fbd4e41af45bf86728b04938082bc2b7ed86cde45bc"
+    }
+  },
+  "import_runtime": {
+    "status": "pass",
+    "cgroup": "actual_attach_and_cleanup_pass",
+    "scratch_size_bytes": 268435456,
+    "independent_import_consumers": 1,
+    "independent_maintenance_consumers": 1,
+    "eager": false,
+    "inline": false,
+    "schedule_tree_sha256": "095000ea6961e55eb8b9c0a8ed67692a826bda99ba602a28321c1e06abb1dc10",
+    "native_mpp": {
+      "status": "pass",
+      "parsed_tasks": 80,
+      "summary_tasks": 6,
+      "reference_sha256": "3a4f800f0f57e408be52095117f1a53887f653ac07f720621b3e22aa67765553"
+    },
+    "business_data_unchanged": true
+  },
+  "source_verification": {
+    "matched_python_files": 1073,
+    "migrations_complete": true,
+    "public_assets": {
+      "public_assets_match_production_image": true,
+      "matched_assets": 9
+    }
+  },
+  "delivery_artifact": {
+    "url": "https://github.com/Itshossein128/project-management-information-system/releases/tag/a7-2026-11-16",
+    "name": "a7-delivery-2026-11-16.tar",
+    "size_bytes": 808232960,
+    "sha256": "62f396bcde6b73ac10c6fdf975da7a092c79ba663cb46440522fe68eaec2b528",
+    "github_digest_matches": true,
+    "frozen_handoff_commit": "97dbc26b4c22c6843a970729b3d57008d8ce4069",
+    "source_commit": "2090da13f90756e9512070ffcd4feb87dcf5fd7a",
+    "publication_run": "https://github.com/Itshossein128/project-management-information-system/actions/runs/44342757732",
+    "frozen_package_validation": {
+      "status": "passed",
+      "audit_items_verified": 56,
+      "scenarios_verified": 28,
+      "reconciliation_fixtures_verified": 4,
+      "secret_scan": "clean",
+      "technical_readiness": "ready_for_acceptance",
+      "employer_decision": "pending"
+    }
+  },
+  "employer_decision": "pending",
+  "notes": [
+    "Browser uses a short-lived token for an existing administrator; no account was created or modified.",
+    "An absent kickoff charter for a historical project returns expected HTTP 404; the page renders its empty state.",
+    "The immutable acceptance source is preserved. Subsequent application change: LanguageSwitcher presentation (89ca65e7). Validate the frozen handoff from its checkout, rather than claiming the later presentation change is byte-identical."
+  ]
+}
