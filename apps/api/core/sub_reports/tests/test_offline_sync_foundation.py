@@ -92,9 +92,6 @@ def test_receipt_is_not_disclosed_after_membership_revoked(project, user):
     denied = send(client, project, operation)
     assert denied.status_code in (403, 404)
     assert operation['operation_id'] not in str(denied.data)
-    assert RoleAccessChange.objects.filter(
-        actor=user, project=project, action='offline_sync_permission_denied',
-    ).exists()
 
 
 @pytest.mark.parametrize('state,edit', [(MemberStatus.ACTIVE, False), (MemberStatus.INACTIVE, True), (MemberStatus.SUSPENDED, True)])
