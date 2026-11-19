@@ -8,6 +8,7 @@ import { isRTL } from "@/app/lib/i18n";
 import { cn } from "@/app/lib/utils";
 import { ICONS } from "@/components/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useProjectNavigation } from "./hooks/useNavigation";
 
 const toPath = (path: string) => `/${path}`.replace(/\/+/g, "/");
@@ -33,7 +34,16 @@ export function ProjectNavigation() {
       <div className="mb-2 flex min-w-0 items-center gap-2 text-xs">
         <span className="shrink-0 font-semibold text-muted-foreground">{t("nav.section.project")}</span>
         <span aria-hidden="true" className="text-muted-foreground">/</span>
-        <span className="truncate font-medium" title={project?.project_name}>{project?.project_name ?? t("nav.projectWorkspace")}</span>
+        {project?.project_name ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="truncate font-medium cursor-default">{project.project_name}</span>
+            </TooltipTrigger>
+            <TooltipContent>{project.project_name}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <span className="truncate font-medium">{t("nav.projectWorkspace")}</span>
+        )}
       </div>
       <ul className="flex items-center gap-1 overflow-x-auto pb-1">
         {items.map((item) => {
