@@ -13,7 +13,8 @@ from procurement.serializers import ApprovalActionSerializer, ApprovalLogSeriali
 class _BaseApprovalActionView(APIView):
     """Base class for approval action views."""
 
-    permission_classes = [IsAuthenticated, ProcurementStepPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission, ProcurementStepPermission]
+    required_permission = 'edit_procurement'
     action: str = ''
 
     def post(self, request, project_pk=None, pk=None):
