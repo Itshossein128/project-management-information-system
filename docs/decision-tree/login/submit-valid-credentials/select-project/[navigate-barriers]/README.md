@@ -34,6 +34,7 @@ ProjectProvider fetches the project. The registered route remains distinct from 
 - [Create barriers record](%5Bcreate-record%5D/README.md)
 - [Edit barriers record](%5Bedit-record%5D/README.md)
 - [Resolve a barrier](%5Bresolve-barrier%5D/README.md)
+- [Start product tour](start-product-tour/README.md)
 
 Continue / return links (the same state is documented once):
 

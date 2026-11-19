@@ -87,10 +87,11 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
   });
 
   const rows = data?.results ?? [];
+  let firstOpenAnchorUsed = false;
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3" data-tour="barriers-filters">
         <div className="min-w-[240px] flex-1">
           <JalaliDateRangePicker
             name="barrier_range"
@@ -116,6 +117,7 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
         <Button
           variant="primary"
           size="sm"
+          data-tour="barriers-add-button"
           onClick={() => {
             setEdit(null);
             setForm({
@@ -165,7 +167,7 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto rounded-lg border border-border" data-tour="barriers-table">
           <table className="w-full min-w-[900px] text-sm">
             <thead className="bg-muted/50">
               <tr>
@@ -180,6 +182,9 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
               {rows.map((row) => {
                 const cat = row.category ? CATEGORY_META[row.category] : null;
                 const st = STATUS_META[row.status];
+                const isFirstOpen = row.status === "open" && !firstOpenAnchorUsed;
+                if (isFirstOpen) firstOpenAnchorUsed = true;
+
                 return (
                   <Fragment key={row.id}>
                     <tr className="border-t border-border">
@@ -220,7 +225,12 @@ export function BarriersGrid({ projectId }: { projectId: string }) {
                             ویرایش
                           </Button>
                           {row.status === "open" ? (
-                            <Button variant="ghost" size="sm" onClick={() => setResolveId(row.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              {...(isFirstOpen ? { "data-tour": "barriers-resolve" } : {})}
+                              onClick={() => setResolveId(row.id)}
+                            >
                               رفع شد
                             </Button>
                           ) : null}
