@@ -153,7 +153,7 @@ class CashFlowForecastListView(APIView):
 
 
 class CashFlowForecastUpsertView(APIView):
-    permission_classes = [IsAuthenticated, HasProjectPermission]
+    permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
     required_permission = 'edit_cashflow'
 
     @extend_schema(summary='Upsert monthly forecast', tags=['Cash flow'])

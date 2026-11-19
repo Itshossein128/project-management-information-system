@@ -48,3 +48,8 @@ Added missing authentication and permission checks to RequisitionItemHoldView to
 - Discovered that `ApprovalLogListView` (`apps/api/core/procurement/views/approval_views.py`) was only enforcing `IsProjectMember` but not verifying the specific `view_procurement` permission. Fixed by adding `HasProjectPermission` to the `permission_classes` list and setting `required_permission = 'view_procurement'`.
 - Updated test setups to grant `view_procurement` permission to roles that require them for successful test execution after tightening the `ApprovalLogListView` permissions.
 - When running backend tests against an in-memory SQLite database (`DATABASE_URL=sqlite:///:memory:`), concurrency tests using threads (e.g. in `test_inventory_concurrency.py`) fail with `OperationalError('database table is locked')`. These are known SQLite limitations and can be safely ignored.
+
+## 2026-07-27 - Enforce Project Membership Alongside HasProjectPermission
+**Vulnerability:** `CashFlowForecastUpsertView` in `apps/api/core/cash_flow/views.py` only declared `permission_classes = [IsAuthenticated, HasProjectPermission]`, omitting `IsProjectMember`.
+**Learning:** In project-scoped endpoints, relying solely on `HasProjectPermission` without `IsProjectMember` skips tenant membership verification. For consistent defense-in-depth and tenancy isolation across DRF views, both `IsProjectMember` and `HasProjectPermission` must be enforced on any endpoint bounded by `project_pk`.
+**Prevention:** Whenever defining `permission_classes` on project-scoped API views, always include both `IsProjectMember` and `HasProjectPermission` alongside `required_permission = '...'`.
