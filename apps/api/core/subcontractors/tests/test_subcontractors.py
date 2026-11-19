@@ -255,3 +255,24 @@ def test_delete_score(finance_client, project, subcontractor, user):
     resp = finance_client.delete(url)
     assert resp.status_code == 204
     assert not SubcontractorPerformanceScore.objects.filter(id=score.id, is_deleted=False).exists()
+
+
+def test_warning_permissions_for_unprivileged_member(api_client, project, subcontractor, member):
+    api_client.force_authenticate(user=member.user)
+    url = f'{BASE.format(project_id=project.id)}/{subcontractor.id}/warnings/'
+
+    # GET requires view_contracts permission (viewer role does not have contracts permissions)
+    get_resp = api_client.get(url)
+    assert get_resp.status_code == 403
+
+    # POST requires edit_contracts permission
+    post_resp = api_client.post(
+        url,
+        {
+            'warning_date': '2024-05-01',
+            'warning_type': 'written',
+            'reason': 'تأخیر در تحویل پروژه',
+        },
+        format='json',
+    )
+    assert post_resp.status_code == 403
