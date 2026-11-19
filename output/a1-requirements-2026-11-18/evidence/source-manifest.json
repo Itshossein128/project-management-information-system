@@ -1,0 +1,257 @@
+[
+  {
+    "path": "apps/api/core/field_reports/daily_report_views.py",
+    "sha256": "ac3eeb592fcac4a38c3f34331d7229b9bbda72571ad8c0aca626deaba74fec9c",
+    "bytes": 33608
+  },
+  {
+    "path": "apps/api/core/field_reports/excel_safety.py",
+    "sha256": "572fa3d0de576349d7eabc25e5a497f5d75d35c1c01fd08e0351204916b5a41d",
+    "bytes": 379
+  },
+  {
+    "path": "apps/api/core/field_reports/models.py",
+    "sha256": "38949ecbbd4156f95f3b85ef2907fa560c0176b5d8a10ef3763fdfc49bac66ea",
+    "bytes": 37115
+  },
+  {
+    "path": "apps/api/core/field_reports/pdf.py",
+    "sha256": "49876e4a891fc98ec7c160031221941f58ee5007823973e9a211689d3152e1e7",
+    "bytes": 22818
+  },
+  {
+    "path": "apps/api/core/field_reports/report_views.py",
+    "sha256": "d398e5da22308fffe90751bce7a0afc13eb93cc772ffcfabc5d39f9a9fa1ced1",
+    "bytes": 6177
+  },
+  {
+    "path": "apps/api/core/field_reports/serializers.py",
+    "sha256": "0663765773166e58d2b5f81b608aff6f9d9172b116730b13d716b6b65b746e56",
+    "bytes": 61576
+  },
+  {
+    "path": "apps/api/core/field_reports/services/__init__.py",
+    "sha256": "556a703ca936bf6e477815b0df9917a3088b5d7884147b3601932cb366ef7c92",
+    "bytes": 23902
+  },
+  {
+    "path": "apps/api/core/field_reports/services/activity_log.py",
+    "sha256": "3b08c4dba9e164981c5df5d8ec1c937e6ad4a12ca2faf1d69f8a2df53109304d",
+    "bytes": 4171
+  },
+  {
+    "path": "apps/api/core/field_reports/services/correction_service.py",
+    "sha256": "0e84be774626a621652c3d34df7264c87451a6d458afba605aa8ebf253046141",
+    "bytes": 10578
+  },
+  {
+    "path": "apps/api/core/field_reports/services/daily_report_aggregation.py",
+    "sha256": "71d01a525635498b01dd5e26216187edfc523fc07d2f493bd1562da5d8f5dd6d",
+    "bytes": 56811
+  },
+  {
+    "path": "apps/api/core/field_reports/shiraz_file1_excel.py",
+    "sha256": "5217a24a78bd5b0c6b05a7efe772f70b646edb022d282b7b4b9fd55db5bd762a",
+    "bytes": 6829
+  },
+  {
+    "path": "apps/api/core/field_reports/shiraz_file4_excel.py",
+    "sha256": "42b325c1704b63815d3c482fefc29f96ff611df19fa8a7363af4d62037086c06",
+    "bytes": 39730
+  },
+  {
+    "path": "apps/api/core/inventory/department_activity_data_views.py",
+    "sha256": "d07dff37765238bbc16535baa9250a7b976dbbeb8b300ad91416f6da516e7993",
+    "bytes": 16706
+  },
+  {
+    "path": "apps/api/core/projects/services/report_export_service.py",
+    "sha256": "a62810005adab50e36fc0c4c45ba0d416ce510f6e7271c11101c5887ff2ed11b",
+    "bytes": 9043
+  },
+  {
+    "path": "apps/api/core/sub_reports/services/attachments.py",
+    "sha256": "c4e0d7945aa5c2e51a3a52f07e8124c255acdb0b58583b4c3fce815c4b3c5c70",
+    "bytes": 4774
+  },
+  {
+    "path": "apps/api/core/sub_reports/shiraz_subreport_excel.py",
+    "sha256": "bbdd6d3d0560e648d1fb793667e26b2b3cba229f209e06a939a7e20789a4e1ce",
+    "bytes": 14412
+  },
+  {
+    "path": "apps/api/core/sub_reports/tests/test_department_reports.py",
+    "sha256": "629a7847d46353823c2f8a580c5e029d1d6b217bed2d424fb6a8e54f32785abe",
+    "bytes": 22400
+  },
+  {
+    "path": "apps/web/src/app/routes/daily-reports-list.tsx",
+    "sha256": "9188387ca050ec7daa43fa872ab0895c38ff28950a0fd2fd62f9c0867121299b",
+    "bytes": 18568
+  },
+  {
+    "path": "apps/web/src/app/routes/project-activity-log.tsx",
+    "sha256": "6c75235300ce6f1dfaf945e030997474c0b5f994fd8406663a61ed209e3e5e20",
+    "bytes": 16718
+  },
+  {
+    "path": "docs/decision-tree/README.md",
+    "sha256": "a2db07fecc69ac04f4e0b3fecb731de7cf5b8fae6054a688ff69d9a3b31ad038",
+    "bytes": 38321
+  },
+  {
+    "path": "docs/delivery/R0-scope-and-reports-contract.md",
+    "sha256": "76992c93e6008d0aeec993a80e6227fe764387c55200150342cf9b0aafbcd0c2",
+    "bytes": 9413
+  },
+  {
+    "path": "output/delivery-plan-2026-11-03/delivery-plan.md",
+    "sha256": "3f5daf4d21c383b9fd69a2d9d518378155263686d5834348c7d0b405b372b826",
+    "bytes": 61070
+  },
+  {
+    "path": "real-data/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز (7).xlsx",
+    "sha256": "d56316ab79790348f0ce7f254101fbae5c3aa79a0145c44bd8424db70a435825",
+    "bytes": 3151766
+  },
+  {
+    "path": "real-data/گزارش روزانه پروژه 2000 واحدی کمیل آباد شیراز.xlsx",
+    "sha256": "b4747d4b629ac5c711e1c64d8ed6256249b2b4e71835488a868e080a654851e9",
+    "bytes": 10737479
+  },
+  {
+    "path": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md",
+    "sha256": "17019b7209a2eab4ab2034cbdc758f1637f2c092e2b7ff1bba2fd3f6263e4ed3",
+    "bytes": 7509
+  },
+  {
+    "path": "reports_documentation/01-core-requirements-and-excel-blueprints/چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md",
+    "sha256": "762eba3357cf65391719891635bf4afae4441df7aa89542ed8e0df1557ea0a91",
+    "bytes": 130426
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-01-DAILY-HEADER-WEATHER.md",
+    "sha256": "f5e3e51f20cbafa599a0bbd43f453e7a2c88c61fe821720990b009f0680d19cf",
+    "bytes": 8477
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-02-DAILY-SECTIONS-GRID.md",
+    "sha256": "e5f5e2397e6fe3d083154965a2b74fc66e6af60aa8d20254c2241fb93c6f4917",
+    "bytes": 15419
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-03-DAILY-LIFECYCLE-LOCK.md",
+    "sha256": "7207e49cb0d6fe7176c06f66e09178de58185a3cc1e8c5937134cbd55dde8b96",
+    "bytes": 11265
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-04-DAILY-OFFLINE-SYNC.md",
+    "sha256": "7ab5a568a2d0527fc5c5fead3d193a5b4a458845b85175d71020cbf943b0d78e",
+    "bytes": 6439
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-05-DISCIPLINE-SUB-REPORTS.md",
+    "sha256": "27f1280daed5cb3446b19c99c87a54c6081234eb4496e886768d298c3eec883a",
+    "bytes": 9712
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-06-AUTO-DAILY-ROLLUP.md",
+    "sha256": "8f25c45998b6064a440edc03b142fd6dd94651e764c73e70b9941dab11ab5fba",
+    "bytes": 13526
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md",
+    "sha256": "5dd68bd9aeddec39ea5dbb6d810b1945664ff4e4abe38dedd5a487a50cb6a49d",
+    "bytes": 8882
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-08-PERIODIC-REPORTS-ROLLUP.md",
+    "sha256": "158e36552fb3ebd267b6f7146a9fe490c68a2eab55b717ce844fd390f79693a6",
+    "bytes": 10414
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md",
+    "sha256": "2ad611736862aeff7452d55ff84fc1415ab09de062820f1aa71e4a1ec084ef9f",
+    "bytes": 7601
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md",
+    "sha256": "2e0cc5371aa12bf98621c6df00740dcbfbbfc47434b726669f6a3283d206b504",
+    "bytes": 6026
+  },
+  {
+    "path": "reports_documentation/atomic-specs/SPEC-11-SHIRAZ-EXCEL-PARITY-PDF.md",
+    "sha256": "fd9597416a732ecec21992c5ed29aa830e7b24fae4b2da69032ba6361ab17f41",
+    "bytes": 9171
+  },
+  {
+    "path": "specs/007-daily-report-gaps/spec.md",
+    "sha256": "fe8e968f2db236d94fee3a64fd3aa27a9dd6f408a1c831da798d0b501d4f4db3",
+    "bytes": 17298
+  },
+  {
+    "path": "specs/028-auto-daily-report-summary/spec.md",
+    "sha256": "ec9b0b76ffb6a1442ef51bd8e4d8d4f61c7a16acfdb99913ef747a27eec29980",
+    "bytes": 15846
+  },
+  {
+    "path": "specs/030-daily-header-weather/spec.md",
+    "sha256": "7d405529f056e6c988df386e9e6f74d59c860dddc4d51e81a5eabfbce4b76dd9",
+    "bytes": 15333
+  },
+  {
+    "path": "specs/031-site-inactivity-security/spec.md",
+    "sha256": "727b339c66bf18142b76ad09743d12e5d44863cf7aa02592e15a8240a786932a",
+    "bytes": 15489
+  },
+  {
+    "path": "specs/032-unit-report-source-truth/spec.md",
+    "sha256": "c39011c0afad64394170297726330156f2829affe487ee32f6dd738a73be8eac",
+    "bytes": 30150
+  },
+  {
+    "path": "specs/033-daily-sections-grid/spec.md",
+    "sha256": "6a82ff497e02853dee87cb19671549f30e54640a85583bb489613f92548a9eeb",
+    "bytes": 40032
+  },
+  {
+    "path": "specs/033-daily-sections-grid/verification-report.md",
+    "sha256": "9ce55723edc0fadec41f778b34871ca810f1f5385a7e4c9c151bc39a670b8e29",
+    "bytes": 6718
+  },
+  {
+    "path": "specs/034-daily-lifecycle-lock/spec.md",
+    "sha256": "5953cd38114c43f7d39eb3665ff583076ad4ee5e37dcf04373c946e024e4078d",
+    "bytes": 14209
+  },
+  {
+    "path": "specs/035-correction-lineage-cloning/spec.md",
+    "sha256": "fcb7e620c3c4db0a801ce063a7dd62499d5e254814f1d93ad40a048cbc22a248",
+    "bytes": 13958
+  },
+  {
+    "path": "specs/036-validation-codes-unset-semantics/spec.md",
+    "sha256": "c821335b9c111754113c18876cb98254bfbe6a0c64860a5f473f217135384d31",
+    "bytes": 14647
+  },
+  {
+    "path": "specs/037-daily-offline-sync/spec.md",
+    "sha256": "e7bba52680bdcaf12d95fa75024ea4c5b91c147c34e095974428fd897b5759fc",
+    "bytes": 38612
+  },
+  {
+    "path": "specs/038-discipline-sub-reports/spec.md",
+    "sha256": "4698b5fc368d251bfd827f07505df223c092aac818eb5a5a68b9337683166f29",
+    "bytes": 27238
+  },
+  {
+    "path": "specs/039-auto-daily-rollup/spec.md",
+    "sha256": "1bd87778c74dcdd08ff94521bc3410deb63424e342802ea7c21b56cb1d8ed832",
+    "bytes": 26846
+  },
+  {
+    "path": "specs/044-shiraz-excel-parity-pdf/spec.md",
+    "sha256": "0540f83261433118cb4bce9f5da97f0243336f69eb8073ecf01c91e95330f2a6",
+    "bytes": 28554
+  }
+]

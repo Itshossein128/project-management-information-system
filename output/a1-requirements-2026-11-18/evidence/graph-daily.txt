@@ -1,0 +1,12 @@
+Ambiguous: 'DailyReport' matches 5 nodes in different files.
+  apps/api/core/field_reports/models.py
+    id: apps_api_core_field_reports_models_dailyreport
+  specs/034-daily-lifecycle-lock/data-model.md
+    id: specs_034_daily_lifecycle_lock_data_model_dailyreport
+  e2e/tests/daily-report-header-weather.spec.ts
+    id: e2e_tests_daily_report_header_weather_spec_dailyreport
+  specs/036-validation-codes-unset-semantics/data-model.md
+    id: specs_036_validation_codes_unset_semantics_data_model_dailyreport
+  specs/007-daily-report-gaps/data-model.md
+    id: specs_007_daily_report_gaps_model_dailyreport
+Retry with path::symbol using one of the paths above (e.g. <path>::DailyReport) or the full node id.

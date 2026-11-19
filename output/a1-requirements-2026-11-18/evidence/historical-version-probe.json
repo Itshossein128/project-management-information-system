@@ -1,0 +1,8 @@
+{
+  "actual_rows": 2,
+  "expected_rows": 1,
+  "actual_quantity": 10.0,
+  "expected_quantity": 5,
+  "actual_headcount": 8,
+  "expected_headcount": 4
+}

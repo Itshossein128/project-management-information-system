@@ -1,0 +1,25 @@
+x.xx.xxx                                                                 [100%]
+=============================== warnings summary ===============================
+../.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12
+  /home/hossein/Desktop/projects/building-management/apps/api/.venv/lib/python3.12/site-packages/reportlab/lib/rl_safe_eval.py:12: DeprecationWarning: ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead
+    haveNameConstant = hasattr(ast,'NameConstant')
+
+::test_activity_api_provides_whole_filter_totals
+  /home/hossein/Desktop/projects/building-management/apps/api/core/inventory/item_services.py:4: DeprecationWarning: 
+  Pyarrow will become a required dependency of pandas in the next major release of pandas (pandas 3.0),
+  (to allow more performant data types, such as the Arrow string type, and better interoperability with other libraries)
+  but was not found to be installed on your system.
+  If this would cause problems for you,
+  please provide us feedback at https://github.com/pandas-dev/pandas/issues/54466
+          
+    import pandas as pd
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+XFAIL ::test_unknown_equipment_hour_must_not_be_zero - legacy equipment null is emitted as numeric zero
+XFAIL ::test_log_counts_only_current_approved_version - master activity log includes superseded approved versions
+XFAIL ::test_activity_api_provides_whole_filter_totals - API has no whole-filter aggregates; UI sums current page
+XFAIL ::test_summary_correction_must_not_enable_direct_child_writes - correction drops auto-summary identity and permits derived child edits
+XFAIL ::test_summary_correction_preserves_complete_provenance - correction copies children but omits complete derived source records
+XFAIL ::test_summary_correction_preserves_owned_metadata - correction drops management opinion and explicit override marker
+2 passed, 6 xfailed, 2 warnings in 4.29s

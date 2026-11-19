@@ -1,0 +1,906 @@
+{
+  "meta": {
+    "audited_at": "2026-11-18",
+    "source_commit": "f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a",
+    "product_changes": false,
+    "scope": "A.1 مستقیم + وابستگی‌های مؤثر + موارد مرتبط با مرز فاز",
+    "status_counts": {
+      "پیاده‌سازی موجود": 27,
+      "ناقص": 22,
+      "نیازمند تثبیت قرارداد": 3,
+      "مرتبط؛ خارج از تحویل مستقیم A.1": 9
+    },
+    "normalized_requirements": 61,
+    "source_clauses": 370,
+    "atomic_story_references": 42,
+    "fresh_tests": {
+      "existing_passed": 162,
+      "control_passed": 2,
+      "reproduced_gaps_strict_xfail": 6
+    },
+    "cautions": [
+      "تعداد گروه‌ها درصد پیشرفت نیست؛ وزن و دامنه برابر ندارند.",
+      "پیاده‌سازی موجود به معنای پذیرش یا production verified نیست.",
+      "وضعیت هر گروه ارزیابی جمعی است؛ متن بندهای منبع برای کنترل دقیق حفظ شده و پوشش همه بندها ادعا نشده."
+    ]
+  },
+  "requirements": [
+    {
+      "id": "H01",
+      "title": "هویت گزارش، پروژه، قرارداد، تاریخ شمسی، روز هفته و مسئول تهیه",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "مدل هدر و نمایش/خروجی پروژه، قرارداد، تاریخ و تهیه‌کننده وجود دارد.",
+      "remaining": "تطبیق مقادیر و عنوان‌ها با روز مرجع و نمایش روی مرورگر.",
+      "acceptance": "شناسه پروژه، قرارداد، تاریخ و تهیه‌کننده در صفحه و دو فایل یکسان باشند.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:113",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:162",
+        "apps/api/core/field_reports/pdf.py:117"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "H02",
+      "title": "آب‌وهوا، دمای اختیاری، اثرات جوی و اعتبارسنجی دما",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "پنج وضعیت پایدار، دامنه دمای -۴۰ تا ۶۰، ترتیب کمینه/بیشینه و یادداشت اثرات در مدل/API/PDF وجود دارد.",
+      "remaining": "اجرای پذیرش تعاملی دوزبانه؛ حفظ override در اصلاحیه در W05 باز است.",
+      "acceptance": "پنج مقدار معتبر پذیرفته؛ مقدار قدیمی/ناشناخته رد؛ متن چندخطی عیناً در PDF حفظ شود.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:113",
+        "apps/api/core/field_reports/pdf.py:117",
+        "specs/030-daily-header-weather/spec.md:87"
+      ],
+      "verification": "آزمون‌های منتخب weather و header در بسته ۶۹تایی موفق؛ مرورگر این نوبت اجرا نشده"
+    },
+    {
+      "id": "H03",
+      "title": "فعال/تعطیل بودن کارگاه و دلیل استاندارد تعطیلی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "دلایل پنج‌گانه، الزام دلیل در تعطیلی، نمایش PDF و کنترل مجوز by-date در کد وجود دارند.",
+      "remaining": "اخطار فعالیت مثبت در روز تعطیل و تأیید/انصراف آن در مرورگر دوباره بررسی شود.",
+      "acceptance": "تعطیلی بدون دلیل ثبت نشود؛ فعال‌شدن دلیل قبلی نسازد؛ انصراف از اخطار چیزی ثبت نکند.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:197",
+        "apps/api/core/field_reports/pdf.py:117",
+        "specs/031-site-inactivity-security/spec.md:83"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "H04",
+      "title": "مدل شیفت و ساعت شروع/پایان یا مدت واقعی شیفت‌های ۱ تا ۳",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "سطرهای نیروی انسانی و فعالیت شیفت دارند؛ هدر مدل day/night/full دارد. در Excel متن ثابت «ساعات کاری شیفت: ثبت نشده» چاپ می‌شود.",
+      "remaining": "تثبیت نگاشت هدر/سطر و ثبت مدت یا بازه واقعی هر شیفت؛ نمایش داده واقعی به جای متن ثابت.",
+      "acceptance": "سه شیفت مرجع با مدت مشخص، بدون تبدیل خاموش شیفت نامعتبر، در UI/Excel/PDF تطبیق شوند.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:9",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:206",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:181"
+      ],
+      "verification": "نقص هدر در نمونه خروجی بازتولید شد؛ generated-structure.json"
+    },
+    {
+      "id": "H05",
+      "title": "شماره رسمی گزارش، شماره صفحه و شماره روز پروژه در مرجع",
+      "status": "نیازمند تثبیت قرارداد",
+      "phase": "A.1",
+      "existing": "فایل مرجع شماره رسمی گزارش دارد؛ فیلد مستقل معادل report_number/project_day_number در DailyReport مشاهده نشد.",
+      "remaining": "مشخص شود شماره رسمی و روز پروژه در تحویل A.1 الزام هستند یا خیر؛ در صورت الزام مدل و قاعده شماره‌گذاری پیاده شود.",
+      "acceptance": "شماره بر اساس قاعده مصوب و مستقل از ID داخلی؛ شماره صفحه در چاپ معتبر باشد.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:113",
+        "docs/delivery/R0-scope-and-reports-contract.md:30"
+      ],
+      "verification": "بازبینی مدل و سلول‌های واقعی مرجع؛ نمونه AG3=882 و X3=500"
+    },
+    {
+      "id": "H06",
+      "title": "یکتایی گزارش جاری، تاریخ منطقی و پوسته گزارش بدون ثبت خام",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "by-date و نسخه جاری، تجمیع روزانه و منع POST گزارش خام وجود دارند.",
+      "remaining": "تعیین سازگاری مفهوم یک روز با شیفت هدر؛ کنترل رقابت و دسترسی مشاهده‌گر در پذیرش.",
+      "acceptance": "تکرار بازکردن تاریخ گزارش موازی نسازد و مشاهده‌گر نیازی به مجوز ویرایش نداشته باشد.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:191",
+        "apps/api/core/field_reports/daily_report_views.py:197",
+        "specs/039-auto-daily-rollup/spec.md:179"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D01",
+      "title": "گزارش پروژه فقط تجمیعی؛ ورود داده از صفحات واحدها",
+      "status": "ناقص",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "تجمیع و ممنوعیت ایجاد خام وجود دارد؛ قفل ردیف مشتق به is_auto_summary وابسته است.",
+      "remaining": "رفع گریز اصلاحیه که این پرچم را از دست می‌دهد؛ پوشش تمام مسیرهای مستقیم/قدیمی/batch.",
+      "acceptance": "اصلاحیه هم گزارش تجمیعی بماند؛ هیچ ردیف مشتق با API یا UI قابل تألیف مستقیم نباشد.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:618",
+        "apps/api/core/field_reports/services/correction_service.py:138",
+        "specs/032-unit-report-source-truth/spec.md:179"
+      ],
+      "verification": "نقص اجرایی: اصلاحیه auto_summary=False و PATCH ردیف مشتق 200؛ correction-write-probe.json"
+    },
+    {
+      "id": "D02",
+      "title": "شش واحد معتبر و پیکربندی مؤثر پروژه در تاریخ گزارش",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "buildings/electrical/mechanical/machinery/warehouse/security و قواعد template در تجمیع وجود دارد.",
+      "remaining": "اعتبارسنجی روی پروژه واقعی و دو نسخه template با تاریخ اثر متفاوت.",
+      "acceptance": "واحد الزامی از template همان تاریخ تعیین شود؛ پیش‌فرض ثابت سه‌رشته‌ای معیار نباشد.",
+      "refs": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:119",
+        "specs/032-unit-report-source-truth/spec.md:144"
+      ],
+      "verification": "آزمون‌های منتخب completeness موفق؛ همه صفحات شش واحد در این نوبت مرور نشده"
+    },
+    {
+      "id": "D03",
+      "title": "انتخاب منابع واجد شرایط: جاری، همان پروژه/روز، submitted یا approved",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "فیلتر منابع هم‌پروژه/هم‌روز/جاری و وضعیت SUBMITTED یا APPROVED در موتور هست.",
+      "remaining": "شفاف‌کردن اینکه approved بودن خلاصه به معنای approved بودن تک‌تک منابع نیست؛ سناریوی واقعی.",
+      "acceptance": "draft/rejected/deleted/قدیمی و روز یا پروژه دیگر هیچ contribution و اعتبار تکمیل ندهند.",
+      "refs": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:41",
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:53",
+        "specs/032-unit-report-source-truth/spec.md:176"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D04",
+      "title": "فعالیت اجراشده با WBS، پیمانکار، اکیپ، محل، حجم و واحد",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "فیلدهای فعالیت شامل شیفت، قطعه/بلوک/طبقه، پیمانکار و اکیپ جدا و مقادیر کارکرد در مدل و خروجی هستند.",
+      "remaining": "تطبیق همه ستون‌ها با روز مرجع؛ آزمون مرورگری شناسه‌های پروژه دیگر و WBS مجاز.",
+      "acceptance": "پیمانکار جای اکیپ ننشیند؛ WBS و پیمانکار نامعتبر یا پروژه دیگر رد شوند.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:46",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:625",
+        "specs/033-daily-sections-grid/spec.md:186"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D05",
+      "title": "تفکیک صفر واقعی، ثبت‌نشده و اندازه‌گیری‌نشده در حجم فعالیت",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "quantity_measured و قواعد quantity_unset_invalid و نمایش ثبت‌نشده وجود دارند؛ صفر صریح معتبر است.",
+      "remaining": "رفع تعارض متن قدیمی «صفر ممنوع» با 034/036؛ تطبیق FILE1 و همه viewها با داده legacy ناسازگار.",
+      "acceptance": "۰ و ۰٫۰۰ صفر بمانند؛ null یا not-measured عدد ساختگی نشود؛ حجم نامعلوم از جمع واحدها پنهانی صفر نشود.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:332",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:625",
+        "specs/036-validation-codes-unset-semantics/spec.md:84"
+      ],
+      "verification": "آزمون‌های منتخب unset موفق؛ پوشش همه مسیرهای FILE1/مرورگر ادعا نمی‌شود"
+    },
+    {
+      "id": "D06",
+      "title": "نیروی انسانی مستقیم/غیرمستقیم، پیمانکار، شیفت، مرخصی و اضافه‌کاری",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "مدل و تجمیع دسته، شغل، پیمانکار و شمارش شیفت‌ها را نگه می‌دارند؛ SUM در Excel وجود دارد.",
+      "remaining": "تطبیق مقادیر واقعی، مرخصی اختیاری و عنوان واحد شمارش؛ عدم فرض نفر یکتا.",
+      "acceptance": "یک عنوان نزد دو پیمانکار در داده منبع جدا بماند؛ جمع هر ستون با مرجع برابر شود.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:340",
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:559",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:247"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D07",
+      "title": "قاعده نفرساعت و تمایز نفر، نفرشیفت، نفرروز و جمع ردیف‌ها",
+      "status": "ناقص",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "فیلد ساعت و قاعده template و ledger در مسیرهای تخصصی وجود دارد؛ Excel نیروی انسانی نفرشیفت را برچسب می‌زند.",
+      "remaining": "تثبیت معنای شمارش برای هر خروجی؛ عنوان نفرروز در نوار activity log بدون اثبات حضور یکتا اصلاح شود.",
+      "acceptance": "هیچ جمع headcount روی فعالیت‌ها به‌عنوان تعداد افراد یکتا معرفی نشود؛ نفرساعت از مدت واقعی شیفت بیاید.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:340",
+        "apps/web/src/app/routes/project-activity-log.tsx:129",
+        "specs/033-daily-sections-grid/spec.md:196"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D08",
+      "title": "کاتالوگ شغل نسخه‌دار، ترتیب پروژه و نگاشت فرم ۳۴/۳۲",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "زیرساخت catalog/template موجود است؛ خروجی FILE4 ابتدا لیست ثابت ۳۴/۳۲ و سپس عنوان‌های اضافه را می‌چیند.",
+      "remaining": "جداسازی پروفایل فرم شیراز از حقیقت عمومی پروژه؛ رعایت ترتیب و نگاشت عنوان‌های تاریخی/اختصاصی.",
+      "acceptance": "تغییر template عنوان یا داده تاریخی را حذف نکند؛ فرم شیراز فقط در پروفایل مصوب ۳۴/۳۲ باشد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:247",
+        "specs/033-daily-sections-grid/spec.md:198",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:182"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D09",
+      "title": "ماشین‌آلات: هویت یکتا، پنج وضعیت، ساعات و دلیل توقف",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "مدل و تجمیع وضعیت/ساعت/هویت و قواعد توقف و سقف ۲۴ ساعت وجود دارد.",
+      "remaining": "کنترل روز واقعی، دو واحد گزارش‌دهنده یک تجهیز و خطاهای دوزبانه در UI.",
+      "acceptance": "تجهیز با شناسه پایدار یک‌بار شمرده شود؛ توقف بدون دلیل و زمان بیش از ۲۴ ساعت رد شود.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:636",
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:559",
+        "specs/033-daily-sections-grid/spec.md:204"
+      ],
+      "verification": "آزمون‌های منتخب machinery_derivation در بسته ۶۹تایی موفق"
+    },
+    {
+      "id": "D10",
+      "title": "ساعت نامعلوم ماشین‌آلات در خروجی legacy",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "مسیر تجمیعی جدید nullable را حفظ می‌کند؛ شاخه equipment قدیمی در Excel مقدار None را ۰ می‌نویسد؛ PDF خط تیره می‌دهد.",
+      "remaining": "همسان‌سازی معنای null/صفر در شاخه legacy یا تعیین بازنشستگی رسمی آن بدون تغییر تاریخچه.",
+      "acceptance": "None در هر دو فایل نامعلوم باشد؛ صفر صریح عدد ۰ بماند.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:614",
+        "apps/api/core/field_reports/pdf.py:212"
+      ],
+      "verification": "نقص اجرایی strict XFAIL؛ کنترل مستقل صفر صریح موفق"
+    },
+    {
+      "id": "D11",
+      "title": "مصالح وارده واقعی در جدول اصلی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "تمایز رسید واقعی و ردیف عمومی و نمایش دریافت در جدول اصلی وجود دارد.",
+      "remaining": "تطبیق نوع سند، واحد و مقدار روی روز مرجع.",
+      "acceptance": "مصرف/برگشت/ضایعات به‌عنوان رسید واقعی نمایش داده نشوند.",
+      "refs": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:1193",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:417",
+        "specs/033-daily-sections-grid/spec.md:213"
+      ],
+      "verification": "آزمون‌های منتخب material reconciliation موفق"
+    },
+    {
+      "id": "D12",
+      "title": "مصرف، برگشت، ضایعات و مغایرت با سند معین انبار",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "جزئیات و reconciliation دارای match/mismatch/insufficient-data با مرجع سند انبار وجود دارند.",
+      "remaining": "آزمون گردش کامل سند واقعی و پیوند قابل مشاهده از گزارش؛ بازطراحی کل انبار در A.1 نیست.",
+      "acceptance": "مقایسه با سند ارجاع‌شده باشد؛ مانده تاریخی کلی جانشین سند نشود.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:542",
+        "apps/api/core/field_reports/daily_report_views.py:548",
+        "specs/033-daily-sections-grid/spec.md:216"
+      ],
+      "verification": "آزمون‌های منتخب سندمحور موفق؛ پذیرش گردش واقعی اجرا نشده"
+    },
+    {
+      "id": "D13",
+      "title": "بتن‌ریزی و جزئیات نمونه‌برداری/کیفیت",
+      "status": "ناقص",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "داده تخصصی بتن و QC در کد هست؛ Excel/PDF روزانه فقط بخشی از اطلاعات پایه را چاپ می‌کنند.",
+      "remaining": "تعیین ستون‌های چاپی الزامی و مسیر drill-down برای بچینگ، کامیون، نمونه، آزمایش و محل دقیق؛ سپس تطبیق.",
+      "acceptance": "حجم و محل برابر مرجع؛ هر نمونه‌برداری با نتیجه/بازرسی مربوط قابل ردیابی باشد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:476",
+        "apps/api/core/field_reports/pdf.py:250",
+        "specs/033-daily-sections-grid/spec.md:222"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D14",
+      "title": "فعالیت عمومی، موانع و دستورکار با مسئول و موعد",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "ردیف‌های ساخت‌یافته عمومی، مسائل، مسئول و سررسید و ترتیب/منبع در مدل و تجمیع هستند.",
+      "remaining": "تطبیق متن چندخطی و ترتیب در خروجی؛ آزمون عدم تبدیل یادداشت ساده به مسئله.",
+      "acceptance": "ردیف ساخت‌یافته در بازسازی به متن قالب‌بندی‌شده تبدیل نشود؛ مالک و موعد مانع محفوظ باشد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:699",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:716",
+        "specs/033-daily-sections-grid/spec.md:228"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D15",
+      "title": "حوادث HSE، شدت، اقدام فوری و پیگیری",
+      "status": "ناقص",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "حادثه و شدت و مسیر پیگیری در کد وجود دارد؛ نمایش Excel از جمله Major انگلیسی است.",
+      "remaining": "هماهنگ‌سازی واژگان فارسی/انگلیسی خروجی و اثبات ایجاد اعلان/پیگیری واقعی در سناریو.",
+      "acceptance": "شدت و اقدام فوری از منبع بیایند؛ کار پیگیری و مسئول/موعد قابل مشاهده باشد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:723",
+        "specs/033-daily-sections-grid/spec.md:231"
+      ],
+      "verification": "بازبینی مستقیم؛ وجود مسیر اعلان معادل تحویل واقعی اعلان نیست"
+    },
+    {
+      "id": "D16",
+      "title": "بازدیدها و جلسات روزانه ساخت‌یافته",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "ردیف بازدید با منبع و تاریخ/ترتیب و انتقال به خلاصه موجود است.",
+      "remaining": "تطبیق بازدید روز مرجع؛ اتصال کامل مدیریت جلسات/مصوبات در A.3.C جداست.",
+      "acceptance": "انتقال چند واحد ترتیب و منبع را حفظ کند؛ متن جلسه با مصوبه رسمی خلط نشود.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:723",
+        "specs/033-daily-sections-grid/spec.md:229"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "D17",
+      "title": "عکس و پیوست فعالیت، محدودیت نوع/اندازه و انتساب پروژه",
+      "status": "پیاده‌سازی موجود",
+      "phase": "وابستگی A.1 / عملیات A.8",
+      "existing": "قواعد JPEG/PNG تا ۱۰MB و ارتباط منبع/فعالیت و پیوند بخش‌ها در پیاده‌سازی وجود دارد.",
+      "remaining": "تست upload واقعی و پروژه دیگر، MIME جعلی، تاریخ ثبت و بازیابی از هر بخش در مرورگر.",
+      "acceptance": "ZIP/EXE/فایل جعلی یا بزرگ رد؛ فایل پروژه دیگر متصل نشود؛ گالری بزرگ چاپی الزام خودکار نیست.",
+      "refs": [
+        "apps/api/core/sub_reports/services/attachments.py:28",
+        "apps/api/core/field_reports/serializers.py:1439",
+        "specs/033-daily-sections-grid/spec.md:236"
+      ],
+      "verification": "بازبینی کد؛ ذخیره‌سازی و مرورگر پیوست این نوبت اجرا نشده"
+    },
+    {
+      "id": "W01",
+      "title": "گردش draft، submit/review، approve/reject و قفل رسمی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "مراحل، کنشگرها، زمان‌ها، کدهای خطای وضعیت/رد و قفل approved وجود دارند.",
+      "remaining": "UAT با تهیه‌کننده، ناظر و تأییدکننده واقعی؛ بررسی SoD و همه مسیرهای جایگزین.",
+      "acceptance": "حالت نامعتبر رد شود؛ دلیل رد حداقل ۱۰ کاراکتر؛ کاربر ممنوع نتواند تأیید کند.",
+      "refs": [
+        "apps/api/core/field_reports/services/__init__.py:28",
+        "apps/api/core/field_reports/daily_report_views.py:332",
+        "specs/036-validation-codes-unset-semantics/spec.md:79"
+      ],
+      "verification": "آزمون‌های منتخب workflow/status و validation موفق؛ ماتریس کامل نقش‌ها اجرا نشده"
+    },
+    {
+      "id": "W02",
+      "title": "اصلاحیه، نسخه‌بندی، دلیل، لغو و بازگشت به نسخه قبلی",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "ساخت draft بعدی، دلیل، انتقال فرزندان، تاریخچه و لغو وجود دارند؛ قرارداد قبلی آزمون دارد.",
+      "remaining": "تکمیل انتقال هویت تجمیعی، مجموعه کامل provenance و متادیتای مالک خلاصه؛ بازآزمایی لغو/تأیید نسخه.",
+      "acceptance": "نسخه جدید هیچ داده/منبع معتبر را گم نکند؛ اصلاح همزمان تکراری نشود؛ لغو نسخه approved قبلی را بازگرداند.",
+      "refs": [
+        "apps/api/core/field_reports/services/correction_service.py:138",
+        "specs/035-correction-lineage-cloning/spec.md:89"
+      ],
+      "verification": "آزمون‌های قدیمی اصلاحیه موفق؛ سه نقص تازه در انتقال معنای خلاصه بازتولید شد"
+    },
+    {
+      "id": "W03",
+      "title": "قفل داده مشتق پس از اصلاحیه و منع ویرایش مستقیم",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "قفل روی گزارش auto فعال است؛ نسخه اصلاحی ساخته‌شده این پرچم را حفظ نمی‌کند.",
+      "remaining": "حفظ هویت تجمیعی و قفل‌کردن بر اساس مالکیت داده در تمام child/batch paths؛ اصلاح فقط در واحد منبع.",
+      "acceptance": "POST/PATCH/DELETE ردیف مشتق نسخه اصلاحی هم رد شود؛ جزئیات مجاز مدیریت قابل ویرایش بماند.",
+      "refs": [
+        "apps/api/core/field_reports/services/correction_service.py:138",
+        "apps/api/core/field_reports/daily_report_views.py:618"
+      ],
+      "verification": "نقص اجرایی: PATCH موفق و ذخیره‌شده روی ردیف derived؛ correction-write-probe.json"
+    },
+    {
+      "id": "W04",
+      "title": "منبع ردیف و مجموعه کامل منابع مقادیر تجمیعی",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "DailyReportDerivedSource و drill-down برای خلاصه اصلی موجودند؛ اصلاحیه این رکوردها را کپی/بازنگاشت نمی‌کند.",
+      "remaining": "بازنگاشت منبع به شناسه ردیف نسخه جدید و حفظ تمام منابع، نه فقط source FK تک‌ردیفی.",
+      "acceptance": "جمع دو منبع در هر نسخه هر دو منبع را نشان دهد؛ اصلاح/لغو هیچ منبعی را گم نکند.",
+      "refs": [
+        "apps/api/core/field_reports/services/correction_service.py:138",
+        "apps/api/core/field_reports/serializers.py:100",
+        "specs/032-unit-report-source-truth/spec.md:180"
+      ],
+      "verification": "نقص اجرایی: ۲ رکورد provenance در مبدأ و ۰ در نسخه اصلاحی"
+    },
+    {
+      "id": "W05",
+      "title": "نظر مدیریت، override هوا/تعطیلی و اطلاعات مالک خلاصه در اصلاح",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "بازسازی معمول نظر/override را حفظ می‌کند؛ clone اصلاحیه management_opinion و weather_override را از دست می‌دهد.",
+      "remaining": "حفظ و تعیین سیاست تمام metadata مالک خلاصه، config/fingerprint/aggregation metadata؛ سازگاری با snapshot نسخه.",
+      "acceptance": "اصلاح/لغو/تأیید مجدد نظر و override مجاز را عیناً حفظ کند؛ مقادیر مشتق دوباره دستی نشوند.",
+      "refs": [
+        "apps/api/core/field_reports/services/correction_service.py:138",
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:559",
+        "specs/032-unit-report-source-truth/spec.md:184"
+      ],
+      "verification": "نقص اجرایی نظر و weather_override بازتولید؛ بقیه metadata در کد مشکوک و نیازمند تست دقیق"
+    },
+    {
+      "id": "W06",
+      "title": "نسخه رسمی ثابت و تشخیص تفاوت با منابع جاری",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "snapshot مصوب حفظ و در خروجی مقایسه/هشدار منبع نمایش داده می‌شود؛ زمان ثبت و تأیید جدا هستند.",
+      "remaining": "تطبیق نسخه دانلودشده با نسخه مصوب و اصلاح‌شده؛ قاعده وضعیت مبنای گزارش رسمی مستند شود.",
+      "acceptance": "تغییر منبع بدون اصلاح رسمی محتوای snapshot تأییدشده را پنهانی عوض نکند.",
+      "refs": [
+        "apps/api/core/field_reports/services/daily_report_aggregation.py:593",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:132",
+        "apps/api/core/field_reports/pdf.py:117"
+      ],
+      "verification": "آزمون‌های منتخب summary_snapshot_comparison موفق"
+    },
+    {
+      "id": "E01",
+      "title": "دانلود FILE4 با RTL، فونت فارسی و بخش‌های اصلی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "سازنده Excel، endpoint مجاز و بخش‌های اصلی فعال هستند؛ فایل کنترل تولید شد.",
+      "remaining": "تطبیق کامل با مرجع مستقل و اصلاح اختلاف‌های E02 تا E04.",
+      "acceptance": "xlsx سالم، فارسی خوانا و همه بخش‌های مورد توافق با مقدار درست دانلود شوند.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:124",
+        "apps/api/core/field_reports/daily_report_views.py:435"
+      ],
+      "verification": "آزمون‌های منتخب FILE4 موفق؛ این وضعیت معادل برابری کامل فرم نیست"
+    },
+    {
+      "id": "E02",
+      "title": "انطباق چیدمان و فیلدهای FILE4 با فرم واقعی شیراز",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "بخش‌های اصلی موجودند؛ خروجی فعلی جدول‌های روی‌هم دارد، فرم واقعی نیروی مستقیم/غیرمستقیم را کنار هم می‌چیند.",
+      "remaining": "تعیین و اجرای معیار برابری ساختاری/چاپی؛ ساعت شیفت و شماره رسمی، عنوان‌ها و ترتیب ستون‌ها روشن شوند.",
+      "acceptance": "بازبین با مقایسه کنارهم محل و مقدار هر فیلد مصوب را بدون نگاشت مبهم پیدا کند.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:162",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:247",
+        "docs/delivery/R0-scope-and-reports-contract.md:30"
+      ],
+      "verification": "مقایسه ساختار workbook مرجع با خروجی کنترل؛ تطبیق عددی یک روز کامل انجام نشده"
+    },
+    {
+      "id": "E03",
+      "title": "فرمول‌های بومی جمع و بازحساب در نرم‌افزار مستقل",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "فرمول SUM و جمع کل در xlsx نوشته می‌شوند و تست ساختار دارند.",
+      "remaining": "بازحساب واقعی با Excel یا موتور سازگار و کنترل مقادیر cache/خطا؛ صرف نوشتن فرمول کافی نیست.",
+      "acceptance": "جمع کنترل‌شده برابر مرجع و بدون #REF/#VALUE/#NAME باشد؛ فرمول بر داده خالی صفر ساختگی نسازد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:247",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:219"
+      ],
+      "verification": "وجود فرمول در آزمون تأیید؛ recalc مستقل این نوبت اجرا نشده"
+    },
+    {
+      "id": "E04",
+      "title": "چاپ Excel و PDF برای متن بلند و بیش از ۵۰ ردیف",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "PDF صفحه‌بندی دارد؛ Excel عرض ستون را محدود می‌کند اما print area/fit/repeat headers و ارتفاع پویا تنظیم نشده‌اند.",
+      "remaining": "تنظیم چاپ، شکست صفحه، تکرار عنوان و wrap/ارتفاع؛ بازبینی بصری همه صفحات و امضاها.",
+      "acceptance": "هیچ متن/عدد بریده نشود؛ عنوان‌ها در صفحات بعد خوانا و امضا آخرین صفحه باشد.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:763",
+        "apps/api/core/field_reports/pdf.py:83"
+      ],
+      "verification": "ساختار نمونه Excel فاقد print area/orientation؛ PDF بلند مستقل بصری این نوبت بررسی نشده"
+    },
+    {
+      "id": "E05",
+      "title": "PDF روزانه، نام فایل و محتوای بخش‌ها",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "PDF فارسی با هدر، فعالیت، منابع، یادداشت و نظر مدیریت و نام قراردادی تولید می‌شود.",
+      "remaining": "تطبیق ارقام و فیلدهای الزامی با Excel و مرجع؛ جزئیات بتن و شیفت طبق قرارداد.",
+      "acceptance": "نام daily-report-{date}-{shift}.pdf و محتوای نسخه یکسان باشد.",
+      "refs": [
+        "apps/api/core/field_reports/pdf.py:83",
+        "apps/api/core/field_reports/daily_report_views.py:423",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:189"
+      ],
+      "verification": "آزمون‌های منتخب PDF summary parity موفق؛ برابر بودن با مرجع واقعی هنوز اثبات نشده"
+    },
+    {
+      "id": "E06",
+      "title": "واترمارک تمام صفحات پیش‌نویس و حذف آن از نسخه مصوب",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "وضعیت غیرapproved واترمارک و approved حذف آن دارد.",
+      "remaining": "بازبینی بصری PDF چندصفحه‌ای برای هر حالت و نسخه اصلاحی.",
+      "acceptance": "تمام صفحات غیرمصوب نشانه پیش‌نویس داشته باشند؛ نسخه مصوب نشان پیش‌نویس نداشته باشد.",
+      "refs": [
+        "apps/api/core/field_reports/pdf.py:298",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:190"
+      ],
+      "verification": "آزمون‌های منتخب watermark/signatures موفق؛ بررسی بصری مستقل همه حالت‌ها انجام نشده"
+    },
+    {
+      "id": "E07",
+      "title": "سه جای امضای واقعی، سمت کنشگر و زمان محلی خوانا",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "نام کنشگر و زمان در سه جای امضای آخر فایل هست؛ سمت/نقش واقعی در خروجی چاپ نشده.",
+      "remaining": "افزودن نقش مصوب/واقعی؛ بررسی تقویم/منطقه زمانی و مسیر تأیید مستقیم بدون ساخت ناظر جعلی.",
+      "acceptance": "کنشگر واقعی همراه سمت و زمان قابل فهم؛ مرحله طی‌نشده نام یا امضای ساختگی نگیرد.",
+      "refs": [
+        "apps/api/core/field_reports/pdf.py:338",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:192"
+      ],
+      "verification": "نام/زمان در آزمون‌های منتخب؛ نبود نقش از کد؛ اشکال منطقه زمانی بازتولید نشده"
+    },
+    {
+      "id": "E08",
+      "title": "شناسه صحت مبتنی بر متادیتا و حدود ادعای امضای دیجیتال",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "fingerprint قطعی از شناسه/lineage/روز/شیفت/وضعیت/کنش تأیید چاپ می‌شود.",
+      "remaining": "در تحویل صریحاً متادیتایی بودن هش توضیح داده شود؛ اگر امضای کل محتوا/PKI خواسته شود قرارداد جدید لازم است.",
+      "acceptance": "metadata برابر هش برابر دهد؛ این نشان به‌عنوان اثبات عدم تغییر همه مقادیر یا امضای گواهی‌دار معرفی نشود.",
+      "refs": [
+        "apps/api/core/field_reports/pdf.py:316",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:196"
+      ],
+      "verification": "آزمون مشخصه موفق: تغییر quantity هش را عوض نکرد؛ تغییر status عوض کرد؛ این خود نقض FR015 نیست"
+    },
+    {
+      "id": "E09",
+      "title": "مجوز مشاهده و دانلود و جلوگیری از نشت بین پروژه‌ها",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "endpointهای خروجی و عضویت/مجوز view_reports وجود دارند و تست منتخب دارند.",
+      "remaining": "ماتریس کامل نقش مجاز/غیرمجاز/کاربر پروژه دیگر در API و مرورگر روی همان نسخه تحویل.",
+      "acceptance": "کاربر غیرمجاز نتواند با ID مستقیم گزارش یا فایل را بگیرد؛ viewer مجاز بتواند دانلود کند.",
+      "refs": [
+        "apps/api/core/field_reports/daily_report_views.py:423",
+        "apps/api/core/field_reports/daily_report_views.py:435",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:188"
+      ],
+      "verification": "بخشی از آزمون مجوز در بسته‌های موفق؛ پوشش منفی کامل و استقرار زنده اثبات نشده"
+    },
+    {
+      "id": "E10",
+      "title": "FILE5 ابنیه و FILE6 برق با درصد عددی و ستون‌های تخصصی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "مرتبط با A.1؛ ورود داده در A.8",
+      "existing": "هر دو Excel تخصصی و دکمه/endpoint واحد وجود دارند؛ درصد عددی 0.0%، درصد نامعلوم خالی؛ برق فاقد قطعه/درصد است.",
+      "remaining": "تطبیق تخصصی با فایل واقعی و کنترل مسیر دسترسی؛ تعیین ابهام PDF زیرگزارش.",
+      "acceptance": "ابنیه درصد ۰ تا ۱۰۰ به فرمت درصد صحیح؛ برق ستون ابنیه اضافه نداشته باشد.",
+      "refs": [
+        "apps/api/core/sub_reports/shiraz_subreport_excel.py:1",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:185"
+      ],
+      "verification": "آزمون‌های منتخب subreport Excel موفق؛ گردش واقعی مرورگری اجرا نشده"
+    },
+    {
+      "id": "E11",
+      "title": "دفتر فعالیت‌ها و FILE1 با تمام نتیجه فیلتر",
+      "status": "پیاده‌سازی موجود",
+      "phase": "پشتیبان A.1 / عملیات A.8",
+      "existing": "API دفتر فعالیت و خروجی Excel کامل queryset فیلترشده وجود دارند.",
+      "remaining": "رفع نسخه‌های تاریخی و جمع کل در E14/E15؛ تثبیت معیار measured/نامعلوم در داده legacy.",
+      "acceptance": "تمام ردیف‌های نتیجه فیلتر، مستقل از صفحه، با همان ستون‌ها صادر شوند.",
+      "refs": [
+        "apps/api/core/field_reports/report_views.py:89",
+        "apps/api/core/field_reports/shiraz_file1_excel.py:1"
+      ],
+      "verification": "آزمون‌های منتخب FILE1 موفق؛ نقص‌های دامنه نتیجه جدا بازتولید شده"
+    },
+    {
+      "id": "E12",
+      "title": "فیلترهای کامل فهرست گزارش روزانه و URL",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "فهرست روزانه date_from/date_to/status/page دارد؛ discipline/contractor/block در UI و queryset این مسیر مشاهده نشد.",
+      "remaining": "پیاده‌سازی/تثبیت معنای سه فیلتر مفقود برای یک خلاصه چندواحدی؛ اتصال UI/API/URL و دانلود.",
+      "acceptance": "URL اشتراکی تمام فیلترهای FR016 را با نتیجه یکسان بازسازد.",
+      "refs": [
+        "apps/web/src/app/routes/daily-reports-list.tsx:91",
+        "apps/api/core/field_reports/daily_report_views.py:153",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:197"
+      ],
+      "verification": "نقص با بازبینی UI و backend؛ سناریوی مرورگر اجرا نشده"
+    },
+    {
+      "id": "E13",
+      "title": "فیلتر چندبعدی دفتر فعالیت و بازگردانی URL",
+      "status": "پیاده‌سازی موجود",
+      "phase": "پشتیبان A.1 / عملیات A.8",
+      "existing": "date/disc/parcel/zone/block/subcontractor/page در URL و query وجود دارند.",
+      "remaining": "UAT لینک مشترک، refresh، بازگشت مرورگر و یکسانی download؛ replace:true می‌تواند تاریخچه را محدود کند.",
+      "acceptance": "دو عضو مجاز با URL یکسان ورودی‌ها، صفحه و مجموعه نتیجه یکسان ببینند.",
+      "refs": [
+        "apps/web/src/app/routes/project-activity-log.tsx:1",
+        "specs/044-shiraz-excel-parity-pdf/spec.md:198"
+      ],
+      "verification": "وجود پیاده‌سازی؛ ریسک history مشاهده کدی است و نقص اجرایی اثبات‌شده نامیده نمی‌شود"
+    },
+    {
+      "id": "E14",
+      "title": "جمع کل دفتر فعالیت روی تمام نتیجه فیلتر، جدا به تفکیک واحد",
+      "status": "ناقص",
+      "phase": "پشتیبان A.1 / عملیات A.8",
+      "existing": "UI جمع headcount و quantity را از data.results همان صفحه می‌گیرد؛ API aggregate کل نمی‌دهد.",
+      "remaining": "محاسبه کل سمت سرور با همان فیلتر و قواعد null/measured؛ اصلاح عنوان نفرروز مطابق D07.",
+      "acceptance": "برای ۵۱ ردیف و صفحه ۵۰تایی جمع کل ۵۱ باشد و با خروجی کل برابر؛ m2 با m3 جمع نشود.",
+      "refs": [
+        "apps/web/src/app/routes/project-activity-log.tsx:129",
+        "apps/api/core/field_reports/report_views.py:89"
+      ],
+      "verification": "نقص اجرایی: count=51، results=50 و جمع صفحه=50؛ pagination-probe.json"
+    },
+    {
+      "id": "E15",
+      "title": "نسخه جاری در دفتر رسمی؛ تاریخچه جدا از جمع عملیاتی",
+      "status": "ناقص",
+      "phase": "پشتیبان A.1 / عملیات A.8",
+      "existing": "query وضعیت approved را اعمال می‌کند اما is_current را نه؛ نسخه قدیمی approved هم وارد می‌شود.",
+      "remaining": "فیلتر نسخه جاری برای دفتر عملیاتی و سیاست نمایش تاریخچه مستقل؛ کنترل پس از اصلاح/لغو.",
+      "acceptance": "دو نسخه ۵ واحدی یک فعالیت، جمع رسمی ۵ بدهند نه ۱۰؛ سابقه همچنان قابل دسترس بماند.",
+      "refs": [
+        "apps/api/core/field_reports/services/activity_log.py:9",
+        "specs/032-unit-report-source-truth/spec.md:163"
+      ],
+      "verification": "نقص اجرایی: ۲ ردیف، quantity=10 و headcount=8 در برابر ۱ ردیف،۵ و۴"
+    },
+    {
+      "id": "E16",
+      "title": "امنیت محتوای سلول‌های Excel و متن فارسی/چندخطی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "literalize_cell در خروجی‌های Excel برای جلوگیری از فرمول‌شدن متن وجود دارد.",
+      "remaining": "حفظ پوشش متن‌های شروع‌شونده با =,+,-,@ و فارسی/انگلیسی در نمونه پذیرش.",
+      "acceptance": "ورودی کاربر به‌عنوان متن ذخیره شود؛ فرمول‌های محاسباتی داخلی سالم بمانند.",
+      "refs": [
+        "apps/api/core/field_reports/excel_safety.py:1",
+        "apps/api/core/field_reports/shiraz_file4_excel.py:124"
+      ],
+      "verification": "آزمون‌های منتخب export موفق؛ ارزیابی امنیت جامع کل محصول انجام نشده"
+    },
+    {
+      "id": "E17",
+      "title": "دامنه فایل چندشیته تاریخی در مقابل خروجی یک روز",
+      "status": "نیازمند تثبیت قرارداد",
+      "phase": "A.1",
+      "existing": "هر فراخوانی FILE4 یک شیت روزانه می‌سازد؛ مرجع ۱۰۹/۳۶۷ شیت و R0 واژه چندشیته دارد.",
+      "remaining": "ثبت تصمیم: تک‌روز در A.1 طبق برنامه یا workbook بازه/کل تاریخ؛ بدون فرض خودکار مهاجرت همه شیت‌ها.",
+      "acceptance": "دامنه فایل و تعداد شیت در قرارداد خروجی روشن و همان حالت آزموده شود.",
+      "refs": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:132",
+        "docs/delivery/R0-scope-and-reports-contract.md:46",
+        "output/delivery-plan-2026-11-03/delivery-plan.md:107"
+      ],
+      "verification": "نمونه کنترل یک شیت؛ metadata مرجع واقعی خوانده شد"
+    },
+    {
+      "id": "Q01",
+      "title": "روز مرجع کامل و نگاشت مستقل همه داده‌ها",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "فایل‌های واقعی در real-data ثبت شده‌اند؛ آزمون‌های واحد و sample کنترل موجودند.",
+      "remaining": "انتخاب یک روز کامل با ارقام کنترل‌شده تمام بخش‌ها و ساخت expected مستقل از builder/aggregation.",
+      "acceptance": "برای هر مقدار خروجی، سلول یا سند منبع، واحد، تبدیل و انتظار ثبت شود؛ اختلاف باز صفر.",
+      "refs": [
+        "docs/delivery/R0-scope-and-reports-contract.md:30",
+        "output/delivery-plan-2026-11-03/delivery-plan.md:107"
+      ],
+      "verification": "گواه تطبیق مستقل کامل یک روز و پذیرش کارفرما در بررسی حاضر احراز نشد؛ نبودش در کل دنیا ادعا نمی‌شود"
+    },
+    {
+      "id": "Q02",
+      "title": "معیار سرعت دانلود و زمان انجام کار توسط کاربر",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "تولید فایل در آزمون کار می‌کند؛ معیار ۳ ثانیه دانلود و معیارهای usability در specs وجود دارند.",
+      "remaining": "اندازه‌گیری روی همان release و روز معمول ۱۵–۳۰ فعالیت و ۲۰ ردیف منابع؛ تجربه کاربران فارسی/انگلیسی.",
+      "acceptance": "دانلود معمول زیر ۳ ثانیه طبق معیار توافق‌شده؛ نرخ موفقیت/زمان کاربر با شاهد ثبت شود.",
+      "refs": [
+        "specs/044-shiraz-excel-parity-pdf/spec.md:220",
+        "specs/028-auto-daily-report-summary/spec.md:139"
+      ],
+      "verification": "سنجش کارایی/کاربر این نوبت اجرا نشده؛ زمان pytest معیار دانلود نیست"
+    },
+    {
+      "id": "Q03",
+      "title": "پذیرش مرورگری دسکتاپ/موبایل و فارسی/انگلیسی",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "UI و سناریوهای E2E/گزارش‌های قبلی وجود دارند.",
+      "remaining": "اجرای تازه از ثبت واحد تا تجمیع، اصلاح، مشاهده نسخه و دانلود با نقش‌های واقعی و اندازه موبایل.",
+      "acceptance": "مسیرهای لازم بدون خطای UI، داده گمشده و دورزدن مجوز در هر دو زبان کامل شوند.",
+      "refs": [
+        "specs/007-daily-report-gaps/spec.md:130",
+        "specs/033-daily-sections-grid/verification-report.md:1"
+      ],
+      "verification": "گزارش‌های قدیمی صرفاً تاریخی؛ در این ممیزی اجرای تازه مرورگر انجام نشده"
+    },
+    {
+      "id": "Q04",
+      "title": "راهنمای مسیرها و درخت تصمیم مطابق رفتار واقعی",
+      "status": "پیاده‌سازی موجود",
+      "phase": "A.1",
+      "existing": "سندهای مسیر کاربر و تصمیم‌گیری برای دانلودها وجود دارند.",
+      "remaining": "تطبیق همه لینک‌ها و gateهای نقش با نسخه نهایی و حذف ادعای امضای گواهی‌دار اثبات‌نشده.",
+      "acceptance": "هر اقدام خروجی از مسیر واقعی و مجوز درست به فایل صحیح برسد؛ لینک شکسته صفر.",
+      "refs": [
+        "specs/044-shiraz-excel-parity-pdf/spec.md:201",
+        "docs/decision-tree/README.md:1"
+      ],
+      "verification": "وجود docs بررسی شده؛ ممیزی کامل همه لینک‌ها این نوبت انجام نشده"
+    },
+    {
+      "id": "Q05",
+      "title": "بسته تحویل همان نسخه، راهنمای آزمون و صورت‌جلسه پذیرش",
+      "status": "ناقص",
+      "phase": "A.1",
+      "existing": "زیرساخت برنامه و اسناد تحویل وجود دارد؛ کد و تست هم بخش عمده موجودند.",
+      "remaining": "ثبت SHA انتشار، فایل‌ها و checksum، ورودی/expected، لاگ بازحساب و صفحات PDF و اجرای آزمون کارفرما.",
+      "acceptance": "کارفرما دقیقاً فایل و نسخه آزموده‌شده را دانلود و نتیجه پذیرش اولیه را صریح ثبت کند.",
+      "refs": [
+        "output/delivery-plan-2026-11-03/delivery-plan.md:113",
+        "docs/delivery/R0-scope-and-reports-contract.md:22"
+      ],
+      "verification": "استقرار، فایل دانلودی تولید و صورت‌جلسه کارفرما در این ممیزی احراز/ایجاد نشده"
+    },
+    {
+      "id": "X01",
+      "title": "آفلاین، صف محلی، retry، حل تعارض و جداسازی هویت",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.8؛ سازگاری با A.1 الزامی",
+      "existing": "زیرساخت sync و spec037 و آزمون‌های مستقل وجود دارند؛ به صرف این وجود کامل نامیده نمی‌شود.",
+      "remaining": "پذیرش اختصاصی operation_id، قطع پیش/پس از commit، refresh/restart، رقابت تأیید، عدم حذف موفق‌ها و تغییر حساب.",
+      "acceptance": "هیچ داده/عملیات گم یا تکراری نشود؛ مشتقات پروژه در sync هم readonly؛ اثبات‌های مستقل spec037 ارائه شود.",
+      "refs": [
+        "specs/037-daily-offline-sync/spec.md:104"
+      ],
+      "verification": "تست آفلاین و browser این نوبت اجرا نشده؛ وضعیت «پیاده نشده» به آن نسبت داده نمی‌شود"
+    },
+    {
+      "id": "X02",
+      "title": "درصد اجرا، نفرساعت پیمانکار و QC تخصصی مکانیک/برق",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.8؛ خروجی مرتبط A.1",
+      "existing": "مدل‌ها و مسیرهای تخصصی/درصد/بازرسی وجود دارند.",
+      "remaining": "پذیرش درصد ۰..۱۰۰/null، گزارش خالی، تست فشار و ledger پس از تأیید و داده واقعی واحد.",
+      "acceptance": "درصد نامعلوم صفر نشود؛ فشار غیرمثبت رد؛ نفرساعت از مدت واقعی و افراد منبع محاسبه شود.",
+      "refs": [
+        "specs/038-discipline-sub-reports/spec.md:156"
+      ],
+      "verification": "درصد/Excel منتخب موفق؛ بقیه گردش تخصصی به طور کامل این نوبت آزموده نشده"
+    },
+    {
+      "id": "X03",
+      "title": "پیشرفت برنامه‌ای/واقعی و روش‌های وزن‌دهی فیزیکی",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.7/A.8",
+      "existing": "ماژول زمان‌بندی/پیشرفت جدا از daily quantities وجود دارد.",
+      "remaining": "تطبیق WBS و قواعد وزن‌دهی در فاز مربوط؛ مرز نمایش روزانه تعیین شود.",
+      "acceptance": "حجم فعالیت روزانه جانشین پیشرفت تجمعی رسمی تلقی نشود.",
+      "refs": [
+        "reports_documentation/atomic-specs/SPEC-07-PHYSICAL-PROGRESS-MEASUREMENT.md:1"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "X04",
+      "title": "گزارش هفتگی/ماهانه، KPI و کاتالوگ عمومی گزارش‌ها",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.10",
+      "existing": "ProjectPeriodReport و کاتالوگ پنج‌گانه جدا هستند؛ مسیر عمومی monthly هنوز از سازنده weekly استفاده می‌کند.",
+      "remaining": "در A.10 تفکیک معنا، تاریخ/WBS و منابع approved؛ ادعای همه گزارش‌های دوره‌ای ناقص بر اساس یک مسیر عمومی درست نیست.",
+      "acceptance": "بازه، شاخص و منبع هر گزارش واقعی آزموده شود؛ A.1 جای پذیرش A.10 را نگیرد.",
+      "refs": [
+        "docs/delivery/R0-scope-and-reports-contract.md:51",
+        "apps/api/core/projects/services/report_export_service.py:80"
+      ],
+      "verification": "کد مسیر عمومی بازبینی شد؛ مسیر تخصصی period_report جداست"
+    },
+    {
+      "id": "X05",
+      "title": "ذی‌نفعان، جلسات، مکاتبات و گزارش وضعیت ارتباطات",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.3.C و گزارش A.10",
+      "existing": "پایه ذی‌نفع/ماتریس/برنامه ارتباطی موجود است؛ اتصال جامع در دامنه پذیرفته‌شده پروژه باقی است.",
+      "remaining": "تکمیل اتصال صریح stakeholder/meeting/correspondence، مسئول/موعد، workflow و کنترل داده تماس در فاز مربوط.",
+      "acceptance": "کارفرما مسیر ثبت تا اقدام باز و گزارش وضعیت فیلترشده را جدا از گزارش روزانه بپذیرد.",
+      "refs": [
+        "docs/delivery/R0-scope-and-reports-contract.md:19"
+      ],
+      "verification": "درخواست قبلی کاربر جزو کل تحویل است؛ این ممیزی آن را از کل پروژه حذف نمی‌کند"
+    },
+    {
+      "id": "X06",
+      "title": "تدارکات روز، RFI/Submittal و پیوند اسناد رسمی",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.4/A.9/A.10؛ نمایش روزانه نیازمند قرارداد",
+      "existing": "یادداشت/ارجاع روزانه جایگزین گردش رسمی مکاتبات و تدارکات نیست.",
+      "remaining": "تعیین اقلام لازم در snapshot چاپی A.1 و اتصال ماژول‌های صاحب داده در فاز مربوط.",
+      "acceptance": "شماره/وضعیت سند از منبع رسمی بیاید؛ یک متن آزاد به‌عنوان گزارش کامل تدارکات معرفی نشود.",
+      "refs": [
+        "docs/delivery/R0-scope-and-reports-contract.md:12",
+        "docs/delivery/R0-scope-and-reports-contract.md:55"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "X07",
+      "title": "باد، وضعیت زمین و پیش‌بینی سه روز آینده در فرم واقعی",
+      "status": "نیازمند تثبیت قرارداد",
+      "phase": "مرتبط؛ دامنه چاپ A.1 باید مشخص شود",
+      "existing": "WeatherLog دارای داده باد/زمین است؛ این داده‌ها در هدر فعلی daily/export دیده نشدند؛ فرم واقعی پیش‌بینی سه‌روزه دارد.",
+      "remaining": "تصمیم صریح درباره ضرورت این فیلدها و منبع قابل اتکا؛ از ساخت سرویس پیش‌بینی بدون نیاز مصوب پرهیز شود.",
+      "acceptance": "اگر داخل دامنه شد مقدار/منبع/تاریخ روشن؛ در نبود داده «نامعلوم» و بدون داده ساختگی.",
+      "refs": [
+        "apps/api/core/field_reports/models.py:788",
+        "docs/delivery/R0-scope-and-reports-contract.md:30"
+      ],
+      "verification": "تفکیک وجود مدل از نبود اتصال به گزارش؛ پیش‌بینی یک مشاهده مرجع است نه تعهد قطعی تازه"
+    },
+    {
+      "id": "X08",
+      "title": "مهاجرت سابقه، نگاشت taxonomy و rollback داده‌های قدیمی",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.8/A.12",
+      "existing": "مدل migration trace و الزامات نگهداری شناسه/منبع/تاریخچه در spec032 وجود دارند.",
+      "remaining": "تمرین مهاجرت با داده واقعی، قرنطینه مقدار نامعلوم، یک نسخه جاری و rollback قابل اثبات.",
+      "acceptance": "تمام رکوردها migrated/history/quarantined شمرده شوند؛ سابقه بدون اثر در جمع رسمی قابل ردیابی بماند.",
+      "refs": [
+        "specs/032-unit-report-source-truth/spec.md:195"
+      ],
+      "verification": "تمرین مهاجرت و rollback این نوبت اجرا نشده؛ ۳۶۷ شیت به خودی خود تعهد ETL نیست"
+    },
+    {
+      "id": "X09",
+      "title": "استقرار نهایی کل محصول و آموزش گسترده",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.12؛ بسته همان SHA برای A.1 لازم",
+      "existing": "زیرساخت release/راهنما وجود دارد.",
+      "remaining": "استقرار و آموزش کل محصول در A.12؛ A.1 برای فایل‌های خود نسخه منتشرشده آزموده‌شده و راهنمای محدود می‌خواهد.",
+      "acceptance": "آزمون محلی به‌عنوان تأیید production معرفی نشود.",
+      "refs": [
+        "docs/delivery/R0-scope-and-reports-contract.md:20"
+      ],
+      "verification": "بازبینی مستقیم کد؛ پذیرش نهایی اجرا نشده"
+    },
+    {
+      "id": "X10",
+      "title": "گزارش‌های مستقل دپارتمان و انبار، ورود دسته‌ای و بالانس",
+      "status": "مرتبط؛ خارج از تحویل مستقیم A.1",
+      "phase": "A.8/A.10؛ سازگاری منبع A.1",
+      "existing": "اسناد SPEC09/10 و مسیرهای داده دپارتمان/آزمون گزارش وجود دارند؛ این مسیرها با خلاصه مشتق پروژه یکی نیستند.",
+      "remaining": "پذیرش مستقل import/export روزانه/هفتگی و بالانس ۸ فیلدی؛ تعیین مسیر قدیمی سازگار با مالکیت شش واحد و جلوگیری از منبع موازی.",
+      "acceptance": "رسید/مصرف/مانده و فیلترهای روز/واحد/پیمانکار با مرجع برابر؛ import تکراری یا ردیف نامعتبر داده رسمی را خراب نکند.",
+      "refs": [
+        "apps/api/core/inventory/department_activity_data_views.py:1",
+        "apps/api/core/sub_reports/tests/test_department_reports.py:1",
+        "reports_documentation/atomic-specs/SPEC-09-DEPARTMENT-ACTIVITY-REPORTS.md:1",
+        "reports_documentation/atomic-specs/SPEC-10-WAREHOUSE-DEPARTMENT-REPORTS.md:1"
+      ],
+      "verification": "صرفاً ثبت دامنه و مسیرهای موجود؛ آزمون جامع دپارتمان/انبار و بالانس در این نوبت اجرا نشده"
+    }
+  ]
+}

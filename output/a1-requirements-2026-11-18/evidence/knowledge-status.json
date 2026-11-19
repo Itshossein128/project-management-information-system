@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "indexed_at": "2026-11-18T18:06:51.821765+00:00",
+  "commit": "f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a",
+  "catalog_digest": "bb7f81e0b6edbde40cf8c7ff8afba44e12725a09bfe2e5bb71d3c1b15661ee21",
+  "skipped": [
+    {
+      "path": "specs/050-a6-p6-delivery-acceptance/evidence/secret-scan.md",
+      "reason": "sensitive_filename"
+    }
+  ],
+  "documents": 2591,
+  "chunks": 18183,
+  "mode": "hybrid",
+  "embedding_signature": "d0ddcbcac272cec2b7dbf74fd0f67ebf818df79bd719b4c9503c71cd452ad3a8",
+  "embedding_model": "text-embedding-qwen3-embedding-0.6b",
+  "dimensions": 1024,
+  "new_embeddings": 780,
+  "freshness": {
+    "fresh": true,
+    "changed_paths": [],
+    "indexed_commit": "f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a",
+    "current_commit": "f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a",
+    "basis": "content_hashes_and_configuration; commit alone does not cover uncommitted edits"
+  },
+  "embedding_job": {
+    "state": "complete",
+    "pid": 211853,
+    "started_at": "2026-11-18T18:03:23.714688+00:00",
+    "updated_at": "2026-11-18T18:06:58.310655+00:00",
+    "model": "text-embedding-qwen3-embedding-0.6b",
+    "documents": 2591,
+    "total_chunks": 18183,
+    "unique_chunks": 18182,
+    "cached_unique_chunks": 17402,
+    "new_total": 780,
+    "new_completed": 780,
+    "completed_unique_chunks": 18182,
+    "dimensions": 1024,
+    "chunks": 18183
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "recovered_on": "2026-11-19",
+  "original_audit_date": "2026-11-18",
+  "source_commit": "f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a",
+  "normalized_requirements": 61,
+  "source_clauses": 370,
+  "atomic_stories": 42,
+  "source_manifest_hashes": "match",
+  "markdown_file_links": "all_resolve",
+  "original_test_evidence": "preserved; not rerun",
+  "recovery_source": "surviving original generator scripts and evidence, plus existing personal canvas",
+  "original_folder_deletion_cause": "not established",
+  "product_code_changed": false
+}
