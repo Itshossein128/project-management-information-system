@@ -21,6 +21,9 @@ import { Button } from "@/components/ui/sprint-button";
 import { Drawer } from "@/components/ui/drawer";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 
 function Content() {
@@ -235,31 +238,47 @@ function Content() {
             value={form.overtime_date}
             onChange={(v) => setForm((f) => ({ ...f, overtime_date: v }))}
           />
-          <input
-            className='w-full rounded border px-2 py-1'
-            placeholder='واحد'
-            value={form.department}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, department: e.target.value }))
-            }
-          />
-          <input
-            type='number'
-            className='w-full rounded border px-2 py-1'
-            placeholder='ساعات'
-            value={form.requested_hours}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                requested_hours: Number(e.target.value),
-              }))
-            }
-          />
-          <textarea
-            className='w-full rounded border px-2 py-1'
-            value={form.reason}
-            onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="overtime-department">
+              واحد
+            </Label>
+            <Input
+              id="overtime-department"
+              placeholder="واحد"
+              value={form.department}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, department: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="overtime-hours">
+              ساعات
+            </Label>
+            <Input
+              id="overtime-hours"
+              type="number"
+              placeholder="ساعات"
+              value={form.requested_hours}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  requested_hours: Number(e.target.value),
+                }))
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="overtime-reason">
+              علت
+            </Label>
+            <Textarea
+              id="overtime-reason"
+              placeholder="علت"
+              value={form.reason}
+              onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
+            />
+          </div>
         </div>
       </Drawer>
     </div>

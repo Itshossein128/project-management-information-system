@@ -11,3 +11,7 @@ In `apps/web/src/components/ui/table.tsx`, added `[&::-webkit-scrollbar]:hidden 
 ## 2026-07-28 - Logical Directional Classes for Form Middleware Elements
 **Learning:** Inputs with forced `dir="ltr"` inside an RTL application layout (e.g. `PasswordInput`) will cause action buttons positioned with physical classes (`right-1`, `pr-10`) to overlap or misalign in RTL viewports.
 **Action:** Use logical direction utilities (`end-1`, `pe-10`) so inner form elements align consistently across document text directions and language contexts.
+
+## 2026-07-29 - Explicit Form Labels and Keyboard Focus Rings in Drawer Forms
+**Learning:** Drawer form inputs relying solely on placeholders without explicit `<label>` tags and focus-visible rings degrade screen-reader usability and keyboard navigation clarity.
+**Action:** Always wrap drawer form inputs with explicit `<label htmlFor="...">` elements and include `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring` classes for accessible focus management.
