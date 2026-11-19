@@ -58,7 +58,9 @@ class ProjectTemplateListSerializer(serializers.ModelSerializer):
         return len(obj.wbs_nodes.all())
 
     def get_required_daily_report_units(self, obj):
-        return [u.unit for u in obj.required_units.all().order_by('display_order', 'id')]
+        # ⚡ Bolt: Sort prefetched collection in Python instead of calling .order_by() which triggers an extra DB query per template
+        units = sorted(obj.required_units.all(), key=lambda u: (u.display_order, u.id))
+        return [u.unit for u in units]
 
 
 class ProjectTemplateDetailSerializer(ProjectTemplateListSerializer):

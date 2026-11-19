@@ -13,6 +13,7 @@ from project_templates.models import (
 from project_templates.serializers import (
     ProjectTemplateCreateSerializer,
     ProjectTemplateDetailSerializer,
+    ProjectTemplateListSerializer,
 )
 from project_templates.services import activate_project_reporting_configuration
 
@@ -110,6 +111,30 @@ def test_template_serializer_preserves_display_order(sample_template):
     data = ProjectTemplateDetailSerializer(sample_template).data
     assert 'required_daily_report_units' in data
     assert data['required_daily_report_units'] == units
+
+
+@pytest.mark.django_db
+def test_template_list_serializer_uses_prefetched_required_units_without_db_query(sample_template, django_assert_num_queries):
+    for i, u in enumerate([SpecialtyUnit.SECURITY, SpecialtyUnit.BUILDINGS, SpecialtyUnit.MECHANICAL]):
+        ProjectTemplateRequiredUnit.objects.create(
+            template=sample_template,
+            unit=u,
+            display_order=i,
+        )
+
+    qs = ProjectTemplate.objects.filter(pk=sample_template.pk).prefetch_related('wbs_nodes', 'required_units')
+    templates = list(qs)
+
+    with django_assert_num_queries(0):
+        serializer = ProjectTemplateListSerializer(templates, many=True)
+        data = serializer.data
+
+    assert len(data) == 1
+    assert data[0]['required_daily_report_units'] == [
+        SpecialtyUnit.SECURITY,
+        SpecialtyUnit.BUILDINGS,
+        SpecialtyUnit.MECHANICAL,
+    ]
 
 
 @pytest.mark.django_db
