@@ -3,6 +3,7 @@ import { cn } from "src/app/lib/utils";
 import { Button } from "src/components/ui/sprint-button";
 import { useTranslation } from "react-i18next";
 import { Dialog as DialogPrimitive } from "radix-ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface DrawerProps {
   isOpen: boolean;
@@ -38,15 +39,20 @@ export function Drawer({
             <DialogPrimitive.Title className="text-base font-semibold" asChild>
               <h2 id="drawer-title">{title}</h2>
             </DialogPrimitive.Title>
-            <DialogPrimitive.Close asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t("common.close")}
-              >
-                <X className="size-4" aria-hidden />
-              </Button>
-            </DialogPrimitive.Close>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogPrimitive.Close asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={t("common.close")}
+                  >
+                    <X className="size-4" aria-hidden />
+                  </Button>
+                </DialogPrimitive.Close>
+              </TooltipTrigger>
+              <TooltipContent>{t("common.close")}</TooltipContent>
+            </Tooltip>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
           {footer ? (
