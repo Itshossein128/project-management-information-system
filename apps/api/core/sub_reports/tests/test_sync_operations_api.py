@@ -58,3 +58,19 @@ def test_reordered_results_still_identify_operations_by_id(project, user):
     response = client.post(endpoint(project), {'contract_version': 2, 'operations': [first, second]}, format='json')
     assert {item['operation_id'] for item in response.data['results']} == {first['operation_id'], second['operation_id']}
     assert set(response.data['synced_ids']) == {first['operation_id'], second['operation_id']}
+
+
+def test_sync_operations_v2_requires_project_membership(project, other_user):
+    client = APIClient()
+    client.force_authenticate(other_user)
+    op = create_report('2026-12-03')
+    response = client.post(endpoint(project), {'contract_version': 2, 'operations': [op]}, format='json')
+    assert response.status_code == 403
+
+
+def test_sync_operations_v2_requires_edit_reports_permission(project, member):
+    client = APIClient()
+    client.force_authenticate(member.user)
+    op = create_report('2026-12-04')
+    response = client.post(endpoint(project), {'contract_version': 2, 'operations': [op]}, format='json')
+    assert response.status_code == 403
