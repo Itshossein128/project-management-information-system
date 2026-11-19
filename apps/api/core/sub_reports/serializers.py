@@ -541,22 +541,34 @@ class UnitReportMaterialSectionSerializer(serializers.ModelSerializer):
         ]
 
     def _is_receipt_resolved(self, obj) -> bool:
+        # ⚡ Bolt: Cache warehouse resolution per object on serializer instance to prevent duplicate DB queries
+        if not hasattr(self, '_resolved_receipt_cache'):
+            self._resolved_receipt_cache = {}
+        cache_key = getattr(obj, 'id', None) or id(obj)
+        if cache_key in self._resolved_receipt_cache:
+            return self._resolved_receipt_cache[cache_key]
+
         tx_type = getattr(obj, 'transaction_type', None)
         if tx_type != 'receipt':
+            self._resolved_receipt_cache[cache_key] = False
             return False
         doc_ref = (getattr(obj, 'warehouse_document_reference', '') or '').strip()
         if not doc_ref:
+            self._resolved_receipt_cache[cache_key] = False
             return False
         report = self.context.get('report') or getattr(obj, 'sub_report', None)
         project_id = getattr(report, 'project_id', None) or self.context.get('project_id')
         if not project_id:
+            self._resolved_receipt_cache[cache_key] = False
             return False
         from sub_reports.services.section_validation import resolve_warehouse_document
 
         doc = resolve_warehouse_document(
             project_id, doc_ref, getattr(obj, 'material_ref_id', None)
         )
-        return doc is not None
+        resolved = doc is not None
+        self._resolved_receipt_cache[cache_key] = resolved
+        return resolved
 
     def get_receipt_evidence(self, obj) -> str | None:
         tx_type = getattr(obj, 'transaction_type', None)
