@@ -42,18 +42,23 @@ class SubcontractorSerializer(serializers.ModelSerializer):
             obj._risk_cache = compute_risk_flag(obj)
         return obj._risk_cache
 
+    def _latest_score(self, obj):
+        # ⚡ Bolt: Cache latest valid score on instance to prevent duplicate max() iterations
+        if not hasattr(obj, '_cached_latest_score'):
+            valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
+            obj._cached_latest_score = max(valid_scores, key=lambda x: x.score_date) if valid_scores else None
+        return obj._cached_latest_score
+
     def get_latest_score(self, obj):
-        valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
-        if not valid_scores:
+        s = self._latest_score(obj)
+        if not s:
             return None
-        s = max(valid_scores, key=lambda x: x.score_date)
         return float(s.overall_score) if s.overall_score is not None else None
 
     def get_latest_score_date(self, obj):
-        valid_scores = [s for s in obj.scores.all() if not s.is_deleted]
-        if not valid_scores:
+        s = self._latest_score(obj)
+        if not s:
             return None
-        s = max(valid_scores, key=lambda x: x.score_date)
         return s.score_date.isoformat()
 
     def get_financial_summary(self, obj):
