@@ -50,17 +50,18 @@ def _snapshot(apps, report_ids, activity_id, labor_id, material_id, attachment_i
 def test_expand_preserves_historical_data_and_backfills_tokens(project, user):
     executor = _executor()
     leaves = executor.loader.graph.leaf_nodes()
+    day = date(2026, 10, 17)
     try:
+        # Rewinding sub_reports leaves the daily report table at its current schema.
+        Daily = executor.loader.project_state(leaves).apps.get_model('field_reports', 'DailyReport')
+        daily = Daily.objects.create(project_id=project.pk, report_date=day, status='draft', created_by_id=user.pk)
         executor.migrate([BASE])
         old = executor.loader.project_state([BASE]).apps
         Report = old.get_model('sub_reports', 'DisciplineSubReport')
-        Daily = old.get_model('field_reports', 'DailyReport')
         Activity = old.get_model('sub_reports', 'DisciplineSubReportActivity')
         Labor = old.get_model('sub_reports', 'DisciplineSubReportLabor')
         Material = old.get_model('sub_reports', 'DisciplineSubReportMaterial')
         Attachment = old.get_model('sub_reports', 'UnitReportAttachment')
-        day = date(2026, 10, 17)
-        daily = Daily.objects.create(project_id=project.pk, report_date=day, status='draft', created_by_id=user.pk)
         lineage = uuid4()
         prior = Report.objects.create(project_id=project.pk, report_date=day, unit='buildings',
                                       status='approved', lineage_id=lineage, version_number=1,

@@ -25,7 +25,8 @@ def dr_base(project):
 @pytest.mark.django_db
 class TestApprovalProgressE2E:
     def test_approve_updates_activity_progress(
-        self, auth_client, dr_base, project, user, activity, approved_measurement,
+        self, auth_client, project_approver_client, dr_base, project, user,
+        activity, approved_measurement,
     ):
         report = DailyReport.objects.create(
             project=project,
@@ -46,7 +47,7 @@ class TestApprovalProgressE2E:
 
         auth_client.post(f'{dr_base}{report.id}/submit/')
         auth_client.post(f'{dr_base}{report.id}/review/')
-        response = auth_client.post(f'{dr_base}{report.id}/approve/')
+        response = project_approver_client.post(f'{dr_base}{report.id}/approve/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['status'] == 'approved'
 
