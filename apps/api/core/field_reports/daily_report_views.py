@@ -165,11 +165,13 @@ class DailyReportViewSet(WorkflowViewSetMixin, viewsets.ModelViewSet):
 
     # Queries: before optimization=47, after=4 (list with select_related + prefetch_related)
     def get_queryset(self):
-        qs = (
-            DailyReport.objects.filter(project_id=self.get_project_id(), is_deleted=False)
-            .select_related('project', 'prepared_by', 'submitted_by', 'reviewed_by', 'approved_by')
-            .prefetch_related('activities', 'labor_entries', 'equipment_entries', 'machinery_rows', 'incidents')
-        )
+        qs = DailyReport.objects.filter(project_id=self.get_project_id(), is_deleted=False)
+        if self.action == 'versions':
+            # The version lookup uses the report's lineage and project for the history query.
+            qs = qs.only('id', 'project_id', 'lineage_id')
+        else:
+            qs = qs.select_related('project', 'prepared_by', 'submitted_by', 'reviewed_by', 'approved_by')
+            qs = qs.prefetch_related('activities', 'labor_entries', 'equipment_entries', 'machinery_rows', 'incidents')
         if self.action in ('excel', 'pdf'):
             return qs
         params = self.request.query_params

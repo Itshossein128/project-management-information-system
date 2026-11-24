@@ -618,6 +618,9 @@ class TestDailyReportGapsCorrection:
             quantity=10,
         )
 
+        # Initialize the request stack before measuring report operations.
+        assert auth_client.get(reports_url).status_code == status.HTTP_200_OK
+
         # 1. Open correction
         t0 = time.perf_counter()
         with CaptureQueriesContext(connection) as ctx_open:
@@ -645,6 +648,7 @@ class TestDailyReportGapsCorrection:
         t_vers = time.perf_counter() - t0
         assert vers_res.status_code == status.HTTP_200_OK
         assert len(ctx_vers.captured_queries) < 40  # Pre-fetched version history + auth/perm queries
+        assert all(DailyReportActivity._meta.db_table not in query['sql'] for query in ctx_vers.captured_queries)
         assert t_vers < 0.2  # Under 200 ms
 
         # 3. Cancel correction
