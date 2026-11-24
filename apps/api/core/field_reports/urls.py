@@ -50,7 +50,11 @@ report_approve = DailyReportViewSet.as_view({'post': 'approve'})
 report_reject = DailyReportViewSet.as_view({'post': 'reject'})
 report_pdf = DailyReportViewSet.as_view({'get': 'pdf'})
 report_excel = DailyReportViewSet.as_view({'get': 'excel'})
+report_excel_range = DailyReportViewSet.as_view({'get': 'excel_range'})
 report_versions = DailyReportViewSet.as_view({'get': 'versions'})
+report_rebuild = DailyReportViewSet.as_view({'post': 'rebuild'})
+report_contract = DailyReportViewSet.as_view({'get': 'contract'})
+report_contract_summary = DailyReportViewSet.as_view({'get': 'contract_summary'})
 report_corrections = DailyReportViewSet.as_view({'get': 'correction_requests', 'post': 'correction_requests'})
 report_materials_reconciliation = DailyReportViewSet.as_view({'get': 'materials_reconciliation'})
 report_provenance = DailyReportViewSet.as_view({'get': 'provenance'})
@@ -120,9 +124,12 @@ urlpatterns = [
     path('activity-log/filter-options/', ActivityLogFilterOptionsView.as_view(), name='activity-log-filter-options'),
 
     path(f'{DR}/', report_list, name='daily-report-list'),
+    path(f'{DR}/contract/', report_contract, name='daily-report-contract'),
     path(f'{DR}/by-date/', report_by_date, name='daily-report-by-date'),
+    path(f'{DR}/excel/', report_excel_range, name='daily-report-excel-range'),
     path(f'{DR}/sync-batch/', report_sync_batch, name='daily-report-sync-batch'),
     path(f'{DR}/<uuid:pk>/', report_detail, name='daily-report-detail'),
+    path(f'{DR}/<uuid:pk>/contract-summary/', report_contract_summary, name='daily-report-contract-summary'),
     path(
         f'{DR}/<uuid:pk>/navigation/',
         DailyReportNavigationView.as_view(),
@@ -135,6 +142,7 @@ urlpatterns = [
     path(f'{DR}/<uuid:pk>/pdf/', report_pdf, name='daily-report-pdf'),
     path(f'{DR}/<uuid:pk>/excel/', report_excel, name='daily-report-excel'),
     path(f'{DR}/<uuid:pk>/versions/', report_versions, name='daily-report-versions'),
+    path(f'{DR}/<uuid:pk>/rebuild/', report_rebuild, name='daily-report-rebuild'),
     path(
         f'{DR}/<uuid:pk>/correction-requests/',
         report_corrections,

@@ -1,0 +1,33 @@
+{
+  "requirementId": "B01",
+  "title": "Data contract and reference-day fixture",
+  "evaluatedAt": "2026-11-21T23:45:00+03:30",
+  "qaStatus": "qa_passed",
+  "implementationStatus": "implemented_and_verified",
+  "scopeDecisions": {
+    "C01": "enforced_derived_summary_boundary",
+    "C02": "enforced_zero_vs_unset_distinct_semantics",
+    "C03": "enforced_canonical_shifts_and_duration",
+    "C04": "enforced_shiraz_34_32_profile_and_appendix",
+    "C05": "single_day_delivered_multi_sheet_handed_off_to_b03",
+    "C06": "metadata_fingerprint_scoped_no_pki_claim",
+    "C07": "daily_pdf_standardized_subreport_pdf_handed_off_to_b03",
+    "C08": "official_numbering_and_weather_boundaries_enforced",
+    "GOV-01": "synthetic_sim_a1_001_labeled_employer_acceptance_pending_b06"
+  },
+  "tests": {
+    "suite": "field_reports/tests/test_a1_b01_data_contract.py",
+    "total": 11,
+    "passed": 11,
+    "failed": 0
+  },
+  "defects": [],
+  "handoffs": [
+    {
+      "id": "T030",
+      "targetPackage": "B03",
+      "description": "Multi-sheet date-range Excel workbook (DEL-03) and standalone discipline PDFs (DEL-04)"
+    }
+  ],
+  "summary": "Requirement B01 (Data contract and reference-day fixture) is fully implemented, compliant with decisions C01-C08 and GOV-01, verified against live PostgreSQL/Redis services, and has 0 open defects."
+}

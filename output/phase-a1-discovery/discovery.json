@@ -1,0 +1,34 @@
+{
+  "phase": "A.1",
+  "phaseTitle": "تطبیق و تحویل اولیه گزارش روزانه",
+  "requirements": [
+    {
+      "id": "A.1.01",
+      "title": "قواعد داده و fixture کامل روز مرجع",
+      "acceptance": "قاعده null/صفر، شیفت، شمارش نفر و منبع هر بخش ثبت شود."
+    },
+    {
+      "id": "A.1.02",
+      "title": "تطبیق مستقل Excel و PDF تمام بخش‌ها",
+      "acceptance": "اقلام، واحدها، ارقام و فرمول‌ها با مرجع مستقل مقایسه و Excel بازحساب شود."
+    },
+    {
+      "id": "A.1.03",
+      "title": "رفع اختلاف‌های اثبات‌شده خروجی",
+      "acceptance": "ساعت نامعلوم ماشین‌آلات صفر قطعی جلوه نکند و تست دقیق اضافه شود."
+    },
+    {
+      "id": "A.1.04",
+      "title": "دانلود همان نسخه، walkthrough و تأیید اولیه",
+      "acceptance": "فایل و نسخه و نتیجه بازبینی ارقام و صفحه‌بندی نگهداری شود."
+    }
+  ],
+  "summary": "A.1 is the first non-implemented phase in declared order. Only the four remaining work packages are in scope. Phase acceptance requires one complete day with controlled figures, independently recalculated Excel, readable PDF, and initial approval; full report-scope closure follows A.10.",
+  "evidence": [
+    "apps/web/src/app/data/delivery-plan.ts:161-206",
+    "output/a1-requirements-2026-11-18/requirements.csv:1-4",
+    "output/a1-requirements-2026-11-18/speckit-prompts/05-b05-independent-reconciliation.md:51-82",
+    "apps/api/core/field_reports/shiraz_file4_excel.py",
+    "apps/api/core/field_reports/pdf.py"
+  ]
+}

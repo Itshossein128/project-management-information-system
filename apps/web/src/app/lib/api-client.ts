@@ -201,20 +201,38 @@ export async function apiJson<T>(path: string, options: RequestInit = {}): Promi
   return data as T;
 }
 
-export async function apiBlob(path: string): Promise<Blob> {
+async function fetchBinary(path: string): Promise<Response> {
   const res = await apiFetch(path, { method: "GET", headers: await getAuthHeadersNoContentType() });
   if (!res.ok) {
     const text = await res.text();
     let msg = res.statusText;
     try {
-      const j = JSON.parse(text) as ApiError;
-      if (j.error) msg = j.error;
+      const payload = JSON.parse(text) as {error?: string | {message?: string}};
+      msg = typeof payload.error === "string" ? payload.error : payload.error?.message ?? msg;
     } catch {
       if (text) msg = text;
     }
     throw new Error(msg);
   }
-  return res.blob();
+  return res;
+}
+
+export async function apiBlob(path: string): Promise<Blob> {
+  return (await fetchBinary(path)).blob();
+}
+
+export async function downloadApiAttachment(path: string, fallbackFilename: string): Promise<void> {
+  const response = await fetchBinary(path);
+  const disposition = response.headers.get("Content-Disposition") ?? "";
+  const filename = disposition.match(/filename="([^"]+)"/i)?.[1] ?? fallbackFilename;
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 export async function apiFormData<T>(

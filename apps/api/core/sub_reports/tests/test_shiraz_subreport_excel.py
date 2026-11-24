@@ -97,13 +97,55 @@ def electrical_sub_report(project, user):
 @pytest.mark.django_db
 class TestShirazSubReportExcel:
 
+    def test_file5_repeats_column_headings_and_wraps_long_bilingual_activity(self, civil_sub_report):
+        activity = civil_sub_report.activities.order_by('row_number').first()
+        description = 'شرح فعالیت اجرایی ' * 12 + '\n' + 'Long bilingual activity description ' * 8
+        activity.activity_description = description
+        activity.save(update_fields=['activity_description'])
+
+        raw, _ = ShirazSubReportExcelBuilder(civil_sub_report).build()
+        sheet = openpyxl.load_workbook(io.BytesIO(raw)).active
+
+        assert sheet.print_title_rows == '$1:$8'
+        assert sheet['I8'].value == 'شرح فعالیت'
+        assert sheet['I9'].value == description
+        assert sheet['I9'].alignment.wrap_text
+        assert sheet.column_dimensions['I'].width <= 45
+        assert sheet.row_dimensions[9].height > 31
+
+    def test_canonical_electrical_unit_takes_precedence_over_legacy_civil_value(self, electrical_sub_report):
+        electrical_sub_report.discipline = 'civil'
+        data, filename = ShirazSubReportExcelBuilder(electrical_sub_report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(data)).active
+        assert filename.startswith('electrical-subreport-')
+        assert ws.max_column == 10
+        assert all(cell.value not in ('قطعه', 'درصد اجرا') for cell in ws[7])
+
+    def test_file5_numeric_percentages_print_settings_and_literal_text(self, civil_sub_report):
+        for row_number, percent in enumerate((0, Decimal('45.5'), 100, None), 10):
+            DisciplineSubReportActivity.objects.create(
+                sub_report=civil_sub_report, row_number=row_number, activity_description=f'  ={row_number}',
+                execution_percentage=percent,
+            )
+        raw, _ = ShirazSubReportExcelBuilder(civil_sub_report).build()
+        ws = openpyxl.load_workbook(io.BytesIO(raw)).active
+        assert ws.page_setup.fitToWidth == 1 and str(ws.page_setup.paperSize) == ws.PAPERSIZE_A4
+        indexes = {row[8].value: row for row in ws.iter_rows(min_col=1, max_col=12)}
+        for row_number, expected in enumerate((0, 0.455, 1, None), 10):
+            row = indexes[f'  ={row_number}']
+            assert row[8].data_type == 's'
+            assert row[11].value == expected
+            if expected is not None:
+                assert '%' in row[11].number_format
+
     def test_header_uses_project_data_and_does_not_invent_missing_values(self, civil_sub_report):
-        civil_sub_report.project.contractor = 'پیمانکار نمونه'
+        civil_sub_report.project.contractor = '=پیمانکار نمونه'
         civil_sub_report.weather_condition = ''
         civil_sub_report.form_code = ''
         civil_sub_report.revision_number = ''
         ws = openpyxl.load_workbook(io.BytesIO(ShirazSubReportExcelBuilder(civil_sub_report).build()[0])).active
-        assert 'پیمانکار نمونه' in ws['A1'].value
+        assert ws['A1'].value.startswith('=پیمانکار نمونه')
+        assert ws['A1'].data_type == 's'
         assert 'پی‌چین' not in ws['A1'].value
         assert 'نامشخص' in ws['D3'].value
         assert 'ثبت نشده' in ws['G3'].value and 'ثبت نشده' in ws['J3'].value

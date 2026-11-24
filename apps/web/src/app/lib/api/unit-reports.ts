@@ -3,7 +3,8 @@
  * Not the legacy hr-forms helpers — this targets the canonical unit-report
  * contract under `/projects/{id}/units/{unit}/daily-reports/`.
  */
-import { apiBlob, apiFormData, apiJson, ApiRequestError } from "@/app/lib/api-client";
+import { apiBlob, apiFormData, apiJson, ApiRequestError, downloadApiAttachment } from "@/app/lib/api-client";
+import { jalaliToIso } from "@/app/lib/jalali-utils";
 
 export type CanonicalUnit =
   | "buildings"
@@ -127,6 +128,7 @@ export interface UnitReportVersion {
   version_number: number;
   status: UnitReportStatus;
   is_current: boolean;
+  is_deleted?: boolean;
   created_at: string;
   supersedes: string | null;
   superseded_by: string | null;
@@ -239,6 +241,14 @@ export function fetchSubReportExcel(
   reportId: string,
 ): Promise<Blob> {
   return apiBlob(`${base(projectId, unit)}/${reportId}/excel/`);
+}
+
+export function downloadUnitReportPdf(projectId: string, unit: CanonicalUnit, reportId: string) {
+  return downloadApiAttachment(`${base(projectId, unit)}/${reportId}/pdf/`, `unit-daily-report-${unit}.pdf`);
+}
+
+export function downloadUnitReportExcel(projectId: string, unit: CanonicalUnit, reportId: string) {
+  return downloadApiAttachment(`${base(projectId, unit)}/${reportId}/excel/`, `${unit}-subreport.xlsx`);
 }
 
 // ---------------------------------------------------------------------------
@@ -482,8 +492,9 @@ export function fetchEffectiveReportingConfiguration(
   projectId: string,
   reportDate: string,
 ): Promise<EffectiveReportingConfiguration> {
+  const effectiveDate = reportDate.includes("/") ? jalaliToIso(reportDate) : reportDate;
   return apiJson<EffectiveReportingConfiguration>(
-    `/api/v1/projects/${projectId}/reporting-configuration/?date=${encodeURIComponent(reportDate)}`,
+    `/v1/projects/${projectId}/reporting-configuration/?date=${encodeURIComponent(effectiveDate)}`,
   );
 }
 

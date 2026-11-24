@@ -1,0 +1,27 @@
+{
+  "browser": "153.0.8010.12",
+  "base": "http://127.0.0.1:15184",
+  "api": "http://127.0.0.1:18084/api",
+  "window": [
+    "2026-10-01",
+    "2026-10-31"
+  ],
+  "rows": 51,
+  "commit_lower_ms": 1795318337750.617,
+  "commit_upper_ms": 1795318337756.006,
+  "visibleAt": 1795318338255.3,
+  "approvalResponseAt": 1795318337927,
+  "upperVisibilityMs": 504.68310546875,
+  "coldFilterMs": 374.900146484375,
+  "warmFilterMs": 154.800048828125,
+  "requests": [
+    {
+      "durationMs": 82.309,
+      "status": 200
+    },
+    {
+      "durationMs": 21.298,
+      "status": 200
+    }
+  ]
+}

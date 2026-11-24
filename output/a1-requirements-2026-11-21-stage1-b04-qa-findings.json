@@ -1,0 +1,46 @@
+{
+  "qaStatus": "qa_failed",
+  "requirementId": "B04",
+  "title": "Filters, complete result set, and totals",
+  "phase": "A.1",
+  "verificationDate": "2026-11-21",
+  "acceptanceCriteria": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+  "defects": [
+    {
+      "id": "DEF-B04-01",
+      "title": "Client-side aggregation on page slice instead of whole queryset",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx",
+      "severity": "high",
+      "description": "Page 1 shows 50 and Page 2 shows 1 when 51 records match. Totals change upon pagination navigation."
+    },
+    {
+      "id": "DEF-B04-02",
+      "title": "Missing whole-queryset totals/aggregates payload in ActivityLogView API",
+      "component": "apps/api/core/field_reports/report_views.py",
+      "severity": "high",
+      "description": "API response only returns standard pagination envelope without aggregated headcount or unit-grouped quantities across the full filtered queryset."
+    },
+    {
+      "id": "DEF-B04-03",
+      "title": "Missing discipline, block, and contractor filters on Daily Reports list",
+      "component": "apps/web/src/app/routes/daily-reports-list.tsx & apps/api/core/field_reports/daily_report_views.py",
+      "severity": "medium",
+      "description": "Daily reports list only supports date range and status filters, lacking standard FR016 project dimensions."
+    },
+    {
+      "id": "DEF-B04-04",
+      "title": "Collapsing unset/unmeasured quantities into numeric zero",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx",
+      "severity": "medium",
+      "description": "Unset semantics conflated with 0 in UI reduction."
+    },
+    {
+      "id": "DEF-B04-05",
+      "title": "Misleading man-days labeling for raw headcount row sum",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx",
+      "severity": "low",
+      "description": "Raw headcount sum labeled as 'مجموع نفرات (نفر-روز)' violating D07 decision."
+    }
+  ],
+  "summary": "Requirement B04 is qa_failed. The activity log computes summary aggregates solely on the 50-row client page slice rather than the entire filtered queryset, causing totals to jump upon pagination and diverge from full Excel exports. Daily reports list also lacks discipline/block/contractor filters."
+}

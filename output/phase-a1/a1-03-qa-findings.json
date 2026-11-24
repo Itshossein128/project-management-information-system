@@ -1,0 +1,65 @@
+{
+  "requirementId": "A.1.03",
+  "requirementTitle": "رفع اختلافهای اثباتشده خروجی",
+  "legacyPackageId": "B03",
+  "acceptanceCriteria": "ساعت نامعلوم ماشینآلات صفر قطعی جلوه نکند و تست دقیق اضافه شود.",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-22T21:18:00+03:30",
+  "qaStatus": "qa_passed",
+  "verdict": "passed",
+  "environments": {
+    "frontend": "http://localhost:5173",
+    "backend": "http://localhost:8000"
+  },
+  "authVerification": {
+    "account": "+10000000001",
+    "role": "admin",
+    "loginEndpoint": "http://localhost:8000/api/auth/login/",
+    "deliveryPlanRoute": "http://localhost:5173/delivery-plan",
+    "deliveryPlanTaskStatus": "remaining (formal sign-off pending)"
+  },
+  "verificationScope": {
+    "machineryZeroVsUnknown": {
+      "status": "passed",
+      "excelBehavior": "When productive_hours is null/None, cell value is written as None (blank), while 0 is explicitly written as numeric 0.",
+      "pdfBehavior": "When productive_hours is null/None, PDF renders '—' (em-dash), while 0 is rendered as integer 0.",
+      "evidenceCode": [
+        "apps/api/core/field_reports/shiraz_file4_excel.py:481-485",
+        "apps/api/core/field_reports/pdf.py:233,247"
+      ]
+    },
+    "automatedTests": {
+      "status": "passed",
+      "testCases": [
+        {
+          "name": "test_b03_legacy_equipment_zero_and_unknown_across_exports",
+          "file": "apps/api/core/field_reports/tests/test_pdf_summary_parity.py:279-304",
+          "assertion": "hours_by_name == {'Unknown machine': None, 'Measured machine': 0} and PDF captured row == {'Unknown machine': '—', 'Measured machine': 0}"
+        },
+        {
+          "name": "test_b03_conflicting_status_and_excess_hours_preserve_source_rows",
+          "file": "apps/api/core/field_reports/tests/test_machinery_derivation.py:111-128",
+          "assertion": "Conflicting status or hours preserve source rows and set aggregated operating_hours to None"
+        },
+        {
+          "name": "test_hours_exceed_day_limit",
+          "file": "apps/api/core/sub_reports/tests/test_machinery_contract.py",
+          "assertion": "Rejects combined machinery hours > 24 with hours_exceed_day_limit"
+        }
+      ]
+    },
+    "historicalDefectsRegression": {
+      "DEF-B03-01": "Resolved (Dynamic worked shift hours)",
+      "DEF-B03-02": "Resolved (Manpower layout side-by-side matching Shiraz profile)",
+      "DEF-B03-03": "Resolved (A4 print setup, column widths, header repetition)",
+      "DEF-B03-04": "Resolved (Actor authentic roles and local timestamp without phantom actors)",
+      "DEF-B03-05": "Resolved (Legacy equipment unknown hours displayed as None/'—' instead of 0)",
+      "DEF-B03-06": "Resolved (Concrete QC, batching, slump and 28-day sample linkage)",
+      "DEF-B03-07": "Resolved (Bilingual Persian HSE incident labels and severities)",
+      "DEF-B03-08": "Resolved (Project profile customization support without fixed counts)"
+    }
+  },
+  "defects": [],
+  "summary": "Requirement A.1.03 (B03) has been fully verified from an End-User and QA perspective. The acceptance criterion ('ساعت نامعلوم ماشین‌آلات صفر قطعی جلوه نکند و تست دقیق اضافه شود') is completely satisfied. In both FILE 4 Excel and bilingual PDF exports, unknown machinery hours remain null/em-dash ('—') and are clearly distinguished from explicit 0 hours. Exact regression tests (test_b03_legacy_equipment_zero_and_unknown_across_exports and test_b03_conflicting_status_and_excess_hours_preserve_source_rows) are implemented and cover all export formats and edge conditions."
+}

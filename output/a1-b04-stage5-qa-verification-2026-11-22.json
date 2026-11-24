@@ -1,0 +1,46 @@
+{
+  "qaStatus": "qa_passed",
+  "requirementId": "B04",
+  "phase": "A.1",
+  "evaluatedStage": "Stage 5",
+  "verificationDate": "2026-11-22",
+  "acceptanceCriteria": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+  "defects": [],
+  "resolvedDefects": [
+    {
+      "id": "DEF-B04-01",
+      "title": "Client-side aggregation on page slice instead of whole queryset",
+      "resolution": "ActivityLogView and ProjectActivityLog UI aggregate across the complete filtered queryset. Totals are page-invariant across pages 1 and 2."
+    },
+    {
+      "id": "DEF-B04-02",
+      "title": "Missing whole-queryset totals/aggregates payload in ActivityLogView API",
+      "resolution": "API exposes totals payload covering row headcount sum, unit-grouped quantities (m², m³, etc.), distinct from unmeasured/missing units."
+    },
+    {
+      "id": "DEF-B04-03",
+      "title": "Missing discipline, block, and contractor filters on Daily Reports list",
+      "resolution": "Discipline, block, and contractor dropdown filters implemented on Daily Reports list adhering to same-row matching and split-row exclusion."
+    },
+    {
+      "id": "DEF-B04-04",
+      "title": "Collapsing unset/unmeasured quantities into numeric zero",
+      "resolution": "Distinction between measured numeric zero (0) and unset/unknown quantities preserved in API, UI tables, and FILE1 exports across FA and EN."
+    },
+    {
+      "id": "DEF-B04-05",
+      "title": "Misleading man-days labeling for raw headcount row sum",
+      "resolution": "Labels accurately describe raw activity-row headcount sums in Persian and English without conflating man-days."
+    }
+  ],
+  "verificationSummary": {
+    "specAcceptanceCriteria": {
+      "SC-001": "Passed. Single-row dimension matching, split-row exclusion, summary deduplication, scoped RBAC (403 on unauthorized access), and bidirectional URL filter/page restoration verified in FA/RTL and EN/LTR.",
+      "SC-002": "Passed. 51-row activity fixture verified across 2 pages (50 on page 1, 1 on page 2) with constant headcount 51, 45 m², and 25 m³. FILE1 exports match full 51 rows regardless of page downloaded from.",
+      "SC-003": "Passed. Distinct rendering of measured zero vs unknown semantics verified in UI and Excel formulas.",
+      "SC-004": "Passed. Approval-to-visibility commit bracketed within 504.7 ms, cold filtering 374.9 ms, warm filtering 154.8 ms."
+    },
+    "deliveryPlanStatus": "Item A.1-B04 is marked implemented in apps/web/src/app/data/delivery-plan.ts. Localhost browser delivery plan verified."
+  },
+  "summary": "Package B04 (Filters, complete result set, and totals) is fully verified and qa_passed. All historical defects (DEF-B04-01 through DEF-B04-05) are resolved. Single-row matching, split-row exclusion, full-queryset totals, shared FILE1 export parity, URL state recovery, and RBAC authorization are verified end-to-end. Employer acceptance remains pending."
+}

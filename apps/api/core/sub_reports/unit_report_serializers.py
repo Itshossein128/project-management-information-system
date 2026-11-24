@@ -193,6 +193,7 @@ class UnitReportVersionSerializer(serializers.Serializer):
     version_number = serializers.IntegerField()
     status = serializers.CharField()
     is_current = serializers.BooleanField()
+    is_deleted = serializers.BooleanField()
     created_at = serializers.DateTimeField()
     supersedes = serializers.UUIDField(source='supersedes_id', default=None, allow_null=True)
     superseded_by = serializers.UUIDField(default=None, allow_null=True)

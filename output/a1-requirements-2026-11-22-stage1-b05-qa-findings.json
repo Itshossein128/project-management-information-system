@@ -1,0 +1,75 @@
+{
+  "requirementId": "B05",
+  "title": "Independent numeric, formula, and print reconciliation",
+  "phase": "A.1",
+  "stage": "1.2",
+  "verificationDate": "2026-11-22",
+  "acceptanceCriteria": "Independent expected values, recalculation evidence, mappings, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity.",
+  "qaStatus": "qa_failed",
+  "personasEvaluated": [
+    {
+      "persona": "Independent Auditor / QA Engineer",
+      "summary": "Existing automated tests compute expected values using internal model aggregators rather than an independent calculation oracle from controlled reference documents. No headless recalculation test (e.g. LibreOffice Calc) exists to verify against #REF!, #VALUE!, or #NAME? errors on empty/sparse data rows. Inspecting evidence/generated-sample.xlsx with openpyxl(data_only=True) verifies all key formula cells evaluate to None."
+    },
+    {
+      "persona": "Technical Office / Planning Engineer",
+      "summary": "Exported Excel workbooks lack cached pre-calculated values for formula cells (C47, D47, G47, C82, D82, G82, G83, C92), appearing blank or zero in lightweight web, mobile, or external viewers. Real-world download latency under broadband (<3.0s per SC-002 for 15-30 activities and 20 resource rows) remains completely unmeasured."
+    },
+    {
+      "persona": "Project Manager / Site Supervisor",
+      "summary": "No side-by-side visual regression logs or page-by-page comparison screenshots exist between employer reference forms, generated PDF, and Excel print views. In apps/web/src/app/data/delivery-plan.ts, items A.1.02 and A.1.03 remain marked 'remaining'."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B05-01",
+      "title": "Missing cached values for formula cells in exported Excel and lack of standalone recalculation tests",
+      "type": "Defect / Excel Engine Gap",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "critical",
+      "evidence": "openpyxl data_only=True inspection on output/a1-requirements-2026-11-18/evidence/generated-sample.xlsx shows C47, D47, G47, C82, D82, G82, G83, and C92 evaluate to None while formula strings exist in data_only=False. No standalone recalculation execution log is captured.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-02",
+      "title": "Missing real-world download latency benchmark (<3.0s) for standard site daily reports (SC-002)",
+      "type": "Performance Defect / QA Benchmark Gap",
+      "component": "apps/api/core/field_reports/report_views.py & apps/web",
+      "severity": "major",
+      "evidence": "SC-002 mandates export and download of master daily report (FILE4) or PDF for 15-30 activities and 20 resource rows in <3.0 seconds under standard broadband. No automated telemetry or client-side benchmark test exists.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-03",
+      "title": "Expected test assertions generated from internal models/aggregators rather than independent calculation oracle (Q01)",
+      "type": "Verification Methodology Gap / Quality Gate Defect",
+      "component": "apps/api/core/field_reports/tests/",
+      "severity": "critical",
+      "evidence": "Automated tests generate expected comparison targets dynamically using internal Python models and queryset methods rather than an independently maintained reference calculation sheet or oracle.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-04",
+      "title": "Lack of visual regression and page-by-page screenshot diff logs across PDF, Excel print layout, and employer reference form",
+      "type": "Compliance & Visual Parity Defect",
+      "component": "output/a1-requirements-2026-11-18/evidence/",
+      "severity": "major",
+      "evidence": "Requirements E04 and E05 demand archived side-by-side visual comparisons, page layout validation, and screenshots for normal and long daily report outputs. No screenshot archive is present.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-05",
+      "title": "Delivery plan tasks A.1.02 and A.1.03 remain in 'remaining' status",
+      "type": "Delivery & Scope Gap",
+      "component": "apps/web/src/app/data/delivery-plan.ts",
+      "severity": "major",
+      "evidence": "Delivery plan tasks A.1.02 ('تطبیق تمام بخش‌های گزارش با روز مرجع') and A.1.03 ('رفع اختلاف ارقام و نمایش خروجی‌ها') have not been completed or verified.",
+      "status": "open"
+    }
+  ],
+  "checksums": {
+    "generated_sample_xlsx_sha256": "e47f04c861acc86247a272b8cfb987ff27f11e99088cc6b250168fd1f57a7e6f",
+    "generated_sample_pdf_sha256": "e9b775328abe621125c9b0a49449dd6a8613faf10068531bfeb4c9cfb331e9fb"
+  },
+  "summary": "Requirement B05 is qa_failed. Excel exports lack pre-computed cached values for formulas (resulting in None in viewers without live recalculation engines), automated standalone recalculation (headless LibreOffice/Excel) is not part of CI/QA, no <3.0s download speed benchmark exists for standard site datasets, test suites lack an independent calculation oracle, visual regression logs are missing, and delivery plan tasks A.1.02 and A.1.03 remain unfulfilled."
+}

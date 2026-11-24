@@ -1,0 +1,21 @@
+{
+  "requirementId": "B01-04",
+  "title": "Shifts, durations, and labor metrics",
+  "acceptanceCriteria": "Use worked shifts only with canonical IDs 1-3, actual durations, unknown missing durations, and distinct bilingual labor metrics.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    "DEF-B01-04-GAP-01: Backend DailyReport schema uses mismatched shift enums (day/night/full vs shift_1/2/3) and lacks one-report-per-date worked shift list with canonical IDs 1-3 (FR-011, C03)",
+    "DEF-B01-04-GAP-02: Shiraz File 4 Excel export hardcodes static placeholder text 'ساعات کاری شیفت: ثبت نشده' in cell G4 (FR-012, DEF-B01-02)",
+    "DEF-B01-04-GAP-03: Man-hours calculation silently defaults missing durations to 8 planned hours rather than treating missing durations as unknown (FR-008, FR-012)",
+    "DEF-B01-04-GAP-04: Frontend activity log sums row headcounts and mislabels them as 'مجموع نفرات (نفر-روز)' without unique worker attendance deduplication (FR-013, D07, DEF-B01-03)",
+    "DEF-B01-04-GAP-05: Missing explicit bilingual data contract definitions distinguishing headcount, person-shifts, person-days, and person-hours across API and UI"
+  ],
+  "verificationDetails": {
+    "specStatus": "Ratified in specs/057-a1-b01-data-contract/spec.md under C03, US4, FR-011, FR-012, FR-013",
+    "backendModel": "ReportShift (day/night/full) vs ActivityRowShift (shift_1/2/3); unique constraint on project+date+shift",
+    "excelExporter": "shiraz_file4_excel.py L205 hardcodes 'ساعات کاری شیفت: ثبت نشده'",
+    "calculationEngine": "field_reports/services/man_hours.py defaults missing shift length to 8 hours",
+    "frontendMetrics": "project-activity-log.tsx L295 displays 'مجموع نفرات (نفر-روز)' for row headcount sum"
+  },
+  "summary": "Requirement B01-04 failed QA verification: while the data contract and C03 rules are ratified in the specification, the software implementation in apps/api and apps/web continues to exhibit legacy shift enum mismatch, static placeholder text in exports, silent 8-hour default duration substitution, and mislabeling of headcount sums as 'نفر-روز'."
+}

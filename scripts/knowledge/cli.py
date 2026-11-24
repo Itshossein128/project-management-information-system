@@ -180,14 +180,15 @@ class Embeddings:
             raise KnowledgeError("Set KNOWLEDGE_EMBEDDING_URL and KNOWLEDGE_EMBEDDING_MODEL before semantic indexing")
         from urllib.parse import urlsplit
         parsed = urlsplit(self.url)
+        self.loopback = parsed.hostname in {"localhost", "127.0.0.1", "::1"}
         if parsed.username or parsed.password or parsed.query or parsed.fragment:
             raise KnowledgeError("Embedding URL must not contain credentials, query parameters or fragments")
-        if parsed.scheme != "https" and not (parsed.scheme == "http" and parsed.hostname in {"localhost", "127.0.0.1", "::1"}):
+        if parsed.scheme != "https" and not (parsed.scheme == "http" and self.loopback):
             raise KnowledgeError("Use HTTPS for remote embeddings or HTTP on loopback")
         self.signature = digest(json.dumps({"url": self.url, "model": self.model,
             "query_prefix": self.config["query_prefix"], "passage_prefix": self.config["passage_prefix"]}, sort_keys=True).encode())
 
-    def embed(self, texts: list[str], query: bool = False) -> list[list[float]]:
+    def _embed_once(self, texts: list[str], query: bool = False) -> list[list[float]]:
         prefix = self.config["query_prefix" if query else "passage_prefix"]
         data = json.dumps({"model": self.model, "input": [prefix + x for x in texts], "encoding_format": "float"}).encode()
         headers = {"Content-Type": "application/json"}
@@ -198,13 +199,22 @@ class Embeddings:
         class NoRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, *args, **kwargs):
                 return None
-        opener = urllib.request.build_opener(NoRedirect)
-        try:
-            with opener.open(request, timeout=60) as response:
-                payload = json.loads(response.read(16_000_000))
-        except (urllib.error.URLError, ValueError) as exc:
-            code = getattr(exc, "code", "connection_error")
-            raise KnowledgeError(f"Embedding request failed ({code}); response body omitted") from None
+        handlers = [NoRedirect()]
+        if self.loopback:
+            handlers.append(urllib.request.ProxyHandler({}))
+        opener = urllib.request.build_opener(*handlers)
+        for attempt in range(3):
+            try:
+                with opener.open(request, timeout=60) as response:
+                    payload = json.loads(response.read(16_000_000))
+                break
+            except (urllib.error.URLError, ValueError) as exc:
+                code = getattr(exc, "code", "connection_error")
+                if not self.loopback or code not in {502, 503, 504} or attempt == 2:
+                    err = KnowledgeError(f"Embedding request failed ({code}); response body omitted")
+                    err.http_status = code
+                    raise err from None
+                time.sleep(2 ** attempt)
         try:
             items = sorted(payload["data"], key=lambda row: row["index"])
             if [r["index"] for r in items] != list(range(len(texts))):
@@ -223,6 +233,35 @@ class Embeddings:
             return vectors
         except (KeyError, TypeError, ValueError, OverflowError):
             raise KnowledgeError("Malformed embedding response; previous index preserved") from None
+
+    def embed(self, texts: list[str], query: bool = False) -> list[list[float]]:
+        if not texts:
+            return []
+        try:
+            return self._embed_once(texts, query=query)
+        except KnowledgeError as exc:
+            if getattr(exc, "http_status", None) != 400:
+                raise
+            # Local OpenAI-compatible embedding servers (e.g. LM Studio / llama.cpp)
+            # return HTTP 400 when a batch exceeds n_ubatch or a dense-token chunk
+            # exceeds n_ctx. Bisect batches first, then progressively trim a single
+            # oversized input rather than failing the entire semantic refresh.
+            if len(texts) > 1:
+                mid = len(texts) // 2
+                return self.embed(texts[:mid], query=query) + self.embed(texts[mid:], query=query)
+            text = texts[0]
+            min_chars = 300
+            while len(text) > min_chars:
+                next_len = max(min_chars, int(len(text) * 0.65))
+                if next_len >= len(text):
+                    break
+                text = text[:next_len]
+                try:
+                    return self._embed_once([text], query=query)
+                except KnowledgeError as retry_exc:
+                    if getattr(retry_exc, "http_status", None) != 400:
+                        raise
+            raise
 
 
 def connect(db: Path) -> sqlite3.Connection:

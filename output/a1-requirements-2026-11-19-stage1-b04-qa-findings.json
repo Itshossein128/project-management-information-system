@@ -1,0 +1,81 @@
+{
+  "requirementId": "B04",
+  "title": "فیلترها، مجموعه نتیجه و جمع قابل اتکا",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-19T17:03:00+03:30",
+  "acceptanceCriteria": "صفحه، aggregate، URL، pagination و Excel export از یک دامنه داده استفاده کنند؛ فیلترهای الزامی کامل و project-isolated باشند؛ جمع ۵۱ ردیف مستقل از صفحه ۵۰تایی، ۵۱ بماند.",
+  "qaStatus": "qa_failed",
+  "verdict": "failed",
+  "personasEvaluated": [
+    {
+      "persona": "Project Manager / Supervisor",
+      "summary": "Observes total headcount jumping between 50 on page 1 and 1 on page 2 instead of maintaining the consistent total of 51. Discrepancy between web summary cards and exported FILE 1 Excel totals."
+    },
+    {
+      "persona": "Technical Office / Planning Engineer",
+      "summary": "Missing core filters (discipline, block, contractor) in daily reports list. Browser navigation and shareable URL state replace/desynchronization."
+    },
+    {
+      "persona": "QA & Data Auditor",
+      "summary": "Incompatible unit aggregations across paginated boundaries, null/zero handling confusion, and improper labeling of headcount sum as 'man-days' violating Decision D07."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B04-01",
+      "title": "محاسبه جمع احجام و نفرات در UI بر مبنای data.results صفحه جاری به جای کل Queryset فیلترشده",
+      "type": "Functional Defect / Math Inconsistency",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx",
+      "severity": "critical",
+      "evidence": "In project-activity-log.tsx L124-135, totals are calculated on rows = data?.results ?? []. For 51 records with pageSize 50, page 1 displays 50 and page 2 displays 1.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B04-02",
+      "title": "عدم ارائه آبجکت Aggregates/Totals روی کل کوئری‌ست توسط اندپوینت ActivityLogView",
+      "type": "Backend API Gap",
+      "component": "apps/api/core/field_reports/report_views.py",
+      "severity": "major",
+      "evidence": "ActivityLogView uses standard DRF ReportPagination returning only count, next, previous, results without whole-queryset totals.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B04-03",
+      "title": "فقدان فیلترهای دیسیپلین، پیمانکار و بلوک در فهرست گزارش‌های روزانه (UI و API)",
+      "type": "Functional & API Gap",
+      "component": "apps/web/src/app/routes/daily-reports-list.tsx & apps/api/core/field_reports/daily_report_views.py",
+      "severity": "major",
+      "evidence": "daily-reports-list.tsx only exposes date_from, date_to, status, missing discipline, contractor, block required by FR016.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B04-04",
+      "title": "اطلاق عنوان نادرست «نفر-روز» به جمع ساده سطرهای فعالیت در نوار سرجمع لاگ فعالیت",
+      "type": "Semantic / UI Defect",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx",
+      "severity": "minor",
+      "evidence": "Card header displays 'مجموع نفرات (نفر-روز)' violating Decision D07 which forbids equating raw headcount sums to person-days.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B04-05",
+      "title": "عدم انطباق دامنه داده فیلترشده بین نمایش وب و خروجی اکسل FILE 1",
+      "type": "Functional Inconsistency",
+      "component": "apps/web/src/app/routes/project-activity-log.tsx vs apps/api/core/field_reports/shiraz_file1_excel.py",
+      "severity": "major",
+      "evidence": "Excel exports all 51 filtered rows while UI summary only sums the 50 rows of current page.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B04-06",
+      "title": "احتمال اعمال مقادیر نسخه‌های غیرجاری و تاریخی در صورت باز بودن شروط فیلتر",
+      "type": "Data Integrity Gap",
+      "component": "apps/api/core/field_reports/activity_log.py",
+      "severity": "major",
+      "evidence": "Governance requirement E15 mandates isolating approved current versions from historical or revised drafts.",
+      "status": "open"
+    }
+  ],
+  "verificationSummary": "Requirement B04 currently fails acceptance criteria: UI summary aggregates over paginated 50-row pages instead of whole filtered queryset, causing 51 rows to drop to 1 row on page 2. Backend API lacks aggregate calculations, and daily reports list lacks required discipline/block/contractor filters."
+}

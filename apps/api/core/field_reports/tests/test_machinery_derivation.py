@@ -108,6 +108,26 @@ def test_stable_equipment_identity_is_aggregated_exactly_once(project, user):
 
 
 @pytest.mark.django_db
+def test_b03_conflicting_status_and_excess_hours_preserve_source_rows(project, user):
+    equipment = Equipment.objects.create(
+        project=project, equipment_code='EX-B03', equipment_name='Tracked machine',
+        equipment_type='excavator', created_by=user,
+    )
+    first = make_machinery_report(project, user, version_number=1)
+    second = make_machinery_report(project, user, version_number=2)
+    add_machinery(first, equipment_ref=equipment, status_active=1, operating_hours=Decimal('16'))
+    add_machinery(second, equipment_ref=equipment, status_active=0, status_ready=1, operating_hours=Decimal('12'))
+
+    summary = rebuild_daily_report_summary(project.id, SUMMARY_DATE, user=user)
+    equipment_total = summary.machinery_rows.get(equipment_ref=equipment)
+    assert equipment_total.status_total == 1
+    assert equipment_total.status_active == equipment_total.status_ready == 0
+    assert equipment_total.operating_hours is None
+    assert set(first.machinery_rows.values_list('operating_hours', flat=True)) == {Decimal('16')}
+    assert set(second.machinery_rows.values_list('operating_hours', flat=True)) == {Decimal('12')}
+
+
+@pytest.mark.django_db
 def test_type_only_rows_are_not_identity_deduped(project, user):
     report = make_machinery_report(project, user)
     add_machinery(report, status_total=1, status_active=1)

@@ -227,9 +227,13 @@ CORS_ALLOWED_ORIGINS = [
     ).split(',')
     if origin.strip()
 ]
+CORS_EXPOSE_HEADERS = ['Content-Disposition']
 
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@velora.local')
+MET_NORWAY_USER_AGENT = os.environ.get(
+    'MET_NORWAY_USER_AGENT', 'Velora/1.0 (+https://github.com/Itshossein128)',
+)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 # Feature 037: versioned unit sync stays off until an isolated test or rollout enables it.
 V2_OFFLINE_SYNC_ENABLED = os.environ.get('V2_OFFLINE_SYNC_ENABLED', 'false').lower() in ('1', 'true', 'yes')
@@ -411,3 +415,5 @@ CACHES = {
 RATELIMIT_USE_CACHE = 'default'
 RATELIMIT_ENABLE = True
 RATELIMIT_VIEW = 'authentication.ratelimit_handlers.ratelimit_view'
+
+DAILY_REPORT_EXCEL_RANGE_MAX_DAYS = int(os.environ.get('DAILY_REPORT_EXCEL_RANGE_MAX_DAYS', '31'))

@@ -1,0 +1,494 @@
+{
+  "is_synthetic_reference": true,
+  "project": {
+    "id": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+    "project_code": "SIM-A1-001",
+    "project_name": "[SYNTHETIC A.1 REFERENCE] کارگاه آزمایشی شیراز",
+    "start_date": "2027-05-11",
+    "latitude": "29.591800",
+    "longitude": "52.583700"
+  },
+  "report": {
+    "id": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+    "report_date": "2027-05-22",
+    "contract_version": "1.0.0",
+    "presentation_profile_code": "shiraz-34-32-v1",
+    "work_front": "قطعه نمونه B، بلوک ۱۲",
+    "is_auto_summary": true
+  },
+  "worked_shifts": [
+    {
+      "shift_id": 1,
+      "actual_duration_hours": "8.50"
+    },
+    {
+      "shift_id": 3,
+      "actual_duration_hours": null
+    }
+  ],
+  "activities": [
+    {
+      "activity_description": "بتن‌ریزی پی بلوک ۱۲",
+      "shift": "shift_1",
+      "quantity": "12.50",
+      "quantity_measured": true,
+      "unit": "m³",
+      "headcount": 8,
+      "source_discipline": "civil"
+    },
+    {
+      "activity_description": "خاکبرداری محل چاهک پس از توقف عملیات",
+      "shift": "shift_1",
+      "quantity": "0",
+      "quantity_measured": true,
+      "unit": "m³",
+      "headcount": 2,
+      "source_discipline": "civil"
+    },
+    {
+      "activity_description": "پرکردن ترانشه کانال تأسیسات",
+      "shift": "shift_1",
+      "quantity": "0.00",
+      "quantity_measured": true,
+      "unit": "m³",
+      "headcount": 4,
+      "source_discipline": "electrical"
+    },
+    {
+      "activity_description": "خاکریزی محوطه در دست بررسی",
+      "shift": "shift_3",
+      "quantity": null,
+      "quantity_measured": true,
+      "unit": "m³",
+      "headcount": 3,
+      "source_discipline": "civil"
+    },
+    {
+      "activity_description": "خاکریزی مسیر لوله آب بدون اندازه‌گیری",
+      "shift": "shift_3",
+      "quantity": null,
+      "quantity_measured": false,
+      "unit": "m³",
+      "headcount": 4,
+      "source_discipline": "mechanical"
+    }
+  ],
+  "labor": [
+    {
+      "labor_category": "indirect",
+      "job_title": "مدیرشعبه",
+      "shift_1_count": 1,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "معاونت فنی شعبه",
+      "shift_1_count": 4,
+      "shift_3_count": 2
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست کنترل پروژه",
+      "shift_1_count": 2,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کنترل کیفیت شعبه",
+      "shift_1_count": 0,
+      "shift_3_count": 1
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "مدیر مالی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "تدارکات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "مدیر پروژه",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست کارگاه",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "معاونت کارگاه",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست دفتر فنی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "برنامه‌ریزی و کنترل پروژه",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کارشناس دفتر فنی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست اجرا",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کارشناس اجرا",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "حسابداری",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "واحد مکانیک",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "واحد برق",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "اداری و مالی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کارمند اداری",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کنترل کیفیت",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست ایمنی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "کارشناس ایمنی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "انباردار",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "نقشه‌بردار",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "نگهبان روز و شب",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "خدمات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "تأسیسات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "مسئول ماشین‌آلات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "تکنسین اجرا",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "فناوری اطلاعات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سرپرست بچینگ",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "آزمایشگاه",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "مهمان",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "متفرقه ستادی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "کارگر ساده",
+      "shift_1_count": 1,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "کارگر ماهر",
+      "shift_1_count": 4,
+      "shift_3_count": 2
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "بنا",
+      "shift_1_count": 2,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "آرماتور بند و قالب بند",
+      "shift_1_count": 0,
+      "shift_3_count": 1
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اکیپ بتن‌ریزی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "جوشکار",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اکیپ حفاری",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "سرویس‌کار",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "متفرقه (تعمیرکار-برق‌کار)",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "پیمانکار برق و تأسیسات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "پلاستر کار",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "لوله‌کش تأسیسات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "نصاب تاور",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "داربست‌بند",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "نیروی انسانی ماشین‌آلات",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده بابکت",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده کامیون",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده لودر",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده بیل مکانیکی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده تراک میکسر",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده غلتک",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده بیل بکهو",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده جرثقیل",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده تانکر آب",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده گریدر",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اپراتور پمپ بتن",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اپراتور بچینگ",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اپراتور باسکول",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "کنترل‌چی عملیات خاکی",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "راننده سواری",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اپراتور دستگاه حفاری",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "اپراتور تاور",
+      "shift_1_count": 0,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "indirect",
+      "job_title": "سفارشی",
+      "custom_title": "هماهنگ‌کننده پایش کارگاه",
+      "shift_1_count": 1,
+      "shift_3_count": 0
+    },
+    {
+      "labor_category": "direct",
+      "job_title": "کمک راننده قدیمی",
+      "shift_1_count": 2,
+      "shift_3_count": 1
+    }
+  ],
+  "weather": {
+    "weather_condition": "clear",
+    "temp_min": "16.0",
+    "temp_max": "31.5",
+    "wind_speed": "12 km/h NW",
+    "soil_condition": "خشک / Dry"
+  }
+}

@@ -33,6 +33,7 @@ def sample_report_with_data(project, user):
         created_by=user,
         report_date=date(2025, 2, 2),
         shift=ReportShift.FULL,
+        presentation_profile_code='shiraz-34-32-v1',
         work_front='بلوک ۳۲ و ۳۳',
         weather_condition='clear',
         temp_min=Decimal('5.0'),
@@ -143,6 +144,53 @@ def sample_report_with_data(project, user):
 @pytest.mark.django_db
 class TestShirazFile4Excel:
 
+    def test_print_settings_and_whitespace_prefixed_user_text(self, sample_report_with_data):
+        activity = sample_report_with_data.activities.get()
+        activity.activity_description = '  =1+1\n' + 'عبارت نمونه with English text ' * 8
+        activity.save(update_fields=['activity_description'])
+        content, _ = ShirazFile4ExcelBuilder(sample_report_with_data).build()
+        ws = openpyxl.load_workbook(io.BytesIO(content)).active
+        assert str(ws.page_setup.paperSize) == ws.PAPERSIZE_A4
+        assert ws.page_setup.fitToWidth == 1 and ws.page_setup.fitToHeight == 0
+        assert ws.sheet_properties.pageSetUpPr.fitToPage is True
+        assert ws.print_area and ws.print_title_rows
+        cell = next(cell for row in ws for cell in row if cell.value == activity.activity_description)
+        assert cell.data_type == 's' and cell.alignment.wrap_text
+        assert ws.row_dimensions[cell.row].height > 15
+        assert any(cell.data_type == 'f' for row in ws for cell in row)
+
+    def test_selected_profile_places_fixed_blocks_side_by_side_and_keeps_appendix(self, sample_report_with_data):
+        report = sample_report_with_data
+        for contractor in ('First contractor', 'Second contractor'):
+            DailyReportLabor.objects.create(
+                report=report, job_title='Historical title', labor_category=LaborCategory.DIRECT,
+                contractor_name=contractor, shift_1_count=2, overtime_hours=Decimal('1.50'),
+            )
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazFile4ExcelBuilder(report).build()[0])).active
+        first_slots = {
+            cell.value: cell for row in ws for cell in row
+            if cell.value in (SHIRAZ_INDIRECT_ROLES[0], SHIRAZ_DIRECT_ROLES[0])
+        }
+        indirect = first_slots[SHIRAZ_INDIRECT_ROLES[0]]
+        direct = first_slots[SHIRAZ_DIRECT_ROLES[0]]
+        assert indirect.row == direct.row
+        assert indirect.column != direct.column
+        assert [ws.cell(indirect.row + index, indirect.column).value for index in range(34)] == SHIRAZ_INDIRECT_ROLES
+        assert [ws.cell(direct.row + index, direct.column).value for index in range(32)] == SHIRAZ_DIRECT_ROLES
+        appendix = [row for row in ws if any(cell.value == 'Historical title' for cell in row)]
+        assert len(appendix) == 2
+        for row, contractor in zip(appendix, ('First contractor', 'Second contractor')):
+            assert contractor in [cell.value for cell in row]
+            assert 1.5 in [cell.value for cell in row]
+
+    def test_no_shiraz_profile_preserves_project_titles_without_fixed_slots(self, sample_report_with_data):
+        report = sample_report_with_data
+        report.presentation_profile_code = ''
+        ws = openpyxl.load_workbook(io.BytesIO(ShirazFile4ExcelBuilder(report).build()[0])).active
+        values = [cell.value for row in ws for cell in row]
+        assert 'کارگر ساده' in values
+        assert SHIRAZ_INDIRECT_ROLES[0] not in values
+
     def test_user_text_is_literal_and_totals_remain_formulas(self, sample_report_with_data):
         report = sample_report_with_data
         activity = report.activities.get()
@@ -195,7 +243,7 @@ class TestShirazFile4Excel:
         hse = next(row for row in cells if 'حادثه در کارگاه' in row)
         assert visit[1] == 'بازدید مشاور'
         assert 'Test User' in barrier and '1403/11/20' in barrier
-        assert 'توقف و ایمن‌سازی' in hse and 'Major' in hse
+        assert 'توقف و ایمن‌سازی' in hse and 'شدید' in hse
         assert any('مرخصی' in row for row in cells)
 
     def test_export_preserves_real_header_and_derived_rows(self, sample_report_with_data):
@@ -221,9 +269,8 @@ class TestShirazFile4Excel:
         assert 'دستگاه تجمیعی' in text and 'فعالیت عمومی خاص' in text and 'مانع آزمایشی' in text
         assert 'جمع نفر-شیفت' in text
         assert 'جمع کل نفر-شیفت کارگاه' in text
-        rows = {row[1].value: row for row in ws.iter_rows() if len(row) > 2 and row[1].value in ('کارگر ساده', 'عنوان سفارشی')}
-        assert rows['کارگر ساده'][2].value == 19
-        assert rows['عنوان سفارشی'][2].value == 7
+        assert next(cell for row in ws for cell in row if cell.value == 'کارگر ساده').offset(column=1).value == 19
+        assert next(cell for row in ws for cell in row if cell.value == 'عنوان سفارشی').offset(column=1).value == 7
         machine = next(row for row in ws.iter_rows() if len(row) > 1 and row[1].value == 'دستگاه تجمیعی')
         assert [c.value for c in machine[2:7]] == [3, 2, 0, 0, 1]
 
@@ -278,10 +325,11 @@ class TestShirazFile4Excel:
         )
         raw, _ = ShirazFile4ExcelBuilder(sample_report_with_data).build()
         ws = openpyxl.load_workbook(io.BytesIO(raw), data_only=False).active
-        rows = {row[1].value: row for row in ws.iter_rows() if len(row) > 6 and row[1].value in ('مدیرشعبه', 'کارگر ماهر')}
-        assert [c.value for c in rows['مدیرشعبه'][2:7]] == [None, None, None, None, None]
-        assert [c.value for c in rows['کارگر ماهر'][2:6]] == [0, 0, 0, 0]
-        assert rows['کارگر ماهر'][6].value.startswith('=SUM(')
+        staff = next(cell for row in ws for cell in row if cell.value == 'مدیرشعبه')
+        worker = next(cell for row in ws for cell in row if cell.value == 'کارگر ماهر')
+        assert [staff.offset(column=col).value for col in range(1, 6)] == [None] * 5
+        assert [worker.offset(column=col).value for col in range(1, 5)] == [0] * 4
+        assert worker.offset(column=5).data_type == 'f'
 
     def test_auto_summary_warns_when_completeness_unknown(self, sample_report_with_data):
         report = sample_report_with_data

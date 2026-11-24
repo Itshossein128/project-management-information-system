@@ -127,3 +127,37 @@ class TestConcreteContract:
 
 def VOLUME(excinfo):
     return excinfo.value.field_errors('volume_m3')
+
+
+@pytest.mark.parametrize('volume', ['0', '-1'])
+def test_b03_daily_concrete_serializer_requires_positive_volume(volume):
+    from field_reports.serializers import DailyReportConcreteLogSerializer
+
+    serializer = DailyReportConcreteLogSerializer(data={'concrete_description': 'Sample pour', 'volume_m3': volume})
+    assert not serializer.is_valid()
+    assert serializer.errors['volume_m3'][0].code == 'min_value'
+
+
+@pytest.mark.django_db
+def test_b03_concrete_details_keep_sample_code_and_count_separate_from_sheet_number(auth_client, project, user):
+    from field_reports.models import DailyReport
+
+    report = DailyReport.objects.create(project=project, report_date=REPORT_DATE, created_by=user)
+    pour = DailyReportConcreteLog.objects.create(
+        report=report, concrete_description='C30 slab', volume_m3=Decimal('12.5'),
+        sampling_state=SamplingState.SAMPLING_DECLARED, lab_sample_code='LAB-11', test_sheet_count=3,
+        batching_plant='Plant North',
+    )
+    data = auth_client.get(f'/api/v1/projects/{project.pk}/daily-reports/{report.pk}/').data
+    result = data['concrete_logs'][0]
+    assert result['sampling_state'] == 'sampling_declared'
+    assert result['lab_sample_code'] == 'LAB-11'
+    assert result['test_sheet_count'] == 3
+    assert result['qc_details']['lab_sheet_number'] is None
+    assert result['qc_details']['result_28_day_href'] is None
+    assert result['qc_details']['batching_plant'] == 'Plant North'
+    for state in (SamplingState.NOT_SAMPLED, ''):
+        pour.sampling_state = state
+        pour.save(update_fields=['sampling_state'])
+        data = auth_client.get(f'/api/v1/projects/{project.pk}/daily-reports/{report.pk}/').data
+        assert data['concrete_logs'][0]['sampling_state'] == state

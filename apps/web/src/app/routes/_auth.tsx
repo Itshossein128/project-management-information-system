@@ -11,7 +11,7 @@ export async function loader({ request }: { request: Request }) {
   // Server: auth_token cookie for SSR document requests.
   if (!hasLoaderAuth(request)) {
     const url = new URL(request.url);
-    throw redirect(`/login?redirectTo=${encodeURIComponent(url.pathname)}`);
+    throw redirect(`/login?redirectTo=${encodeURIComponent(`${url.pathname}${url.search}`)}`);
   }
   return {};
 }

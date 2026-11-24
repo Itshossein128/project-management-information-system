@@ -6,7 +6,7 @@
 این درخواست فقط نگارش specification برای همین زیرمرحله است. طبق قالب فعال SpecKit یک feature specification و checklist کیفیت مستقل تولید کن و سپس متوقف شو؛ plan، tasks، analyze، implement، تست محصول، استقرار و اجرای مرحله بعد مجاز نشده‌اند. خروجی حاضرِ Stage 2 صرفاً ورودی specify است.
 
 ورودی workflow اصلی (عین متن):
-Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through B06 from /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
+Go for the next step to deliver the application, based on A.1 phase in http://localhost:5173/delivery-plan
 
 ریشه پروژه: /home/hossein/Desktop/projects/building-management
 منبع مرحلهٔ ۱: /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
@@ -15,7 +15,7 @@ Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through
 قواعد نگارش:
 - چه چیزی و چرا، نقش‌ها، ارزش کاربر، دامنه/غیردامنه، سناریوهای Given/When/Then و شکست/لبه، نیازمندی‌های قابل آزمون، معیارهای موفقیت قابل اندازه‌گیری، وابستگی و تصمیم‌های باز را در spec بنویس. فناوری/ساختار کد را راه‌حل اجباری نکن. نام API/مدل در شواهد فقط نشانی رفتار فعلی است.
 - شناسه‌های H/D/W/E/Q/X و C و US و path:line بندها را به FR/SC و سناریوهای spec وصل کن؛ برای هر بند disposition صریحِ حفظ رفتار، رفع شکاف، تصمیم شرطی یا ارجاع فاز دیگر بده. نگاشت داستان به گروه به معنی اجرای تمام سناریوهای آن نیست؛ اختلاف‌ها را در سطح معیار بررسی کن.
-- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن.
+- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن. وضعیت‌ها و تصمیم‌های نقل‌شده از ممیزی پایه تاریخی‌اند؛ برای رفتار جاری، قرارداد نسخه‌دار و شواهد تاریخ‌دار پایین را بررسی کن.
 - تصمیم باز را به کارفرما نسبت نده؛ پیشنهاد، تصمیم مصوب و رفتار مشاهده‌شده جدا باشند. C01..C10 را با متن منبع حفظ کن؛ اثرگذاری تصمیم باید پیش از کار وابسته رفع شود. برای پنهان‌کردن ابهام مادی default نساز. حداکثر۳ سؤال بحرانی هر دور؛ باقی موارد در رجیستر باز باقی بمانند.
 - هسته روزانه، موتور تجمیع، صفحات واحد، workflow و خروجی‌های موجود را بی‌دلیل از نو تعریف نکن. کل عملیات/آفلاین/منابع A.8، ارتباطات A.3.C، گزارش‌های دوره‌ای A.10 و استقرار/آموزش جامع A.12 در مالک خود باقی‌اند؛ اثر خراب‌کننده آن‌ها بر A.1 قابل چشم‌پوشی نیست. قرارداد دامنه B01 هر توسعه شرطی را به مالک مشخص می‌رساند.
 - پیش از ایجاد feature، مسیر/شماره آزاد را با وضعیت واقعی specs انتخاب کن؛ مسیر اشغال‌شده را بازنویسی نکن. شناسه B بسته ثابت است و feature-number نیست. یک feature در هر فراخوانی؛ شماره از پیش تحمیل نشده است.
@@ -39,6 +39,42 @@ granularity کل A.1: multi؛ granularity این فراخوانی: single.
 - fixture حداقل ۵۱ ردیف، page_size=50، دو واحد اندازه‌گیری، مقدار نامعلوم، دو نسخه approved و دو پیمانکار با شغل هم‌نام داشته باشد. count=51 و جمع کامل ۵۱ در مثال واحدِ کنترل‌شده، مستقل از صفحه باقی بماند؛ Excel همه نتیجه را بدهد.
 - معیار اتمیک US-EX-04 برای فیلتر زیر یک ثانیه روی داده/محیط مستند، و بازیابی فیلتر برای عضو مجاز دیگر ردیابی شود؛ اگر با قرارداد جاری تعارض دارد حل مصوب ثبت شود، نه حذف خاموش.
 پایان قابل آزمون: صفحه، aggregate، URL و خروجی یک دامنه داده داشته باشند؛ سهم E15 با گیت B02 بازآزمایی شود.
+
+در تحویل‌نامه، DEF-B04-06 به ناوبری URL اشاره می‌کند؛ در جدول و JSON محلی همین شناسه به ورود نسخه تاریخی اشاره دارد. هر دو سناریو لازم‌اند. ناوبری ذیل DEF-B04-03 و ریسک نسخه تاریخی با B02 پوشش داده شود. جدول محلی برای شرح DEF-B04-02/04/05 مبناست و مقادیر اندازه‌گیری‌نشده و واحدها ذیل DEF-B04-02 آزموده شوند.
+
+Current Stage 1 package evidence (2026-11-22)
+- QA verdict for B04: qa_passed. Existing specification, regression and handoff baseline. Adopt its current scope and use existing QA evidence. If specify is invoked for a material residual gap, scope that gap against the existing spec.
+- Reports: output/a1-requirements-2026-11-22-stage1-b04-qa-findings.md and output/a1-requirements-2026-11-22-stage1-b04-qa-findings.json.
+- The historical blocks below retain the baseline, prior verdicts, and original defect meanings. Use the dated package reports for their tested scopes and the published contract for decisions and deliverable IDs. Stage 2 did not run product QA.
+- Use specs/060-a1-b04-filters-totals as the baseline. Under FR-001 one eligible source activity row must satisfy all selected discipline, contractor and block dimensions. Include a split-row exclusion case. Preserve all-results FILE 1 and totals across pagination, role/project scope, bilingual URL restoration and zero versus unset. Reconcile any older DEF-B04-06 variants by scenario and target evidence.
+- DEF-B04-01 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B04-02 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B04-03 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B04-04 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B04-05 — reported resolved in current QA; preserve as regression coverage.
+
+ردیابی QA مرحله ۱.۲ (2026-11-19)
+اقلام رسمی تحویل: A.1.03
+معیار بسته در کشف مرحله ۱: صفحه، aggregate، URL، pagination و Excel export از یک دامنه داده استفاده کنند؛ فیلترهای الزامی کامل و project-isolated باشند؛ جمع ۵۱ ردیف مستقل از صفحه ۵۰تایی، ۵۱ بماند.
+منابع گزارش: output/a1-requirements-2026-11-19-stage1-b04-qa-findings.md و output/a1-requirements-2026-11-19-stage1-b04-qa-findings.json. خلاصه قابل حمل در coverage.json ثبت شده است.
+برای هر شناسه زیر معیار سنجش یا تصمیم دامنه ثبت کن. qa_failed وضعیت گزارش قبلی است. یافته احتمالی، نبود شاهد، بازتولید تاریخی و تصمیم باز را با هم یکی نگیر.
+- DEF-B04-01 — روی داده ۵۱ ردیفی، تغییر صفحه ۵۰/۱، جمع کل را تغییر ندهد.
+- DEF-B04-02 — پاسخ فهرست امکان نمایش جمع تمام نتایج فیلترشده را مستقل از صفحه بدهد و واحدها و null/zero را تفکیک کند.
+- DEF-B04-03 — فیلتر دیسیپلین، پیمانکار و بلوک همراه با دیگر ابعاد مصوب در UI/API/URL هم‌معنا باشند. reload، لینک و back/forward پوشش داده شوند.
+- DEF-B04-04 — جمع نفرات سطرها با برچسب منطبق بر D07 نمایش داده شود.
+- DEF-B04-05 — FILE1 و فهرست بر دامنه یکسان فیلترشده و مجاز منطبق باشند.
+- DEF-B04-06 — ریسک گزارش‌شده را با قرارداد B02 بررسی کن. فیلتر عملیاتی نباید نسخه تاریخی را دوباره وارد نتیجه یا جمع کند.
+
+Historical Stage 1 evidence (2026-11-21, retained for regression traceability)
+- QA verdict for B04: qa_failed. Acceptance criterion: API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.
+- Source reports: output/a1-requirements-2026-11-21-stage1-b04-qa-findings.md and output/a1-requirements-2026-11-21-stage1-b04-qa-findings.json.
+- Use the 2026-11-19 entries and baseline audit below as traceability and regression evidence. Use the newer package-specific report for its stated technical scope. Reconcile any disagreement by scope and tested build before relying on it. Existing specs are the first place to carry forward verified behavior and identify residual gaps.
+- Use specs/060-a1-b04-filters-totals as the baseline. The 51-row fixture must yield the same full totals on both pages and the same logical rows in FILE1. Require server-wide aggregates for the authorized filtered set, discipline/block/contractor filters with clear multi-unit matching, separate measured zero from unknown, and label raw row sums without man-days or unique-person claims.
+- DEF-B04-01 — Client-side aggregation on page slice instead of whole queryset
+- DEF-B04-02 — Missing whole-queryset totals/aggregates payload in ActivityLogView API
+- DEF-B04-03 — Missing discipline, block, and contractor filters on Daily Reports list
+- DEF-B04-04 — Collapsing unset/unmeasured quantities into numeric zero
+- DEF-B04-05 — Misleading man-days labeling for raw headcount row sum
 
 متن بسته مرحلهٔ ۱، عیناً برای حفظ دامنه:
 ## B04 — فیلترها، مجموعه نتیجه و جمع قابل اتکا

@@ -96,11 +96,69 @@ for src in c['source_manifest']:
 assert c['summary']['unmapped'] == []
 assert c['summary']['implementation_coverage_percent'] is None
 assert c['summary']['employer_acceptance'] == 'not_performed'
+assert set(c['formal_work_items']) == {f'A.1.{i:02}' for i in range(1, 5)}
+assert set().union(*map(set, c['formal_work_items'].values())) == set(order)
+assert [r['id'] for r in c['stage1_snapshot']['discovery']['requirements']] == order
+assert [p['package'] for p in c['qa_packages']] == order
+qa_ids = set()
+for package in c['qa_packages']:
+    stage = stages[package['package']]
+    assert package['prompt_file'] == stage['prompt_file']
+    prompt = (HERE / stage['prompt_file']).read_text()
+    rows = package['defects']
+    ids = [row['id'] for row in rows]
+    assert len(ids) == len(set(ids))
+    for row in rows:
+        assert row['id'].startswith(f"DEF-{package['package']}-")
+        assert row['id'] not in qa_ids
+        qa_ids.add(row['id'])
+        assert row['specification_check'] in prompt
+    source_ids = set()
+    sources_present = True
+    for source in package['source_files']:
+        path = ROOT / source['path']
+        if not path.is_file():
+            sources_present = False
+            continue
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == source['sha256'], path
+        if path.suffix == '.md':
+            source_ids.update(re.findall(rf"DEF-{package['package']}-\d+", path.read_text()))
+        if path.suffix == '.json':
+            report = read(path)
+            assert report['qaStatus'] == package['reported_qa_status']
+            defects = report['defects']
+            source_ids.update(d['id'] if isinstance(d, dict) else d.split(': ', 1)[0] for d in defects)
+    assert source_ids <= set(ids), package['package']
+    if sources_present:
+        assert source_ids == set(ids), package['package']
+assert len(qa_ids) == 36
+assert c['summary']['qa_defect_traceability'] == {'mapped': 36, 'total': 36, 'percent': 100}
+latest = c['latest_qa_packages']
+assert [p['package'] for p in latest] == order
+assert [p['reported_qa_status'] for p in latest] == ['qa_passed'] * 4 + ['qa_failed'] * 2
+latest_count = 0
+for entry in latest:
+    report = read(ROOT / next(s['path'] for s in entry['source_files'] if s['path'].endswith('.json')))
+    assert report['qaStatus'] == entry['reported_qa_status']
+    assert report['defects'] == entry['defects']
+    assert report.get('resolvedDefects', []) == entry['reported_resolved_defects']
+    prompt = (HERE / entry['prompt_file']).read_text()
+    assert entry['specification_check'] in prompt
+    for defect in entry['reported_resolved_defects']:
+        defect_id = defect['id'] if isinstance(defect, dict) else defect
+        assert f'{defect_id} — reported resolved in current QA' in prompt
+    assert stages[entry['package']]['reported_qa_status'] == entry['reported_qa_status']
+    for defect in entry['defects']:
+        assert defect['id'] in prompt and defect.get('title', defect.get('summary')) in prompt
+        latest_count += 1
+assert c['summary']['latest_qa_defect_traceability'] == {'mapped': latest_count, 'total': 11, 'percent': 100}
+assert c['recommended_next_stage'] == next(p['package'] for p in latest if p['reported_qa_status'] == 'qa_failed')
+assert c['summary']['current_qa_reported_resolved'] == sum(len(p['reported_resolved_defects']) for p in latest)
 combined = (HERE / 'all-prompts.md').read_text()
 for s in c['stages']:
     assert (HERE / s['prompt_file']).read_text() in combined
 for f in CANON.iterdir():
     if f.is_file():
         assert (MIRROR / f.name).read_bytes() == f.read_bytes(), f.name
-print('PASS: 6 ordered prompts; 61/61 groups; 370/370 clauses; 42/42 stories; 10/10 decisions; 18 sections; 6 gap routes; exact source text; source hashes; identical mirror.')
+print('PASS: 6 ordered prompts; 61/61 groups; 370/370 clauses; 42/42 stories; 10/10 decisions; 18 sections; 6 gap routes; 4 formal work items; 36/36 historical and 11/11 current open QA findings; exact source text; source hashes; identical mirror.')
 print('Coverage is prompt traceability only. Product tests and employer acceptance were not run.')

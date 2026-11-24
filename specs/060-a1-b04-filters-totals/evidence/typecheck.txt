@@ -1,0 +1,8 @@
+
+> building-management@ typecheck /home/hossein/Desktop/projects/building-management
+> pnpm --filter web typecheck
+
+
+> web@ typecheck /home/hossein/Desktop/projects/building-management/apps/web
+> react-router typegen && tsc
+

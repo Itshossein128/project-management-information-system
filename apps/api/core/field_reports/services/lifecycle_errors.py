@@ -46,6 +46,14 @@ LIFECYCLE_MESSAGES = {
         'fa': 'نسخه مبنای اصلاح قابل بازگردانی نیست',
         'en': 'Base report cannot be restored.',
     },
+    'report_not_current': {'fa': 'نسخه گزارش جاری نیست', 'en': 'Report is not the current version.'},
+    'historical_rebuild_rejected': {'fa': 'بازسازی نسخه تاریخی مجاز نیست', 'en': 'Historical report versions cannot be rebuilt.'},
+    'rebuild_target_deleted': {'fa': 'گزارش حذف شده قابل بازسازی نیست', 'en': 'Deleted reports cannot be rebuilt.'},
+    'report_not_editable': {'fa': 'گزارش در وضعیت قابل ویرایش نیست', 'en': 'Report is not in an editable state.'},
+    'report_locked': {'fa': 'گزارش قفل شده است', 'en': 'Report is locked.'},
+    'derived_collection_read_only': {'fa': 'ردیف‌های مشتق‌شده فقط‌خواندنی هستند', 'en': 'Derived rows are read-only.'},
+    'derived_readonly': {'fa': 'ردیف‌های مشتق‌شده فقط‌خواندنی هستند', 'en': 'Derived rows are read-only.'},
+    'sod_self_approval_forbidden': {'fa': 'ثبت‌کننده گزارش نمی‌تواند آن را تأیید کند', 'en': 'The submitter cannot approve their own report.'},
 }
 
 

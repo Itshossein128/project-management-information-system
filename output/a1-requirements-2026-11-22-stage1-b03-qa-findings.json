@@ -1,0 +1,46 @@
+{
+  "requirementId": "B03",
+  "title": "Reference-form parity",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-22T20:13:30+03:30",
+  "acceptanceCriteria": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form.",
+  "qaStatus": "qa_passed",
+  "verdict": "passed",
+  "personasEvaluated": [
+    {
+      "persona": "Site Engineer / Technical Office",
+      "summary": "Verified dynamic worked shift hours in row 4 of FILE 4 Excel, side-by-side direct/indirect manpower layout starting at row 6, dynamic row height wrapping for long Persian notes, and literalized formula-injection text."
+    },
+    {
+      "persona": "Consultant / Resident Inspector",
+      "summary": "Verified authentic legal roles, organizational titles, and Tehran timestamps on PDF signature block, along with full-page diagonal draft watermark on all non-approved pages and clean omission on approved reports."
+    },
+    {
+      "persona": "Discipline Lead & Quality Control Engineer",
+      "summary": "Verified concrete pour details (batching plant, transit mixer ID, slump test, sample ID), Persian HSE incident categories, and isolated discipline sub-reports (FILE 5 Civil, FILE 6 Electrical, and unit PDFs)."
+    },
+    {
+      "persona": "Project Manager / Auditor",
+      "summary": "Verified multi-sheet range export enforcing chronological order, 31-day limit, and standard A4 landscape print settings with repeated title rows across daily and sub-report sheets."
+    }
+  ],
+  "defects": [],
+  "resolvedDefects": [
+    "DEF-B03-01",
+    "DEF-B03-02",
+    "DEF-B03-03",
+    "DEF-B03-04",
+    "DEF-B03-05",
+    "DEF-B03-06",
+    "DEF-B03-07",
+    "DEF-B03-08"
+  ],
+  "deliverablesVerified": [
+    "DEL-01 (FILE 4 Shiraz Parity Daily Excel)",
+    "DEL-02 (Bilingual Daily Summary PDF)",
+    "DEL-03 (Discipline Sub-Reports FILE 5, FILE 6, Unit PDFs)",
+    "DEL-04 (Date-Range Multi-Sheet Workbook)"
+  ],
+  "verificationSummary": "Requirement B03 meets acceptance criteria for reference-form parity. All 8 historical QA defects are resolved across DEL-01 through DEL-04. Frontend typechecks pass with 0 errors, live servers respond at http://localhost:5173 and http://localhost:8000/api/docs/, and comprehensive parity suites validate Excel, PDF, printing, watermark, timezone, and layout contracts."
+}

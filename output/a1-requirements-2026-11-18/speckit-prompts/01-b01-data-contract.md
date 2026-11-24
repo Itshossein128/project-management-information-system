@@ -6,7 +6,7 @@
 این درخواست فقط نگارش specification برای همین زیرمرحله است. طبق قالب فعال SpecKit یک feature specification و checklist کیفیت مستقل تولید کن و سپس متوقف شو؛ plan، tasks، analyze، implement، تست محصول، استقرار و اجرای مرحله بعد مجاز نشده‌اند. خروجی حاضرِ Stage 2 صرفاً ورودی specify است.
 
 ورودی workflow اصلی (عین متن):
-Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through B06 from /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
+Go for the next step to deliver the application, based on A.1 phase in http://localhost:5173/delivery-plan
 
 ریشه پروژه: /home/hossein/Desktop/projects/building-management
 منبع مرحلهٔ ۱: /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
@@ -15,7 +15,7 @@ Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through
 قواعد نگارش:
 - چه چیزی و چرا، نقش‌ها، ارزش کاربر، دامنه/غیردامنه، سناریوهای Given/When/Then و شکست/لبه، نیازمندی‌های قابل آزمون، معیارهای موفقیت قابل اندازه‌گیری، وابستگی و تصمیم‌های باز را در spec بنویس. فناوری/ساختار کد را راه‌حل اجباری نکن. نام API/مدل در شواهد فقط نشانی رفتار فعلی است.
 - شناسه‌های H/D/W/E/Q/X و C و US و path:line بندها را به FR/SC و سناریوهای spec وصل کن؛ برای هر بند disposition صریحِ حفظ رفتار، رفع شکاف، تصمیم شرطی یا ارجاع فاز دیگر بده. نگاشت داستان به گروه به معنی اجرای تمام سناریوهای آن نیست؛ اختلاف‌ها را در سطح معیار بررسی کن.
-- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن.
+- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن. وضعیت‌ها و تصمیم‌های نقل‌شده از ممیزی پایه تاریخی‌اند؛ برای رفتار جاری، قرارداد نسخه‌دار و شواهد تاریخ‌دار پایین را بررسی کن.
 - تصمیم باز را به کارفرما نسبت نده؛ پیشنهاد، تصمیم مصوب و رفتار مشاهده‌شده جدا باشند. C01..C10 را با متن منبع حفظ کن؛ اثرگذاری تصمیم باید پیش از کار وابسته رفع شود. برای پنهان‌کردن ابهام مادی default نساز. حداکثر۳ سؤال بحرانی هر دور؛ باقی موارد در رجیستر باز باقی بمانند.
 - هسته روزانه، موتور تجمیع، صفحات واحد، workflow و خروجی‌های موجود را بی‌دلیل از نو تعریف نکن. کل عملیات/آفلاین/منابع A.8، ارتباطات A.3.C، گزارش‌های دوره‌ای A.10 و استقرار/آموزش جامع A.12 در مالک خود باقی‌اند؛ اثر خراب‌کننده آن‌ها بر A.1 قابل چشم‌پوشی نیست. قرارداد دامنه B01 هر توسعه شرطی را به مالک مشخص می‌رساند.
 - پیش از ایجاد feature، مسیر/شماره آزاد را با وضعیت واقعی specs انتخاب کن؛ مسیر اشغال‌شده را بازنویسی نکن. شناسه B بسته ثابت است و feature-number نیست. یک feature در هر فراخوانی؛ شماره از پیش تحمیل نشده است.
@@ -38,6 +38,30 @@ granularity کل A.1: multi؛ granularity این فراخوانی: single.
 - C09 و C10 را نیز حفظ کن: وضعیت منابع submitted/approved مستقل از خلاصه است؛ پایان A.1 جای پذیرش ارتباطات، گزارش دوره‌ای، آفلاین یا کل عملیات را نمی‌گیرد.
 - تصمیم‌ها را می‌توان در چند دور clarification (حداکثر سه سؤال بحرانی در هر دور) روشن کرد؛ برای رعایت سقف سؤال، هیچ تصمیم مادی باقی‌مانده را حدس نزن یا حذف نکن. تا قرارداد مؤثر باز است آمادگی plan/پیاده‌سازی وابسته را اعلام نکن.
 پایان قابل آزمون: ۱۰۰٪ فیلدهای الزامی mapping مستقل دارند و C01..C08 به‌علاوه اثر C09/C10 در قرارداد ثبت‌اند؛ هیچ تصمیم باز مؤثر بر خروجی رسمی به‌عنوان حل‌شده نمایش داده نشده است.
+
+Current Stage 1 package evidence (2026-11-22)
+- QA verdict for B01: qa_passed. Existing specification, regression and handoff baseline. Adopt its current scope and use existing QA evidence. If specify is invoked for a material residual gap, scope that gap against the existing spec.
+- Reports: output/a1-requirements-2026-11-22-stage1-b01-qa-findings.md and output/a1-requirements-2026-11-22-stage1-b01-qa-findings.json.
+- The historical blocks below retain the baseline, prior verdicts, and original defect meanings. Use the dated package reports for their tested scopes and the published contract for decisions and deliverable IDs. Stage 2 did not run product QA.
+- Use specs/057-a1-b01-data-contract and published contract v1.0.0 (shiraz-file4-v1) as the baseline. Preserve all 128 mappings and 18 sections, idempotent synthetic SIM-A1-001 (1406-03-01 / 2027-05-22), measured zero, unknowns, and GOV-01. C01–C02 are recorded baselines, C03–C08 are ratified, and C09–C10 are preserved boundaries or behaviors. Carry the recorded decisions forward. Employer representative and date are pending B06.
+
+ردیابی QA مرحله ۱.۲ (2026-11-19)
+اقلام رسمی تحویل: A.1.01, A.1.02
+معیار بسته در کشف مرحله ۱: روز مرجع کامل و هر ۱۸ بخش broader-daily-sections نگاشت نسخه‌دار و قابل بازبینی داشته باشد؛ تصمیم‌های C01 تا C08 ثبت و هیچ ابهام اثرگذار بر خروجی رسمی باز نماند.
+منابع گزارش: output/a1-requirements-2026-11-19-stage1-b01-qa-findings.md و output/a1-requirements-2026-11-19-stage1-b01-qa-findings.json. خلاصه قابل حمل در coverage.json ثبت شده است.
+برای هر شناسه زیر معیار سنجش یا تصمیم دامنه ثبت کن. qa_failed وضعیت گزارش قبلی است. یافته احتمالی، نبود شاهد، بازتولید تاریخی و تصمیم باز را با هم یکی نگیر.
+- DEF-B01-01 — الزام و منبع معتبر شماره رسمی گزارش و روز پروژه را با C08 ثبت کن. داده ساختگی پذیرفتنی نیست.
+- DEF-B01-02 — واحد منطقی گزارش، شناسه و مدت واقعی شیفت و نگاشت هدر/فعالیت/by-date را با C03 ببند.
+- DEF-B01-03 — سرجمع نفرات، نفرشیفت و نفرساعت را با پیش‌شرط‌های حضور یکتا و مدت معتبر تعریف کن. B03/B04 مصرف‌کننده‌اند.
+- DEF-B01-04 — پروفایل ۳۴/۳۲ و جایگاه عنوان سفارشی/تاریخی را به C04 و تأیید B01 مشروط کن.
+- DEF-B01-05 — وضعیت زمین/باد موجود در WeatherLog و پیش‌بینی را با منبع، ضرورت و نحوه نمایش طبق C08 تعیین کن.
+- DEF-B01-06 — C01..C08 را تعیین تکلیف کن، C09/C10 را حفظ کن و برای هر ۱۸ بخش جایگاه چاپ، جزئیات یا فاز مالک را ثبت کن.
+
+Historical Stage 1 evidence (2026-11-21, retained for regression traceability)
+- QA verdict for B01: qa_passed. Acceptance criterion: Independently map every required field and complete reference day; resolve C01-C08 decisions affecting official output.
+- Source reports: output/a1-requirements-2026-11-21-stage1-b01-qa-findings.md and output/a1-requirements-2026-11-21-stage1-b01-qa-findings.json.
+- Use the 2026-11-19 entries and baseline audit below as traceability and regression evidence. Use the newer package-specific report for its stated technical scope. Reconcile any disagreement by scope and tested build before relying on it. Existing specs are the first place to carry forward verified behavior and identify residual gaps.
+- Use specs/057-a1-b01-data-contract as the baseline. QA reports 11 passing tests and a versioned fixture contract covering all 18 sections and C01–C08/GOV-01. Preserve SIM-A1-001 as a synthetic fixture. Record any employer decision or real reference-day evidence still needed for official delivery.
 
 متن بسته مرحلهٔ ۱، عیناً برای حفظ دامنه:
 ## B01 — بستن قرارداد داده و نمونه آزمون

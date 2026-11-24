@@ -1,0 +1,37 @@
+# A.1 / B04 implementation evidence
+
+## Candidate and environment
+
+The local Stage 4.2 candidate is based on `develop` at `63a95a0ece1573d494b0abe565aa705f0a528c0d`. The [candidate manifest](evidence/candidate.json) records its source digest and synthetic fixture identifiers. The digest covers the sorted Git-visible Python, TypeScript and JSON files under the API and web source roots and the B04 browser fixtures and suite. It includes existing B01–B03 workspace changes on which B04 depends.
+
+The isolated API used Django 4.2.11, PostgreSQL 16 on port 5433 in database `velora_b04_stage42`, and a dedicated Redis instance on port 16384. The browser ran Chromium desktop 153.0.8010.12 against React Router 7 on loopback ports 15184 and 18084. Pytest used `test_velora_b04_checks` with the suite's isolated cache. No service credentials are in the evidence.
+
+The browser fixture is project `B04-UAT`. The equivalent members are `b04-viewer-1` and `b04-viewer-2`. `b04-no-reports` is a member with project access only. `b04-other-project` belongs to the other project. `b04-author` and `b04-approver` are separate lifecycle actors. Use the [quickstart](quickstart.md) to recreate them.
+
+Spec Kit resolved all prerequisites and the requirements checklist passed 16/16. The original knowledge lookup reported staleness. The local hybrid index refresh succeeded, while lookups during concurrent artifact edits still reported staleness. The implementation decisions use the approved B01 and B04 artifacts and verified repository source.
+
+## Executed checks
+
+- Pre-change scoped activity, FILE1, B01 and B02 baseline. **48 passed**. The US1 regression reproduced ignored dimensions and unrestricted results from a foreign contractor ID. US2 reproduced missing contractor identity and ignored contractor filtering, and US3 reproduced the missing aggregate payload.
+- Final PostgreSQL pytest run. **110 passed** across B01/B02, B04, activity caching, FILE1, FILE4, individual PDF parity and daily report permissions. B02 and FILE1 fixtures that expected measured numeric amounts now supply the required unit. [Backend command result](evidence/backend-verified.txt)
+- Frontend typecheck. **Passed**. [Typecheck output](evidence/typecheck.txt)
+- Authenticated Chromium acceptance for daily list and Activity Log in FA/RTL and EN/LTR. **Five passed** including the signed-in authorization case. An earlier repeated run reached the existing login throttle. The passing run reused signed-in actors within the test worker and kept the two viewer browser contexts independent. [Browser output](evidence/browser-acceptance.txt)
+- Read-only schema checks. `manage.py makemigrations --check --dry-run field_reports` detected no changes and `manage.py migrate --plan` found no planned operations. The workspace-wide dry run proposed the existing `storage.StoredFile.source` migration drift. The B04 change does not modify storage models or migrations. [App migration check](evidence/field-report-migrations.txt) · [Database migration plan](evidence/migration-plan.txt)
+- Scoped SQL counts with Django's query capture, including authorization, middleware and transactions. The API recorded 22 statements per cold activity page, 16 for a warm page, 24 for options, 17 for FILE1 and 23 for the filtered daily list. The two pages and the warm read retained identical totals. [Query evidence](evidence/query-counts.json)
+
+The backend command ran `pytest -q --reuse-db` from `apps/api/core` on `test_a1_b01_data_contract.py`, `test_a1_b02_version_integrity.py`, `test_a1_b04_filters_totals.py`, `test_activity_log_sync.py`, `test_shiraz_file1_excel.py`, `test_shiraz_file4_excel.py`, `test_pdf_summary_parity.py`, `test_pdf_signatures_watermark.py` and `test_daily_report_summary_permissions.py` under `field_reports/tests/`. The frontend commands and fixture environment are in the [quickstart](quickstart.md).
+
+## Acceptance criteria
+
+- **SC-001 passed.** The daily list includes the summary with two qualifying source rows once and excludes the split-row and deleted-row summaries. The sourced projection case covers the unit and department activity records and verifies their version-bound provenance. A department row without a recorded block cannot satisfy a block selection. Both routes restored filters, page and identities on reload, copied links and Back/Forward in FA and EN. The no-report member and the cross-project account received HTTP 403 on the activity list, both option aliases and FILE1 even after warming the selection with an authorized account. Invalid and foreign IDs could not broaden the filtered results.
+- **SC-002 passed.** The activity fixture dated 2027-04-01 yielded 50 rows and one row on its two pages. Both exposed 51 matches, a row headcount sum of 51, 45 m² and 25 m³. All four downloaded FILE1 workbooks matched the independent 51-row manifest, retained the reference columns and used `SUM(F2:F52)` for headcount. [FA page 1](evidence/file1-fa-page-1.xlsx) · [FA page 2](evidence/file1-fa-page-2.xlsx) · [EN page 1](evidence/file1-en-page-1.xlsx) · [EN page 2](evidence/file1-en-page-2.xlsx) · [SHA-256 checksums](evidence/SHA256SUMS)
+- **SC-003 passed.** Each locale distinguished measured zero from unknown, and FILE1 retained numeric zero and the unknown marker. An all-unknown kg group had a null total and one missing-unit row was counted separately. The label describes a sum of activity-row headcounts. The official policy excludes historical, deleted and non-approved data. The preview, correction, cancellation and approval tests covered the version boundaries.
+- **SC-004 passed on the local fixture.** The 51-activity report covered the October 2026 last-month window. A read-only PostgreSQL observer bracketed the approval commit within 5.4 ms. All 51 rows, the headcount sum and 63.75 m² were painted within a conservative **504.7 ms** of commit. The approval response arrived about 171 ms after the upper commit bound. The combined CIVIL, «آرماتوربند الف» and last-month preset rendered in **374.9 ms cold** and **154.8 ms warm**. The observing session had warmed the pre-approval selection. The first filter request used a fresh browser context and a new selection in the post-approval cache generation. The second reused the filter selection after Back. The preset writes project-local Gregorian month bounds to the URL. [Timing and network evidence](evidence/timings.json)
+
+The checks resolve the B04 findings from November 19 and November 21. Respectively, SC-001 covers `DEF-B04-03` in both registers. SC-002 covers `DEF-B04-01/02/05` on November 19 and `DEF-B04-01/02` on November 21. SC-003 covers `DEF-B04-04/06` on November 19 and `DEF-B04-04/05` on November 21. [November 19 register](../../output/a1-requirements-2026-11-19-stage1-b04-qa-findings.md) · [November 21 register](../../output/a1-requirements-2026-11-21-stage1-b04-qa-findings.md)
+
+## Delivery and handoff
+
+The authenticated [local delivery plan](http://localhost:5173/delivery-plan) shows the B04 work item implemented under A.1. The overall A.1 section still has four remaining items. The localhost browser check used the isolated B04 API. [Delivery-plan browser result](evidence/delivery-plan.json)
+
+B05 can reuse the four workbooks, checksums and [independent workbook verifier](../../e2e/fixtures/check_b04_workbook.py) for reconciliation. B06 has the local candidate manifest, authenticated results and timing inputs for release verification. The candidate is local, and employer acceptance remains pending.

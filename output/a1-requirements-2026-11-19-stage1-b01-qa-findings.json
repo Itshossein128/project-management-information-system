@@ -1,0 +1,22 @@
+{
+  "requirementId": "B01",
+  "title": "قرارداد داده و روز مرجع",
+  "acceptanceCriteria": "قرارداد نسخه‌دار شامل منبع هر فیلد، قواعد null/zero، شیفت، مدت، نفرساعت، ترتیب بخش‌ها و تصمیم‌های C01 تا C08 ثبت و تأیید شود.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    "DEF-B01-01: Missing report_number and project_day_number in DailyReport data model",
+    "DEF-B01-02: Work shift actual duration missing, outputting hardcoded 'ساعات کاری شیفت: ثبت نشده' in export",
+    "DEF-B01-03: Headcount sum erroneously labeled as 'نفرروز' without unique worker presence proof",
+    "DEF-B01-04: Rigid hardcoded 34/32 catalog in export without configurable project profile mapping",
+    "DEF-B01-05: Missing integration of wind and ground conditions from WeatherLog to official daily header",
+    "DEF-B01-06: Unresolved and unratified scope decisions C01 to C08 causing data contract ambiguity"
+  ],
+  "verificationDetails": {
+    "sectionsCovered": "18 broader daily sections audited against apps/api/core/field_reports/ and export templates",
+    "scopeDecisions": "C01 to C08 unratified or partially implemented",
+    "nullZeroRules": "Discrepancy between historical validation logic (rejecting 0) and updated requirement (valid measured 0 vs null unset)",
+    "shiftDuration": "Mismatch between header shift definitions and row-level shifts; missing duration field in hours",
+    "manHours": "Headcount sum treated as man-days without deduplicated identity attendance tracking"
+  },
+  "summary": "Requirement B01 (Data Contract & Reference Day Test Sample Closure) verification failed due to open scope decisions C01-C08, missing fields in daily report header (report number, project day, shift duration), unmapped weather attributes, and lack of a finalized versioned data contract across all 18 broader daily sections."
+}

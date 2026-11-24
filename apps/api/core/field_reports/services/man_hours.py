@@ -61,3 +61,10 @@ def compute_man_hours(
         overtime_person_hours=overtime_person_hours,
         standard_shift_hours=standard_shift_hours or Decimal('8'),
     )
+
+
+def compute_actual_person_hours(headcount, actual_duration_hours) -> Decimal | None:
+    """Return person-hours from a recorded count and actual worked duration."""
+    if headcount is None or actual_duration_hours is None:
+        return None
+    return Decimal(str(headcount)) * Decimal(str(actual_duration_hours))

@@ -1,0 +1,12 @@
+{
+  "phase": "A.1",
+  "requirements": [
+    {"id": "B01", "title": "Data contract and reference-day fixture", "acceptance": "Independently map every required field and the complete reference day; resolve C01-C08 decisions that affect official output."},
+    {"id": "B02", "title": "Version integrity, derived locks, and preservation", "acceptance": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, and approved-current aggregation pass end-user scenarios."},
+    {"id": "B03", "title": "Reference-form parity", "acceptance": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form."},
+    {"id": "B04", "title": "Filters, complete result set, and totals", "acceptance": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics."},
+    {"id": "B05", "title": "Independent numeric, formula, and print reconciliation", "acceptance": "Independent expected values, recalculation logs, mapping, checksums, screenshots, and discrepancy decisions prove Excel/PDF parity and measured download time."},
+    {"id": "B06", "title": "Delivery and initial employer acceptance bundle", "acceptance": "A fixed release/SHA, guide, inputs/expected values, checksums, role/device/language/cross-project tests, and explicit employer review are recorded."}
+  ],
+  "summary": "A.1 is the next delivery phase. The delivery plan marks daily Excel/PDF export implemented but A.1.01-A.1.04 remaining. The audit expands the remaining work into B01-B06; 42 atomic stories and the H/D/W/E/Q/X requirement register are linked in the saved report. Live localhost delivery-plan verification was unavailable during discovery."
+}

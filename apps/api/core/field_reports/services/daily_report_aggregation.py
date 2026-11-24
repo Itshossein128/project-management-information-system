@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import date
 from decimal import Decimal
 
@@ -424,8 +424,10 @@ def ensure_daily_report_summary(project_id, report_date: date, user=None, shift=
             kwargs['created_by'] = user
             kwargs['updated_by'] = user
         report = DailyReport.objects.create(**kwargs)
-    elif report.status == ReportStatus.APPROVED:
-        # Approved summaries are immutable; correction is a separate workflow.
+    elif report.status in (
+        ReportStatus.APPROVED, ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW,
+    ):
+        # Non-editable snapshots are immutable; correction is a separate workflow.
         return report
     elif not report.is_auto_summary:
         report.is_auto_summary = True
@@ -562,15 +564,17 @@ def rebuild_daily_report_summary(
     user=None,
     report: DailyReport | None = None,
     shift=None,
+    request=None,
 ) -> DailyReport:
+    from rest_framework.exceptions import ValidationError
+    from field_reports.services.lifecycle_errors import lifecycle_error_detail
     from projects.models import Project
 
     target_shift = shift or ReportShift.FULL
-    # 1. Lock Order: Project -> current unit report(s) -> full-shift DailyReport
+    # Serialize rebuild and unit workflow mutations on the project first.
     Project.objects.select_for_update().filter(id=project_id).first()
 
-    sub_reports_qs = contributing_sub_reports(project_id, report_date).select_for_update()
-    sub_reports = list(sub_reports_qs)
+    explicit_target = report is not None
 
     if report is None:
         report = (
@@ -588,10 +592,26 @@ def rebuild_daily_report_summary(
             return ensure_daily_report_summary(project_id, report_date, user=user, shift=target_shift)
     else:
         # Reload with lock
-        report = DailyReport.objects.select_for_update().get(id=report.id)
+        report = DailyReport.all_objects.select_for_update().get(id=report.id)
 
-    if report.status == ReportStatus.APPROVED:
+        def reject(code):
+            raise ValidationError({'detail': lifecycle_error_detail(code, request=request), 'code': code})
+
+        if report.is_deleted:
+            reject('rebuild_target_deleted')
+        if not report.is_current:
+            reject('historical_rebuild_rejected')
+        if report.status == ReportStatus.APPROVED:
+            reject('report_locked')
+        if report.status in (ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW):
+            reject('report_not_editable')
+
+    if not explicit_target and report.status in (
+        ReportStatus.APPROVED, ReportStatus.SUBMITTED, ReportStatus.UNDER_REVIEW,
+    ):
         return report
+
+    sub_reports = list(contributing_sub_reports(project_id, report_date).select_for_update())
 
     # Bind configuration if not yet bound
     config = None
@@ -645,11 +665,16 @@ def rebuild_daily_report_summary(
     # Activities (DisciplineSubReportActivity & DepartmentActivityRecord)
     # -------------------------------------------------------------------------
     current_derived_activity_ids = set()
+    activity_sources = list(DailyReportDerivedSource.objects.filter(
+        daily_report=report, derived_kind='activity',
+    ))
+    source_counts = Counter(source.derived_row_id for source in activity_sources)
+    # Activity rebuild emits one row per source. A shared row cloned from a
+    # prior version must be regenerated so one source cannot overwrite another.
     existing_act_sources = {
-        (s.source_row_kind, s.source_row_id): s.derived_row_id
-        for s in DailyReportDerivedSource.objects.filter(
-            daily_report=report, derived_kind='activity',
-        )
+        (source.source_row_kind, source.source_row_id): source.derived_row_id
+        for source in activity_sources
+        if source_counts[source.derived_row_id] == 1
     }
 
     for sr in sub_reports:
@@ -1019,21 +1044,25 @@ def rebuild_daily_report_summary(
             if not stoppage_reason and r.stoppage_reason_code:
                 stoppage_reason = r.stoppage_reason_code
 
-        # For a declared stable identity (single physical equipment item), status counts deduplicate across reports:
-        # We take max across contributing reports for this item
-        status_total = max(r.status_total for _, r in contribs)
-        status_active = max(r.status_active for _, r in contribs)
-        status_ready = max(r.status_ready for _, r in contribs)
-        status_inactive = max(r.status_inactive for _, r in contribs)
-        status_under_repair = max(r.status_under_repair for _, r in contribs)
+        # One stable identity contributes one machine. Conflicting source
+        # statuses remain unclassified and are visible in source evidence.
+        status_total = 1
+        status_fields = ('status_active', 'status_ready', 'status_inactive', 'status_under_repair')
+        reported = {field for _, row in contribs for field in status_fields if getattr(row, field)}
+        status_active, status_ready, status_inactive, status_under_repair = (
+            int(reported == {field}) for field in status_fields
+        )
 
         mach_obj = report.machinery_rows.filter(
             is_derived=True, equipment_ref_id=eq_ref_id,
         ).first()
 
-        op_hours = tot_operating if has_operating else None
-        stop_hours = tot_stoppage if has_stoppage else None
-        rep_hours = tot_repair if has_repair else None
+        # Separate unit rows may cover the same time. Keep their provenance
+        # and leave the daily duration unknown if adding them exceeds a day.
+        within_day = tot_operating + tot_stoppage + tot_repair <= 24
+        op_hours = tot_operating if has_operating and within_day else None
+        stop_hours = tot_stoppage if has_stoppage and within_day else None
+        rep_hours = tot_repair if has_repair and within_day else None
 
         if mach_obj is None:
             mach_obj = DailyReportMachineryRow.objects.create(

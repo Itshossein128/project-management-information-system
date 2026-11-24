@@ -1,0 +1,51 @@
+{
+  "phase": "A.1",
+  "phaseTitle": "گزارش روزانه و خروجی‌ها",
+  "requirements": [
+    {
+      "id": "A.1.01",
+      "title": "نهایی‌کردن قواعد اطلاعات روزانه",
+      "acceptance": "قرارداد داده روزانه برای هر فیلد شامل منبع، واحد، تبدیل، قاعده null/zero، خروجی و provenance نسخه‌دار باشد؛ fixture اجرایی روز مرجع برچسب‌گذاری شود و تصمیم‌های مؤثر بر خروجی رسمی (هوا، شیفت، مدت، نیروی انسانی و unknown در برابر zero) ثبت و قابل آزمون باشند.",
+      "traceability": ["output/a1-requirements-2026-11-18/requirements-and-delivery.md", "specs/028-auto-daily-report-summary/spec.md"]
+    },
+    {
+      "id": "A.1.02",
+      "title": "تطبیق تمام بخش‌های گزارش با روز مرجع",
+      "acceptance": "تمام بخش‌های گزارش روزانه از جمله عملیات، فعالیت/WBS، نیروی انسانی، ماشین‌آلات، مصالح، آب‌وهوا، موانع/حوادث، تصاویر و تأیید با fixture روز مرجع تطبیق داده شوند؛ lineage، وضعیت Draft/Approved، اصلاح و حفظ داده منبع در سناریوی مرورگر و API قابل مشاهده باشد.",
+      "traceability": ["output/a1-requirements-2026-11-18/requirements-and-delivery.md", "reports_documentation/01-core-requirements-and-excel-blueprints/چرخه اطلاعات و عملیات کنترل پروژه (بخش سوم- چرخه‌ها، محاسبات پیشرفت و فرمول‌ها).md"]
+    },
+    {
+      "id": "A.1.03",
+      "title": "رفع اختلاف ارقام و نمایش خروجی‌ها",
+      "acceptance": "اختلاف‌های ارقام با مرجع مستقل ثبت، علت‌یابی و اصلاح شوند؛ Excel و PDF پس از بازحساب مقادیر یکسان، واحدها و null/zero درست، و نمایش خوانا داشته باشند؛ فیلتر، pagination و totals یک queryset کامل را نشان دهند و preview بدون نوشتن داده باقی بماند.",
+      "traceability": ["output/a1-requirements-2026-11-22-stage1-b04-qa-findings.json", "output/a1-requirements-2026-11-21-stage1-b05-qa-findings.json", "specs/028-auto-daily-report-summary/spec.md"]
+    },
+    {
+      "id": "A.1.04",
+      "title": "ارائه نمونه نهایی و تأیید اولیه گزارش",
+      "acceptance": "یک روز کامل با ارقام کنترل‌شده، خروجی بازحساب‌شده Excel و PDF خوانا، سناریوهای نقش/زبان/دستگاه/مرز پروژه، checksum و نسخه/SHA ثابت ارائه شود و مرور و sign-off اولیه کارفرما به‌صورت قابل ردیابی ثبت گردد.",
+      "traceability": ["output/a1-requirements-2026-11-22-stage1-b06-qa-findings.json", "output/a1-stage1-discovery-2026-11-22.md"]
+    }
+  ],
+  "summary": "بر اساس delivery-plan.ts، schedule.json و delivery_plan_reader_tool، نخستین فاز دارای کارهای remaining فاز A.1 است. دو قابلیت موجود A.1 به‌عنوان implemented کنار گذاشته شدند؛ ادعای کاربر درباره پذیرش Previews فقط به‌عنوان ورودی زمینه‌ای حفظ شد و جایگزین معیارهای پذیرش فاز نشد. فاز برای fan-out QA آماده است، نه برای اعلام پذیرش نهایی؛ وابستگی‌های اصلی شامل قرارداد روز مرجع، تطبیق مستقل ارقام/فرمول، parity خروجی و بسته sign-off است.",
+  "evidence": [
+    "apps/web/src/app/data/delivery-plan.ts:161-205",
+    "output/delivery-plan-2026-11-03/schedule.json",
+    "scripts/knowledge/cli.py context: fresh hybrid retrieval on 2026-11-24",
+    "graphify-out/graph.json: daily-report, preview, totals and correction-related nodes"
+  ],
+  "workingMemoryUpdates": [
+    {
+      "op": "add",
+      "scope": "workflow",
+      "kind": "finding",
+      "content": "Active phase is A.1; remaining fan-out is A.1.01-A.1.04. Source: apps/web/src/app/data/delivery-plan.ts:161-205 and delivery_plan_reader_tool."
+    },
+    {
+      "op": "add",
+      "scope": "workflow",
+      "kind": "constraint",
+      "content": "Implemented export/preview capabilities are not equivalent to employer acceptance; A.1 still requires reference-day parity, independent reconciliation and sign-off evidence. Source: output/a1-stage1-discovery-2026-11-22.md."
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import {
   CloudOff,
+  Download,
   Eye,
   FileText,
   Pencil,
@@ -29,14 +30,15 @@ import {
   type DailyReportListParams,
   type ReportStatus,
   STATUS_BADGE,
-  STATUS_LABELS,
   WEATHER_META,
   deleteDailyReport,
+  downloadDailyReportWorkbook,
   ensureDailyReportByDate,
   fetchDailyReportByDate,
   fetchDailyReports,
 } from "@/app/lib/api/daily-reports";
-import { formatDisplayDate } from "@/app/lib/jalali-utils";
+import { formatDisplayDate, isPersianLanguage, isoToJalali, jalaliToIso } from "@/app/lib/jalali-utils";
+import { fetchActivityLogFilters } from "@/app/lib/api/reports";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/layout/empty-state";
 import {
@@ -46,17 +48,10 @@ import {
 } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
-import { Select } from "@/components/form";
+import { Input, Select } from "@/components/form";
 import { Button } from "@/components/ui/sprint-button";
 
-const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "", label: "همه وضعیت‌ها" },
-  { value: "draft", label: STATUS_LABELS.draft },
-  { value: "submitted", label: STATUS_LABELS.submitted },
-  { value: "under_review", label: STATUS_LABELS.under_review },
-  { value: "approved", label: STATUS_LABELS.approved },
-  { value: "rejected", label: STATUS_LABELS.rejected },
-];
+const STATUS_FILTERS = ["draft", "submitted", "under_review", "approved", "rejected"] as const;
 
 function StatCard({
   label,
@@ -72,6 +67,59 @@ function StatCard({
       <p className='text-sm text-muted-foreground'>{label}</p>
       <p className={`mt-1 text-2xl font-bold ${tone}`}>{value}</p>
     </div>
+  );
+}
+
+function ReportDateFilter({
+  name, label, value, onCommit,
+}: {
+  name: string;
+  label: string;
+  value: string;
+  onCommit: (value: string | null) => void;
+}) {
+  const { i18n, t } = useTranslation();
+  const persian = isPersianLanguage(i18n.language);
+  const displayed = persian ? isoToJalali(value) || value : value;
+  const [text, setText] = useState(displayed);
+  const [invalid, setInvalid] = useState(false);
+  useEffect(() => {
+    setText(displayed);
+    setInvalid(false);
+  }, [displayed]);
+
+  const commit = () => {
+    const local = text.trim()
+      .replace(/[۰-۹]/g, (digit) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit)))
+      .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
+    const jalaliInput = /^\d{4}\/\d{2}\/\d{2}$/.test(local);
+    const iso = jalaliInput ? jalaliToIso(local) : local;
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T00:00:00Z`) : null;
+    const valid = !local || (
+      parsed !== null && Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === iso &&
+      (!jalaliInput || isoToJalali(iso) === local)
+    );
+    setInvalid(!valid);
+    onCommit(valid ? iso : null);
+  };
+
+  return (
+    <label className="grid gap-1.5 text-sm font-medium">
+      <span>{label}</span>
+      <Input name={name} dir="ltr" value={text} placeholder={persian ? "۱۴۰۶/۰۳/۰۱" : "YYYY-MM-DD"}
+        aria-invalid={invalid || undefined}
+        aria-describedby={invalid ? `${name}-error` : undefined}
+        onChange={(event) => setText(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            event.currentTarget.blur();
+          }
+        }}
+      />
+      {invalid ? <span id={`${name}-error`} className="text-destructive">{t("dailyReports.referenceHeader.invalidDate")}</span> : null}
+    </label>
   );
 }
 
@@ -98,35 +146,75 @@ export default function DailyReportsListPage() {
       date_from,
       date_to,
       status,
+      discipline: searchParams.get("discipline") || undefined,
+      contractor: searchParams.get("contractor") || undefined,
+      block: searchParams.get("block") || undefined,
     };
   }, [searchParams]);
 
   const setFilter = useCallback((patch: Partial<DailyReportListParams>) => {
-    setSearchParams((prev) => {
-      const sp = new URLSearchParams(prev);
-      Object.entries(patch).forEach(([k, v]) => {
-        if (v === undefined || v === null || v === "" || v === "all") {
-          sp.delete(k);
-        } else {
-          sp.set(k, String(v));
-        }
-      });
-      if (patch.date_from !== undefined || patch.date_to !== undefined || patch.status !== undefined) {
-        sp.delete("page");
+    // A date field can commit while React is still rendering the previous
+    // location. Preserve the filters already present in the browser URL.
+    const sp = new URLSearchParams(window.location.search);
+    Object.entries(patch).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === "" || v === "all" || v === "__all__") {
+        sp.delete(k);
+      } else {
+        sp.set(k, String(v));
       }
-      return sp;
-    }, { replace: true });
+    });
+    if (!("page" in patch)) {
+      sp.delete("page");
+    }
+    setSearchParams(sp);
   }, [setSearchParams]);
   const [openDate, setOpenDate] = useState("");
   const [openingDate, setOpeningDate] = useState(false);
   const [offlineRows, setOfflineRows] = useState<OfflineReport[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
+  const [downloadingRange, setDownloadingRange] = useState(false);
+  const [dateErrors, setDateErrors] = useState({ date_from: false, date_to: false });
+
+  const commitDate = (field: "date_from" | "date_to", date: string | null) => {
+    setDateErrors((previous) => ({ ...previous, [field]: date === null }));
+    if (date !== null && date !== (filters[field] ?? "")) setFilter({ [field]: date || undefined });
+  };
+
+  const exportRange = async () => {
+    // Keyboard activation can follow a date blur before React rerenders.
+    const committedDates = new URLSearchParams(window.location.search);
+    const first = committedDates.get("date_from");
+    const last = committedDates.get("date_to");
+    if (dateErrors.date_from || dateErrors.date_to) {
+      toast.error(t("dailyReports.referenceHeader.invalidDate"));
+      return;
+    }
+    if (!first || !last) {
+      toast.error(t("dailyReports.referenceHeader.rangeDatesRequired"));
+      return;
+    }
+    setDownloadingRange(true);
+    try {
+      await downloadDailyReportWorkbook(projectId, first, last);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("dailyReports.referenceHeader.downloadFailed"));
+    } finally {
+      setDownloadingRange(false);
+    }
+  };
 
   const listQuery = useQuery({
     queryKey: ["daily-reports", projectId, filters],
     queryFn: () => fetchDailyReports(projectId, filters),
   });
+
+  const optionsQuery = useQuery({
+    queryKey: ["activity-log-filters", projectId, false],
+    queryFn: () => fetchActivityLogFilters(projectId, false),
+    enabled: Boolean(projectId) && has("view_reports"),
+  });
+  const choices = optionsQuery.data;
 
   const loadOffline = useCallback(async () => {
     if (!isOfflineDBAvailable() || !projectId) return;
@@ -278,21 +366,21 @@ export default function DailyReportsListPage() {
       </div>
 
       <div className='mb-4 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-3'>
-        <JalaliDatePicker
+        <ReportDateFilter
           name='date_from'
-          label='از تاریخ'
+          label={t("dailyReports.referenceHeader.dateFrom")}
           value={filters.date_from ?? ""}
-          onChange={(iso) => setFilter({ date_from: iso || undefined })}
+          onCommit={(day) => commitDate("date_from", day)}
         />
-        <JalaliDatePicker
+        <ReportDateFilter
           name='date_to'
-          label='تا تاریخ'
+          label={t("dailyReports.referenceHeader.dateTo")}
           value={filters.date_to ?? ""}
-          onChange={(iso) => setFilter({ date_to: iso || undefined })}
+          onCommit={(day) => commitDate("date_to", day)}
         />
         <Select
           name='status'
-          label='وضعیت'
+          label={t("reportFilters.status")}
           value={filters.status ?? "all"}
           onChange={(e) =>
             setFilter({
@@ -301,11 +389,46 @@ export default function DailyReportsListPage() {
                 | undefined,
             })
           }
-          options={STATUS_FILTERS.map((s) => ({
-            value: s.value || "all",
-            label: s.label,
-          }))}
+          options={[
+            { value: "all", label: t("reportFilters.all") },
+            ...STATUS_FILTERS.map((status) => ({ value: status, label: t(`reportFilters.statuses.${status}`) })),
+          ]}
         />
+        <Select
+          name="discipline"
+          label={t("reportFilters.discipline")}
+          value={filters.discipline ?? "__all__"}
+          onChange={(event) => setFilter({ discipline: event.target.value })}
+          options={[
+            { value: "__all__", label: t("reportFilters.all") },
+            ...(choices?.disciplines ?? []).map((value) => ({ value, label: value })),
+          ]}
+        />
+        <Select
+          name="contractor"
+          label={t("reportFilters.contractor")}
+          value={filters.contractor ?? "__all__"}
+          onChange={(event) => setFilter({ contractor: event.target.value })}
+          options={[
+            { value: "__all__", label: t("reportFilters.all") },
+            ...(choices?.contractors ?? []).map(({ id, name }) => ({ value: id, label: name })),
+          ]}
+        />
+        <Select
+          name="block"
+          label={t("reportFilters.block")}
+          value={filters.block ?? "__all__"}
+          onChange={(event) => setFilter({ block: event.target.value })}
+          options={[
+            { value: "__all__", label: t("reportFilters.all") },
+            ...(choices?.blocks ?? []).map((value) => ({ value, label: value })),
+          ]}
+        />
+        {optionsQuery.isError && <QueryErrorState onRetry={() => void optionsQuery.refetch()} />}
+        <Button type="button" disabled={downloadingRange || !isOnline} onClick={() => void exportRange()}>
+          <Download aria-hidden="true" className="size-4" />
+          {t(`dailyReports.referenceHeader.${downloadingRange ? "downloading" : "rangeWorkbook"}`)}
+        </Button>
       </div>
 
       <div className='mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4'>
@@ -479,10 +602,10 @@ export default function DailyReportsListPage() {
             }
             className='rounded-md border border-border px-3 py-1 text-sm disabled:opacity-40'
           >
-            قبلی
+            {t("reportFilters.previousPage")}
           </button>
           <span className='text-sm text-muted-foreground'>
-            صفحه {filters.page ?? 1}
+            {t("reportFilters.page", { page: filters.page ?? 1 })}
           </span>
           <button
             type='button'
@@ -492,7 +615,7 @@ export default function DailyReportsListPage() {
             }
             className='rounded-md border border-border px-3 py-1 text-sm disabled:opacity-40'
           >
-            بعدی
+            {t("reportFilters.nextPage")}
           </button>
         </div>
       ) : null}

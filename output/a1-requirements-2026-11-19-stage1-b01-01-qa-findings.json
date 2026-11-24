@@ -1,0 +1,19 @@
+{
+  "requirementId": "B01-01",
+  "title": "Versioned contract and synthetic reference day",
+  "acceptanceCriteria": "Publish a versioned contract and clearly labeled SIM-A1-001 fixture for 1406-03-01, project day 12, with complete field mappings and revision history.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    "DEF-B01-01-GAP-01: Missing SIM-A1-001 synthetic reference day fixture file and database seeding mechanism for Solar Hijri 1406-03-01 (project day 12)",
+    "DEF-B01-01-GAP-02: Absence of an executable, reviewable versioned data contract artifact defining field-by-field sources, units, conversions, null/zero rules, and print/drill-down destinations",
+    "DEF-B01-01-GAP-03: Backend DailyReport and frontend daily summary views lack report_number and project_day_number fields required for the reference fixture",
+    "DEF-B01-01-GAP-04: Local dev servers (:5173 and :8000) are not running in this container environment, preventing live browser UAT of reference-day navigation and display"
+  ],
+  "verificationDetails": {
+    "specStatus": "Clarified in specs/057-a1-b01-data-contract/spec.md (FR-001..FR-004, SC-001..SC-002, GOV-01)",
+    "fixtureExistence": "SIM-A1-001 referenced in spec but absent from code, migrations, and test fixtures",
+    "dataContractArtifact": "Not published as an independent runtime artifact; defined only conceptually in specification",
+    "runtimeEnvironment": "Ports 5173 and 8000 are closed; no running service instances found in container"
+  },
+  "summary": "Requirement B01-01 (Versioned contract and synthetic reference day) failed QA verification because the contract and SIM-A1-001 fixture for 1406-03-01 exist only as a clarified specification (specs/057-a1-b01-data-contract/spec.md) and have not yet been implemented or published in the runtime application code."
+}

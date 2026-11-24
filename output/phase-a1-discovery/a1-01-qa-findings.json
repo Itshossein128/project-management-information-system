@@ -1,0 +1,68 @@
+{
+  "requirementId": "A.1.01",
+  "phase": "A.1",
+  "stage": "1.2",
+  "title": "قواعد داده و fixture کامل روز مرجع",
+  "acceptanceCriteria": "قاعده null/صفر، شیفت، شمارش نفر و منبع هر بخش ثبت شود.",
+  "timestamp": "2026-11-22T21:14:00+03:30",
+  "status": "implemented_and_verified",
+  "qaStatus": "qa_passed",
+  "defects": [],
+  "findings": {
+    "dataContract": {
+      "contractVersion": "1.0.0",
+      "referenceFormVersion": "shiraz-file4-v1",
+      "broaderDailySectionsCount": 18,
+      "fieldMappingsCount": 128,
+      "scopeDecisionsCount": 11,
+      "nullVsZeroSemantics": {
+        "rule": "C02: Measured 0/0.00 is a valid numeric zero; unset (null) and not-measured remain unknown and are never silently coerced to 0.",
+        "verified": true
+      },
+      "canonicalShifts": {
+        "rule": "C03: Canonical shift identifiers (1, 2, 3) unified across headers, labor, and activities; person-hours calculated strictly from actual working duration per shift.",
+        "verified": true
+      },
+      "laborHeadcountAndCatalog": {
+        "rule": "C04: Versioned configurable project job-title catalog kept separate from Shiraz 34/32 form profile; extra/historical titles relegated to dedicated appendix without corrupting fixed layout.",
+        "verified": true
+      },
+      "sectionSourceAttribution": {
+        "rule": "Every section records source provenance, actor attribution block, and metadata fingerprint.",
+        "verified": true
+      }
+    },
+    "referenceFixture": {
+      "projectCode": "SIM-A1-001",
+      "reportDate": "2027-05-22",
+      "jalaliDate": "1406-03-01",
+      "projectDay": 12,
+      "officialReportNumber": "SIM-A1-001-12-1406-03-01",
+      "isSynthetic": true,
+      "syntheticLabel": "[SYNTHETIC A.1 REFERENCE]",
+      "seedingCommand": "seed_a1_reference_fixture",
+      "idempotenceVerified": true
+    },
+    "automatedTests": {
+      "testSuite": "field_reports/tests/test_a1_b01_data_contract.py",
+      "totalTests": 11,
+      "passed": 11,
+      "failed": 0,
+      "errors": 0,
+      "keyTestCases": [
+        "test_seed_is_idempotent_and_scoped",
+        "test_seed_refuses_existing_non_fixture_project",
+        "test_contract_permissions_and_query_params",
+        "test_measured_zero_and_unknown_are_distinct",
+        "test_canonical_shifts_and_actual_duration",
+        "test_form_profile_has_fixed_slots_and_preserves_appendix",
+        "test_numbering_observed_weather_and_summary",
+        "test_legacy_summary_warns_without_merging_reports",
+        "test_b01_migrations_preserve_legacy_and_enforce_uniqueness",
+        "test_published_contract_covers_reference_form_fields_and_governance",
+        "test_forecast_uses_local_days_caches_and_degrades"
+      ]
+    }
+  },
+  "summary": "Requirement A.1.01 (قواعد داده و fixture کامل روز مرجع) is fully implemented and verified against PostgreSQL 16 and Redis. All 11 rigorous automated verification tests passed. Rules for null vs. zero, canonical shifts (1, 2, 3), actual duration-based person-hours, Shiraz 34/32 profile headcount with dedicated appendix, section source attribution, and the idempotent SIM-A1-001 synthetic reference day fixture are verified."
+}

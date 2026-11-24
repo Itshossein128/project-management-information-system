@@ -1,0 +1,81 @@
+{
+  "requirementId": "B06",
+  "title": "Delivery and initial employer acceptance bundle",
+  "phase": "A.1",
+  "stage": "1.2",
+  "verificationDate": "2026-11-22",
+  "targetCommit": "63a95a0ece1573d494b0abe565aa705f0a528c0d",
+  "acceptanceCriteria": "Record fixed release/SHA, guide, fixtures, expected values, checksums, role/device/language/cross-project tests, walkthrough, and explicit employer sign-off.",
+  "qaStatus": "qa_failed",
+  "personasEvaluated": [
+    {
+      "persona": "Employer / Client Representative",
+      "summary": "No frozen release bundle exists for Phase A.1. Live delivery-plan route redirects unauthenticated requests to login. No formal sign-off protocol or employer acceptance mechanism is recorded; status remains pending."
+    },
+    {
+      "persona": "Independent Auditor / QA Engineer",
+      "summary": "Delivery chain blocked by open defects in upstream packages B01, B02, B03, B04, and B05. Negative cross-project isolation tests for direct ID download endpoints (E09) lack documented live execution evidence."
+    },
+    {
+      "persona": "Field Engineer / Report Preparer",
+      "summary": "Comprehensive mobile (390x844) and bilingual (FA RTL / EN LTR) verification evidence for all 18 daily report sections is incomplete on the current target release."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B06-01",
+      "group": "Q05",
+      "type": "Process & Delivery Defect",
+      "severity": "critical",
+      "title": "Missing frozen Phase A.1 release package with commit SHA, independent inputs/expected fixtures, final sample exports, and verified SHA-256 checksums",
+      "evidence": "No frozen package exists under output/ or specs/ for Phase A.1 (last delivery archive is output/a7-delivery-2026-11-16/).",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-02",
+      "group": "Q05",
+      "type": "Dependency Blocker",
+      "severity": "critical",
+      "title": "Hard dependency block: upstream delivery packages B01 through B05 have open blocker defects",
+      "evidence": "B01 (data contract), B02 (version integrity), B03 (reference parity), B04 (filters/totals), and B05 (independent numeric reconciliation) have unresolved defects and qa_failed statuses.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-03",
+      "group": "Q05",
+      "type": "Governance & Compliance Defect",
+      "severity": "critical",
+      "title": "Missing explicit employer review and sign-off protocol",
+      "evidence": "Project instructions mandate that automated tests or agents cannot sign on behalf of the employer. No employer review minutes or sign-off decision is recorded.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-04",
+      "group": "E09",
+      "type": "Security & Multi-Tenancy Defect",
+      "severity": "major",
+      "title": "Unverified live cross-project isolation matrix and negative security tests for direct ID download endpoints",
+      "evidence": "Live execution evidence proving non-member or unauthorized direct-ID download denial across projects is not formally packaged.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-05",
+      "group": "Q03",
+      "type": "UI/UX & Localization Defect",
+      "severity": "major",
+      "title": "Incomplete mobile responsive and bilingual (FA/EN) verification evidence across all 18 daily report sections",
+      "evidence": "Full journey audit on mobile viewports (390x844) and English locale is not archived with the release.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-06",
+      "group": "Q04",
+      "type": "Documentation Defect",
+      "severity": "minor",
+      "title": "Decision tree in docs/decision-tree/ lacks final verification against deployed authorization gates and export routes",
+      "evidence": "Decision tree routes need live validation once release deployment is frozen.",
+      "status": "open"
+    }
+  ],
+  "summary": "Requirement B06 is qa_failed. The frozen release package for Phase A.1 is absent, prerequisites B01 through B05 remain unresolved with open defects, live cross-project authorization guarantees are unverified, mobile/bilingual end-user evidence is incomplete, and no explicit employer acceptance sign-off exists."
+}

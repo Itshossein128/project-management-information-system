@@ -11,6 +11,7 @@ import { PATHS } from "@/app/routeVars";
 import { findDepartmentBySlug } from "@/config/business-departments.config";
 import { IncompletenessBanner } from "./IncompletenessBanner";
 import { AttachmentCountLink } from "./AttachmentCountLink";
+import { ConcreteQcDetails } from "../ConcreteTab";
 import { UnsetQuantityBadge } from "../UnsetQuantityBadge";
 
 function Section({
@@ -26,6 +27,7 @@ function Section({
     <section
       className='mb-6 rounded-xl border border-border bg-card p-4'
       data-testid={testId}
+      id={testId}
     >
       <h2 className='mb-3 text-base font-semibold'>{title}</h2>
       {children}
@@ -678,9 +680,15 @@ export function DailyReportSummaryView({
             r.structural_element || [r.zone, r.block, r.floor].filter(Boolean).join(" / "),
             [r.parcel, r.zone, r.block, r.floor].filter(Boolean).join(" / ") || "—",
             [r.batching_plant, r.truck_delivery_note_number].filter(Boolean).join(" / ") || "—",
-            [r.sampling_state, r.lab_sample_code, r.test_sheet_count != null ? `${r.test_sheet_count}` : ""]
+            [t(`dailyReports.referenceHeader.sampling.${
+              r.sampling_state === "sampling_declared" || r.sampling_state === "not_sampled"
+                ? r.sampling_state : "unknown"
+            }`), r.lab_sample_code, r.test_sheet_count != null ? `${r.test_sheet_count}` : ""]
               .filter(Boolean).join(" / ") || "—",
-            r.qc_link ? <a className='underline text-primary' href={r.qc_link.href}>{t("dailyReports.summary.openQc", "مشاهده کنترل کیفیت")}</a> : "—",
+            <div key={`qc-${r.id}`}>
+              <ConcreteQcDetails row={r} />
+              {r.qc_link ? <a className='underline text-primary' href={r.qc_link.href}>{t("dailyReports.summary.openQc", "مشاهده کنترل کیفیت")}</a> : null}
+            </div>,
             <ProvenanceCell
               key={`prov-${r.id}`}
               provenance={r.provenance}

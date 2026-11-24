@@ -1,0 +1,3404 @@
+{
+  "schema_version": 1,
+  "phase": "A.1",
+  "stage": 2,
+  "scope": "B01 only",
+  "granularity": "single",
+  "feature_directory": "specs/057-a1-b01-data-contract",
+  "execution_order": [
+    "B01"
+  ],
+  "stages": [
+    {
+      "id": "B01",
+      "prompt_file": "01-b01-data-contract.md",
+      "requirements": [
+        "B01-01",
+        "B01-02",
+        "B01-03",
+        "B01-04",
+        "B01-05",
+        "B01-06"
+      ],
+      "next_command": "/speckit-plan",
+      "gate": "Supervisor approval"
+    }
+  ],
+  "complexity_assessment": {
+    "level": "single-feature",
+    "basis": "Shift, labor, catalog, numbering, weather and exports share one versioned contract and fixture. Runtime consumers have separate downstream ownership."
+  },
+  "requirements": [
+    {
+      "id": "B01-01",
+      "title": "Versioned contract and synthetic reference day",
+      "acceptance": "Publish a versioned contract and clearly labeled SIM-A1-001 fixture for 1406-03-01, project day 12, with complete field mappings and revision history.",
+      "qaStatus": "qa_failed",
+      "user_story": "US1",
+      "functional_requirements": [
+        "FR-001",
+        "FR-002",
+        "FR-003",
+        "FR-004"
+      ],
+      "success_criteria": [
+        "SC-001",
+        "SC-002",
+        "SC-003",
+        "SC-004",
+        "SC-006"
+      ],
+      "prompt_heading": "B01-01",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.json"
+      ],
+      "defects": [
+        {
+          "id": "DEF-B01-01-GAP-01",
+          "finding": "Missing SIM-A1-001 synthetic reference day fixture file and database seeding mechanism for Solar Hijri 1406-03-01 (project day 12)",
+          "requirement": "FR-002",
+          "disposition": "B01 fixture/import"
+        },
+        {
+          "id": "DEF-B01-01-GAP-02",
+          "finding": "Absence of an executable, reviewable versioned data contract artifact defining field-by-field sources, units, conversions, null/zero rules, and print/drill-down destinations",
+          "requirement": "FR-001",
+          "disposition": "B01 contract"
+        },
+        {
+          "id": "DEF-B01-01-GAP-03",
+          "finding": "Backend DailyReport and frontend daily summary views lack report_number and project_day_number fields required for the reference fixture",
+          "requirement": "FR-017",
+          "disposition": "B01 numbering contract and fixture; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-01-GAP-04",
+          "finding": "Local dev servers (:5173 and :8000) are not running in this container environment, preventing live browser UAT of reference-day navigation and display",
+          "requirement": "FR-002",
+          "disposition": "B01 environment-dependent fixture verification"
+        }
+      ]
+    },
+    {
+      "id": "B01-02",
+      "title": "Governance and anti-fabrication",
+      "acceptance": "Record C01-C10 and GOV-01 with provenance, preserving boundaries and never fabricating missing values or employer decisions.",
+      "qaStatus": "qa_passed",
+      "user_story": "US2",
+      "functional_requirements": [
+        "FR-005",
+        "FR-006",
+        "FR-007",
+        "FR-008"
+      ],
+      "success_criteria": [
+        "SC-003",
+        "SC-004",
+        "SC-005",
+        "SC-006"
+      ],
+      "prompt_heading": "B01-02",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.json"
+      ],
+      "defects": []
+    },
+    {
+      "id": "B01-03",
+      "title": "Zero, unset, and not-measured semantics",
+      "acceptance": "Measured zero remains valid; unset and not-measured remain unknown and are never silently coerced to zero.",
+      "qaStatus": "qa_passed",
+      "user_story": "US3",
+      "functional_requirements": [
+        "FR-009",
+        "FR-010"
+      ],
+      "success_criteria": [
+        "SC-005"
+      ],
+      "prompt_heading": "B01-03",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.json"
+      ],
+      "defects": []
+    },
+    {
+      "id": "B01-04",
+      "title": "Shifts, durations, and labor metrics",
+      "acceptance": "Use worked shifts only with canonical IDs 1-3, actual durations, unknown missing durations, and distinct bilingual labor metrics.",
+      "qaStatus": "qa_failed",
+      "user_story": "US4",
+      "functional_requirements": [
+        "FR-011",
+        "FR-012",
+        "FR-013"
+      ],
+      "success_criteria": [
+        "SC-004",
+        "SC-005"
+      ],
+      "prompt_heading": "B01-04",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.json"
+      ],
+      "defects": [
+        {
+          "id": "DEF-B01-04-GAP-01",
+          "finding": "Backend DailyReport schema uses mismatched shift enums (day/night/full vs shift_1/2/3) and lacks one-report-per-date worked shift list with canonical IDs 1-3 (FR-011, C03)",
+          "requirement": "FR-011",
+          "disposition": "B01 shift contract"
+        },
+        {
+          "id": "DEF-B01-04-GAP-02",
+          "finding": "Shiraz File 4 Excel export hardcodes static placeholder text 'ساعات کاری شیفت: ثبت نشده' in cell G4 (FR-012, DEF-B01-02)",
+          "requirement": "FR-012",
+          "disposition": "B01 duration contract; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-04-GAP-03",
+          "finding": "Man-hours calculation silently defaults missing durations to 8 planned hours rather than treating missing durations as unknown (FR-008, FR-012)",
+          "requirement": "FR-012",
+          "disposition": "B01 duration contract; B03/B04 consumers"
+        },
+        {
+          "id": "DEF-B01-04-GAP-04",
+          "finding": "Frontend activity log sums row headcounts and mislabels them as 'مجموع نفرات (نفر-روز)' without unique worker attendance deduplication (FR-013, D07, DEF-B01-03)",
+          "requirement": "FR-013",
+          "disposition": "B01 metric contract; B04 presentation/totals"
+        },
+        {
+          "id": "DEF-B01-04-GAP-05",
+          "finding": "Missing explicit bilingual data contract definitions distinguishing headcount, person-shifts, person-days, and person-hours across API and UI",
+          "requirement": "FR-013",
+          "disposition": "B01 bilingual contract"
+        }
+      ]
+    },
+    {
+      "id": "B01-05",
+      "title": "Job-title catalog and Shiraz profile",
+      "acceptance": "Separate the configurable project catalog from the 34/32 Shiraz profile and preserve extra, custom, and historical titles in an appendix.",
+      "qaStatus": "qa_failed",
+      "user_story": "US5",
+      "functional_requirements": [
+        "FR-014",
+        "FR-015"
+      ],
+      "success_criteria": [
+        "SC-004",
+        "SC-005"
+      ],
+      "prompt_heading": "B01-05",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.json"
+      ],
+      "defects": [
+        {
+          "id": "DEF-B01-05-GAP-01",
+          "finding": "Exporter hardcodes 34 indirect and 32 direct Shiraz roles globally instead of separating project catalog from a selectable presentation profile (FR-014, C04)",
+          "requirement": "FR-014",
+          "disposition": "B01 catalog/profile contract; B03 presentation"
+        },
+        {
+          "id": "DEF-B01-05-GAP-02",
+          "finding": "Non-standard, custom, and historical job titles are concatenated onto main tables instead of being isolated in a dedicated appendix (FR-015, C04, DEF-B01-04)",
+          "requirement": "FR-015",
+          "disposition": "B01 appendix contract; B03 presentation"
+        },
+        {
+          "id": "DEF-B01-05-GAP-03",
+          "finding": "No Form Presentation Profile data contract abstraction exists in backend or frontend to bind project catalog items to reference form slots",
+          "requirement": "FR-014",
+          "disposition": "B01 profile contract"
+        }
+      ]
+    },
+    {
+      "id": "B01-06",
+      "title": "Official headers, weather, outputs, and boundaries",
+      "acceptance": "Define official report numbering, weather sources, required Excel/PDF deliverables, unknown-data behavior, fingerprint scope, and cross-phase ownership.",
+      "qaStatus": "qa_failed",
+      "user_story": "US6",
+      "functional_requirements": [
+        "FR-016",
+        "FR-017",
+        "FR-018",
+        "FR-019"
+      ],
+      "success_criteria": [
+        "SC-002",
+        "SC-003",
+        "SC-004",
+        "SC-005",
+        "SC-006"
+      ],
+      "prompt_heading": "B01-06",
+      "evidence": [
+        "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.md",
+        "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.json"
+      ],
+      "defects": [
+        {
+          "id": "DEF-B01-06-GAP-01",
+          "finding": "Backend schema and exporters lack official report numbering (<projectID>-<projectDay>-<YYYY>-<MM>-<DD>) and actual project day calculation from project start date (FR-017, H05, C08, DEF-B01-01)",
+          "requirement": "FR-017",
+          "disposition": "B01 numbering contract; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-06-GAP-02",
+          "finding": "Free MET Norway Locationforecast 2.0 client and 3-day project location forecast integration are missing in apps/api/core/field_reports/ (FR-017, X07, C08, DEF-B01-05)",
+          "requirement": "FR-017",
+          "disposition": "B01 forecast source contract; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-06-GAP-03",
+          "finding": "Observed wind and ground conditions from weather logs are omitted from official daily report header exports (FR-017, X07, C08)",
+          "requirement": "FR-017",
+          "disposition": "B01 log-source contract; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-06-GAP-04",
+          "finding": "Multi-sheet date-range Excel workbook exporter is not implemented in field_reports or report_export_service (FR-016, E17, C05)",
+          "requirement": "FR-016",
+          "disposition": "B01 deliverable contract; B03 output parity"
+        },
+        {
+          "id": "DEF-B01-06-GAP-05",
+          "finding": "Standalone discipline sub-report PDF exporter is not implemented in apps/api/core/sub_reports/ (FR-016, C07)",
+          "requirement": "FR-016",
+          "disposition": "B01 deliverable contract; B03 output parity"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "requirements_mapped": 6,
+    "requirements_total": 6,
+    "traceability_percent": 100,
+    "functional_requirements_mapped": 19,
+    "success_criteria_mapped": 6,
+    "reported_runtime_or_artifact_qa_failed": 4,
+    "reported_qa_passed": 2,
+    "fanout_defects_mapped": 17
+  },
+  "coverage_meaning": "100% of scoped fan-out requirements map to existing specification requirements, success criteria and prompt sections. This measures traceability only.",
+  "historical_audit_inventory": {
+    "source": "output/a1-requirements-2026-11-18/speckit-prompts/coverage.json",
+    "requirements": [
+      {
+        "id": "H01",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "H02",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "H03",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "H04",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "H05",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "H06",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D01",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D02",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D03",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D04",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D05",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "D06",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D07",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "D08",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "D09",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D10",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D11",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D12",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D13",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D14",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D15",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D16",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "D17",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W01",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W02",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W03",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W04",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W05",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "W06",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E01",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E02",
+        "owner": "B03",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "E03",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E04",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E05",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E06",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E07",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E08",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E09",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E10",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E11",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E12",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E13",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E14",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E15",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E16",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "E17",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "Q01",
+        "owner": "B05",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "Q02",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "Q03",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "Q04",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "Q05",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "id": "X01",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X02",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X03",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X04",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X05",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X06",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X07",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X08",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X09",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "id": "X10",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      }
+    ],
+    "source_clauses": [
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:120:FR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:121:FR-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:122:FR-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:123:FR-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:124:FR-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:125:FR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:126:FR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:127:FR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:128:FR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:129:FR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:130:FR-011",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:131:FR-012",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:132:FR-013",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:149:SC-001",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:150:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:151:SC-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:152:SC-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:153:SC-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/007-daily-report-gaps/spec.md:154:SC-006",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:92:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:93:FR-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:94:FR-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:95:FR-004",
+        "owner": "B03",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:109:FR-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:110:FR-006",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:111:FR-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:112:FR-008",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:113:FR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:114:FR-010",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:115:FR-011",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:116:FR-012",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:134:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:135:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:136:SC-003",
+        "owner": "B03",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:137:SC-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:138:SC-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:139:SC-006",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/028-auto-daily-report-summary/spec.md:140:SC-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:87:FR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:88:FR-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:89:FR-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:90:FR-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:91:FR-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:92:FR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:93:FR-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:94:FR-008",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:95:FR-009",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:96:FR-010",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:97:FR-011",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:98:FR-012",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:99:FR-013",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:100:FR-014",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:101:FR-015",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:102:FR-016",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:103:FR-017",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:137:SC-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:138:SC-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:139:SC-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:140:SC-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:141:SC-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:142:SC-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/030-daily-header-weather/spec.md:143:SC-007",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:83:FR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:84:FR-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:85:FR-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:86:FR-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:87:FR-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:88:FR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:89:FR-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:90:FR-008",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:91:FR-009",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:92:FR-010",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:93:FR-011",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:94:FR-012",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:113:SC-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:114:SC-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:115:SC-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:116:SC-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:117:SC-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:118:SC-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/031-site-inactivity-security/spec.md:119:SC-007",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:144:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:155:FR-002",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:156:FR-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:157:FR-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:158:FR-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:162:FR-006",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:163:FR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:164:FR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:165:FR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:166:FR-010",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:167:FR-011",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:168:FR-012",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:169:FR-013",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:170:FR-014",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:171:FR-015",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:172:FR-016",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:176:FR-017",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:177:FR-018",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:178:FR-019",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:179:FR-020",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:180:FR-021",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:181:FR-022",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:182:FR-023",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:183:FR-024",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:184:FR-025",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:185:FR-026",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:186:FR-027",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:187:FR-028",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:191:FR-029",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:192:FR-030",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:193:FR-031",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:194:FR-032",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:195:FR-033",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:196:FR-034",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:197:FR-035",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:198:FR-036",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:199:FR-037",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:200:FR-038",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:218:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:219:SC-002",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:220:SC-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:221:SC-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:222:SC-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:223:SC-006",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:224:SC-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:225:SC-008",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:226:SC-009",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/032-unit-report-source-truth/spec.md:227:SC-010",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:186:FR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:187:FR-002",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:188:FR-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:189:FR-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:190:FR-005",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:194:FR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:195:FR-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:196:FR-008",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:197:FR-009",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:198:FR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:199:FR-011",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:200:FR-012",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:204:FR-013",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:205:FR-014",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:206:FR-015",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:207:FR-016",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:208:FR-017",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:209:FR-018",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:213:FR-019",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:214:FR-020",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:215:FR-021",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:216:FR-022",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:217:FR-023",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:218:FR-024",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:222:FR-025",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:223:FR-026",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:224:FR-027",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:228:FR-028",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:229:FR-029",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:230:FR-030",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:231:FR-031",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:232:FR-032",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:236:FR-033",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:237:FR-034",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:238:FR-035",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:239:FR-036",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:243:FR-037",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:244:FR-038",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:245:FR-039",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:246:FR-040",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:247:FR-041",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:248:FR-042",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:249:FR-043",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:250:FR-044",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:251:FR-045",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:269:SC-001",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:270:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:271:SC-003",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:272:SC-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:273:SC-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:274:SC-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:275:SC-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:276:SC-008",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:277:SC-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/033-daily-sections-grid/spec.md:278:SC-010",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:87:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:88:FR-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:89:FR-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:90:FR-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:91:FR-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:92:FR-006",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:93:FR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:94:FR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:95:FR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:96:FR-010",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:97:FR-011",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:98:FR-012",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:99:FR-013",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:100:FR-014",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:115:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:116:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:117:SC-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:118:SC-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/034-daily-lifecycle-lock/spec.md:119:SC-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:89:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:90:FR-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:96:FR-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:97:FR-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:98:FR-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:99:FR-006",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:100:FR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:101:FR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:102:FR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:103:FR-010",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:104:FR-011",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:105:FR-012",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:118:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:119:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:120:SC-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:121:SC-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/035-correction-lineage-cloning/spec.md:122:SC-005",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:79:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:80:FR-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:81:FR-003",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:82:FR-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:83:FR-005",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:84:FR-006",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:85:FR-007",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:86:FR-008",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:87:FR-009",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:88:FR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:89:FR-011",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:90:FR-012",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:91:FR-013",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:92:FR-014",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:93:FR-015",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:94:FR-016",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:108:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:109:SC-002",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:110:SC-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:111:SC-004",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/036-validation-codes-unset-semantics/spec.md:112:SC-005",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:104:FR-001",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:105:FR-002",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:106:FR-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:107:FR-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:108:FR-005",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:109:FR-006",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:110:FR-007",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:111:FR-008",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:112:FR-009",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:113:FR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:114:FR-011",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:115:FR-012",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:116:FR-013",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:117:FR-014",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:118:FR-015",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:119:FR-016",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:120:FR-017",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:121:FR-018",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:122:FR-019",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:123:FR-020",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:124:FR-021",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:125:FR-022",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:126:FR-023",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:127:FR-024",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:128:FR-025",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:129:FR-026",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:130:FR-027",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:131:FR-028",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:155:SC-01",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:156:SC-02",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:157:SC-03",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:158:SC-04",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:159:SC-05",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:160:SC-06",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/037-daily-offline-sync/spec.md:161:SC-07",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:156:FR-001",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:157:FR-002",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:158:FR-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:159:FR-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:160:FR-005",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:161:FR-006",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:162:FR-007",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:163:FR-008",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:164:FR-009",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:165:FR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:171:FR-011",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:176:FR-012",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:177:FR-013",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:178:FR-014",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:179:FR-015",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:180:FR-016",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:181:FR-017",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:184:FR-018",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:185:FR-019",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:186:FR-020",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:218:SC-001",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:219:SC-002",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:220:SC-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:221:SC-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:222:SC-005",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:223:SC-006",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:224:SC-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/038-discipline-sub-reports/spec.md:225:SC-008",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:179:FR-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:180:FR-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:181:FR-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:182:FR-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:183:FR-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:184:FR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:185:FR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:186:FR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:187:FR-009",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:188:FR-010",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:189:FR-011",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:190:FR-012",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:191:FR-013",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:192:FR-014",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:193:FR-015",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:194:FR-016",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:195:FR-017",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:211:SC-001",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:212:SC-002",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:213:SC-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:214:SC-004",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:215:SC-005",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:216:SC-006",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:217:SC-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/039-auto-daily-rollup/spec.md:218:SC-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:179:FR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:180:FR-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:181:FR-003",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:182:FR-004",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:183:FR-005",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:184:FR-006",
+        "owner": "B03",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:185:FR-007",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:186:FR-008",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:187:FR-009",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:188:FR-010",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:189:FR-011",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:190:FR-012",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:191:FR-013",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:192:FR-014",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:196:FR-015",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:197:FR-016",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:198:FR-017",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:199:FR-018",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:200:FR-019",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:201:FR-020",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:219:SC-001",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:220:SC-002",
+        "owner": "B05",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:221:SC-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:222:SC-004",
+        "owner": "B04",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:223:SC-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "specs/044-shiraz-excel-parity-pdf/spec.md:224:SC-006",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:54:FR-DR-001",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:55:FR-DR-002",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:56:FR-DR-003",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:57:FR-DR-004",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:58:FR-DR-005",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:59:FR-DR-006",
+        "owner": "B03",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:60:FR-DR-007",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:61:FR-DR-008",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:62:FR-DR-009",
+        "owner": "B02",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:63:FR-DR-010",
+        "owner": "B01",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:64:FR-DR-011",
+        "owner": "B06",
+        "disposition": "historical owner retained; audit context only"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:76:SC-DR-001",
+        "owner": "B05",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:77:SC-DR-002",
+        "owner": "B05",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:78:SC-DR-003",
+        "owner": "B05",
+        "disposition": "B01 contract review"
+      },
+      {
+        "key": "reports_documentation/01-core-requirements-and-excel-blueprints/07-گزارش روزانه کارگاه.md:79:SC-DR-004",
+        "owner": "B05",
+        "disposition": "B01 contract review"
+      }
+    ],
+    "atomic_stories": [
+      {
+        "id": "US-DR-01",
+        "groups": [
+          "H02"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-02",
+        "groups": [
+          "H03",
+          "H04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-03",
+        "groups": [
+          "H06"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-04",
+        "groups": [
+          "D04",
+          "D05"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-05",
+        "groups": [
+          "D06",
+          "D07",
+          "D08"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-06",
+        "groups": [
+          "D09",
+          "D10"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-07",
+        "groups": [
+          "D11",
+          "D12"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-08",
+        "groups": [
+          "D13"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-09",
+        "groups": [
+          "D14",
+          "D15"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-10",
+        "groups": [
+          "D17"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-11",
+        "groups": [
+          "W01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-12",
+        "groups": [
+          "W03"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-13",
+        "groups": [
+          "W02",
+          "W04",
+          "W05"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-14",
+        "groups": [
+          "D05"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-15",
+        "groups": [
+          "X01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DR-16",
+        "groups": [
+          "X01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-SR-01",
+        "groups": [
+          "X02",
+          "E10",
+          "D01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-SR-02",
+        "groups": [
+          "X02",
+          "E10",
+          "D01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-SR-03",
+        "groups": [
+          "X02",
+          "E10",
+          "D01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-SR-04",
+        "groups": [
+          "X02",
+          "E10",
+          "D01"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-01",
+        "groups": [
+          "D01",
+          "H06"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-02",
+        "groups": [
+          "D03",
+          "D04",
+          "D06",
+          "D11",
+          "W04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-03",
+        "groups": [
+          "W03"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-04",
+        "groups": [
+          "H02",
+          "W05"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-05",
+        "groups": [
+          "D02"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-AG-06",
+        "groups": [
+          "E11",
+          "E13",
+          "E14",
+          "E15"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-01",
+        "groups": [
+          "X03"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-02",
+        "groups": [
+          "X03"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-03",
+        "groups": [
+          "X03"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-04",
+        "groups": [
+          "X04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-05",
+        "groups": [
+          "X04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-06",
+        "groups": [
+          "X04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-PR-07",
+        "groups": [
+          "X04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DP-01",
+        "groups": [
+          "X10"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DP-02",
+        "groups": [
+          "X10"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-DP-03",
+        "groups": [
+          "X10"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-WH-01",
+        "groups": [
+          "X10",
+          "D12"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-WH-02",
+        "groups": [
+          "X10",
+          "D12"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-EX-01",
+        "groups": [
+          "E01",
+          "E02",
+          "E03",
+          "E04"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-EX-02",
+        "groups": [
+          "E10"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-EX-03",
+        "groups": [
+          "E05",
+          "E06",
+          "E07",
+          "E08"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      },
+      {
+        "id": "US-EX-04",
+        "groups": [
+          "E12",
+          "E13",
+          "E14"
+        ],
+        "disposition": "review criterion relevance through requirement-group ownership; preserve original owner"
+      }
+    ]
+  },
+  "historical_b01_defects": [
+    {
+      "id": "DEF-B01-01",
+      "reported_title": "Missing report_number and project_day_number in DailyReport data model",
+      "specification_check": "الزام و منبع معتبر شماره رسمی گزارش و روز پروژه را با C08 ثبت کن. داده ساختگی پذیرفتنی نیست."
+    },
+    {
+      "id": "DEF-B01-02",
+      "reported_title": "Work shift actual duration missing, outputting hardcoded 'ساعات کاری شیفت: ثبت نشده' in export",
+      "specification_check": "واحد منطقی گزارش، شناسه و مدت واقعی شیفت و نگاشت هدر/فعالیت/by-date را با C03 ببند."
+    },
+    {
+      "id": "DEF-B01-03",
+      "reported_title": "Headcount sum erroneously labeled as 'نفرروز' without unique worker presence proof",
+      "specification_check": "سرجمع نفرات، نفرشیفت و نفرساعت را با پیش‌شرط‌های حضور یکتا و مدت معتبر تعریف کن. B03/B04 مصرف‌کننده‌اند."
+    },
+    {
+      "id": "DEF-B01-04",
+      "reported_title": "Rigid hardcoded 34/32 catalog in export without configurable project profile mapping",
+      "specification_check": "پروفایل ۳۴/۳۲ و جایگاه عنوان سفارشی/تاریخی را به C04 و تأیید B01 مشروط کن."
+    },
+    {
+      "id": "DEF-B01-05",
+      "reported_title": "Missing integration of wind and ground conditions from WeatherLog to official daily header",
+      "specification_check": "وضعیت زمین/باد موجود در WeatherLog و پیش‌بینی را با منبع، ضرورت و نحوه نمایش طبق C08 تعیین کن."
+    },
+    {
+      "id": "DEF-B01-06",
+      "reported_title": "Unresolved and unratified scope decisions C01 to C08 causing data contract ambiguity",
+      "specification_check": "C01..C08 را تعیین تکلیف کن، C09/C10 را حفظ کن و برای هر ۱۸ بخش جایگاه چاپ، جزئیات یا فاز مالک را ثبت کن."
+    }
+  ],
+  "broader_daily_sections": [
+    {
+      "id": 1,
+      "title": "اطلاعات عمومی",
+      "source_text": "1. **اطلاعات عمومی** — H01 H04 H05 H06؛ A.1؛ ساعت/شماره رسمی هنوز بسته نشده.",
+      "groups": [
+        "H01",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "stage_assignments": [
+        {
+          "group": "H01",
+          "owner": "B03"
+        },
+        {
+          "group": "H04",
+          "owner": "B01"
+        },
+        {
+          "group": "H05",
+          "owner": "B01"
+        },
+        {
+          "group": "H06",
+          "owner": "B02"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 2,
+      "title": "شرایط جوی، باد، زمین",
+      "source_text": "2. **شرایط جوی، باد، زمین** — H02 X07؛ A.1 آب‌وهوا؛ اتصال باد/زمین و پیش‌بینی تصمیم باز.",
+      "groups": [
+        "H02",
+        "X07"
+      ],
+      "stage_assignments": [
+        {
+          "group": "H02",
+          "owner": "B03"
+        },
+        {
+          "group": "X07",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 3,
+      "title": "فعالیت‌های ابنیه",
+      "source_text": "3. **فعالیت‌های ابنیه** — D04 D05 E10؛ ورود A.8؛ نمایش/خروجی A.1.",
+      "groups": [
+        "D04",
+        "D05",
+        "E10"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D04",
+          "owner": "B03"
+        },
+        {
+          "group": "D05",
+          "owner": "B01"
+        },
+        {
+          "group": "E10",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 4,
+      "title": "فعالیت‌های مکانیکی",
+      "source_text": "4. **فعالیت‌های مکانیکی** — D04 X02؛ ورود/QC در A.8؛ نمایش A.1.",
+      "groups": [
+        "D04",
+        "X02"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D04",
+          "owner": "B03"
+        },
+        {
+          "group": "X02",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 5,
+      "title": "فعالیت‌های برقی",
+      "source_text": "5. **فعالیت‌های برقی** — D04 X02 E10؛ ورود A.8؛ خروجی مربوط A.1.",
+      "groups": [
+        "D04",
+        "X02",
+        "E10"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D04",
+          "owner": "B03"
+        },
+        {
+          "group": "X02",
+          "owner": "B01"
+        },
+        {
+          "group": "E10",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 6,
+      "title": "نیروی انسانی",
+      "source_text": "6. **نیروی انسانی** — D06 D07 D08؛ A.1 نمایش؛ قواعد منابع A.8.",
+      "groups": [
+        "D06",
+        "D07",
+        "D08"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D06",
+          "owner": "B03"
+        },
+        {
+          "group": "D07",
+          "owner": "B01"
+        },
+        {
+          "group": "D08",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 7,
+      "title": "ماشین‌آلات",
+      "source_text": "7. **ماشین‌آلات** — D09 D10؛ A.1 نمایش و رفع null؛ عملیات A.8.",
+      "groups": [
+        "D09",
+        "D10"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D09",
+          "owner": "B03"
+        },
+        {
+          "group": "D10",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 8,
+      "title": "مصالح",
+      "source_text": "8. **مصالح** — D11 D12؛ رسید در چاپ A.1؛ جزئیات انبار A.8.",
+      "groups": [
+        "D11",
+        "D12"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D11",
+          "owner": "B03"
+        },
+        {
+          "group": "D12",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 9,
+      "title": "پیشرفت برنامه‌ای و واقعی",
+      "source_text": "9. **پیشرفت برنامه‌ای و واقعی** — X03؛ A.7/A.8؛ نه معادل حجم روزانه.",
+      "groups": [
+        "X03"
+      ],
+      "stage_assignments": [
+        {
+          "group": "X03",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 10,
+      "title": "موانع و مسائل",
+      "source_text": "10. **موانع و مسائل** — D14؛ ساختار موجود؛ تطبیق A.1.",
+      "groups": [
+        "D14"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D14",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 11,
+      "title": "ایمنی و HSE",
+      "source_text": "11. **ایمنی و HSE** — D15؛ پیگیری A.8؛ بومی‌سازی چاپ ناقص.",
+      "groups": [
+        "D15"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D15",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 12,
+      "title": "کنترل کیفیت و آزمایش‌ها",
+      "source_text": "12. **کنترل کیفیت و آزمایش‌ها** — D13 X02؛ QC تخصصی A.8؛ دامنه چاپ A.1 روشن شود.",
+      "groups": [
+        "D13",
+        "X02"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D13",
+          "owner": "B03"
+        },
+        {
+          "group": "X02",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 13,
+      "title": "تدارکات روز",
+      "source_text": "13. **تدارکات روز** — X06؛ A.4/A.10؛ اتصال چاپ نیازمند دامنه.",
+      "groups": [
+        "X06"
+      ],
+      "stage_assignments": [
+        {
+          "group": "X06",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 14,
+      "title": "مکاتبات، RFI، Submittal",
+      "source_text": "14. **مکاتبات، RFI، Submittal** — X05 X06؛ A.3.C/A.9؛ متن آزاد جانشین گردش رسمی نیست.",
+      "groups": [
+        "X05",
+        "X06"
+      ],
+      "stage_assignments": [
+        {
+          "group": "X05",
+          "owner": "B01"
+        },
+        {
+          "group": "X06",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 15,
+      "title": "بازدید و جلسه و تصمیم",
+      "source_text": "15. **بازدید و جلسه و تصمیم** — D16 X05؛ بازدید روزانه موجود؛ جلسات رسمی A.3.C.",
+      "groups": [
+        "D16",
+        "X05"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D16",
+          "owner": "B03"
+        },
+        {
+          "group": "X05",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 16,
+      "title": "عکس‌های کارگاه",
+      "source_text": "16. **عکس‌های کارگاه** — D17؛ پیوند بخش/منبع؛ upload واقعی باید آزموده شود.",
+      "groups": [
+        "D17"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D17",
+          "owner": "B03"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 17,
+      "title": "نظر مدیر پروژه",
+      "source_text": "17. **نظر مدیر پروژه** — W05؛ موجود در خلاصه؛ در اصلاحیه گم می‌شود.",
+      "groups": [
+        "W05"
+      ],
+      "stage_assignments": [
+        {
+          "group": "W05",
+          "owner": "B02"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    },
+    {
+      "id": 18,
+      "title": "ورود واحد، تأیید، قفل و آفلاین",
+      "source_text": "18. **ورود واحد، تأیید، قفل و آفلاین** — D01 W01 W02 W03 W04 X01؛ اثر بر A.1 مستقیم؛ پذیرش جامع آفلاین A.8.",
+      "groups": [
+        "D01",
+        "W01",
+        "W02",
+        "W03",
+        "W04",
+        "X01"
+      ],
+      "stage_assignments": [
+        {
+          "group": "D01",
+          "owner": "B02"
+        },
+        {
+          "group": "W01",
+          "owner": "B02"
+        },
+        {
+          "group": "W02",
+          "owner": "B02"
+        },
+        {
+          "group": "W03",
+          "owner": "B02"
+        },
+        {
+          "group": "W04",
+          "owner": "B02"
+        },
+        {
+          "group": "X01",
+          "owner": "B01"
+        }
+      ],
+      "contract_review_stage": "B01",
+      "final_review_stage": "B06"
+    }
+  ],
+  "governance": {
+    "ratified": [
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "GOV-01"
+    ],
+    "fixture": "SIM-A1-001",
+    "solar_hijri_date": "1406-03-01",
+    "project_day": 12,
+    "employer_acceptance": "Pending independent B06 handoff"
+  },
+  "evidence_limitations": [
+    "Separate state.memory.stage1_audit_snapshot was not exposed. Supplied handoff and local Stage 1 reports were used.",
+    "QA observations are historical and were not rerun for Stage 2."
+  ],
+  "source_manifest": [
+    {
+      "path": "output/a1-b01-stage1-discovery-2026-11-19.md",
+      "sha256": "8a9017a1516cfd22a8cdda79709c0a21aab1c6b594384161e557503a942ac663"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/README.md",
+      "sha256": "40e8573e143047611fe969ca781834b22d2c9c6243f9c1934e60a74778fa2684"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/atomic-coverage.md",
+      "sha256": "66f77bd3a5120a92a4932e0bd45268ccbe011f1ee633b20e0c83a2df6a9c788a"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/broader-daily-sections.md",
+      "sha256": "c326e11f462c1299aaee9c6b8cc1c04e86d0fab08bc9c94151afa3e253b63aec"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/employer-summary.md",
+      "sha256": "b55ed7ca6912818911524b1d1e5ea1481ab9063e889d7942a7000e3e9bb3b89b"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/remaining-work.md",
+      "sha256": "b6fd91c996b12fb17db28c5de0b20ac6c3ebb4e9df2dc86e3715df34ac66ea89"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/requirements-and-delivery.md",
+      "sha256": "a73f8b78c6a6c8d8bab7f9bdee4cf78bffa29eb74599e74c13c8bfe1d025a22b"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/scope-decisions.md",
+      "sha256": "fa29feff752bd628a21337fcd936cd26d26f1bea6e0dca2596076d77c0f4d3a5"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/speckit-prompts/01-b01-data-contract.md",
+      "sha256": "e05b0d2b6fec40efc1c3070e21012a086aab89bda47ccc972c98d000f9921926"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-18/speckit-prompts/coverage.json",
+      "sha256": "140c3dae1fe1344956a326382b9bc7704b6c52f787e4fb39d602f5ecaeaec758"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage-1.1.md",
+      "sha256": "a4ed3e2a7cd0622202665d877ca40aaab5086136649f524296671f90a3a7313a"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.json",
+      "sha256": "e3e45a42e3570ea6b2fbfd7ebb725f94981513a50e73caeac2acca4f9c2cb2ae"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.md",
+      "sha256": "2ecdf7a663b9ce219782f7e460bb49e9dc4732c8bc7b956154fd137b2889c83c"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.json",
+      "sha256": "bebbec8039b8509db1efce5836296619f47bdf6060cc7878ad78d6ece007ba46"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.md",
+      "sha256": "c0b9ed0449a274c143829581923c4f5df3194b88cacc9ba7e6beaeb6b47a2a89"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.json",
+      "sha256": "f5a1d7830decf16f04048c27cc006fc299829b6885969728ad69fbcd7dc69901"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.md",
+      "sha256": "9b25da8ba4095710a6b7659c4a8de369f3fe0f72be3ddebf8859f390dab36647"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.json",
+      "sha256": "708917dfc987cd8c8e983b6b4bdb4ba6f854e2b10f620bf4fde43bd01dfabd18"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.md",
+      "sha256": "8ee122e06ea0cef8f4e267f44c1e1044a4e54cf8297b8eade50999eaafee8349"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.json",
+      "sha256": "7e4ae8d14f68764d36d2115a38462aec8e6fae36a1c2a214b483e476d08baed1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.md",
+      "sha256": "0959918d82039e5489bac1967960fdd32799c4fec62145d0ca419ae3e1a0c0d7"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.json",
+      "sha256": "45a96da0ab79ecf3681ec0a697034ead6f2d1bd48422f07a907c6607865ca8fb"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.md",
+      "sha256": "4547714822b950f92f65a38d008c51820beb8230f0cce401b0b37918bd5816a1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.json",
+      "sha256": "337a0a7201e5038b81c7d3f28a6503b14fd9db4ea4683d0093949d32640dd2a6"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.md",
+      "sha256": "461f3bc336a52d76e6905f8fc860c53fbbfa6c526d13476025d69629c0e1ed02"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.json",
+      "sha256": "771f8109fd8437990cf2a6ff18af87c2d94f05f03ec71dfb627f83b3d1ebbb84"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.md",
+      "sha256": "f867a23368a9d841993926cada67868569f1e5f36fecf93940a24b7385a8b366"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.json",
+      "sha256": "a78ced4e1c055e06bf0a0c64d57976d118780898f43311cea768d250860b7ad3"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.md",
+      "sha256": "9e4cdbc5a083ab7384198ad3aa5353fb53198b28f266469bbd9630f314d5d23e"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.json",
+      "sha256": "ffd133b7fda4da8c5b7833d752abd5eb22ffbf296654a80394b2fe941f641286"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.md",
+      "sha256": "1b86bc4c4f5eef678d331152bb4d202bad3966d1e05390b6b3f4ec5844f07f99"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.json",
+      "sha256": "b2b3cf7e1152a33e49ffa0d20193174a4a4fd0e6ef732311b66da8f7333671f7"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.md",
+      "sha256": "4100b503a3f33b655ea2a238f43ba3a534613218047fe9ef147687010537e1c2"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.json",
+      "sha256": "edf80bf5f2c71336058d79801eecf8445be79816fafcd122bb68e5d0840dbb40"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.md",
+      "sha256": "2533cd46e69eb9890379867dbb1f3e4fb7686281753f80dde481de5223ddfe7b"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-discovery.md",
+      "sha256": "1b15d9c6e43e47a96a64fc766fe47d1e2724c13eb04937d187ec064f9118048e"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-19.json",
+      "sha256": "5d958dae5de0886669a9e1ee6a6cf69f7ea7090cbbd732e9eb41af516e72715d"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-19.md",
+      "sha256": "6ac16b99301bf398461df24dce329321ae9ab394996d910efb7a805601e47ff9"
+    },
+    {
+      "path": "specs/057-a1-b01-data-contract/checklists/requirements.md",
+      "sha256": "3cca0735b12a2291fac679955f02c5323dc69e7ca74c357e542bfbee50c94355"
+    },
+    {
+      "path": "specs/057-a1-b01-data-contract/spec.md",
+      "sha256": "da3db1c84e685571e965b4d0104947539e7acf55422be1aa673f236c04cb24a7"
+    }
+  ],
+  "supervisor_review": {
+    "status": "approved",
+    "ready_for_planning": true,
+    "next_command": "/speckit-plan",
+    "feature_directory": "specs/057-a1-b01-data-contract",
+    "material_blockers": [],
+    "evidence": [
+      "specs/057-a1-b01-data-contract/spec.md",
+      "specs/057-a1-b01-data-contract/checklists/requirements.md"
+    ],
+    "execution_status": "Routed in Stage 2 handoff"
+  }
+}

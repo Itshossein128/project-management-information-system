@@ -1,4 +1,5 @@
-import { apiBlob, apiJson } from "@/app/lib/api-client";
+import { serializeActivityLogSelection, type ActivityLogSelection } from "@/app/lib/api/reports";
+import { apiBlob, apiJson, downloadApiAttachment } from "@/app/lib/api-client";
 import { PATHS } from "@/app/routeVars";
 import type { ListResponse } from "@/app/lib/api-types";
 
@@ -278,6 +279,13 @@ export interface ConcreteRow {
   test_sheet_count?: number | null;
   qc_inspection?: string | null;
   qc_link?: { id: string; href: string } | null;
+  qc_details?: {
+    batching_plant: string | null;
+    truck_mixer: string | null;
+    lab_sheet_number: string | null;
+    slump: string | null;
+    result_28_day_href: string | null;
+  } | null;
   source_discipline?: string;
   is_derived?: boolean;
   provenance?: DerivedSourceItem[];
@@ -455,6 +463,9 @@ export interface DailyReportListParams {
   date_to?: string;
   status?: ReportStatus;
   prepared_by?: string;
+  discipline?: string;
+  contractor?: string;
+  block?: string;
 }
 
 const base = (projectId: string) => `/${PATHS.API_PROJECTS}/${projectId}/daily-reports`;
@@ -467,12 +478,43 @@ function buildQuery(params: DailyReportListParams = {}) {
   if (params.date_to) q.set("date_to", params.date_to);
   if (params.status) q.set("status", params.status);
   if (params.prepared_by) q.set("prepared_by", params.prepared_by);
+  if (params.discipline) q.set("discipline", params.discipline);
+  if (params.contractor) q.set("contractor", params.contractor);
+  if (params.block) q.set("block", params.block);
   const s = q.toString();
   return s ? `?${s}` : "";
 }
 
 export function fetchDailyReports(projectId: string, params?: DailyReportListParams) {
   return apiJson<ListResponse<DailyReportListItem>>(`${base(projectId)}/${buildQuery(params)}`);
+}
+
+export interface DailyReportContractHeader {
+  project_name: string;
+  contract_number: string | null;
+  prepared_by_name: string | null;
+  report_date: string;
+  day_of_week: string;
+  official_numbering: {
+    official_report_number: string | null;
+    project_day: number | null;
+  };
+  worked_shifts: {
+    shift_id: 1 | 2 | 3;
+    actual_start_at: string | null;
+    actual_end_at: string | null;
+    actual_duration_hours: string | null;
+  }[];
+  weather: {
+    wind_speed: string | null;
+    soil_condition: string | null;
+    forecast_provider: string;
+    forecast_days: { date: string; air_temperature_c: number }[];
+  };
+}
+
+export function fetchDailyReportContractHeader(projectId: string, reportId: string) {
+  return apiJson<DailyReportContractHeader>(`${base(projectId)}/${reportId}/contract-summary/`);
 }
 
 export function fetchDailyReport(projectId: string, reportId: string) {
@@ -603,24 +645,21 @@ export function fetchReportExcel(projectId: string, reportId: string) {
   return apiBlob(`${base(projectId)}/${reportId}/excel/`);
 }
 
-export function fetchActivityLogExcel(
-  projectId: string,
-  params?: Record<string, string | number | string[] | undefined>
-) {
-  const query = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, val]) => {
-      if (val !== undefined && val !== null && val !== "") {
-        if (Array.isArray(val)) {
-          val.forEach((item) => query.append(key, String(item)));
-        } else {
-          query.set(key, String(val));
-        }
-      }
-    });
-  }
-  const qs = query.toString() ? `?${query.toString()}` : "";
-  return apiBlob(`/${PATHS.API_PROJECTS}/${projectId}/activity-log/excel/${qs}`);
+export function downloadDailyReportFile(projectId: string, reportId: string, format: "excel" | "pdf") {
+  return downloadApiAttachment(
+    `${base(projectId)}/${reportId}/${format}/`,
+    `daily-report.${format === "excel" ? "xlsx" : "pdf"}`,
+  );
+}
+
+export function downloadDailyReportWorkbook(projectId: string, first: string, last: string) {
+  const dates = new URLSearchParams({ date_from: first, date_to: last });
+  return downloadApiAttachment(`${base(projectId)}/excel/?${dates.toString()}`, "daily-reports.xlsx");
+}
+
+export function fetchActivityLogExcel(projectId: string, selection: ActivityLogSelection = {}) {
+  const query = serializeActivityLogSelection(selection).toString();
+  return apiBlob(`/${PATHS.API_PROJECTS}/${projectId}/activity-log/excel/${query ? `?${query}` : ""}`);
 }
 
 export interface SyncBatchResult {

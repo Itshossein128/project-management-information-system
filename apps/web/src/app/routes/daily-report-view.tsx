@@ -12,8 +12,8 @@ import { fetchProject } from "@/app/lib/api/projects";
 import {
   approveReport,
   fetchDailyReport,
-  fetchReportExcel,
-  fetchReportPdf,
+  fetchDailyReportContractHeader,
+  downloadDailyReportFile,
   rejectReport,
   reviewReport,
   submitReport,
@@ -93,6 +93,15 @@ export default function DailyReportViewPage() {
     queryFn: () => fetchDailyReport(projectId, reportId),
   });
   const report = reportQuery.data ?? null;
+  const headerQuery = useQuery({
+    queryKey: ["daily-report-header", projectId, reportId],
+    queryFn: () => fetchDailyReportContractHeader(projectId, reportId),
+    enabled: Boolean(report),
+  });
+  const header = headerQuery.data;
+  const unknown = t("dailyReports.referenceHeader.unknown");
+  const shiftTimestamp = (timestamp: string | null) =>
+    timestamp ? `${formatDisplayDate(timestamp.slice(0, 10))} ${timestamp.slice(11, 16)}` : unknown;
 
   useEffect(() => {
     if (!report) return;
@@ -120,10 +129,10 @@ export default function DailyReportViewPage() {
     [activitiesQuery.data],
   );
 
-  const refetch = () =>
-    queryClient.invalidateQueries({
-      queryKey: ["daily-report", projectId, reportId],
-    });
+  const refetch = () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["daily-report", projectId, reportId] }),
+    queryClient.invalidateQueries({ queryKey: ["daily-report-header", projectId, reportId] }),
+  ]);
 
   const workflow = useMutation({
     mutationFn: async (action: {
@@ -145,17 +154,7 @@ export default function DailyReportViewPage() {
   const exportPdf = async () => {
     setDownloading(true);
     try {
-      const blob = await fetchReportPdf(projectId, reportId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const pdfDate = report?.report_date ?? reportId;
-      const pdfShift = report?.shift ?? "full";
-      a.download = `daily-report-${pdfDate}-${pdfShift}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      await downloadDailyReportFile(projectId, reportId, "pdf");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -166,17 +165,7 @@ export default function DailyReportViewPage() {
   const exportExcel = async () => {
     setDownloadingExcel(true);
     try {
-      const blob = await fetchReportExcel(projectId, reportId);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const xlDate = report?.report_date ?? reportId;
-      const xlShift = report?.shift ?? "full";
-      a.download = `daily-report-${xlDate}-${xlShift}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      await downloadDailyReportFile(projectId, reportId, "excel");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -248,10 +237,13 @@ export default function DailyReportViewPage() {
         ]}
       />
       <PageHeader
-        title={`گزارش روزانه — ${formatDisplayDate(report.report_date)} (${report.day_of_week})`}
+        title={t("dailyReports.referenceHeader.title", {
+          date: formatDisplayDate(header?.report_date ?? report.report_date),
+          day: header?.day_of_week ?? report.day_of_week,
+        })}
         subtitle={
           report.prepared_by_name
-            ? `تهیه‌کننده: ${report.prepared_by_name}`
+            ? t("dailyReports.referenceHeader.preparer", { name: header?.prepared_by_name ?? report.prepared_by_name })
             : undefined
         }
         actions={
@@ -272,7 +264,7 @@ export default function DailyReportViewPage() {
               className='inline-flex items-center gap-1 rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50'
             >
               <Download className='size-4' />
-              خروجی اکسل (FILE 4)
+              {t("dailyReports.referenceHeader.dailyExcel")}
             </button>
             <button
               type='button'
@@ -281,13 +273,37 @@ export default function DailyReportViewPage() {
               className='inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50'
             >
               <Download className='size-4' />
-              خروجی PDF
+              {t("dailyReports.referenceHeader.dailyPdf")}
             </button>
           </div>
         }
       />
 
       <div className='space-y-5'>
+        {headerQuery.isError ? <QueryErrorState onRetry={() => void headerQuery.refetch()} /> : null}
+        {header ? (
+          <div className='grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-4'>
+            <Info label={t("dailyReports.referenceHeader.project")} value={header.project_name} />
+            <Info label={t("dailyReports.referenceHeader.contract")} value={header.contract_number ?? unknown} />
+            <Info label={t("dailyReports.referenceHeader.number")} value={header.official_numbering.official_report_number ?? unknown} />
+            <Info label={t("dailyReports.referenceHeader.day")} value={String(header.official_numbering.project_day ?? unknown)} />
+            <Info label={t("dailyReports.referenceHeader.wind")} value={header.weather.wind_speed ?? unknown} />
+            <Info label={t("dailyReports.referenceHeader.ground")} value={header.weather.soil_condition ?? unknown} />
+            <Info label={t("dailyReports.referenceHeader.forecast", { provider: header.weather.forecast_provider })}
+              value={header.weather.forecast_days.map(
+                (day) => `${formatDisplayDate(day.date)} · ${day.air_temperature_c} °C`,
+              ).join("\n") || unknown}
+            />
+            <Info label={t("dailyReports.referenceHeader.shifts")}
+              value={header.worked_shifts.map((shift) => t("dailyReports.referenceHeader.shiftLine", {
+                shift: shift.shift_id,
+                start: shiftTimestamp(shift.actual_start_at),
+                end: shiftTimestamp(shift.actual_end_at),
+                duration: shift.actual_duration_hours ?? unknown,
+              })).join("\n") || unknown}
+            />
+          </div>
+        ) : null}
         <ApprovalStatusBar
           projectId={projectId}
           report={report}
@@ -315,7 +331,7 @@ export default function DailyReportViewPage() {
               >
                 <div>
                   <label className='mb-2 block text-sm font-medium' htmlFor='mgmt-opinion'>
-                    نظر مدیریت
+                    {t("dailyReports.summary.managementOpinion")}
                   </label>
                   <textarea
                     id='mgmt-opinion'
@@ -345,7 +361,7 @@ export default function DailyReportViewPage() {
                   </label>
                   {weatherOverride ? (
                     <div className='block text-sm' data-testid='weather-override-value'>
-                      <span className='mb-1 block text-muted-foreground'>شرایط جوی</span>
+                      <span className='mb-1 block text-muted-foreground'>{t("weather.condition")}</span>
                       <WeatherSelector
                         value={weather as WeatherCondition}
                         onChange={(w) => setWeather(w)}
@@ -355,7 +371,7 @@ export default function DailyReportViewPage() {
                   ) : null}
                   {siteOverride ? (
                     <label className='block text-sm'>
-                      <span className='mb-1 block text-muted-foreground'>وضعیت کارگاه</span>
+                      <span className='mb-1 block text-muted-foreground'>{t("weather.siteStatus")}</span>
                       <select
                         className='w-full rounded-md border border-border bg-background p-2'
                         value={siteStatus}
@@ -366,8 +382,8 @@ export default function DailyReportViewPage() {
                         }}
                         data-testid='site-override-value'
                       >
-                        <option value='active'>فعال</option>
-                        <option value='inactive'>تعطیل</option>
+                        <option value='active'>{t("common.active")}</option>
+                        <option value='inactive'>{t("common.inactive")}</option>
                       </select>
                     </label>
                   ) : null}
@@ -376,7 +392,7 @@ export default function DailyReportViewPage() {
                 <div className='grid gap-3 sm:grid-cols-2'>
                   <div>
                     <label htmlFor='summary-temp-max' className='mb-1 block text-sm text-muted-foreground'>
-                      حداکثر دما (°C)
+                      {t("weather.tempMax")} (°C)
                     </label>
                     <input
                       id='summary-temp-max'
@@ -401,7 +417,7 @@ export default function DailyReportViewPage() {
                   </div>
                   <div>
                     <label htmlFor='summary-temp-min' className='mb-1 block text-sm text-muted-foreground'>
-                      حداقل دما (°C)
+                      {t("weather.tempMin")} (°C)
                     </label>
                     <input
                       id='summary-temp-min'
@@ -484,7 +500,7 @@ export default function DailyReportViewPage() {
                       ? siteStatus === "inactive"
                       : report.site_status === "inactive";
                     if (isInactive && !inactivityReason) {
-                      toast.error("علت تعطیلی کارگاه الزامی است");
+                      toast.error(t("dailyReports.summary.inactivityReasonRequired"));
                       return;
                     }
 
@@ -497,7 +513,7 @@ export default function DailyReportViewPage() {
                         temp_min: tempMin === "" ? null : tempMin,
                         temp_max: tempMax === "" ? null : tempMax,
                         weather_impact_notes: weatherImpactNotes,
-                        inactivity_reason: isInactive ? (inactivityReason as InactivityReason) : null,
+                        ...(isInactive ? { inactivity_reason: inactivityReason as InactivityReason } : {}),
                         ...(weatherOverride
                           ? { weather_condition: weather as WeatherCondition }
                           : {}),
@@ -506,7 +522,7 @@ export default function DailyReportViewPage() {
                           : {}),
                       });
                       setServerTempErrors({});
-                      toast.success("ذخیره شد");
+                      toast.success(t("dailyReports.summary.metadataSaved"));
                       void refetch();
                     } catch (e: any) {
                       const code = e?.code || e?.response?.data?.error?.code;
@@ -514,20 +530,20 @@ export default function DailyReportViewPage() {
                       const msg =
                         e?.response?.data?.error?.message ||
                         e?.message ||
-                        "خطا در ثبت اطلاعات";
+                        t("dailyReports.summary.metadataSaveFailed");
                       if (code === "temp_max_must_be_gte_temp_min" || details?.temp_max) {
                         const text = t("errors.temp_max_must_be_gte_temp_min", "دمای بیشینه باید بزرگتر یا مساوی دمای کمینه باشد.");
                         setServerTempErrors({ max: text });
                         toast.error(text);
                       } else if (code === "inactivity_reason_required" || msg.includes("inactivity_reason_required")) {
-                        toast.error("علت تعطیلی کارگاه الزامی است");
+                        toast.error(t("dailyReports.summary.inactivityReasonRequired"));
                       } else {
                         toast.error(msg);
                       }
                     }
                   }}
                 >
-                  ذخیره نظر و سربرگ
+                  {t("dailyReports.summary.saveMetadata")}
                 </Button>
               </div>
             ) : null}
@@ -606,7 +622,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <p className='text-xs text-muted-foreground'>{label}</p>
-      <p className='text-sm font-medium'>{value}</p>
+      <p className='whitespace-pre-line text-sm font-medium' dir='auto'>{value}</p>
     </div>
   );
 }

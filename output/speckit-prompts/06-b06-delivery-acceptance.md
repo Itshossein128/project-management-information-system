@@ -6,7 +6,7 @@
 این درخواست فقط نگارش specification برای همین زیرمرحله است. طبق قالب فعال SpecKit یک feature specification و checklist کیفیت مستقل تولید کن و سپس متوقف شو؛ plan، tasks، analyze، implement، تست محصول، استقرار و اجرای مرحله بعد مجاز نشده‌اند. خروجی حاضرِ Stage 2 صرفاً ورودی specify است.
 
 ورودی workflow اصلی (عین متن):
-Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through B06 from /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
+Go for the next step to deliver the application, based on A.1 phase in http://localhost:5173/delivery-plan
 
 ریشه پروژه: /home/hossein/Desktop/projects/building-management
 منبع مرحلهٔ ۱: /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
@@ -15,7 +15,7 @@ Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through
 قواعد نگارش:
 - چه چیزی و چرا، نقش‌ها، ارزش کاربر، دامنه/غیردامنه، سناریوهای Given/When/Then و شکست/لبه، نیازمندی‌های قابل آزمون، معیارهای موفقیت قابل اندازه‌گیری، وابستگی و تصمیم‌های باز را در spec بنویس. فناوری/ساختار کد را راه‌حل اجباری نکن. نام API/مدل در شواهد فقط نشانی رفتار فعلی است.
 - شناسه‌های H/D/W/E/Q/X و C و US و path:line بندها را به FR/SC و سناریوهای spec وصل کن؛ برای هر بند disposition صریحِ حفظ رفتار، رفع شکاف، تصمیم شرطی یا ارجاع فاز دیگر بده. نگاشت داستان به گروه به معنی اجرای تمام سناریوهای آن نیست؛ اختلاف‌ها را در سطح معیار بررسی کن.
-- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن.
+- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن. وضعیت‌ها و تصمیم‌های نقل‌شده از ممیزی پایه تاریخی‌اند؛ برای رفتار جاری، قرارداد نسخه‌دار و شواهد تاریخ‌دار پایین را بررسی کن.
 - تصمیم باز را به کارفرما نسبت نده؛ پیشنهاد، تصمیم مصوب و رفتار مشاهده‌شده جدا باشند. C01..C10 را با متن منبع حفظ کن؛ اثرگذاری تصمیم باید پیش از کار وابسته رفع شود. برای پنهان‌کردن ابهام مادی default نساز. حداکثر۳ سؤال بحرانی هر دور؛ باقی موارد در رجیستر باز باقی بمانند.
 - هسته روزانه، موتور تجمیع، صفحات واحد، workflow و خروجی‌های موجود را بی‌دلیل از نو تعریف نکن. کل عملیات/آفلاین/منابع A.8، ارتباطات A.3.C، گزارش‌های دوره‌ای A.10 و استقرار/آموزش جامع A.12 در مالک خود باقی‌اند؛ اثر خراب‌کننده آن‌ها بر A.1 قابل چشم‌پوشی نیست. قرارداد دامنه B01 هر توسعه شرطی را به مالک مشخص می‌رساند.
 - پیش از ایجاد feature، مسیر/شماره آزاد را با وضعیت واقعی specs انتخاب کن؛ مسیر اشغال‌شده را بازنویسی نکن. شناسه B بسته ثابت است و feature-number نیست. یک feature در هر فراخوانی؛ شماره از پیش تحمیل نشده است.
@@ -39,6 +39,41 @@ granularity کل A.1: multi؛ granularity این فراخوانی: single.
 - B01..B05 باید handoff بسته داشته باشند؛ همه۶۱ گروه،۳۷۰ بند و۴۲ داستان را طبق disposition و مرز قرارداد مرور کن، نه اینکه خارج‌دامنه‌ها را پیاده‌شده یا پذیرفته‌شده حساب کنی. پرونده انتقال به A.3.C/A.4/A.7/A.8/A.9/A.10/A.12 حفظ شود.
 - سه وضعیت مستقل گزارش شوند: آمادگی فنی، نسخه قابل دسترسی آزموده‌شده، و پذیرش اولیه کارفرما. هیچ عامل یا تستی به‌جای کارفرما امضا نکند. نبود کارفرما/محیط واقعی/داده لازم نتیجه pending با مسئول و شاهد لازم دارد.
 پایان A.1 تنها با بسته‌شدن نقص اجرایی مؤثر، گواه مستقل عدد/فرمول/چاپ، تصمیم‌های دامنه مؤثر، صفر خطای باز رسمی و صورت‌جلسه پذیرش اولیه صریح کارفرما قابل اعلام است.
+
+Current Stage 1 package evidence (2026-11-22)
+- QA verdict for B06: qa_failed. Specify after B05 in the sequence. Release acceptance requires the B05 evidence and same-candidate clearance of B01–B05.
+- Reports: output/a1-requirements-2026-11-22-stage1-b06-qa-findings.md and output/a1-requirements-2026-11-22-stage1-b06-qa-findings.json.
+- The historical blocks below retain the baseline, prior verdicts, and original defect meanings. Use the dated package reports for their tested scopes and the published contract for decisions and deliverable IDs. Stage 2 did not run product QA.
+- Specify a frozen release manifest and sample hashes, independent B05 evidence, role/access guide, and a walkthrough with explicit employer disposition, identity, date and release. B01–B04 reported passes supersede the blanket upstream QA claim within their tested scopes. B05 remains open. Require candidate-bound clearance for B01–B05. Record authorized access-control verification by role, project and download surface, desktop and 390×844 mobile in FA RTL and EN LTR across 18 sections, and reconcile the decision tree with deployed permissions. Keep acceptance pending until the employer records it.
+- DEF-B06-01 — Missing frozen Phase A.1 release package with commit SHA, independent inputs/expected fixtures, final sample exports, and verified SHA-256 checksums
+- DEF-B06-02 — Hard dependency block: upstream delivery packages B01 through B05 have open blocker defects
+- DEF-B06-03 — Missing explicit employer review and sign-off protocol
+- DEF-B06-04 — Unverified live cross-project isolation matrix and negative security tests for direct ID download endpoints
+- DEF-B06-05 — Incomplete mobile responsive and bilingual (FA/EN) verification evidence across all 18 daily report sections
+- DEF-B06-06 — Decision tree in docs/decision-tree/ lacks final verification against deployed authorization gates and export routes
+
+ردیابی QA مرحله ۱.۲ (2026-11-19)
+اقلام رسمی تحویل: A.1.04
+معیار بسته در کشف مرحله ۱: یک release/SHA و فایل‌های checksum‌دار با راهنمای نقش و سناریو ارائه شود؛ آزمون API و مرورگر در دسکتاپ/موبایل و FA/EN انجام و سه وضعیت فنی، نسخه قابل دسترسی آزموده‌شده و پذیرش صریح کارفرما جدا ثبت شوند.
+منابع گزارش: output/a1-requirements-2026-11-19-stage1-b06-qa-findings.md و output/a1-requirements-2026-11-19-stage1-b06-qa-findings.json. خلاصه قابل حمل در coverage.json ثبت شده است.
+برای هر شناسه زیر معیار سنجش یا تصمیم دامنه ثبت کن. qa_failed وضعیت گزارش قبلی است. یافته احتمالی، نبود شاهد، بازتولید تاریخی و تصمیم باز را با هم یکی نگیر.
+- DEF-B06-01 — آرشیو منجمد با release/SHA، ورودی، expected، فایل‌ها، راهنمای نقش و SHA-256 تحویل شود.
+- DEF-B06-02 — بسته‌شدن B01..B05 و تعیین تکلیف شواهد نقص‌های باز قبل از اعلام آمادگی ثبت شود.
+- DEF-B06-03 — نتیجه صریح کارفرما روی همان نسخه، همراه با تاریخ، نقش، اختلاف و وضعیت pending/accepted/rejected ثبت شود.
+- DEF-B06-04 — برای E09 معیار دفاعی رد دسترسی و دانلود میان پروژه‌ها را با نقش‌ها و داده آزمون مجاز روی نسخه هدف مشخص کن.
+- DEF-B06-05 — گردش واقعی نقش‌ها روی دسکتاپ/موبایل و FA/EN را با وضعیت و شواهد هر یک از ۱۸ بخش مرتبط ثبت کن.
+
+Historical Stage 1 evidence (2026-11-21, retained for regression traceability)
+- QA verdict for B06: qa_failed. Acceptance criterion: Fixed release/SHA, guide, inputs/expected values, checksums, role/device/language/cross-project tests, and explicit employer review are recorded.
+- Source reports: output/a1-requirements-2026-11-21-stage1-b06-qa-findings.md and output/a1-requirements-2026-11-21-stage1-b06-qa-findings.json.
+- Use the 2026-11-19 entries and baseline audit below as traceability and regression evidence. Use the newer package-specific report for its stated technical scope. Reconcile any disagreement by scope and tested build before relying on it. Existing specs are the first place to carry forward verified behavior and identify residual gaps.
+- Require a frozen release/SHA with inputs, expected values, outputs, checksums and role guide. Require authenticated desktop and 390×844 mobile evidence in Persian RTL and English LTR across all 18 sections, including scoped permission-denial checks on the candidate and verification against docs/decision-tree/. Require named employer disposition (accepted, rejected or conditional), date and feedback. Record technical QA separately. B01–B03 have reported technical passes, with same-release verification still due. B04/B05 remain failed. Require evidence before checking off A.1.01–A.1.04 at http://localhost:5173/delivery-plan. The Stage 1 live visit redirected to login, so authenticated status remains unverified.
+- DEF-B06-01 — Missing frozen Phase A.1 release package with commit SHA, independent inputs/expected fixtures, final sample exports, and verified SHA-256 checksums
+- DEF-B06-02 — Hard dependency block: upstream delivery packages B01 through B05 have open blocker defects
+- DEF-B06-03 — Missing explicit employer review and sign-off protocol
+- DEF-B06-04 — Unverified live cross-project isolation matrix and negative security tests for direct ID download endpoints
+- DEF-B06-05 — Incomplete mobile responsive and bilingual (FA/EN) verification evidence across all 18 daily report sections
+- DEF-B06-06 — Decision tree in docs/decision-tree/ lacks final verification against deployed authorization gates and export routes
 
 متن بسته مرحلهٔ ۱، عیناً برای حفظ دامنه:
 ## B06 — بسته تحویل قابل آزمون و پذیرش اولیه کارفرما

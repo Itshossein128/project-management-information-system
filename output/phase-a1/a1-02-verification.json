@@ -1,0 +1,67 @@
+{
+  "requirementId": "A.1.02",
+  "requirementTitle": "تطبیق مستقل Excel و PDF تمام بخشها",
+  "acceptanceCriteria": "اقلام، واحدها، ارقام و فرمولها با مرجع مستقل مقایسه و Excel بازحساب شود.",
+  "phase": "A.1",
+  "qaStatus": "qa_passed",
+  "verificationDate": "2026-11-22T21:15:00+03:30",
+  "verificationMode": "authenticated_browser_and_api_uat",
+  "environments": {
+    "frontend": "http://localhost:5173",
+    "backend": "http://localhost:8000"
+  },
+  "fixture": {
+    "projectId": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+    "reportId": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+    "reportNumber": "SIM-A1-001-12-1406-03-01",
+    "date": "1406/03/01",
+    "projectDay": 12
+  },
+  "findings": {
+    "crossFormatParity": {
+      "status": "passed",
+      "sectionsCompared": [
+        "Header & Metadata",
+        "Worked Shifts & Hours",
+        "Weather & Ground Conditions",
+        "Direct Manpower (34 profile)",
+        "Staff & Indirect Manpower (32 profile)",
+        "Appendix (Additional Job Titles)",
+        "Machinery & Equipment",
+        "Materials & Warehouse Receipts",
+        "Concrete Pours & Volume",
+        "Executed Activities",
+        "General Activities",
+        "Site Visits & Meetings",
+        "Issues, Barriers & HSE Incidents",
+        "Digital Attribution & Audit Fingerprint"
+      ],
+      "discrepancies": []
+    },
+    "excelRecalculation": {
+      "status": "passed",
+      "totalFormulas": 88,
+      "recalculationDiscrepancies": 0,
+      "formulaTypes": [
+        "Horizontal shift sums (=SUM(C:E), =SUM(L:N))",
+        "Column subtotals (=SUM(G15:G48), =SUM(P15:P46), =SUM(G52:G53))",
+        "Grand total formula (=SUM(G49,P47,G54))"
+      ],
+      "printSetup": {
+        "orientation": "landscape",
+        "paperSize": 9,
+        "fitToWidth": 1,
+        "fitToHeight": 0,
+        "repeatingHeaderRows": "$1:$4",
+        "rightToLeft": true
+      }
+    },
+    "securityAndRbac": {
+      "guard": "CanReadReportExport",
+      "projectIsolationEnforced": true,
+      "formulaInjectionNeutralization": true
+    }
+  },
+  "defects": [],
+  "evidenceArtifact": "/home/hossein/Desktop/projects/building-management/output/phase-a1/a1-02-excel-pdf-parity-verification.json.md"
+}

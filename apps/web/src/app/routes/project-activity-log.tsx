@@ -1,168 +1,146 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Download, ExternalLink, Users } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router";
+import { Download, ExternalLink } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigation, useParams, useSearchParams } from "react-router";
+import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
 import {
-  ProjectProvider,
-  usePermission,
-  useProject,
-} from "@/app/contexts/project-context";
-import {
+  activityLogScalarFilters,
   fetchActivityLog,
   fetchActivityLogFilters,
+  type ActivityLogSelection,
 } from "@/app/lib/api/reports";
 import { fetchActivityLogExcel } from "@/app/lib/api/daily-reports";
+import { formatDisplayDate, isPersianLanguage, jalaliToIso } from "@/app/lib/jalali-utils";
 import { useToast } from "@/components/ui/toast";
 import { PATHS } from "@/app/routeVars";
 import { JalaliDateRangePicker } from "@/components/form/JalaliDateRangePicker";
 import { Breadcrumb, LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { AccessDenied, NotFoundState } from "@/components/layout/empty-state";
+import { QueryErrorState } from "@/components/layout/query-error-state";
 import { Button } from "@/components/ui/sprint-button";
 
-function monthStartIso() {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-}
+const defaultPageSize = 50;
+const selectClass = "min-h-9 rounded-md border border-input bg-background px-3 py-2";
+const statuses = ["draft", "submitted", "under_review", "approved", "rejected"] as const;
+const columns = [
+  "date", "day", "discipline", "parcel", "shift", "activityCode", "description", "zone", "block",
+  "floor", "contractor", "headcount", "quantity", "unit", "location", "status", "report",
+] as const;
+const textFilters = ["q", "location", "headcount", "quantity", "report_id", "activity_id"] as const;
 
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+function projectDateBounds() {
+  const today = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tehran" }).format(new Date());
+  const currentMonth = `${today.slice(0, 7)}-01`;
+  const lastDay = new Date(Date.parse(currentMonth) - 86_400_000).toISOString().slice(0, 10);
+  return {
+    current: { from: currentMonth, to: today },
+    previous: { from: `${lastDay.slice(0, 7)}-01`, to: lastDay },
+  };
 }
 
 function ActivityLogContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-
+  const navigation = useNavigation();
+  const pendingFilters = useRef<{ origin: string; next: URLSearchParams } | null>(null);
   const { projectId, project, isLoading: projectLoading } = useProject();
   const { has } = usePermission(projectId);
   const canView = has("view_reports");
-
   const [exportingExcel, setExportingExcel] = useState(false);
+  const bounds = projectDateBounds();
+  const needsDefaultDates = !searchParams.has("date_from") && !searchParams.has("date_to");
+  const from = needsDefaultDates ? bounds.current.from : searchParams.get("date_from") ?? "";
+  const to = needsDefaultDates ? bounds.current.to : searchParams.get("date_to") ?? "";
+  const pageParam = Number(searchParams.get("page"));
+  const page = Number.isSafeInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+  const sizeParam = Number(searchParams.get("page_size"));
+  const pageSize = Number.isSafeInteger(sizeParam) && sizeParam > 0 && sizeParam <= 500 ? sizeParam : defaultPageSize;
 
-  const dateRange = useMemo(
-    () => ({
-      from: searchParams.get("date_from") || monthStartIso(),
-      to: searchParams.get("date_to") || todayIso(),
-    }),
-    [searchParams]
-  );
+  useEffect(() => {
+    if (!needsDefaultDates) return;
+    const next = new URLSearchParams(searchParams);
+    next.set("date_from", from);
+    next.set("date_to", to);
+    setSearchParams(next, { replace: true });
+  }, [from, needsDefaultDates, searchParams, setSearchParams, to]);
 
-  const discipline = useMemo(() => {
-    const raw = searchParams.get("discipline");
-    return raw ? raw.split(",").filter(Boolean) : [];
-  }, [searchParams]);
+  const selection = useMemo<ActivityLogSelection>(() => ({
+    ...Object.fromEntries(activityLogScalarFilters.map((filter) => [filter, searchParams.get(filter) || undefined])),
+    date_from: from || undefined,
+    date_to: to || undefined,
+    discipline: (searchParams.get("source_discipline") || searchParams.get("discipline") || "")
+      .split(",").map((value) => value.trim()).filter(Boolean),
+    parcel: (searchParams.get("parcel") || "").split(",").map((value) => value.trim()).filter(Boolean),
+    approved_only: searchParams.get("approved_only") === "false" ? false : undefined,
+  }), [from, searchParams, to]);
+  const approvedOnly = selection.approved_only !== false;
 
-  const parcel = useMemo(() => {
-    const raw = searchParams.get("parcel");
-    return raw ? raw.split(",").filter(Boolean) : [];
-  }, [searchParams]);
-
-  const zone = searchParams.get("zone") || "";
-  const block = searchParams.get("block") || "";
-  const subcontractor = searchParams.get("subcontractor") || "";
-  const page = Number(searchParams.get("page")) || 1;
-
-  const updateFilters = useCallback(
-    (updates: Record<string, string | string[] | number | undefined>) => {
-      setSearchParams(
-        (prev) => {
-          const sp = new URLSearchParams(prev);
-          Object.entries(updates).forEach(([k, v]) => {
-            if (
-              v === undefined ||
-              v === null ||
-              v === "" ||
-              (Array.isArray(v) && v.length === 0)
-            ) {
-              sp.delete(k);
-            } else if (Array.isArray(v)) {
-              sp.set(k, v.join(","));
-            } else {
-              sp.set(k, String(v));
-            }
-          });
-          return sp;
-        },
-        { replace: true }
-      );
-    },
-    [setSearchParams]
-  );
-
-  const { data: filters } = useQuery({
-    queryKey: ["activity-log-filters", projectId],
-    queryFn: () => fetchActivityLogFilters(projectId),
-    enabled: canView && Boolean(projectId),
-  });
-
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "activity-log",
-      projectId,
-      dateRange,
-      discipline,
-      parcel,
-      zone,
-      block,
-      subcontractor,
-      page,
-    ],
-    queryFn: () =>
-      fetchActivityLog(projectId, {
-        date_from: dateRange.from,
-        date_to: dateRange.to,
-        source_discipline: discipline.length ? discipline : undefined,
-        parcel: parcel.length ? parcel : undefined,
-        zone: zone || undefined,
-        block: block || undefined,
-        subcontractor: subcontractor || undefined,
-        page,
-        page_size: 50,
-      }),
-    enabled: canView && Boolean(projectId),
-  });
-
-  const rows = data?.results ?? [];
-  const totalPages = data ? Math.ceil(data.count / 50) : 1;
-
-  const totalHeadcount = useMemo(() => {
-    return rows.reduce((acc, r) => acc + (Number(r.headcount) || 0), 0);
-  }, [rows]);
-
-  const quantitiesByUnit = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const r of rows) {
-      if (r.unit && r.quantity != null && !isNaN(Number(r.quantity))) {
-        map[r.unit] = (map[r.unit] || 0) + Number(r.quantity);
-      }
+  function updateFilters(updates: Record<string, string>) {
+    const origin = window.location.search;
+    const previous = pendingFilters.current?.origin === origin
+      ? pendingFilters.current.next
+      : new URLSearchParams(origin);
+    const next = new URLSearchParams(previous);
+    if (!("page" in updates)) next.delete("page");
+    if ("discipline" in updates) next.delete("source_discipline");
+    for (const [key, value] of Object.entries(updates)) {
+      if (value || key === "date_from" || key === "date_to") next.set(key, value);
+      else next.delete(key);
     }
-    return map;
-  }, [rows]);
+    if (next.toString() === previous.toString()) return;
+    pendingFilters.current = { origin, next };
+    setSearchParams(next);
+  }
+
+  useEffect(() => {
+    if (navigation.state === "idle") pendingFilters.current = null;
+  }, [navigation.state, searchParams]);
+
+  const optionsQuery = useQuery({
+    queryKey: ["activity-log-filters", projectId, approvedOnly],
+    queryFn: () => fetchActivityLogFilters(projectId, approvedOnly),
+    enabled: canView && Boolean(projectId),
+  });
+
+  const listQuery = useQuery({
+    queryKey: ["activity-log", projectId, selection, page, pageSize],
+    queryFn: () => fetchActivityLog(projectId, { ...selection, page, page_size: pageSize }),
+    enabled: canView && Boolean(projectId),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    // An approval in another session must become visible while the log is open.
+    refetchInterval: (query) => query.state.status === "error" ? false : 450,
+  });
+
+  const options = optionsQuery.data;
+  const loading = listQuery.isPending || navigation.state !== "idle";
+  const rows = listQuery.isError ? [] : listQuery.data?.results ?? [];
+  const totalPages = Math.max(1, Math.ceil((listQuery.data?.count ?? 0) / pageSize));
+  const aggregates = listQuery.data?.aggregates;
+  const formatNumber = (value: number) => value.toLocaleString(i18n.language, { maximumFractionDigits: 4 });
+  const formatDecimal = (value: string) => {
+    const decimal = value.includes(".") ? value.replace(/0+$/, "").replace(/\.$/, "") : value;
+    return isPersianLanguage(i18n.language) ? decimal.replace(".", "٫").replace(/[0-9]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹"[Number(digit)]) : decimal;
+  };
+  const label = (key: string) => t(`reportFilters.${key}`);
+  const statusLabel = (status: string) => t(`reportFilters.statuses.${status}`, { defaultValue: status });
 
   const handleExportExcel = async () => {
-    if (!projectId) return;
     setExportingExcel(true);
     try {
-      const blob = await fetchActivityLogExcel(projectId, {
-        date_from: dateRange.from,
-        date_to: dateRange.to,
-        discipline: discipline.length ? discipline.join(",") : undefined,
-        parcel: parcel.length ? parcel.join(",") : undefined,
-        zone: zone || undefined,
-        block: block || undefined,
-        subcontractor: subcontractor || undefined,
-      });
+      const blob = await fetchActivityLogExcel(projectId, selection);
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `activity-database-${dateRange.from}-to-${dateRange.to}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "activity-database.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       URL.revokeObjectURL(url);
-    } catch (e) {
-      toast.error((e as Error).message || "خطا در دانلود اکسل دیتابیس فعالیت‌ها");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : label("downloadFailed"));
     } finally {
       setExportingExcel(false);
     }
@@ -170,285 +148,228 @@ function ActivityLogContent() {
 
   if (projectLoading) return <LoadingSkeleton rows={10} />;
   if (!project) return <NotFoundState title={t("common.projectNotFound")} />;
-
   if (!canView) {
-    return (
-      <AccessDenied
-        title={t("common.accessDenied")}
-        description={t("pages.activityLog.accessDeniedDescription", {
-          defaultValue: "نقش شما مجوز مشاهده گزارش‌ها را ندارد.",
-        })}
-      />
-    );
+    return <AccessDenied title={t("common.accessDenied")} description={t("pages.activityLog.accessDeniedDescription")} />;
   }
 
-  return (
-    <div className='space-y-6'>
-      <PageHeader title={t("pages.activityLog.title")} subtitle={project.project_name} />
+  const optionFilters = [
+    { key: "zone", values: options?.zones },
+    { key: "block", values: options?.blocks },
+    { key: "floor", values: options?.floors },
+    { key: "shift", values: options?.shifts },
+    { key: "unit", values: options?.units },
+    { key: "status", values: statuses },
+  ] as const;
+  const contractorValue = selection.contractor_id ?? (selection.subcontractor ? `legacy:${selection.subcontractor}` : "");
 
-      {/* Multidimensional Filters */}
-      <div className='flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4'>
-        <div className='min-w-[260px] flex-1'>
+  return (
+    <div className="space-y-6">
+      <PageHeader title={t("pages.activityLog.title")} subtitle={project.project_name} />
+      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
+        <div className="min-w-[15rem]">
           <JalaliDateRangePicker
-            name='activity_log_range'
-            label='بازه تاریخ'
-            value={dateRange}
-            onChange={(v) => {
-              updateFilters({ date_from: v.from, date_to: v.to, page: undefined });
-            }}
+            name="activity_log_range"
+            label={label("dateRange")}
+            value={{ from, to }}
+            onChange={(range) => updateFilters({ date_from: range.from, date_to: range.to })}
           />
         </div>
-        <label className='flex flex-col gap-1 text-sm'>
-          <span>دیسیپلین</span>
+        <Button variant="secondary" onClick={() => updateFilters({
+          date_from: bounds.previous.from, date_to: bounds.previous.to,
+        })}>
+          {label("lastMonth")}
+        </Button>
+        {(["discipline", "parcel"] as const).map((field) => {
+          const available = field === "discipline" ? options?.disciplines : options?.parcels;
+          const selected = selection[field] as string[];
+          // The API accepts case-insensitive values in older shared links.
+          const values = [...new Map([...(available ?? []), ...selected].map((value) => [value.toLowerCase(), value])).values()];
+          return (
+            <label key={field} className="flex flex-col gap-1 text-sm">
+              {label(field)}
+              <select
+                className={selectClass}
+                aria-label={label(field)}
+                multiple
+                size={3}
+                value={selected}
+                onChange={(event) => updateFilters({
+                  [field]: Array.from(event.target.selectedOptions, (option) => option.value).join(","),
+                })}
+              >
+                {values.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+            </label>
+          );
+        })}
+        <label className="flex flex-col gap-1 text-sm">
+          {label("contractor")}
           <select
-            className='rounded-md border border-input bg-background px-3 py-2'
-            multiple
-            value={discipline}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, (option) => option.value);
-              updateFilters({ discipline: selected, page: undefined });
+            className={selectClass}
+            aria-label={label("contractor")}
+            value={contractorValue}
+            onChange={(event) => {
+              const value = event.target.value;
+              const legacy = value.startsWith("legacy:");
+              updateFilters({ contractor_id: legacy ? "" : value, subcontractor: legacy ? value.slice(7) : "" });
             }}
           >
-            {(filters?.disciplines ?? []).map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
+            <option value="">{label("all")}</option>
+            {(options?.contractors ?? []).map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            {selection.contractor_id && !options?.contractors?.some(({ id }) => id === selection.contractor_id) && (
+              <option value={selection.contractor_id}>{label("unavailable")}</option>
+            )}
+            {[...new Set([...(options?.subcontractors ?? []), selection.subcontractor].filter(Boolean))].map((name) => (
+              <option key={name} value={`legacy:${name}`}>{name}</option>
             ))}
           </select>
         </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          <span>قطعه</span>
-          <select
-            className='rounded-md border border-input bg-background px-3 py-2'
-            multiple
-            value={parcel}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, (option) => option.value);
-              updateFilters({ parcel: selected, page: undefined });
-            }}
-          >
-            {(filters?.parcels ?? []).map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
+        {optionFilters.map(({ key, values }) => {
+          const selected = selection[key] ?? "";
+          const choices = new Set([...(values ?? []), ...(selected ? [selected] : [])]);
+          return (
+            <label key={key} className="flex flex-col gap-1 text-sm">
+              {label(key)}
+              <select className={selectClass} aria-label={label(key)} value={selected} onChange={(event) => updateFilters({ [key]: event.target.value })}>
+                <option value="">{label("all")}</option>
+                {[...choices].map((value) => (
+                  <option key={value} value={value}>
+                    {key === "status" ? statusLabel(value) : key === "shift" ? t(`reportFilters.shifts.${value}`, { defaultValue: value }) : value}
+                  </option>
+                ))}
+              </select>
+            </label>
+          );
+        })}
+        <label className="flex flex-col gap-1 text-sm">
+          {label("policy")}
+          <select className={selectClass} aria-label={label("policy")} value={approvedOnly ? "approved" : "preview"} onChange={(event) =>
+            updateFilters({ approved_only: event.target.value === "preview" ? "false" : "" })
+          }>
+            <option value="approved">{label("official")}</option>
+            <option value="preview">{label("preview")}</option>
           </select>
         </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          <span>زون</span>
-          <select
-            className='rounded-md border border-input bg-background px-3 py-2'
-            value={zone}
-            onChange={(e) => {
-              updateFilters({ zone: e.target.value, page: undefined });
-            }}
-          >
-            <option value=''>همه</option>
-            {(filters?.zones ?? []).map((z) => (
-              <option key={z} value={z}>
-                {z}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          <span>بلوک</span>
-          <select
-            className='rounded-md border border-input bg-background px-3 py-2'
-            value={block}
-            onChange={(e) => {
-              updateFilters({ block: e.target.value, page: undefined });
-            }}
-          >
-            <option value=''>همه</option>
-            {(filters?.blocks ?? []).map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className='flex flex-col gap-1 text-sm'>
-          <span>پیمانکار</span>
-          <select
-            className='rounded-md border border-input bg-background px-3 py-2'
-            value={subcontractor}
-            onChange={(e) => {
-              updateFilters({ subcontractor: e.target.value, page: undefined });
-            }}
-          >
-            <option value=''>همه</option>
-            {(filters?.subcontractors ?? []).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
+        {textFilters.map((field) => (
+          <label key={field} className="flex flex-col gap-1 text-sm">
+            {label(field === "report_id" ? "reportReference" : field === "activity_id" ? "activityReference" : field)}
+            <input
+              key={selection[field] ?? ""}
+              className={selectClass}
+              type={field === "headcount" || field === "quantity" ? "number" : "text"}
+              step={field === "quantity" ? "any" : undefined}
+              defaultValue={selection[field] ?? ""}
+              onBlur={(event) => {
+                const value = event.target.value.trim();
+                if (value !== (selection[field] ?? "")) updateFilters({ [field]: value });
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.currentTarget.blur();
+              }}
+            />
+          </label>
+        ))}
+        {optionsQuery.isError && <QueryErrorState onRetry={() => void optionsQuery.refetch()} />}
       </div>
 
-      {/* Prominent Aggregate Summary Bar & FILE 1 Export Button */}
-      <div className='flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4'>
-        <div className='flex flex-wrap items-center gap-6 text-sm'>
-          <div className='flex items-center gap-2'>
-            <Users className='size-5 text-primary' />
-            <span className='text-muted-foreground'>مجموع نفرات (نفر-روز):</span>
-            <span className='font-bold text-foreground'>{totalHeadcount}</span>
-          </div>
-          {Object.keys(quantitiesByUnit).length > 0 ? (
-            <div className='flex flex-wrap items-center gap-2'>
-              <BarChart3 className='size-5 text-primary' />
-              <span className='text-muted-foreground'>احجام اجرایی:</span>
-              {Object.entries(quantitiesByUnit).map(([unitName, totalQty]) => (
-                <span
-                  key={unitName}
-                  className='inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-foreground'
-                >
-                  <span>{unitName}:</span>
-                  <span className='font-bold'>
-                    {Number(totalQty.toFixed(2)).toLocaleString()}
-                  </span>
-                </span>
-              ))}
-            </div>
-          ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center gap-4" data-testid="activity-log-totals">
+          {!loading && listQuery.data && aggregates && !listQuery.isError && (
+            <>
+              <span data-testid="activity-result-count" data-count={listQuery.data.count}>
+                {label("resultCount")} <strong>{formatNumber(listQuery.data.count)}</strong>
+              </span>
+              <span data-testid="activity-headcount-sum" data-count={aggregates.headcount_sum}>
+                {label("headcountSum")} <strong>{formatNumber(aggregates.headcount_sum)}</strong>
+              </span>
+              {aggregates.quantity_by_unit.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span>{label("quantityTotals")}</span>
+                  {aggregates.quantity_by_unit.map(({ unit, total, measured_count, unknown_count }) => (
+                    <span key={unit} data-unit={unit} data-total={total ?? undefined} className="rounded-md bg-muted px-2 py-1 text-sm">
+                      <strong>{total === null ? label("unknown") : formatDecimal(total)}</strong> {unit}
+                      <span className="ms-1 text-muted-foreground">
+                        ({t("reportFilters.quantityCoverage", { measured: formatNumber(measured_count), unknown: formatNumber(unknown_count) })})
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {aggregates.unknown_quantity_without_unit_count > 0 && (
+                <span>{t("reportFilters.unknownUnit", { count: formatNumber(aggregates.unknown_quantity_without_unit_count) })}</span>
+              )}
+            </>
+          )}
         </div>
-        <Button
-          variant='secondary'
-          size='sm'
-          disabled={exportingExcel}
-          onClick={handleExportExcel}
-          className='inline-flex items-center gap-1.5'
-        >
-          <Download className='size-4' />
-          خروجی اکسل دیتابیس جامع فعالیت‌ها (FILE 1)
+        <Button variant="secondary" size="sm" disabled={exportingExcel || listQuery.isError || loading} onClick={handleExportExcel}>
+          <Download aria-hidden="true" className="size-4" />
+          {label("file1")}
         </Button>
       </div>
 
-      {isLoading ? (
-        <LoadingSkeleton rows={8} />
+      {loading ? (
+        <div role="status" aria-label={t("common.loading")}><LoadingSkeleton rows={8} /></div>
+      ) : listQuery.isError ? (
+        <QueryErrorState onRetry={() => void listQuery.refetch()} message={listQuery.error.message} error={listQuery.error} />
       ) : (
         <>
-          <div className='overflow-x-auto rounded-lg border border-border'>
-            <table className='w-full text-sm'>
-              <thead className='bg-muted/50'>
-                <tr>
-                  {[
-                    "تاریخ",
-                    "روز",
-                    "دیسیپلین",
-                    "قطعه",
-                    "شیفت",
-                    "فعالیت",
-                    "شرح",
-                    "زون",
-                    "بلوک",
-                    "طبقه",
-                    "پیمانکار",
-                    "نفر",
-                    "مقدار",
-                    "واحد",
-                    "مکان",
-                    "گزارش",
-                  ].map((h) => (
-                    <th key={h} className='px-3 py-2 text-start'>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>{columns.map((field) => <th key={field} scope="col" className="px-3 py-2 text-start">{label(field)}</th>)}</tr>
               </thead>
               <tbody>
                 {rows.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={16}
-                      className='px-3 py-6 text-center text-muted-foreground'
-                    >
-                      فعالیتی یافت نشد
-                    </td>
-                  </tr>
-                ) : (
-                  rows.map((r) => (
-                    <tr key={r.id} className='border-t border-border'>
-                      <td className='px-3 py-2 whitespace-nowrap'>
-                        {r.report_date}
-                      </td>
-                      <td className='px-3 py-2 whitespace-nowrap'>{r.day_name}</td>
-                      <td className='px-3 py-2 whitespace-nowrap font-medium'>
-                        {r.source_discipline || "—"}
-                      </td>
-                      <td className='px-3 py-2 whitespace-nowrap'>
-                        {r.parcel || "—"}
-                      </td>
-                      <td className='px-3 py-2 whitespace-nowrap'>{r.shift || "—"}</td>
-                      <td className='px-3 py-2'>
-                        {r.activity_code ? (
-                          <span title={r.activity_name ?? ""}>
-                            {r.activity_code}
-                          </span>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td
-                        className='px-3 py-2 max-w-[180px] truncate'
-                        title={r.activity_description}
-                      >
-                        {r.activity_description || "—"}
-                      </td>
-                      <td className='px-3 py-2'>{r.zone || "—"}</td>
-                      <td className='px-3 py-2'>{r.block || "—"}</td>
-                      <td className='px-3 py-2'>{r.floor || "—"}</td>
-                      <td className='px-3 py-2'>{r.subcontractor || "—"}</td>
-                      <td className='px-3 py-2'>{r.headcount ?? "—"}</td>
-                      <td className='px-3 py-2'>
-                        {r.quantity != null
-                          ? r.quantity
-                          : "—"}
-                      </td>
-                      <td className='px-3 py-2'>{r.unit || "—"}</td>
-                      <td className='px-3 py-2 max-w-[180px] truncate' title={r.location}>
-                        {r.location || "—"}
-                      </td>
-                      <td className='px-3 py-2'>
+                  <tr><td colSpan={columns.length} className="px-3 py-6 text-center text-muted-foreground">{label("empty")}</td></tr>
+                ) : rows.map((row) => {
+                  const isoDate = jalaliToIso(row.report_date);
+                  const day = isoDate ? new Date(isoDate).toLocaleDateString(i18n.language, {
+                    weekday: "long", timeZone: "UTC",
+                  }) : row.day_name;
+                  const details = { activityCode: row.activity_name, description: row.activity_description, location: row.location };
+                  const cells = [
+                    isPersianLanguage(i18n.language) ? formatDisplayDate(row.report_date) : isoDate,
+                    day, row.source_discipline, row.parcel,
+                    t(`reportFilters.shifts.${row.shift}`, { defaultValue: row.shift }),
+                    row.activity_code, row.activity_description, row.zone, row.block, row.floor,
+                    row.subcontractor, row.headcount == null ? null : formatNumber(row.headcount),
+                    row.quantity == null ? label("unknown") : formatNumber(row.quantity),
+                    row.unit, row.location, statusLabel(row.report_status),
+                  ];
+                  return (
+                    <tr key={row.id} data-testid="activity-log-row" data-row-id={row.id} className="border-t border-border">
+                      {cells.map((value, index) => {
+                        const column = columns[index];
+                        const title = column in details ? details[column as keyof typeof details] ?? undefined : undefined;
+                        return <td key={column} data-field={column} title={title} className="px-3 py-2">{value || "—"}</td>;
+                      })}
+                      <td className="px-3 py-2">
                         <Link
-                          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${r.report_id}/view`}
-                          className='inline-flex items-center gap-1 text-primary hover:underline'
+                          to={`/${PATHS.PROJECT}/${projectId}/${PATHS.PROJECT_DAILY_REPORTS}/${row.report_id}/view`}
+                          title={row.report_id}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
                         >
-                          <ExternalLink className='size-3.5' />
-                          مشاهده
+                          <ExternalLink aria-hidden="true" className="size-3.5" />
+                          {t("common.view")}
                         </Link>
                       </td>
                     </tr>
-                  ))
-                )}
+                  );
+                })}
               </tbody>
             </table>
           </div>
-
-          {totalPages > 1 ? (
-            <div className='flex items-center justify-center gap-2'>
-              <Button
-                variant='secondary'
-                size='sm'
-                disabled={page <= 1}
-                onClick={() => updateFilters({ page: page - 1 })}
-              >
-                قبلی
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2">
+              <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => updateFilters({ page: String(page - 1) })}>
+                {label("previousPage")}
               </Button>
-              <span className='text-sm text-muted-foreground'>
-                صفحه {page} از {totalPages}
-              </span>
-              <Button
-                variant='secondary'
-                size='sm'
-                disabled={page >= totalPages}
-                onClick={() => updateFilters({ page: page + 1 })}
-              >
-                بعدی
+              <span className="text-sm text-muted-foreground">{t("reportFilters.pages", { page, total: totalPages })}</span>
+              <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => updateFilters({ page: String(page + 1) })}>
+                {label("nextPage")}
               </Button>
             </div>
-          ) : null}
+          )}
         </>
       )}
     </div>
@@ -456,18 +377,15 @@ function ActivityLogContent() {
 }
 
 export default function ProjectActivityLogPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { projectId = "" } = useParams();
-
   return (
-    <main className='page-main page-shell mx-auto  px-4 py-8'>
+    <main className="page-main page-shell mx-auto px-4 py-8">
       <ProjectProvider projectId={projectId}>
-        <Breadcrumb
-          items={[
-            { label: "پروژه‌ها", href: `/${PATHS.PROJECT}` },
-            { label: "بانک فعالیت‌ها" },
-          ]}
-        />
+        <Breadcrumb items={[
+          { label: t("nav.projects"), href: `/${PATHS.PROJECT}` },
+          { label: t("pages.activityLog.title") },
+        ]} />
         <ActivityLogContent />
       </ProjectProvider>
     </main>

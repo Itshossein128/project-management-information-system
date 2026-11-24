@@ -1,0 +1,18 @@
+{
+  "requirementId": "B01-05",
+  "title": "Job-title catalog and Shiraz profile",
+  "acceptanceCriteria": "Separate the configurable project catalog from the 34/32 Shiraz profile and preserve extra, custom, and historical titles in an appendix.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    "DEF-B01-05-GAP-01: Exporter hardcodes 34 indirect and 32 direct Shiraz roles globally instead of separating project catalog from a selectable presentation profile (FR-014, C04)",
+    "DEF-B01-05-GAP-02: Non-standard, custom, and historical job titles are concatenated onto main tables instead of being isolated in a dedicated appendix (FR-015, C04, DEF-B01-04)",
+    "DEF-B01-05-GAP-03: No Form Presentation Profile data contract abstraction exists in backend or frontend to bind project catalog items to reference form slots"
+  ],
+  "verificationDetails": {
+    "specStatus": "Ratified in specs/057-a1-b01-data-contract/spec.md under C04, US5, FR-014, FR-015",
+    "excelExporter": "shiraz_file4_excel.py L22-75 hardcodes SHIRAZ_INDIRECT_ROLES / SHIRAZ_DIRECT_ROLES and L280/L345 concatenates extra roles without an appendix",
+    "catalogModel": "project_templates/models.py has LaborTitleCatalog but it is uncoupled from daily report export presentation",
+    "appendixImplementation": "Absent across Excel and PDF outputs"
+  },
+  "summary": "Requirement B01-05 failed QA verification: while C04 is ratified in the specification, the current implementation hardcodes 34/32 Shiraz roles in the export logic and fails to provide a dedicated appendix for extra, custom, and historical job titles."
+}

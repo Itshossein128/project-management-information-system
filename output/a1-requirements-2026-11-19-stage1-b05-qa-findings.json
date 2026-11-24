@@ -1,0 +1,76 @@
+{
+  "requirementId": "B05",
+  "title": "تطبیق مستقل عدد، فرمول و چاپ",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-19T17:15:00+03:30",
+  "acceptanceCriteria": "Expected مستقل تولید، Excel در نرمافزار مستقل recalc، و mapping، اختلافها، screenshot، log و checksum ثبت شوند.",
+  "qaStatus": "qa_failed",
+  "verdict": "failed",
+  "personasEvaluated": [
+    {
+      "persona": "Independent Auditor / QA Engineer",
+      "summary": "Independent gold calculation benchmark against real-data golden workbook is not formalized; expected values in test suites are derived directly from the application's own aggregation engines rather than an external controlled oracle. Formula recalculation in native standalone Excel / LibreOffice is not executed or verified, leaving open formula cache risks and #REF/#VALUE possibilities."
+    },
+    {
+      "persona": "Technical Office Engineer / Planning Engineer",
+      "summary": "Generated Excel exports (FILE4) lack pre-computed cached values for formulas, meaning third-party viewers or preview engines without live recalc engines display blank cells or None for vital manpower and equipment totals. Download performance benchmarks for typical site day datasets (15-30 activities, 20 materials/equipment rows) are completely unmeasured against the <3.0s broadband requirement."
+    },
+    {
+      "persona": "Project Manager / Supervisor",
+      "summary": "Cannot certify reference parity between daily report PDF prints and Excel sheets; discrepancies in layout, section order, dynamic shift durations, and signature block legal authority prevent formal employer sign-off."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B05-01",
+      "title": "فقدان مقادیر از پیش محاسبه‌شده (Cached Values) برای سلول‌های فرمول در اکسل تولیدی و عدم اجرای آزمون بازحساب مستقل (Recalc)",
+      "type": "Defect / Excel Engine Gap",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "critical",
+      "evidence": "Inspecting generated-sample.xlsx with openpyxl(data_only=True) shows cached values at C47, D47, G47, G82, G83, C92 are all None. No automated recalc logs using standalone engines (LibreOffice calc or Excel headless) exist in the verification pipeline.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-02",
+      "title": "عدم وجود آزمون معیار کارایی سرعت دانلود (زیر ۳ ثانیه) برای گزارش‌های روزانه با حجم واقعی (SC-002)",
+      "type": "Performance Defect / QA Benchmark Gap",
+      "component": "apps/api/core/field_reports/report_views.py & apps/web",
+      "severity": "major",
+      "evidence": "SC-002 requires technical office users to export and download master daily report (FILE4) or PDF for 15-30 activities and 20 resource rows in <3.0 seconds. No benchmark or automated end-user performance telemetry exists.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-03",
+      "title": "تولید مقادیر مورد انتظار (Expected) در تست‌ها از خود مدل‌ها و موتورهای تجمیع داخلی به جای اوراکل محاسباتی مستقل (Q01)",
+      "type": "Verification Methodology Gap / Quality Gate Defect",
+      "component": "apps/api/core/field_reports/tests/",
+      "severity": "critical",
+      "evidence": "Existing test suites construct expected assertions by querying the internal Django models and summing their values using the same Python logic as the reporting module, violating the requirement that golden expected data must be derived from an independent controlled oracle or real-data reference workbook.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-04",
+      "title": "عدم ثبت گواهی تطبیق بصری صفحه به صفحه (Screenshot Diff / Visual Regression) میان PDF، Excel و فرم مرجع کارفرما",
+      "type": "Compliance & Audit Defect",
+      "component": "output/a1-requirements-2026-11-18/evidence/",
+      "severity": "major",
+      "evidence": "Requirements E04 and E05 demand side-by-side visual comparison, page layout validation, and screenshots of long and standard daily report prints. No image diff or structured screenshot audit log is present.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-05",
+      "title": "عدم تحقق پیش‌نیازهای کیفی بسته‌های قبلی (B02, B03, B04 هنوز qa_failed هستند)",
+      "type": "Process & Pre-condition Blocker",
+      "component": "Delivery Pipeline Stage 1",
+      "severity": "critical",
+      "evidence": "The mandatory sequence requires B01 -> B02 -> B03 -> B04 -> B05 -> B06, where B05's semantic prerequisite is that B02 through B04 are resolved and green. As documented in output/a1-requirements-2026-11-19-stage1-b02/b03/b04-qa-findings.json, earlier packages have critical open defects blocking independent reconciliation sign-off.",
+      "status": "open"
+    }
+  ],
+  "checksums": {
+    "generated_sample_xlsx_sha256": "e47f04c861acc86247a272b8cfb987ff27f11e99088cc6b250168fd1f57a7e6f",
+    "generated_sample_pdf_sha256": "e9b775328abe621125c9b0a49449dd6a8613faf10068531bfeb4c9cfb331e9fb"
+  },
+  "summary": "بسته B05 به عنوان دروازه تطبیق مستقل عدد، فرمول و چاپ در فاز A.1 مورد ممیزی کیفی قرار گرفت. به دلیل فقدان کش محاسباتی فرمول‌ها در اکسل خروجی (نمایش None بدون ریکلک لایو)، عدم اعتبارسنجی مستقل با اوراکل خارجی (تکیه تست‌ها بر موتورهای داخلی)، فقدان آزمون سرعت دانلود ۳ ثانیه‌ای برای داده‌های واقعی، عدم ثبت شواهد بصری/اسکرین‌شات تطبیقی و باز بودن عیوب بحرانی در پیش‌نیازهای B02..B04، این بسته وضعیت qa_failed دریافت نمود."
+}

@@ -5,10 +5,11 @@ export type DeliveryPhase = { id: string; title: string; start: string; finish: 
 // are separate from remaining work; implementation does not imply final acceptance.
 // R.0/A.6 review evidence: docs/delivery/delivery-plan-status-review-2026-11-11.md.
 // A.7 review evidence: docs/delivery/A7-delivery-plan-status-review-2026-11-18.md.
+// A.1 B04 review evidence: specs/060-a1-b04-filters-totals/implementation-evidence.md.
 export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: string; phases: DeliveryPhase[] } = {
   "baselineStart": "2026-11-04",
   "finish": "2027-03-10",
-  "updatedAt": "2026-11-18",
+  "updatedAt": "2026-11-22",
   "phases": [
     {
       "id": "R.0",
@@ -167,6 +168,12 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
           "id": "A.1-available-1",
           "title": "خروجی Excel و PDF گزارش روزانه",
           "status": "implemented"
+        },
+        {
+          "id": "A.1-B04",
+          "title": "فیلتر گزارش‌ها، خروجی کامل FILE 1 و جمع کل نتایج",
+          "status": "implemented",
+          "note": "فیلترها، بازیابی پیوند و صفحه، تطابق جمع با خروجی اکسل و زمان پاسخ با داده مرجع محلی در فارسی و انگلیسی بررسی شدند. پذیرش کارفرما در انتظار بررسی است."
         },
         {
           "id": "A.1.01",

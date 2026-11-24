@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import Group
 from rest_framework import status
 
 from field_reports.models import DailyReport, ReportStatus
@@ -8,7 +9,12 @@ from field_reports.tests.daily_report_summary_helpers import (
     add_activity,
     make_sub_report,
 )
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberRole, Role, RolePermission
+from master_data.models import (
+    MemberStatus, OrganizationUnit, ProjectMember, ProjectMemberRole, Role, RolePermission,
+)
+from projects.models import Project
+from storage.models import StoredFile, StoredFileSource
+from storage.services import user_may_download_stored_file
 from sub_reports.models import SubReportStatus
 
 
@@ -22,6 +28,74 @@ def viewer_member(project, other_user):
     )
     ProjectMemberRole.objects.create(member=member, role=role)
     return member
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('format,signature', [('excel', b'PK'), ('pdf', b'%PDF')])
+def test_daily_export_exact_version_and_scope(api_client, project, user, other_user, viewer_member, format, signature):
+    history = DailyReport.objects.create(
+        project=project, created_by=user, report_date='2026-08-18',
+        status=ReportStatus.APPROVED, is_current=False,
+    )
+    draft = DailyReport.objects.create(
+        project=project, created_by=user, report_date=history.report_date,
+        lineage_id=history.lineage_id, version_number=2, supersedes=history,
+    )
+    deleted = DailyReport.all_objects.create(
+        project=project, created_by=user, report_date='2026-08-19', is_deleted=True,
+    )
+    foreign = Project.objects.create(project_code='B03-FOREIGN', project_name='Foreign project')
+    foreign_report = DailyReport.objects.create(project=foreign, created_by=user, report_date=history.report_date)
+
+    def url(report, target=project):
+        return f'/api/v1/projects/{target.pk}/daily-reports/{report.pk}/{format}/'
+
+    assert api_client.get(url(history)).status_code == 401
+    api_client.force_authenticate(user=other_user)
+    before = list(DailyReport.all_objects.order_by('pk').values())
+    for report in (history, draft):
+        response = api_client.get(url(report))
+        assert response.status_code == 200
+        assert response.content.startswith(signature)
+    assert api_client.get(url(deleted)).status_code == 404
+    assert api_client.get(url(foreign_report)).status_code == 404
+    assert api_client.get(url(foreign_report, foreign)).status_code == 403
+    assert list(DailyReport.all_objects.order_by('pk').values()) == before
+    RolePermission.objects.filter(
+        role_id__in=viewer_member.member_roles.values('role_id'), permission_codename='view_reports',
+    ).delete()
+    assert api_client.get(url(history)).status_code == 403
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize('format', ['excel', 'pdf'])
+def test_daily_export_observation_requires_verified_scope(api_client, project, user, other_user, format):
+    report = DailyReport.objects.create(project=project, created_by=user, report_date='2026-08-18')
+    file = StoredFile.objects.create(
+        project=project, uploaded_by=user, filename='confidential.png', s3_key='synthetic',
+        source=StoredFileSource.REPORTS, confirmed=True,
+    )
+    file.restricted_allowlist.add(user)
+    unit = OrganizationUnit.objects.create(code='B03-DAILY', name='B03 daily organization unit')
+    other_unit = OrganizationUnit.objects.create(code='B03-OTHER', name='Other organization unit')
+    project.owning_unit = unit
+    project.save(update_fields=['owning_unit'])
+
+    url = f'/api/v1/projects/{project.pk}/daily-reports/{report.pk}/{format}/'
+    api_client.force_authenticate(user=other_user)
+    other_user.groups.add(Group.objects.get_or_create(name='admin')[0])
+    assert api_client.get(url).status_code == 403
+    other_user.org_unit = other_unit
+    other_user.save(update_fields=['org_unit'])
+    assert api_client.get(url).status_code == 403
+    other_user.org_unit = unit
+    other_user.save(update_fields=['org_unit'])
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert not user_may_download_stored_file(other_user, file)
+    other_user.groups.clear()
+    other_user.groups.add(Group.objects.get_or_create(name='hr')[0])
+    assert api_client.get(url).status_code == 403
 
 
 @pytest.mark.django_db

@@ -3,12 +3,13 @@
 import uuid
 from datetime import date
 import pytest
+from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from django.utils import timezone
-from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride
+from master_data.models import MemberStatus, OrganizationUnit, ProjectMember, ProjectMemberPermissionOverride
 from projects.models import ProjectStatus
 from projects.services import create_project_with_creator
 from sub_reports.models import (
@@ -58,6 +59,53 @@ def make_member(project, user, permissions: list[str] | None = None):
                 is_granted=True,
             )
     return member
+
+
+@pytest.mark.django_db
+def test_unit_excel_exact_version_and_scope(viewer_user, project, other_project, existing_draft_report):
+    draft = existing_draft_report
+    historical = DisciplineSubReport.objects.create(
+        project=project, unit=draft.unit, discipline=draft.discipline, report_date=draft.report_date,
+        status=SubReportStatus.APPROVED, is_current=False, created_by=draft.created_by,
+    )
+    foreign = DisciplineSubReport.objects.create(
+        project=other_project, unit=draft.unit, discipline=draft.discipline, report_date=draft.report_date,
+        created_by=draft.created_by,
+    )
+    deleted = DisciplineSubReport.all_objects.create(
+        project=project, unit=draft.unit, discipline=draft.discipline, report_date=draft.report_date,
+        is_deleted=True, is_current=False, created_by=draft.created_by,
+    )
+    base = BASE.format(project_id=project.pk, unit=draft.unit)
+    client = make_client(viewer_user)
+    before = list(DisciplineSubReport.all_objects.order_by('pk').values())
+    for version in (draft, historical):
+        response = client.get(f'{base}{version.pk}/excel/')
+        assert response.status_code == 200
+        assert response.content.startswith(b'PK')
+    for version in (foreign, deleted):
+        assert client.get(f'{base}{version.pk}/excel/').status_code == 404
+    wrong_unit = BASE.format(project_id=project.pk, unit='electrical')
+    assert client.get(f'{wrong_unit}{draft.pk}/excel/').status_code == 404
+    assert list(DisciplineSubReport.all_objects.order_by('pk').values()) == before
+
+
+@pytest.mark.django_db
+def test_unit_excel_observation_requires_verified_scope(project, existing_draft_report, admin_superuser):
+    base = BASE.format(project_id=project.pk, unit=existing_draft_report.unit)
+    url = f'{base}{existing_draft_report.pk}/excel/'
+    client = make_client(admin_superuser)
+    assert client.get(url).status_code == 403
+    unit = OrganizationUnit.objects.create(code='B03-UNIT', name='B03 unit organization')
+    project.owning_unit = unit
+    project.save(update_fields=['owning_unit'])
+    admin_superuser.org_unit = unit
+    admin_superuser.save(update_fields=['org_unit'])
+    assert client.get(url).status_code == 200
+    admin_superuser.is_superuser = False
+    admin_superuser.save(update_fields=['is_superuser'])
+    admin_superuser.groups.add(Group.objects.get_or_create(name='hr')[0])
+    assert client.get(url).status_code == 403
 
 
 @pytest.fixture

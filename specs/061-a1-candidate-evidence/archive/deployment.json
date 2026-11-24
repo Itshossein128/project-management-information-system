@@ -1,0 +1,56 @@
+{
+  "status": "unverified",
+  "captureTimeUtc": "2026-11-23T15:01:26Z",
+  "candidateId": null,
+  "sourceSha": null,
+  "environment": null,
+  "apiBuildId": null,
+  "webBuildId": null,
+  "releaseOwnerProvenance": null,
+  "localObservations": [
+    {
+      "url": "http://localhost:5173/delivery-plan",
+      "httpStatus": 302,
+      "observation": "Unauthenticated request redirected to login."
+    },
+    {
+      "url": "http://localhost:8000/api/health/",
+      "httpStatus": 200,
+      "observation": "Local Django runserver returned status ok. The health response did not expose a build ID."
+    }
+  ],
+  "observedLocalCheckoutHead": "63a95a0ece1573d494b0abe565aa705f0a528c0d",
+  "observedLocalCheckoutHasUncommittedChanges": true,
+  "productionWorkflowObservation": {
+    "runUrl": "https://github.com/Itshossein128/project-management-information-system/actions/runs/44354761103",
+    "sourceSha": "460a2d629b49e43786177cb546a167a8156f7d2e",
+    "startedAtUtc": "2026-11-18T17:05:47Z",
+    "conclusion": "success",
+    "scope": "Latest successful production workflow in the checked GitHub Actions history. It predates the A.1 specification commits and does not establish the A.1.04 candidate or running build identities."
+  },
+  "evidenceReferences": [
+    ".github/workflows/deploy.yml:83-128",
+    "specs/061-a1-candidate-evidence/tasks.md#phase-2--foundational-prerequisites"
+  ],
+  "blockingGaps": [
+    "Release-owner confirmation of candidate target, candidate ID and exact source SHA is missing.",
+    "Running API and web build IDs have not been observed for a confirmed candidate.",
+    "Controlled verifier access and evidence storage are awaiting confirmation."
+  ],
+  "latestLocalObservation": {
+    "captureTimeUtc": "2026-11-23T21:50:44+00:00",
+    "deliveryPlanUrl": "http://localhost:5173/delivery-plan",
+    "observation": "Authenticated Chrome displayed A.1 with A.1.01 through A.1.04 under the remaining filter. The local API health response was OK without a build ID. No candidate identity was established."
+  },
+  "stage42Recheck": {
+    "observedAtUtc": "2026-11-23T22:57:05Z",
+    "localDeliveryPlanHttpStatus": 302,
+    "localDeliveryPlanObservation": "Unauthenticated request redirected to login.",
+    "localApiHealthHttpStatus": 200,
+    "localApiHealthObservation": "Local Django returned status ok without a build identifier.",
+    "latestListedDeployWorkflowRunId": 44354761103,
+    "workflowHeadSha": "460a2d629b49e43786177cb546a167a8156f7d2e",
+    "workflowRunConclusion": "success",
+    "observationScope": "GitHub Actions run metadata. The workflow supports a target SHA override, and the running API and web build identities for the intended candidate are unverified."
+  }
+}

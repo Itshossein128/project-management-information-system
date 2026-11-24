@@ -1,0 +1,23 @@
+
+> building-management@ e2e /home/hossein/Desktop/projects/building-management
+> playwright test e2e/tests/b04-filters-totals.spec.ts --project=chromium-desktop --workers=1 --reporter=line --grep-invert SC-004 --output=/tmp/velora-b04-acceptance
+
+
+Running 5 tests using 1 worker
+
+(node:663417) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/5] [chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:39:7 › B04 daily filters and page recovery in fa
+[2/5] [chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:39:7 › B04 daily filters and page recovery in en
+[3/5] [chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:89:7 › B04 activity selection and FILE1 recovery in fa
+[chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:89:7 › B04 activity selection and FILE1 recovery in fa
+
+
+[4/5] [chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:89:7 › B04 activity selection and FILE1 recovery in en
+[chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:89:7 › B04 activity selection and FILE1 recovery in en
+
+
+[5/5] [chromium-desktop] › e2e/tests/b04-filters-totals.spec.ts:184:5 › B04 report access rejects both unauthorized actors against a warm selection
+  5 passed (42.6s)

@@ -1,9 +1,12 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 
 from common.jalali import persian_day_of_week
-from common.models import AuditSoftDeleteModel, UUIDModel
+from common.models import AuditSoftDeleteModel, TimeStampedModel, UUIDModel
 
 
 class ReportShift(models.TextChoices):
@@ -114,6 +117,9 @@ class DailyReport(AuditSoftDeleteModel):
     project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, related_name='daily_reports')
     report_date = models.DateField()
     shift = models.CharField(max_length=10, choices=ReportShift.choices, default=ReportShift.FULL)
+    is_synthetic_reference = models.BooleanField(default=False)
+    contract_version = models.CharField(max_length=20, blank=True, default='')
+    presentation_profile_code = models.CharField(max_length=40, blank=True, default='')
     work_front = models.CharField(max_length=120, blank=True, default='')
     location_notes = models.CharField(max_length=200, blank=True, default='')
     weather_condition = models.CharField(
@@ -147,6 +153,7 @@ class DailyReport(AuditSoftDeleteModel):
     general_notes = models.TextField(blank=True, default='')
     management_opinion = models.TextField(blank=True, default='')
     weather_override = models.BooleanField(default=False)
+    export_weather_snapshot = models.JSONField(null=True, blank=True, encoder=DjangoJSONEncoder)
     site_status_override = models.BooleanField(default=False)
     is_auto_summary = models.BooleanField(default=False)
     aggregated_at = models.DateTimeField(null=True, blank=True)
@@ -184,6 +191,7 @@ class DailyReport(AuditSoftDeleteModel):
     submitted_at = models.DateTimeField(null=True, blank=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    export_action_attribution = models.JSONField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, default='')
 
     lineage_id = models.UUIDField(null=True, blank=True, db_index=True)
@@ -211,6 +219,24 @@ class DailyReport(AuditSoftDeleteModel):
     aggregation_fingerprint = models.CharField(max_length=64, blank=True, default='')
 
     @property
+    def official_numbering(self) -> dict:
+        from field_reports.services.data_contract import compute_official_report_number
+
+        return compute_official_report_number(self.project.project_code, self.project.start_date, self.report_date)
+
+    @property
+    def project_day_number(self) -> int | None:
+        return self.official_numbering['project_day']
+
+    @property
+    def official_report_number(self) -> str | None:
+        return self.official_numbering['official_report_number']
+
+    @property
+    def canonical_worked_shift_ids(self) -> list[int]:
+        return [shift.shift_id for shift in self.worked_shifts.all()]
+
+    @property
     def issues(self):
         """Derived issue/barrier rows (feature 033). HSE rows stay on ``hse_incidents``."""
         return self.incidents.filter(incident_type__in=['issue', 'barrier'])
@@ -227,6 +253,11 @@ class DailyReport(AuditSoftDeleteModel):
                 fields=['project', 'report_date', 'shift'],
                 condition=models.Q(is_deleted=False, is_current=True),
                 name='unique_current_daily_report_per_date_shift',
+            ),
+            models.UniqueConstraint(
+                fields=['project', 'report_date'],
+                condition=models.Q(is_deleted=False, is_current=True) & ~models.Q(contract_version=''),
+                name='unique_current_contract_daily_report_per_date',
             ),
         ]
 
@@ -259,6 +290,35 @@ class DailyReport(AuditSoftDeleteModel):
     @property
     def is_locked(self) -> bool:
         return self.status == ReportStatus.APPROVED
+
+
+class DailyReportWorkedShift(UUIDModel, TimeStampedModel):
+    report = models.ForeignKey(DailyReport, on_delete=models.CASCADE, related_name='worked_shifts')
+    shift_id = models.PositiveSmallIntegerField(choices=[(1, '1'), (2, '2'), (3, '3')])
+    actual_start_at = models.DateTimeField(null=True, blank=True)
+    actual_end_at = models.DateTimeField(null=True, blank=True)
+    actual_duration_hours = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(24)],
+    )
+
+    class Meta:
+        db_table = 'daily_report_worked_shifts'
+        ordering = ['shift_id']
+        constraints = [
+            models.UniqueConstraint(fields=['report', 'shift_id'], name='unique_worked_shift_per_report'),
+            models.CheckConstraint(check=models.Q(shift_id__in=[1, 2, 3]), name='daily_report_worked_shift_id_valid'),
+            models.CheckConstraint(
+                check=models.Q(actual_start_at__isnull=True) | models.Q(actual_end_at__isnull=True)
+                | models.Q(actual_end_at__gte=models.F('actual_start_at')),
+                name='daily_report_worked_shift_end_order',
+            ),
+            models.CheckConstraint(
+                check=models.Q(actual_duration_hours__isnull=True)
+                | models.Q(actual_duration_hours__gt=0, actual_duration_hours__lte=24),
+                name='daily_report_worked_shift_duration_valid',
+            ),
+        ]
 
 
 class DailyReportActivity(ChildRowModel):

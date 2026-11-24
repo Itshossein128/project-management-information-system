@@ -516,15 +516,23 @@ class TestAttachmentContract:
             'not allowed' in str(excinfo.value).lower() or \
             'submitted' in str(excinfo.value).lower()
 
-    def test_provenance_metadata_preserved(self, db, unit_report, section_activity_payload):
+    def test_provenance_metadata_preserved(self, db, unit_report, section_activity_payload, monkeypatch):
         """Provenance metadata (capture date, work front, source activity/unit/project) preserved."""
         from sub_reports.services import attach_image_to_activity
+        from io import BytesIO
+        from unittest.mock import Mock
+        from PIL import Image
+        from storage import services
+
+        output = BytesIO()
+        Image.new('RGB', (2, 2)).save(output, format='JPEG')
+        monkeypatch.setattr(services, 's3_client', Mock())
 
         saved = _save_rows(unit_report, [section_activity_payload])
         attachment = attach_image_to_activity(
             report=unit_report,
             activity_row_id=str(saved[0].id),
-            file_content=b'fake-image-data',
+            file_content=output.getvalue(),
             declared_content_type='image/jpeg',
             capture_date=date(2024, 6, 10),
             work_front='Site A',

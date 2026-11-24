@@ -1,0 +1,32 @@
+{
+  "requirementId": "B01-03",
+  "title": "Zero, unset, and not-measured semantics",
+  "acceptanceCriteria": "Measured zero remains valid; unset and not-measured remain unknown and are never silently coerced to zero.",
+  "evaluator": "Per-Requirement End-User QA Agent",
+  "date": "2026-11-19",
+  "qaStatus": "qa_passed",
+  "defects": [],
+  "summary": "Requirement B01-03 is fully satisfied in both specification (057 spec.md US3, FR-009, FR-010, C02) and codebase implementation. Explicit numeric zero (0/0.00) is preserved through coerce_optional_decimal and accepted by serializers. Unset (null) and not-measured (quantity_measured=False) are handled as unknown, rendered as localized neutral badges with caution outlines (ثبت‌نشده / Unset), and never coerced to zero in daily aggregation or export views. Domain-invalid zeros (materials receipts, pressure/concrete) remain strictly guarded by positive-only checks.",
+  "evidence": {
+    "specCitations": [
+      "specs/057-a1-b01-data-contract/spec.md:L58-L71",
+      "specs/057-a1-b01-data-contract/spec.md:L156-L158",
+      "specs/057-a1-b01-data-contract/spec.md:L222"
+    ],
+    "codeCitations": [
+      "apps/api/core/common/unset.py:L12-L28",
+      "apps/api/core/field_reports/serializers.py:L208-L228",
+      "apps/api/core/field_reports/services/daily_report_aggregation.py:L680-L703",
+      "apps/web/src/components/daily_reports/UnsetQuantityBadge.tsx:L4-L31",
+      "apps/web/src/components/daily_reports/summary/DailyReportSummaryView.tsx:L722-L764",
+      "apps/web/src/app/locales/fa.json:L2729",
+      "apps/web/src/app/locales/en.json:L2737"
+    ],
+    "verifiedTests": [
+      "apps/api/core/field_reports/tests/test_core_principles_unset_vs_zero.py",
+      "apps/api/core/common/tests/test_unset.py",
+      "apps/api/core/field_reports/tests/test_daily_report_gaps_status_unset.py",
+      "apps/web/e2e/tests/daily-report.spec.ts"
+    ]
+  }
+}

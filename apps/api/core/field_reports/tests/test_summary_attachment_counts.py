@@ -258,7 +258,7 @@ class TestSummaryAttachmentCounts:
     ):
         """T069: metadata navigation links require project membership, never storage access."""
         from rest_framework.test import APIRequestFactory
-        from master_data.models import MemberStatus, ProjectMember
+        from master_data.models import MemberStatus, ProjectMember, ProjectMemberPermissionOverride
         from field_reports.serializers import DailyReportDetailSerializer
         from field_reports.services.daily_report_aggregation import ensure_daily_report_summary
 
@@ -280,9 +280,11 @@ class TestSummaryAttachmentCounts:
         ).data['attachment_counts']
         assert without_membership[0]['first_links'] == []
 
-        ProjectMember.objects.create(
+        member = ProjectMember.objects.create(
             project=project, user=user, status=MemberStatus.ACTIVE,
         )
+        assert DailyReportDetailSerializer(summary, context={'request': request}).data['attachment_counts'][0]['first_links'] == []
+        ProjectMemberPermissionOverride.objects.create(member=member, permission_codename='view_reports', is_granted=True)
         with_membership = DailyReportDetailSerializer(
             summary, context={'request': request},
         ).data['attachment_counts']

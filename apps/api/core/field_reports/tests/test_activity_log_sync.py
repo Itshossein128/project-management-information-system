@@ -111,7 +111,9 @@ def test_activity_log_filter_options_returns_disciplines_and_parcels(auth_client
 
 
 @pytest.mark.django_db
-def test_activity_log_cache_invalidation_on_approve(auth_client, activity_log_url, project, user):
+def test_activity_log_cache_invalidation_on_approve(
+    auth_client, activity_log_url, project, user, django_capture_on_commit_callbacks,
+):
     today = timezone.localdate()
     report = DailyReport.objects.create(
         project=project,
@@ -134,7 +136,8 @@ def test_activity_log_cache_invalidation_on_approve(auth_client, activity_log_ur
     assert res1.data['count'] == 0
 
     # 2. Approve the report
-    approve_report(report, user)
+    with django_capture_on_commit_callbacks(execute=True):
+        approve_report(report, user)
 
     # 3. Read activity log again - MUST immediately reflect the approved activity without stale cache
     res2 = auth_client.get(activity_log_url)

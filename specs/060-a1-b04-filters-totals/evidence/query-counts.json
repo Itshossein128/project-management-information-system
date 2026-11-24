@@ -1,0 +1,104 @@
+{
+  "activity_cold": {
+    "status": 200,
+    "sql_statements": 22,
+    "matching_rows": 51,
+    "page_rows": 50,
+    "aggregates": {
+      "headcount_sum": 51,
+      "quantity_by_unit": [
+        {
+          "unit": "kg",
+          "total": null,
+          "measured_count": 0,
+          "unknown_count": 1
+        },
+        {
+          "unit": "m²",
+          "total": "45.0000",
+          "measured_count": 37,
+          "unknown_count": 2
+        },
+        {
+          "unit": "m³",
+          "total": "25.0000",
+          "measured_count": 10,
+          "unknown_count": 0
+        }
+      ],
+      "unknown_quantity_without_unit_count": 1
+    }
+  },
+  "activity_warm": {
+    "status": 200,
+    "sql_statements": 16,
+    "matching_rows": 51,
+    "page_rows": 50,
+    "aggregates": {
+      "headcount_sum": 51,
+      "quantity_by_unit": [
+        {
+          "unit": "kg",
+          "total": null,
+          "measured_count": 0,
+          "unknown_count": 1
+        },
+        {
+          "unit": "m²",
+          "total": "45.0000",
+          "measured_count": 37,
+          "unknown_count": 2
+        },
+        {
+          "unit": "m³",
+          "total": "25.0000",
+          "measured_count": 10,
+          "unknown_count": 0
+        }
+      ],
+      "unknown_quantity_without_unit_count": 1
+    }
+  },
+  "activity_page_2_cold": {
+    "status": 200,
+    "sql_statements": 22,
+    "matching_rows": 51,
+    "page_rows": 1,
+    "aggregates": {
+      "headcount_sum": 51,
+      "quantity_by_unit": [
+        {
+          "unit": "kg",
+          "total": null,
+          "measured_count": 0,
+          "unknown_count": 1
+        },
+        {
+          "unit": "m²",
+          "total": "45.0000",
+          "measured_count": 37,
+          "unknown_count": 2
+        },
+        {
+          "unit": "m³",
+          "total": "25.0000",
+          "measured_count": 10,
+          "unknown_count": 0
+        }
+      ],
+      "unknown_quantity_without_unit_count": 1
+    }
+  },
+  "options": {
+    "status": 200,
+    "sql_statements": 24
+  },
+  "file1": {
+    "status": 200,
+    "sql_statements": 17
+  },
+  "daily": {
+    "status": 200,
+    "sql_statements": 23
+  }
+}

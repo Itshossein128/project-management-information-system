@@ -166,6 +166,19 @@ class KnowledgeTests(unittest.TestCase):
                     self.send_header("Location", "/other")
                     self.end_headers()
                     return
+                if len(requests) <= behavior.get("fail_first", 0):
+                    self.send_response(502)
+                    self.end_headers()
+                    return
+                max_batch = behavior.get("max_batch_items")
+                max_chars = behavior.get("max_input_chars")
+                if (max_batch is not None and len(data["input"]) > max_batch) or (
+                    max_chars is not None and any(len(t) > max_chars for t in data["input"])
+                ):
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(b'{"error":"input exceeds context length"}')
+                    return
                 entries = []
                 for i, text in enumerate(data["input"]):
                     # Deterministic semantic fixture, not a real embedding-model evaluation.
@@ -207,6 +220,16 @@ class KnowledgeTests(unittest.TestCase):
             before = len(requests)
             kb.retrieve(self.root, self.db, "daily report", lexical=True)
             self.assertEqual(len(requests), before)
+
+    def test_local_embeddings_bypass_proxy_and_retry_transient_gateway_error(self):
+        with self.endpoint() as (requests, behavior):
+            behavior["fail_first"] = 1
+            with patch.dict(os.environ, {"http_proxy": "http://127.0.0.1:1", "no_proxy": "", "NO_PROXY": ""}):
+                with patch.object(kb.time, "sleep") as backoff:
+                    vectors = kb.Embeddings(self.config).embed(["daily report"])
+            self.assertEqual(vectors, [[1.0, 0.0]])
+            self.assertEqual(requests[0], requests[1])
+            backoff.assert_called_once_with(1)
 
     def test_interrupted_index_resumes_committed_batches(self):
         self.config["embedding"]["batch_size"] = 1
@@ -431,6 +454,24 @@ class KnowledgeTests(unittest.TestCase):
             {"id": "holdout", "query": "گزارش‌روزانه", "split": "holdout", "must_clarify": False}]}))
         with self.assertRaisesRegex(kb.KnowledgeError, "both development and holdout"):
             kb.evaluation_suite(cases)
+
+    def test_embedding_http_400_bisects_batches_and_trims_oversized_inputs(self):
+        with self.endpoint() as (requests, behavior):
+            behavior["max_batch_items"] = 1
+            behavior["max_input_chars"] = 500
+            encoder = kb.Embeddings(kb.config_for(self.root))
+            vectors = encoder.embed(["report " + ("x" * 1200), "other " + ("y" * 900)])
+            self.assertEqual(len(vectors), 2)
+            self.assertEqual(vectors[0], [1.0, 0.0])
+            self.assertEqual(vectors[1], [0.0, 1.0])
+            # First attempt sent the full batch of 2, then bisected and trimmed each item.
+            self.assertEqual(len(requests[0]["input"]), 2)
+            self.assertTrue(any(len(req["input"]) == 1 and len(req["input"][0]) <= 500 for req in requests))
+
+            # Unrecoverable HTTP 400 (even below min_chars) still fails cleanly without leaking body.
+            behavior["max_input_chars"] = 10
+            with self.assertRaisesRegex(kb.KnowledgeError, r"Embedding request failed \(400\); response body omitted"):
+                encoder.embed(["short text that exceeds 10 chars"])
 
 
 if __name__ == "__main__":

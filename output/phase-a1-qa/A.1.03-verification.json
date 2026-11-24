@@ -1,0 +1,26 @@
+{
+  "requirementId": "A.1.03",
+  "title": "رفع اختلاف ارقام و نمایش خروجی‌ها",
+  "acceptanceCriteria": "ساعت نامعلوم ماشین‌آلات صفر قطعی جلوه نکند و تست دقیق اضافه شود.",
+  "phase": "A.1",
+  "status": "implemented",
+  "qaStatus": "qa_passed",
+  "authenticatedBrowserUAT": {
+    "url": "http://localhost:5173/delivery-plan",
+    "persona": "+10000000001 (Admin)",
+    "verified": true,
+    "pageTitle": "برنامه تحویل ولورا",
+    "matchedInUI": true
+  },
+  "backendVerification": {
+    "testSuite": "field_reports/tests/test_pdf_summary_parity.py::test_b03_legacy_equipment_zero_and_unknown_across_exports",
+    "result": "passed",
+    "testsPassed": 16,
+    "evidence": {
+      "excelBehavior": "Unknown machine hours remain None/blank; explicit 0 remains 0",
+      "pdfBehavior": "Unknown machine hours formatted as em-dash ('—'); explicit 0 remains 0"
+    }
+  },
+  "defects": [],
+  "summary": "Requirement A.1.03 is verified. The distinction between unknown/null equipment hours and explicit 0 hours is fully maintained across Excel (ShirazFile4ExcelBuilder) and PDF outputs, supported by regression test test_b03_legacy_equipment_zero_and_unknown_across_exports."
+}

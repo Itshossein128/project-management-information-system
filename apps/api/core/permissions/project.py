@@ -2,7 +2,8 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 from django.utils.translation import gettext_lazy as _
 
 from config.exceptions import CodedValidationError
-from master_data.models import ProjectMember
+from master_data.models import OrgUnitStatus, ProjectMember
+from projects.models import Project
 
 
 def _is_global_admin(user) -> bool:
@@ -166,6 +167,27 @@ class ActiveMemberPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view)
+
+
+class CanReadReportExport(BasePermission):
+    """Allow operational exports to report readers and verified scoped observers."""
+
+    message = _('You do not have permission to perform this action.')
+
+    def has_permission(self, request, view):
+        project_id = view.kwargs.get('project_pk')
+        user = request.user
+        if request.method not in SAFE_METHODS or not project_id or not user.is_authenticated:
+            return False
+        if active_member_has_codename(user, project_id, 'view_reports'):
+            return True
+        if not user.org_unit_id or not has_organizational_observation(user):
+            return False
+        # The persisted OBS assignment proves the exact owning unit. It does
+        # not establish an administrative grant for parent or sibling units.
+        return Project.objects.filter(
+            pk=project_id, owning_unit_id=user.org_unit_id, owning_unit__status=OrgUnitStatus.ACTIVE,
+        ).exists()
 
 
 class HasProjectPermission(BasePermission):

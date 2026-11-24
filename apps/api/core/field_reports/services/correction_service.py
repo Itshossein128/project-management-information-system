@@ -5,11 +5,13 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
+from field_reports.services.activity_log import invalidate_activity_log_cache
 from field_reports.services.lifecycle_errors import get_lifecycle_msg, lifecycle_error_detail
 
 from field_reports.models import (
     CorrectionRequestStatus,
     DailyReport,
+    DailyReportDerivedSource,
     DailyReportActivity,
     DailyReportConcreteLog,
     DailyReportCorrectionRequest,
@@ -21,6 +23,7 @@ from field_reports.models import (
     DailyReportMaterial,
     DailyReportGeneralActivity,
     DailyReportVisit,
+    DailyReportWorkedShift,
     ReportStatus,
 )
 
@@ -91,11 +94,38 @@ CHILD_CLONE_SPECS = (
 
 
 def _clone_children(source: DailyReport, target: DailyReport) -> None:
+    id_map: dict[str, str] = {str(source.id): str(target.id)}
     for model, related_name, fields in CHILD_CLONE_SPECS:
         manager = getattr(source, related_name)
         for row in manager.filter(is_deleted=False):
             data = {field: getattr(row, field) for field in fields}
-            model.objects.create(report=target, **data)
+            clone = model.objects.create(report=target, **data)
+            id_map[str(row.pk)] = str(clone.pk)
+
+    DailyReportDerivedSource.objects.bulk_create([
+        DailyReportDerivedSource(
+            daily_report=target,
+            derived_kind=item.derived_kind,
+            derived_row_id=id_map.get(item.derived_row_id, item.derived_row_id),
+            source_report_id=item.source_report_id,
+            source_report_id_snapshot=item.source_report_id_snapshot,
+            source_report_version=item.source_report_version,
+            source_unit=item.source_unit,
+            source_row_kind=item.source_row_kind,
+            source_row_id=item.source_row_id,
+            contribution_value=item.contribution_value,
+            ordinal=item.ordinal,
+        )
+        for item in source.derived_sources.all()
+    ])
+    DailyReportWorkedShift.objects.bulk_create([
+        DailyReportWorkedShift(
+            report=target, shift_id=item.shift_id,
+            actual_duration_hours=item.actual_duration_hours,
+            actual_start_at=item.actual_start_at, actual_end_at=item.actual_end_at,
+        )
+        for item in source.worked_shifts.all()
+    ])
 
 
 @transaction.atomic
@@ -146,6 +176,16 @@ def open_correction(*, source_report: DailyReport, user, reason: str, request=No
         inactivity_reason=source_report.inactivity_reason,
         weather_impact_notes=source_report.weather_impact_notes,
         general_notes=source_report.general_notes,
+        is_auto_summary=source_report.is_auto_summary,
+        is_synthetic_reference=source_report.is_synthetic_reference,
+        contract_version=source_report.contract_version,
+        presentation_profile_code=source_report.presentation_profile_code,
+        management_opinion=source_report.management_opinion,
+        weather_override=source_report.weather_override,
+        site_status_override=source_report.site_status_override,
+        reporting_configuration=source_report.reporting_configuration,
+        aggregation_fingerprint=source_report.aggregation_fingerprint,
+        aggregated_at=source_report.aggregated_at,
         prepared_by=user,
         status=ReportStatus.DRAFT,
         lineage_id=lineage_id,
@@ -172,6 +212,8 @@ def open_correction(*, source_report: DailyReport, user, reason: str, request=No
         created_by=user,
         updated_by=user,
     )
+    project_id = source_report.project_id
+    transaction.on_commit(lambda: invalidate_activity_log_cache(project_id))
     return correction
 
 
@@ -218,6 +260,9 @@ def cancel_correction(*, correction: DailyReportCorrectionRequest, user, request
     source.is_current = True
     source.updated_by = user
     source.save(update_fields=['is_current', 'updated_by', 'updated_at'])
+
+    project_id = source.project_id
+    transaction.on_commit(lambda: invalidate_activity_log_cache(project_id))
 
     correction.status = CorrectionRequestStatus.CANCELLED
     correction.decided_by = user

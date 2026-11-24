@@ -16,6 +16,7 @@ from openpyxl.utils import get_column_letter
 from common.jalali import gregorian_to_jalali
 from field_reports.models import DailyReportActivity
 from field_reports.excel_safety import literalize_cell
+from field_reports.services.activity_log import activity_contractor, measured_activity_quantity
 
 FONT_FAMILY = 'Tahoma'
 
@@ -75,9 +76,11 @@ class ShirazFile1ExcelBuilder:
                 report = act.report
                 r_date = gregorian_to_jalali(report.report_date) if report and report.report_date else ''
                 shift_display = act.get_shift_display() if hasattr(act, 'get_shift_display') else (act.shift or '—')
-                contractor = (act.contractor_ref.name if act.contractor_ref_id else act.subcontractor_name) or '—'
+                contractor_ref = activity_contractor(act)
+                contractor = (contractor_ref.name if contractor_ref else act.subcontractor_name) or '—'
                 headcount = act.headcount
-                qty_val = float(act.quantity) if act.quantity_measured and act.quantity is not None else '*'
+                measured_quantity = measured_activity_quantity(act)
+                qty_val = measured_quantity if measured_quantity is not None else '*'
 
                 self.ws.cell(row=row, column=1, value=idx).alignment = ALIGN_CENTER
                 self.ws.cell(row=row, column=2, value=r_date).alignment = ALIGN_CENTER

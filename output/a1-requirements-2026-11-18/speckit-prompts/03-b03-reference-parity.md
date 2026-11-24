@@ -6,7 +6,7 @@
 این درخواست فقط نگارش specification برای همین زیرمرحله است. طبق قالب فعال SpecKit یک feature specification و checklist کیفیت مستقل تولید کن و سپس متوقف شو؛ plan، tasks، analyze، implement، تست محصول، استقرار و اجرای مرحله بعد مجاز نشده‌اند. خروجی حاضرِ Stage 2 صرفاً ورودی specify است.
 
 ورودی workflow اصلی (عین متن):
-Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through B06 from /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
+Go for the next step to deliver the application, based on A.1 phase in http://localhost:5173/delivery-plan
 
 ریشه پروژه: /home/hossein/Desktop/projects/building-management
 منبع مرحلهٔ ۱: /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18
@@ -15,7 +15,7 @@ Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through
 قواعد نگارش:
 - چه چیزی و چرا، نقش‌ها، ارزش کاربر، دامنه/غیردامنه، سناریوهای Given/When/Then و شکست/لبه، نیازمندی‌های قابل آزمون، معیارهای موفقیت قابل اندازه‌گیری، وابستگی و تصمیم‌های باز را در spec بنویس. فناوری/ساختار کد را راه‌حل اجباری نکن. نام API/مدل در شواهد فقط نشانی رفتار فعلی است.
 - شناسه‌های H/D/W/E/Q/X و C و US و path:line بندها را به FR/SC و سناریوهای spec وصل کن؛ برای هر بند disposition صریحِ حفظ رفتار، رفع شکاف، تصمیم شرطی یا ارجاع فاز دیگر بده. نگاشت داستان به گروه به معنی اجرای تمام سناریوهای آن نیست؛ اختلاف‌ها را در سطح معیار بررسی کن.
-- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن.
+- مبنای ممیزی f41fc378ebfe8a5d227b1e4b34dc85de5aaf3d8a در 2026-11-18 است؛ وضعیت کد امروز از این متن استنباط نشود. ۱۶۲ تست موجود و۲ کنترل موفق و۶ strict XFAIL تاریخی‌اند؛ XFAIL شاهد نقص است. نبود شاهد با نبود قابلیت یکی نیست. اگر نقص در کد روز رفع شده، الزام حفظ رفتار و اثبات باقیمانده را ثبت کن، بازنویسی نکن. وضعیت‌ها و تصمیم‌های نقل‌شده از ممیزی پایه تاریخی‌اند؛ برای رفتار جاری، قرارداد نسخه‌دار و شواهد تاریخ‌دار پایین را بررسی کن.
 - تصمیم باز را به کارفرما نسبت نده؛ پیشنهاد، تصمیم مصوب و رفتار مشاهده‌شده جدا باشند. C01..C10 را با متن منبع حفظ کن؛ اثرگذاری تصمیم باید پیش از کار وابسته رفع شود. برای پنهان‌کردن ابهام مادی default نساز. حداکثر۳ سؤال بحرانی هر دور؛ باقی موارد در رجیستر باز باقی بمانند.
 - هسته روزانه، موتور تجمیع، صفحات واحد، workflow و خروجی‌های موجود را بی‌دلیل از نو تعریف نکن. کل عملیات/آفلاین/منابع A.8، ارتباطات A.3.C، گزارش‌های دوره‌ای A.10 و استقرار/آموزش جامع A.12 در مالک خود باقی‌اند؛ اثر خراب‌کننده آن‌ها بر A.1 قابل چشم‌پوشی نیست. قرارداد دامنه B01 هر توسعه شرطی را به مالک مشخص می‌رساند.
 - پیش از ایجاد feature، مسیر/شماره آزاد را با وضعیت واقعی specs انتخاب کن؛ مسیر اشغال‌شده را بازنویسی نکن. شناسه B بسته ثابت است و feature-number نیست. یک feature در هر فراخوانی؛ شماره از پیش تحمیل نشده است.
@@ -39,6 +39,40 @@ granularity کل A.1: multi؛ granularity این فراخوانی: single.
 - Excel برای A4 با محدوده چاپ/fit، تکرار هدر، wrap، ارتفاع و شکست صفحه خوانا باشد. PDF بیش از ۵۰ ردیف، امضا در انتها، نقش واقعی/زمان محلی خوانا، و واترمارک تمام صفحات غیرمصوب داشته باشد؛ مرحله طی‌نشده کنشگر جعلی نگیرد.
 - نام فایل قراردادی، RTL و قلم فارسی، متن چندخطی و متن آغازشونده با =,+,-,@ محفوظ باشند؛ متن کاربر فرمول نشود و فرمول محاسباتی سالم بماند. fingerprint متادیتا به‌عنوان تضمین کل بدنه معرفی نشود.
 پایان قابل آزمون: هیچ عدد ساختگی، نقش جعلی، متن بریده، جمع غلط یا خطای فرمول در سناریوهای فوق نباشد. شاهد اصلاح خروجی با گواه تطبیق مستقل B05 یکی تلقی نشود.
+
+Current Stage 1 package evidence (2026-11-22)
+- QA verdict for B03: qa_passed. Existing specification, regression and handoff baseline. Adopt its current scope and use existing QA evidence. If specify is invoked for a material residual gap, scope that gap against the existing spec.
+- Reports: output/a1-requirements-2026-11-22-stage1-b03-qa-findings.md and output/a1-requirements-2026-11-22-stage1-b03-qa-findings.json.
+- The historical blocks below retain the baseline, prior verdicts, and original defect meanings. Use the dated package reports for their tested scopes and the published contract for decisions and deliverable IDs. Stage 2 did not run product QA.
+- Use specs/059-a1-b03-reference-parity and contract deliverables. Map the QA aliases by artifact. DEL-01 is single-day Excel and PDF, DEL-02 is discipline Excel, DEL-03 is the date-range workbook, and DEL-04 is standalone discipline PDF. C04 defines 34 indirect / 32 direct slots. Keep B03 technical evidence and send independent numeric, print and download evidence to B05.
+- DEF-B03-01 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-02 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-03 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-04 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-05 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-06 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-07 — reported resolved in current QA; preserve as regression coverage.
+- DEF-B03-08 — reported resolved in current QA; preserve as regression coverage.
+
+ردیابی QA مرحله ۱.۲ (2026-11-19)
+اقلام رسمی تحویل: A.1.02, A.1.03
+معیار بسته در کشف مرحله ۱: FILE 4، FILE 5/6 و PDF در سناریوهای روز عادی/تعطیل/صفر/نامعلوم/سه‌شیفت/FA-EN با مرجع برابر باشند و عدد ساختگی، نقش جعلی، متن بریده، جمع غلط یا خطای فرمول نداشته باشند.
+منابع گزارش: output/a1-requirements-2026-11-19-stage1-b03-qa-findings.md و output/a1-requirements-2026-11-19-stage1-b03-qa-findings.json. خلاصه قابل حمل در coverage.json ثبت شده است.
+برای هر شناسه زیر معیار سنجش یا تصمیم دامنه ثبت کن. qa_failed وضعیت گزارش قبلی است. یافته احتمالی، نبود شاهد، بازتولید تاریخی و تصمیم باز را با هم یکی نگیر.
+- DEF-B03-01 — شروع، پایان و مدت شیفت توافق‌شده با روز مرجع در خروجی مقایسه شود.
+- DEF-B03-02 — برای پروفایل مصوب شیراز دو جدول نیروی انسانی مجاور باشند. جایگاه عناوین اضافی را طبق C04 بررسی کن.
+- DEF-B03-03 — چاپ A4 در یک صفحه عرض، محدوده چاپ، تکرار هدر و خوانایی متن فارسی بلند بررسی شود.
+- DEF-B03-04 — سمت واقعی، نام و زمان محلی کنشگر نمایش داده شود و مرحله طی‌نشده کنشگر یا عنوان ساختگی نگیرد.
+- DEF-B03-05 — تجهیز قدیمی با ساعت نامعلوم از ساعت صفر واقعی در Excel/PDF قابل تمایز باشد.
+- DEF-B03-06 — برای بچینگ، تراک میکسر، شماره شیت آزمایشگاه و پیوند نتیجه ۲۸روزه، چاپ یا جزئیات را مطابق قرارداد B01 تعیین و بررسی کن.
+- DEF-B03-07 — برچسب نوع و شدت حادثه در خروجی فارسی بومی باشد، از جمله معادل‌های Major و safety.
+- DEF-B03-08 — پروفایل توافق‌شده در پروژه‌های مختلف و با عنوان سفارشی/تاریخی بدون حذف یا تحمیل شمار ثابت آزموده شود.
+
+Historical Stage 1 evidence (2026-11-21, retained for regression traceability)
+- QA verdict for B03: qa_passed. Acceptance criterion: Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form.
+- Source reports: output/a1-requirements-2026-11-21-stage1-b03-qa-findings.md and output/a1-requirements-2026-11-21-stage1-b03-qa-findings.json.
+- Use the 2026-11-19 entries and baseline audit below as traceability and regression evidence. Use the newer package-specific report for its stated technical scope. Reconcile any disagreement by scope and tested build before relying on it. Existing specs are the first place to carry forward verified behavior and identify residual gaps.
+- Use specs/059-a1-b03-reference-parity as the baseline. Treat DEF-B03-01 through DEF-B03-08 as regression scenarios. Preserve the tested shifts, manpower layout, A4/long print, legal roles and watermarks, unset equipment, concrete QC and Persian HSE display. Real reference-day reconciliation remains a B05 gate.
 
 متن بسته مرحلهٔ ۱، عیناً برای حفظ دامنه:
 ## B03 — رفع اختلاف خروجی با فرم مرجع

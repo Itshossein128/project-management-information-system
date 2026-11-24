@@ -139,7 +139,7 @@ class TestShirazFile1Excel:
         )
         missing = DailyReportActivity.objects.create(
             report=report, shift='shift_1', activity_description='فاقد پیمانکار',
-            responsible_name='مسئول متفاوت', headcount=0, quantity=Decimal('0'), quantity_measured=True,
+            responsible_name='مسئول متفاوت', headcount=0, quantity=Decimal('0'), quantity_measured=True, unit='m²',
         )
         data, _ = ShirazFile1ExcelBuilder([actual, missing]).build()
         sheet = openpyxl.load_workbook(io.BytesIO(data), data_only=False).active

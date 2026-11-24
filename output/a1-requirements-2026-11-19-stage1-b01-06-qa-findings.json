@@ -1,0 +1,22 @@
+{
+  "requirementId": "B01-06",
+  "title": "Official headers, weather, outputs, and boundaries",
+  "acceptanceCriteria": "Define official report numbering, weather sources, required Excel/PDF deliverables, unknown-data behavior, fingerprint scope, and cross-phase ownership.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    "DEF-B01-06-GAP-01: Backend schema and exporters lack official report numbering (<projectID>-<projectDay>-<YYYY>-<MM>-<DD>) and actual project day calculation from project start date (FR-017, H05, C08, DEF-B01-01)",
+    "DEF-B01-06-GAP-02: Free MET Norway Locationforecast 2.0 client and 3-day project location forecast integration are missing in apps/api/core/field_reports/ (FR-017, X07, C08, DEF-B01-05)",
+    "DEF-B01-06-GAP-03: Observed wind and ground conditions from weather logs are omitted from official daily report header exports (FR-017, X07, C08)",
+    "DEF-B01-06-GAP-04: Multi-sheet date-range Excel workbook exporter is not implemented in field_reports or report_export_service (FR-016, E17, C05)",
+    "DEF-B01-06-GAP-05: Standalone discipline sub-report PDF exporter is not implemented in apps/api/core/sub_reports/ (FR-016, C07)"
+  ],
+  "verificationDetails": {
+    "specStatus": "Ratified in specs/057-a1-b01-data-contract/spec.md under C05, C06, C07, C08, US6, FR-016, FR-017, FR-018, FR-019",
+    "officialReportNumber": "Absent in field_reports/models.py, shiraz_file4_excel.py, and pdf.py",
+    "weatherIntegration": "Basic weather fields exist, but MET Norway Locationforecast 2.0 integration and wind/ground log integration are absent",
+    "deliverablesParity": "Single-day Excel and PDF exist; discipline Excel exists; multi-sheet date-range Excel workbook and standalone discipline PDFs are absent",
+    "securityScope": "C06 verified: strictly actor attribution + metadata fingerprint; PKI certificate signatures properly excluded",
+    "boundaries": "FR-019 and 18-section disposition matrix cleanly preserve X01-X06, X08-X10 to external owner phases"
+  },
+  "summary": "Requirement B01-06 failed QA verification against the codebase: while C05-C08 and boundary rules are ratified in the specification, the software implementation lacks official report numbering, MET Norway 3-day weather forecast integration, wind/ground weather-log headers, multi-sheet date-range Excel exports, and standalone discipline PDFs."
+}

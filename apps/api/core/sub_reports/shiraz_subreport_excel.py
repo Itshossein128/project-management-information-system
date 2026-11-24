@@ -16,7 +16,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from common.jalali import gregorian_to_jalali, persian_day_of_week
-from field_reports.excel_safety import literalize_cell
+from field_reports.excel_safety import configure_report_print, literalize_cell
 from common.reporting_units import SpecialtyUnit
 from sub_reports.models import DisciplineSubReport
 
@@ -57,8 +57,8 @@ class ShirazSubReportExcelBuilder:
 
         unit = getattr(sub_report, 'unit', None)
         discipline = getattr(sub_report, 'discipline', '') or ''
-        self.is_civil = unit == SpecialtyUnit.BUILDINGS or discipline.lower() in ('civil', 'finishing')
-        self.is_electrical = unit == SpecialtyUnit.ELECTRICAL or discipline.lower() == 'electrical'
+        self.is_civil = unit == SpecialtyUnit.BUILDINGS or (not unit and discipline.lower() in ('civil', 'finishing'))
+        self.is_electrical = unit == SpecialtyUnit.ELECTRICAL or (not unit and discipline.lower() == 'electrical')
 
         if self.is_civil:
             self.ws.title = 'گزارش ابنیه'
@@ -75,9 +75,10 @@ class ShirazSubReportExcelBuilder:
 
     def build(self) -> Tuple[bytes, str]:
         self._write_header()
-        current_row = 7
-        current_row = self._write_activities(current_row)
-        self._auto_fit_columns()
+        first_column_header_row = 8
+        self._write_activities(first_column_header_row - 1)
+        self._auto_fit_columns(first_column_header_row)
+        configure_report_print(self.ws, title_rows=f'1:{first_column_header_row}', landscape=True)
 
         buf = io.BytesIO()
         self.wb.save(buf)
@@ -107,6 +108,7 @@ class ShirazSubReportExcelBuilder:
         project = self.sub_report.project
         contractor = project.contractor_ref.name if project.contractor_ref_id else project.contractor
         header_cell.value = f'{contractor or "پیمانکار ثبت نشده"} — گزارش روزانه واحدهای اجرا ({self.discipline_name}) — {project_name}'
+        literalize_cell(header_cell)
         header_cell.font = STYLE_HEADER_FONT
         header_cell.fill = STYLE_HEADER_FILL
         header_cell.alignment = ALIGN_CENTER
@@ -270,15 +272,17 @@ class ShirazSubReportExcelBuilder:
 
         return row
 
-    def _auto_fit_columns(self):
+    def _auto_fit_columns(self, header_row):
         ws = self.ws
-        for col in ws.columns:
-            max_len = 0
-            col_letter = get_column_letter(col[0].column)
-            for cell in col:
-                val = cell.value
-                if val:
-                    val_str = str(val)
-                    if not val_str.startswith('='):
-                        max_len = max(max_len, len(val_str))
-            ws.column_dimensions[col_letter].width = max(max_len + 3, 11)
+        for column in ws.columns:
+            max_line_length = max(
+                (
+                    len(line)
+                    for cell in column
+                    if cell.row >= header_row and cell.value is not None and cell.data_type != 'f'
+                    for line in str(cell.value).split('\n')
+                ),
+                default=0,
+            )
+            col_letter = get_column_letter(column[0].column)
+            ws.column_dimensions[col_letter].width = min(max(max_line_length + 3, 11), 45)

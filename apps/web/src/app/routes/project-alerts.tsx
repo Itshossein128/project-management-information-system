@@ -1,6 +1,17 @@
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  BellRing,
+  Check,
+  CheckCheck,
+  Clock,
+  Lock,
+  Plus,
+  SlidersHorizontal,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ProjectProvider, usePermission, useProject } from "@/app/contexts/project-context";
@@ -15,12 +26,16 @@ import {
   type AlertLogEntry,
   type AlertRule,
 } from "@/app/lib/api/alerts";
-import { Checkbox, Field, Input, Select } from "@/components/form";
+import { formatRoleLabel } from "@/app/lib/role-labels";
+import { Field, Input, Select } from "@/components/form";
 import { EmptyState } from "@/components/layout/empty-state";
 import { LoadingSkeleton, PageHeader } from "@/components/layout/page-header";
 import { QueryErrorState } from "@/components/layout/query-error-state";
+import { Badge } from "@/components/ui/badge";
 import { Drawer } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/sprint-button";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 import { ProductTourButton } from "@/components/tour/ProductTourButton";
 import { useProductTour } from "@/components/tour/useProductTour";
@@ -38,7 +53,7 @@ function groupByType(entries: AlertLogEntry[]) {
 }
 
 function AlertCenterContent() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { projectId, project, isLoading } = useProject();
   const qc = useQueryClient();
@@ -180,7 +195,23 @@ function AlertCenterContent() {
     return <QueryErrorState onRetry={() => void refetchAlerts()} />;
   }
 
-  const grouped = groupByType(alerts?.results ?? []);
+  const activeAlerts = alerts?.results ?? [];
+  const grouped = groupByType(activeAlerts);
+  const ruleList = rules?.results ?? [];
+
+  const formatThreshold = (value: number | null) => {
+    if (value === null || value === undefined || String(value) === "") return "—";
+    const n = Number(value);
+    return Number.isFinite(n)
+      ? n.toLocaleString("fa-IR", { maximumFractionDigits: 2 })
+      : String(value);
+  };
+
+  const splitRoles = (roles: string) =>
+    (roles ?? "")
+      .split(",")
+      .map((r) => r.trim())
+      .filter(Boolean);
 
   return (
     <div className="space-y-6">
@@ -190,141 +221,232 @@ function AlertCenterContent() {
         actions={<ProductTourButton onClick={startTour} />}
       />
 
-      <div className="flex flex-wrap gap-2" data-tour="alerts-tabs">
-        <Button variant={tab === "active" ? "primary" : "secondary"} size="sm" onClick={() => setTab("active")}>
-          هشدارهای فعال
-        </Button>
-        {canManage ? (
-          <Button
-            variant={tab === "rules" ? "primary" : "secondary"}
-            size="sm"
-            data-tour="alerts-rules-tab"
-            onClick={() => setTab("rules")}
-          >
-            قوانین هشدار
-          </Button>
-        ) : null}
-      </div>
-
-      {tab === "active" ? (
-        <div className="space-y-4" data-tour="alerts-active-list">
-          <div className="flex justify-end">
-            {(alerts?.results?.length ?? 0) > 0 ? (
-              <Button variant="secondary" size="sm" onClick={() => ackAll.mutate()} disabled={ackAll.isPending}>
-                علامت‌گذاری همه
-              </Button>
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as Tab)}
+        dir={i18n.dir()}
+        className="w-full gap-4"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <TabsList className="h-10" data-tour="alerts-tabs">
+            <TabsTrigger value="active" className="gap-2 px-4">
+              <BellRing />
+              هشدارهای فعال
+              {activeAlerts.length > 0 ? (
+                <span className="rounded-full bg-danger-100 px-1.5 text-xs font-semibold text-danger-800 tabular-nums dark:bg-danger-900/40 dark:text-danger-300">
+                  {activeAlerts.length.toLocaleString("fa-IR")}
+                </span>
+              ) : null}
+            </TabsTrigger>
+            {canManage ? (
+              <TabsTrigger value="rules" className="gap-2 px-4" data-tour="alerts-rules-tab">
+                <SlidersHorizontal />
+                قوانین هشدار
+              </TabsTrigger>
             ) : null}
-          </div>
-          {grouped.size === 0 ? (
-            <EmptyState
-              icon={<Bell />}
-              title="هشدار فعالی وجود ندارد"
-              description="وقتی آستانه‌ای رد شود، هشدارها اینجا نمایش داده می‌شوند."
-            />
-          ) : (
-            Array.from(grouped.entries()).map(([type, items], groupIdx) => (
-              <div key={type} className="rounded-lg border">
-                <div className="border-b bg-muted/40 px-4 py-2 font-medium">
-                  {ALERT_TYPE_LABELS[type] ?? type}
-                </div>
-                <ul className="divide-y">
-                  {items.map((item, itemIdx) => (
-                    <li
-                      key={item.id}
-                      className="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
-                      {...(groupIdx === 0 && itemIdx === 0
-                        ? { "data-tour": "alerts-acknowledge" }
-                        : {})}
-                    >
-                      <div>
-                        <p className="text-sm">{item.message}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{new Date(item.fired_at).toLocaleString("fa-IR")}</p>
-                      </div>
-                      <Button variant="secondary" size="sm" onClick={() => ack.mutate(item.id)}>
-                        رفع شد
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
-        </div>
-      ) : null}
+          </TabsList>
 
-      {tab === "rules" && canManage ? (
-        <div className="space-y-4">
-          <div className="flex justify-end">
-            <Button variant="primary" onClick={() => setRuleDrawer(true)}>افزودن قانون هشدار</Button>
-          </div>
-          {loadingRules ? (
-            <LoadingSkeleton rows={6} />
-          ) : rulesError ? (
-            <QueryErrorState onRetry={() => void refetchRules()} />
-          ) : (rules?.results?.length ?? 0) === 0 ? (
-            <EmptyState
-              title="قانونی تعریف نشده"
-              description="اولین قانون هشدار را اضافه کنید."
-              action={
-                <Button variant="primary" onClick={() => setRuleDrawer(true)}>
-                  افزودن قانون هشدار
-                </Button>
-              }
-            />
-          ) : (
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/50">
-                  <tr>
-                    {["نام", "نوع", "آستانه", "گیرندگان", "وضعیت", "عملیات"].map((h) => (
-                      <th key={h} className="px-3 py-2 text-start">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(rules?.results ?? []).map((r: AlertRule) => (
-                    <tr key={r.id} className="border-t">
-                      <td className="px-3 py-2">
-                        {r.is_system ? "🔒 " : ""}{r.name}
-                      </td>
-                      <td className="px-3 py-2">{ALERT_TYPE_LABELS[r.alert_type] ?? r.alert_type}</td>
-                      <td className="px-3 py-2">{r.threshold_value ?? "—"}</td>
-                      <td className="px-3 py-2">{r.notify_roles}</td>
-                      <td className="px-3 py-2">
-                        <Checkbox
-                          name={`rule-active-${r.id}`}
-                          label="فعال"
-                          checked={r.is_active}
-                          onChange={(e) => {
-                            const checked = Boolean(
-                              (e.target as unknown as { value: boolean }).value,
-                            );
-                            toggleRule.mutate({ id: r.id, is_active: checked });
-                          }}
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        {!r.is_system ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            loading={deleteRule.isPending}
-                            onClick={() => deleteRule.mutate(r.id)}
-                          >
-                            حذف
-                          </Button>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {tab === "active" && activeAlerts.length > 0 ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => ackAll.mutate()}
+              loading={ackAll.isPending}
+            >
+              <CheckCheck className="size-4" />
+              علامت‌گذاری همه
+            </Button>
+          ) : null}
+          {tab === "rules" && canManage && ruleList.length > 0 ? (
+            <Button variant="primary" size="sm" onClick={() => setRuleDrawer(true)}>
+              <Plus className="size-4" />
+              افزودن قانون هشدار
+            </Button>
+          ) : null}
         </div>
-      ) : null}
+
+        <TabsContent value="active" className="mt-0">
+          <div className="space-y-4" data-tour="alerts-active-list">
+            {grouped.size === 0 ? (
+              <EmptyState
+                icon={<Bell />}
+                title="هشدار فعالی وجود ندارد"
+                description="وقتی آستانه‌ای رد شود، هشدارها اینجا نمایش داده می‌شوند."
+                className="bg-card"
+              />
+            ) : (
+              Array.from(grouped.entries()).map(([type, items], groupIdx) => (
+                <section
+                  key={type}
+                  className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-[var(--shadow-card)]"
+                >
+                  <header className="flex items-center justify-between gap-3 border-b border-border/80 bg-muted/40 px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex size-8 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300">
+                        <AlertTriangle className="size-4" />
+                      </span>
+                      <h2 className="text-sm font-semibold text-foreground">
+                        {ALERT_TYPE_LABELS[type] ?? type}
+                      </h2>
+                    </div>
+                    <Badge
+                      variant="warning"
+                      label={`${items.length.toLocaleString("fa-IR")} هشدار`}
+                    />
+                  </header>
+                  <ul className="divide-y divide-border/70">
+                    {items.map((item, itemIdx) => (
+                      <li
+                        key={item.id}
+                        className="flex flex-col gap-3 px-4 py-3.5 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-sm leading-6 text-foreground">{item.message}</p>
+                          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Clock className="size-3.5" />
+                            <span className="tabular-nums">
+                              {new Date(item.fired_at).toLocaleString("fa-IR")}
+                            </span>
+                          </p>
+                        </div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="shrink-0 self-end sm:self-auto"
+                          onClick={() => ack.mutate(item.id)}
+                          loading={ack.isPending && ack.variables === item.id}
+                          {...(groupIdx === 0 && itemIdx === 0
+                            ? { "data-tour": "alerts-acknowledge" }
+                            : {})}
+                        >
+                          <Check className="size-4" />
+                          رفع شد
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        {canManage ? (
+          <TabsContent value="rules" className="mt-0">
+            {loadingRules ? (
+              <LoadingSkeleton rows={6} />
+            ) : rulesError ? (
+              <QueryErrorState onRetry={() => void refetchRules()} />
+            ) : ruleList.length === 0 ? (
+              <EmptyState
+                icon={<SlidersHorizontal />}
+                title="قانونی تعریف نشده"
+                description="اولین قانون هشدار را اضافه کنید."
+                className="bg-card"
+                action={
+                  <Button variant="primary" onClick={() => setRuleDrawer(true)}>
+                    <Plus className="size-4" />
+                    افزودن قانون هشدار
+                  </Button>
+                }
+              />
+            ) : (
+              <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-[var(--shadow-card)]">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[820px] text-sm">
+                    <thead className="border-b border-border/80 bg-muted/50 text-xs text-muted-foreground">
+                      <tr>
+                        {["نام", "نوع", "آستانه", "گیرندگان", "فاصله تکرار", "وضعیت", ""].map(
+                          (h, i) => (
+                            <th key={h || i} className="px-4 py-3 text-start font-medium whitespace-nowrap">
+                              {h}
+                            </th>
+                          ),
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/70">
+                      {ruleList.map((r: AlertRule) => (
+                        <tr key={r.id} className="transition-colors hover:bg-muted/30">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2 font-medium text-foreground">
+                              {r.is_system ? (
+                                <Lock
+                                  className="size-3.5 shrink-0 text-muted-foreground"
+                                  aria-label="قانون سیستمی"
+                                />
+                              ) : null}
+                              <span>{r.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                            {ALERT_TYPE_LABELS[r.alert_type] ?? r.alert_type}
+                          </td>
+                          <td className="px-4 py-3 tabular-nums whitespace-nowrap">
+                            {formatThreshold(r.threshold_value)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {splitRoles(r.notify_roles).map((role) => (
+                                <span
+                                  key={role}
+                                  className="rounded-md bg-muted px-2 py-0.5 text-xs text-foreground/80 whitespace-nowrap"
+                                >
+                                  {formatRoleLabel(role, t)}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground tabular-nums whitespace-nowrap">
+                            {r.cooldown_hours != null
+                              ? `${Number(r.cooldown_hours).toLocaleString("fa-IR")} ساعت`
+                              : "—"}
+                          </td>
+                          <td className="px-4 py-3">
+                            <label className="inline-flex cursor-pointer items-center gap-2 whitespace-nowrap">
+                              <Switch
+                                checked={r.is_active}
+                                disabled={toggleRule.isPending && toggleRule.variables?.id === r.id}
+                                onCheckedChange={(checked) =>
+                                  toggleRule.mutate({ id: r.id, is_active: checked })
+                                }
+                                aria-label={`فعال‌سازی ${r.name}`}
+                              />
+                              <span
+                                className={
+                                  r.is_active ? "text-xs text-foreground" : "text-xs text-muted-foreground"
+                                }
+                              >
+                                {r.is_active ? "فعال" : "غیرفعال"}
+                              </span>
+                            </label>
+                          </td>
+                          <td className="px-4 py-3 text-end">
+                            {!r.is_system ? (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="size-8 text-muted-foreground hover:text-destructive"
+                                loading={deleteRule.isPending && deleteRule.variables === r.id}
+                                onClick={() => deleteRule.mutate(r.id)}
+                                aria-label={`حذف ${r.name}`}
+                              >
+                                {deleteRule.isPending && deleteRule.variables === r.id ? null : (
+                                  <Trash2 className="size-4" />
+                                )}
+                              </Button>
+                            ) : null}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        ) : null}
+      </Tabs>
 
       <Drawer
         isOpen={ruleDrawer}

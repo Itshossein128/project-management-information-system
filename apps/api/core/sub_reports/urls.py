@@ -26,6 +26,7 @@ unit_approve_view = UnitReportViewSet.as_view({'post': 'approve'})
 unit_reject_view = UnitReportViewSet.as_view({'post': 'reject'})
 unit_correct_view = UnitReportViewSet.as_view({'post': 'correct'})
 unit_excel_view = UnitReportViewSet.as_view({'get': 'excel'})
+unit_pdf_view = UnitReportViewSet.as_view({'get': 'pdf'})
 
 # §1 executed-activity section rows (feature 033, T017).
 activity_section_list = UnitReportActivitySectionViewSet.as_view(
@@ -70,6 +71,7 @@ general_section_list = UnitReportGeneralSectionViewSet.as_view({'get': 'list', '
 general_section_row = UnitReportGeneralSectionViewSet.as_view({'delete': 'destroy'})
 attachment_section_list = UnitReportAttachmentSectionViewSet.as_view({'get': 'list', 'post': 'create'})
 attachment_section_row = UnitReportAttachmentSectionViewSet.as_view({'delete': 'destroy'})
+attachment_section_download = UnitReportAttachmentSectionViewSet.as_view({'get': 'download'})
 
 # NOTE (FR-032 / US5 / research D2):
 # Legacy client endpoints under `/api/v1/projects/{project_id}/sub-reports/`
@@ -87,6 +89,7 @@ urlpatterns = [
     path('units/<str:unit>/daily-reports/<uuid:pk>/reject/', unit_reject_view, name='unit-report-reject'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/correct/', unit_correct_view, name='unit-report-correct'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/excel/', unit_excel_view, name='unit-report-excel'),
+    path('units/<str:unit>/daily-reports/<uuid:pk>/pdf/', unit_pdf_view, name='unit-report-pdf'),
     path(
         'units/<str:unit>/daily-reports/<uuid:pk>/activities/',
         activity_section_list,
@@ -139,6 +142,10 @@ urlpatterns = [
     path('units/<str:unit>/daily-reports/<uuid:pk>/general-activities/<uuid:row_pk>/', general_section_row, name='unit-report-general-row'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/', attachment_section_list, name='unit-report-attachments'),
     path('units/<str:unit>/daily-reports/<uuid:pk>/attachments/<uuid:row_pk>/', attachment_section_row, name='unit-report-attachment-row'),
+    path(
+        'units/<str:unit>/daily-reports/<uuid:pk>/attachments/<uuid:row_pk>/download/',
+        attachment_section_download, name='unit-report-attachment-download',
+    ),
     path('contractors/<uuid:contractor_pk>/labor-ledger/', ContractorLaborLedgerView.as_view(), name='contractor-labor-ledger'),
     path('daily-reports/sync-operations/v2/', SyncOperationsV2View.as_view(), name='sync-operations-v2'),
 ]

@@ -1,0 +1,42 @@
+{
+  "phase": "A.1",
+  "phaseTitle": "تطبیق و تحویل اولیه گزارش روزانه",
+  "selectedBy": "first phase in declared delivery-plan order with at least one remaining task",
+  "inspectedOn": "2026-11-24",
+  "requirements": [
+    {
+      "id": "A.1.01",
+      "title": "نهایی‌کردن قواعد اطلاعات روزانه",
+      "acceptance": "قاعده null/صفر، شیفت، شمارش نفر و منبع هر بخش ثبت شود."
+    },
+    {
+      "id": "A.1.02",
+      "title": "تطبیق تمام بخش‌های گزارش با روز مرجع",
+      "acceptance": "اقلام، واحدها، ارقام و فرمول‌ها با مرجع مستقل مقایسه و Excel بازحساب شود."
+    },
+    {
+      "id": "A.1.03",
+      "title": "رفع اختلاف ارقام و نمایش خروجی‌ها",
+      "acceptance": "ساعت نامعلوم ماشین‌آلات صفر قطعی جلوه نکند و تست دقیق اضافه شود."
+    },
+    {
+      "id": "A.1.04",
+      "title": "ارائه نمونه نهایی و تأیید اولیه گزارش",
+      "acceptance": "فایل و نسخه و نتیجه بازبینی ارقام و صفحه‌بندی نگهداری شود."
+    }
+  ],
+  "summary": "A.1 is the first non-implemented phase. R.0, A.6, and A.7 are implemented; A.1 has four remaining tasks. Phase-level acceptance requires a complete controlled day, independently recalculated Excel, readable PDF, and initial approval; full report-scope closure follows A.10.",
+  "evidence": [
+    "apps/web/src/app/data/delivery-plan.ts:161-206",
+    "output/delivery-plan-2026-11-03/schedule.json",
+    "output/a1-requirements-2026-11-18/requirements.json",
+    "output/a1-requirements-2026-11-18/remaining-work.md",
+    "graphify-out/graph.json",
+    "knowledge/agent-instructions.md"
+  ],
+  "inspectionNotes": [
+    "delivery_plan_reader_tool reports A.1 as nextRemainingPhase with four remaining task IDs.",
+    "The generic employer extractor returned stale A.6 context and was not used as A.1 evidence.",
+    "Completed A.1-B04 and prior QA findings were excluded from the remaining fan-out scope."
+  ]
+}

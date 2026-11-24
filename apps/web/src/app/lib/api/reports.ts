@@ -21,13 +21,15 @@ export interface ActivityLogRow {
   activity_description: string;
   shift: string;
   subcontractor: string;
+  contractor_id: string | null;
   headcount: number | null;
-  zone: string;
-  block: string;
-  floor: string;
-  location: string;
+  zone: string | null;
+  block: string | null;
+  floor: string | null;
+  location: string | null;
   quantity: number | null;
-  unit: string;
+  quantity_measured: boolean;
+  unit: string | null;
   activity_code: string | null;
   activity_name: string | null;
   report_status: string;
@@ -37,14 +39,40 @@ export interface ActivityLogFilterOptions {
   zones: string[];
   blocks: string[];
   subcontractors: string[];
+  contractors: { id: string; name: string }[];
   disciplines?: string[];
   parcels?: string[];
+  floors: string[];
+  shifts: string[];
+  units: string[];
 }
 
 export type ActivityLogMultiValue = string | string[];
 
-export function serializeActivityLogMultiValue(value?: ActivityLogMultiValue) {
-  return Array.isArray(value) ? value.join(",") : value;
+export const activityLogScalarFilters = [
+  "date_from", "date_to", "contractor_id", "subcontractor", "zone", "block", "floor",
+  "shift", "activity_id", "status", "location", "q", "headcount", "quantity", "unit", "report_id",
+] as const;
+
+export type ActivityLogSelection = Partial<Record<(typeof activityLogScalarFilters)[number], string>> & {
+  discipline?: ActivityLogMultiValue;
+  source_discipline?: ActivityLogMultiValue;
+  parcel?: ActivityLogMultiValue;
+  approved_only?: boolean;
+};
+
+export function serializeActivityLogSelection(selection: ActivityLogSelection) {
+  const search = new URLSearchParams();
+  for (const field of activityLogScalarFilters) {
+    const value = selection[field];
+    if (value) search.set(field, value);
+  }
+  for (const field of ["source_discipline", "discipline", "parcel"] as const) {
+    const value = selection[field];
+    if (value?.length) search.set(field, Array.isArray(value) ? value.join(",") : value);
+  }
+  if (selection.approved_only !== undefined) search.set("approved_only", String(selection.approved_only));
+  return search;
 }
 
 export interface PaginatedActivityLog {
@@ -52,6 +80,16 @@ export interface PaginatedActivityLog {
   next: string | null;
   previous: string | null;
   results: ActivityLogRow[];
+  aggregates: {
+    headcount_sum: number;
+    quantity_by_unit: {
+      unit: string;
+      total: string | null;
+      measured_count: number;
+      unknown_count: number;
+    }[];
+    unknown_quantity_without_unit_count: number;
+  };
 }
 
 export function fetchPersonnelSummary(
@@ -76,33 +114,18 @@ export function fetchPersonnelSummary(
 
 export function fetchActivityLog(
   projectId: string,
-  params: {
-    date_from?: string;
-    date_to?: string;
-    source_discipline?: ActivityLogMultiValue;
-    parcel?: ActivityLogMultiValue;
-    subcontractor?: string;
-    zone?: string;
-    block?: string;
-    floor?: string;
-    shift?: string;
-    activity_id?: string;
-    approved_only?: boolean;
-    page?: number;
-    page_size?: number;
-  } = {},
+  params: ActivityLogSelection & { page?: number; page_size?: number } = {},
 ) {
-  const search = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    const serialized = serializeActivityLogMultiValue(v as ActivityLogMultiValue | undefined);
-    if (serialized != null && serialized !== "") search.set(k, serialized);
-  }
-  const qs = search.toString();
+  const search = serializeActivityLogSelection(params);
+  if (params.page) search.set("page", String(params.page));
+  if (params.page_size) search.set("page_size", String(params.page_size));
+  const query = search.toString();
   return apiJson<PaginatedActivityLog>(
-    `${base(projectId)}/activity-log/${qs ? `?${qs}` : ""}`,
+    `${base(projectId)}/activity-log/${query ? `?${query}` : ""}`,
   );
 }
 
-export function fetchActivityLogFilters(projectId: string) {
-  return apiJson<ActivityLogFilterOptions>(`${base(projectId)}/activity-log/filters/`);
+export function fetchActivityLogFilters(projectId: string, approvedOnly = true) {
+  const query = approvedOnly ? "" : "?approved_only=false";
+  return apiJson<ActivityLogFilterOptions>(`${base(projectId)}/activity-log/filters/${query}`);
 }

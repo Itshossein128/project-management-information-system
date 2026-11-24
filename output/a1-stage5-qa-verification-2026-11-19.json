@@ -1,0 +1,88 @@
+{
+  "phase": "A.1",
+  "stage": "Stage 5",
+  "evaluatedAt": "2026-11-19T17:56:00+03:30",
+  "qaStatus": "qa_failed",
+  "liveEnvironmentStatus": {
+    "web": "offline (http://localhost:5173 refused connection)",
+    "api": "offline (http://localhost:8000 refused connection)",
+    "postgres": "offline (port 5433 no response)",
+    "redis": "offline (port 6379 connection refused)"
+  },
+  "implementationState": "blocked_upstream_unratified_spec",
+  "defects": [
+    {
+      "id": "DEF-SYS-01",
+      "severity": "CRITICAL",
+      "category": "Infrastructure",
+      "title": "Live servers offline (localhost:5173 and localhost:8000 refused connection)"
+    },
+    {
+      "id": "DEF-SYS-02",
+      "severity": "CRITICAL",
+      "category": "Workflow Block",
+      "title": "Phase A.1 implementation not executed due to unratified employer decisions C03-C08 and missing plan.md/tasks.md"
+    },
+    {
+      "id": "DEF-B01-01",
+      "severity": "HIGH",
+      "category": "Data Contract",
+      "title": "Missing report_number and project_day_number in DailyReport data model"
+    },
+    {
+      "id": "DEF-B01-02",
+      "severity": "HIGH",
+      "category": "Data Contract / Export",
+      "title": "Work shift actual duration missing, outputting hardcoded 'ساعات کاری شیفت: ثبت نشده' in export"
+    },
+    {
+      "id": "DEF-B01-03",
+      "severity": "MEDIUM",
+      "category": "Calculation",
+      "title": "Headcount sum erroneously labeled as 'نفرروز' without unique worker presence proof"
+    },
+    {
+      "id": "DEF-B02-01",
+      "severity": "CRITICAL",
+      "category": "Version Integrity",
+      "title": "is_auto_summary flag drops to False in correction version creation"
+    },
+    {
+      "id": "DEF-B02-02",
+      "severity": "CRITICAL",
+      "category": "Lock Integrity / RBAC",
+      "title": "Direct mutation of derived rows permitted in revision reports (bypass of derived lock)"
+    },
+    {
+      "id": "DEF-B02-03",
+      "severity": "HIGH",
+      "category": "Lineage / Provenance",
+      "title": "DailyReportDerivedSource records are not cloned or remapped in correction copies"
+    },
+    {
+      "id": "DEF-B03-01",
+      "severity": "HIGH",
+      "category": "Reference Parity",
+      "title": "Reference form discrepancies in layout, styling, and missing weather attributes"
+    },
+    {
+      "id": "DEF-B04-01",
+      "severity": "HIGH",
+      "category": "Aggregation",
+      "title": "Discrepancy between filtered paginated querysets and aggregate totals"
+    },
+    {
+      "id": "DEF-B05-01",
+      "severity": "HIGH",
+      "category": "Formulas",
+      "title": "Absence of pre-calculated formula cache in generated Excel output"
+    },
+    {
+      "id": "DEF-B06-01",
+      "severity": "CRITICAL",
+      "category": "Release / Delivery",
+      "title": "Missing frozen A.1 release package, SHA-256 digest manifest, and client initial sign-off protocol"
+    }
+  ],
+  "summary": "Stage 5 end-user QA verification for Phase A.1 failed: live application endpoints (localhost:5173 and localhost:8000) are offline, upstream SpecKit implementation for packages B01-B06 remains blocked by unratified employer decisions C03-C08, and all prerequisite packages carry critical unresolved functional, integrity, and parity defects."
+}

@@ -1,0 +1,27 @@
+{
+  "requirementId": "B01-02",
+  "title": "Governance and anti-fabrication",
+  "acceptanceCriteria": "Record C01-C10 and GOV-01 with provenance, preserving boundaries and never fabricating missing values or employer decisions.",
+  "qaStatus": "qa_passed",
+  "defects": [],
+  "verificationDetails": {
+    "scopeDecisionsEvaluated": "C01 through C10 and GOV-01 formally recorded in specs/057-a1-b01-data-contract/spec.md",
+    "provenanceVerification": {
+      "C01": "Recorded baseline (prior specs 028/032/037/039) - Raw daily entry restricted to unit-level; project daily report is derived summary",
+      "C02": "Recorded baseline (prior specs 034/036) - Measured zero/0.00 is valid, null/unset is unknown",
+      "C03_to_C08": "Ratified on 2026-11-19 by actor 385da9f5-52d9-4f26-bb09-fc125283cf94",
+      "C09": "Baseline preserved - Unit-source approvals independent of daily summary approval",
+      "C10": "Boundary preserved - Stakeholder/correspondence in A.3.C, periodic reporting in A.10 preserved without false closure",
+      "GOV_01": "Ratified (Internal Scope) on 2026-11-19 by actor 385da9f5-52d9-4f26-bb09-fc125283cf94 - Internal synthetic reference fixture SIM-A1-001 (1406-03-01, day 12) permits planning/implementation/internal verification, while employer representative & acceptance date remain deferred to B06 handoff"
+    },
+    "antiFabricationRules": [
+      "Missing shift durations remain unknown and must not default to planned hours (FR-008, FR-012)",
+      "Unavailable weather/wind/ground display 'unknown' and must never be fabricated (FR-008, FR-017)",
+      "Unratified scope changes remain OPEN and are never silently assumed (US2 Scen 2, FR-005)",
+      "Digital signatures restricted to actor attribution and hash fingerprint; PKI certificate signatures explicitly outside A.1 (C06, US2 Scen 4)",
+      "Employer representative and sign-off date are left blank/pending until B06 handoff rather than fabricated (GOV-01, SC-006)"
+    ],
+    "upstreamContractStatus": "Specification Quality Checklist (checklists/requirements.md) fully verified and checked; ready for Supervisor review and speckit-plan."
+  },
+  "summary": "Requirement B01-02 (Governance and anti-fabrication) passed QA verification at the specification and data contract level. Scope decisions C01-C10 and GOV-01 are comprehensively recorded with complete provenance, actor attribution, and dates. Boundaries are preserved, and anti-fabrication rules strictly prevent guessing or defaulting missing operational values or employer rulings."
+}

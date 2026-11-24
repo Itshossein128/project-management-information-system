@@ -527,6 +527,7 @@ class UnitReportAttachment(UUIDModel):
     declared_content_type = models.CharField(max_length=60, blank=True, default='')
     size_bytes = models.PositiveIntegerField(null=True, blank=True)
     checksum = models.CharField(max_length=64, blank=True, default='')
+    uploaded_at = models.DateTimeField(null=True, blank=True)
     capture_date = models.DateField(null=True, blank=True)
     work_front = models.CharField(max_length=120, blank=True, default='')
     is_deleted = models.BooleanField(default=False)
@@ -572,6 +573,8 @@ class UnitReportStatusEvent(UUIDModel):
         related_name='unit_report_status_events',
     )
     occurred_at = models.DateTimeField()
+    actor_name = models.CharField(max_length=120, null=True, blank=True)
+    actor_position = models.CharField(max_length=120, null=True, blank=True)
     reason = models.TextField(blank=True, default='')
     event_type = models.CharField(max_length=20, choices=UnitReportEventType.choices)
 

@@ -161,7 +161,7 @@ def test_pdf_does_not_invent_user_job_titles(project, user, monkeypatch):
 
     monkeypatch.setattr(pdf, '_fa', capture)
     pdf._signatures_block(report, pdf._register_font())
-    assert not any(value.startswith('سمت:') for value in captured)
+    assert {value for value in captured if value.startswith('سمت:')} == {'سمت: نامشخص'}
 
 
 @pytest.mark.django_db
@@ -275,3 +275,30 @@ def test_summary_pdf_warns_when_current_sources_changed_since_aggregation(projec
     report.refresh_from_db()
     assert report.status == 'approved'
     assert report.aggregation_fingerprint == original_fingerprint
+@pytest.mark.django_db
+def test_b03_legacy_equipment_zero_and_unknown_across_exports(project, user, monkeypatch):
+    import io
+    import openpyxl
+    import field_reports.pdf as pdf
+    from field_reports.models import DailyReportEquipment
+    from field_reports.shiraz_file4_excel import ShirazFile4ExcelBuilder
+
+    report = DailyReport.objects.create(project=project, created_by=user, report_date=date(2025, 2, 4))
+    for name, hours in [('Unknown machine', None), ('Measured machine', 0)]:
+        DailyReportEquipment.objects.create(
+            report=report, equipment_name=name, shift='day', status='active', ownership_type='owned',
+            productive_hours=hours,
+        )
+    ws = openpyxl.load_workbook(io.BytesIO(ShirazFile4ExcelBuilder(report).build()[0])).active
+    hours_by_name = {row[1]: row[5] for row in ws.values if row[1] in ('Unknown machine', 'Measured machine')}
+    assert hours_by_name == {'Unknown machine': None, 'Measured machine': 0}
+    captured = {}
+    render = pdf._section
+
+    def section(title, headers, rows, *args):
+        captured[title] = rows
+        return render(title, headers, rows, *args)
+
+    monkeypatch.setattr(pdf, '_section', section)
+    pdf.generate_daily_report_pdf(report)
+    assert {row[0]: row[4] for row in captured['ماشین‌آلات']} == {'Unknown machine': '—', 'Measured machine': 0}

@@ -1,0 +1,33 @@
+{
+  "requirementId": "B01",
+  "title": "Data contract and reference-day fixture",
+  "phase": "A.1",
+  "stage": "1.2",
+  "timestamp": "2026-11-22T20:30:00+03:30",
+  "status": "implemented_and_verified",
+  "qaStatus": "qa_passed",
+  "defects": [],
+  "verificationDetails": {
+    "contractVersion": "1.0.0",
+    "referenceFormVersion": "shiraz-file4-v1",
+    "broaderDailySectionsCount": 18,
+    "fieldMappingsCount": 128,
+    "scopeDecisionsCount": 11,
+    "ratifiedDecisions": ["C03", "C04", "C05", "C06", "C07", "C08", "GOV-01"],
+    "baselineDecisions": ["C01", "C02", "C09", "C10"],
+    "referenceFixture": {
+      "projectCode": "SIM-A1-001",
+      "reportDate": "2027-05-22",
+      "jalaliDate": "1406-03-01",
+      "projectDay": 12,
+      "officialReportNumber": "SIM-A1-001-12-1406-03-01",
+      "idempotentSeedingVerified": true,
+      "nonFabricationCompliant": true
+    },
+    "testResults": {
+      "test_published_contract_covers_reference_form_fields_and_governance": "passed",
+      "test_b01_migrations_preserve_legacy_and_enforce_uniqueness": "passed"
+    }
+  },
+  "summary": "Requirement B01 (Data contract and reference-day fixture) is fully implemented and verified against PostgreSQL 16 and Redis. All 18 broader sections, 128 field mappings, null vs zero semantics, idempotent reference fixture SIM-A1-001, and scope decisions C01-C08 + GOV-01 are enforced."
+}

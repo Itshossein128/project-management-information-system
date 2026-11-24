@@ -22,7 +22,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from common.reporting_units import SpecialtyUnit, is_canonical_unit
-from permissions.project import HasProjectPermission, IsProjectMember
+from permissions.project import ActiveMemberPermission, CanReadReportExport, HasProjectPermission, IsProjectMember
 from sub_reports.models import (
     DisciplineSubReportActivity,
     DisciplineSubReportConcrete,
@@ -47,7 +47,9 @@ from sub_reports.serializers import (
     UnitReportMachinerySectionSerializer,
     UnitReportMaterialSectionSerializer,
 )
-from sub_reports.services.attachments import attach_image_to_activity
+from sub_reports.services.attachments import (
+    MAX_BYTES, attach_report_image, attachment_download_href, sign_attachment_download,
+)
 from sub_reports.services.section_validation import (
     SectionContractError,
     resolve_stoppage_vocabulary,
@@ -77,11 +79,13 @@ class UnitReportViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated, IsProjectMember, HasProjectPermission]
 
     def get_permissions(self):
+        if self.action in ('excel', 'pdf'):
+            return [IsAuthenticated(), CanReadReportExport()]
         return [IsAuthenticated(), IsProjectMember(), HasProjectPermission()]
 
     @property
     def required_permission(self):
-        if self.action in ('retrieve', 'history', 'current', 'excel'):
+        if self.action in ('retrieve', 'history', 'current', 'excel', 'pdf'):
             return 'view_reports'
         if self.action in ('approve', 'reject'):
             return 'approve_reports'
@@ -98,9 +102,10 @@ class UnitReportViewSet(viewsets.GenericViewSet):
     def _project_id(self):
         return self.kwargs['project_pk']
 
-    def _report_or_404(self):
+    def _report_or_404(self, *, include_deleted=True):
         return svc.get_scoped_report(
             project_id=self._project_id(), unit=self._unit(), report_id=self.kwargs['pk'],
+            include_deleted=include_deleted,
         )
 
     def _detail(self, report):
@@ -202,7 +207,7 @@ class UnitReportViewSet(viewsets.GenericViewSet):
         from django.http import HttpResponse
         from sub_reports.shiraz_subreport_excel import ShirazSubReportExcelBuilder
 
-        report = self._report_or_404()
+        report = self._report_or_404(include_deleted=False)
         builder = ShirazSubReportExcelBuilder(report)
         excel_bytes, filename = builder.build()
 
@@ -210,6 +215,18 @@ class UnitReportViewSet(viewsets.GenericViewSet):
             excel_bytes,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    @extend_schema(summary='Export the selected unit daily report as PDF', tags=['Unit Daily Reports'])
+    @action(detail=True, methods=['get'])
+    def pdf(self, request, *args, **kwargs):
+        from django.http import HttpResponse
+        from sub_reports.pdf import generate_unit_report_pdf
+
+        report = self._report_or_404(include_deleted=False)
+        data, filename = generate_unit_report_pdf(report, language=getattr(request, 'LANGUAGE_CODE', 'fa'))
+        response = HttpResponse(data, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
@@ -868,7 +885,20 @@ class UnitReportGeneralSectionViewSet(_NarrativeSectionViewSet):
 
 
 class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
-    """JPEG/PNG activity images (feature 033, T051). Local storage key when MinIO is absent."""
+    """JPEG/PNG activity images for the selected unit-report version."""
+
+    def get_permissions(self):
+        if self.action in ('list', 'download'):
+            permission = ActiveMemberPermission()
+            permission.codename = 'view_reports'
+            return [IsAuthenticated(), permission]
+        return super().get_permissions()
+
+    def _report(self):
+        return svc.get_scoped_report(
+            project_id=self.kwargs['project_pk'], unit=self._unit(), report_id=self.kwargs['pk'],
+            include_deleted=False,
+        )
 
     def list(self, request, *args, **kwargs):
         report = self._report()
@@ -881,7 +911,9 @@ class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
                 'declared_content_type': row.declared_content_type,
                 'size_bytes': row.size_bytes,
                 'capture_date': row.capture_date.isoformat() if row.capture_date else None,
+                'uploaded_at': row.uploaded_at.isoformat() if row.uploaded_at else None,
                 'work_front': row.work_front,
+                'download_href': attachment_download_href(row) if row.uploaded_at else None,
             }
             for row in rows
         ])
@@ -889,11 +921,12 @@ class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
     def create(self, request, *args, **kwargs):
         report = self._editable_report()
         upload = request.FILES.get('file')
-        content = upload.read() if upload is not None else b''
+        content = upload.read(MAX_BYTES + 1) if upload is not None else b''
         try:
-            saved = attach_image_to_activity(
+            saved = attach_report_image(
                 report=report,
-                activity_row_id=request.data.get('row_id') or request.data.get('activity_row_id'),
+                row_kind=request.data.get('row_kind', 'activity'),
+                row_id=request.data.get('row_id') or request.data.get('activity_row_id'),
                 file_content=content,
                 declared_content_type=(
                     request.data.get('declared_content_type')
@@ -908,6 +941,14 @@ class UnitReportAttachmentSectionViewSet(UnitReportMaterialSectionViewSet):
             {'id': str(saved.id), 'row_kind': saved.row_kind, 'row_id': saved.row_id},
             status=status.HTTP_201_CREATED,
         )
+
+    def download(self, request, *args, **kwargs):
+        report = self._report()
+        try:
+            row = report.attachments.get(pk=self.kwargs['row_pk'], is_deleted=False)
+        except UnitReportAttachment.DoesNotExist:
+            raise svc.UnitReportNotFound(_('unit_report_not_found'), 'unit_report_not_found')
+        return Response({'download_url': sign_attachment_download(row)})
 
     def destroy(self, request, *args, **kwargs):
         report = self._editable_report()

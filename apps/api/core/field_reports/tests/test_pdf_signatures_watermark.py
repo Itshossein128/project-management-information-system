@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone as utc_timezone
 from decimal import Decimal
 import subprocess
 import tempfile
@@ -44,6 +44,39 @@ def approved_report(project, user, other_user):
 @pytest.mark.django_db
 class TestPdfSignaturesAndWatermark:
 
+    def test_action_position_is_frozen_and_timestamp_uses_project_local_date(self, draft_report, user, monkeypatch):
+        import field_reports.pdf as pdf
+        from field_reports.services import submit_report
+        from master_data.models import ProjectMember, ProjectPosition
+
+        position = ProjectPosition.objects.create(project=draft_report.project, position_name='Site Engineer at action')
+        ProjectMember.objects.filter(project=draft_report.project, user=user).update(position=position)
+        monkeypatch.setattr(timezone, 'now', lambda: datetime(2025, 2, 2, 21, 30, tzinfo=utc_timezone.utc))
+        submit_report(draft_report, user)
+        position.position_name = 'Renamed position'
+        position.save(update_fields=['position_name'])
+        draft_report.refresh_from_db()
+
+        captured = []
+        render = pdf._fa
+
+        def capture(value):
+            captured.append(str(value))
+            return render(value)
+
+        monkeypatch.setattr(pdf, '_fa', capture)
+        pdf._signatures_block(draft_report, pdf._register_font(), language='en')
+        assert any('Site Engineer at action' in line for line in captured)
+        assert all('Renamed position' not in line for line in captured)
+        assert any('1403/11/15 01:00' in line for line in captured)
+
+    def test_fingerprint_tracks_review_evidence_and_ignores_report_prose(self, approved_report):
+        original = generate_report_audit_hash(approved_report)
+        approved_report.general_notes = 'Additional prose'
+        assert generate_report_audit_hash(approved_report) == original
+        approved_report.reviewed_by_id = None
+        assert generate_report_audit_hash(approved_report) != original
+
     def test_audit_hash_deterministic(self, approved_report):
         hash1 = generate_report_audit_hash(approved_report)
         hash2 = generate_report_audit_hash(approved_report)
@@ -62,9 +95,17 @@ class TestPdfSignaturesAndWatermark:
         assert filename.endswith('-full.pdf')
         assert pdf_bytes.startswith(b'%PDF')
 
-    def test_draft_watermark_is_present_on_multiple_pages(self, draft_report, monkeypatch):
+    @pytest.mark.parametrize('report_status,is_revision', [
+        (ReportStatus.DRAFT, False), (ReportStatus.SUBMITTED, False), (ReportStatus.UNDER_REVIEW, False),
+        (ReportStatus.REJECTED, False), (ReportStatus.DRAFT, True),
+    ])
+    def test_draft_watermark_is_present_on_multiple_pages(self, draft_report, monkeypatch, report_status, is_revision):
         from field_reports.models import DailyReportActivity
         import field_reports.pdf as pdf_module
+
+        draft_report.status = report_status
+        if is_revision:
+            draft_report.version_number = 2
 
         watermark_calls = []
         original_make_watermark = pdf_module._make_watermark

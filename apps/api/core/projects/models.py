@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from treebeard.mp_tree import MP_Node
 
@@ -68,6 +69,14 @@ class Project(UUIDModel, TimeStampedModel):
         related_name='managed_projects',
     )
     location = models.TextField(blank=True, default='')
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True,
+        validators=[MinValueValidator(-90), MaxValueValidator(90)],
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True,
+        validators=[MinValueValidator(-180), MaxValueValidator(180)],
+    )
     start_date = models.DateField(null=True, blank=True)
     planned_finish_date = models.DateField(null=True, blank=True)
     contract_amount = models.DecimalField(max_digits=18, decimal_places=2, null=True, blank=True)

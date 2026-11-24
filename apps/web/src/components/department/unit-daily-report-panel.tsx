@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { Download } from "lucide-react";
 import {
-  fetchSubReportExcel,
+  downloadUnitReportPdf,
+  downloadUnitReportExcel,
   type CanonicalUnit,
   type UnitReport,
   type UnitReportStatus,
@@ -188,28 +189,27 @@ export function UnitDailyReportPanel({
   }, [report]);
 
   const [downloadingExcel, setDownloadingExcel] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  const handleExportPdf = async (versionId: string) => {
+    setDownloadingPdf(true);
+    setActionError(null);
+    try {
+      await downloadUnitReportPdf(businessId, unit, versionId);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : t("dailyReports.referenceHeader.downloadFailed"));
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   const handleExportExcel = async () => {
     if (!report?.id) return;
     setDownloadingExcel(true);
     try {
-      const blob = await fetchSubReportExcel(businessId, unit, report.id);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const fileLabel =
-        unit === "buildings"
-          ? "civil-subreport"
-          : unit === "electrical"
-            ? "electrical-subreport"
-            : `${unit}-subreport`;
-      a.download = `${fileLabel}-${report.report_date || report.id}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      await downloadUnitReportExcel(businessId, unit, report.id);
     } catch {
-      setActionError("خطا در دانلود فایل اکسل ساب‌ریپورت");
+      setActionError(t("dailyReports.referenceHeader.downloadFailed"));
     } finally {
       setDownloadingExcel(false);
     }
@@ -679,11 +679,18 @@ export function UnitDailyReportPanel({
               onClick={() => void handleExportExcel()}
             >
               <Download className="size-4 ml-1" />
-              {unit === "buildings"
-                ? "خروجی اکسل ابنیه (FILE 5)"
-                : unit === "electrical"
-                  ? "خروجی اکسل برق (FILE 6)"
-                  : "خروجی اکسل ساب‌ریپورت"}
+              {t(`dailyReports.referenceHeader.${unit === "buildings" ? "file5" : unit === "electrical" ? "file6" : "unitExcel"}`)}
+            </Button>
+            <Button
+              id="button-exportUnitReportPdf"
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={downloadingPdf}
+              onClick={() => void handleExportPdf(report.id)}
+            >
+              <Download aria-hidden="true" className="size-4 ms-1" />
+              {t(`dailyReports.referenceHeader.${downloadingPdf ? "downloading" : "unitPdf"}`)}
             </Button>
           </div>
 
@@ -936,6 +943,7 @@ export function UnitDailyReportPanel({
                         <th className="p-2 text-start">
                           {t("businessDepartment.unitReport.preparer")}
                         </th>
+                        <th className="p-2 text-start">PDF</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -961,6 +969,14 @@ export function UnitDailyReportPanel({
                             ) : (
                               <span className="text-muted-foreground">—</span>
                             )}
+                          </td>
+                          <td className="p-2">
+                            {!ver.is_deleted ? (
+                              <Button size="sm" type="button" variant="outline" disabled={downloadingPdf}
+                                onClick={() => void handleExportPdf(ver.id)}>
+                                {t("dailyReports.referenceHeader.unitPdf")}
+                              </Button>
+                            ) : null}
                           </td>
                         </tr>
                       ))}

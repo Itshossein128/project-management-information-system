@@ -1,0 +1,99 @@
+{
+  "requirementId": "B03",
+  "title": "رفع اختلاف خروجی با فرم مرجع",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-19T17:04:00+03:30",
+  "acceptanceCriteria": "FILE 4، FILE 5/6 و PDF در سناریوهای روز عادی/تعطیل/صفر/نامعلوم/سهشیفت/FA-EN با مرجع برابر باشند و عدد ساختگی، نقش جعلی، متن بریده، جمع غلط یا خطای فرمول نداشته باشند.",
+  "qaStatus": "qa_failed",
+  "verdict": "failed",
+  "personasEvaluated": [
+    {
+      "persona": "Site Engineer / Technical Office",
+      "summary": "Observes hardcoded shift hours text \"ساعات کاری شیفت: ثبت نشده\" in row 4 of FILE 4 Excel instead of actual shift time range; stacked manpower direct/indirect tables instead of side-by-side Shiraz layout; artificial 0 hours displayed for legacy equipment with unset operating hours instead of hyphen/blank."
+    },
+    {
+      "persona": "Project Supervisor / Client Inspector",
+      "summary": "Notes missing organizational legal roles/titles in PDF signature block (e.g. Site Engineer, Resident Supervisor, Project Manager) and unapproved synthetic text \"بدون نیاز به بررسی دفتر فنی / تأیید مستقیم\"; print pagination and print area issues in Excel exports (A4 overflow, lack of fit-to-page, lack of print_title_rows repeat headers, clipped multi-line Persian text)."
+    },
+    {
+      "persona": "QA & Quality Control Engineer",
+      "summary": "Identifies lack of detailed concrete & QC testing fields (batching plant, delivery truck, slump test sheet, 28-day cylinder link), untranslated English HSE incident severity labels (\"Major\", \"safety\") violating FA RTL consistency, and rigid 34/32 labor profile displacing custom project occupations."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B03-01",
+      "title": "چاپ متن ثابت «ساعات کاری شیفت: ثبت نشده» در سطر ۴ اکسل به جای خواندن ساعات واقعی شیفت",
+      "type": "Data Inconsistency / Defect",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py:L142",
+      "severity": "major",
+      "evidence": "In shiraz_file4_excel.py row 4 hardcodes \"ساعات کاری شیفت: ثبت نشده\" because shift timing models and header definitions lack unified actual shift hours.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-02",
+      "title": "چیدمان پشته‌ای (عمودی) جدول نیروی انسانی مستقیم و غیرمستقیم به جای دو جدول مجاور (افقی)",
+      "type": "Layout & Visual Mismatch",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py:_write_manpower",
+      "severity": "major",
+      "evidence": "Shiraz reference form arranges direct (34) and indirect (32) labor tables side-by-side horizontally, while export implementation stacks them vertically, violating physical reference sheet layout.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-03",
+      "title": "فقدان تنظیمات استاندارد چاپ در اکسل (Print Area، Fit-to-1-Page Wide، تکرار هدر، ارتفاع سطر پویا)",
+      "type": "Print & Formatting Defect",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "major",
+      "evidence": "Generated openpyxl workbook lacks print_title_rows, fitToPage/fitToWidth=1 settings, causing A4 print overflow and clipped long Persian/English text.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-04",
+      "title": "عدم درج سمت‌های سازمانی/حقوقی در بلوک امضای PDF و استفاده از متن‌های غیراستاندارد",
+      "type": "Compliance & Audit Defect",
+      "component": "apps/api/core/field_reports/pdf.py:draw_signature_block",
+      "severity": "major",
+      "evidence": "PDF signature block renders user names and timestamps but lacks explicit legal roles (Resident Engineer, Project Manager) and prints unapproved text \"بدون نیاز به بررسی دفتر فنی / تأیید مستقیم\".",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-05",
+      "title": "درج صفر ساختگی به جای مقدار خالی برای تجهیزات نامعلوم ماشین‌آلات در شاخه legacy اکسل",
+      "type": "Data Integrity / Fake Data Defect",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py:L614",
+      "severity": "critical",
+      "evidence": "shiraz_file4_excel.py line 614 converts None operating hours to 0 via cell.value = eq.operating_hours or 0. Marked as Strict XFAIL in audit tests.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-06",
+      "title": "کمبود فیلدهای تفصیلی بتن‌ریزی و آزمایش‌های کیفی در خروجی‌های استاندارد",
+      "type": "Domain Coverage Gap",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py & pdf.py",
+      "severity": "major",
+      "evidence": "Batching plant, transit mixer count, slump test, sample count and 28-day break tests are missing from daily export sheets without drill-down navigation.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-07",
+      "title": "درج عبارات انگلیسی در ستون‌های شدت حادثه و نوع رخداد در شیت اکسل فارسی",
+      "type": "Localization & Bilingual Defect",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "minor",
+      "evidence": "Raw enum keys (\"Major\", \"safety\") are placed directly in Persian report columns without Persian translation mappings.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B03-08",
+      "title": "تثبیت اجباری کاتالوگ ۳۴/۳۲ و عدم انطباق با تغییرات کاتالوگ پویای پروژه‌های مختلف",
+      "type": "Flexibility & Contract Defect",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "minor",
+      "evidence": "Project occupations outside fixed 34/32 are relegated to the bottom rather than following dynamic project catalog mapping profiles (C04).",
+      "status": "open"
+    }
+  ],
+  "verificationSummary": "Requirement B03 currently fails acceptance criteria: FILE 4, FILE 5/6 and PDF exports have significant reference discrepancies including hardcoded shift hours, stacked rather than side-by-side manpower layouts, lack of A4 print area setup, missing legal roles in PDF signatures, artificial zero hours for legacy equipment, and raw English enum strings in Persian sheets."
+}

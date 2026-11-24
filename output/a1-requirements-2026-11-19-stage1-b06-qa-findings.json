@@ -1,0 +1,72 @@
+{
+  "requirementId": "B06",
+  "title": "بسته تحویل و پذیرش اولیه کارفرما",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-19T17:12:00+03:30",
+  "acceptanceCriteria": "Release/SHA، ورودی، expected، راهنمای نقش‌ها، نمونه‌ها، checksum و نتیجه صریح آزمون کارفرما روی همان نسخه ثبت شود.",
+  "qaStatus": "qa_failed",
+  "verdict": "failed",
+  "personasEvaluated": [
+    {
+      "persona": "Client / Owner Representative",
+      "summary": "Observes absence of frozen A.1 release archive, missing SHA-256 digest manifest, and lack of explicit protocol/sign-off mechanism for initial acceptance."
+    },
+    {
+      "persona": "Project Supervisor / Technical Inspector",
+      "summary": "Notes that negative cross-project data leakage tests and direct ID access tests on live endpoints have not been verified in running instances."
+    },
+    {
+      "persona": "Field Engineer / Report Preparer",
+      "summary": "Points out that dependencies B01 through B05 remain unresolved with open defects in daily Excel layout, shift hours, and 34/32 occupation mapping."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B06-01",
+      "title": "Missing A.1 frozen delivery package (Commit SHA, archive, and SHA-256 checksums)",
+      "type": "Release Packaging Defect",
+      "component": "delivery/packaging",
+      "severity": "critical",
+      "evidence": "No frozen release archive or checksum file exists for Phase A.1. Existing package belongs to legacy A.7 release.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-02",
+      "title": "Open blocker defects and Strict XFAILs in prerequisite packages B01 through B05",
+      "type": "Dependency Block",
+      "component": "packages B01-B05",
+      "severity": "critical",
+      "evidence": "B06 strictly depends on B01-B05 closure. Previous audits confirmed open defects across data contracts, version integrity, Shiraz parity, and aggregations.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-03",
+      "title": "Missing client initial acceptance protocol/sign-off mechanism",
+      "type": "Process & Compliance Defect",
+      "component": "specs/056-a7-p6-delivery-acceptance",
+      "severity": "critical",
+      "evidence": "Automated tests or agent execution cannot substitute for explicit client acceptance sign-off. Status is currently pending.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-04",
+      "title": "Unverified live multi-tenant cross-project authorization and direct ID download isolation (Group E09)",
+      "type": "Security / Authorization Gap",
+      "component": "apps/api/core/field_reports/daily_report_views.py",
+      "severity": "major",
+      "evidence": "Negative test suite against direct file ID queries across different project IDs has not been verified on a running server instance.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B06-05",
+      "title": "Incomplete mobile responsive & bilingual FA/EN verification evidence for end-to-end report workflow (Group Q03)",
+      "type": "UI/UX / Responsive Defect",
+      "component": "apps/web/src/components/daily_reports/",
+      "severity": "major",
+      "evidence": "Fresh end-to-end execution across desktop/mobile and FA/EN views is missing with servers offline.",
+      "status": "open"
+    }
+  ],
+  "summary": "Requirement B06 failed QA verification because the frozen release package (Release/SHA, inputs, expected files, checksums) for Phase A.1 is not generated, prerequisite packages B01-B05 remain open with defects, live cross-project authorization on running instances is unverified, and no explicit client initial acceptance protocol is recorded."
+}

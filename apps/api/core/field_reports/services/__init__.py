@@ -25,10 +25,20 @@ CHILD_SERIALIZER_MAP = {
 # ---------------------------------------------------------------------------
 
 
+def _capture_action_attribution(report, action, user):
+    from workflow.services.attribution import actor_position_at_action
+
+    report.export_action_attribution = {
+        **(report.export_action_attribution or {}),
+        action: {'actor_name': user.get_full_name(), 'position': actor_position_at_action(report.project_id, user)},
+    }
+
+
 def submit_report(report: DailyReport, user) -> DailyReport:
     report.status = ReportStatus.SUBMITTED
     report.submitted_by = user
     report.submitted_at = timezone.now()
+    _capture_action_attribution(report, 'submitted', user)
     report.rejection_reason = ''
     report.updated_by = user
     report.save(
@@ -36,6 +46,7 @@ def submit_report(report: DailyReport, user) -> DailyReport:
             'status',
             'submitted_by',
             'submitted_at',
+            'export_action_attribution',
             'rejection_reason',
             'updated_by',
             'updated_at',
@@ -49,8 +60,9 @@ def review_report(report: DailyReport, user, notes: str = '') -> DailyReport:
     report.status = ReportStatus.UNDER_REVIEW
     report.reviewed_by = user
     report.reviewed_at = timezone.now()
+    _capture_action_attribution(report, 'reviewed', user)
     report.updated_by = user
-    update_fields = ['status', 'reviewed_by', 'reviewed_at', 'updated_by', 'updated_at']
+    update_fields = ['status', 'reviewed_by', 'reviewed_at', 'updated_by', 'updated_at', 'export_action_attribution']
     if notes:
         # Persist reviewer notes on the report header until a dedicated field exists.
         suffix = f'\n[بررسی] {notes.strip()}'
@@ -61,14 +73,20 @@ def review_report(report: DailyReport, user, notes: str = '') -> DailyReport:
 
 
 def approve_report(report: DailyReport, user) -> DailyReport:
+    from field_reports.services.weather_forecast import capture_report_weather
+
+    report.export_weather_snapshot = capture_report_weather(report, cache_only=True)
     report.status = ReportStatus.APPROVED
     report.approved_by = user
     report.approved_at = timezone.now()
+    _capture_action_attribution(report, 'approved', user)
     report.is_current = True
     report.updated_by = user
     report.save(
         update_fields=[
             'status', 'approved_by', 'approved_at', 'is_current', 'updated_by', 'updated_at',
+            'export_weather_snapshot',
+            'export_action_attribution',
         ],
     )
 
@@ -76,7 +94,7 @@ def approve_report(report: DailyReport, user) -> DailyReport:
     from field_reports.services.activity_log import invalidate_activity_log_cache
 
     mark_correction_approved_for_report(report, user)
-    invalidate_activity_log_cache(report.project_id)
+    transaction.on_commit(lambda: invalidate_activity_log_cache(report.project_id))
     _publish_approved(report)
     _enqueue_progress_recalc(report)
     _notify_approved(report)
@@ -88,14 +106,16 @@ def reject_report(report: DailyReport, user, reason: str) -> DailyReport:
     report.rejection_reason = reason
     report.reviewed_by = user
     report.reviewed_at = timezone.now()
+    _capture_action_attribution(report, 'reviewed', user)
     report.updated_by = user
     report.save(
         update_fields=[
             'status', 'rejection_reason', 'reviewed_by', 'reviewed_at', 'updated_by', 'updated_at',
+            'export_action_attribution',
         ],
     )
     from field_reports.services.activity_log import invalidate_activity_log_cache
-    invalidate_activity_log_cache(report.project_id)
+    transaction.on_commit(lambda: invalidate_activity_log_cache(report.project_id))
     _notify_rejected(report)
     return report
 
@@ -272,6 +292,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
     results = []
     counts = {'created': 0, 'merged': 0, 'skipped': 0, 'conflicts': 0, 'errors': 0}
     seen_local_ids: set[str] = set()
+    from field_reports.services.derived_lock import report_has_derived_rows
 
     for item in reports:
         local_id = item.get('local_id')
@@ -347,7 +368,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
             counts['conflicts'] += 1
             continue
 
-        if (existing is None or existing.is_auto_summary) and _derived_sections_in_payload(item):
+        if (existing is None or report_has_derived_rows(existing)) and _derived_sections_in_payload(item):
             results.append({
                 'local_id': local_id,
                 'status': 'error',
@@ -398,7 +419,7 @@ def sync_batch(project_id, user, reports: list) -> dict:
                 results.append(_conflict_result(local_id, existing, item, reason))
                 counts['conflicts'] += 1
                 continue
-            if existing is not None and existing.is_auto_summary and _derived_sections_in_payload(item):
+            if existing is not None and report_has_derived_rows(existing) and _derived_sections_in_payload(item):
                 results.append({
                     'local_id': local_id, 'status': 'error', 'server_id': str(existing.id),
                     'conflict_reason': 'ردیف‌های تجمیعی قابل تغییر مستقیم نیستند',

@@ -1,0 +1,61 @@
+{
+  "requirementId": "B04",
+  "title": "Filters, complete result set, and totals",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-22T20:14:30+03:30",
+  "acceptanceCriteria": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+  "qaStatus": "qa_passed",
+  "verdict": "passed",
+  "personasEvaluated": [
+    {
+      "persona": "Project Manager / Supervisor Persona (مدیر پروژه / دستگاه نظارت)",
+      "summary": "Verified that totals and aggregates represent the entire filtered queryset (51 rows) rather than the active page slice (50 on Page 1, 1 on Page 2). Both Page 1 and Page 2 display an identical row headcount sum of 51 and matching per-unit quantity totals. FILE 1 Excel download contains all 51 rows with SUM(F2:F52), matching the UI whole-queryset totals."
+    },
+    {
+      "persona": "Technical Office / Planning Engineer Persona (سرپرست دفتر فنی و برنامه‌ریزی)",
+      "summary": "Verified that Daily Reports list (/projects/:id/daily-reports) supports discipline, block, and contractor filters alongside date and status. Single-row match rule is strictly enforced: summaries only match if an eligible activity row satisfies all selected filters; split-row summaries are excluded. URL query parameters restore 100% of filter selections and page state upon reload and back/forward navigation in both Persian (RTL) and English (LTR)."
+    },
+    {
+      "persona": "QA & Data Auditor Persona (ممیز کنترل کیفیت و داده)",
+      "summary": "Verified that measured zero (0.0) is strictly distinguished from unset/not-measured quantities (rendered as null/dash), preventing distortion of unit totals. Headcount totals are accurately labeled as the sum of activity-row headcounts in both Persian and English (satisfying decision D07), without conflation into unique attendance or man-days. Cross-project and unauthorized requests return HTTP 403 Forbidden with zero data leakage."
+    }
+  ],
+  "defects": [],
+  "resolvedDefects": [
+    {
+      "id": "DEF-B04-01",
+      "severity": "high",
+      "title": "Client-side aggregation on page slice instead of whole queryset",
+      "resolution": "Resolved in apps/web/src/app/routes/project-activity-log.tsx and activity_log.py: Aggregates are computed by backend activity_log_aggregates across the full filtered queryset and rendered directly from listQuery.data.aggregates."
+    },
+    {
+      "id": "DEF-B04-02",
+      "severity": "high",
+      "title": "Missing whole-queryset totals/aggregates payload in ActivityLogView API",
+      "resolution": "Resolved in apps/api/core/field_reports/report_views.py and services/activity_log.py: API payload returns aggregates object containing headcount_sum, quantity_by_unit (with measured_count, unknown_count, and numeric totals), and unknown_quantity_without_unit_count."
+    },
+    {
+      "id": "DEF-B04-03",
+      "severity": "medium",
+      "title": "Missing discipline, block, and contractor filters on Daily Reports list",
+      "resolution": "Resolved in apps/web/src/app/routes/daily-reports-list.tsx and apps/api/core/field_reports/daily_report_views.py: Standard dimensional filters (discipline, contractor, block) are bound to URL query params and backend queryset filtering, enforcing single-row matching and split-row exclusion."
+    },
+    {
+      "id": "DEF-B04-04",
+      "severity": "medium",
+      "title": "Collapsing unset/unmeasured quantities into numeric zero",
+      "resolution": "Resolved in apps/api/core/field_reports/services/activity_log.py and project-activity-log.tsx: Explicit measured zero is preserved as numeric 0, while unset or unmeasured quantities remain null/dash and are counted under unknown_count / unknown_quantity_without_unit_count."
+    },
+    {
+      "id": "DEF-B04-05",
+      "severity": "low",
+      "title": "Misleading man-days labeling for raw headcount row sum",
+      "resolution": "Resolved in apps/web/src/app/locales/fa/common.json and en/common.json: Labels updated to 'مجموع نفرات ثبت‌شده در ردیف‌ها' (Persian) and 'Sum of activity-row headcounts' (English), strictly complying with decision D07."
+    }
+  ],
+  "deliverablesVerified": [
+    "A.1-B04 (Filters, complete result set, and totals)"
+  ],
+  "verificationSummary": "Requirement B04 is fully verified and qa_passed. Full-queryset aggregates are decoupled from pagination slices, FILE 1 export strictly agrees with UI aggregates across pages, dimensional filters and deep links function symmetrically in Persian and English, and unset semantics preserve data integrity. All 5 historical defects are resolved."
+}

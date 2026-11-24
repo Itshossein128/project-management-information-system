@@ -32,12 +32,29 @@ Base path: `daily-reports/`
 | `daily-reports/{pk}/reject/` | POST | Reject. Body: `reason` (min 10 chars). Requires `submitted` or `under_review`. |
 | `daily-reports/{pk}/pdf/` | GET | Export report as PDF attachment. |
 | `daily-reports/{pk}/versions/` | GET | All versions sharing `lineage_id`. |
+| `daily-reports/{pk}/rebuild/` | POST | Rebuild a current editable summary. Approved, historical, deleted, submitted, and under-review targets return stable localized error codes. |
 | `daily-reports/{pk}/correction-requests/` | GET/POST | List or open correction (reason ≥ 10 chars) from **approved current**; clones draft version. |
 | `daily-reports/{pk}/materials/reconciliation/` | GET | Advisory consumption vs inventory balance (`match`/`mismatch`/`insufficient_data`). |
 | `correction-requests/{id}/cancel/` | POST | Cancel open correction; restore source as current. |
 | `daily-reports/sync-batch/` | POST | Offline batch sync (see below). Conflicts on approved **current**. |
 
+### Phase A.1 daily report contract
+
+Both routes require authentication, active membership with `view_reports` or the existing organizational read-only observation exception.
+
+- `GET daily-reports/contract/` returns the versioned field mappings, decision register, 18-section scope, deliverables, and form profiles. Use `include_mappings=false` to omit the field mappings or `profile=shiraz-34-32-v1` to select that profile.
+- `GET daily-reports/{pk}/contract-summary/` returns official numbering, worked shifts and actual durations, selected labor profile counts, observed weather, forecast status, and the metadata fingerprint scope. Unknown readings are represented as JSON nulls or an explicit `unknown` status. Multiple current legacy reports on the same date trigger `multiple_current_legacy_reports_for_date` with an unknown official number.
+- For a contract-bound report, `daily-reports/by-date/` accepts an optional worked shift `1`, `2`, or `3`, with `shift_1` through `shift_3` accepted as aliases. Each worked shift resolves to the same logical report. Unworked shifts return `404` and invalid identifiers return `400`.
+
+With project coordinates, the forecast adapter requests up to three project-local days from [MET Norway Locationforecast 2.0](https://api.met.no/weatherapi/locationforecast/2.0/documentation). Deployments can set `MET_NORWAY_USER_AGENT` to their application identity and contact per the [MET Weather API terms](https://api.met.no/doc/TermsOfService).
+
 ### Approval workflow
+
+Derived child rows are read-only based on summary or row ownership. Direct child writes and batch upserts return `derived_collection_read_only`. Legacy nested patches and offline sync return `derived_readonly` for derived-section writes. Existing workflow and version guards may reject the report before the ownership check.
+
+Explicit rebuild requires `edit_reports` and active project membership. Ineligible targets return HTTP 400 with `report_locked` (approved), `historical_rebuild_rejected` (non-current), `rebuild_target_deleted` (deleted), or `report_not_editable` (submitted or under review). Unit-triggered rebuilds leave these non-editable current snapshots intact.
+
+The official activity log and FILE 1 Excel use approved, current, non-deleted reports. The `approved_only=false` preview includes current non-approved rows. Superseded versions are available through the versions endpoint. Opening or cancelling a correction invalidates the activity log cache after the transaction commits.
 
 ```
 draft ──submit──► submitted ──review──► under_review
@@ -124,6 +141,12 @@ Conflict responses include `server_payload` and `conflict_fields` for the fronte
 - `/projects/{id}/daily-reports/new` — create form
 - `/projects/{id}/daily-reports/{reportId}` — edit/view
 - `/projects/{id}/sync-conflicts` — offline conflict resolution
+
+## B03 exports
+
+- `GET daily-reports/{pk}/excel/` and `GET daily-reports/{pk}/pdf/` render the requested daily version. `GET units/{unit}/daily-reports/{pk}/excel/` and `GET units/{unit}/daily-reports/{pk}/pdf/` render the requested unit version. All require `view_reports` or verified observation in the project's active owning unit. Foreign, deleted, or wrong-unit version IDs return 404 within an authorized project route.
+- `GET daily-reports/excel/?date_from=…&date_to=…` renders one sheet per current approved date in chronological order. The configurable inclusive limit is `DAILY_REPORT_EXCEL_RANGE_MAX_DAYS` (default 31). Missing or reversed dates, over-limit ranges, and ranges without eligible reports return 400. Duplicate eligible legacy dates return 409. See the [B03 contract](../../../../specs/059-a1-b03-reference-parity/contracts/exports.md) for the stable codes and filenames.
+- `GET units/{unit}/daily-reports/{pk}/attachments/{row_pk}/download/` requires active project membership plus `view_reports`. It signs a temporary URL for an uploaded image in the requested version. Legacy metadata-only rows have no downloadable bytes.
 
 ## Operational notes
 

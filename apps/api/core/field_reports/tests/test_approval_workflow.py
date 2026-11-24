@@ -39,7 +39,7 @@ class TestApprovalWorkflow:
         response = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_full_flow(self, auth_client, base_url, draft_report):
+    def test_full_flow(self, auth_client, project_approver_client, base_url, draft_report):
         _add_activity(draft_report)
         submit = auth_client.post(f'{base_url}{draft_report.id}/submit/')
         assert submit.status_code == status.HTTP_200_OK
@@ -49,7 +49,7 @@ class TestApprovalWorkflow:
         assert review.status_code == status.HTTP_200_OK
         assert review.data['status'] == 'under_review'
 
-        approve = auth_client.post(f'{base_url}{draft_report.id}/approve/')
+        approve = project_approver_client.post(f'{base_url}{draft_report.id}/approve/')
         assert approve.status_code == status.HTTP_200_OK
         assert approve.data['status'] == 'approved'
         draft_report.refresh_from_db()

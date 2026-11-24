@@ -1,0 +1,75 @@
+{
+  "requirementId": "B05",
+  "title": "Independent numeric, formula, and print reconciliation",
+  "phase": "A.1",
+  "stage": "1.2",
+  "verificationDate": "2026-11-21",
+  "acceptanceCriteria": "Independent expected values, recalculation logs, mapping, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity.",
+  "qaStatus": "qa_failed",
+  "personasEvaluated": [
+    {
+      "persona": "Independent Auditor / QA Engineer",
+      "summary": "No independent calculation oracle exists outside internal Django models/aggregators. Automated tests verify openpyxl formula strings but do not execute headless recalculation (e.g. LibreOffice/Excel) to detect #REF!, #VALUE!, or empty-cell formula traps. Openpyxl data_only=True confirms cached formula values in generated-sample.xlsx are all None."
+    },
+    {
+      "persona": "Technical Office Engineer / Planning Engineer",
+      "summary": "Generated Excel exports (FILE4) lack pre-computed cached values for formulas (e.g., C47, D47, G47, G82, G83, C92). Third-party viewers or mobile preview engines show blank/None for manpower and equipment totals. Download latency for typical site datasets (15-30 activities, 20 resources) is completely unmeasured against the <3.0s broadband requirement (SC-002)."
+    },
+    {
+      "persona": "Project Manager / Supervisor",
+      "summary": "No side-by-side visual regression or screenshot parity audit exists between employer reference forms, generated PDF, and Excel print layout. Open blockers in B02, B03, and B04 prevent formal reconciliation and delivery sign-off."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-B05-01",
+      "title": "Missing cached values for formula cells in exported Excel and lack of standalone recalculation tests",
+      "type": "Defect / Excel Engine Gap",
+      "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+      "severity": "critical",
+      "evidence": "Inspecting generated-sample.xlsx with openpyxl(data_only=True) shows cached values at C47, D47, G47, G82, G83, C92 are all None. No automated headless recalculation logs exist in CI/QA pipeline.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-02",
+      "title": "Missing real-world download latency benchmark (<3.0s) for standard site daily reports (SC-002)",
+      "type": "Performance Defect / QA Benchmark Gap",
+      "component": "apps/api/core/field_reports/report_views.py & apps/web",
+      "severity": "major",
+      "evidence": "SC-002 mandates export and download of master daily report (FILE4) or PDF for 15-30 activities and 20 resource rows in <3.0 seconds. No automated end-user telemetry or benchmark test exists.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-03",
+      "title": "Expected test assertions generated from internal models/aggregators rather than independent calculation oracle (Q01)",
+      "type": "Verification Methodology Gap / Quality Gate Defect",
+      "component": "apps/api/core/field_reports/tests/",
+      "severity": "critical",
+      "evidence": "Existing test suites construct expected values by querying internal models using the same Python aggregation logic being tested, violating the requirement that golden expected data must originate from an independent oracle.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-04",
+      "title": "Lack of visual regression and page-by-page screenshot diff logs across PDF, Excel print layout, and employer reference form",
+      "type": "Compliance & Audit Defect",
+      "component": "output/a1-requirements-2026-11-18/evidence/",
+      "severity": "major",
+      "evidence": "Requirements E04 and E05 demand side-by-side visual comparison, page layout validation, and screenshots of long and standard daily report prints. No structured image diff or audit log is archived.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-B05-05",
+      "title": "Unresolved blocking defects in upstream prerequisites B02, B03, and B04",
+      "type": "Process & Pre-condition Blocker",
+      "component": "Delivery Pipeline Stage 1",
+      "severity": "critical",
+      "evidence": "Mandatory delivery ordering B01 -> B02 -> B03 -> B04 -> B05 -> B06 requires prerequisites to be green. Upstream packages B02, B03, and B04 currently have unresolved defects blocking final reconciliation.",
+      "status": "open"
+    }
+  ],
+  "checksums": {
+    "generated_sample_xlsx_sha256": "e47f04c861acc86247a272b8cfb987ff27f11e99088cc6b250168fd1f57a7e6f",
+    "generated_sample_pdf_sha256": "e9b775328abe621125c9b0a49449dd6a8613faf10068531bfeb4c9cfb331e9fb"
+  },
+  "summary": "Requirement B05 is qa_failed. Excel exports lack pre-computed cached values for formulas (resulting in None in viewers without live recalc), automated standalone recalculation (headless LibreOffice/Excel) is not part of CI/QA, no <3.0s download speed benchmark exists for standard site datasets, test suites lack an independent calculation oracle, visual regression logs are missing, and upstream prerequisite packages B02-B04 have unresolved defects."
+}

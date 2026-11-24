@@ -1,6 +1,9 @@
 from decimal import Decimal
 
 from django.utils.translation import gettext as _
+from django.utils.timezone import is_naive
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import transaction
 from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
@@ -20,6 +23,7 @@ from field_reports.models import (
     DailyReportMachineryRow,
     DailyReportMaterial,
     DailyReportVisit,
+    DailyReportWorkedShift,
     LaborJobTitle,
     SiteStatus,
     WeatherCondition,
@@ -746,6 +750,7 @@ class DailyReportMaterialSerializer(serializers.ModelSerializer):
 
 class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
     provenance = serializers.SerializerMethodField()
+    qc_details = serializers.SerializerMethodField()
 
     class Meta:
         model = DailyReportConcreteLog
@@ -767,6 +772,7 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
             'test_sheet_count',
             'qc_inspection',
             'qc_link',
+            'qc_details',
             'source_sub_report',
             'source_discipline',
             'is_derived',
@@ -775,16 +781,49 @@ class DailyReportConcreteLogSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id', 'source_sub_report', 'source_discipline', 'is_derived', 'provenance', 'qc_link',
         ]
+        extra_kwargs = {'volume_m3': {'min_value': Decimal('0.001')}}
 
     qc_link = serializers.SerializerMethodField()
 
     def get_qc_link(self, obj):
-        if not obj.qc_inspection_id:
+        if not obj.qc_inspection_id or not self._may_view_qc(obj):
+            return None
+        inspection = obj.qc_inspection
+        if inspection.is_deleted or inspection.project_id != obj.report.project_id:
             return None
         return {
             'id': str(obj.qc_inspection_id),
             'href': f'/api/v1/projects/{obj.report.project_id}/inspections/{obj.qc_inspection_id}/',
         }
+
+    def _may_view_qc(self, obj):
+        from permissions.project import active_member_has_codename
+
+        request = self.context.get('request')
+        return active_member_has_codename(getattr(request, 'user', None), obj.report.project_id, 'view_reports')
+
+    def get_qc_details(self, obj):
+        if not self._may_view_qc(obj):
+            return None
+        root = f'/api/v1/projects/{obj.report.project_id}/daily-reports/{obj.report_id}/'
+        return {
+            'batching_plant': obj.batching_plant or None,
+            'truck_mixer': None,
+            'lab_sheet_number': None,
+            'slump': None,
+            'result_28_day_href': None,
+            'detail_href': root,
+            'source_href': f'{root}provenance/concrete/{obj.pk}/' if obj.is_derived else None,
+            'omission_reason': 'detail_only_or_no_verified_source',
+        }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data['qc_link'] is None:
+            data['qc_inspection'] = None
+        if data['qc_details'] is None:
+            data['batching_plant'] = ''
+        return data
 
     def get_provenance(self, obj):
         return _build_provenance_list(obj, 'concrete', self.context)
@@ -973,11 +1012,36 @@ def _user_name(user):
     return full or getattr(user, 'username', None)
 
 
+class ObservedShiftDateTimeField(serializers.DateTimeField):
+    def enforce_timezone(self, value):
+        if is_naive(value):
+            raise serializers.ValidationError(_('Include the UTC offset for an observed shift timestamp.'))
+        return super().enforce_timezone(value)
+
+
+class WorkedShiftInputSerializer(serializers.Serializer):
+    shift_id = serializers.ChoiceField(choices=(1, 2, 3))
+    actual_start_at = ObservedShiftDateTimeField(required=False, allow_null=True, default=None)
+    actual_end_at = ObservedShiftDateTimeField(required=False, allow_null=True, default=None)
+    actual_duration_hours = serializers.DecimalField(
+        max_digits=5, decimal_places=2, required=False, allow_null=True, default=None,
+        validators=[MinValueValidator(Decimal('0.01')), MaxValueValidator(24)],
+    )
+
+    def validate(self, attrs):
+        start = attrs.get('actual_start_at')
+        end = attrs.get('actual_end_at')
+        if start is not None and end is not None and end < start:
+            raise serializers.ValidationError({'actual_end_at': _('The observed end must be at or after the observed start.')})
+        return attrs
+
+
 class DailyReportHeaderSerializer(serializers.ModelSerializer):
     """Create / update of header fields only."""
 
     report_id = serializers.UUIDField(source='id', read_only=True)
     report_date = JalaliDateField()
+    worked_shifts = WorkedShiftInputSerializer(many=True, required=False, write_only=True, max_length=3)
 
     class Meta:
         model = DailyReport
@@ -985,6 +1049,7 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
             'report_id',
             'report_date',
             'shift',
+            'worked_shifts',
             'work_front',
             'location_notes',
             'weather_condition',
@@ -1000,6 +1065,26 @@ class DailyReportHeaderSerializer(serializers.ModelSerializer):
             'local_id',
             'synced_from_offline',
         ]
+
+    def validate_worked_shifts(self, entries):
+        if len({item['shift_id'] for item in entries}) != len(entries):
+            raise serializers.ValidationError(_('Each worked shift may be recorded only once.'))
+        return entries
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        shifts = validated_data.pop('worked_shifts', None)
+        instance = super().update(instance, validated_data)
+        if shifts is not None:
+            instance.worked_shifts.exclude(shift_id__in=[entry['shift_id'] for entry in shifts]).delete()
+            for entry in shifts:
+                values = {field: entry.get(field) for field in (
+                    'actual_start_at', 'actual_end_at', 'actual_duration_hours',
+                )}
+                DailyReportWorkedShift.objects.update_or_create(
+                    report=instance, shift_id=entry['shift_id'], defaults=values,
+                )
+        return instance
 
     def validate(self, attrs):
         temp_min = attrs.get('temp_min', getattr(self.instance, 'temp_min', None))
@@ -1409,7 +1494,8 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         }
 
     def get_concrete_logs(self, obj):
-        return DailyReportConcreteLogSerializer(self._active(obj.concrete_logs), many=True, context=self.context).data
+        rows = obj.concrete_logs.filter(is_deleted=False).select_related('qc_inspection', 'report')
+        return DailyReportConcreteLogSerializer(rows, many=True, context=self.context).data
 
     def get_labor_camp(self, obj):
         return DailyReportLaborCampSerializer(self._active(obj.labor_camp_entries), many=True).data
@@ -1444,23 +1530,24 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
         collection, so clients can navigate to metadata without treating a
         storage key as a public file URL.
         """
+        from permissions.project import active_member_has_codename
         from sub_reports.models import UnitReportAttachment
+        from sub_reports.services.attachments import attachment_download_href
         from field_reports.services.daily_report_aggregation import contributing_sub_reports
 
-        source_ids = contributing_sub_reports(obj.project_id, obj.report_date).values('id')
+        source_ids = obj.derived_sources.filter(
+            source_report__project_id=obj.project_id,
+        ).values('source_report_id')
+        if obj.is_current and obj.status != 'approved' and not source_ids.exists():
+            source_ids = contributing_sub_reports(obj.project_id, obj.report_date).values('id')
         rows = UnitReportAttachment.objects.filter(
-            sub_report_id__in=source_ids, is_deleted=False,
+            sub_report_id__in=source_ids, sub_report__project_id=obj.project_id,
+            sub_report__is_deleted=False, is_deleted=False,
         ).select_related('sub_report').order_by('row_kind', 'id')
 
         request = self.context.get('request')
         user = getattr(request, 'user', None)
-        allowed = False
-        if user is not None and getattr(user, 'is_authenticated', False):
-            if getattr(user, 'is_superuser', False):
-                allowed = True
-            else:
-                from master_data.models import ProjectMember
-                allowed = ProjectMember.objects.filter(project_id=obj.project_id, user_id=user.id).exists()
+        allowed = active_member_has_codename(user, obj.project_id, 'view_reports')
 
         grouped = {}
         for row in rows:
@@ -1469,6 +1556,7 @@ class DailyReportDetailSerializer(serializers.ModelSerializer):
             payload['count'] += 1
             if allowed and len(payload['first_links']) < 3:
                 payload['first_links'].append(
+                    attachment_download_href(row) if row.uploaded_at else
                     f'/api/v1/projects/{obj.project_id}/units/{row.sub_report.unit}/'
                     f'daily-reports/{row.sub_report_id}/attachments/#attachment-{row.id}'
                 )

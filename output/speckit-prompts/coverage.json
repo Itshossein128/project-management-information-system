@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "A.1",
   "stage": 2,
-  "generated_on": "2026-11-19",
+  "generated_on": "2026-11-22",
   "granularity": "multi",
   "original_workflow_input": {
-    "input": "Generate ordered speckit-specify prompts for Phase A.1 work packages B01 through B06 from /home/hossein/Desktop/projects/building-management/output/a1-requirements-2026-11-18"
+    "input": "Go for the next step to deliver the application, based on A.1 phase in http://localhost:5173/delivery-plan"
   },
   "scope": "Stage 2 prompt generation only for B01..B06; no specification or implementation executed",
   "complexity_assessment": {
@@ -74,8 +74,11 @@
         "X07",
         "Q01"
       ],
-      "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B01 — بستن قرارداد داده و نمونه آزمون\n\n**مربوط به:** H04/H05/D05/D07/D08/E02/E17/X07/Q01. **پیش‌نیاز:** دسترسی به روز مرجع کامل و مسئول پذیرش.\n\nخروجی: یک سند نسخه‌دار شامل روز نماینده، سلول/سند منبع هر فیلد، معنای null/صفر، شیفت و مدت، نفر/نفرشیفت/نفرساعت، ترتیب عناوین و بخش‌ها و دامنه تک‌روز/چندشیته. موارد خارج از چاپ با دلیل و مسیر drill-down معلوم شوند. قاعده داده نباید با سلیقه توسعه‌دهنده یا مقدار ساختگی پر شود.\n\n**پایان قابل آزمون:** همه فیلدهای الزام‌شده در FR044 و روز مرجع نگاشت مستقل داشته باشند. تصمیم‌های C01 تا C08 در سند قرارداد ثبت شوند؛ مورد باز اثرگذار بر خروجی رسمی باقی نماند. پذیرش اولیه A.1 به معنای پذیرش همه زیرسیستم‌های A.8 نیست."
+      "entry_gate": "Published B01 contract and synthetic reference-day provenance. GOV-01 assigns the named employer representative and date to B06.",
+      "reported_qa_status": "qa_passed",
+      "disposition": "regression_and_handoff_baseline",
+      "historical_audit_exit_criteria": "## B01 — بستن قرارداد داده و نمونه آزمون\n\n**مربوط به:** H04/H05/D05/D07/D08/E02/E17/X07/Q01. **پیش‌نیاز:** دسترسی به روز مرجع کامل و مسئول پذیرش.\n\nخروجی: یک سند نسخه‌دار شامل روز نماینده، سلول/سند منبع هر فیلد، معنای null/صفر، شیفت و مدت، نفر/نفرشیفت/نفرساعت، ترتیب عناوین و بخش‌ها و دامنه تک‌روز/چندشیته. موارد خارج از چاپ با دلیل و مسیر drill-down معلوم شوند. قاعده داده نباید با سلیقه توسعه‌دهنده یا مقدار ساختگی پر شود.\n\n**پایان قابل آزمون:** همه فیلدهای الزام‌شده در FR044 و روز مرجع نگاشت مستقل داشته باشند. تصمیم‌های C01 تا C08 در سند قرارداد ثبت شوند؛ مورد باز اثرگذار بر خروجی رسمی باقی نماند. پذیرش اولیه A.1 به معنای پذیرش همه زیرسیستم‌های A.8 نیست.",
+      "exit_gate": "Use specs/057-a1-b01-data-contract and published contract v1.0.0 (shiraz-file4-v1) as the baseline. Preserve all 128 mappings and 18 sections, idempotent synthetic SIM-A1-001 (1406-03-01 / 2027-05-22), measured zero, unknowns, and GOV-01. C01–C02 are recorded baselines, C03–C08 are ratified, and C09–C10 are preserved boundaries or behaviors. Carry the recorded decisions forward. Employer representative and date are pending B06."
     },
     {
       "id": "B02",
@@ -109,7 +112,10 @@
         "X01"
       ],
       "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B02 — اصلاح نسخه‌بندی، قفل مشتقات و حفظ داده\n\n**مربوط به:** D01/W02/W03/W04/W05/E15. **پیش‌نیاز:** B01 برای قواعد نسخه و منبع؛ بازتولیدهای فعلی آماده‌اند.\n\n1. نسخه اصلاحی هویت تجمیعی خود را حفظ کند. تمام APIهای child و batch/legacy، مستقل از فرض UI، مالکیت ردیف مشتق را اعمال کنند.\n2. تمام فرزندان و مجموعه کامل DailyReportDerivedSource با شناسه‌های ردیف نسخه مقصد بازنگاشت شوند؛ فقط کپی فیلد تک‌منبع کافی نیست.\n3. نظر مدیریت و overrideهای مجاز و اطلاعات لازم template/aggregation در اصلاح و لغو به درستی حفظ یا طبق قاعده صریح بازتولید شوند؛ هش/snapshot باید به نسخه مربوط بمانند.\n4. دفتر عملیاتی فقط نسخه approved جاری را جمع کند؛ تاریخچه در مسیر مستقل قابل مشاهده بماند.\n\n**آزمون تحویل:** approved summary از دو واحد و چند منبع → اصلاحیه → تلاش مستقیم POST/PATCH/DELETE مشتقات (رد) → اصلاح در واحد منبع و بازسازی مجاز → تأیید → کنترل منبع/نظر/override/جمع → لغو سناریوی دوم و بازگشت دقیق. دو درخواست اصلاح همزمان، نقش مشاهده‌گر و پروژه دیگر پوشش داده شوند. آزمون‌های مشاهده نقص بدون XFAIL سبز شوند؛ XFAIL یا xpass را رفع نقص جا نزنیم."
+      "reported_qa_status": "qa_passed",
+      "disposition": "regression_and_handoff_baseline",
+      "historical_audit_exit_criteria": "## B02 — اصلاح نسخه‌بندی، قفل مشتقات و حفظ داده\n\n**مربوط به:** D01/W02/W03/W04/W05/E15. **پیش‌نیاز:** B01 برای قواعد نسخه و منبع؛ بازتولیدهای فعلی آماده‌اند.\n\n1. نسخه اصلاحی هویت تجمیعی خود را حفظ کند. تمام APIهای child و batch/legacy، مستقل از فرض UI، مالکیت ردیف مشتق را اعمال کنند.\n2. تمام فرزندان و مجموعه کامل DailyReportDerivedSource با شناسه‌های ردیف نسخه مقصد بازنگاشت شوند؛ فقط کپی فیلد تک‌منبع کافی نیست.\n3. نظر مدیریت و overrideهای مجاز و اطلاعات لازم template/aggregation در اصلاح و لغو به درستی حفظ یا طبق قاعده صریح بازتولید شوند؛ هش/snapshot باید به نسخه مربوط بمانند.\n4. دفتر عملیاتی فقط نسخه approved جاری را جمع کند؛ تاریخچه در مسیر مستقل قابل مشاهده بماند.\n\n**آزمون تحویل:** approved summary از دو واحد و چند منبع → اصلاحیه → تلاش مستقیم POST/PATCH/DELETE مشتقات (رد) → اصلاح در واحد منبع و بازسازی مجاز → تأیید → کنترل منبع/نظر/override/جمع → لغو سناریوی دوم و بازگشت دقیق. دو درخواست اصلاح همزمان، نقش مشاهده‌گر و پروژه دیگر پوشش داده شوند. آزمون‌های مشاهده نقص بدون XFAIL سبز شوند؛ XFAIL یا xpass را رفع نقص جا نزنیم.",
+      "exit_gate": "Use specs/058-a1-b02-version-integrity as the baseline. Carry forward the reported 51 passing cases, including correction and cancellation, concurrent correction, summary ownership, protected derived edits, full provenance remapping, reviewer and weather preservation, and approved-current aggregation. Verify evidence against the target build before reuse."
     },
     {
       "id": "B03",
@@ -160,7 +166,10 @@
         "X07"
       ],
       "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B03 — رفع اختلاف خروجی با فرم مرجع\n\n**مربوط به:** H04/D08/D10/D13/D15/E02/E03/E04/E07. **پیش‌نیاز:** B01 و تثبیت رفتار نسخه در B02.\n\nساعت شیفت از منبع واقعی خوانده شود؛ فیلدهای هدر مصوب، ترتیب نیروی انسانی/ستون‌ها و قالب مرجع تکمیل شود. کاتالوگ عمومی تابع template باشد و ۳۴/۳۲ پروفایل فرم تلقی شود. ساعت تجهیز legacy نامعلوم صفر نشود. فهرست فیلدهای بتن/HSE و نقش‌های امضاکننده طبق قرارداد در چاپ یا جزئیات در دسترس باشد. timezone و تاریخ/ساعت امضا با حساب واقعی بررسی شوند.\n\nچاپ Excel برای A4، محدوده چاپ، fit، تکرار هدر و wrap/ارتفاع تنظیم شود؛ PDF طولانی با امضا در انتها و واترمارک همه صفحات آزموده شود. تغییر ظاهر نباید اعداد یا معنا را عوض کند.\n\n**آزمون تحویل:** روز عادی، روز تعطیل، صفر واقعی، ساعت/درصد نامعلوم، متن فارسی/انگلیسی بلند و بیش از ۵۰ ردیف. هیچ عدد ساختگی، متن بریده، نقش جعلی، جمع اشتباه یا خطای فرمول باقی نماند. تغییر حالت approved/draft و نسخه اصلاحی بررسی شود."
+      "reported_qa_status": "qa_passed",
+      "disposition": "regression_and_handoff_baseline",
+      "historical_audit_exit_criteria": "## B03 — رفع اختلاف خروجی با فرم مرجع\n\n**مربوط به:** H04/D08/D10/D13/D15/E02/E03/E04/E07. **پیش‌نیاز:** B01 و تثبیت رفتار نسخه در B02.\n\nساعت شیفت از منبع واقعی خوانده شود؛ فیلدهای هدر مصوب، ترتیب نیروی انسانی/ستون‌ها و قالب مرجع تکمیل شود. کاتالوگ عمومی تابع template باشد و ۳۴/۳۲ پروفایل فرم تلقی شود. ساعت تجهیز legacy نامعلوم صفر نشود. فهرست فیلدهای بتن/HSE و نقش‌های امضاکننده طبق قرارداد در چاپ یا جزئیات در دسترس باشد. timezone و تاریخ/ساعت امضا با حساب واقعی بررسی شوند.\n\nچاپ Excel برای A4، محدوده چاپ، fit، تکرار هدر و wrap/ارتفاع تنظیم شود؛ PDF طولانی با امضا در انتها و واترمارک همه صفحات آزموده شود. تغییر ظاهر نباید اعداد یا معنا را عوض کند.\n\n**آزمون تحویل:** روز عادی، روز تعطیل، صفر واقعی، ساعت/درصد نامعلوم، متن فارسی/انگلیسی بلند و بیش از ۵۰ ردیف. هیچ عدد ساختگی، متن بریده، نقش جعلی، جمع اشتباه یا خطای فرمول باقی نماند. تغییر حالت approved/draft و نسخه اصلاحی بررسی شود.",
+      "exit_gate": "Use specs/059-a1-b03-reference-parity and contract deliverables. Map the QA aliases by artifact. DEL-01 is single-day Excel and PDF, DEL-02 is discipline Excel, DEL-03 is the date-range workbook, and DEL-04 is standalone discipline PDF. C04 defines 34 indirect / 32 direct slots. Keep B03 technical evidence and send independent numeric, print and download evidence to B05."
     },
     {
       "id": "B04",
@@ -188,7 +197,10 @@
         "D05"
       ],
       "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B04 — فیلترها، مجموعه نتیجه و جمع قابل اتکا\n\n**مربوط به:** E11/E12/E13/E14/E15/D07. **پیش‌نیاز:** سیاست نسخه جاری از B02.\n\nفیلترهای discipline/contractor/block در فهرست روزانه با معنای روشن برای خلاصه چندواحدی و همان معنای API/UI/URL تکمیل شوند. دفتر فعالیت aggregate کل queryset فیلترشده را از سرور بگیرد؛ quantity بر اساس واحد و measured بودن محاسبه شود؛ مقدار نامعلوم از صفر متمایز باشد. عنوان headcount مطابق معیار مصوب باشد؛ جمع ردیف‌ها به افراد یکتا تبدیل لفظی نشود.\n\n**آزمون تحویل:** ۵۱ ردیف با page_size=50، چند واحد اندازه‌گیری، یک مقدار نامعلوم، دو نسخه approved و دو پیمانکار هم‌نامِ شغل. URL مشترک نزد عضو مجاز دیگر، refresh و بازگشت مرورگر، نتیجه فهرست و Excel کامل، همگی یک مجموعه منطقی بدهند. جمع کل با تغییر صفحه عوض نشود."
+      "reported_qa_status": "qa_passed",
+      "disposition": "regression_and_handoff_baseline",
+      "historical_audit_exit_criteria": "## B04 — فیلترها، مجموعه نتیجه و جمع قابل اتکا\n\n**مربوط به:** E11/E12/E13/E14/E15/D07. **پیش‌نیاز:** سیاست نسخه جاری از B02.\n\nفیلترهای discipline/contractor/block در فهرست روزانه با معنای روشن برای خلاصه چندواحدی و همان معنای API/UI/URL تکمیل شوند. دفتر فعالیت aggregate کل queryset فیلترشده را از سرور بگیرد؛ quantity بر اساس واحد و measured بودن محاسبه شود؛ مقدار نامعلوم از صفر متمایز باشد. عنوان headcount مطابق معیار مصوب باشد؛ جمع ردیف‌ها به افراد یکتا تبدیل لفظی نشود.\n\n**آزمون تحویل:** ۵۱ ردیف با page_size=50، چند واحد اندازه‌گیری، یک مقدار نامعلوم، دو نسخه approved و دو پیمانکار هم‌نامِ شغل. URL مشترک نزد عضو مجاز دیگر، refresh و بازگشت مرورگر، نتیجه فهرست و Excel کامل، همگی یک مجموعه منطقی بدهند. جمع کل با تغییر صفحه عوض نشود.",
+      "exit_gate": "Use specs/060-a1-b04-filters-totals as the baseline. Under FR-001 one eligible source activity row must satisfy all selected discipline, contractor and block dimensions. Include a split-row exclusion case. Preserve all-results FILE 1 and totals across pagination, role/project scope, bilingual URL restoration and zero versus unset. Reconcile any older DEF-B04-06 variants by scenario and target evidence."
     },
     {
       "id": "B05",
@@ -215,7 +227,10 @@
         "Q02"
       ],
       "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B05 — تطبیق مستقل عدد، فرمول و چاپ\n\n**مربوط به:** Q01/E03/E04/E05/Q02. **پیش‌نیاز:** B02 تا B04 سبز.\n\nروز مرجع کامل از داده کنترل‌شده مستقل ساخته شود؛ expected از خود builder یا همان موتور aggregation تولید نشود. هر بخش به منبع/واحد/تبدیل وصل شود. Excel در نرم‌افزار مستقل بازحساب و خطاها/مقادیر cache ثبت شوند. PDF و Excel کنار مرجع و کنار هم از نظر ارقام، برچسب و چاپ بررسی شوند. سرعت دانلود روی نسخه هدف و داده معمول اندازه‌گیری شود.\n\n**خروجی:** mapping، expected مستقل، اختلاف قبل/بعد، فایل‌های نهایی، screenshot صفحات، لاگ recalc و checksum؛ هر اختلاف باز دارای تصمیم/رفع صریح باشد. تولید یک فایل مصنوعی یا assertion روی وجود متن، جای این مرحله را نمی‌گیرد."
+      "reported_qa_status": "qa_failed",
+      "disposition": "next_specify",
+      "historical_audit_exit_criteria": "## B05 — تطبیق مستقل عدد، فرمول و چاپ\n\n**مربوط به:** Q01/E03/E04/E05/Q02. **پیش‌نیاز:** B02 تا B04 سبز.\n\nروز مرجع کامل از داده کنترل‌شده مستقل ساخته شود؛ expected از خود builder یا همان موتور aggregation تولید نشود. هر بخش به منبع/واحد/تبدیل وصل شود. Excel در نرم‌افزار مستقل بازحساب و خطاها/مقادیر cache ثبت شوند. PDF و Excel کنار مرجع و کنار هم از نظر ارقام، برچسب و چاپ بررسی شوند. سرعت دانلود روی نسخه هدف و داده معمول اندازه‌گیری شود.\n\n**خروجی:** mapping، expected مستقل، اختلاف قبل/بعد، فایل‌های نهایی، screenshot صفحات، لاگ recalc و checksum؛ هر اختلاف باز دارای تصمیم/رفع صریح باشد. تولید یک فایل مصنوعی یا assertion روی وجود متن، جای این مرحله را نمی‌گیرد.",
+      "exit_gate": "Specify independent source-to-expected calculations, unit/rounding rules, cached-value checks on candidate Excel files and standalone recalculation. Record formula, value, rendering and print comparisons by cell and page with SHA-256 and discrepancy decisions. Measure end-to-end SC-002 under 3.0 seconds for representative FILE 4 and PDF downloads (15–30 activities and 20 resource/equipment rows) on the candidate. Recheck the historical missing-cache observation on fresh exports; generated-sample.xlsx is synthetic historical evidence. Define closure evidence for A.1.02 and A.1.03. B01–B04 are reported passes with candidate validation required."
     },
     {
       "id": "B06",
@@ -243,7 +258,10 @@
         "Q05"
       ],
       "entry_gate": "Contract and predecessor handoff recorded; open material dependencies remain blocked",
-      "exit_gate": "## B06 — بسته تحویل قابل آزمون و پذیرش اولیه کارفرما\n\n**مربوط به:** E09/Q03/Q04/Q05. **پیش‌نیاز:** B01 تا B05 بسته شده باشند.\n\nیک release/SHA مشخص، مسیر دسترسی، ورودی/expected، راهنمای نقش‌ها، فایل‌های نمونه با checksum و سناریوهای پذیرش ارائه شود. API و مرورگر روی همان نسخه، دسکتاپ/موبایل و فارسی/انگلیسی، نقش مجاز/غیرمجاز و پروژه دیگر آزموده شوند. تهیه‌کننده/ناظر/کارفرما همان نسخه را دانلود کنند و تفاوت منبع submitted با approved و حدود fingerprint توضیح داده شود.\n\n**معیار پایان A.1:** نقص‌های اجرایی اثرگذار بسته؛ گواه مستقل عدد/فرمول/چاپ موجود؛ همه تصمیم‌های دامنه اثرگذار ثبت‌شده؛ هیچ خطای باز تأثیرگذار بر گزارش رسمی؛ نتیجه مرور کارفرما و پذیرش اولیه صریح ثبت شود. قبولی اتوماتیک تست‌ها به جای صورت‌جلسه کارفرما نیست."
+      "reported_qa_status": "qa_failed",
+      "disposition": "specify_after_B05_and_gate_release_on_candidate_clearance",
+      "historical_audit_exit_criteria": "## B06 — بسته تحویل قابل آزمون و پذیرش اولیه کارفرما\n\n**مربوط به:** E09/Q03/Q04/Q05. **پیش‌نیاز:** B01 تا B05 بسته شده باشند.\n\nیک release/SHA مشخص، مسیر دسترسی، ورودی/expected، راهنمای نقش‌ها، فایل‌های نمونه با checksum و سناریوهای پذیرش ارائه شود. API و مرورگر روی همان نسخه، دسکتاپ/موبایل و فارسی/انگلیسی، نقش مجاز/غیرمجاز و پروژه دیگر آزموده شوند. تهیه‌کننده/ناظر/کارفرما همان نسخه را دانلود کنند و تفاوت منبع submitted با approved و حدود fingerprint توضیح داده شود.\n\n**معیار پایان A.1:** نقص‌های اجرایی اثرگذار بسته؛ گواه مستقل عدد/فرمول/چاپ موجود؛ همه تصمیم‌های دامنه اثرگذار ثبت‌شده؛ هیچ خطای باز تأثیرگذار بر گزارش رسمی؛ نتیجه مرور کارفرما و پذیرش اولیه صریح ثبت شود. قبولی اتوماتیک تست‌ها به جای صورت‌جلسه کارفرما نیست.",
+      "exit_gate": "Specify a frozen release manifest and sample hashes, independent B05 evidence, role/access guide, and a walkthrough with explicit employer disposition, identity, date and release. B01–B04 reported passes supersede the blanket upstream QA claim within their tested scopes. B05 remains open. Require candidate-bound clearance for B01–B05. Record authorized access-control verification by role, project and download surface, desktop and 390×844 mobile in FA RTL and EN LTR across 18 sections, and reconcile the decision tree with deployed permissions. Keep acceptance pending until the employer records it."
     }
   ],
   "requirements": [
@@ -8984,7 +9002,12 @@
         "B02",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "baseline_recorded",
+        "decision_text": "Operational data enters through unit-level sources; the project daily report is a derived summary permitting only authorized project-level metadata, including during revisions.",
+        "ratified_date": null
+      }
     },
     {
       "id": "C02",
@@ -9002,7 +9025,12 @@
         "B04",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "baseline_recorded",
+        "decision_text": "Measured 0/0.00 is valid numeric zero; unset (null) and not-measured remain unknown and are never silently coerced to 0. Supersedes older 033 zero-forbidden text while preserving positive-only domain rules (e.g., pressure/concrete tests).",
+        "ratified_date": null
+      }
     },
     {
       "id": "C03",
@@ -9019,7 +9047,12 @@
         "B02",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "One logical daily report per project per local calendar date; list only shifts that actually worked in the header; use identical canonical shift identifiers (1, 2, 3) across header, activity/labor, and date lookup; calculate person-hours from actual working duration per shift; treat missing duration and resulting person-hours as unknown without assuming planned or default hours.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C04",
@@ -9035,7 +9068,12 @@
         "B03",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "Keep the versioned, configurable project job-title catalog separate from the selectable Shiraz 34/32 reference-form profile; list additional, custom, and historical job titles in a dedicated appendix.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C05",
@@ -9049,7 +9087,12 @@
         "B01",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "Phase A.1 requires both a representative single-day report (Excel and PDF) AND a multi-sheet Excel workbook covering a date range. Legacy 367-sheet historical ETL remains outside A.1 under X08.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C06",
@@ -9064,7 +9107,12 @@
         "B03",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "Existing actor attribution block and metadata fingerprint are sufficient for Phase A.1. Certificate-backed PKI digital signatures and whole-report tamper-evidence mechanisms are outside Phase A.1 scope.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C07",
@@ -9079,7 +9127,12 @@
         "B03",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "Phase A.1 requires standalone PDFs for each discipline in addition to discipline-specific Excel exports.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C08",
@@ -9096,7 +9149,12 @@
         "B03",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "ratified",
+        "decision_text": "All three are mandatory in A.1: (a) stable project ID + actual project day (actual start date = day 1) + official report number <projectID>-<projectDay>-<YYYY>-<MM>-<DD> in Solar Hijri project-local date with 2-digit month/day, (b) observed weather/wind/ground from existing weather logs, (c) 3-day forecast at project location from free MET Norway Locationforecast 2.0. Missing values display unknown and are never fabricated.",
+        "ratified_date": "2026-11-19"
+      }
     },
     {
       "id": "C09",
@@ -9113,7 +9171,12 @@
         "B02",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "baseline_preserved",
+        "decision_text": "Unit source submitted/approved states remain independent of daily summary approved state unless an explicit stricter approval gate is ratified.",
+        "ratified_date": null
+      }
     },
     {
       "id": "C10",
@@ -9130,7 +9193,12 @@
         "B01",
         "B06"
       ],
-      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction"
+      "resolution_status": "Not resolved by Stage 2; preserve source basis/proposal/question distinction",
+      "current_contract_record": {
+        "status": "boundary_preserved",
+        "decision_text": "Preserved in total product scope under named owner phases A.3.C and A.10; neither deleted nor closed by A.1 acceptance.",
+        "ratified_date": null
+      }
     }
   ],
   "stage1_observations": {
@@ -9144,10 +9212,10 @@
     "rerun_in_stage2": false
   },
   "retrieval_limitations": {
-    "knowledge_context": "Index is stale; rerun index",
-    "local_semantic_rebuild": "Attempted after status confirmed no active job; failed: Embedding request failed (connection_error)",
+    "knowledge_context": "Stale index confirmed by status. Stage 1 reported a failed semantic refresh. Stage 2 used primary files.",
+    "local_semantic_rebuild": "Prior job was failed; no fresh semantic retrieval was used.",
     "authority": "Current Stage 1 source documents read directly; stale retrieval not used as truth",
-    "graph": "Vocabulary-constrained BFS returned 591 nodes, 43 displayed; discovery only, not completeness/runtime proof"
+    "graph": "Graphify used for navigation only."
   },
   "summary": {
     "normalized_requirements": 61,
@@ -9165,9 +9233,32 @@
     "implementation_coverage_percent": null,
     "employer_acceptance": "not_performed",
     "broader_daily_sections": 18,
-    "reproduced_gaps_assigned": 6
+    "reproduced_gaps_assigned": 6,
+    "qa_defect_traceability": {
+      "mapped": 36,
+      "total": 36,
+      "percent": 100
+    },
+    "latest_qa_defect_traceability": {
+      "mapped": 11,
+      "total": 11,
+      "percent": 100
+    },
+    "current_qa_reported_resolved": 19
   },
   "source_manifest": [
+    {
+      "path": "apps/api/core/field_reports/contracts/daily_report_contract_v1.json",
+      "sha256": "7adcba62fded39d615c78e992d7083aab6af73fd2b456646ded9eb94f703a707"
+    },
+    {
+      "path": "apps/web/src/app/data/delivery-plan.ts",
+      "sha256": "01e18e3d026d4595cc207253bb9455e105c4012b0d739bff26362708c9dc86c2"
+    },
+    {
+      "path": "output/a1-b01-stage1-discovery-2026-11-19.md",
+      "sha256": "8a9017a1516cfd22a8cdda79709c0a21aab1c6b594384161e557503a942ac663"
+    },
     {
       "path": "output/a1-requirements-2026-11-18/README.md",
       "sha256": "40e8573e143047611fe969ca781834b22d2c9c6243f9c1934e60a74778fa2684"
@@ -9309,6 +9400,222 @@
       "sha256": "d88c9c3fc9bd3c259ddd7be66bb738ba2cb856726a0f32231ded851954048a94"
     },
     {
+      "path": "output/a1-requirements-2026-11-19-stage-1.1.md",
+      "sha256": "a4ed3e2a7cd0622202665d877ca40aaab5086136649f524296671f90a3a7313a"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.json",
+      "sha256": "e3e45a42e3570ea6b2fbfd7ebb725f94981513a50e73caeac2acca4f9c2cb2ae"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-01-qa-findings.md",
+      "sha256": "2ecdf7a663b9ce219782f7e460bb49e9dc4732c8bc7b956154fd137b2889c83c"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.json",
+      "sha256": "bebbec8039b8509db1efce5836296619f47bdf6060cc7878ad78d6ece007ba46"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-02-qa-findings.md",
+      "sha256": "c0b9ed0449a274c143829581923c4f5df3194b88cacc9ba7e6beaeb6b47a2a89"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.json",
+      "sha256": "f5a1d7830decf16f04048c27cc006fc299829b6885969728ad69fbcd7dc69901"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-03-qa-findings.md",
+      "sha256": "9b25da8ba4095710a6b7659c4a8de369f3fe0f72be3ddebf8859f390dab36647"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.json",
+      "sha256": "708917dfc987cd8c8e983b6b4bdb4ba6f854e2b10f620bf4fde43bd01dfabd18"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-04-qa-findings.md",
+      "sha256": "8ee122e06ea0cef8f4e267f44c1e1044a4e54cf8297b8eade50999eaafee8349"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.json",
+      "sha256": "7e4ae8d14f68764d36d2115a38462aec8e6fae36a1c2a214b483e476d08baed1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-05-qa-findings.md",
+      "sha256": "0959918d82039e5489bac1967960fdd32799c4fec62145d0ca419ae3e1a0c0d7"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.json",
+      "sha256": "45a96da0ab79ecf3681ec0a697034ead6f2d1bd48422f07a907c6607865ca8fb"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-06-qa-findings.md",
+      "sha256": "4547714822b950f92f65a38d008c51820beb8230f0cce401b0b37918bd5816a1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.json",
+      "sha256": "337a0a7201e5038b81c7d3f28a6503b14fd9db4ea4683d0093949d32640dd2a6"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.md",
+      "sha256": "461f3bc336a52d76e6905f8fc860c53fbbfa6c526d13476025d69629c0e1ed02"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.json",
+      "sha256": "771f8109fd8437990cf2a6ff18af87c2d94f05f03ec71dfb627f83b3d1ebbb84"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.md",
+      "sha256": "f867a23368a9d841993926cada67868569f1e5f36fecf93940a24b7385a8b366"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.json",
+      "sha256": "a78ced4e1c055e06bf0a0c64d57976d118780898f43311cea768d250860b7ad3"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.md",
+      "sha256": "9e4cdbc5a083ab7384198ad3aa5353fb53198b28f266469bbd9630f314d5d23e"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.json",
+      "sha256": "ffd133b7fda4da8c5b7833d752abd5eb22ffbf296654a80394b2fe941f641286"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.md",
+      "sha256": "1b86bc4c4f5eef678d331152bb4d202bad3966d1e05390b6b3f4ec5844f07f99"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.json",
+      "sha256": "b2b3cf7e1152a33e49ffa0d20193174a4a4fd0e6ef732311b66da8f7333671f7"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.md",
+      "sha256": "4100b503a3f33b655ea2a238f43ba3a534613218047fe9ef147687010537e1c2"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.json",
+      "sha256": "edf80bf5f2c71336058d79801eecf8445be79816fafcd122bb68e5d0840dbb40"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.md",
+      "sha256": "2533cd46e69eb9890379867dbb1f3e4fb7686281753f80dde481de5223ddfe7b"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-19-stage1-discovery.md",
+      "sha256": "1b15d9c6e43e47a96a64fc766fe47d1e2724c13eb04937d187ec064f9118048e"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b01-qa-findings.json",
+      "sha256": "d8b507df700066ff4116a5e5cdb7c18a5d02ecc5c549c9ea5007f8f3329f409f"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b01-qa-findings.md",
+      "sha256": "89ca6a3062f680b11636a6fc9dbcdbc7641c172e89517d0a0c5fd6797ce02db1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b02-qa-findings.json",
+      "sha256": "02a3bccbb5ebebbefffbbc7508c1dd8a717b9f3b5f94bf8ee5215b620c0220af"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b02-qa-findings.md",
+      "sha256": "1d6c626d8f23d0cdb03fba82d7264aa65bf343478a02a80cd29e0ae48b965c0d"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b03-qa-findings.json",
+      "sha256": "8fe173ad4e06f4c26d83e3ac18ef8dd0466989995b95b0d3bf44145c3940eed1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b03-qa-findings.md",
+      "sha256": "4d2811594af7b712ac745dd9938613b6ba9bbbf226c81dcffb6f8148a27390a4"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b04-qa-findings.json",
+      "sha256": "5a9d174fbcc7d42834c9d55fc7467ae1a364eac9225cef6f890d0610111cb970"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b04-qa-findings.md",
+      "sha256": "330a67d6421059bffc5662485d510c9081ad5af2a0998f47c78b8b0fa4972a02"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b05-qa-findings.json",
+      "sha256": "30b26113fd5d880b7591c2d91c9fd8f1f715d198b50b8ae4284851fb7f78a4a1"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b05-qa-findings.md",
+      "sha256": "526267b95e0d29e1d7371cc40f5bdff419e50529a0de50322d07a9bd460223f7"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b06-qa-findings.json",
+      "sha256": "f936fe7e470960a97c23e5fffea346aba1a88698ba9416ac8e6d08dd2f48f666"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-21-stage1-b06-qa-findings.md",
+      "sha256": "4725c59559d3153de9087a5217c5dbf600e017e8ff492d0edfdd2e0eff120423"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b01-qa-findings.json",
+      "sha256": "7d868f075d77e5ddbc12fccb911350d1c6e4c6ba7a78a359080751fca5f6ebed"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b01-qa-findings.md",
+      "sha256": "93bfbeae5a21fc5505e13ce86ea176083c79084555e093146c3b28d66b1bbd51"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b02-qa-findings.json",
+      "sha256": "558e38938960e70c78ff3e0b88ad7cf1c205baef2538ddcc16f01a43cb15d915"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b02-qa-findings.md",
+      "sha256": "8eb73117a5e92be1dc5241aa2840b2b7187e34094ba5b246651c60aa0be0288e"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b03-qa-findings.json",
+      "sha256": "4a976540f11b4b9812f2a7f2766e218f8658aa511bacd48fd3b48a61e54653a8"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b03-qa-findings.md",
+      "sha256": "628aa149ece835847b576973506ba13841fc1428d4a353f348f870dfeb6bca1d"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b04-qa-findings.json",
+      "sha256": "f2daa41608832821b73b14737f3b8e5e137c801cb4a00655b34b064787a9a99f"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b04-qa-findings.md",
+      "sha256": "23856734cc49fbbe940e5ca238144fa74f47c0a2fef6c05c42dca86252679466"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b05-qa-findings.json",
+      "sha256": "de73d50cdaa211c1f1669c0e5f185288776391ffb40dd3ec0c1880ae26e33687"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b05-qa-findings.md",
+      "sha256": "346c8b0f365e087419a1dce417fc473cf0021abbd33b528f9bc7df9e8430c835"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b06-qa-findings.json",
+      "sha256": "cf57298365536f879d9aace688a79356585763308882a38f3f394d50ef382663"
+    },
+    {
+      "path": "output/a1-requirements-2026-11-22-stage1-b06-qa-findings.md",
+      "sha256": "d1e5f1db719a0bdb44ced8ca817593d6cf2faff3996df7f08af168e803cb6450"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-19.json",
+      "sha256": "5d958dae5de0886669a9e1ee6a6cf69f7ea7090cbbd732e9eb41af516e72715d"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-19.md",
+      "sha256": "6ac16b99301bf398461df24dce329321ae9ab394996d910efb7a805601e47ff9"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-21.md",
+      "sha256": "6aa61dd381a9ff279a073e1cf30d7cea0af39930915e1a39ab41629d18a30203"
+    },
+    {
+      "path": "output/a1-stage1-discovery-2026-11-22.md",
+      "sha256": "fa8a9d91eadd80e08f83efe99cbc1970eed9853d49abdea76d5aa5fc9dd17aa2"
+    },
+    {
       "path": "output/a6-requirements-2026-11-04/acceptance.md",
       "sha256": "bbf0ef6effa8478d7cd81bbffb6b70a2209f23b734c3a9dcb22f67e230717c06"
     },
@@ -9331,6 +9638,22 @@
     {
       "path": "output/a7-requirements-2026-11-10/requirements.json",
       "sha256": "c5dd3140280a7efee67be9dc44ad9fb046a3a9dd10a433f9c237d0ba7c3d418a"
+    },
+    {
+      "path": "specs/057-a1-b01-data-contract/spec.md",
+      "sha256": "6bf81e39ba829bd308d7ef98d78fc426cbfa5e0b975fad56c836a86bf426af78"
+    },
+    {
+      "path": "specs/058-a1-b02-version-integrity/spec.md",
+      "sha256": "1905bb98952cdd7ec8857b8cd2fdbfc01f0c6879a393df28ba5af7636be669fb"
+    },
+    {
+      "path": "specs/059-a1-b03-reference-parity/spec.md",
+      "sha256": "d569b693eedfef8803a053b2caa29ea2fc6cdb734a36769249538af64e1430e3"
+    },
+    {
+      "path": "specs/060-a1-b04-filters-totals/spec.md",
+      "sha256": "7a5d203f15c29ca5f8b5a20d1ddbb60854d079aed3a6550e395793bb3d2a8752"
     }
   ],
   "conditional_routes": [
@@ -9359,7 +9682,8 @@
       "delivery_stages": [
         "B03"
       ],
-      "rule": "Apply approved catalog/profile choice; proposed 34/32 mapping remains unapproved until recorded"
+      "rule": "Apply ratified C04. Keep the versioned project catalog separate from the selectable 34 indirect / 32 direct profile and preserve extra titles in the appendix.",
+      "historical_rule": "Apply approved catalog/profile choice; proposed 34/32 mapping remains unapproved until recorded"
     },
     {
       "decision": "C05",
@@ -9371,7 +9695,8 @@
         "B03",
         "B05"
       ],
-      "rule": "If range/multi-sheet accepted, specify that behavior here and verify every contracted sheet; no automatic full-history ETL"
+      "rule": "DEL-03 is in scope under ratified C05. Reconcile each contracted sheet in the date-range workbook. Legacy 367-sheet ETL is routed under X08.",
+      "historical_rule": "If range/multi-sheet accepted, specify that behavior here and verify every contracted sheet; no automatic full-history ETL"
     },
     {
       "decision": "C07",
@@ -9384,7 +9709,8 @@
         "B05",
         "B06"
       ],
-      "rule": "If standalone unit PDF accepted, add its specification/validation to B03/B05/B06; otherwise record explicit exclusion and external owner"
+      "rule": "DEL-04 is in scope under ratified C07. Carry standalone unit PDFs through B03 parity, B05 reconciliation and B06 acceptance.",
+      "historical_rule": "If standalone unit PDF accepted, add its specification/validation to B03/B05/B06; otherwise record explicit exclusion and external owner"
     },
     {
       "decision": "C08",
@@ -9872,6 +10198,1001 @@
         "W05"
       ],
       "evidence": "evidence/correction-probe.json"
+    }
+  ],
+  "formal_work_items": {
+    "A.1.01": [
+      "B01"
+    ],
+    "A.1.02": [
+      "B01",
+      "B03",
+      "B05"
+    ],
+    "A.1.03": [
+      "B02",
+      "B03",
+      "B04",
+      "B05"
+    ],
+    "A.1.04": [
+      "B06"
+    ]
+  },
+  "stage1_snapshot": {
+    "handoff_id": "ho-6a61aa76-6a7",
+    "run_id": "run-mws0kyuv-4o2eyo",
+    "source": "Supplied node results and working memory, and dated Stage 1 discovery and package reports. Separate state.memory.stage1_audit_snapshot was unavailable.",
+    "discovery": {
+      "phase": "A.1",
+      "source_file": "output/a1-stage1-discovery-2026-11-22.md",
+      "requirements": [
+        {
+          "id": "B01",
+          "title": "Data contract and reference-day fixture",
+          "acceptance": "Independently map every required field and complete reference day; resolve C01-C08 decisions affecting official output."
+        },
+        {
+          "id": "B02",
+          "title": "Version integrity, derived locks, and preservation",
+          "acceptance": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, and approved-current aggregation pass end-user scenarios."
+        },
+        {
+          "id": "B03",
+          "title": "Reference-form parity",
+          "acceptance": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form."
+        },
+        {
+          "id": "B04",
+          "title": "Filters, complete result set, and totals",
+          "acceptance": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics."
+        },
+        {
+          "id": "B05",
+          "title": "Independent numeric, formula, and print reconciliation",
+          "acceptance": "Independent expected values, recalculation logs, mapping, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity."
+        },
+        {
+          "id": "B06",
+          "title": "Delivery and initial employer acceptance bundle",
+          "acceptance": "Fixed release/SHA, guide, inputs/expected values, checksums, role/device/language/cross-project tests, and explicit employer review are recorded."
+        }
+      ],
+      "summary": "A.1 remains open. Source lists A.1.01–A.1.04 as remaining. The discovery report records a login redirect and supplies no authenticated delivery-plan UAT."
+    }
+  },
+  "qa_packages": [
+    {
+      "package": "B01",
+      "prompt_file": "01-b01-data-contract.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.md",
+          "sha256": "461f3bc336a52d76e6905f8fc860c53fbbfa6c526d13476025d69629c0e1ed02"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b01-qa-findings.json",
+          "sha256": "337a0a7201e5038b81c7d3f28a6503b14fd9db4ea4683d0093949d32640dd2a6"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B01-01",
+          "reported_title": "Missing report_number and project_day_number in DailyReport data model",
+          "specification_check": "الزام و منبع معتبر شماره رسمی گزارش و روز پروژه را با C08 ثبت کن. داده ساختگی پذیرفتنی نیست."
+        },
+        {
+          "id": "DEF-B01-02",
+          "reported_title": "Work shift actual duration missing, outputting hardcoded 'ساعات کاری شیفت: ثبت نشده' in export",
+          "specification_check": "واحد منطقی گزارش، شناسه و مدت واقعی شیفت و نگاشت هدر/فعالیت/by-date را با C03 ببند."
+        },
+        {
+          "id": "DEF-B01-03",
+          "reported_title": "Headcount sum erroneously labeled as 'نفرروز' without unique worker presence proof",
+          "specification_check": "سرجمع نفرات، نفرشیفت و نفرساعت را با پیش‌شرط‌های حضور یکتا و مدت معتبر تعریف کن. B03/B04 مصرف‌کننده‌اند."
+        },
+        {
+          "id": "DEF-B01-04",
+          "reported_title": "Rigid hardcoded 34/32 catalog in export without configurable project profile mapping",
+          "specification_check": "پروفایل ۳۴/۳۲ و جایگاه عنوان سفارشی/تاریخی را به C04 و تأیید B01 مشروط کن."
+        },
+        {
+          "id": "DEF-B01-05",
+          "reported_title": "Missing integration of wind and ground conditions from WeatherLog to official daily header",
+          "specification_check": "وضعیت زمین/باد موجود در WeatherLog و پیش‌بینی را با منبع، ضرورت و نحوه نمایش طبق C08 تعیین کن."
+        },
+        {
+          "id": "DEF-B01-06",
+          "reported_title": "Unresolved and unratified scope decisions C01 to C08 causing data contract ambiguity",
+          "specification_check": "C01..C08 را تعیین تکلیف کن، C09/C10 را حفظ کن و برای هر ۱۸ بخش جایگاه چاپ، جزئیات یا فاز مالک را ثبت کن."
+        }
+      ]
+    },
+    {
+      "package": "B02",
+      "prompt_file": "02-b02-version-integrity.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.md",
+          "sha256": "f867a23368a9d841993926cada67868569f1e5f36fecf93940a24b7385a8b366"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b02-qa-findings.json",
+          "sha256": "771f8109fd8437990cf2a6ff18af87c2d94f05f03ec71dfb627f83b3d1ebbb84"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B02-01",
+          "reported_title": "افتادن پرچم is_auto_summary در ایجاد نسخه اصلاحی",
+          "specification_check": "هویت گزارش تجمیعی در نسخه اصلاحی و پس از لغو مطابق قرارداد حفظ شود."
+        },
+        {
+          "id": "DEF-B02-02",
+          "reported_title": "امکان جهش و ویرایش مستقیم ردیف‌های مشتق در نسخه اصلاحی (Bypass قفل مشتقات)",
+          "specification_check": "رد تغییر مستقیم مشتقات و حفظ داده در تمام مسیرهای تغییر child، batch و legacy به‌عنوان کنترل دفاعی تعریف شود."
+        },
+        {
+          "id": "DEF-B02-03",
+          "reported_title": "عدم کلون و بازنگاشت رکوردهای DailyReportDerivedSource به نسخه اصلاحی",
+          "specification_check": "همه منابع مشتق هر ردیف به همتای همان ردیف در نسخه مقصد منتسب باشند و سابقه قابل ممیزی بماند."
+        },
+        {
+          "id": "DEF-B02-04",
+          "reported_title": "حذف و پاک‌شدن نظر مدیریت و پرچم weather_override در گزارش اصلاحی",
+          "specification_check": "نظر مدیریت و override مجاز طبق قواعد حفظ یا بازتولید نسخه ثبت و در چرخه تأیید/لغو قابل مشاهده باشند."
+        },
+        {
+          "id": "DEF-B02-05",
+          "reported_title": "دوباره‌شماری تاریخی در دفتر رسمی فعالیت‌ها با عدم فیلتر is_current",
+          "specification_check": "جمع رسمی فقط نسخه مصوب جاری را لحاظ کند. B04 همین قاعده را در نتیجه فیلتر و FILE1 مصرف کند."
+        },
+        {
+          "id": "DEF-B02-06",
+          "reported_title": "عدم ابطال/رد بازسازی خودکار روی نسخه‌های بایگانی‌شده/قدیمی",
+          "specification_check": "بازسازی خودکار نسخه قدیمی یا بایگانی‌شده رد شود و snapshot و منابع آن نسخه ثابت بمانند. این یافته محلی در Markdown ثبت شده و در JSON و تحویل‌نامه ارائه‌شده نیامده است."
+        }
+      ]
+    },
+    {
+      "package": "B03",
+      "prompt_file": "03-b03-reference-parity.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.md",
+          "sha256": "9e4cdbc5a083ab7384198ad3aa5353fb53198b28f266469bbd9630f314d5d23e"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b03-qa-findings.json",
+          "sha256": "a78ced4e1c055e06bf0a0c64d57976d118780898f43311cea768d250860b7ad3"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B03-01",
+          "reported_title": "چاپ متن ثابت «ساعات کاری شیفت: ثبت نشده» در سطر ۴ اکسل به جای خواندن ساعات واقعی شیفت",
+          "specification_check": "شروع، پایان و مدت شیفت توافق‌شده با روز مرجع در خروجی مقایسه شود."
+        },
+        {
+          "id": "DEF-B03-02",
+          "reported_title": "چیدمان پشته‌ای (عمودی) جدول نیروی انسانی مستقیم و غیرمستقیم به جای دو جدول مجاور (افقی)",
+          "specification_check": "برای پروفایل مصوب شیراز دو جدول نیروی انسانی مجاور باشند. جایگاه عناوین اضافی را طبق C04 بررسی کن."
+        },
+        {
+          "id": "DEF-B03-03",
+          "reported_title": "فقدان تنظیمات استاندارد چاپ در اکسل (Print Area، Fit-to-1-Page Wide، تکرار هدر، ارتفاع سطر پویا)",
+          "specification_check": "چاپ A4 در یک صفحه عرض، محدوده چاپ، تکرار هدر و خوانایی متن فارسی بلند بررسی شود."
+        },
+        {
+          "id": "DEF-B03-04",
+          "reported_title": "عدم درج سمت‌های سازمانی/حقوقی در بلوک امضای PDF و استفاده از متن‌های غیراستاندارد",
+          "specification_check": "سمت واقعی، نام و زمان محلی کنشگر نمایش داده شود و مرحله طی‌نشده کنشگر یا عنوان ساختگی نگیرد."
+        },
+        {
+          "id": "DEF-B03-05",
+          "reported_title": "درج صفر ساختگی به جای مقدار خالی برای تجهیزات نامعلوم ماشین‌آلات در شاخه legacy اکسل",
+          "specification_check": "تجهیز قدیمی با ساعت نامعلوم از ساعت صفر واقعی در Excel/PDF قابل تمایز باشد."
+        },
+        {
+          "id": "DEF-B03-06",
+          "reported_title": "کمبود فیلدهای تفصیلی بتن‌ریزی و آزمایش‌های کیفی در خروجی‌های استاندارد",
+          "specification_check": "برای بچینگ، تراک میکسر، شماره شیت آزمایشگاه و پیوند نتیجه ۲۸روزه، چاپ یا جزئیات را مطابق قرارداد B01 تعیین و بررسی کن."
+        },
+        {
+          "id": "DEF-B03-07",
+          "reported_title": "درج عبارات انگلیسی در ستون‌های شدت حادثه و نوع رخداد در شیت اکسل فارسی",
+          "specification_check": "برچسب نوع و شدت حادثه در خروجی فارسی بومی باشد، از جمله معادل‌های Major و safety."
+        },
+        {
+          "id": "DEF-B03-08",
+          "reported_title": "تثبیت اجباری کاتالوگ ۳۴/۳۲ و عدم انطباق با تغییرات کاتالوگ پویای پروژه‌های مختلف",
+          "specification_check": "پروفایل توافق‌شده در پروژه‌های مختلف و با عنوان سفارشی/تاریخی بدون حذف یا تحمیل شمار ثابت آزموده شود."
+        }
+      ]
+    },
+    {
+      "package": "B04",
+      "prompt_file": "04-b04-filters-totals.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.md",
+          "sha256": "1b86bc4c4f5eef678d331152bb4d202bad3966d1e05390b6b3f4ec5844f07f99"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b04-qa-findings.json",
+          "sha256": "ffd133b7fda4da8c5b7833d752abd5eb22ffbf296654a80394b2fe941f641286"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B04-01",
+          "reported_title": "محاسبه جمع احجام و نفرات در UI بر مبنای data.results صفحه جاری به جای کل Queryset فیلترشده",
+          "specification_check": "روی داده ۵۱ ردیفی، تغییر صفحه ۵۰/۱، جمع کل را تغییر ندهد."
+        },
+        {
+          "id": "DEF-B04-02",
+          "reported_title": "عدم ارائه آبجکت Aggregates/Totals روی کل کوئری‌ست توسط اندپوینت ActivityLogView",
+          "specification_check": "پاسخ فهرست امکان نمایش جمع تمام نتایج فیلترشده را مستقل از صفحه بدهد و واحدها و null/zero را تفکیک کند."
+        },
+        {
+          "id": "DEF-B04-03",
+          "reported_title": "فقدان فیلترهای دیسیپلین، پیمانکار و بلوک در فهرست گزارش‌های روزانه (UI و API)",
+          "specification_check": "فیلتر دیسیپلین، پیمانکار و بلوک همراه با دیگر ابعاد مصوب در UI/API/URL هم‌معنا باشند. reload، لینک و back/forward پوشش داده شوند."
+        },
+        {
+          "id": "DEF-B04-04",
+          "reported_title": "اطلاق عنوان نادرست «نفر-روز» به جمع ساده سطرهای فعالیت در نوار سرجمع لاگ فعالیت",
+          "specification_check": "جمع نفرات سطرها با برچسب منطبق بر D07 نمایش داده شود."
+        },
+        {
+          "id": "DEF-B04-05",
+          "reported_title": "عدم انطباق دامنه داده فیلترشده بین نمایش وب و خروجی اکسل FILE 1",
+          "specification_check": "FILE1 و فهرست بر دامنه یکسان فیلترشده و مجاز منطبق باشند."
+        },
+        {
+          "id": "DEF-B04-06",
+          "reported_title": "احتمال اعمال مقادیر نسخه‌های غیرجاری و تاریخی در صورت باز بودن شروط فیلتر",
+          "specification_check": "ریسک گزارش‌شده را با قرارداد B02 بررسی کن. فیلتر عملیاتی نباید نسخه تاریخی را دوباره وارد نتیجه یا جمع کند."
+        }
+      ],
+      "source_reconciliation": "در تحویل‌نامه، DEF-B04-06 به ناوبری URL اشاره می‌کند؛ در جدول و JSON محلی همین شناسه به ورود نسخه تاریخی اشاره دارد. هر دو سناریو لازم‌اند. ناوبری ذیل DEF-B04-03 و ریسک نسخه تاریخی با B02 پوشش داده شود. جدول محلی برای شرح DEF-B04-02/04/05 مبناست و مقادیر اندازه‌گیری‌نشده و واحدها ذیل DEF-B04-02 آزموده شوند."
+    },
+    {
+      "package": "B05",
+      "prompt_file": "05-b05-independent-reconciliation.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.md",
+          "sha256": "4100b503a3f33b655ea2a238f43ba3a534613218047fe9ef147687010537e1c2"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b05-qa-findings.json",
+          "sha256": "b2b3cf7e1152a33e49ffa0d20193174a4a4fd0e6ef732311b66da8f7333671f7"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B05-01",
+          "reported_title": "فقدان مقادیر از پیش محاسبه‌شده (Cached Values) برای سلول‌های فرمول در اکسل تولیدی و عدم اجرای آزمون بازحساب مستقل (Recalc)",
+          "specification_check": "بازحساب مستقل و مقایسه مقدار/فرمول را ثبت کن. نبود cache نمونه تاریخی و خطاهای بازحساب جداگانه گزارش شوند. الزام انتشار cache فقط با شواهد قرارداد."
+        },
+        {
+          "id": "DEF-B05-02",
+          "reported_title": "عدم وجود آزمون معیار کارایی سرعت دانلود (زیر ۳ ثانیه) برای گزارش‌های روزانه با حجم واقعی (SC-002)",
+          "specification_check": "SC-002 را برای دانلود Excel/PDF زیر ۳ ثانیه روی نسخه هدف با ۱۵ تا ۳۰ فعالیت و ۲۰ ردیف تجهیزات اندازه‌گیری کن."
+        },
+        {
+          "id": "DEF-B05-03",
+          "reported_title": "تولید مقادیر مورد انتظار (Expected) در تست‌ها از خود مدل‌ها و موتورهای تجمیع داخلی به جای اوراکل محاسباتی مستقل (Q01)",
+          "specification_check": "expected و قواعد گردکردن/واحد را از داده مرجع مستقل از builder و aggregate تولید کن."
+        },
+        {
+          "id": "DEF-B05-04",
+          "reported_title": "عدم ثبت گواهی تطبیق بصری صفحه به صفحه (Screenshot Diff / Visual Regression) میان PDF، Excel و فرم مرجع کارفرما",
+          "specification_check": "نقشه سلول/صفحه، اختلاف قبل/بعد، تصاویر خوانا، لاگ بازحساب و checksum را برای Excel/PDF و مرجع نگه دار."
+        },
+        {
+          "id": "DEF-B05-05",
+          "reported_title": "عدم تحقق پیش‌نیازهای کیفی بسته‌های قبلی (B02, B03, B04 هنوز qa_failed هستند)",
+          "specification_check": "پیش‌نیازهای B02/B03/B04 را با شواهد همان نسخه راستی‌آزمایی کن. اختلاف مؤثر باز نتیجه را blocked/unverified نگه دارد."
+        }
+      ]
+    },
+    {
+      "package": "B06",
+      "prompt_file": "06-b06-delivery-acceptance.md",
+      "reported_qa_status": "qa_failed",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.md",
+          "sha256": "2533cd46e69eb9890379867dbb1f3e4fb7686281753f80dde481de5223ddfe7b"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-19-stage1-b06-qa-findings.json",
+          "sha256": "edf80bf5f2c71336058d79801eecf8445be79816fafcd122bb68e5d0840dbb40"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B06-01",
+          "reported_title": "Missing A.1 frozen delivery package (Commit SHA, archive, and SHA-256 checksums)",
+          "specification_check": "آرشیو منجمد با release/SHA، ورودی، expected، فایل‌ها، راهنمای نقش و SHA-256 تحویل شود."
+        },
+        {
+          "id": "DEF-B06-02",
+          "reported_title": "Open blocker defects and Strict XFAILs in prerequisite packages B01 through B05",
+          "specification_check": "بسته‌شدن B01..B05 و تعیین تکلیف شواهد نقص‌های باز قبل از اعلام آمادگی ثبت شود."
+        },
+        {
+          "id": "DEF-B06-03",
+          "reported_title": "Missing client initial acceptance protocol/sign-off mechanism",
+          "specification_check": "نتیجه صریح کارفرما روی همان نسخه، همراه با تاریخ، نقش، اختلاف و وضعیت pending/accepted/rejected ثبت شود."
+        },
+        {
+          "id": "DEF-B06-04",
+          "reported_title": "Unverified live multi-tenant cross-project authorization and direct ID download isolation (Group E09)",
+          "specification_check": "برای E09 معیار دفاعی رد دسترسی و دانلود میان پروژه‌ها را با نقش‌ها و داده آزمون مجاز روی نسخه هدف مشخص کن."
+        },
+        {
+          "id": "DEF-B06-05",
+          "reported_title": "Incomplete mobile responsive & bilingual FA/EN verification evidence for end-to-end report workflow (Group Q03)",
+          "specification_check": "گردش واقعی نقش‌ها روی دسکتاپ/موبایل و FA/EN را با وضعیت و شواهد هر یک از ۱۸ بخش مرتبط ثبت کن."
+        }
+      ]
+    }
+  ],
+  "latest_qa_packages": [
+    {
+      "package": "B01",
+      "prompt_file": "01-b01-data-contract.md",
+      "reported_qa_status": "qa_passed",
+      "acceptance": "Independently map every required field and complete reference day; resolve C01-C08 decisions affecting official output.",
+      "specification_check": "Use specs/057-a1-b01-data-contract and published contract v1.0.0 (shiraz-file4-v1) as the baseline. Preserve all 128 mappings and 18 sections, idempotent synthetic SIM-A1-001 (1406-03-01 / 2027-05-22), measured zero, unknowns, and GOV-01. C01–C02 are recorded baselines, C03–C08 are ratified, and C09–C10 are preserved boundaries or behaviors. Carry the recorded decisions forward. Employer representative and date are pending B06.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b01-qa-findings.md",
+          "sha256": "93bfbeae5a21fc5505e13ce86ea176083c79084555e093146c3b28d66b1bbd51"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b01-qa-findings.json",
+          "sha256": "7d868f075d77e5ddbc12fccb911350d1c6e4c6ba7a78a359080751fca5f6ebed"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": []
+    },
+    {
+      "package": "B02",
+      "prompt_file": "02-b02-version-integrity.md",
+      "reported_qa_status": "qa_passed",
+      "acceptance": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, reviewer/weather preservation, and approved-current aggregation pass end-user scenarios.",
+      "specification_check": "Use specs/058-a1-b02-version-integrity as the baseline. Carry forward the reported 51 passing cases, including correction and cancellation, concurrent correction, summary ownership, protected derived edits, full provenance remapping, reviewer and weather preservation, and approved-current aggregation. Verify evidence against the target build before reuse.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b02-qa-findings.md",
+          "sha256": "8eb73117a5e92be1dc5241aa2840b2b7187e34094ba5b246651c60aa0be0288e"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b02-qa-findings.json",
+          "sha256": "558e38938960e70c78ff3e0b88ad7cf1c205baef2538ddcc16f01a43cb15d915"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": [
+        "DEF-B02-01",
+        "DEF-B02-02",
+        "DEF-B02-03",
+        "DEF-B02-04",
+        "DEF-B02-05",
+        "DEF-B02-06"
+      ]
+    },
+    {
+      "package": "B03",
+      "prompt_file": "03-b03-reference-parity.md",
+      "reported_qa_status": "qa_passed",
+      "acceptance": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form.",
+      "specification_check": "Use specs/059-a1-b03-reference-parity and contract deliverables. Map the QA aliases by artifact. DEL-01 is single-day Excel and PDF, DEL-02 is discipline Excel, DEL-03 is the date-range workbook, and DEL-04 is standalone discipline PDF. C04 defines 34 indirect / 32 direct slots. Keep B03 technical evidence and send independent numeric, print and download evidence to B05.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b03-qa-findings.md",
+          "sha256": "628aa149ece835847b576973506ba13841fc1428d4a353f348f870dfeb6bca1d"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b03-qa-findings.json",
+          "sha256": "4a976540f11b4b9812f2a7f2766e218f8658aa511bacd48fd3b48a61e54653a8"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": [
+        "DEF-B03-01",
+        "DEF-B03-02",
+        "DEF-B03-03",
+        "DEF-B03-04",
+        "DEF-B03-05",
+        "DEF-B03-06",
+        "DEF-B03-07",
+        "DEF-B03-08"
+      ]
+    },
+    {
+      "package": "B04",
+      "prompt_file": "04-b04-filters-totals.md",
+      "reported_qa_status": "qa_passed",
+      "acceptance": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+      "specification_check": "Use specs/060-a1-b04-filters-totals as the baseline. Under FR-001 one eligible source activity row must satisfy all selected discipline, contractor and block dimensions. Include a split-row exclusion case. Preserve all-results FILE 1 and totals across pagination, role/project scope, bilingual URL restoration and zero versus unset. Reconcile any older DEF-B04-06 variants by scenario and target evidence.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b04-qa-findings.md",
+          "sha256": "23856734cc49fbbe940e5ca238144fa74f47c0a2fef6c05c42dca86252679466"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b04-qa-findings.json",
+          "sha256": "f2daa41608832821b73b14737f3b8e5e137c801cb4a00655b34b064787a9a99f"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": [
+        {
+          "id": "DEF-B04-01",
+          "severity": "high",
+          "title": "Client-side aggregation on page slice instead of whole queryset",
+          "resolution": "Resolved in apps/web/src/app/routes/project-activity-log.tsx and activity_log.py: Aggregates are computed by backend activity_log_aggregates across the full filtered queryset and rendered directly from listQuery.data.aggregates."
+        },
+        {
+          "id": "DEF-B04-02",
+          "severity": "high",
+          "title": "Missing whole-queryset totals/aggregates payload in ActivityLogView API",
+          "resolution": "Resolved in apps/api/core/field_reports/report_views.py and services/activity_log.py: API payload returns aggregates object containing headcount_sum, quantity_by_unit (with measured_count, unknown_count, and numeric totals), and unknown_quantity_without_unit_count."
+        },
+        {
+          "id": "DEF-B04-03",
+          "severity": "medium",
+          "title": "Missing discipline, block, and contractor filters on Daily Reports list",
+          "resolution": "Resolved in apps/web/src/app/routes/daily-reports-list.tsx and apps/api/core/field_reports/daily_report_views.py: Standard dimensional filters (discipline, contractor, block) are bound to URL query params and backend queryset filtering, enforcing single-row matching and split-row exclusion."
+        },
+        {
+          "id": "DEF-B04-04",
+          "severity": "medium",
+          "title": "Collapsing unset/unmeasured quantities into numeric zero",
+          "resolution": "Resolved in apps/api/core/field_reports/services/activity_log.py and project-activity-log.tsx: Explicit measured zero is preserved as numeric 0, while unset or unmeasured quantities remain null/dash and are counted under unknown_count / unknown_quantity_without_unit_count."
+        },
+        {
+          "id": "DEF-B04-05",
+          "severity": "low",
+          "title": "Misleading man-days labeling for raw headcount row sum",
+          "resolution": "Resolved in apps/web/src/app/locales/fa/common.json and en/common.json: Labels updated to 'مجموع نفرات ثبت‌شده در ردیف‌ها' (Persian) and 'Sum of activity-row headcounts' (English), strictly complying with decision D07."
+        }
+      ]
+    },
+    {
+      "package": "B05",
+      "prompt_file": "05-b05-independent-reconciliation.md",
+      "reported_qa_status": "qa_failed",
+      "acceptance": "Independent expected values, recalculation evidence, mappings, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity.",
+      "specification_check": "Specify independent source-to-expected calculations, unit/rounding rules, cached-value checks on candidate Excel files and standalone recalculation. Record formula, value, rendering and print comparisons by cell and page with SHA-256 and discrepancy decisions. Measure end-to-end SC-002 under 3.0 seconds for representative FILE 4 and PDF downloads (15–30 activities and 20 resource/equipment rows) on the candidate. Recheck the historical missing-cache observation on fresh exports; generated-sample.xlsx is synthetic historical evidence. Define closure evidence for A.1.02 and A.1.03. B01–B04 are reported passes with candidate validation required.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b05-qa-findings.md",
+          "sha256": "346c8b0f365e087419a1dce417fc473cf0021abbd33b528f9bc7df9e8430c835"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b05-qa-findings.json",
+          "sha256": "de73d50cdaa211c1f1669c0e5f185288776391ffb40dd3ec0c1880ae26e33687"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B05-01",
+          "title": "Missing cached values for formula cells in exported Excel and lack of standalone recalculation tests",
+          "type": "Defect / Excel Engine Gap",
+          "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+          "severity": "critical",
+          "evidence": "openpyxl data_only=True inspection on output/a1-requirements-2026-11-18/evidence/generated-sample.xlsx shows C47, D47, G47, C82, D82, G82, G83, and C92 evaluate to None while formula strings exist in data_only=False. No standalone recalculation execution log is captured.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-02",
+          "title": "Missing real-world download latency benchmark (<3.0s) for standard site daily reports (SC-002)",
+          "type": "Performance Defect / QA Benchmark Gap",
+          "component": "apps/api/core/field_reports/report_views.py & apps/web",
+          "severity": "major",
+          "evidence": "SC-002 mandates export and download of master daily report (FILE4) or PDF for 15-30 activities and 20 resource rows in <3.0 seconds under standard broadband. No automated telemetry or client-side benchmark test exists.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-03",
+          "title": "Expected test assertions generated from internal models/aggregators rather than independent calculation oracle (Q01)",
+          "type": "Verification Methodology Gap / Quality Gate Defect",
+          "component": "apps/api/core/field_reports/tests/",
+          "severity": "critical",
+          "evidence": "Automated tests generate expected comparison targets dynamically using internal Python models and queryset methods rather than an independently maintained reference calculation sheet or oracle.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-04",
+          "title": "Lack of visual regression and page-by-page screenshot diff logs across PDF, Excel print layout, and employer reference form",
+          "type": "Compliance & Visual Parity Defect",
+          "component": "output/a1-requirements-2026-11-18/evidence/",
+          "severity": "major",
+          "evidence": "Requirements E04 and E05 demand archived side-by-side visual comparisons, page layout validation, and screenshots for normal and long daily report outputs. No screenshot archive is present.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-05",
+          "title": "Delivery plan tasks A.1.02 and A.1.03 remain in 'remaining' status",
+          "type": "Delivery & Scope Gap",
+          "component": "apps/web/src/app/data/delivery-plan.ts",
+          "severity": "major",
+          "evidence": "Delivery plan tasks A.1.02 ('تطبیق تمام بخش‌های گزارش با روز مرجع') and A.1.03 ('رفع اختلاف ارقام و نمایش خروجی‌ها') have not been completed or verified.",
+          "status": "open"
+        }
+      ],
+      "reported_resolved_defects": []
+    },
+    {
+      "package": "B06",
+      "prompt_file": "06-b06-delivery-acceptance.md",
+      "reported_qa_status": "qa_failed",
+      "acceptance": "Record fixed release/SHA, guide, fixtures, expected values, checksums, role/device/language/cross-project tests, walkthrough, and explicit employer sign-off.",
+      "specification_check": "Specify a frozen release manifest and sample hashes, independent B05 evidence, role/access guide, and a walkthrough with explicit employer disposition, identity, date and release. B01–B04 reported passes supersede the blanket upstream QA claim within their tested scopes. B05 remains open. Require candidate-bound clearance for B01–B05. Record authorized access-control verification by role, project and download surface, desktop and 390×844 mobile in FA RTL and EN LTR across 18 sections, and reconcile the decision tree with deployed permissions. Keep acceptance pending until the employer records it.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b06-qa-findings.md",
+          "sha256": "d1e5f1db719a0bdb44ced8ca817593d6cf2faff3996df7f08af168e803cb6450"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-22-stage1-b06-qa-findings.json",
+          "sha256": "cf57298365536f879d9aace688a79356585763308882a38f3f394d50ef382663"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B06-01",
+          "group": "Q05",
+          "type": "Process & Delivery Defect",
+          "severity": "critical",
+          "title": "Missing frozen Phase A.1 release package with commit SHA, independent inputs/expected fixtures, final sample exports, and verified SHA-256 checksums",
+          "evidence": "No frozen package exists under output/ or specs/ for Phase A.1 (last delivery archive is output/a7-delivery-2026-11-16/).",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-02",
+          "group": "Q05",
+          "type": "Dependency Blocker",
+          "severity": "critical",
+          "title": "Hard dependency block: upstream delivery packages B01 through B05 have open blocker defects",
+          "evidence": "B01 (data contract), B02 (version integrity), B03 (reference parity), B04 (filters/totals), and B05 (independent numeric reconciliation) have unresolved defects and qa_failed statuses.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-03",
+          "group": "Q05",
+          "type": "Governance & Compliance Defect",
+          "severity": "critical",
+          "title": "Missing explicit employer review and sign-off protocol",
+          "evidence": "Project instructions mandate that automated tests or agents cannot sign on behalf of the employer. No employer review minutes or sign-off decision is recorded.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-04",
+          "group": "E09",
+          "type": "Security & Multi-Tenancy Defect",
+          "severity": "major",
+          "title": "Unverified live cross-project isolation matrix and negative security tests for direct ID download endpoints",
+          "evidence": "Live execution evidence proving non-member or unauthorized direct-ID download denial across projects is not formally packaged.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-05",
+          "group": "Q03",
+          "type": "UI/UX & Localization Defect",
+          "severity": "major",
+          "title": "Incomplete mobile responsive and bilingual (FA/EN) verification evidence across all 18 daily report sections",
+          "evidence": "Full journey audit on mobile viewports (390x844) and English locale is not archived with the release.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-06",
+          "group": "Q04",
+          "type": "Documentation Defect",
+          "severity": "minor",
+          "title": "Decision tree in docs/decision-tree/ lacks final verification against deployed authorization gates and export routes",
+          "evidence": "Decision tree routes need live validation once release deployment is frozen.",
+          "status": "open"
+        }
+      ],
+      "reported_resolved_defects": []
+    }
+  ],
+  "previous_stage1_snapshot": {
+    "handoff_id": "ho-07c1988e-3d1",
+    "run_id": "run-mwqu33d0-b2fhcg",
+    "source": "Supplied node results and working memory cross-checked with local Stage 1 reports. Separate state.memory.stage1_audit_snapshot unavailable.",
+    "discovery": {
+      "phase": "A.1",
+      "requirements": [
+        {
+          "id": "B01",
+          "title": "Data contract and reference-day fixture",
+          "acceptance": "Independently map every required field and complete reference day; resolve C01-C08 decisions affecting official output.",
+          "status": "open"
+        },
+        {
+          "id": "B02",
+          "title": "Version integrity, derived locks, and preservation",
+          "acceptance": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, and approved-current aggregation pass end-user scenarios.",
+          "status": "open"
+        },
+        {
+          "id": "B03",
+          "title": "Reference-form parity",
+          "acceptance": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form.",
+          "status": "open"
+        },
+        {
+          "id": "B04",
+          "title": "Filters, complete result set, and totals",
+          "acceptance": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+          "status": "qa_failed"
+        },
+        {
+          "id": "B05",
+          "title": "Independent numeric, formula, and print reconciliation",
+          "acceptance": "Independent expected values, recalculation logs, mapping, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity.",
+          "status": "qa_failed"
+        },
+        {
+          "id": "B06",
+          "title": "Delivery and initial employer acceptance bundle",
+          "acceptance": "Fixed release/SHA, guide, inputs/expected values, checksums, role/device/language/cross-project tests, and explicit employer review are recorded.",
+          "status": "qa_failed"
+        }
+      ],
+      "summary": "A.1 is the active next delivery phase. The plan marks daily Excel/PDF export implemented, while A.1.01-A.1.04 remain. Six downstream QA work packages B01-B06 cover the unresolved contract, lineage, parity, totals, independent reconciliation, and acceptance gaps; authenticated browser UAT and employer sign-off are unverified."
+    }
+  },
+  "previous_qa_packages": [
+    {
+      "package": "B01",
+      "prompt_file": "01-b01-data-contract.md",
+      "reported_qa_status": "qa_passed",
+      "discovery_status": "open",
+      "acceptance": "Independently map every required field and complete reference day; resolve C01-C08 decisions affecting official output.",
+      "specification_check": "Use specs/057-a1-b01-data-contract as the baseline. QA reports 11 passing tests and a versioned fixture contract covering all 18 sections and C01–C08/GOV-01. Preserve SIM-A1-001 as a synthetic fixture. Record any employer decision or real reference-day evidence still needed for official delivery.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b01-qa-findings.json",
+          "sha256": "d8b507df700066ff4116a5e5cdb7c18a5d02ecc5c549c9ea5007f8f3329f409f"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b01-qa-findings.md",
+          "sha256": "89ca6a3062f680b11636a6fc9dbcdbc7641c172e89517d0a0c5fd6797ce02db1"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": []
+    },
+    {
+      "package": "B02",
+      "prompt_file": "02-b02-version-integrity.md",
+      "reported_qa_status": "qa_passed",
+      "discovery_status": "open",
+      "acceptance": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, and approved-current aggregation pass end-user scenarios.",
+      "specification_check": "Use specs/058-a1-b02-version-integrity as the baseline. Treat DEF-B02-01 through DEF-B02-06 as regression scenarios. Preserve derived-row restrictions, complete lineage, eligible rebuilds, cancel/restore, concurrent correction and approved-current totals.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b02-qa-findings.json",
+          "sha256": "02a3bccbb5ebebbefffbbc7508c1dd8a717b9f3b5f94bf8ee5215b620c0220af"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b02-qa-findings.md",
+          "sha256": "1d6c626d8f23d0cdb03fba82d7264aa65bf343478a02a80cd29e0ae48b965c0d"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": [
+        "DEF-B02-01",
+        "DEF-B02-02",
+        "DEF-B02-03",
+        "DEF-B02-04",
+        "DEF-B02-05",
+        "DEF-B02-06"
+      ]
+    },
+    {
+      "package": "B03",
+      "prompt_file": "03-b03-reference-parity.md",
+      "reported_qa_status": "qa_passed",
+      "discovery_status": "open",
+      "acceptance": "Excel/PDF values, fields, labels, roles, unknown semantics, long text, pagination, printing, timezone, and watermark match the agreed reference form.",
+      "specification_check": "Use specs/059-a1-b03-reference-parity as the baseline. Treat DEF-B03-01 through DEF-B03-08 as regression scenarios. Preserve the tested shifts, manpower layout, A4/long print, legal roles and watermarks, unset equipment, concrete QC and Persian HSE display. Real reference-day reconciliation remains a B05 gate.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b03-qa-findings.json",
+          "sha256": "8fe173ad4e06f4c26d83e3ac18ef8dd0466989995b95b0d3bf44145c3940eed1"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b03-qa-findings.md",
+          "sha256": "4d2811594af7b712ac745dd9938613b6ba9bbbf226c81dcffb6f8148a27390a4"
+        }
+      ],
+      "defects": [],
+      "reported_resolved_defects": [
+        "DEF-B03-01",
+        "DEF-B03-02",
+        "DEF-B03-03",
+        "DEF-B03-04",
+        "DEF-B03-05",
+        "DEF-B03-06",
+        "DEF-B03-07",
+        "DEF-B03-08"
+      ]
+    },
+    {
+      "package": "B04",
+      "prompt_file": "04-b04-filters-totals.md",
+      "reported_qa_status": "qa_failed",
+      "discovery_status": "qa_failed",
+      "acceptance": "API, UI, URL, Excel, pagination, and totals represent one complete filtered queryset with correct units and unset semantics.",
+      "specification_check": "Use specs/060-a1-b04-filters-totals as the baseline. The 51-row fixture must yield the same full totals on both pages and the same logical rows in FILE1. Require server-wide aggregates for the authorized filtered set, discipline/block/contractor filters with clear multi-unit matching, separate measured zero from unknown, and label raw row sums without man-days or unique-person claims.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b04-qa-findings.json",
+          "sha256": "5a9d174fbcc7d42834c9d55fc7467ae1a364eac9225cef6f890d0610111cb970"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b04-qa-findings.md",
+          "sha256": "330a67d6421059bffc5662485d510c9081ad5af2a0998f47c78b8b0fa4972a02"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B04-01",
+          "title": "Client-side aggregation on page slice instead of whole queryset",
+          "component": "apps/web/src/app/routes/project-activity-log.tsx",
+          "severity": "high",
+          "description": "Page 1 shows 50 and Page 2 shows 1 when 51 records match. Totals change upon pagination navigation."
+        },
+        {
+          "id": "DEF-B04-02",
+          "title": "Missing whole-queryset totals/aggregates payload in ActivityLogView API",
+          "component": "apps/api/core/field_reports/report_views.py",
+          "severity": "high",
+          "description": "API response only returns standard pagination envelope without aggregated headcount or unit-grouped quantities across the full filtered queryset."
+        },
+        {
+          "id": "DEF-B04-03",
+          "title": "Missing discipline, block, and contractor filters on Daily Reports list",
+          "component": "apps/web/src/app/routes/daily-reports-list.tsx & apps/api/core/field_reports/daily_report_views.py",
+          "severity": "medium",
+          "description": "Daily reports list only supports date range and status filters, lacking standard FR016 project dimensions."
+        },
+        {
+          "id": "DEF-B04-04",
+          "title": "Collapsing unset/unmeasured quantities into numeric zero",
+          "component": "apps/web/src/app/routes/project-activity-log.tsx",
+          "severity": "medium",
+          "description": "Unset semantics conflated with 0 in UI reduction."
+        },
+        {
+          "id": "DEF-B04-05",
+          "title": "Misleading man-days labeling for raw headcount row sum",
+          "component": "apps/web/src/app/routes/project-activity-log.tsx",
+          "severity": "low",
+          "description": "Raw headcount sum labeled as 'مجموع نفرات (نفر-روز)' violating D07 decision."
+        }
+      ],
+      "reported_resolved_defects": []
+    },
+    {
+      "package": "B05",
+      "prompt_file": "05-b05-independent-reconciliation.md",
+      "reported_qa_status": "qa_failed",
+      "discovery_status": "qa_failed",
+      "acceptance": "Independent expected values, recalculation logs, mapping, checksums, screenshots, discrepancy decisions, and measured download time prove Excel/PDF parity.",
+      "specification_check": "Specify an independently computed expected dataset and reconcile cells, formulas and rendered output. Record before/after cached values and standalone recalculation results, page-by-page print comparisons, SHA-256 and unresolved discrepancies. Measure SC-002 on the target release with representative data and record whether download is under 3.0 seconds. The upstream blocker finding requires current evidence for B02–B04. B02/B03 have reported technical passes, and B04 remains failed.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b05-qa-findings.json",
+          "sha256": "30b26113fd5d880b7591c2d91c9fd8f1f715d198b50b8ae4284851fb7f78a4a1"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b05-qa-findings.md",
+          "sha256": "526267b95e0d29e1d7371cc40f5bdff419e50529a0de50322d07a9bd460223f7"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B05-01",
+          "title": "Missing cached values for formula cells in exported Excel and lack of standalone recalculation tests",
+          "type": "Defect / Excel Engine Gap",
+          "component": "apps/api/core/field_reports/shiraz_file4_excel.py",
+          "severity": "critical",
+          "evidence": "Inspecting generated-sample.xlsx with openpyxl(data_only=True) shows cached values at C47, D47, G47, G82, G83, C92 are all None. No automated headless recalculation logs exist in CI/QA pipeline.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-02",
+          "title": "Missing real-world download latency benchmark (<3.0s) for standard site daily reports (SC-002)",
+          "type": "Performance Defect / QA Benchmark Gap",
+          "component": "apps/api/core/field_reports/report_views.py & apps/web",
+          "severity": "major",
+          "evidence": "SC-002 mandates export and download of master daily report (FILE4) or PDF for 15-30 activities and 20 resource rows in <3.0 seconds. No automated end-user telemetry or benchmark test exists.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-03",
+          "title": "Expected test assertions generated from internal models/aggregators rather than independent calculation oracle (Q01)",
+          "type": "Verification Methodology Gap / Quality Gate Defect",
+          "component": "apps/api/core/field_reports/tests/",
+          "severity": "critical",
+          "evidence": "Existing test suites construct expected values by querying internal models using the same Python aggregation logic being tested, violating the requirement that golden expected data must originate from an independent oracle.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-04",
+          "title": "Lack of visual regression and page-by-page screenshot diff logs across PDF, Excel print layout, and employer reference form",
+          "type": "Compliance & Audit Defect",
+          "component": "output/a1-requirements-2026-11-18/evidence/",
+          "severity": "major",
+          "evidence": "Requirements E04 and E05 demand side-by-side visual comparison, page layout validation, and screenshots of long and standard daily report prints. No structured image diff or audit log is archived.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B05-05",
+          "title": "Unresolved blocking defects in upstream prerequisites B02, B03, and B04",
+          "type": "Process & Pre-condition Blocker",
+          "component": "Delivery Pipeline Stage 1",
+          "severity": "critical",
+          "evidence": "Mandatory delivery ordering B01 -> B02 -> B03 -> B04 -> B05 -> B06 requires prerequisites to be green. Upstream packages B02, B03, and B04 currently have unresolved defects blocking final reconciliation.",
+          "status": "open"
+        }
+      ],
+      "reported_resolved_defects": []
+    },
+    {
+      "package": "B06",
+      "prompt_file": "06-b06-delivery-acceptance.md",
+      "reported_qa_status": "qa_failed",
+      "discovery_status": "qa_failed",
+      "acceptance": "Fixed release/SHA, guide, inputs/expected values, checksums, role/device/language/cross-project tests, and explicit employer review are recorded.",
+      "specification_check": "Require a frozen release/SHA with inputs, expected values, outputs, checksums and role guide. Require authenticated desktop and 390×844 mobile evidence in Persian RTL and English LTR across all 18 sections, including scoped permission-denial checks on the candidate and verification against docs/decision-tree/. Require named employer disposition (accepted, rejected or conditional), date and feedback. Record technical QA separately. B01–B03 have reported technical passes, with same-release verification still due. B04/B05 remain failed. Require evidence before checking off A.1.01–A.1.04 at http://localhost:5173/delivery-plan. The Stage 1 live visit redirected to login, so authenticated status remains unverified.",
+      "source_files": [
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b06-qa-findings.json",
+          "sha256": "f936fe7e470960a97c23e5fffea346aba1a88698ba9416ac8e6d08dd2f48f666"
+        },
+        {
+          "path": "output/a1-requirements-2026-11-21-stage1-b06-qa-findings.md",
+          "sha256": "4725c59559d3153de9087a5217c5dbf600e017e8ff492d0edfdd2e0eff120423"
+        }
+      ],
+      "defects": [
+        {
+          "id": "DEF-B06-01",
+          "group": "Q05",
+          "type": "Process & Delivery Defect",
+          "severity": "critical",
+          "title": "Missing frozen Phase A.1 release package with commit SHA, independent inputs/expected fixtures, final sample exports, and verified SHA-256 checksums",
+          "evidence": "No frozen package exists under output/ or specs/ for Phase A.1 (last delivery archive is output/a7-delivery-2026-11-16/).",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-02",
+          "group": "Q05",
+          "type": "Dependency Blocker",
+          "severity": "critical",
+          "title": "Hard dependency block: upstream delivery packages B01 through B05 have open blocker defects",
+          "evidence": "B01 (data contract), B02 (version integrity), B03 (reference parity), B04 (filters/totals), and B05 (independent numeric reconciliation) have unresolved defects and qa_failed statuses.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-03",
+          "group": "Q05",
+          "type": "Governance & Compliance Defect",
+          "severity": "critical",
+          "title": "Missing explicit employer review and sign-off protocol",
+          "evidence": "Project instructions mandate that automated tests or agents cannot sign on behalf of the employer. No employer review minutes or sign-off decision is recorded.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-04",
+          "group": "E09",
+          "type": "Security & Multi-Tenancy Defect",
+          "severity": "major",
+          "title": "Unverified live cross-project isolation matrix and negative security tests for direct ID download endpoints",
+          "evidence": "Live execution evidence proving non-member or unauthorized direct-ID download denial across projects is not formally packaged.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-05",
+          "group": "Q03",
+          "type": "UI/UX & Localization Defect",
+          "severity": "major",
+          "title": "Incomplete mobile responsive and bilingual (FA/EN) verification evidence across all 18 daily report sections",
+          "evidence": "Full journey audit on mobile viewports (390x844) and English locale is not archived with the release.",
+          "status": "open"
+        },
+        {
+          "id": "DEF-B06-06",
+          "group": "Q04",
+          "type": "Documentation Defect",
+          "severity": "minor",
+          "title": "Decision tree in docs/decision-tree/ lacks final verification against deployed authorization gates and export routes",
+          "evidence": "Decision tree routes need live validation once release deployment is frozen.",
+          "status": "open"
+        }
+      ],
+      "reported_resolved_defects": []
+    }
+  ],
+  "delivery_plan_source_status": {
+    "A.1.01": "remaining",
+    "A.1.02": "remaining",
+    "A.1.03": "remaining",
+    "A.1.04": "remaining"
+  },
+  "contract_deliverables": [
+    {
+      "id": "DEL-01",
+      "name": "Representative Single-Day Report (Excel + PDF)",
+      "decision": "C05",
+      "in_phase_a1": true,
+      "primary_implementation_owner": "B03"
+    },
+    {
+      "id": "DEL-02",
+      "name": "Discipline-Specific Excel Exports",
+      "decision": "C05",
+      "in_phase_a1": true,
+      "primary_implementation_owner": "B03"
+    },
+    {
+      "id": "DEL-03",
+      "name": "Multi-Sheet Date-Range Excel Workbook",
+      "decision": "C05",
+      "in_phase_a1": true,
+      "primary_implementation_owner": "B03"
+    },
+    {
+      "id": "DEL-04",
+      "name": "Standalone Discipline Sub-Report PDFs",
+      "decision": "C07",
+      "in_phase_a1": true,
+      "primary_implementation_owner": "B03"
+    }
+  ],
+  "recommended_next_stage": "B05",
+  "evidence_conflicts": [
+    {
+      "id": "upstream-verdict",
+      "sources": [
+        "B01–B04 package QA, 2026-11-22",
+        "DEF-B06-02"
+      ],
+      "resolution": "B01–B04 retain reported technical passes for tested scopes. B05 remains failed. Require B01–B05 clearance bound to the frozen B06 candidate."
+    },
+    {
+      "id": "deliverable-aliases",
+      "sources": [
+        "B03 QA, 2026-11-22",
+        "apps/api/core/field_reports/contracts/daily_report_contract_v1.json"
+      ],
+      "resolution": "Use contract artifact IDs. Map QA evidence by physical output and check C04 profile against 34 indirect / 32 direct slots."
+    },
+    {
+      "id": "reused-defect-id",
+      "sources": [
+        "B05 QA, 2026-11-21",
+        "B05 QA, 2026-11-22"
+      ],
+      "resolution": "DEF-B05-05 is date-qualified. The November 22 finding refers to A.1.02/A.1.03 remaining; upstream candidate evidence is tracked separately."
     }
   ]
 }

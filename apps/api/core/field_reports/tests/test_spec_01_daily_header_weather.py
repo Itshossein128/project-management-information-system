@@ -1,10 +1,12 @@
 """Focused test suite for GAP-SPEC-01 / Spec 030 Daily Report Header and Weather Controls."""
 import pytest
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from rest_framework import status
 
 from field_reports.models import (
     DailyReport,
+    DailyReportWorkedShift,
     WeatherCondition,
     SiteStatus,
     InactivityReason,
@@ -16,6 +18,45 @@ from field_reports.tests.daily_report_summary_helpers import (
 )
 from field_reports.services.daily_report_aggregation import ensure_daily_report_summary, rebuild_daily_report_summary
 from sub_reports.models import Discipline, DisciplineSubReport, SubReportStatus
+
+
+@pytest.mark.django_db
+def test_b03_worked_shift_endpoints_preserve_overnight_and_unknown(auth_client, project, user):
+    report = DailyReport.objects.create(project=project, created_by=user, report_date=date(2026, 9, 15))
+    root = f'/api/v1/projects/{project.pk}/daily-reports/{report.pk}/'
+    shifts = [
+        {'shift_id': 1},
+        {'shift_id': 2, 'actual_duration_hours': '7.75'},
+        {'shift_id': 3, 'actual_start_at': '2026-09-15T22:00:00+03:30',
+         'actual_end_at': '2026-09-16T06:00:00+03:30', 'actual_duration_hours': '7.50'},
+    ]
+    assert auth_client.patch(root, {'worked_shifts': shifts}, format='json').status_code == 200
+    summary = auth_client.get(f'{root}contract-summary/').data
+    assert [item['shift_id'] for item in summary['worked_shifts']] == [1, 2, 3]
+    first, second, overnight = summary['worked_shifts']
+    assert first['actual_start_at'] is first['actual_end_at'] is first['actual_duration_hours'] is None
+    assert second['actual_start_at'] is second['actual_end_at'] is None
+    assert datetime.fromisoformat(overnight['actual_end_at']) == datetime(2026, 9, 16, 2, 30, tzinfo=timezone.utc)
+    assert overnight['actual_duration_hours'] == '7.50'
+    shifts[2]['actual_end_at'] = '2026-09-15T06:00:00+03:30'
+    assert auth_client.patch(root, {'worked_shifts': shifts}, format='json').status_code == 400
+    assert DailyReportWorkedShift.objects.get(report=report, shift_id=3).actual_duration_hours == Decimal('7.50')
+
+
+@pytest.mark.django_db
+def test_b03_approval_freezes_observed_weather_and_uses_unknown_forecast(auth_client, project, user):
+    from field_reports.services import approve_report
+
+    report = DailyReport.objects.create(project=project, created_by=user, report_date=date(2026, 9, 16))
+    log = WeatherLog.objects.create(
+        project=project, log_date=report.report_date, created_by=user, wind_speed=Decimal('2.5'),
+    )
+    approve_report(report, user)
+    WeatherLog.objects.filter(pk=log.pk).update(wind_speed=Decimal('8.5'))
+    url = f'/api/v1/projects/{project.pk}/daily-reports/{report.pk}/contract-summary/'
+    weather = auth_client.get(url).data['weather']
+    assert Decimal(weather['wind_speed']) == Decimal('2.5')
+    assert weather['forecast_status'] == 'unknown'
 
 
 @pytest.fixture

@@ -1,0 +1,10 @@
+{
+    "url": "http://localhost:5173/delivery-plan",
+    "stage": "A.1",
+    "b04": "implemented",
+    "counts": {
+        "implemented": 2,
+        "remaining": 4
+    },
+    "employer_acceptance": "pending"
+}

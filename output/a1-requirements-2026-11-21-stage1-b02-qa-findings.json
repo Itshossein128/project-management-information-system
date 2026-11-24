@@ -1,0 +1,41 @@
+{
+  "requirementId": "B02",
+  "title": "Version integrity, derived locks, and preservation",
+  "phase": "A.1",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-21T23:45:00+03:30",
+  "acceptanceCriteria": "Correction, cancellation, concurrency, unauthorized mutation, lineage, source preservation, and approved-current aggregation pass end-user scenarios.",
+  "qaStatus": "qa_passed",
+  "verdict": "passed",
+  "personasEvaluated": [
+    {
+      "persona": "Site Engineer / Preparer",
+      "summary": "Verified correction opening preserves is_auto_summary and B01 contract metadata, derived operational rows are locked against direct mutations across all API channels, and authorized rebuild refreshes derived rows cleanly while preserving management opinion."
+    },
+    {
+      "persona": "Project Approver / Consultant",
+      "summary": "Verified separation of duties (preparer cannot self-approve), approved versions lock and cannot be rebuilt, and cancellation of a correction restores original approved version."
+    },
+    {
+      "persona": "Project Auditor / Controller",
+      "summary": "Verified multi-source provenance (2 of 2 sources) is cloned and remapped losslessly to revision child row UUIDs, and activity master log counts only current approved version, preventing double-counting."
+    },
+    {
+      "persona": "Viewer / Unauthorized User",
+      "summary": "Verified read-only viewers can inspect reports by date without edit permissions, while anonymous and cross-project users are blocked with 401/403."
+    }
+  ],
+  "defects": [],
+  "resolvedDefects": [
+    "DEF-B02-01",
+    "DEF-B02-02",
+    "DEF-B02-03",
+    "DEF-B02-04",
+    "DEF-B02-05",
+    "DEF-B02-06"
+  ],
+  "deliverablesVerified": [
+    "A.1.03 (Daily report revision integrity and derived locks)"
+  ],
+  "verificationSummary": "Requirement B02 meets all acceptance criteria. All 6 historical QA defects (DEF-B02-01..06) are completely resolved in the active codebase. Derived operational rows are immutable, provenance is preserved across revisions, official activity logs strictly filter by is_current=True, and rebuild correctly validates target eligibility with localized FA/EN error messages. Frontend typecheck passes with 0 errors."
+}

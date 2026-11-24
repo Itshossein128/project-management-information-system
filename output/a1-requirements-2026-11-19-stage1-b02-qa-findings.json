@@ -1,0 +1,57 @@
+{
+  "requirementId": "B02",
+  "title": "یکپارچگی نسخه و قفل مشتقات",
+  "acceptanceCriteria": "اصلاحیه همه منابع و هویت نسخه مقصد را حفظ کند؛ ردیفهای مشتق از تمام APIها قفل باشند و خلاصه فقط نسخه approved جاری را جمع کند.",
+  "qaStatus": "qa_failed",
+  "defects": [
+    {
+      "id": "DEF-B02-01",
+      "title": "افتادن پرچم is_auto_summary در ایجاد نسخه اصلاحی",
+      "severity": "CRITICAL",
+      "location": "apps/api/core/field_reports/services/correction_service.py:138",
+      "description": "هنگام فراخوانی open_correction، مقدار is_auto_summary به گزارش مقصد منتقل نمی‌شود (پیش‌فرض False می‌ماند) و هویت تجمیعی خودکار از دست می‌رود."
+    },
+    {
+      "id": "DEF-B02-02",
+      "title": "امکان جهش و ویرایش مستقیم ردیف‌های مشتق در نسخه اصلاحی (Bypass قفل مشتقات)",
+      "severity": "CRITICAL",
+      "location": "apps/api/core/field_reports/daily_report_views.py:618",
+      "description": "به دلیل رخ دادن DEF-B02-01 و False شدن is_auto_summary در نسخه اصلاحی، تابع _assert_editable متوقف نشده و امکان PATCH/PUT/DELETE مستقیم روی ردیف‌های مشتق از طریق child APIها فراهم می‌شود."
+    },
+    {
+      "id": "DEF-B02-03",
+      "title": "عدم کلون و بازنگاشت رکوردهای DailyReportDerivedSource به نسخه اصلاحی",
+      "severity": "HIGH",
+      "location": "apps/api/core/field_reports/services/correction_service.py:90-110",
+      "description": "در تابع _clone_children تنها سطر‌های فرزند کپی می‌شوند اما رکوردهای منشأ مشتقات (DailyReportDerivedSource) به نسخه مقصد بازنگاشت نمی‌شوند و شمارش provenance به صفر سقوط می‌کند."
+    },
+    {
+      "id": "DEF-B02-04",
+      "title": "حذف و پاک‌شدن نظر مدیریت و پرچم weather_override در گزارش اصلاحی",
+      "severity": "HIGH",
+      "location": "apps/api/core/field_reports/services/correction_service.py:138",
+      "description": "فیلدهای management_opinion و weather_override از گزارش مبدا به شیء DailyReport در گزارش اصلاحی جدید منتقل نمی‌شوند و پس از اصلاحیه خالی می‌گردند."
+    },
+    {
+      "id": "DEF-B02-05",
+      "title": "دوباره‌شماری تاریخی در دفتر رسمی فعالیت‌ها با عدم فیلتر is_current",
+      "severity": "CRITICAL",
+      "location": "apps/api/core/field_reports/services/activity_log.py:15-18",
+      "description": "سرویس activity_log_queryset فقط شرط report__status=APPROVED را بررسی می‌کند و فیلتر report__is_current=True را اعمال نمی‌کند؛ در نتیجه با ثبت اصلاحیه مصوب، حجم کار و نفرات دو برابر محاسبه می‌شوند."
+    }
+  ],
+  "verificationDetails": {
+    "probesExecuted": [
+      "correction-probe.json: source_is_auto_summary=true -> result_is_auto_summary=false; provenance_count drops 2 -> 0; management_opinion wiped; weather_override reset",
+      "correction-write-probe.json: direct child PATCH returned status 200 with persisted mutation",
+      "historical-version-probe.json: activity_log counted both superseded and current approved versions (actual_rows=2 vs expected=1, quantity=10 vs expected=5)"
+    ],
+    "testedModules": [
+      "apps/api/core/field_reports/services/correction_service.py",
+      "apps/api/core/field_reports/services/activity_log.py",
+      "apps/api/core/field_reports/daily_report_views.py",
+      "apps/api/core/field_reports/models.py"
+    ]
+  },
+  "summary": "Requirement B02 failed QA verification. Auditing and empirical probe tests confirm that creating a correction drops the auto-summary identity, resets provenance and management opinions, permits illegal direct mutations on derived rows via child APIs, and double-counts superseded approved versions in the master activity log."
+}

@@ -64,11 +64,15 @@ class UnitReportNotFound(NotFound):
 
 
 def _record_event(report, event_type, actor, from_status='', to_status=None, reason=''):
+    from workflow.services.attribution import actor_position_at_action
+
     return UnitReportStatusEvent.objects.create(
         report_version=report,
         from_status=from_status,
         to_status=to_status if to_status is not None else report.status,
         actor=actor,
+        actor_name=actor.get_full_name() if actor else None,
+        actor_position=actor_position_at_action(report.project_id, actor),
         occurred_at=timezone.now(),
         reason=reason or '',
         event_type=event_type,
@@ -135,11 +139,12 @@ def open_unit_report(*, project, unit: str, report_date: date, user, sub_discipl
         raise
 
 
-def get_scoped_report(*, project_id, unit: str, report_id):
+def get_scoped_report(*, project_id, unit: str, report_id, include_deleted=True):
     """Resolve a report version scoped to the URL project/unit (non-disclosing)."""
+    reports = DisciplineSubReport.all_objects if include_deleted else DisciplineSubReport.objects
     try:
         return (
-            DisciplineSubReport.all_objects
+            reports
             .filter(project_id=project_id, unit=unit, id=report_id)
             .select_related('project')
             .get()
