@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import type {
+  DailyReportContractHeader,
   DailyReportDetail,
   DerivedSourceItem,
   MaterialReconciliationStatus,
@@ -81,8 +82,11 @@ function ProvenanceCell({
               const dept = findDepartmentBySlug(src.unit);
               const deptLabel = dept ? t(dept.labelI18nKey, src.unit) : src.unit;
               const targetUrl =
-                src.can_view_source && projectId && reportDate
-                  ? `${PATHS.BUSINESS}/${projectId}/${src.unit}?date=${reportDate}`
+                src.can_view_source && dept && projectId && reportDate && src.report_id
+                  ? `/${PATHS.BUSINESS}/${projectId}/${src.unit}?${new URLSearchParams({
+                      date: reportDate,
+                      reportVersion: src.report_id,
+                    })}`
                   : null;
 
               return (
@@ -130,12 +134,14 @@ function ProvenanceCell({
 function SimpleTable({
   headers,
   rows,
+  emptyLabel = "—",
 }: {
   headers: string[];
   rows: React.ReactNode[][];
+  emptyLabel?: string;
 }) {
   if (rows.length === 0) {
-    return <p className='text-sm text-muted-foreground'>—</p>;
+    return <p className='text-sm text-muted-foreground'>{emptyLabel}</p>;
   }
   return (
     <div className='overflow-x-auto'>
@@ -167,12 +173,14 @@ function SimpleTable({
 
 export function DailyReportSummaryView({
   report,
+  workedShifts = [],
   projectId,
   projectName,
   contractNumber,
   employer,
 }: {
   report: DailyReportDetail;
+  workedShifts?: DailyReportContractHeader["worked_shifts"];
   projectId?: string;
   projectName?: string;
   contractNumber?: string;
@@ -185,6 +193,24 @@ export function DailyReportSummaryView({
 
   const indirect = report.labor.filter((r) => r.labor_category === "indirect");
   const direct = report.labor.filter((r) => r.labor_category === "direct");
+  const recordedShifts = workedShifts.flatMap(({ shift_id, actual_duration_hours }) =>
+    actual_duration_hours === null ? [] : [{
+      shiftId: shift_id,
+      duration: Number(actual_duration_hours),
+    }],
+  );
+  const hasCompleteHours = workedShifts.length > 0 && workedShifts.length === recordedShifts.length;
+  const actualHoursLabel = t("dailyReports.summary.actualPersonHours");
+  const personHoursForShift = (
+    rows: DailyReportDetail["labor"],
+    { shiftId, duration }: (typeof recordedShifts)[number],
+  ) => duration * rows.reduce((count, row) => count + row[`shift_${shiftId}_count`], 0);
+  const formatActualHours = (rows: DailyReportDetail["labor"]) => hasCompleteHours
+    ? recordedShifts.reduce(
+        (hours, shift) => hours + personHoursForShift(rows, shift),
+        0,
+      ).toFixed(2)
+    : t("dailyReports.referenceHeader.unknown");
   const machineryRows = report.machinery?.rows ?? report.machinery_rows ?? [];
   const mainMaterials =
     report.materials_summary?.main_table ??
@@ -366,7 +392,7 @@ export function DailyReportSummaryView({
             t("dailyReports.summary.colPresent", "حاضر"),
             t("dailyReports.summary.colLeave", "مرخصی"),
             t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
-            t("dailyReports.summary.colManHours", "نفر-ساعت"),
+            actualHoursLabel,
             t("dailyReports.summary.colDiscipline", "رشته"),
             t("dailyReports.summary.colSources", "منابع"),
           ]}
@@ -376,7 +402,7 @@ export function DailyReportSummaryView({
             r.present_count ?? r.shift_1_count,
             r.leave_count ?? r.absence_count ?? 0,
             r.overtime_hours ?? 0,
-            r.man_hours ?? r.work_hours ?? "—",
+            formatActualHours([r]),
             r.has_multiple_sources
               ? t("dailyReports.summary.multiUnit", "چند واحدی ({{count}})", {
                   count: r.source_count ?? r.provenance?.length ?? 2,
@@ -414,9 +440,9 @@ export function DailyReportSummaryView({
               </strong>
             </span>
             <span>
-              {t("dailyReports.summary.colManHours", "نفر-ساعت")}:{" "}
+              {actualHoursLabel}:{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.indirect?.man_hours ?? "0.00"}
+                {formatActualHours(indirect)}
               </strong>
             </span>
           </div>
@@ -434,7 +460,7 @@ export function DailyReportSummaryView({
             t("dailyReports.summary.colPresent", "حاضر"),
             t("dailyReports.summary.colLeave", "مرخصی"),
             t("dailyReports.summary.colOvertime", "اضافه‌کاری (ساعت)"),
-            t("dailyReports.summary.colManHours", "نفر-ساعت"),
+            actualHoursLabel,
             t("dailyReports.summary.colDiscipline", "رشته"),
             t("dailyReports.summary.colSources", "منابع"),
           ]}
@@ -444,7 +470,7 @@ export function DailyReportSummaryView({
             r.present_count ?? r.shift_1_count,
             r.leave_count ?? r.absence_count ?? 0,
             r.overtime_hours ?? 0,
-            r.man_hours ?? r.work_hours ?? "—",
+            formatActualHours([r]),
             r.has_multiple_sources
               ? t("dailyReports.summary.multiUnit", "چند واحدی ({{count}})", {
                   count: r.source_count ?? r.provenance?.length ?? 2,
@@ -475,9 +501,9 @@ export function DailyReportSummaryView({
               <strong className='font-mono text-foreground'>
                 {report.labor_summary.totals.direct?.leave_count ?? 0}
               </strong>{" "}
-              · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
+              · {actualHoursLabel}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.direct?.man_hours ?? "0.00"}
+                {formatActualHours(direct)}
               </strong>
             </div>
             <div>
@@ -492,11 +518,19 @@ export function DailyReportSummaryView({
               <strong className='font-mono text-foreground'>
                 {report.labor_summary.totals.overall?.leave_count ?? 0}
               </strong>{" "}
-              · {t("dailyReports.summary.colManHours", "نفر-ساعت")}{" "}
+              · {actualHoursLabel}{" "}
               <strong className='font-mono text-foreground'>
-                {report.labor_summary.totals.overall?.man_hours ?? "0.00"}
+                {formatActualHours(report.labor)}
               </strong>
             </div>
+            {!hasCompleteHours && recordedShifts.map((shift) => (
+              <span key={shift.shiftId}>
+                {t("dailyReports.summary.knownShiftPersonHours", {
+                  shift: new Intl.NumberFormat(i18n.resolvedLanguage).format(shift.shiftId),
+                  hours: personHoursForShift(report.labor, shift).toFixed(2),
+                })}
+              </span>
+            ))}
           </div>
         ) : null}
       </Section>
@@ -674,6 +708,7 @@ export function DailyReportSummaryView({
             t("dailyReports.summary.concreteQc", "کنترل کیفیت"),
             t("dailyReports.summary.colSources", "منابع"),
           ]}
+          emptyLabel={t("dailyReports.summary.noConcreteQcRecords", "رکوردی برای بتن و کنترل کیفیت ثبت نشده است.")}
           rows={report.concrete_logs.map((r) => [
             r.concrete_description,
             r.volume_m3,
@@ -817,10 +852,10 @@ export function DailyReportSummaryView({
         />
       </Section>
 
-      {(report.attachment_counts ?? []).length > 0 ? (
-        <Section title={t("dailyReports.summary.attachments", "تصاویر فعالیت‌ها")} testId='summary-section-attachments'>
+      <Section title={t("dailyReports.summary.attachments", "تصاویر فعالیت‌ها")} testId='summary-section-attachments'>
+        {report.attachment_counts?.length ? (
           <div className='space-y-2'>
-            {(report.attachment_counts ?? []).map((entry) => (
+            {report.attachment_counts.map((entry) => (
               <AttachmentCountLink
                 key={entry.section}
                 count={entry.count}
@@ -829,8 +864,12 @@ export function DailyReportSummaryView({
               />
             ))}
           </div>
-        </Section>
-      ) : null}
+        ) : (
+          <p className='text-sm text-muted-foreground'>
+            {t("dailyReports.summary.noActivityPhotos", "تصویری برای فعالیت‌ها ثبت نشده است.")}
+          </p>
+        )}
+      </Section>
 
       <Section title={t("dailyReports.summary.managementOpinion", "نظر مدیریت")}>
         <pre className='whitespace-pre-wrap text-sm'>

@@ -1,0 +1,82 @@
+{
+  "requirementId": "A.1.04",
+  "phase": "A.1",
+  "title": "ارائه نمونه نهایی و تأیید اولیه گزارش",
+  "acceptanceCriteria": "یک روز کامل با ارقام کنترلشده، خروجی بازحسابشده Excel و PDF خوانا، شواهد نقش/زبان/دستگاه/مرز پروژه، checksum و نسخه/SHA ثابت ارائه و sign-off اولیه کارفرما ثبت شود.",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-24T07:42:00+03:30",
+  "commitSha": "5ab279a2542bdb357b172949ebd94f40f02cbf35",
+  "qaStatus": "qa_failed",
+  "verdict": "failed",
+  "liveEnvironment": {
+    "frontendUrl": "http://localhost:5173",
+    "backendApiUrl": "http://localhost:8000/api/",
+    "deliveryPlanRoute": "http://localhost:5173/delivery-plan",
+    "deliveryPlanTaskStatus": "remaining",
+    "authenticatedAdmin": "+10000000001",
+    "testedVisitor": "+10000000003",
+    "referenceProjectId": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+    "referenceReportId": "fb9bcd42-a786-4b19-ba7b-1548c9526393"
+  },
+  "acceptanceVerification": {
+    "fullControlledDayAvailable": true,
+    "excelExportWorking": true,
+    "pdfExportWorking": true,
+    "excelSha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+    "pdfSha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+    "roleEnforcementVerified": true,
+    "crossProjectIsolationVerified": true,
+    "frozenDeliveryPackageArchived": false,
+    "upstreamDependenciesClear": false,
+    "employerSignOffRecorded": false
+  },
+  "personasEvaluated": [
+    {
+      "persona": "نماینده عالی کارفرما و دستگاه نظارت (Employer / Client Representative)",
+      "finding": "هیچ بسته تحویل منجمدی برای فاز A.1 شامل صورت‌جلسه بازبینی، گواهی walkthrough و امضای رسمی کارفرما وجود ندارد. در برنامه تحویل زنده (/delivery-plan) وضعیت این وظیفه همچنان 'remaining' ثبت شده است. طبق خط‌مشی حاکمیت پروژه، ایجنت یا تست خودکار مجاز به ثبت تأییدیه کارفرما نیست و وضعیت تأیید اولیه در حالت pending باقی مانده است."
+    },
+    {
+      "persona": "بازرس مستقل کیفیت و داده (Independent Auditor / QA Engineer)",
+      "finding": "اگرچه خروجی‌های PDF و اکسل نمونه روز مرجع تولید شده و چک‌سام‌های SHA-256 و ایزولاسیون چندمستأجری (کد 404 برای پروژه نامربوط و کد 403 برای ویزیتور) تأیید شد، اما به دلیل باز بودن نقص‌های پیش‌نیاز A.1.02 و A.1.03 (عدم بازحساب مستقل فرمول‌های اکسل و نیازمندی به parity کامل ارقام)، زنجیره پذیرش نهایی مسدود است."
+    },
+    {
+      "persona": "سرپرست کارگاه و مسئول تهیه گزارش (Field Engineer / Report Preparer)",
+      "finding": "فرایند ثبت و مشاهده نمونه نهایی در محیط‌های موبایل و شواهد جامع دوزبانه (FA RTL و EN LTR) به صورت بسته‌بندی رسمی در مدارک خروجی ثبت نگردیده است."
+    }
+  ],
+  "defects": [
+    {
+      "id": "DEF-A104-01",
+      "severity": "critical",
+      "type": "Process & Delivery Defect",
+      "title": "فقدان بسته منجمد تحویل فاز A.1 و آرشیو نمونه‌های نهایی با متادیتا و SHA ثابت",
+      "description": "بسته تحویل منجمد رسمی شامل Commit SHA ثابت، فایل‌های نمونه نهایی اکسل/PDF با چک‌سام‌های SHA-256 و مانیفست تحویل در دایرکتوری خروجی آرشیو نشده است.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-A104-02",
+      "severity": "critical",
+      "type": "Dependency Blocker",
+      "title": "مسدود بودن زنجیره تأیید به دلیل باز بودن نیازمندی‌های پیش‌نیاز A.1.02 و A.1.03",
+      "description": "نیازمندی‌های A.1.02 و A.1.03 به دلیل نقص‌های تطبیق روز مرجع، بازحساب مقادیر و رفع مغایرت‌های محاسباتی اکسل در وضعیت remaining / qa_failed بوده و مانع تصویب نهایی نمونه A.1.04 می‌باشند.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-A104-03",
+      "severity": "critical",
+      "type": "Governance & Compliance Defect",
+      "title": "عدم وجود صورت‌جلسه یا رأی صریح sign-off اولیه کارفرما",
+      "description": "هیچ تأییدیه یا صورت‌جلسه امضا شده رسمی از کارفرما در مخزن ثبت نشده است. این نیازمندی مستلزم تصمیم صریح کارفرما بوده و نمی‌تواند به صورت خودکار پاس شود.",
+      "status": "open"
+    },
+    {
+      "id": "DEF-A104-04",
+      "severity": "major",
+      "type": "UI/UX & Localization Defect",
+      "title": "نقص شواهد مکتوب سازگاری در تمامی نماهای موبایل و سناریوهای دوزبانه FA/EN",
+      "description": "پکیج تست‌های رگرسیون تصویری و شواهد کامل نماهای موبایل (390x844) در سناریوی نهایی خروجی‌های روزانه همراه با بسته نمونه تحویل ضمیمه نشده است.",
+      "status": "open"
+    }
+  ],
+  "summary": "ارزیابی زنده اندپوینت‌های صادرات PDF و Excel برای روز مرجع کنترل‌شده شیراز با موفقیت انجام شد (PDF SHA-256: 7a884a1e..., Excel SHA-256: a0b7bd2f...) و کنترل‌های RBAC (رد ویزیتور 403) و ایزولاسیون پروژه‌ها (404) تأیید گردید. با این حال، به دلیل فقدان بسته منجمد تحویل فاز A.1، مسدود بودن وابستگی‌های بالادستی A.1.02 و A.1.03، و عدم ثبت صورت‌جلسه و sign-off رسمی کارفرما، وضعیت نیازمندی A.1.04 همچنان qa_failed باقی می‌ماند."
+}

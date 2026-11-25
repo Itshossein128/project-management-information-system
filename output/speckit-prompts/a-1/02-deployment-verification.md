@@ -1,11 +1,15 @@
 /speckit-specify
 
-Specify the deployment verification for A.1.04 (B06) on the exact candidate and reference version identified in 01-candidate-evidence.md. Source: ../../phase-a1/a1-04-qa-findings.json.
+# شواهد نقش، زبان، دستگاه و مرز پروژه برای نمونه نهایی گزارش روزانه Velora
 
-DEF-A104-04 (E09) — Require a recorded download authorization matrix on the candidate, using controlled accounts and reference projects. Cover authorized downloads and denial for signed-out users, users lacking the required role, and users outside the report's project. Include direct report/version download access for Excel and PDF. Record expected and actual authorization outcomes, candidate identity and evidence references. For allowed downloads, record file identity against the frozen manifest. Denials must withhold the report and its artifacts.
+برای A.1.04 و DEF-A104-04 گزارش QA جاری، داستان کاربر، الزامات، سناریوهای Given/When/Then و معیار پذیرش بنویس. خروجی این گام spec و چک‌لیست کیفیت مشخصات است. ورودی پذیرش، بسته نسخه‌دار و شواهد تطبیق گام ۱ است.
 
-DEF-A104-05 (Q03) — Require evidence for all 18 daily report sections in Persian RTL and English LTR, on desktop and a 390×844 mobile viewport. Record the report journey, readability and layout, correct version selection and same-version Excel/PDF download. Record locale, viewport, observed results and evidence for each combination.
+- شواهد مکتوب مرور گزارش کامل و دسترسی به نمونه‌های Excel و PDF را برای FA و EN در دسکتاپ و موبایل، شامل اندازه 390×844، با نتیجه مورد انتظار، نتیجه مشاهده‌شده، نسخه و اثر قابل بازبینی تعریف کن. خوانایی، جهت متن و دسترسی به بخش‌ها و اقدامات ضروری در هر ترکیب بررسی شود. هر مورد ناقص یا ناموفق در ماتریس پذیرش ثبت شود.
+- شواهد نقش مجاز، رد Visitor و رد دسترسی مستقیم به نمونه پروژه دیگر را به همان نامزد تحویل متصل کن. از شواهد 403 و 404 گزارش QA جاری در مواردی استفاده کن که تعلق آن‌ها به نامزد ثابت قابل ردیابی باشد. موارد فاقد شاهد مرتبط در ماتریس مشخص شوند.
+- کامل بودن ماتریس و تطابق نسخه و checksum فایل‌ها با مانیفست گام ۱ شرط تحویل بسته برای مرور کارفرما در گام ۳ باشد.
 
-DEF-A104-06 (Q04) — Require the decision tree under docs/decision-tree/ to be verified against the candidate's deployed export routes and authorization decisions. Record each reviewed route and outcome and reconcile any discrepancies with the intended access rules.
+مراجع از ریشه مخزن
 
-Write observable acceptance scenarios for the roles and environments above. Hand off the candidate-linked verification matrix, decision-tree references and unresolved findings to 03. Give a clear disposition where evidence is missing or the deployment differs from the frozen candidate.
+- `output/speckit-prompts/a-1/01-candidate-evidence.md`
+- `output/phase-a1-discovery/stage1-discovery.json`
+- `output/phase-a1-qa/A.1.04-verification.json`

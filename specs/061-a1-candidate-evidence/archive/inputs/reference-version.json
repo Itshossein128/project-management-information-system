@@ -1,5 +1,5 @@
 {
-  "status": "unverified",
+  "status": "verified_starting_draft",
   "referenceFixture": "SIM-A1-001-12-1406-03-01",
   "fixtureLocalDate": "1406-03-01",
   "fixtureProjectDay": 12,
@@ -13,11 +13,16 @@
       "sha256": "7adcba62fded39d615c78e992d7083aab6af73fd2b456646ded9eb94f703a707"
     }
   ],
-  "deploymentCandidateId": null,
-  "projectUuid": null,
-  "reportVersionUuid": null,
-  "reportLineageId": null,
-  "versionNumber": null,
-  "deployedInputSnapshot": null,
-  "blockedBy": "T003 release provenance and a verifier session on the confirmed target."
+  "deploymentCandidateId": "a104-isolated-433dc98",
+  "projectUuid": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+  "reportVersionUuid": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+  "reportLineageId": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+  "versionNumber": 1,
+  "deployedInputSnapshot": {
+    "location": "/home/hossein/.local/state/velora/a104-isolated-433dc98/inputs/reference-version-1-api.json",
+    "sha256": "efe90535e957f35f36857937e64a9a4d5babb6e5b9899eb4686ad411ad199f59",
+    "contractSummaryLocation": "/home/hossein/.local/state/velora/a104-isolated-433dc98/inputs/reference-contract-summary.json"
+  },
+  "blockedBy": null,
+  "reportNumber": "SIM-A1-001-12-1406-03-01"
 }

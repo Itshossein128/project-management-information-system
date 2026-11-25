@@ -32,5 +32,6 @@ This checklist records specification quality for Supervisor review.
 
 ## Notes
 
-- FR-001–FR-004 cover DEF-A104-03, including the same-version walkthrough, review minute and employer decision.
-- Specification quality checks passed 16 of 16. Candidate, deployment and employer evidence remain delivery requirements.
+- FR-001–FR-004 cover current DEF-A104-03, including the same-digest walkthrough and delivery agent disposition.
+- The 2026-11-24 owner decision supersedes the earlier employer sign-off cases. Verify the agent disposition and record optional employer feedback separately.
+- Specification quality checks passed 16 of 16 on 2026-11-24. Supervisor review is pending. The employer reviews verified items after deployment.

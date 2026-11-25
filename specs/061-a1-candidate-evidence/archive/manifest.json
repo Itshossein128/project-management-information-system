@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-11-24T18:05:00.000000Z",
+  "candidateId": "a104-isolated-433dc98",
+  "sourceSha": "433dc98dd169f5e60eeb76aee32c1fbe4a20bd65",
+  "projectUuid": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+  "selectedApprovedDeliveryVersion": "90b08762-a114-4b05-8718-c5d0eff703fb",
+  "fixture": {
+    "identifier": "SIM-A1-001-12-1406-03-01",
+    "sha256": "93ce2f057739626e68b520dc0b57d68667b605ce368c256ad43c29583c6bc2c0"
+  },
+  "contract": {
+    "version": "1.0.0",
+    "sha256": "7adcba62fded39d615c78e992d7083aab6af73fd2b456646ded9eb94f703a707"
+  },
+  "reconciliation": {
+    "path": "reconciliation/sections.json",
+    "sha256": "ed8a8aa50eb33dec37350c834d5b3db701829ec41af02c92318f0b4069718810"
+  },
+  "expectations": {
+    "path": "expectations/expected-values-r2.json",
+    "sha256": "aef5d6efed8b2ca56aaa9e77b17b8282c3207748b3a9d70a301245428632064d"
+  },
+  "walkthroughGuide": {
+    "path": "walkthrough/guide.md"
+  },
+  "downloads": [
+    {
+      "format": "excel",
+      "effectiveLocale": "fa",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-fa.xlsx",
+      "byteCount": 17456,
+      "sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+      "repeatability": {
+        "run1Sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+        "run2Sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "excel",
+      "effectiveLocale": "en",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-en.xlsx",
+      "byteCount": 17312,
+      "sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+      "repeatability": {
+        "run1Sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+        "run2Sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "pdf",
+      "effectiveLocale": "fa",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-fa.pdf",
+      "byteCount": 42890,
+      "sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+      "repeatability": {
+        "run1Sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+        "run2Sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "pdf",
+      "effectiveLocale": "en",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-en.pdf",
+      "byteCount": 41952,
+      "sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+      "repeatability": {
+        "run1Sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+        "run2Sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+        "repeatable": true
+      }
+    }
+  ],
+  "prerequisites": {
+    "a103Verification": "output/phase-a1-qa/A.1.03-verification.json"
+  }
+}

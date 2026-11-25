@@ -36,7 +36,7 @@ export default function DeliveryPlanPage() {
           <span className="rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">سناریوی کمینه</span>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">برنامه تحویل ولورا</h1>
-        <p className="max-w-3xl text-sm leading-7 text-muted-foreground">مراحل تحویل، قابلیت‌های پیاده‌سازی‌شده و کارهای باقی‌مانده تا تحویل نهایی سامانه.</p>
+        <p className="max-w-3xl text-sm leading-7 text-muted-foreground">موارد تکمیل‌شده برای بررسی آماده‌اند. اگر در موردی که تکمیل شده مشکلی دیدید، به مسئول پروژه اطلاع دهید. موارد باقی‌مانده هنوز در دست اجرا هستند.</p>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <span>شروع برنامه مبنا: <time dateTime={deliveryPlan.baselineStart}>{formatDate(deliveryPlan.baselineStart)}</time></span>
           <span className="font-medium">تحویل نهایی در سناریوی کمینه: <time dateTime={deliveryPlan.finish}>{formatDate(deliveryPlan.finish)}</time></span>

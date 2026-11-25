@@ -1,9 +1,11 @@
 # Feature Specification for A.1.04 — Deployment Verification
 
 **Created** 2026-11-22  
+**Updated** 2026-11-24
+
 **Status** Draft for Supervisor review  
 **Input** [Stage 2 prompt 02](../../output/speckit-prompts/a-1/02-deployment-verification.md)  
-**Sequence** 2 of 3. Uses [Candidate Evidence](../061-a1-candidate-evidence/spec.md) and hands off to [Employer Acceptance](../063-a1-employer-acceptance/spec.md).
+**Sequence** 2 of 3. Uses [Candidate Evidence](../061-a1-candidate-evidence/spec.md) and hands off to [Delivery Status and Employer Review](../063-a1-employer-acceptance/spec.md).
 
 ## User Scenarios & Testing
 
@@ -14,7 +16,7 @@ A QA verifier confirms that the intended project user can download the selected 
 **Independent test** — Use controlled accounts and projects against the frozen candidate and record expected and actual outcomes for both formats.
 
 1. **Given** an active member authorized to view and export the reference report, **when** the user downloads its Excel and PDF through the report screen and by its direct version-specific download routes, **then** the files match the frozen report version and manifest checksums.
-2. **Given** a signed-out visitor, an active project member without required export permission, or a user authorized for a different project without access to the reference project, **when** each attempts access to either format through the report journey or a direct report/version download route, **then** access is denied and the report and its artifacts are withheld.
+2. **Given** a signed-out user, an authenticated Visitor, a project member lacking the required export permission, and a user authorized for a different project without access to the reference project, **when** each attempts access to either format through the report journey or a direct report/version download route, **then** access is denied and the protected report and files are withheld.
 
 ### User Story 2 — Verify both languages on desktop and mobile (P1)
 
@@ -43,11 +45,11 @@ A decision-tree maintainer can trace each relevant documented export route and d
 
 ### Functional Requirements
 
-- **FR-001** — QA MUST verify the deployed candidate ID and exact source SHA against the frozen manifest and bind each result to the reference report ID and version. Missing identity or a mismatch MUST be marked unverified and carried into handoff.
-- **FR-002** — QA MUST record an authorization matrix covering an authorized project member, a signed-out visitor, a project member lacking the required role or export permission, and an otherwise authorized user from another project without access to the reference project. Check both Excel and PDF, including direct report/version downloads. Each row MUST capture the candidate, role and project context, route or action, expected and actual result, and evidence reference. For allowed downloads, record file identity against the frozen manifest. Denials MUST withhold the report and its artifacts.
-- **FR-003** — QA MUST record all 18 sections in Persian RTL and English LTR, each on desktop and on mobile at 390 × 844. Record interface language, actual viewport, report journey, section readability and layout, correct version selection, both downloads and their version and file identity, observed outcomes and evidence references for every combination. Match each download to the manifest entry for its format and effective export language.
-- **FR-004** — The decision-tree maintainer MUST verify the relevant deployed export routes and authorization decisions against the intended access rules and project decision tree. Record each reviewed route, documentation reference, intended result, observed result and discrepancy disposition.
-- **FR-005** — QA MUST hand off the candidate-linked authorization and browser matrices, decision-tree references, and all unresolved findings. Required evidence gaps, candidate drift, access mismatches or incomplete verification MUST remain visible in the handoff and block employer acceptance readiness.
+- **FR-001** — QA MUST verify the candidate ID and full deployed source SHA against the frozen 061 manifest and bind each result to its digest and reference report ID and version. Missing identity or a mismatch MUST be marked unverified and carried into handoff.
+- **FR-002** — QA MUST record an authorization matrix covering the allowed and denied contexts in User Story 1 for both Excel and PDF, including direct report/version downloads. The controlled Visitor account may also cover the case of a project member lacking the required export permission if the record establishes its membership and effective permissions. Each row MUST capture role and project context, route or action, expected and observed outcome, and evidence reference. Denials MUST withhold protected content. The observed Visitor PDF 403 and wrong-project 404 can be reused only for the matching candidate, access context, route and format.
+- **FR-003** — QA MUST record all 18 sections in Persian RTL and English LTR, each on desktop and on mobile at 390 × 844. Record expected and observed outcomes, actual viewport, text direction, report journey, section readability, access to required actions, selected version, both downloads, and reviewable evidence for each combination. All allowed downloads, including the direct checks in FR-002, MUST match the original download entry in the manifest for their format and effective export language. QA MUST also verify the archived recalculated Excel checksum and its linkage to the original download.
+- **FR-004** — The decision-tree maintainer MUST verify the relevant deployed export routes and authorization decisions against the intended access rules and project decision tree, including the applicable owning-unit observation rule. Record each reviewed route, documentation reference, intended result, observed result and discrepancy disposition.
+- **FR-005** — QA MUST hand off the authorization and browser matrices, decision-tree references and unresolved findings with the verified 061 reconciliation evidence and the same manifest digest. Required evidence gaps, candidate drift, access mismatches or incomplete verification block the agent’s completion decision.
 
 ### Key Entities
 
@@ -59,11 +61,11 @@ A decision-tree maintainer can trace each relevant documented export route and d
 
 ### Measurable Outcomes
 
-- **SC-001** — The candidate evidence covers four access contexts for both formats and the direct version-specific routes. Every passing authorized download matches the manifest and every passing denial withholds protected content.
+- **SC-001** — The candidate evidence covers every access context in FR-002 for both formats and direct version-specific routes. Every passing authorized download matches its manifest checksum and every passing denial withholds protected content.
 - **SC-002** — All 72 section observations across the four language and viewport combinations have recorded outcomes. Each passing combination includes two matching downloads and the correct selected version.
 - **SC-003** — Every reviewed export route has a decision-tree reference and an observed authorization result. Every discrepancy has an explicit disposition.
 
 ## Assumptions and Sources
 
 - The candidate manifest and B05 disposition are upstream inputs. The application’s existing project permission rules govern access. Use the actual measured desktop viewport in the QA record. [Constitution, Principle I](../../.specify/memory/constitution.md#i-server-enforced-authorization-and-tenantproject-isolation)
-- FR-001 and FR-005 bind the evidence to the candidate. FR-002 covers DEF-A104-04 (E09), FR-003 covers DEF-A104-05 (Q03), and FR-004 covers DEF-A104-06 (Q04). [A.1.04 findings](../../output/phase-a1/a1-04-qa-findings.json) · [Decision tree](../../docs/decision-tree/README.md)
+- FR-003 and SC-002 cover current DEF-A104-04. FR-001, FR-002, FR-004 and FR-005 establish candidate identity, role and project boundaries, and the review handoff for A.1.04. The current 403 and 404 observations are scoped to the requests recorded in the QA report. [Stage 2 coverage](../../output/speckit-prompts/a-1/coverage.json) · [Current A.1.04 QA](../../output/phase-a1-qa/A.1.04-verification.json) · [Decision tree](../../docs/decision-tree/README.md)

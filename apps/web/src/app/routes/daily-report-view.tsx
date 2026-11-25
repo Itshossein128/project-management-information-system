@@ -320,6 +320,7 @@ export default function DailyReportViewPage() {
           <>
             <DailyReportSummaryView
               report={report}
+              workedShifts={header?.worked_shifts}
               projectName={projectQuery.data?.project_name}
               contractNumber={projectQuery.data?.contract_number}
               employer={projectQuery.data?.employer}

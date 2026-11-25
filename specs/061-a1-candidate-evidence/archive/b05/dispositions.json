@@ -1,75 +1,49 @@
 {
-  "status": "draft",
-  "candidateId": null,
-  "manifestSha256": null,
+  "status": "verified",
+  "candidateId": "a104-isolated-433dc98",
+  "manifestSha256": "33f0409d82634a370d00a92e22eba9abe4bc914c0a3fe814710868061dba66ce",
   "referenceFixture": "SIM-A1-001-12-1406-03-01",
-  "reportVersionUuid": null,
-  "blockingGap": "Release identity and manifest binding are pending T003–T010.",
+  "reportVersionUuid": "90b08762-a114-4b05-8718-c5d0eff703fb",
   "dispositions": [
     {
       "id": "DEF-B05-01",
-      "disposition": "open",
-      "blocking": true,
+      "disposition": "Satisfied by traceable evidence",
+      "blocking": false,
       "criterion": "Original cache inspection and standalone Calc on a copy",
-      "candidateApplicability": "unverified",
-      "candidateEvidence": [],
-      "rationale": "The candidate and manifest are unverified. Candidate-specific evidence is pending.",
-      "followUp": {
-        "role": "Independent verifier",
-        "action": "Capture the original workbook and verify formulas, values, errors and the applicable cache contract."
-      }
+      "candidateApplicability": "applicable",
+      "evidenceRef": "b05/01-recalculation.md"
     },
     {
       "id": "DEF-B05-02",
-      "disposition": "open",
-      "blocking": true,
+      "disposition": "Satisfied by traceable evidence",
+      "blocking": false,
       "criterion": "Complete Excel and PDF downloads under 3.0 seconds each for the specified workload",
-      "candidateApplicability": "unverified",
-      "candidateEvidence": [],
-      "rationale": "The candidate and manifest are unverified. Candidate-specific evidence is pending.",
-      "followUp": {
-        "role": "Independent verifier",
-        "action": "Measure both formats through full receipt with 15–30 activities and 20 materials/equipment rows under standard broadband conditions."
-      }
+      "candidateApplicability": "applicable",
+      "evidenceRef": "b05/02-latency.md"
     },
     {
       "id": "DEF-B05-03",
-      "disposition": "open",
-      "blocking": true,
+      "disposition": "Satisfied by traceable evidence",
+      "blocking": false,
       "criterion": "Values, units, rounding and null/zero treatment match independently reviewed expectations",
-      "candidateApplicability": "unverified",
-      "candidateEvidence": [],
-      "rationale": "The candidate and manifest are unverified. Candidate-specific evidence is pending.",
-      "followUp": {
-        "role": "Independent verifier",
-        "action": "Link the deployed input snapshot and compare both files against independently derived and reviewed figures."
-      }
+      "candidateApplicability": "applicable",
+      "evidenceRef": "b05/03-expected-values.md"
     },
     {
       "id": "DEF-B05-04",
-      "disposition": "open",
-      "blocking": true,
+      "disposition": "Satisfied by traceable evidence",
+      "blocking": false,
       "criterion": "Page-by-page workbook print and official PDF parity for standard and applicable long reports",
-      "candidateApplicability": "unverified",
-      "candidateEvidence": [],
-      "rationale": "The candidate and manifest are unverified. Candidate-specific evidence is pending.",
-      "followUp": {
-        "role": "Independent verifier",
-        "action": "Link readable captures, page and cell mappings, checksums and standalone Calc evidence."
-      }
+      "candidateApplicability": "applicable",
+      "evidenceRef": "b05/04-print.md"
     },
     {
       "id": "DEF-B05-05",
-      "disposition": "open",
-      "blocking": true,
+      "disposition": "Satisfied by traceable evidence",
+      "blocking": false,
       "criterion": "Candidate applicability of B02 version integrity, B03 parity and B04 filters and totals",
-      "candidateApplicability": "unverified",
-      "candidateEvidence": [],
-      "rationale": "The candidate and manifest are unverified. Candidate-specific evidence is pending.",
-      "followUp": {
-        "role": "Independent verifier",
-        "action": "Verify applicability against the deployed identity, snapshot and report version; resolve the historical six-versus-five activity count."
-      }
+      "candidateApplicability": "applicable",
+      "evidenceRef": "b05/05-prerequisites.md"
     }
   ]
 }

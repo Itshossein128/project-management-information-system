@@ -292,3 +292,7 @@ A resident supervisor and employer reviewer require complete Phase A.1 deliverab
 | **DEF-B01-04** | Stage 1.2 QA (`D08`, `C04`) | Resolved in contract (`C04` ratified: separate catalog + 34/32 Shiraz profile + appendix) | US5, FR-014, FR-015, SC-004 |
 | **DEF-B01-05** | Stage 1.2 QA (`X07`, `C08`) | Resolved in contract (`C08` ratified: weather logs for wind/ground + MET Norway Locationforecast 2.0) | US6, FR-017, SC-004 |
 | **DEF-B01-06** | Stage 1.2 QA (`C01`–`C10`, 18 sections) | Resolved in contract (`C01`–`C10` + `GOV-01` recorded with provenance; 18-section matrix complete) | US1, US2, FR-001..FR-008, SC-002..SC-004 |
+
+### GOV-01 delivery governance update — 2026-11-24
+
+The project owner retained the synthetic reference day and delegated delivery-plan dispositions to Velora agents. Employer review after deployment is feedback to the project owner. The previous employer sign-off requirement is superseded by [063 delivery status and employer review](../063-a1-employer-acceptance/spec.md).

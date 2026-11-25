@@ -48,7 +48,8 @@ export function StructuredSection({
 }: StructuredSectionProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const editable = report.status === "draft" || report.status === "rejected";
+  const editable = report.capabilities.can_edit &&
+    (report.status === "draft" || report.status === "rejected");
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
   const [volume, setVolume] = useState("");

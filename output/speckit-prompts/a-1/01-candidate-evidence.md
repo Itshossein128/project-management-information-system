@@ -1,11 +1,16 @@
 /speckit-specify
 
-Specify the release candidate and dependency evidence for A.1.04 (B06) — same-version daily report downloads and initial employer acceptance.
+# تطبیق روز مرجع و آماده‌سازی بسته ثابت گزارش روزانه Velora
 
-Stage 1 sources: ../../phase-a1-discovery/discovery.json, ../../phase-a1/a1-04-qa-findings.json, ../../phase-a1/a1-02-verification.json and ../../phase-a1/a1-03-qa-findings.json. A.1.01–A.1.03 have direct QA passes with zero defects. Carry these results forward as evidence. Scope specification and any candidate checks to A.1.04.
+برای A.1.02 و DEF-A104-01/02 از A.1.04، داستان کاربر، الزامات قابل ردیابی، سناریوهای Given/When/Then و معیار پذیرش قابل اندازه‌گیری بنویس. خروجی این گام spec و چک‌لیست کیفیت مشخصات است.
 
-DEF-A104-01 — Define a frozen candidate and reference report version. Require a manifest tying the deployed candidate ID and exact source SHA to the reference report ID/version, controlled inputs, independent expected values with provenance and review status, final downloadable Excel and PDF samples, and the employer guide. Require verified SHA-256 for the distributed artifacts. Give the auditor an acceptance scenario that detects mismatched builds, report versions or files.
+- **A.1.02.** با fixture برچسب‌خورده SIM-A1-001 و قرارداد نسخه‌دار موجود، برای ۱۰۰٪ بخش‌های گزارش روزانه ردیف تطبیق با مقدار مورد انتظار، مقدار مشاهده‌شده و مرجع منبع تعریف کن. عملیات، فعالیت/WBS، نیروی انسانی، ماشین‌آلات، مصالح، هوا، موانع/حوادث، تصاویر و تأیید را صریحاً پوشش بده. شواهد مرورگر و API باید lineage هر بخش، Draft، Approved و سناریوی اصلاح همراه با حفظ داده منبع را نشان دهند. هر مغایرت یا شاهد غایب قابل ردیابی و مانع تأیید همان بخش باشد.
+- **DEF-A104-02.** QA جاری A.1.02 به timeout رسید. گزارش قبلی A.1.02 شاهد برابری خروجی‌هاست و برای پوشش کامل معیار جاری باید با شواهد lineage و چرخه اصلاح تکمیل شود. نتیجه مستقیم و بدون نقص A.1.03 را به‌عنوان شاهد پیش‌نیاز به مانیفست پیوند بده و ارتباط آن را با نسخه نامزد تحویل ثبت کن. ادعای باز بودن A.1.03 در گزارش A.1.04 را با نتیجه مستقیم آن تطبیق بده.
+- **DEF-A104-01.** برای یک روز کامل با ارقام کنترل‌شده، بسته آرشیوی شامل fixture مرجع و مقادیر مورد انتظار، Excel بازحساب‌شده و PDF خوانا، مانیفست روز/نسخه/Commit SHA کامل، SHA-256 قابل بازتولید هر فایل و ارجاع به شواهد تطبیق تعریف کن. معیار پذیرش شامل برابری ارقام کنترل‌شده و صحت تمام checksumها باشد. گام بعدی همین نسخه و فایل‌ها را برای QA تحویل می‌گیرد.
 
-DEF-A104-02 — Define an evidence disposition for each referenced B05 finding DEF-B05-01 through DEF-B05-05. Reconcile the A.1.04 report's blocker assertion with the direct A.1.02/A.1.03 passes by build, fixture and verified scope. Reuse the recorded 88-formula recalculation and unknown-hours regression where their scope applies. Establish which residual candidate evidence is needed for workbook cache behavior and standalone recalculation, independent expected values, download latency against B05 SC-002, print/page comparisons and evidence logs, and B02–B04 prerequisite dispositions. Use the B05 evidence referenced by Discovery for the applicable criteria. Treat a workbook cache requirement as conditional on the export contract. State which findings are satisfied by traceable evidence, still open, or require an explicit scope decision. A candidate with an unresolved blocking finding remains blocked for employer handoff.
+مراجع از ریشه مخزن
 
-Write testable stakeholder outcomes and acceptance scenarios for A.1.04 only. The handoff to 02 is the identified candidate, manifest and dependency disposition. Final delivery evidence and employer disposition are supplied by subsequent sub-stages.
+- `output/phase-a1-discovery/stage1-discovery.json`
+- `output/phase-a1/a1-02-verification.json` (شاهد محدود به تطبیق خروجی)
+- `output/phase-a1-qa/A.1.03-verification.json`
+- `output/phase-a1-qa/A.1.04-verification.json`

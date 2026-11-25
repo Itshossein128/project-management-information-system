@@ -8,10 +8,13 @@ formulas, incoming materials, concrete pours, machinery, and daily activities).
 from __future__ import annotations
 
 import io
+from datetime import timezone
 from typing import Tuple
+from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+from openpyxl.writer.excel import ExcelWriter
 
 from common.jalali import gregorian_to_jalali
 from field_reports.models import DailyReport
@@ -60,6 +63,14 @@ ALIGN_RIGHT = Alignment(horizontal='right', vertical='center', wrap_text=True)
 ALIGN_LEFT = Alignment(horizontal='left', vertical='center', wrap_text=True)
 
 
+class _ReportWorkbookArchive(ZipFile):
+    def open(self, name, mode='r', pwd=None, *, force_zip64=False):
+        if mode == 'w' and isinstance(name, ZipInfo):
+            # XLSX member timestamps must not depend on when the workbook was downloaded.
+            name.date_time = (1980, 1, 1, 0, 0, 0)
+        return super().open(name, mode, pwd, force_zip64=force_zip64)
+
+
 class ShirazFile4ExcelBuilder:
     def __init__(self, report: DailyReport, *, language='fa', sheet=None):
         self.report = report
@@ -73,7 +84,12 @@ class ShirazFile4ExcelBuilder:
     def build(self) -> Tuple[bytes, str]:
         self.populate()
         buf = io.BytesIO()
-        self.ws.parent.save(buf)
+        workbook = self.ws.parent
+        created = self.report.created_at.astimezone(timezone.utc).replace(tzinfo=None)
+        workbook.properties.created = created
+        workbook.properties.modified = created
+        with _ReportWorkbookArchive(buf, 'w', ZIP_DEFLATED) as archive:
+            ExcelWriter(workbook, archive).write_data()
         report_date = self.report.report_date
         shift = self.report.shift or 'full'
         formatted_date = gregorian_to_jalali(report_date).replace('/', '-')

@@ -2,10 +2,12 @@ import { getStoredActorId, requireStoredActorId } from "@/app/lib/auth-storage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Download } from "lucide-react";
 import {
   downloadUnitReportPdf,
   downloadUnitReportExcel,
+  fetchUnitReport,
   type CanonicalUnit,
   type UnitReport,
   type UnitReportStatus,
@@ -30,6 +32,7 @@ import {
   useUnitReportHistoryQuery,
 } from "@/app/hooks/queries";
 import { ApiRequestError } from "@/app/lib/api-client";
+import { queryKeys } from "@/app/lib/react-query-keys";
 import { Button, TextArea } from "@/components/form";
 import { JalaliDatePicker } from "@/components/form/JalaliDatePicker";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +60,7 @@ export interface UnitDailyReportPanelProps {
   unit: CanonicalUnit;
   onReportChange?: (report: UnitReport | null) => void;
   selectedDate?: string;
+  reportVersion?: string | null;
   onDateChange?: (date: string) => void;
 }
 
@@ -107,6 +111,7 @@ export function UnitDailyReportPanel({
   unit,
   onReportChange,
   selectedDate: propDate,
+  reportVersion,
   onDateChange,
 }: UnitDailyReportPanelProps) {
   const { t, i18n } = useTranslation();
@@ -119,7 +124,7 @@ export function UnitDailyReportPanel({
   onDateChangeRef.current = onDateChange;
 
   useEffect(() => {
-    if (!activeDate || searchParams.get("date") === activeDate) return;
+    if (reportVersion || !activeDate || searchParams.get("date") === activeDate) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -129,7 +134,7 @@ export function UnitDailyReportPanel({
       { replace: true },
     );
     onDateChangeRef.current?.(activeDate);
-  }, [searchParams, setSearchParams, activeDate]);
+  }, [searchParams, setSearchParams, activeDate, reportVersion]);
 
   const handleDateChange = (newDate: string) => {
     if ((searchParams.get("date") ?? "") === newDate) return;
@@ -150,8 +155,29 @@ export function UnitDailyReportPanel({
     onDateChange?.(newDate);
   };
 
-  const currentQuery = useCurrentUnitReportQuery(businessId, unit, activeDate);
-  const report = currentQuery.data ?? null;
+  const currentQuery = useCurrentUnitReportQuery(businessId, unit, activeDate, !reportVersion);
+  const versionQuery = useQuery({
+    queryKey: queryKeys.unitReport(businessId, unit, reportVersion ?? ""),
+    queryFn: () => fetchUnitReport(businessId, unit, reportVersion!),
+    enabled: Boolean(businessId && reportVersion),
+  });
+  const reportQuery = reportVersion ? versionQuery : currentQuery;
+  const version = reportQuery.data ?? null;
+  const report = useMemo(() => {
+    if (!version || !reportVersion) return version;
+    return {
+      ...version,
+      capabilities: {
+        ...version.capabilities,
+        can_edit: false,
+        can_submit: false,
+        can_approve: false,
+        can_reject: false,
+        can_correct: false,
+        can_delete: false,
+      },
+    };
+  }, [version, reportVersion]);
 
   useEffect(() => {
     onReportChange?.(report);
@@ -383,14 +409,20 @@ export function UnitDailyReportPanel({
               <span id="text-unitReportVersion" className="text-xs font-mono text-muted-foreground">
                 {t("businessDepartment.unitReport.version")} {report.version_number}
               </span>
+              {reportVersion ? <time dateTime={report.report_date}>{report.report_date}</time> : null}
             </div>
           ) : null}
         </div>
-        {currentQuery.isFetching ? (
+        {reportQuery.isFetching ? (
           <span className="text-xs text-muted-foreground">{t("common.loading")}</span>
         ) : null}
       </div>
 
+      {reportVersion && versionQuery.isError ? (
+        <p role="alert">{t("businessDepartment.unitReport.sourceVersionUnavailable")}</p>
+      ) : null}
+
+      {!reportVersion && <>
       <LocalDraftList
         businessId={businessId}
         unit={unit}
@@ -434,6 +466,7 @@ export function UnitDailyReportPanel({
           </>
         ) : null}
       </div>
+      </>}
 
       {actionError ? (
         <div
@@ -462,10 +495,11 @@ export function UnitDailyReportPanel({
               name="unitReportNotes"
               label={t("businessDepartment.unitReport.generalNotes", "یادداشت‌های عمومی واحد")}
               value={headerNotes}
+              readOnly={Boolean(reportVersion)}
               onChange={(e) => setHeaderNotes(e.target.value)}
               rows={2}
             />
-            <div className="flex justify-end">
+            {!reportVersion && <div className="flex justify-end">
               <Button
                 id="button-saveUnitReportNotes"
                 data-testid="unit-report-save-btn"
@@ -475,7 +509,7 @@ export function UnitDailyReportPanel({
               >
                 {t("common.save", "ذخیره")}
               </Button>
-            </div>
+            </div>}
           </div>
 
           <dl

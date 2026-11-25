@@ -1,23 +1,27 @@
 {
   "phase": "A.1",
   "granularity": "multi",
-  "phaseSource": "output/phase-a1-discovery/stage1.1-discovery-2026-11-24.json",
-  "snapshotAvailability": "No standalone state.memory.stage1_audit_snapshot supplied; used Stage 1 node results and corroborating persisted reports.",
-  "failedQaSource": "output/phase-a1/a1-04-qa-findings.json",
+  "phaseSource": "output/phase-a1-discovery/stage1-discovery.json",
+  "snapshotAvailability": "Standalone state.memory.stage1_audit_snapshot was not exposed. Used the supplied same-run Stage 1 node outputs and persisted active-phase reports.",
+  "failedQaSource": "output/phase-a1-qa/A.1.04-verification.json",
   "remainingRequirements": [
+    "A.1.02",
     "A.1.04"
   ],
   "excludedQaPassed": [
     "A.1.01",
-    "A.1.02",
     "A.1.03"
   ],
-  "dependencyConflict": "The direct A.1.02 and A.1.03 zero-defect passes stand within their verified scopes. DEF-A104-02 remains open pending reconciliation on the frozen candidate, including the cited B05 findings.",
+  "exclusionEvidence": {
+    "A.1.01": "output/phase-a1/a1-01-qa-findings.json",
+    "A.1.03": "output/phase-a1-qa/A.1.03-verification.json"
+  },
+  "dependencyConflict": "A.1.02 timed out in the current fan-out. Its older zero-defect parity report verifies a narrower criterion. The current direct A.1.03 pass supersedes the open-status assertion in DEF-A104-02 for A.1.03. Defect IDs follow the current fan-out report, whose numbering differs from the older A.1.04 report.",
   "coverage": {
-    "requirementsMapped": 1,
-    "requirementsTotal": 1,
-    "openDefectsMapped": 6,
-    "openDefectsTotal": 6,
+    "requirementsMapped": 2,
+    "requirementsTotal": 2,
+    "openDefectsMapped": 4,
+    "openDefectsTotal": 4,
     "percent": 100
   },
   "subStages": [
@@ -26,6 +30,7 @@
       "promptPath": "output/speckit-prompts/a-1/01-candidate-evidence.md",
       "dependsOn": [],
       "requirements": [
+        "A.1.02",
         "A.1.04"
       ],
       "defects": [
@@ -43,9 +48,7 @@
         "A.1.04"
       ],
       "defects": [
-        "DEF-A104-04",
-        "DEF-A104-05",
-        "DEF-A104-06"
+        "DEF-A104-04"
       ]
     },
     {
@@ -61,20 +64,5 @@
         "DEF-A104-03"
       ]
     }
-  ],
-  "exclusionEvidence": {
-    "A.1.01": {
-      "report": "output/phase-a1-discovery/a1-01-qa-findings.json",
-      "fanout": "timed out"
-    },
-    "A.1.02": {
-      "report": "output/phase-a1/a1-02-verification.json",
-      "fanout": "execution failed or invalid response"
-    },
-    "A.1.03": {
-      "report": "output/phase-a1/a1-03-qa-findings.json",
-      "fanout": "qa_passed"
-    }
-  },
-  "granularityReason": "Candidate evidence, deployed authorization and presentation verification, and employer disposition require distinct sequential handoffs tied to the same report version."
+  ]
 }

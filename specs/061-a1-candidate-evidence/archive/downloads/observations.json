@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-11-24T18:04:30.000000Z",
+  "candidateId": "a104-isolated-433dc98",
+  "projectUuid": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+  "reportVersionUuid": "90b08762-a114-4b05-8718-c5d0eff703fb",
+  "versionNumber": 1,
+  "status": "approved",
+  "observations": [
+    {
+      "format": "excel",
+      "effectiveLocale": "fa",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-fa.xlsx",
+      "byteCount": 17456,
+      "sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+      "repeatability": {
+        "run1Sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+        "run2Sha256": "a0b7bd2fad7327cdf425b8a2b5a68770ea923c35cb96009dca0660b646977f57",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "excel",
+      "effectiveLocale": "en",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-en.xlsx",
+      "byteCount": 17312,
+      "sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+      "repeatability": {
+        "run1Sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+        "run2Sha256": "b1c8ce3fae8438def536c9b36cb711eb7a924d46db100aedca1770b757988f68",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "pdf",
+      "effectiveLocale": "fa",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-fa.pdf",
+      "byteCount": 42890,
+      "sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+      "repeatability": {
+        "run1Sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+        "run2Sha256": "7a884a1efa02acc94e9cb9c4a1cbb60275b9b5de8940ca1a6b3f82c92085b2e4",
+        "repeatable": true
+      }
+    },
+    {
+      "format": "pdf",
+      "effectiveLocale": "en",
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "version": 1,
+      "filename": "daily-report-90b08762-en.pdf",
+      "byteCount": 41952,
+      "sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+      "repeatability": {
+        "run1Sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+        "run2Sha256": "8b995b2ffb13bdd05f9dcab05b2dcc7139a9ce6ef1010bb1f13b5bf931096fe5",
+        "repeatable": true
+      }
+    }
+  ]
+}

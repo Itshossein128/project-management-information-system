@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-11-24T18:02:03.372212+00:00",
+  "candidateId": "a104-isolated-433dc98",
+  "sourceSha": "433dc98dd169f5e60eeb76aee32c1fbe4a20bd65",
+  "projectUuid": "fbed68bb-3382-44ba-a87e-3b4119cc3f2b",
+  "fixture": {
+    "identifier": "SIM-A1-001-12-1406-03-01",
+    "sha256": "93ce2f057739626e68b520dc0b57d68667b605ce368c256ad43c29583c6bc2c0",
+    "localDate": "1406-03-01",
+    "projectDay": 12
+  },
+  "contract": {
+    "version": "1.0.0",
+    "sha256": "7adcba62fded39d615c78e992d7083aab6af73fd2b456646ded9eb94f703a707"
+  },
+  "lifecycleReports": {
+    "day12BaselineDraft": {
+      "reportId": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+      "versionNumber": 1,
+      "status": "draft",
+      "isCurrent": true,
+      "snapshotSha256": "efe90535e957f35f36857937e64a9a4d5babb6e5b9899eb4686ad411ad199f59",
+      "executedActivitiesCount": 5,
+      "laborRowsCount": 68,
+      "manpowerGrandTotalPersonShifts": 24
+    },
+    "day13SummaryDraft": {
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "versionNumber": 1,
+      "status": "draft",
+      "snapshotSha256": "9d4760b190dea7f4da7319789e4988595150d92f5e78fbc47047f9c514243017"
+    },
+    "day13HistoricalApproved": {
+      "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+      "versionNumber": 1,
+      "status": "approved",
+      "snapshotSha256": "7d85f8f9cf5f04fad429d04215800c38548ae964354b8e21932eea64257c9b4c"
+    },
+    "day13CorrectionDraft": {
+      "reportId": "e7d56891-0edc-485b-957c-37099f45a1e0",
+      "versionNumber": 2,
+      "status": "draft",
+      "snapshotSha256": "28191d4ff47cbae1154bd71e169cec90e92032ac83a2c0dce5d92873ce04444c"
+    },
+    "day13CorrectionApproved": {
+      "reportId": "e7d56891-0edc-485b-957c-37099f45a1e0",
+      "versionNumber": 2,
+      "status": "approved",
+      "snapshotSha256": "79302c71b5e51dcf1c0503c6dbf5634ea020c1e4538850d66987788d9c829c26"
+    }
+  },
+  "selectedApprovedDeliveryVersion": {
+    "reportId": "90b08762-a114-4b05-8718-c5d0eff703fb",
+    "versionNumber": 1,
+    "status": "approved",
+    "exportAvailability": {
+      "excelFile4": true,
+      "officialPdf": true
+    }
+  },
+  "sectionInventory": [
+    {
+      "section_number": 1,
+      "name_en": "General Information",
+      "name_fa": "اطلاعات عمومی",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 2,
+      "name_en": "Weather, Wind & Ground",
+      "name_fa": "شرایط جوی، باد، زمین",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 3,
+      "name_en": "Civil Activities",
+      "name_fa": "فعالیت‌های ابنیه",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03, B04"
+    },
+    {
+      "section_number": 4,
+      "name_en": "Mechanical Activities",
+      "name_fa": "فعالیت‌های مکانیکی",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 5,
+      "name_en": "Electrical Activities",
+      "name_fa": "فعالیت‌های برقی",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 6,
+      "name_en": "Manpower / Labor",
+      "name_fa": "نیروی انسانی",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03, B04"
+    },
+    {
+      "section_number": 7,
+      "name_en": "Machinery / Equipment",
+      "name_fa": "ماشین‌آلات",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 8,
+      "name_en": "Materials",
+      "name_fa": "مصالح",
+      "disposition": "printed_in_a1_and_drill_down",
+      "owner_phase": "A.1 / A.8 / A.10",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 9,
+      "name_en": "Planned & Actual Progress",
+      "name_fa": "پیشرفت برنامه‌ای و واقعی",
+      "disposition": "deferred_to_owner_phase",
+      "owner_phase": "A.7 / A.8",
+      "downstream_package": "X03"
+    },
+    {
+      "section_number": 10,
+      "name_en": "Blockers & Issues",
+      "name_fa": "موانع و مسائل",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 11,
+      "name_en": "Safety & HSE",
+      "name_fa": "ایمنی و HSE",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 12,
+      "name_en": "Quality Control & Tests",
+      "name_fa": "کنترل کیفیت و آزمایش‌ها",
+      "disposition": "printed_in_a1_and_drill_down",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B03"
+    },
+    {
+      "section_number": 13,
+      "name_en": "Daily Procurement",
+      "name_fa": "تدارکات روز",
+      "disposition": "deferred_to_owner_phase",
+      "owner_phase": "A.4 / A.10",
+      "downstream_package": "X06"
+    },
+    {
+      "section_number": 14,
+      "name_en": "Correspondence, RFI, Submittal",
+      "name_fa": "مکاتبات، RFI، سابمیتال",
+      "disposition": "deferred_to_owner_phase",
+      "owner_phase": "A.3.C / A.9",
+      "downstream_package": "X05, X06"
+    },
+    {
+      "section_number": 15,
+      "name_en": "Visits, Meetings & Decisions",
+      "name_fa": "بازدید و جلسه و تصمیم",
+      "disposition": "printed_in_a1_and_deferred_owner",
+      "owner_phase": "A.1 / A.3.C",
+      "downstream_package": "B03, X05"
+    },
+    {
+      "section_number": 16,
+      "name_en": "Site Photos",
+      "name_fa": "عکس‌های کارگاه",
+      "disposition": "drill_down_in_a1",
+      "owner_phase": "A.1",
+      "downstream_package": "B03, B06"
+    },
+    {
+      "section_number": 17,
+      "name_en": "Project Manager Comments",
+      "name_fa": "نظر مدیر پروژه",
+      "disposition": "printed_in_a1",
+      "owner_phase": "A.1",
+      "downstream_package": "B02"
+    },
+    {
+      "section_number": 18,
+      "name_en": "Unit Entry, Approval, Lock & Offline",
+      "name_fa": "ورود واحدی، تایید، قفل و آفلاین",
+      "disposition": "printed_in_a1_and_deferred_owner",
+      "owner_phase": "A.1 / A.8",
+      "downstream_package": "B02, X01"
+    }
+  ],
+  "expectationSummary": {
+    "totalExpectations": 113,
+    "sectionsCount": 18,
+    "recomputationStatus": "passed",
+    "reviewedSha256": "aef5d6efed8b2ca56aaa9e77b17b8282c3207748b3a9d70a301245428632064d"
+  },
+  "lifecycleLineageAndDispositions": {
+    "wbsReference": {
+      "id": "b0418c9c-4bb3-47a7-befe-012ce08c0ef1",
+      "wbs_code": "QA-A104",
+      "wbs_name": "Synthetic A.1 lineage verification"
+    },
+    "scheduleActivityReference": {
+      "id": "46c911a1-f139-46e2-b62a-85fb1b443cf5",
+      "activity_code": "QA-A104-01",
+      "activity_name": "Synthetic A.1 concrete placement"
+    },
+    "unitSourceReference": {
+      "unit": "buildings",
+      "unitReportId": "6d0dde4d-8523-4623-9464-e8b62c044512",
+      "unitRowId": "2260f8af-49bb-423f-ad04-df6fe2dbd46e",
+      "sourceVersion": 1,
+      "quantityM3": "13.25"
+    },
+    "preservedStartingDraft": {
+      "reportId": "fb9bcd42-a786-4b19-ba7b-1548c9526393",
+      "status": "draft",
+      "byteIdenticalToBaseline": true,
+      "topLevelDifferences": []
+    },
+    "resolvedProductDiscrepancies": {
+      "personHoursC03": "formatActualHours formats hours when all worked shifts have recorded actual duration; displays unknown (نامشخص) when unrecorded shift durations exist, with Shift 1 partial contribution (144.50) preserved.",
+      "unitSourceNavigationLink": "ProvenanceCell unit link routes to root-based path /[PATHS.BUSINESS]/[projectId]/[unit]?date=[reportDate]&reportVersion=[reportId] to prevent 404."
+    }
+  }
+}

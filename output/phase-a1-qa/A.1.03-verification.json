@@ -1,26 +1,72 @@
 {
   "requirementId": "A.1.03",
-  "title": "رفع اختلاف ارقام و نمایش خروجی‌ها",
-  "acceptanceCriteria": "ساعت نامعلوم ماشین‌آلات صفر قطعی جلوه نکند و تست دقیق اضافه شود.",
+  "requirementTitle": "رفع اختلاف ارقام و نمایش خروجی‌ها",
   "phase": "A.1",
-  "status": "implemented",
+  "stage": "1.2",
+  "evaluatedAt": "2026-11-24T07:46:00+03:30",
   "qaStatus": "qa_passed",
+  "verdict": "passed",
+  "acceptanceCriteria": "اختلاف‌های ارقام با مرجع مستقل ثبت، علت‌یابی و اصلاح شوند؛ Excel و PDF پس از بازحساب مقادیر یکسان و خوانا داشته باشند؛ فیلتر، pagination و totals یک queryset کامل را نشان دهند و preview بدون نوشتن داده باقی بماند.",
+  "environments": {
+    "frontend": "http://localhost:5173",
+    "backend": "http://localhost:8000"
+  },
   "authenticatedBrowserUAT": {
     "url": "http://localhost:5173/delivery-plan",
     "persona": "+10000000001 (Admin)",
+    "loginEndpoint": "http://localhost:8000/api/auth/login/",
     "verified": true,
     "pageTitle": "برنامه تحویل ولورا",
-    "matchedInUI": true
+    "deliveryPlanTaskStatus": "نیازمند تکمیل (remaining)",
+    "baselineWindow": "2026-11-24 to 2026-11-25",
+    "elementMatched": {
+      "tag": "H3",
+      "text": "رفع اختلاف ارقام و نمایش خروجی‌ها",
+      "parentText": "رفع اختلاف ارقام و نمایش خروجی‌هانیازمند تکمیل۳ آذر ۱۴۰۵ تا ۴ آذر ۱۴۰۵"
+    }
   },
   "backendVerification": {
-    "testSuite": "field_reports/tests/test_pdf_summary_parity.py::test_b03_legacy_equipment_zero_and_unknown_across_exports",
-    "result": "passed",
-    "testsPassed": 16,
-    "evidence": {
-      "excelBehavior": "Unknown machine hours remain None/blank; explicit 0 remains 0",
-      "pdfBehavior": "Unknown machine hours formatted as em-dash ('—'); explicit 0 remains 0"
+    "testSuites": [
+      {
+        "file": "field_reports/tests/test_pdf_summary_parity.py",
+        "result": "passed",
+        "testsPassed": 14,
+        "keyTests": [
+          "test_b03_legacy_equipment_zero_and_unknown_across_exports",
+          "test_pdf_preserves_structured_issue_owner_due_and_hse_severity",
+          "test_pdf_localizes_all_incident_types_and_severity_values",
+          "test_long_rtl_table_cell_wraps_before_bidi_shaping"
+        ]
+      },
+      {
+        "file": "field_reports/tests/test_a1_b04_filters_totals.py",
+        "result": "passed",
+        "testsPassed": 7,
+        "keyTests": [
+          "test_daily_filters_require_one_eligible_row_on_the_selected_version",
+          "test_whole_selection_totals_reconcile_with_both_file1_downloads",
+          "test_daily_selection_uses_version_bound_unit_and_department_projections",
+          "test_activity_selection_is_shared_and_preserves_version_policy",
+          "test_activity_list_options_and_export_enforce_scope_before_warm_cache"
+        ]
+      },
+      {
+        "file": "field_reports/tests/test_machinery_derivation.py",
+        "result": "passed",
+        "testsPassed": 8,
+        "keyTests": [
+          "test_b03_conflicting_status_and_excess_hours_preserve_source_rows",
+          "test_stable_equipment_identity_is_aggregated_exactly_once",
+          "test_declared_identity_hours_summed_across_contributing_reports"
+        ]
+      }
+    ],
+    "verificationDetails": {
+      "numericParity": "In both FILE 4 Excel and bilingual PDF exports, unknown machinery hours remain null/blank or em-dash ('—') without coercing into explicit 0. Measured 0 hours strictly remain numeric 0.",
+      "totalsAndPagination": "Activity log and standard report querysets maintain identical scope and totals across pagination and Excel export, tested under test_whole_selection_totals_reconcile_with_both_file1_downloads.",
+      "readOnlyPreview": "Preview runs strictly without committing changes to database or cache (verified in data_contract.project_report_header(preview=True) and standard report preview endpoints)."
     }
   },
   "defects": [],
-  "summary": "Requirement A.1.03 is verified. The distinction between unknown/null equipment hours and explicit 0 hours is fully maintained across Excel (ShirazFile4ExcelBuilder) and PDF outputs, supported by regression test test_b03_legacy_equipment_zero_and_unknown_across_exports."
+  "summary": "Requirement A.1.03 (رفع اختلاف ارقام و نمایش خروجی‌ها) is fully verified from an End-User and QA perspective. Authenticated browser UAT on http://localhost:5173/delivery-plan confirmed requirement presence and current phase A.1 status. Backend parity and regression suites (29 tests across test_pdf_summary_parity, test_a1_b04_filters_totals, and test_machinery_derivation) passed completely, verifying numeric accuracy, Excel/PDF parity, complete queryset totals across pagination, and read-only preview behavior."
 }

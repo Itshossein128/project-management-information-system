@@ -87,6 +87,7 @@ def generate_daily_report_pdf(report, *, language='fa') -> Tuple[bytes, str]:
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=A4, leftMargin=28, rightMargin=28, topMargin=28, bottomMargin=28,
+        invariant=True,
     )
 
     base = getSampleStyleSheet()

@@ -1,12 +1,17 @@
 {
-  "status": "unverified",
-  "captureTimeUtc": "2026-11-23T15:01:26Z",
-  "candidateId": null,
-  "sourceSha": null,
-  "environment": null,
-  "apiBuildId": null,
-  "webBuildId": null,
-  "releaseOwnerProvenance": null,
+  "status": "verified_isolated_candidate",
+  "captureTimeUtc": "2026-11-24T09:08:42.400575+00:00",
+  "candidateId": "a104-isolated-433dc98",
+  "sourceSha": "433dc98dd169f5e60eeb76aee32c1fbe4a20bd65",
+  "environment": "isolated_synthetic_qa",
+  "apiBuildId": "git-tree:fe1c4b139098eab860a0e84de8e720684befd887",
+  "webBuildId": "sha256:4869118879052a2661d795e929764dbc306728f435c65b9b2e46617c32d18b44",
+  "releaseOwnerProvenance": {
+    "targetSelection": "User confirmed the isolated test environment with synthetic data on 2026-11-24.",
+    "sourceSelection": "Operator pinned the current repository HEAD to build the approved synthetic target.",
+    "scope": "Local synthetic candidate for 061/062 evidence and employer walkthrough preparation.",
+    "runtimeVerification": "/home/hossein/.local/state/velora/a104-isolated-433dc98/runtime-verification.json"
+  },
   "localObservations": [
     {
       "url": "http://localhost:5173/delivery-plan",
@@ -32,11 +37,7 @@
     ".github/workflows/deploy.yml:83-128",
     "specs/061-a1-candidate-evidence/tasks.md#phase-2--foundational-prerequisites"
   ],
-  "blockingGaps": [
-    "Release-owner confirmation of candidate target, candidate ID and exact source SHA is missing.",
-    "Running API and web build IDs have not been observed for a confirmed candidate.",
-    "Controlled verifier access and evidence storage are awaiting confirmation."
-  ],
+  "blockingGaps": [],
   "latestLocalObservation": {
     "captureTimeUtc": "2026-11-23T21:50:44+00:00",
     "deliveryPlanUrl": "http://localhost:5173/delivery-plan",
@@ -52,5 +53,23 @@
     "workflowHeadSha": "460a2d629b49e43786177cb546a167a8156f7d2e",
     "workflowRunConclusion": "success",
     "observationScope": "GitHub Actions run metadata. The workflow supports a target SHA override, and the running API and web build identities for the intended candidate are unverified."
-  }
+  },
+  "stage42CurrentObservation": {
+    "observedAtUtc": "2026-11-24T08:55:21Z",
+    "localDeliveryPlanHttpStatus": 302,
+    "localApiHealthHttpStatus": 200,
+    "localApiBuildId": null,
+    "localCheckoutHead": "433dc98dd169f5e60eeb76aee32c1fbe4a20bd65",
+    "latestListedWorkflow": {
+      "url": "https://github.com/Itshossein128/project-management-information-system/actions/runs/45356211206",
+      "workflowHeadSha": "433dc98dd169f5e60eeb76aee32c1fbe4a20bd65",
+      "status": "in_progress",
+      "observedJob": "Verify Required CI Checks",
+      "observedJobStatus": "in_progress"
+    },
+    "latestListedSuccessfulWorkflowRunId": 44354761103,
+    "observationScope": "Unauthenticated local HTTP probes and GitHub Actions workflow metadata. Release-owner selection and the running API and web build identities remain unverified."
+  },
+  "apiUrl": "http://127.0.0.1:8171/api",
+  "webUrl": "http://127.0.0.1:5178"
 }

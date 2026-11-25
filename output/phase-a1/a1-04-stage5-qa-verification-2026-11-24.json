@@ -1,0 +1,37 @@
+{
+  "evaluationDate": "2026-11-24T23:13:00+03:30",
+  "deliveryPhase": "A.1",
+  "stage": "5",
+  "candidateId": "a104-day12-71dd8cfe",
+  "sourceSha": "71dd8cfe4c17fddd66cf0f5952dadaa1ae7dcb12",
+  "manifestSha256": "917d49da3a1602eecd4524c40794dcc372cde5b8445e2aa6b153e614457efd9e",
+  "qaStatus": "qa_passed",
+  "summary": "Stage 5 End-User QA: Independent verification of candidate a104-day12-71dd8cfe under manifest SHA-256 917d49da3a1602eecd4524c40794dcc372cde5b8445e2aa6b153e614457efd9e PASSED. All three previous blocking defects (DEF-A104-05, DEF-A104-06, DEF-A104-07) are verified fixed and closed. Locked Approved v1 fb9bcd42-a786-4b19-ba7b-1548c9526393 corresponds to the ratified reference day 12 (1406-03-01). All direct and browser downloads match the replacement manifest with 100% byte repeatability and verified Calc formula caches (88 formulas/locale). All 72 browser matrix observations across Persian RTL and English LTR (Desktop/Mobile) passed with localized headers, empty states, and verified RBAC for 5 access contexts. Complete candidate-linked 061/062 evidence for the same manifest digest is established with zero blockers.",
+  "deliveryPlanStatus": {
+    "phase": "A.1",
+    "tasks": {
+      "A.1.01": "remaining",
+      "A.1.02": "remaining",
+      "A.1.03": "remaining",
+      "A.1.04": "implemented"
+    }
+  },
+  "defects": [],
+  "defectDispositions": [
+    {
+      "id": "DEF-A104-05",
+      "status": "closed",
+      "resolution": "Verified that replacement manifest 917d49da... selects locked Approved v1 fb9bcd42-a786-4b19-ba7b-1548c9526393 for ratified reference day 12 (1406-03-01). Controlled synthetic fixture delta (quantity_measured set to false while retaining null quantity) independently reviewed and verified."
+    },
+    {
+      "id": "DEF-A104-06",
+      "status": "closed",
+      "resolution": "Verified that all 4 direct export slots repeat byte-for-byte, all 8 Playwright browser downloads match the frozen manifest SHA-256 checksums, and recalculated Excel workbooks are linked by SHA-256 with 88 formula caches validated per locale."
+    },
+    {
+      "id": "DEF-A104-07",
+      "status": "closed",
+      "resolution": "Verified that 72 browser matrix observations across FA RTL and EN LTR at 1440x900 and 390x844 viewports cover day 12 Approved v1 with localized Machinery/HSE headings, explicit QC and Site Photo empty states, and 5 verified RBAC access contexts with content withholding on denial."
+    }
+  ]
+}

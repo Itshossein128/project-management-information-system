@@ -32,6 +32,6 @@ This checklist records specification quality for Supervisor review.
 
 ## Notes
 
-- FR-002–FR-004 cover DEF-A104-04, DEF-A104-05 and DEF-A104-06. FR-001 and FR-005 bind the results to one candidate.
-- Stage 3.1 review checked that FR-003 links each download to the candidate manifest by format and effective export language.
-- Specification quality checks passed 16 of 16. Candidate, deployment and employer evidence remain delivery requirements.
+- FR-003 and SC-002 cover current DEF-A104-04. FR-001, FR-002, FR-004 and FR-005 cover the other candidate-linked QA requirements in Stage 2 prompt 02.
+- Stage 3.1 review checked the authenticated Visitor case, the limits on reusing the recorded 403 and 404, 72 section observations, and the same-digest QA handoff.
+- Specification quality checks passed 16 of 16 on 2026-11-24. Supervisor review is pending.

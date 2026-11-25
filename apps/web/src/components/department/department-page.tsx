@@ -61,6 +61,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
   const { t } = useTranslation();
   const { businessId } = useParams();
   const [searchParams] = useSearchParams();
+  const reportVersion = searchParams.get("reportVersion");
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [business, setBusiness] = useState<BusinessDetail | null>(null);
@@ -129,7 +130,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
       supplier:
         isWarehouse && supplierFilter.trim() ? supplierFilter.trim() : undefined,
     },
-    isAuthenticated && Boolean(businessId),
+    isAuthenticated && Boolean(businessId) && !reportVersion,
   );
 
   const rows = activityQuery.data?.results ?? [];
@@ -547,6 +548,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
         <UnitDailyReportPanel
           businessId={businessId ?? ""}
           unit={department as CanonicalUnit}
+          reportVersion={reportVersion}
           onReportChange={setCurrentReport}
           onDateChange={(d) => {
             setDateRange({ from: d, to: d });
@@ -583,7 +585,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
           </p>
         ) : null}
 
-        <section
+        {!reportVersion && <section
           id="container-departmentActivityLog"
           className="space-y-3"
           aria-labelledby="text-departmentActivityLogTitle"
@@ -818,7 +820,7 @@ export function DepartmentPage({ slug }: DepartmentPageProps) {
               </div>
             }
           />
-        </section>
+        </section>}
 
         <Modal
           open={dailyModalOpen}

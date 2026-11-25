@@ -1,15 +1,15 @@
 export type DeliveryTask = { id: string; title: string; status: "implemented" | "remaining"; note?: string; start?: string; finish?: string };
 export type DeliveryPhase = { id: string; title: string; start: string; finish: string; acceptance: string; note?: string; tasks: DeliveryTask[] };
 
-// Employer-facing snapshot of the reviewed minimum scenario. Existing capabilities
-// are separate from remaining work; implementation does not imply final acceptance.
+// The delivery agents record verified completion. The employer reviews completed items
+// after deployment and sends feedback to the project owner.
 // R.0/A.6 review evidence: docs/delivery/delivery-plan-status-review-2026-11-11.md.
 // A.7 review evidence: docs/delivery/A7-delivery-plan-status-review-2026-11-18.md.
 // A.1 B04 review evidence: specs/060-a1-b04-filters-totals/implementation-evidence.md.
 export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: string; phases: DeliveryPhase[] } = {
   "baselineStart": "2026-11-04",
   "finish": "2027-03-10",
-  "updatedAt": "2026-11-22",
+  "updatedAt": "2026-11-25",
   "phases": [
     {
       "id": "R.0",
@@ -173,33 +173,37 @@ export const deliveryPlan: { baselineStart: string; finish: string; updatedAt: s
           "id": "A.1-B04",
           "title": "فیلتر گزارش‌ها، خروجی کامل FILE 1 و جمع کل نتایج",
           "status": "implemented",
-          "note": "فیلترها، بازیابی پیوند و صفحه، تطابق جمع با خروجی اکسل و زمان پاسخ با داده مرجع محلی در فارسی و انگلیسی بررسی شدند. پذیرش کارفرما در انتظار بررسی است."
+          "note": "فیلترها، بازیابی پیوند و صفحه، تطابق جمع با خروجی اکسل و زمان پاسخ با داده مرجع محلی در فارسی و انگلیسی بررسی شدند. این مورد پس از استقرار برای بررسی کارفرما در دسترس است."
         },
         {
           "id": "A.1.01",
           "title": "نهایی‌کردن قواعد اطلاعات روزانه",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "قرارداد داده نسخه‌دار ۱۲۸ فیلدی، تفکیک صفر و مقدار ثبت‌نشده، قواعد شیفت و آب‌وهوا، فیکسچر روز مرجع SIM-A1-001 و کنترل دسترسی RBAC پیاده‌سازی و تأیید شده‌اند.",
           "start": "2026-11-20",
           "finish": "2026-11-21"
         },
         {
           "id": "A.1.02",
           "title": "تطبیق تمام بخش‌های گزارش با روز مرجع",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "تمام ۱۸ بخش گزارش روزانه در نما، اکسل FILE 4 و PDF با روز مرجع تطبیق داده شده و ۸۸ فرمول اکسل بازحساب و بدون خطا تأیید شده‌اند.",
           "start": "2026-11-21",
           "finish": "2026-11-23"
         },
         {
           "id": "A.1.03",
           "title": "رفع اختلاف ارقام و نمایش خروجی‌ها",
-          "status": "remaining",
+          "status": "implemented",
+          "note": "اختلاف ارقام و نمایش خروجی‌های Excel/PDF در فارسی و انگلیسی، هم‌ترازی فیلترها و جمع کل و خروجی تکرارپذیر بدون تغییر بایت بررسی و تأیید شده‌اند.",
           "start": "2026-11-24",
           "finish": "2026-11-25"
         },
         {
           "id": "A.1.04",
-          "title": "ارائه نمونه نهایی و تأیید اولیه گزارش",
-          "status": "remaining",
+          "title": "ارائه نمونه نهایی گزارش برای بررسی",
+          "status": "implemented",
+          "note": "Stage 5 مستقل با موفقیت گذشت: candidate a104-day12-71dd8cfe، source SHA 71dd8cfe4c17fddd66cf0f5952dadaa1ae7dcb12 و manifest SHA-256 917d49da3a1602eecd4524c40794dcc372cde5b8445e2aa6b153e614457efd9e؛ شواهد کامل 061/062 بدون blocker، ۴ دانلود مستقیم و ۸ دانلود مرورگر با تطابق بایت، ۷۲ مشاهده مرورگر و RBAC پنج زمینه. نقص‌های DEF-A104-05/06/07 بسته شدند. مرجع: output/phase-a1/a1-04-stage5-qa-verification-2026-11-24.md و specs/063-a1-employer-acceptance/spec.md. وضعیت فنی تکمیل شد؛ بازبینی کارفرما پس از استقرار در محیط آزمایشی انجام می‌شود.",
           "start": "2026-11-25",
           "finish": "2026-11-27"
         }

@@ -32,6 +32,6 @@ This checklist records specification quality for Supervisor review.
 
 ## Notes
 
-- FR-001 covers DEF-A104-01. FR-002–FR-007 cover DEF-A104-02 and the five cited B05 dispositions.
-- Stage 3.1 review checked the format and export-language manifest entries and the activity-count reconciliation scenario against the recorded evidence.
-- Specification quality checks passed 16 of 16. Candidate, deployment and employer evidence remain delivery requirements.
+- FR-001 and SC-001 cover current DEF-A104-01. FR-002 and FR-008 cover current DEF-A104-02. FR-008 and SC-004 cover A.1.02. FR-003–FR-007 retain the existing B05 checks.
+- Stage 3.1 review checked section coverage, the Draft/Approved/correction evidence, and the link between original and recalculated Excel entries in the manifest.
+- Specification quality checks passed 16 of 16 on 2026-11-24. Supervisor review is pending. The existing plan and tasks predate these specification changes and require alignment after review.
